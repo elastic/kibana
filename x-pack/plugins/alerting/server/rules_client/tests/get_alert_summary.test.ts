@@ -163,6 +163,7 @@ describe('getAlertSummary()', () => {
             "flapping": true,
             "muted": false,
             "status": "Active",
+            "tracked": true,
             "uuid": "uuid-1",
           },
           "alert-muted-no-activity": Object {
@@ -171,6 +172,7 @@ describe('getAlertSummary()', () => {
             "flapping": false,
             "muted": true,
             "status": "OK",
+            "tracked": true,
             "uuid": undefined,
           },
           "alert-previously-active": Object {
@@ -179,6 +181,7 @@ describe('getAlertSummary()', () => {
             "flapping": false,
             "muted": false,
             "status": "OK",
+            "tracked": true,
             "uuid": "uuid-2",
           },
         },

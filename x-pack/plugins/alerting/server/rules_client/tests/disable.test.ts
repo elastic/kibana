@@ -252,7 +252,7 @@ describe('disable()', () => {
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
-  test('disables the rule with calling event log to "recover" the alert instances from the task state', async () => {
+  test('disables the rule with calling event log to untrack the alert instances from the task state', async () => {
     const scheduledTaskId = '1';
     taskManager.get.mockResolvedValue({
       id: scheduledTaskId,
@@ -328,7 +328,7 @@ describe('disable()', () => {
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toStrictEqual({
       event: {
-        action: 'recovered-instance',
+        action: 'untracked-instance',
         category: ['alerts'],
         kind: 'alert',
       },
@@ -356,7 +356,7 @@ describe('disable()', () => {
         ],
         space_ids: ['default'],
       },
-      message: "instance '1' has recovered due to the rule was disabled",
+      message: "instance '1' has been untracked because the rule was disabled",
       rule: {
         category: '123',
         id: '1',
@@ -366,7 +366,7 @@ describe('disable()', () => {
     });
   });
 
-  test('disables the rule even if unable to retrieve task manager doc to generate recovery event log events', async () => {
+  test('disables the rule even if unable to retrieve task manager doc to generate untrack event log events', async () => {
     taskManager.get.mockRejectedValueOnce(new Error('Fail'));
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -412,7 +412,7 @@ describe('disable()', () => {
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(0);
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
-      `rulesClient.disable('1') - Could not write recovery events - Fail`
+      `rulesClient.disable('1') - Could not write untrack events - Fail`
     );
   });
 
