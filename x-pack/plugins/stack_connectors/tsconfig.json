@@ -36,6 +36,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/alerting-plugin",
     "@kbn/securitysolution-ecs",
+    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",
