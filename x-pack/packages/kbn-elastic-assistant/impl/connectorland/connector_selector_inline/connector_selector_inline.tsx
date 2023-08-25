@@ -288,7 +288,8 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               postSaveEventHandler={(savedAction: ActionConnector) => {
                 const provider = (savedAction as ActionConnectorProps<Config, unknown>)?.config
                   .apiProvider as OpenAiProviderType;
-                const model = (savedAction as ActionConnectorProps<Config, unknown>)?.config.model;
+                const model = (savedAction as ActionConnectorProps<Config, unknown>)?.config
+                  .defaultModel;
                 onChange(savedAction.id, provider, model);
                 onConnectorSelectionChange(savedAction.id, provider, model);
                 refetchConnectors?.();
