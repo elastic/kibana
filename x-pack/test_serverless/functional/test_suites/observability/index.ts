@@ -6,13 +6,12 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import loadObservabilityLogExplorerSuite from './observability_log_explorer';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless observability UI', function () {
     loadTestFile(require.resolve('./landing_page'));
     loadTestFile(require.resolve('./navigation'));
-    loadObservabilityLogExplorerSuite(loadTestFile);
+    loadTestFile(require.resolve('./observability_log_explorer'));
     loadTestFile(require.resolve('./cases/attachment_framework'));
   });
 }
