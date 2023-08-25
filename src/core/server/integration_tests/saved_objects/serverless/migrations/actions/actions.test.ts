@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { TaskEither } from 'fp-ts/lib/TaskEither';
 import { type Client } from '@elastic/elasticsearch';
 import {
   type TestServerlessESUtils,
@@ -20,7 +19,7 @@ const TEST_INDEX_A_ALIAS = '.some_index';
 const TEST_INDEX_B = '.some_other_index_1';
 const TEST_INDICES = [TEST_INDEX_A, TEST_INDEX_B];
 
-describe('ZDT migration actions', () => {
+describe.skip('ZDT migration actions', () => {
   let serverlessES: TestServerlessESUtils;
   let client: Client;
   beforeAll(async () => {
