@@ -168,7 +168,7 @@ describe('Higher version doc conversion', () => {
     });
     it('throws error for documents using higher version model than current', async () => {
       try {
-        const docv1 = await repositoryV2.bulkGet([{ type: 'test-type', id: 'doc-1' }], {
+        await repositoryV2.bulkGet([{ type: 'test-type', id: 'doc-1' }], {
           versionModelMatch: 'strict',
         });
       } catch (err) {
@@ -197,7 +197,7 @@ describe('Higher version doc conversion', () => {
 
     it('throws error for documents using higher version model than current', async () => {
       try {
-        const docv1 = await repositoryV2.resolve('test-type', 'doc-1', {
+        await repositoryV2.resolve('test-type', 'doc-1', {
           versionModelMatch: 'strict',
         });
       } catch (err) {
@@ -225,7 +225,7 @@ describe('Higher version doc conversion', () => {
     });
     it('throws error for documents using higher version model than current', async () => {
       try {
-        const docv1 = await repositoryV2.bulkResolve([{ type: 'test-type', id: 'doc-1' }], {
+        await repositoryV2.bulkResolve([{ type: 'test-type', id: 'doc-1' }], {
           versionModelMatch: 'strict',
         });
       } catch (err) {
