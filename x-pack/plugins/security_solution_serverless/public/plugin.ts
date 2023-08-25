@@ -54,7 +54,8 @@ export class SecuritySolutionServerlessPlugin
 
     const services = createServices(core, startDeps);
 
-    registerUpsellings(securitySolution.getUpselling(), this.config.productTypes);
+    registerUpsellings(securitySolution.getUpselling(), this.config.productTypes, services);
+
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
 
     configureNavigation(services, this.config);

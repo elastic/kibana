@@ -22,52 +22,59 @@ import { buildRouteValidation } from '../../../../../../utils/build_validation/r
 import { transformFindAlerts } from '../../../utils/utils';
 
 export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: DETECTION_ENGINE_RULES_URL_FIND,
-      validate: {
-        query: buildRouteValidation(FindRulesRequestQuery),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response): Promise<IKibanaResponse<FindRulesResponse>> => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            query: buildRouteValidation(FindRulesRequestQuery),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<FindRulesResponse>> => {
+        const siemResponse = buildSiemResponse(response);
 
-      const validationErrors = validateFindRulesRequestQuery(request.query);
-      if (validationErrors.length) {
-        return siemResponse.error({ statusCode: 400, body: validationErrors });
-      }
-
-      try {
-        const { query } = request;
-        const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
-        const rulesClient = ctx.alerting.getRulesClient();
-
-        const rules = await findRules({
-          rulesClient,
-          perPage: query.per_page,
-          page: query.page,
-          sortField: query.sort_field,
-          sortOrder: query.sort_order,
-          filter: query.filter,
-          fields: query.fields,
-        });
-
-        const transformed = transformFindAlerts(rules);
-        if (transformed == null) {
-          return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
-        } else {
-          return response.ok({ body: transformed ?? {} });
+        const validationErrors = validateFindRulesRequestQuery(request.query);
+        if (validationErrors.length) {
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+
+        try {
+          const { query } = request;
+          const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
+          const rulesClient = ctx.alerting.getRulesClient();
+
+          const rules = await findRules({
+            rulesClient,
+            perPage: query.per_page,
+            page: query.page,
+            sortField: query.sort_field,
+            sortOrder: query.sort_order,
+            filter: query.filter,
+            fields: query.fields,
+          });
+
+          const transformed = transformFindAlerts(rules);
+          if (transformed == null) {
+            return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
+          } else {
+            return response.ok({ body: transformed ?? {} });
+          }
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
