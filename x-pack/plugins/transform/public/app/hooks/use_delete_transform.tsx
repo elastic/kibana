@@ -20,10 +20,12 @@ import type {
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
+import { type TransformListRow } from '../common';
+import { ToastNotificationText } from '../components';
+
 import { useTransformCapabilities } from './use_transform_capabilities';
 import { useDataViewExists } from './use_data_view_exists';
-import { useRefreshTransformList, type TransformListRow } from '../common';
-import { ToastNotificationText } from '../components';
+import { useRefreshTransformList } from './use_refresh_transform_list';
 
 export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const {

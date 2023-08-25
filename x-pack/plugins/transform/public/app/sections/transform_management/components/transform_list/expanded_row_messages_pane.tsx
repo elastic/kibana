@@ -23,8 +23,7 @@ import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE, TIME_FORMAT } from '../../../../../../c
 import { TransformMessage } from '../../../../../../common/types/messages';
 
 import { JobIcon } from '../../../../components/job_icon';
-import { useRefreshTransformList } from '../../../../common';
-import { useGetTransformAuditMessages } from '../../../../hooks';
+import { useGetTransformAuditMessages, useRefreshTransformList } from '../../../../hooks';
 
 interface ExpandedRowMessagesPaneProps {
   transformId: string;

@@ -20,8 +20,9 @@ import type {
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { useRefreshTransformList } from '../common';
 import { ToastNotificationText } from '../components';
+
+import { useRefreshTransformList } from './use_refresh_transform_list';
 
 export const useStopTransforms = () => {
   const { http, i18n: i18nStart, theme } = useAppDependencies();

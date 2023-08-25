@@ -6,10 +6,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { useQueryClient } from '@tanstack/react-query';
 
 import type { TransformConfigUnion, TransformId } from '../../../common/types/transform';
-import { TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 
 // Via https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/utils/TransformStrings.java#L24
 // Matches a string that contains lowercase characters, digits, hyphens, underscores or dots.
@@ -22,15 +20,6 @@ export function isTransformIdValid(transformId: TransformId) {
 export const TRANSFORM_ERROR_TYPE = {
   DANGLING_TASK: 'dangling_task',
 } as const;
-
-export const useRefreshTransformList = () => {
-  const queryClient = useQueryClient();
-
-  return () => {
-    queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS]);
-    queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_AUDIT_MESSAGES]);
-  };
-};
 
 export const overrideTransformForCloning = (originalConfig: TransformConfigUnion) => {
   // 'Managed' means job is preconfigured and deployed by other solutions

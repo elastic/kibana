@@ -15,7 +15,8 @@ import { addInternalBasePath } from '../../../common/constants';
 import type { TransformId } from '../../../common/types/transform';
 
 import { useAppDependencies } from '../app_dependencies';
-import { useRefreshTransformList } from '../common';
+
+import { useRefreshTransformList } from './use_refresh_transform_list';
 
 export const useUpdateTransform = (
   transformId: TransformId,

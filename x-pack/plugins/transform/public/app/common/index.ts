@@ -19,7 +19,7 @@ export {
   toggleSelectedField,
 } from './fields';
 export type { DropDownLabel, DropDownOption, Label } from './dropdown';
-export { isTransformIdValid, useRefreshTransformList } from './transform';
+export { isTransformIdValid } from './transform';
 export type { TransformListAction, TransformListRow } from './transform_list';
 export { TRANSFORM_LIST_COLUMN } from './transform_list';
 export { getTransformProgress, isCompletedBatchTransform } from './transform_stats';

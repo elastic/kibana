@@ -14,14 +14,15 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
-import {
+import type {
   ReauthorizeTransformsRequestSchema,
   ReauthorizeTransformsResponseSchema,
 } from '../../../common/api_schemas/reauthorize_transforms';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { useRefreshTransformList } from '../common';
 import { ToastNotificationText } from '../components';
+
+import { useRefreshTransformList } from './use_refresh_transform_list';
 
 export const useReauthorizeTransforms = () => {
   const { http, i18n: i18nStart, theme } = useAppDependencies();
