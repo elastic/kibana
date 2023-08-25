@@ -383,6 +383,13 @@ export class DiscoverPageObject extends FtrService {
   public async editField(field: string) {
     await this.retry.try(async () => {
       await this.unifiedFieldList.clickFieldListItem(field);
+      // Wait until the field stats popover is opened and loaded before
+      // hitting the edit button, otherwise the click may occur at the
+      // exact time the field stats load, triggering a layout shift, and
+      // will result in the "filter for" button being clicked instead of
+      // the edit button, causing test flakiness
+      await this.unifiedFieldList.waitUntilFieldPopoverIsOpen();
+      await this.unifiedFieldList.waitUntilFieldPopoverIsLoaded();
       await this.testSubjects.click(`discoverFieldListPanelEdit-${field}`);
       await this.find.byClassName('indexPatternFieldEditor__form');
     });

@@ -94,6 +94,12 @@ export class UnifiedFieldListPageObject extends FtrService {
     });
   }
 
+  public async waitUntilFieldPopoverIsLoaded() {
+    await this.retry.waitFor('popover is loaded', async () => {
+      return !(await this.find.existsByCssSelector('[data-test-subj*="-statsLoading"]'));
+    });
+  }
+
   public async clickFieldListItem(field: string) {
     await this.testSubjects.click(`field-${field}`);
 
