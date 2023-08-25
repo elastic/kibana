@@ -30,6 +30,7 @@ export const serverless: Command = {
       --kill              Kill running ESS nodes if detected
       --background        Start ESS without attaching to the first node's logs
       -E                  Additional key=value settings to pass to Elasticsearch
+      -F                  Absolute paths for files to mount into containers
 
     Examples:
 
@@ -50,6 +51,7 @@ export const serverless: Command = {
       alias: {
         basePath: 'base-path',
         esArgs: 'E',
+        files: 'F',
       },
 
       string: ['tag', 'image'],

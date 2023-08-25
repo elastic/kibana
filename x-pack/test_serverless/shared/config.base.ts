@@ -14,6 +14,7 @@ import {
   kbnTestConfig,
   kibanaServiceAccount,
   kibanaServerlessSuperuser,
+  getDockerFileMountPath,
 } from '@kbn/test';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
@@ -38,13 +39,13 @@ export default async () => {
 
     esTestCluster: {
       from: 'serverless',
+      files: [idpPath],
       serverArgs: [
-        // HTTP SSL requires setup for Kibana to trust ESS certs, disable for now
-        'xpack.security.http.ssl.enabled=false',
-
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.realms.saml.cloud-saml-kibana.order=0',
-        `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${idpPath}`,
+        `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${getDockerFileMountPath(
+          idpPath
+        )}`,
         'xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:${servers.kibana.port}`,
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:${servers.kibana.port}/logout`,

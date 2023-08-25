@@ -32,6 +32,7 @@ export const docker: Command = {
       --kill              Kill running ES nodes if detected
       -E                  Additional key=value settings to pass to Elasticsearch
       -D                  Override Docker command
+      -F                  Absolute paths for files to mount into container
 
     Examples:
 
@@ -53,6 +54,7 @@ export const docker: Command = {
       alias: {
         esArgs: 'E',
         dockerCmd: 'D',
+        files: 'F',
       },
 
       string: ['tag', 'image', 'D'],

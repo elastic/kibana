@@ -9,15 +9,15 @@ import chalk from 'chalk';
 import execa from 'execa';
 import fs from 'fs';
 import Fsp from 'fs/promises';
-import { resolve } from 'path';
+import { resolve, basename, join } from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
+import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
 import { ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
-import { ESS_RESOURCES_PATHS, ESS_SECRETS_PATH } from '../paths';
+import { ESS_RESOURCES_PATHS, ESS_SECRETS_PATH, ESS_CONFIG_PATH, ESS_FILES_PATH } from '../paths';
 
 interface BaseOptions {
   tag?: string;
@@ -25,6 +25,7 @@ interface BaseOptions {
   port?: number;
   ssl?: boolean;
   kill?: boolean;
+  files?: string | string[];
 }
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
@@ -47,7 +48,6 @@ interface ServerlessEsNodeArgs {
 
 export const DEFAULT_PORT = 9200;
 const DOCKER_REGISTRY = 'docker.elastic.co';
-const ESS_CONFIG_PATH = '/usr/share/elasticsearch/config/';
 
 const DOCKER_BASE_CMD = [
   'run',
@@ -389,22 +389,31 @@ function getESp12Volume() {
 }
 
 /**
+ * Removes REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.
+ * Returns the path where a file will be mounted inside the ES or ESS container.
+ * /root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json
+ */
+export function getDockerFileMountPath(hostPath: string) {
+  return join(ESS_FILES_PATH, hostPath.replace(REPO_ROOT, ''));
+}
+
+/**
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean, ssl } = options;
-  const volumePath = resolve(basePath, 'stateless');
+  const { basePath, clean, ssl, files } = options;
+  const objectStorePath = resolve(basePath, 'stateless');
 
-  log.info(chalk.bold(`Checking for local serverless ES object store at ${volumePath}`));
+  log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
   log.indent(4);
 
-  if (clean && fs.existsSync(volumePath)) {
+  if (clean && fs.existsSync(objectStorePath)) {
     log.info('Cleaning existing object store.');
-    await Fsp.rm(volumePath, { recursive: true, force: true });
+    await Fsp.rm(objectStorePath, { recursive: true, force: true });
   }
 
-  if (clean || !fs.existsSync(volumePath)) {
-    await Fsp.mkdir(volumePath, { recursive: true }).then(() =>
+  if (clean || !fs.existsSync(objectStorePath)) {
+    await Fsp.mkdir(objectStorePath, { recursive: true }).then(() =>
       log.info('Created new object store.')
     );
   } else {
@@ -412,30 +421,42 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
 
   // Permissions are set separately from mkdir due to default umask
-  await Fsp.chmod(volumePath, 0o777).then(() => {
+  await Fsp.chmod(objectStorePath, 0o777).then(() => {
     log.info('Setup object store permissions (chmod 777).');
   });
 
   log.indent(-4);
 
-  const baseCmd = ['--volume', `${basePath}:/objectstore:z`];
+  const volumeCmds = ['--volume', `${basePath}:/objectstore:z`];
 
-  if (ssl) {
-    const essResources = ESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
-      const fileName = path.split('/').at(-1);
-
-      acc.push('--volume', `${path}:${ESS_CONFIG_PATH}${fileName}`);
+  if (files) {
+    const _files = typeof files === 'string' ? [files] : files;
+    const fileCmds = _files.reduce<string[]>((acc, filePath) => {
+      acc.push('--volume', `${filePath}:${getDockerFileMountPath(filePath)}:z`);
 
       return acc;
     }, []);
 
-    return baseCmd.concat(getESp12Volume(), essResources, [
-      '--volume',
-      `${ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`,
-    ]);
+    volumeCmds.push(...fileCmds);
   }
 
-  return baseCmd;
+  if (ssl) {
+    const essResources = ESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+      acc.push('--volume', `${path}:${ESS_CONFIG_PATH}${basename(path)}`);
+
+      return acc;
+    }, []);
+
+    volumeCmds.push(
+      ...getESp12Volume(),
+      ...essResources,
+
+      '--volume',
+      `${ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`
+    );
+  }
+
+  return volumeCmds;
 }
 
 /**

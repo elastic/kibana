@@ -147,6 +147,10 @@ export interface CreateTestEsClusterOptions {
    * Is this a serverless project
    */
   serverless?: boolean;
+  /**
+   * Files to mount inside ES containers
+   */
+  files?: string[];
 }
 
 export function createTestEsCluster<
@@ -168,6 +172,7 @@ export function createTestEsCluster<
     ssl,
     transportPort,
     onEarlyExit,
+    files,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
@@ -231,6 +236,7 @@ export function createTestEsCluster<
           teardown: true,
           ssl: true,
           background: true,
+          files,
         });
       } else if (Path.isAbsolute(esFrom)) {
         installPath = esFrom;

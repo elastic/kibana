@@ -341,7 +341,7 @@ describe('resolveEsArgs()', () => {
       ssl: true,
     });
 
-    expect(esArgs).toHaveLength(24);
+    expect(esArgs).toHaveLength(20);
     expect(esArgs).not.toEqual(expect.arrayContaining(['xpack.security.enabled=false']));
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
@@ -356,15 +356,11 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
         "--env",
-        "xpack.security.http.ssl.keystore.password=storepass",
-        "--env",
         "xpack.security.http.ssl.verification_mode=certificate",
         "--env",
         "xpack.security.transport.ssl.enabled=true",
         "--env",
         "xpack.security.transport.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
-        "--env",
-        "xpack.security.transport.ssl.keystore.password=storepass",
         "--env",
         "xpack.security.transport.ssl.verification_mode=certificate",
         "--env",
@@ -422,7 +418,7 @@ describe('setupServerlessVolumes()', () => {
       (path) => !volumeCmd.some((cmd) => cmd.includes(path))
     );
 
-    expect(volumeCmd).toHaveLength(16);
+    expect(volumeCmd).toHaveLength(18);
     expect(pathsNotIncludedInCmd).toEqual([]);
   });
 });

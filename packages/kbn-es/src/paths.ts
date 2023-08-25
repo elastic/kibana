@@ -43,3 +43,8 @@ export const ESS_RESOURCES_PATHS = [
   ESS_USERS_PATH,
   ESS_USERS_ROLES_PATH,
 ];
+
+export const ESS_CONFIG_PATH = '/usr/share/elasticsearch/config/';
+
+// Files need to be inside config for permissions reasons inside the container
+export const ESS_FILES_PATH = `${ESS_CONFIG_PATH}files/`;
