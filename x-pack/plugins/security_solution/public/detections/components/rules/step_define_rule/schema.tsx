@@ -78,21 +78,12 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  dataViewTitle: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewTitleSelector',
-      {
-        defaultMessage: 'Data view indices',
-      }
-    ),
-    validations: [],
-  },
   // TODO: populate the dataViewTitle in a better way
   dataViewId: {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewIDSelector',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
       {
-        defaultMessage: 'Data view ID',
+        defaultMessage: 'Data view',
       }
     ),
     fieldsToValidateOnChange: ['dataViewId'],
@@ -127,6 +118,16 @@ export const schema: FormSchema<DefineStepRule> = {
         },
       },
     ],
+  },
+  // TODO: populate the dataViewTitle in a better way
+  dataViewTitle: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewTitleSelector',
+      {
+        defaultMessage: 'Data view index pattern',
+      }
+    ),
+    validations: [],
   },
   eqlOptions: {},
   queryBar: {
