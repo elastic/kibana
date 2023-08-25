@@ -12,6 +12,9 @@ import { EuiDelayRender, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import type { JsonCodeEditorProps } from './components';
 import { UnifiedDocViewerPublicPlugin } from './plugin';
 
+export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';
+export { UnifiedDocViewer } from './components';
+
 const LazyJsonCodeEditor = React.lazy(
   () => import('./components/json_code_editor/json_code_editor')
 );
@@ -25,7 +28,6 @@ export const JsonCodeEditor = withSuspense<JsonCodeEditorProps>(
   </EuiDelayRender>
 );
 
-export { getDocViewsRegistry, setDocViewsRegistry } from './plugin';
 export { useEsDocSearch, useUnifiedDocViewerServices } from './hooks';
 
 export const plugin = () => new UnifiedDocViewerPublicPlugin();

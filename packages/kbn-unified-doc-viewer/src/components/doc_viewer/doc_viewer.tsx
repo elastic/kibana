@@ -8,12 +8,11 @@
 
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
-import type { DocViewsRegistry } from '../../..';
 import { DocViewerTab } from './doc_viewer_tab';
 import type { DocView, DocViewRenderProps } from '../../types';
 
 export interface DocViewerProps extends DocViewRenderProps {
-  docViewsRegistry: DocViewsRegistry;
+  docViews: DocView[];
 }
 
 /**
@@ -22,25 +21,23 @@ export interface DocViewerProps extends DocViewRenderProps {
  * A view can contain a React `component`, or any JS framework by using
  * a `render` function.
  */
-export function DocViewer({ docViewsRegistry, ...renderProps }: DocViewerProps) {
-  const tabs = docViewsRegistry
-    .getDocViewsSorted(renderProps.hit)
-    .map(({ title, render, component }: DocView, idx: number) => {
-      return {
-        id: `kbn_doc_viewer_tab_${idx}`,
-        name: title,
-        content: (
-          <DocViewerTab
-            id={idx}
-            title={title}
-            component={component}
-            renderProps={renderProps}
-            render={render}
-          />
-        ),
-        ['data-test-subj']: `docViewerTab-${idx}`,
-      };
-    });
+export function DocViewer({ docViews, ...renderProps }: DocViewerProps) {
+  const tabs = docViews.map(({ title, render, component }: DocView, idx: number) => {
+    return {
+      id: `kbn_doc_viewer_tab_${idx}`,
+      name: title,
+      content: (
+        <DocViewerTab
+          id={idx}
+          title={title}
+          component={component}
+          renderProps={renderProps}
+          render={render}
+        />
+      ),
+      ['data-test-subj']: `docViewerTab-${idx}`,
+    };
+  });
 
   if (!tabs.length) {
     // There there's a minimum of 2 tabs active in Discover.

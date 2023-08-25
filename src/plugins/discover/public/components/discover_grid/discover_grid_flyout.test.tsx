@@ -14,8 +14,6 @@ import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_fly
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverServices } from '../../build_services';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import { setDocViewsRegistry } from '@kbn/unified-doc-viewer-plugin/public';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -34,8 +32,6 @@ const waitNextUpdate = async (component: ReactWrapper) => {
 };
 
 describe('Discover flyout', function () {
-  setDocViewsRegistry(new DocViewsRegistry());
-
   const mountComponent = async ({
     dataView,
     hits,
@@ -59,6 +55,9 @@ describe('Discover flyout', function () {
       },
       contextLocator: { getRedirectUrl: jest.fn(() => 'mock-context-redirect-url') },
       singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url') },
+      unifiedDocViewer: {
+        getDocViews: () => [],
+      },
     } as unknown as DiscoverServices;
 
     const hit = buildDataTableRecord(

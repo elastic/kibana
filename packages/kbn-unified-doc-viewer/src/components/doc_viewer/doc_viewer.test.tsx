@@ -24,7 +24,9 @@ describe('<DocViewer />', () => {
 
     const renderProps = { hit: {} } as DocViewRenderProps;
 
-    const wrapper = shallow(<DocViewer docViewsRegistry={registry} {...renderProps} />);
+    const wrapper = shallow(
+      <DocViewer docViews={registry.getDocViewsSorted(renderProps.hit)} {...renderProps} />
+    );
 
     expect(wrapper).toMatchSnapshot();
   });
@@ -47,7 +49,9 @@ describe('<DocViewer />', () => {
     } as DocViewRenderProps;
     const errorMsg = 'Catch me if you can!';
 
-    const wrapper = mount(<DocViewer docViewsRegistry={registry} {...renderProps} />);
+    const wrapper = mount(
+      <DocViewer docViews={registry.getDocViewsSorted(renderProps.hit)} {...renderProps} />
+    );
     const error = new Error(errorMsg);
     wrapper.find(SomeComponent).simulateError(error);
     const errorMsgComponent = findTestSubject(wrapper, 'docViewerError');

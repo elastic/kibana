@@ -21,7 +21,7 @@ import { formatFieldValue } from '@kbn/discover-utils';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DocViewerProps } from '@kbn/unified-doc-viewer/src/components/doc_viewer/doc_viewer';
-import { getDocViewsRegistry } from '@kbn/unified-doc-viewer-plugin/public';
+import { useUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
 import { TableRowDetails } from './table_row_details';
@@ -63,6 +63,7 @@ export const TableRow = ({
   DocViewer,
 }: TableRowProps) => {
   const { uiSettings, fieldFormats } = useDiscoverServices();
+  const { unifiedDocViewer } = useUnifiedDocViewerServices();
   const [maxEntries, hideTimeColumn] = useMemo(
     () => [
       uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
@@ -225,7 +226,7 @@ export const TableRow = ({
             isPlainRecord={isPlainRecord}
           >
             <DocViewer
-              docViewsRegistry={getDocViewsRegistry()}
+              docViews={unifiedDocViewer.getDocViews(row)}
               columns={columns}
               filter={filter}
               hit={row}

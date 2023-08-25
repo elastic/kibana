@@ -8,3 +8,4 @@
 
 export type { JsonCodeEditorProps } from './components';
 export type { UnifiedDocViewerServices } from './hooks';
+export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';

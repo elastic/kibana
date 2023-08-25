@@ -12,8 +12,12 @@ import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@e
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { DocViewer, ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { getDocViewsRegistry, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
+import { ElasticRequestState } from '@kbn/unified-doc-viewer';
+import {
+  UnifiedDocViewer,
+  useEsDocSearch,
+  useUnifiedDocViewerServices,
+} from '@kbn/unified-doc-viewer-plugin/public';
 import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
@@ -48,6 +52,7 @@ export function Doc(props: DocProps) {
   const { dataView } = props;
   const [reqState, hit] = useEsDocSearch(props);
   const services = useDiscoverServices();
+  const docViewerServices = useUnifiedDocViewerServices();
   const { locator, chrome, docLinks } = services;
   const indexExistsLink = docLinks.links.apis.indexExists;
 
@@ -140,7 +145,7 @@ export function Doc(props: DocProps) {
 
         {reqState === ElasticRequestState.Found && hit !== null && dataView && (
           <div data-test-subj="doc-hit">
-            <DocViewer docViewsRegistry={getDocViewsRegistry()} hit={hit} dataView={dataView} />
+            <UnifiedDocViewer services={docViewerServices} hit={hit} dataView={dataView} />
           </div>
         )}
       </EuiPageBody>

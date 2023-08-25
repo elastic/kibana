@@ -11,12 +11,11 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { DocViewer } from '@kbn/unified-doc-viewer';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
-  getDocViewsRegistry,
+  UnifiedDocViewer,
   useUnifiedDocViewerServices,
 } from '@kbn/unified-doc-viewer-plugin/public';
 import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
@@ -24,9 +23,16 @@ import type { StartDeps } from './plugin';
 
 export const renderApp = (core: CoreStart, deps: StartDeps, { element }: AppMountParameters) => {
   const { analytics, uiSettings } = core;
-  const { data, fieldFormats } = deps;
+  const { data, fieldFormats, unifiedDocViewer } = deps;
   const storage = new Storage(localStorage);
-  const services: UnifiedDocViewerServices = { analytics, data, fieldFormats, storage, uiSettings };
+  const services: UnifiedDocViewerServices = {
+    analytics,
+    data,
+    fieldFormats,
+    storage,
+    uiSettings,
+    unifiedDocViewer,
+  };
   ReactDOM.render(
     <KibanaContextProvider services={services}>
       <UnifiedDocViewerExamplesApp />
@@ -40,7 +46,8 @@ export const renderApp = (core: CoreStart, deps: StartDeps, { element }: AppMoun
 };
 
 function UnifiedDocViewerExamplesApp() {
-  const { data } = useUnifiedDocViewerServices();
+  const services = useUnifiedDocViewerServices();
+  const { data } = services;
   const [dataView, setDataView] = useState<DataView | null>();
   const [hit, setHit] = useState<DataTableRecord | null>();
 
@@ -80,7 +87,7 @@ function UnifiedDocViewerExamplesApp() {
   return (
     <>
       {dataView?.id && hit ? (
-        <DocViewer docViewsRegistry={getDocViewsRegistry()} hit={hit} dataView={dataView} />
+        <UnifiedDocViewer services={services} hit={hit} dataView={dataView} />
       ) : (
         'Loading... (make sure you have a default data view and at least one matching document)'
       )}

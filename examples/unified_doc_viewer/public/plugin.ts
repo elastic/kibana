@@ -9,6 +9,7 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/publ
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 
 export interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -17,6 +18,7 @@ export interface SetupDeps {
 export interface StartDeps {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
+  unifiedDocViewer: UnifiedDocViewerStart;
 }
 
 export class UnifiedDocViewerExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {

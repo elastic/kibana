@@ -16,8 +16,6 @@ import { Doc, DocProps } from './doc';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { setDocViewsRegistry } from '@kbn/unified-doc-viewer-plugin/public';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
 const mockSearchApi = jest.fn();
 
@@ -67,6 +65,9 @@ async function mountDoc(update = false) {
     },
     locator: { getUrl: jest.fn(() => Promise.resolve('mock-url')) },
     chrome: { setBreadcrumbs: jest.fn() },
+    unifiedDocViewer: {
+      getDocViews: () => [],
+    },
   };
   await act(async () => {
     comp = mountWithIntl(
@@ -102,7 +103,6 @@ describe('Test of <Doc /> of Discover', () => {
   });
 
   test('renders elasticsearch hit ', async () => {
-    setDocViewsRegistry(new DocViewsRegistry());
     mockSearchApi.mockImplementation(() =>
       of({ rawResponse: { hits: { total: 1, hits: [{ _id: 1, _source: { test: 1 } }] } } })
     );

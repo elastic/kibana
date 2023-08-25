@@ -9,10 +9,9 @@
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { TableRow, TableRowProps } from './table_row';
-import { setDocViewsRegistry } from '@kbn/unified-doc-viewer-plugin/public';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import { DocViewer, DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { DocViewer } from '@kbn/unified-doc-viewer';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
@@ -43,6 +42,9 @@ const mountComponent = (props: TableRowProps) => {
               return 100;
             }
           },
+        },
+        unifiedDocViewer: {
+          getDocViews: () => [],
         },
       }}
     >
@@ -82,10 +84,6 @@ describe('Doc table row component', () => {
     addBasePath: (path: string) => path,
     DocViewer,
   } as unknown as TableRowProps;
-
-  beforeEach(() => {
-    setDocViewsRegistry(new DocViewsRegistry());
-  });
 
   it('should render __document__ column', () => {
     const component = mountComponent({ ...defaultProps, columns: [] });
