@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
-import { createCapabilityFailureMessage } from '../../../../lib/authorization';
-import { useAuthorization } from '../../../../hooks';
+import { useTransformCapabilities } from '../../../../hooks';
 import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
 
 export const startActionNameText = i18n.translate(
@@ -53,7 +53,7 @@ export const StartActionName: FC<StartActionNameProps> = ({
   forceDisable,
   transformNodes,
 }) => {
-  const { canStartStopTransform } = useAuthorization().capabilities;
+  const { canStartStopTransform } = useTransformCapabilities();
   const isBulkAction = items.length > 1;
 
   // Disable start for batch transforms which have completed.

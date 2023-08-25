@@ -11,8 +11,9 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { createCapabilityFailureMessage } from '../../../../lib/authorization';
-import { useAuthorization } from '../../../../hooks';
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
+
+import { useTransformCapabilities } from '../../../../hooks';
 
 interface CreateTransformButtonProps {
   onClick: MouseEventHandler<HTMLButtonElement>;
@@ -23,7 +24,7 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
   onClick,
   transformNodes,
 }) => {
-  const { capabilities } = useAuthorization();
+  const capabilities = useTransformCapabilities();
 
   const disabled =
     !capabilities.canCreateTransform ||

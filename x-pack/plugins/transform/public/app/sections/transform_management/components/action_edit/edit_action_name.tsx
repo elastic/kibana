@@ -11,8 +11,9 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiToolTip } from '@elastic/eui';
 
-import { createCapabilityFailureMessage } from '../../../../lib/authorization';
-import { useAuthorization } from '../../../../hooks';
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
+
+import { useTransformCapabilities } from '../../../../hooks';
 
 export const editActionNameText = i18n.translate(
   'xpack.transform.transformList.editActionNameText',
@@ -22,7 +23,7 @@ export const editActionNameText = i18n.translate(
 );
 
 export const EditActionName: FC = () => {
-  const { canCreateTransform } = useAuthorization().capabilities;
+  const { canCreateTransform } = useTransformCapabilities();
 
   if (!canCreateTransform) {
     return (

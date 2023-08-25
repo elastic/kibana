@@ -13,51 +13,31 @@ import { EuiErrorBoundary } from '@elastic/eui';
 
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { ScopedHistory } from '@kbn/core/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { REACT_QUERY_STALE_TIME } from '../../common/constants';
 
-import { SectionError } from './components';
 import { SECTION_SLUG } from './common/constants';
 import { AppDependencies } from './app_dependencies';
-import { useAuthorization } from './hooks';
 import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
 
-export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
-  const { error } = useAuthorization();
-  if (error !== null) {
-    return (
-      <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.transform.app.checkingPrivilegesErrorMessage"
-            defaultMessage="Error fetching user privileges from the server"
-          />
-        }
-        error={error}
+export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
+  <Router history={history}>
+    <Routes>
+      <Route
+        path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+        component={CloneTransformSection}
       />
-    );
-  }
-
-  return (
-    <Router history={history}>
-      <Routes>
-        <Route
-          path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-          component={CloneTransformSection}
-        />
-        <Route
-          path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-          component={CreateTransformSection}
-        />
-        <Route path={`/`} component={TransformManagementSection} />
-      </Routes>
-    </Router>
-  );
-};
+      <Route
+        path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+        component={CreateTransformSection}
+      />
+      <Route path={`/`} component={TransformManagementSection} />
+    </Routes>
+  </Router>
+);
 
 export const renderApp = (element: HTMLElement, appDependencies: AppDependencies) => {
   const I18nContext = appDependencies.i18n.Context;

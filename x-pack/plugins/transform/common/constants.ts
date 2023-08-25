@@ -40,7 +40,6 @@ export const TRANSFORM_REACT_QUERY_KEYS = {
   GET_ES_INDICES: 'transform.get_es_indices',
   GET_ES_INGEST_PIPELINES: 'transform.get_es_ingest_pipelines',
   GET_HISTOGRAMS_FOR_FIELDS: 'transform.get_histograms_for_fields',
-  GET_PRIVILEGES: 'transform.get_privileges',
   GET_TRANSFORM: 'transform.get_transform',
   GET_TRANSFORM_AUDIT_MESSAGES: 'transform.get_transform_audit_messages',
   GET_TRANSFORM_STATS: 'transform.get_transform_stats',
@@ -86,22 +85,6 @@ export const APP_CLUSTER_PRIVILEGES = [
 
 // Minimum privileges required to return transform node count
 export const NODES_INFO_PRIVILEGES = ['cluster:monitor/transform/get'];
-
-// Equivalent of capabilities.canGetTransform
-export const APP_GET_TRANSFORM_CLUSTER_PRIVILEGES = [
-  'cluster.cluster:monitor/transform/get',
-  'cluster.cluster:monitor/transform/stats/get',
-];
-
-// Equivalent of capabilities.canCreateTransform
-export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
-  'cluster.cluster:monitor/transform/get',
-  'cluster.cluster:monitor/transform/stats/get',
-  'cluster.cluster:admin/transform/preview',
-  'cluster.cluster:admin/transform/put',
-  'cluster.cluster:admin/transform/start',
-  'cluster.cluster:admin/transform/start_task',
-];
 
 export const APP_INDEX_PRIVILEGES = ['monitor'];
 

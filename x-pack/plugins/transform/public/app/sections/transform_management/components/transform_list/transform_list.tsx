@@ -39,7 +39,7 @@ import {
   type TransformListRow,
   TRANSFORM_LIST_COLUMN,
 } from '../../../../common';
-import { useAuthorization } from '../../../../hooks';
+import { useTransformCapabilities } from '../../../../hooks';
 
 import { CreateTransformButton } from '../create_transform_button';
 import { RefreshTransformListButton } from '../refresh_transform_list_button';
@@ -147,7 +147,7 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkStopAction = useStopAction(false);
   const bulkScheduleNowAction = useScheduleNowAction(false, transformNodes);
 
-  const { capabilities } = useAuthorization();
+  const capabilities = useTransformCapabilities();
   const disabled =
     !capabilities.canCreateTransform ||
     !capabilities.canPreviewTransform ||

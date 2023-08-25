@@ -6,11 +6,15 @@
  */
 
 import React, { type FC } from 'react';
-import { i18n } from '@kbn/i18n';
+
 import { EuiToolTip, EuiText } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
+
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
-import { createCapabilityFailureMessage } from '../../../../lib/authorization';
-import { useAuthorization } from '../../../../hooks';
+import { useTransformCapabilities } from '../../../../hooks';
 import { TransformListRow } from '../../../../common';
 
 export const reauthorizeActionNameText = i18n.translate(
@@ -43,7 +47,7 @@ export const ReauthorizeActionName: FC<ReauthorizeActionNameProps> = ({
   forceDisable,
   transformNodes,
 }) => {
-  const { canStartStopTransform } = useAuthorization().capabilities;
+  const { canStartStopTransform } = useTransformCapabilities();
 
   // Disable start for batch transforms which have completed.
   const someNeedsReauthorization = items.some(needsReauthorization);

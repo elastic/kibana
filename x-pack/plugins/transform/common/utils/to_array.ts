@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { createCapabilityFailureMessage } from '../../../../../common/privilege/has_privilege_factory';
-export { PrivilegesWrapper } from './with_privileges';
-export { NotAuthorizedSection } from './not_authorized_section';
+export const toArray = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);

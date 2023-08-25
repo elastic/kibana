@@ -18,12 +18,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
-
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
-import { PrivilegesWrapper } from '../../lib/authorization';
+import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
 import { Wizard } from './components/wizard';
 
@@ -54,7 +52,14 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
   );
 
   return (
-    <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
+    <CapabilitiesWrapper
+      requiredCapabilities={[
+        'canGetTransform',
+        'canPreviewTransform',
+        'canCreateTransform',
+        'canStartStopTransform',
+      ]}
+    >
       <EuiPageHeader
         pageTitle={
           <FormattedMessage
@@ -77,6 +82,6 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
         )}
         {searchItems !== undefined && <Wizard searchItems={searchItems} />}
       </EuiPageContentBody>
-    </PrivilegesWrapper>
+    </CapabilitiesWrapper>
   );
 };

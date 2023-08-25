@@ -10,13 +10,13 @@ import React, { useMemo, useState } from 'react';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
-import { useAuthorization, useStartTransforms } from '../../../../hooks';
+import { useTransformCapabilities, useStartTransforms } from '../../../../hooks';
 
 import { isStartActionDisabled, startActionNameText, StartActionName } from './start_action_name';
 
 export type StartAction = ReturnType<typeof useStartAction>;
 export const useStartAction = (forceDisable: boolean, transformNodes: number) => {
-  const { canStartStopTransform } = useAuthorization().capabilities;
+  const { canStartStopTransform } = useTransformCapabilities();
 
   const startTransforms = useStartTransforms();
 

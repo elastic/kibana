@@ -21,15 +21,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { needsReauthorization } from '../../common/reauthorization_utils';
-import {
-  APP_GET_TRANSFORM_CLUSTER_PRIVILEGES,
-  TRANSFORM_STATE,
-} from '../../../../common/constants';
+import { TRANSFORM_STATE } from '../../../../common/constants';
 
 import { useDocumentationLinks } from '../../hooks';
-import { useDeleteTransforms, useAuthorization, useGetTransforms } from '../../hooks';
+import { useDeleteTransforms, useTransformCapabilities, useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
-import { PrivilegesWrapper } from '../../lib/authorization';
+import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 
 import { SearchSelection } from './components/search_selection';
@@ -53,7 +50,7 @@ export const TransformManagement: FC = () => {
     data: { transforms, transformNodes, transformIdsWithoutConfig },
   } = useGetTransforms();
 
-  const { canStartStopTransform } = useAuthorization().capabilities;
+  const { canStartStopTransform } = useTransformCapabilities();
 
   const unauthorizedTransformsWarning = useMemo(() => {
     const unauthorizedCnt = transforms.filter((t) => needsReauthorization(t)).length;
@@ -236,8 +233,8 @@ export const TransformManagementSection: FC = () => {
   }, []);
 
   return (
-    <PrivilegesWrapper privileges={APP_GET_TRANSFORM_CLUSTER_PRIVILEGES}>
+    <CapabilitiesWrapper requiredCapabilities={'canGetTransform'}>
       <TransformManagement />
-    </PrivilegesWrapper>
+    </CapabilitiesWrapper>
   );
 };

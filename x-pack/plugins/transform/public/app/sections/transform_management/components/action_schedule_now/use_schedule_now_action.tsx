@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { useAuthorization } from '../../../../hooks';
+import { useTransformCapabilities } from '../../../../hooks';
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { useScheduleNowTransforms } from '../../../../hooks';
 
@@ -21,7 +21,7 @@ import {
 
 export type ScheduleNowAction = ReturnType<typeof useScheduleNowAction>;
 export const useScheduleNowAction = (forceDisable: boolean, transformNodes: number) => {
-  const { canScheduleNowTransform } = useAuthorization().capabilities;
+  const { canScheduleNowTransform } = useTransformCapabilities();
   const scheduleNowTransforms = useScheduleNowTransforms();
 
   const action: TransformListAction = useMemo(

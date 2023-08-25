@@ -13,7 +13,7 @@ import { TransformListAction, TransformListRow } from '../../../../common';
 import {
   useDeleteIndexAndTargetIndex,
   useDeleteTransforms,
-  useAuthorization,
+  useTransformCapabilities,
 } from '../../../../hooks';
 
 import {
@@ -24,7 +24,7 @@ import {
 
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
 export const useDeleteAction = (forceDisable: boolean) => {
-  const { canDeleteTransform } = useAuthorization().capabilities;
+  const { canDeleteTransform } = useTransformCapabilities();
 
   const deleteTransforms = useDeleteTransforms();
 

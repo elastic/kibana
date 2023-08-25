@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { extractMissingPrivileges, getPrivilegesAndCapabilities } from './has_privilege_factory';
+import { extractMissingPrivileges, getPrivilegesAndCapabilities } from './capabilities';
 
 describe('has_privilege_factory', () => {
   const fullClusterPrivileges = {

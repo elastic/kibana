@@ -17,11 +17,11 @@ import {
 } from './reauthorize_action_name';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
-import { useAuthorization } from '../../../../hooks';
+import { useTransformCapabilities } from '../../../../hooks';
 
 export type ReauthorizeAction = ReturnType<typeof useReauthorizeAction>;
 export const useReauthorizeAction = (forceDisable: boolean, transformNodes: number) => {
-  const { canStartStopTransform } = useAuthorization().capabilities;
+  const { canStartStopTransform } = useTransformCapabilities();
 
   const reauthorizeTransforms = useReauthorizeTransforms();
 

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { SECTION_SLUG } from '../../../../common/constants';
-import { useAuthorization, useSearchItems } from '../../../../hooks';
+import { useTransformCapabilities, useSearchItems } from '../../../../hooks';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 
 import { cloneActionNameText, CloneActionName } from './clone_action_name';
@@ -25,7 +25,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
 
   const { getDataViewIdByTitle, loadDataViews } = useSearchItems(undefined);
 
-  const { canCreateTransform } = useAuthorization().capabilities;
+  const { canCreateTransform } = useTransformCapabilities();
 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {

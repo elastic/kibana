@@ -24,7 +24,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { useAuthorization } from '../../../../hooks';
+import { useTransformCapabilities } from '../../../../hooks';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import {
   isLatestTransform,
@@ -52,7 +52,7 @@ export const useColumns = (
   transformNodes: number,
   transformSelection: TransformListRow[]
 ) => {
-  const { canStartStopTransform } = useAuthorization().capabilities;
+  const { canStartStopTransform } = useTransformCapabilities();
 
   const { actions, modals } = useActions({
     forceDisable: transformSelection.length > 0,
