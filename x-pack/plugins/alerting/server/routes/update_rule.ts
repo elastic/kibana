@@ -152,21 +152,15 @@ export const updateRuleRoute = (
         version: '2023-10-31',
         // Lazily provide validation to the endpoint
         validate: () => {
-          const ruleTypeParams: Array<[string, z.ZodTypeAny]> = Array.from(
+          const paramSchemas = Array.from(
             ruleTypeRegistry.list({ addParamsValidationSchemas: true }).values()
           )
             .map((ruleType: RegistryRuleType) => {
               if (ruleType.validate && instanceofZodType(ruleType.validate.params)) {
-                return [ruleType.id, ruleType.validate.params];
+                return ruleType.validate.params;
               }
             })
-            .filter(Boolean) as unknown as Array<[string, z.ZodTypeAny]>;
-
-          const paramSchemas = ruleTypeParams.map(([, paramsSchema]) => paramsSchema) as [
-            z.ZodTypeAny,
-            z.ZodTypeAny,
-            ...z.ZodTypeAny[]
-          ];
+            .filter(Boolean) as unknown as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]];
 
           const bodySchemaWithParams = bodySchema.merge(
             z.object({ params: z.union(paramSchemas) })
