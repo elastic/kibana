@@ -169,7 +169,7 @@ describe(
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON)
           .should('be.visible')
-          .and('have.text', 'Investigation guide');
+          .and('have.text', 'Show investigation guide');
 
         cy.log('should navigate to left Investigation tab');
 

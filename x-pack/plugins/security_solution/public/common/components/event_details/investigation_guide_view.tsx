@@ -22,11 +22,11 @@ export const BasicAlertDataContext = createContext<Partial<GetBasicDataFromDetai
 
 interface InvestigationGuideViewProps {
   /**
-   * An array of events data
+   * An object of basic fields from the event details data
    */
   basicData: GetBasicDataFromDetailsData;
   /**
-   *
+   * The markdown text of rule.note
    */
   ruleNote: string;
   /**
