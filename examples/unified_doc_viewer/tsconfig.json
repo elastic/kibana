@@ -22,7 +22,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/unified-doc-viewer",
     "@kbn/unified-doc-viewer-plugin",
   ]
 }
