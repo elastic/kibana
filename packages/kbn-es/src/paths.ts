@@ -33,6 +33,8 @@ export const ESS_USERS_ROLES_PATH = resolve(__dirname, './ess_resources/users_ro
 export const ESS_ROLES_PATH = resolve(__dirname, './ess_resources/roles.yml');
 export const ESS_ROLE_MAPPING_PATH = resolve(__dirname, './ess_resources/role_mapping.yml');
 
+export const ESS_SECRETS_PATH = resolve(__dirname, './ess_resources/secrets.json');
+
 export const ESS_RESOURCES_PATHS = [
   ESS_OPERATOR_USERS_PATH,
   ESS_ROLE_MAPPING_PATH,

@@ -17,7 +17,7 @@ import { ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
-import { ESS_RESOURCES_PATHS } from '../paths';
+import { ESS_RESOURCES_PATHS, ESS_SECRETS_PATH } from '../paths';
 
 interface BaseOptions {
   tag?: string;
@@ -138,19 +138,21 @@ const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.http.ssl.keystore.path', `${ESS_CONFIG_PATH}certs/elasticsearch.p12`],
 
-  ['xpack.security.http.ssl.keystore.password', ES_P12_PASSWORD],
-
   ['xpack.security.http.ssl.verification_mode', 'certificate'],
 
   ['xpack.security.transport.ssl.enabled', 'true'],
 
   ['xpack.security.transport.ssl.keystore.path', `${ESS_CONFIG_PATH}certs/elasticsearch.p12`],
 
-  ['xpack.security.transport.ssl.keystore.password', ES_P12_PASSWORD],
-
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 
   ['xpack.security.operator_privileges.enabled', 'true'],
+];
+
+const DOCKER_SSL_ESARGS: Array<[string, string]> = [
+  ['xpack.security.http.ssl.keystore.password', ES_P12_PASSWORD],
+
+  ['xpack.security.transport.ssl.keystore.password', ES_P12_PASSWORD],
 ];
 
 const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
@@ -416,7 +418,13 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   log.indent(-4);
 
-  const baseCmd = ['--volume', `${basePath}:/objectstore:z`];
+  const baseCmd = [
+    '--volume',
+    `${basePath}:/objectstore:z`,
+
+    '--volume',
+    `${ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`,
+  ];
 
   if (ssl) {
     const essResources = ESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
@@ -554,7 +562,7 @@ export function resolveDockerCmd(options: DockerOptions, image: string = DOCKER_
   }
 
   return DOCKER_BASE_CMD.concat(
-    resolveEsArgs(DEFAULT_DOCKER_ESARGS, options),
+    resolveEsArgs(DEFAULT_DOCKER_ESARGS.concat(options.ssl ? DOCKER_SSL_ESARGS : []), options),
     resolvePort(options),
     options.ssl ? getESp12Volume() : [],
     image

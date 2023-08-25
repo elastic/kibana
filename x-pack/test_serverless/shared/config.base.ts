@@ -64,13 +64,13 @@ export default async () => {
          * ESS emits deprecation warnings for ssl.keystore.password.
          * Need to mount a secure keystore into the images because ES_NOPASSWORD_P12_PATH doesn't work.
          */
-        // `--logging.loggers=${JSON.stringify([
-        //   {
-        //     name: 'elasticsearch.deprecation',
-        //     level: 'all',
-        //     appenders: ['deprecation'],
-        //   },
-        // ])}`,
+        `--logging.loggers=${JSON.stringify([
+          {
+            name: 'elasticsearch.deprecation',
+            level: 'all',
+            appenders: ['deprecation'],
+          },
+        ])}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
       ],
