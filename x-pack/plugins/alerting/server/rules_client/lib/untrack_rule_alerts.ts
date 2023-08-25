@@ -43,7 +43,7 @@ export const untrackRuleAlerts = async (
       for (const alertId of untrackedAlertIds) {
         const { group: actionGroup } = untrackedAlerts[alertId].getLastScheduledActions() ?? {};
         const instanceState = untrackedAlerts[alertId].getState();
-        const message = `instance '${alertId}' has untracked because the rule was disabled`;
+        const message = `instance '${alertId}' has been untracked because the rule was disabled`;
         const alertUuid = untrackedAlerts[alertId].getUuid();
 
         const event = createAlertEventLogRecordObject({
