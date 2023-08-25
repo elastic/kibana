@@ -14,34 +14,39 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { readTags } from './read_tags';
 
 export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: DETECTION_ENGINE_TAGS_URL,
-      validate: false,
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response): Promise<IKibanaResponse<ReadTagsResponse>> => {
-      const siemResponse = buildSiemResponse(response);
-      const rulesClient = (await context.alerting)?.getRulesClient();
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: false,
+      },
+      async (context, request, response): Promise<IKibanaResponse<ReadTagsResponse>> => {
+        const siemResponse = buildSiemResponse(response);
+        const rulesClient = (await context.alerting)?.getRulesClient();
 
-      if (!rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
+        if (!rulesClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
 
-      try {
-        const tags = await readTags({
-          rulesClient,
-        });
-        return response.ok({ body: tags });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+        try {
+          const tags = await readTags({
+            rulesClient,
+          });
+          return response.ok({ body: tags });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
