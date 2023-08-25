@@ -132,30 +132,30 @@ interface GcpInputFields {
 
 export const gcpField: GcpInputFields = {
   fields: {
-      "gcp.project_id": {
-        label: i18n.translate('xpack.csp.gcpIntegration.projectidFieldLabel', {
-          defaultMessage: 'Project ID',
-        }),
-        type: 'text',
+    'gcp.project_id': {
+      label: i18n.translate('xpack.csp.gcpIntegration.projectidFieldLabel', {
+        defaultMessage: 'Project ID',
+      }),
+      type: 'text',
     },
-      "gcp.credentials.file": {
-        label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialFileText', {
-          defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
-        }),
-        type: 'text',
-      },
-      "gcp.credentials.json": {
-        label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
-          defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
-        }),
-        type: 'text',
-      },
-      "gcp.credentials.type": {
-        label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
-          defaultMessage: 'Credential',
-        }),
-        type: 'text',
-      },
+    'gcp.credentials.file': {
+      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialFileText', {
+        defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
+      }),
+      type: 'text',
+    },
+    'gcp.credentials.json': {
+      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
+        defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
+      }),
+      type: 'text',
+    },
+    'gcp.credentials.type': {
+      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
+        defaultMessage: 'Credential',
+      }),
+      type: 'text',
+    },
   },
 };
 
@@ -192,10 +192,7 @@ interface GcpFormProps {
   onChange: any;
 }
 
-const getInputVarsFields = (
-  input: NewPackagePolicyInput,
-  fields: GcpFields
-) =>
+const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFields) =>
   Object.entries(input.streams[0].vars || {})
     .filter(([id]) => id in fields)
     .map(([id, inputVar]) => {
@@ -424,7 +421,7 @@ const GcpInputVarFields = ({
     <div>
       <EuiForm component="form">
         {projectIdFields && (
-          <EuiFormRow fullWidth label={gcpField.fields["gcp.project_id"].label}>
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
             <EuiFieldText
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
               id={projectIdFields.id}
@@ -435,7 +432,7 @@ const GcpInputVarFields = ({
           </EuiFormRow>
         )}
         {credentialsTypeFields && credentialFilesFields && credentialJSONFields && (
-          <EuiFormRow fullWidth label={gcpField.fields["gcp.credentials.type"].label}>
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.type'].label}>
             <EuiSelect
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
               fullWidth
@@ -448,7 +445,7 @@ const GcpInputVarFields = ({
           </EuiFormRow>
         )}
         {credentialsTypeValue === credentialFieldValue && credentialFilesFields && (
-          <EuiFormRow fullWidth label={gcpField.fields["gcp.credentials.file"].label}>
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.file'].label}>
             <EuiFieldText
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
               id={credentialFilesFields.id}
@@ -459,7 +456,7 @@ const GcpInputVarFields = ({
           </EuiFormRow>
         )}
         {credentialsTypeValue === credentialJSONValue && credentialJSONFields && (
-          <EuiFormRow fullWidth label={gcpField.fields["gcp.credentials.json"].label}>
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.json'].label}>
             <EuiTextArea
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
               id={credentialJSONFields.id}
