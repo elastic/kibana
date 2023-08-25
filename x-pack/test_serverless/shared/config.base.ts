@@ -83,6 +83,7 @@ export default async () => {
           )
         )}`,
         `--elasticsearch.serviceAccountToken=${kibanaServiceAccount.token}`,
+        `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         '--telemetry.sendUsageTo=staging',
         `--logging.appenders.deprecation=${JSON.stringify({
           type: 'console',
