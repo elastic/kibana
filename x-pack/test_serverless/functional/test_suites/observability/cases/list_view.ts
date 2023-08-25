@@ -35,16 +35,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('listing', () => {
-      before(async () => {
-        await cases.api.createNthRandomCases(2, 'observability');
-        await header.waitUntilLoadingHasFinished();
-        await cases.casesTable.waitForCasesToBeListed();
-      });
-
-      after(async () => {
-        await cases.api.deleteAllCases();
-        await cases.casesTable.waitForCasesToBeDeleted();
-      });
+      createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
       it('lists cases correctly', async () => {
         await cases.casesTable.validateCasesTableHasNthRows(2);
@@ -53,17 +44,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('bulk actions', () => {
       describe('delete', () => {
-        before(async () => {
-          await cases.api.createNthRandomCases(8, 'observability');
-          await cases.api.createCase({ title: 'delete me', tags: ['one'], owner: 'observability' });
-          await header.waitUntilLoadingHasFinished();
-          await cases.casesTable.waitForCasesToBeListed();
-        });
-
-        after(async () => {
-          await cases.api.deleteAllCases();
-          await cases.casesTable.waitForCasesToBeDeleted();
-        });
+        createNCasesBeforeDeleteAllAfter(8, getPageObject, getService);
 
         it('bulk delete cases from the list', async () => {
           await cases.casesTable.selectAndDeleteAllCases();
@@ -73,16 +54,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       describe('status', () => {
-        before(async () => {
-          await cases.api.createNthRandomCases(2, 'observability');
-          await header.waitUntilLoadingHasFinished();
-          await cases.casesTable.waitForCasesToBeListed();
-        });
-
-        after(async () => {
-          await cases.api.deleteAllCases();
-          await cases.casesTable.waitForCasesToBeDeleted();
-        });
+        createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the status of cases to in-progress correctly', async () => {
           await cases.casesTable.selectAndChangeStatusOfAllCases(CaseStatuses['in-progress']);
@@ -92,16 +64,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       describe('severity', () => {
-        before(async () => {
-          await cases.api.createNthRandomCases(2, 'observability');
-          await header.waitUntilLoadingHasFinished();
-          await cases.casesTable.waitForCasesToBeListed();
-        });
-
-        after(async () => {
-          await cases.api.deleteAllCases();
-          await cases.casesTable.waitForCasesToBeDeleted();
-        });
+        createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the severity of cases to medium correctly', async () => {
           await cases.casesTable.selectAndChangeSeverityOfAllCases(CaseSeverity.MEDIUM);
@@ -229,16 +192,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('pagination', () => {
-      before(async () => {
-        await cases.api.createNthRandomCases(12, 'observability');
-        await header.waitUntilLoadingHasFinished();
-        await cases.casesTable.waitForCasesToBeListed();
-      });
-
-      after(async () => {
-        await cases.api.deleteAllCases();
-        await cases.casesTable.waitForCasesToBeDeleted();
-      });
+      createNCasesBeforeDeleteAllAfter(12, getPageObject, getService);
 
       it('paginates cases correctly', async () => {
         await testSubjects.click('tablePaginationPopoverButton');
@@ -254,16 +208,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('row actions', () => {
       describe('Status', () => {
-        before(async () => {
-          await cases.api.createNthRandomCases(1, 'observability');
-          await header.waitUntilLoadingHasFinished();
-          await cases.casesTable.waitForCasesToBeListed();
-        });
-
-        after(async () => {
-          await cases.api.deleteAllCases();
-          await cases.casesTable.waitForCasesToBeDeleted();
-        });
+        createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 
         it('to in progress', async () => {
           await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
@@ -282,16 +227,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       describe('Severity', () => {
-        before(async () => {
-          await cases.api.createNthRandomCases(1, 'observability');
-          await header.waitUntilLoadingHasFinished();
-          await cases.casesTable.waitForCasesToBeListed();
-        });
-
-        after(async () => {
-          await cases.api.deleteAllCases();
-          await cases.casesTable.waitForCasesToBeDeleted();
-        });
+        createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 
         it('to medium', async () => {
           await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
@@ -315,16 +251,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       describe('Delete', () => {
-        before(async () => {
-          await cases.api.createNthRandomCases(1, 'observability');
-          await header.waitUntilLoadingHasFinished();
-          await cases.casesTable.waitForCasesToBeListed();
-        });
-
-        after(async () => {
-          await cases.api.deleteAllCases();
-          await cases.casesTable.waitForCasesToBeDeleted();
-        });
+        createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 
         it('deletes a case correctly', async () => {
           await cases.casesTable.deleteCase(0);
@@ -333,5 +260,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
     });
+  });
+};
+
+const createNCasesBeforeDeleteAllAfter = (
+  numCasesToCreate: number,
+  getPageObject: FtrProviderContext['getPageObject'],
+  getService: FtrProviderContext['getService']
+) => {
+  const cases = getService('cases');
+  const header = getPageObject('header');
+
+  before(async () => {
+    await cases.api.createNthRandomCases(numCasesToCreate, 'observability');
+    await header.waitUntilLoadingHasFinished();
+    await cases.casesTable.waitForCasesToBeListed();
+  });
+
+  after(async () => {
+    await cases.api.deleteAllCases();
+    await cases.casesTable.waitForCasesToBeDeleted();
   });
 };
