@@ -24,6 +24,8 @@ import type { FleetRequestHandlerContext } from '../..';
 
 import { getRequestStore } from '../request_store';
 
+import type { FleetVersionedRouteConfig } from './types';
+
 import type {
   FleetAuthzRouteConfig,
   FleetAuthzRouter,
@@ -37,10 +39,10 @@ import {
 } from './security';
 
 function withDefaultPublicAccess<Method extends RouteMethod>(
-  options: VersionedRouteConfig<Method>
+  options: FleetVersionedRouteConfig<Method>
 ): VersionedRouteConfig<Method> {
   if (options?.access) {
-    return options;
+    return options as VersionedRouteConfig<Method>;
   } else {
     return {
       ...options,

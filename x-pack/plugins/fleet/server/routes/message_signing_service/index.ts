@@ -6,6 +6,7 @@
  */
 
 import type { FleetAuthzRouter } from '../../services/security';
+import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
 import { MESSAGE_SIGNING_SERVICE_API_ROUTES } from '../../constants';
 import { RotateKeyPairSchema } from '../../types';
 
@@ -13,14 +14,18 @@ import { rotateKeyPairHandler } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // Rotate fleet message signing key pair
-  router.post(
-    {
+  router.versioned
+    .post({
       path: MESSAGE_SIGNING_SERVICE_API_ROUTES.ROTATE_KEY_PAIR,
-      validate: RotateKeyPairSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    rotateKeyPairHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: RotateKeyPairSchema },
+      },
+      rotateKeyPairHandler
+    );
 };

@@ -7,6 +7,8 @@
 
 import type { FleetAuthzRouter } from '../../services/security';
 
+import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+
 import { OUTPUT_API_ROUTES } from '../../constants';
 import {
   DeleteOutputRequestSchema,
@@ -26,67 +28,91 @@ import {
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: OUTPUT_API_ROUTES.LIST_PATTERN,
-      validate: GetOutputsRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getOutputsHandler
-  );
-  router.get(
-    {
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetOutputsRequestSchema },
+      },
+      getOutputsHandler
+    );
+  router.versioned
+    .get({
       path: OUTPUT_API_ROUTES.INFO_PATTERN,
-      validate: GetOneOutputRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getOneOuputHandler
-  );
-  router.put(
-    {
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetOneOutputRequestSchema },
+      },
+      getOneOuputHandler
+    );
+  router.versioned
+    .put({
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
-      validate: PutOutputRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    putOutputHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PutOutputRequestSchema },
+      },
+      putOutputHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: OUTPUT_API_ROUTES.CREATE_PATTERN,
-      validate: PostOutputRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postOutputHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostOutputRequestSchema },
+      },
+      postOutputHandler
+    );
 
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: OUTPUT_API_ROUTES.DELETE_PATTERN,
-      validate: DeleteOutputRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    deleteOutputHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: DeleteOutputRequestSchema },
+      },
+      deleteOutputHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
-      validate: false,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postLogstashApiKeyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: false,
+      },
+      postLogstashApiKeyHandler
+    );
 };

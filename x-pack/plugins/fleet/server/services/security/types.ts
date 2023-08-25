@@ -10,6 +10,7 @@ import type {
   VersionedRouteConfig,
   AddVersionOpts,
   IKibanaResponse,
+  RouteConfigOptions,
 } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { RequestHandler } from '@kbn/core/server';
@@ -34,9 +35,18 @@ export interface FleetAuthzRouteConfig<
 }
 
 /**
+ * Internal type necessary to make access in VersionedRouteConfig optional
+ */
+export type FleetVersionedRouteConfig<Method extends RouteMethod> = Omit<
+  VersionedRouteConfig<Method>,
+  'access'
+> & {
+  access?: Exclude<RouteConfigOptions<RouteMethod>['access'], undefined>;
+};
+/**
  * Interface replacing the native VersionedRouteConfig to accept fleetAuthz
  */
-export type FleetRouteConfig<Method extends RouteMethod> = VersionedRouteConfig<Method> &
+export type FleetRouteConfig<Method extends RouteMethod> = FleetVersionedRouteConfig<Method> &
   FleetAuthzRouteConfig;
 
 /**

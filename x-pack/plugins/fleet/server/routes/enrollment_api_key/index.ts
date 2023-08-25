@@ -8,6 +8,8 @@
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { ENROLLMENT_API_KEY_ROUTES } from '../../constants';
+import { OLDEST_PUBLIC_VERSION, INTERNAL_API_ACCESS } from '../../../common/constants';
+
 import {
   GetEnrollmentAPIKeysRequestSchema,
   GetOneEnrollmentAPIKeyRequestSchema,
@@ -23,103 +25,127 @@ import {
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN,
-      validate: GetOneEnrollmentAPIKeyRequestSchema,
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
-    },
-    getOneEnrollmentApiKeyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetOneEnrollmentAPIKeyRequestSchema },
+      },
+      getOneEnrollmentApiKeyHandler
+    );
 
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN,
-      validate: DeleteEnrollmentAPIKeyRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    deleteEnrollmentApiKeyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: DeleteEnrollmentAPIKeyRequestSchema },
+      },
+      deleteEnrollmentApiKeyHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
-      validate: GetEnrollmentAPIKeysRequestSchema,
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
-    },
-    getEnrollmentApiKeysHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetEnrollmentAPIKeysRequestSchema },
+      },
+      getEnrollmentApiKeysHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN,
-      validate: PostEnrollmentAPIKeyRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postEnrollmentApiKeyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostEnrollmentAPIKeyRequestSchema },
+      },
+      postEnrollmentApiKeyHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN_DEPRECATED,
-      validate: GetOneEnrollmentAPIKeyRequestSchema,
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
-      options: {
-        access: 'internal',
+      access: INTERNAL_API_ACCESS,
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetOneEnrollmentAPIKeyRequestSchema },
       },
-    },
-    getOneEnrollmentApiKeyHandler
-  );
+      getOneEnrollmentApiKeyHandler
+    );
 
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN_DEPRECATED,
-      validate: DeleteEnrollmentAPIKeyRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-      options: {
-        access: 'internal',
+      access: INTERNAL_API_ACCESS,
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: DeleteEnrollmentAPIKeyRequestSchema },
       },
-    },
-    deleteEnrollmentApiKeyHandler
-  );
+      deleteEnrollmentApiKeyHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN_DEPRECATED,
-      validate: GetEnrollmentAPIKeysRequestSchema,
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
-      options: {
-        access: 'internal',
+      access: INTERNAL_API_ACCESS,
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetEnrollmentAPIKeysRequestSchema },
       },
-    },
-    getEnrollmentApiKeysHandler
-  );
+      getEnrollmentApiKeysHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN_DEPRECATED,
-      validate: PostEnrollmentAPIKeyRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-      options: {
-        access: 'internal',
+      access: INTERNAL_API_ACCESS,
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostEnrollmentAPIKeyRequestSchema },
       },
-    },
-    postEnrollmentApiKeyHandler
-  );
+      postEnrollmentApiKeyHandler
+    );
 };

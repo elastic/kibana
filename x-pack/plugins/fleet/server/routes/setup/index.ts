@@ -8,48 +8,62 @@
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
+import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+
 import type { FleetConfigType } from '../../../common/types';
 
 import { getFleetStatusHandler, fleetSetupHandler } from './handlers';
 
 export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: SETUP_API_ROUTE,
-      validate: false,
       fleetAuthz: {
         fleet: { setup: true },
       },
-    },
-    fleetSetupHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: false,
+      },
+      fleetSetupHandler
+    );
 };
 
 // That route is used by agent to setup Fleet
 export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
-      validate: false,
       fleetAuthz: {
         fleet: { setup: true },
       },
-    },
-    fleetSetupHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: false,
+      },
+      fleetSetupHandler
+    );
 };
 
 export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: AGENTS_SETUP_API_ROUTES.INFO_PATTERN,
-      validate: false,
       fleetAuthz: {
         fleet: { setup: true },
       },
-    },
-    getFleetStatusHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: false,
+      },
+      getFleetStatusHandler
+    );
 };
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
