@@ -214,7 +214,7 @@ export interface DiscoverStartPlugins {
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
-  noDataPage: NoDataPagePluginStart;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 /**

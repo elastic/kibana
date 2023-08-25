@@ -12,10 +12,27 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
-  describe('empty page', function () {
-    it('should show empty search specific page instead of analytics empty page', async () => {
+  describe('empty pages', function () {
+    before(async () => {
       await svlSearchNavigation.navigateToLandingPage();
+    });
+
+    it('should show search specific empty page in discover', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
+      await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
+      await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting started' });
+    });
+
+    it('should show search specific empty page in visualize', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'visualize' });
+      await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
+      await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting started' });
+    });
+
+    it('should show search specific empty page in dashboards', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
       await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
       await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting started' });

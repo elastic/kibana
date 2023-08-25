@@ -26,8 +26,7 @@
       "expressions",
       "unifiedSearch",
       "unifiedHistogram",
-      "contentManagement",
-      "noDataPage"
+      "contentManagement"
     ],
     "optionalPlugins": [
       "home",
@@ -37,7 +36,8 @@
       "triggersActionsUi",
       "savedObjectsTaggingOss",
       "lens",
-      "serverless"
+      "serverless",
+      "noDataPage"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch"],
     "extraPublicDirs": ["common"]

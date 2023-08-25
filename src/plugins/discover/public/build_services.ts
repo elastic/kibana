@@ -112,7 +112,7 @@ export interface DiscoverServices {
   uiActions: UiActionsStart;
   contentClient: ContentClient;
   serverless?: ServerlessPluginStart;
-  noDataPage: NoDataPagePluginStart;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 export const buildServices = memoize(function (
