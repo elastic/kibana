@@ -79,7 +79,7 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
         {policy.sourceIndices && (
           <>
             <EuiDescriptionListTitle>
-              {i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.matchFieldLabel', {
+              {i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.sourceIndicesLabel', {
                 defaultMessage: 'Source indices',
               })}
             </EuiDescriptionListTitle>

@@ -23,7 +23,7 @@ export const EmptyState = () => {
       title={
         <h2>
           <FormattedMessage
-            id="xpack.remoteClusters.remoteClusterList.emptyPromptTitle"
+            id="xpack.idxMgmt.enrichPolicies.list.emptyPromptTitle"
             defaultMessage="Add your first enrich policy"
           />
         </h2>
@@ -31,7 +31,7 @@ export const EmptyState = () => {
       body={
         <p>
           <FormattedMessage
-            id="xpack.remoteClusters.remoteClusterList.emptyPromptDescription"
+            id="xpack.idxMgmt.enrichPolicies.list.emptyPromptDescription"
             defaultMessage="A set of configuration options used to add the right enrich data to the right incoming documents."
           />
         </p>
@@ -44,7 +44,7 @@ export const EmptyState = () => {
           {...reactRouterNavigate(history, '/enrich_policies/create')}
         >
           <FormattedMessage
-            id="xpack.remoteClusters.remoteClusterList.emptyPrompt.connectButtonLabel"
+            id="xpack.idxMgmt.enrichPolicies.list.emptyPromptButtonLabel"
             defaultMessage="Add an enrich policy"
           />
         </EuiButton>
