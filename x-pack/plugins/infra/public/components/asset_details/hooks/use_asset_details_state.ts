@@ -7,7 +7,6 @@
 
 import createContainer from 'constate';
 import type { AssetDetailsProps } from '../types';
-import { useDateRangeProviderContext } from './use_date_range';
 import { useMetadataStateProviderContext } from './use_metadata_state';
 
 export interface UseAssetDetailsStateProps {
@@ -19,7 +18,6 @@ export interface UseAssetDetailsStateProps {
 
 export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
   const { metadata } = useMetadataStateProviderContext();
-  const { dateRange, dateRangeTs } = useDateRangeProviderContext();
   const { asset, assetType, onTabsStateChange, overrides, renderMode } = state;
 
   // When the asset asset.name is known we can load the page faster
@@ -32,8 +30,6 @@ export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
       name: asset.name || metadata?.name || 'asset-name',
     },
     assetType,
-    dateRange,
-    dateRangeTs,
     onTabsStateChange,
     overrides,
     renderMode,
