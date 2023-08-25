@@ -6,8 +6,10 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { esQueryRuleName } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const actions = getService('actions');
   const browser = getService('browser');
   const commonScreenshots = getService('commonScreenshots');
   const find = getService('find');
@@ -16,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
   const ruleName = 'test query rule';
+  const emailConnectorName = 'Email connector 1';
 
   const validQueryJson = JSON.stringify({
     query: {
@@ -45,6 +48,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   });
 
   describe('elasticsearch query rule', function () {
+    let emailConnectorId: string;
+    before(async () => {
+      ({ id: emailConnectorId } = await actions.api.createConnector({
+        name: emailConnectorName,
+        config: {
+          service: 'other',
+          from: 'bob@example.com',
+          host: 'some.non.existent.com',
+          port: 25,
+        },
+        secrets: {
+          user: 'bob',
+          password: 'supersecret',
+        },
+        connectorTypeId: '.email',
+      }));
+    });
+
+    after(async () => {
+      await actions.api.deleteConnector(emailConnectorId);
+    });
+
     it('create rule screenshot', async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -107,6 +132,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1500
       );
       await testSubjects.click('cancelSaveRuleButton');
+    });
+
+    it('example elasticsearch query rule conditions and actions', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      // Edit the rule that was created as part of startup
+      await testSubjects.setValue('ruleSearchField', esQueryRuleName);
+      await browser.pressKeys(browser.keys.ENTER);
+      const actionPanel = await testSubjects.find('collapsedItemActions');
+      await actionPanel.click();
+      const editRuleMenu = await testSubjects.find('editRule');
+      await editRuleMenu.click();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot(
+        'es-query-rule-conditions',
+        screenshotDirectories,
+        1400,
+        1700
+      );
+      /* Reposition so that the details are visible for the first action */
+      await testSubjects.scrollIntoView('alertActionAccordion-0');
+      await commonScreenshots.takeScreenshot(
+        'es-query-rule-action-summary',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      await testSubjects.click('messageAddVariableButton');
+      await commonScreenshots.takeScreenshot(
+        'es-query-rule-action-variables',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      await browser.pressKeys(browser.keys.ESCAPE);
+      /* Reposition so that the details are visible for the second action */
+      await testSubjects.scrollIntoView('alertActionAccordion-1');
+      await commonScreenshots.takeScreenshot(
+        'es-query-rule-action-for-each-alert',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      const cancelEditButton = await testSubjects.find('cancelSaveEditedRuleButton');
+      await cancelEditButton.click();
+      const confirmCancelButton = await testSubjects.find('confirmModalConfirmButton');
+      await confirmCancelButton.click();
     });
   });
 }

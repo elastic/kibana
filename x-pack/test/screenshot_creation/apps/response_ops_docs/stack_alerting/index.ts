@@ -9,15 +9,30 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const indexThresholdRuleName = 'kibana sites - low bytes';
 export const metricThresholdRuleName = 'network metric packets';
+export const esQueryRuleName = 'sample logs query rule';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const actions = getService('actions');
   const rules = getService('rules');
+  const validQueryJson = JSON.stringify({
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'host.keyword': 'www.elastic.co',
+            },
+          },
+        ],
+      },
+    },
+  });
 
   describe('stack alerting', function () {
     let itRuleId: string;
     let mtRuleId: string;
+    let esRuleId: string;
     let serverLogConnectorId: string;
     before(async () => {
       await browser.setWindowSize(1920, 1080);
@@ -90,11 +105,56 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
           },
         ],
       }));
+      ({ id: esRuleId } = await rules.api.createRule({
+        consumer: 'alerts',
+        name: esQueryRuleName,
+        params: {
+          index: ['kibana_sample_data_logs'],
+          timeField: '@timestamp',
+          timeWindowSize: 1,
+          timeWindowUnit: 'd',
+          thresholdComparator: '>',
+          threshold: [100],
+          size: 100,
+          esQuery: validQueryJson,
+        },
+        ruleTypeId: '.es-query',
+        schedule: { interval: '1d' },
+        actions: [
+          {
+            group: 'query matched',
+            id: serverLogConnectorId,
+            frequency: {
+              throttle: '2d',
+              summary: true,
+              notify_when: 'onThrottleInterval',
+            },
+            params: {
+              level: 'info',
+              message:
+                'The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts.',
+            },
+          },
+          {
+            group: 'recovered',
+            id: serverLogConnectorId,
+            frequency: {
+              summary: false,
+              notify_when: 'onActionGroupChange',
+            },
+            params: {
+              level: 'info',
+              message: '{{alert.id}} has recovered.',
+            },
+          },
+        ],
+      }));
     });
 
     after(async () => {
       await rules.api.deleteRule(itRuleId);
       await rules.api.deleteRule(mtRuleId);
+      await rules.api.deleteRule(esRuleId);
       await rules.api.deleteAllRules();
       await actions.api.deleteConnector(serverLogConnectorId);
       await actions.api.deleteAllConnectors();
