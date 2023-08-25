@@ -168,36 +168,15 @@ describe('buffering documents', () => {
 describe('doesIndexTemplateExist', () => {
   test('should call cluster with proper arguments', async () => {
     await clusterClientAdapter.doesIndexTemplateExist('foo');
-    expect(clusterClient.indices.existsTemplate).toHaveBeenCalledWith({
+    expect(clusterClient.indices.existsIndexTemplate).toHaveBeenCalledWith({
       name: 'foo',
     });
-  });
-
-  test('should return true when call cluster to legacy template API returns true', async () => {
-    clusterClient.indices.existsTemplate.mockResponse(true);
-    clusterClient.indices.existsIndexTemplate.mockResponse(false);
-    await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
   });
 
   test('should return true when call cluster to index template API returns true', async () => {
     clusterClient.indices.existsTemplate.mockResponse(false);
     clusterClient.indices.existsIndexTemplate.mockResponse(true);
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
-  });
-
-  test('should return false when both call cluster calls returns false', async () => {
-    clusterClient.indices.existsTemplate.mockResponse(false);
-    clusterClient.indices.existsIndexTemplate.mockResponse(false);
-    await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(false);
-  });
-
-  test('should throw error when call cluster to legacy template API throws an error', async () => {
-    clusterClient.indices.existsTemplate.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.doesIndexTemplateExist('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error checking existence of index template: Fail"`
-    );
   });
 
   test('should throw error when call cluster to index template API throws an error', async () => {

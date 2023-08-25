@@ -4397,46 +4397,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/get_prebuilt_rules_status_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/find_rules/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/filters/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/read_rule/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/tags/read_tags/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/fleet_integrations/api/get_installed_integrations/route.ts"
               },
               {
@@ -4866,10 +4826,6 @@
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/__mocks__/server.ts"
               },
               {
                 "plugin": "actions",
@@ -7147,22 +7103,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_rule_health/get_rule_health_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
               },
               {
@@ -7180,50 +7120,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_installation/review_rule_installation_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_upgrade/review_rule_upgrade_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_actions/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_create_rules/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/create_rule/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/export_rules/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/import_rules/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -7572,10 +7468,6 @@
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/__mocks__/server.ts"
               },
               {
                 "plugin": "actions",
@@ -8905,18 +8797,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_update_rules/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/update_rule/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/indices/create_index_route.ts"
               },
               {
@@ -9006,10 +8886,6 @@
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/__mocks__/server.ts"
               },
               {
                 "plugin": "actions",
@@ -9423,14 +9299,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_patch_rules/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/patch_rule/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/patch_timelines/index.ts"
               },
               {
@@ -9460,10 +9328,6 @@
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/__mocks__/server.ts"
               },
               {
                 "plugin": "alerting",
@@ -9985,14 +9849,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/delete_rule/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts"
               },
               {
@@ -10066,10 +9922,6 @@
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/__mocks__/server.ts"
               },
               {
                 "plugin": "actions",
@@ -14275,6 +14127,46 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/get_prebuilt_rules_status_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/find_rules/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/filters/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/read_rule/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/tags/read_tags/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
               },
               {
@@ -14672,6 +14564,18 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/routes/pack/update_pack_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_update_rules/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/update_rule/route.ts"
               },
               {
                 "plugin": "transform",
@@ -15227,6 +15131,66 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_rule_health/get_rule_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_installation/review_rule_installation_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/review_rule_upgrade/review_rule_upgrade_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_actions/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_create_rules/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/create_rule/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/export_rules/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/import_rules/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_upload_handler.ts"
               },
               {
@@ -15442,6 +15406,14 @@
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_patch_rules/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/patch_rule/route.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
               }
@@ -15604,6 +15576,14 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/routes/pack/delete_pack_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/delete_rule/route.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
