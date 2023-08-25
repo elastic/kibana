@@ -69,12 +69,6 @@ export interface AddPrebuiltRulesTableState {
    * Rule rows selected in EUI InMemory Table
    */
   selectedRules: RuleResponse[];
-  /**
-   * Is true when the install button in the flyout is disabled
-   * (e.g. when the rule is already being installed or when the table is being refetched)
-   *
-   **/
-  canPreviewedRuleBeInstalled: boolean;
 }
 
 export interface AddPrebuiltRulesTableActions {
@@ -213,7 +207,6 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isUpgradingSecurityPackages,
         selectedRules,
         lastUpdated: dataUpdatedAt,
-        canPreviewedRuleBeInstalled,
       },
       actions,
     };
@@ -229,7 +222,6 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isUpgradingSecurityPackages,
     selectedRules,
     dataUpdatedAt,
-    canPreviewedRuleBeInstalled,
     actions,
   ]);
 

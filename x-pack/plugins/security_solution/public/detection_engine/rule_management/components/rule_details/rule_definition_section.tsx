@@ -42,6 +42,7 @@ import { DataSourceType } from '../../../../detections/pages/detection_engine/ru
 import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { MlJobLink } from '../../../../detections/components/rules/ml_job_link/ml_job_link';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { BadgeList } from './badge_list';
 import * as i18n from './translations';
 
@@ -57,7 +58,7 @@ const EuiBadgeWrap = styled(EuiBadge)`
   .euiBadge__text {
     white-space: pre-wrap !important;
   }
-` as unknown as typeof EuiBadge;
+`;
 
 interface FiltersProps {
   filters: Filter[];
@@ -147,7 +148,11 @@ const MachineLearningJobList = ({ jobIds }: MachineLearningJobListProps) => {
   return (
     <>
       {relevantJobs.map((job) => (
-        <MlJobLink jobId={job.id} jobName={job.customSettings?.security_app_display_name} />
+        <MlJobLink
+          key={job.id}
+          jobId={job.id}
+          jobName={job.customSettings?.security_app_display_name}
+        />
       ))}
     </>
   );

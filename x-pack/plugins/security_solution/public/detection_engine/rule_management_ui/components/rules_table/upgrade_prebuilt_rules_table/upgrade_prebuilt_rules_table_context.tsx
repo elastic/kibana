@@ -75,12 +75,6 @@ export interface UpgradePrebuiltRulesTableState {
    * Rule rows selected in EUI InMemory Table
    */
   selectedRules: RuleUpgradeInfoForReview[];
-  /**
-   * Is true when the upgrade button in the flyout is disabled
-   * (e.g. when the rule is already being upgrade or when the table is being refetched)
-   *
-   **/
-  canPreviewedRuleBeUpgraded: boolean;
 }
 
 export interface UpgradePrebuiltRulesTableActions {
@@ -243,7 +237,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         selectedRules,
         loadingRules,
         lastUpdated: dataUpdatedAt,
-        canPreviewedRuleBeUpgraded,
       },
       actions,
     };
@@ -260,7 +253,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     selectedRules,
     loadingRules,
     dataUpdatedAt,
-    canPreviewedRuleBeUpgraded,
     actions,
   ]);
 

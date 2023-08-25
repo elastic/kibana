@@ -52,7 +52,9 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
 
           const body: ReviewRuleInstallationResponseBody = {
             stats: calculateRuleStats(installableRules),
-            rules: installableRules.map(convertPrebuiltRuleAssetToRuleResponse),
+            rules: installableRules.map((prebuiltRuleAsset) =>
+              convertPrebuiltRuleAssetToRuleResponse(prebuiltRuleAsset)
+            ),
           };
 
           return response.ok({ body });
