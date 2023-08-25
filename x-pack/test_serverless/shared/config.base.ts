@@ -60,10 +60,6 @@ export default async () => {
             type: 'json',
           },
         })}`,
-        /**
-         * ESS emits deprecation warnings for ssl.keystore.password.
-         * Need to mount a secure keystore into the images because ES_NOPASSWORD_P12_PATH doesn't work.
-         */
         `--logging.loggers=${JSON.stringify([
           {
             name: 'elasticsearch.deprecation',
