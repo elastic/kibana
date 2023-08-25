@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 
 import { css } from '@emotion/react';
+import dedent from 'dedent';
 import { useActions, useValues } from 'kea';
 
 import {
@@ -63,6 +64,7 @@ export const APIGettingStarted = () => {
 
   const codeArgs = {
     apiKey,
+    cloudId: cloudContext.cloudId,
     indexName,
     url: cloudContext.elasticsearchUrl || DEFAULT_URL,
   };
@@ -243,7 +245,12 @@ export const APIGettingStarted = () => {
                     overflow-wrap: anywhere;
                   `}
                 >
-                  {codeArgs.url}
+                  {codeArgs.cloudId
+                    ? dedent`{
+                    CloudID: "${codeArgs.cloudId}",
+                    Url: "${codeArgs.url}",
+                  }`
+                    : codeArgs.url}
                 </EuiCodeBlock>
               </EuiSplitPanel.Inner>
             </EuiThemeProvider>
