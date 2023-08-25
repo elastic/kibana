@@ -81,7 +81,7 @@ export const usePrevalence = ({
 
   const items: PrevalenceData[] = [];
 
-  if (data) {
+  if (data && data.aggregations) {
     // total number of unique hosts in the environment
     const uniqueHostsInEnvironment = data.aggregations[HOSTS_AGG_KEY].value;
 
