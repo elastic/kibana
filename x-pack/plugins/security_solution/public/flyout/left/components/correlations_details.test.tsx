@@ -14,15 +14,13 @@ import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_rela
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 import {
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
+  CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_TEST_ID,
 } from './test_ids';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
@@ -30,6 +28,7 @@ import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_re
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 import { mockContextValue } from '../mocks/mock_context';
+import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../shared/components/test_ids';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -39,6 +38,7 @@ jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_session');
 jest.mock('../../shared/hooks/use_show_related_cases');
+jest.mock('../../shared/hooks/use_show_suppressed_alerts');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_same_source_event');
@@ -53,6 +53,11 @@ const renderCorrelationDetails = () => {
     </TestProviders>
   );
 };
+
+const CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TEXT_LINK_TEST_ID =
+  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
+    CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID
+  );
 
 describe('CorrelationsDetails', () => {
   beforeEach(() => {
@@ -70,6 +75,7 @@ describe('CorrelationsDetails', () => {
       .mocked(useShowRelatedAlertsBySession)
       .mockReturnValue({ show: true, entityId: 'entityId' });
     jest.mocked(useShowRelatedCases).mockReturnValue(true);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: true, alertSuppressionCount: 1 });
 
     (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
       loading: false,
@@ -102,6 +108,9 @@ describe('CorrelationsDetails', () => {
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(
+      getByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TEXT_LINK_TEST_ID)
+    ).toBeInTheDocument();
   });
 
   it('should render no section and show error message if show values are false', () => {
@@ -115,13 +124,23 @@ describe('CorrelationsDetails', () => {
       .mocked(useShowRelatedAlertsBySession)
       .mockReturnValue({ show: false, entityId: 'entityId' });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
     const { getByTestId, queryByTestId } = renderCorrelationDetails();
 
-    expect(queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID)).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TEXT_LINK_TEST_ID)
+    ).not.toBeInTheDocument();
     expect(getByTestId(`${CORRELATIONS_DETAILS_TEST_ID}Error`)).toBeInTheDocument();
   });
 
@@ -130,12 +149,22 @@ describe('CorrelationsDetails', () => {
     jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
     const { queryByTestId } = renderCorrelationDetails();
 
-    expect(queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID)).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TEXT_LINK_TEST_ID)
+    ).not.toBeInTheDocument();
   });
 });

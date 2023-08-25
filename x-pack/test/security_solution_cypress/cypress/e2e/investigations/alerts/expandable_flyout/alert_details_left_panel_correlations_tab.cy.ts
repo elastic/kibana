@@ -93,6 +93,12 @@ describe(
         .should('be.visible')
         .and('contain.text', '1 related case');
       cy.get(CORRELATIONS_CASES_SECTION_TABLE).should('be.visible');
+
+      // TODO get proper data to test suppressed alerts
+      // cy.get(CORRELATIONS_SUPPRESSED_ALERTS_TITLE).scrollIntoView();
+      // cy.get(CORRELATIONS_SUPPRESSED_ALERTS_TITLE)
+      //   .should('be.visible')
+      //   .and('contain.text', '1 suppressed alert');
     });
   }
 );

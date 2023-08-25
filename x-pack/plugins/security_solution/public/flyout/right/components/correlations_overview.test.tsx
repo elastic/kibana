@@ -26,6 +26,7 @@ import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_rela
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
@@ -36,12 +37,12 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../shared/components/test_ids';
-import { mockGetFieldsData } from '../mocks/mock_context';
 
 jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_session');
 jest.mock('../../shared/hooks/use_show_related_cases');
+jest.mock('../../shared/hooks/use_show_suppressed_alerts');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_same_source_event');
@@ -97,6 +98,7 @@ describe('<CorrelationsOverview />', () => {
     jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: false });
     jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
     const { getByTestId, queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
     expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
@@ -116,6 +118,7 @@ describe('<CorrelationsOverview />', () => {
       .mocked(useShowRelatedAlertsBySession)
       .mockReturnValue({ show: true, entityId: 'entityId' });
     jest.mocked(useShowRelatedCases).mockReturnValue(true);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: true, alertSuppressionCount: 1 });
 
     (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
       loading: false,
@@ -138,9 +141,7 @@ describe('<CorrelationsOverview />', () => {
       dataCount: 1,
     });
 
-    const { getByTestId } = render(
-      renderCorrelationsOverview({ ...panelContextValue, getFieldsData: mockGetFieldsData })
-    );
+    const { getByTestId } = render(renderCorrelationsOverview(panelContextValue));
     expect(getByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).toBeInTheDocument();
@@ -159,6 +160,7 @@ describe('<CorrelationsOverview />', () => {
       .mocked(useShowRelatedAlertsBySession)
       .mockReturnValue({ show: false, entityId: 'entityId' });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
     const { getByTestId, queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
     expect(queryByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).not.toBeInTheDocument();
@@ -174,6 +176,7 @@ describe('<CorrelationsOverview />', () => {
     jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
     const { queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
     expect(queryByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).not.toBeInTheDocument();

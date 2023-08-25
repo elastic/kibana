@@ -214,3 +214,10 @@ export const RELATED_CASES_HEADING = (count: number) =>
     defaultMessage: '{count} related {count, plural, one {case} other {cases}}',
     values: { count },
   });
+
+export const CORRELATIONS_DETAILS_TABLE_FILTER = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.correlationsDetailsTableFilter',
+  {
+    defaultMessage: 'Correlations Details Table Alert IDs',
+  }
+);

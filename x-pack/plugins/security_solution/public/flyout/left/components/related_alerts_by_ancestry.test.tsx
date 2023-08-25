@@ -7,9 +7,11 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { TestProviders } from '../../../common/mock';
 import {
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
+  INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
@@ -26,6 +28,7 @@ jest.mock('../hooks/use_paginated_alerts');
 const documentId = 'documentId';
 const indices = ['index1'];
 const scopeId = 'scopeId';
+const eventId = 'eventId';
 
 const TOGGLE_ICON = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID
@@ -73,11 +76,19 @@ describe('<RelatedAlertsByAncestry />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+      <TestProviders>
+        <RelatedAlertsByAncestry
+          documentId={documentId}
+          indices={indices}
+          scopeId={scopeId}
+          eventId={eventId}
+        />
+      </TestProviders>
     );
     expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toBeInTheDocument();
+    expect(getByTestId(INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
   });
 
@@ -88,7 +99,14 @@ describe('<RelatedAlertsByAncestry />', () => {
     });
 
     const { container } = render(
-      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+      <TestProviders>
+        <RelatedAlertsByAncestry
+          documentId={documentId}
+          indices={indices}
+          scopeId={scopeId}
+          eventId={eventId}
+        />
+      </TestProviders>
     );
     expect(container).toBeEmptyDOMElement();
   });
