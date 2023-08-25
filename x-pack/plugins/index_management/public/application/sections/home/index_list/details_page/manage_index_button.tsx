@@ -56,7 +56,13 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
 
   // the variables are created to write the index actions in a way to later re-use for indices list without redux
   const indexNames = useMemo(() => [indexName], [indexName]);
-  const reloadIndices = reloadIndexDetails;
+
+  const reloadIndices = useCallback(async () => {
+    setIsLoading(true);
+    await reloadIndexDetails();
+    setIsLoading(false);
+  }, [reloadIndexDetails]);
+
   const indices = [indexDetails];
   const indexStatusByName = getIndexStatusByName(indexNames, indices);
 

@@ -15,8 +15,6 @@ import {
   EuiPageHeaderProps,
   EuiPageSection,
   EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
@@ -133,31 +131,17 @@ export const DetailsPage: React.FunctionComponent<
   return (
     <>
       <EuiPageSection paddingSize="none">
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="indexDetailsBackToIndicesButton"
-              color="text"
-              iconType="arrowLeft"
-              onClick={navigateToAllIndices}
-            >
-              <FormattedMessage
-                id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
-                defaultMessage="Back to all indices"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          {isLoading && (
-            <EuiFlexItem>
-              <SectionLoading inline={true}>
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexDetails.reloadingDescription"
-                  defaultMessage="Re-loading index details…"
-                />
-              </SectionLoading>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <EuiButton
+          data-test-subj="indexDetailsBackToIndicesButton"
+          color="text"
+          iconType="arrowLeft"
+          onClick={navigateToAllIndices}
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
+            defaultMessage="Back to all indices"
+          />
+        </EuiButton>
       </EuiPageSection>
 
       <EuiSpacer size="l" />
