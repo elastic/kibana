@@ -2295,22 +2295,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/core-saved-objects-api-browser",
-                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -2323,8 +2307,16 @@
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-api-browser",
+                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
                 "plugin": "home",
@@ -2361,6 +2353,18 @@
               {
                 "plugin": "home",
                 "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "fleet",
@@ -2513,6 +2517,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/packages/get.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.test.ts"
               }
             ]
           },
@@ -2636,31 +2644,31 @@
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
           },
           {
             "plugin": "actions",
@@ -3254,10 +3262,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/bulk_create.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",

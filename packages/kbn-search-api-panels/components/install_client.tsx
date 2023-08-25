@@ -20,7 +20,7 @@ import { GithubLink } from './github_link';
 
 interface InstallClientProps {
   codeSnippet: string;
-  showTryInConsole: boolean;
+  consoleRequest?: string;
   language: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
   http: HttpStart;
@@ -52,7 +52,7 @@ const Link: React.FC<{ language: LanguageDefinition; http: HttpStart; pluginId: 
 
 export const InstallClientPanel: React.FC<InstallClientProps> = ({
   codeSnippet,
-  showTryInConsole,
+  consoleRequest,
   language,
   languages,
   setSelectedLanguage,
@@ -66,7 +66,7 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
   const panelContent = (
     <>
       <CodeBox
-        showTryInConsole={showTryInConsole}
+        consoleRequest={consoleRequest}
         codeSnippet={codeSnippet}
         languageType="shell"
         languages={languages}

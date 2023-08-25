@@ -16,7 +16,10 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { SavedObject } from '@kbn/core/server';
 import { RiskEngineDataClient } from './risk_engine_data_client';
+import type { RiskEngineConfiguration } from './types';
 import { createDataStream } from './utils/create_datastream';
 import * as savedObjectConfig from './utils/saved_object_configuration';
 import * as transforms from './utils/transforms';
@@ -517,7 +520,7 @@ describe('RiskEngineDataClient', () => {
       describe('initializeResources error', () => {
         it('should handle errors during initialization', async () => {
           const error = new Error('There error');
-          (createOrUpdateComponentTemplate as jest.Mock).mockRejectedValueOnce(error);
+          (createOrUpdateIlmPolicy as jest.Mock).mockRejectedValueOnce(error);
 
           try {
             await riskEngineDataClient.initializeResources({ namespace: 'default' });
@@ -544,10 +547,6 @@ describe('RiskEngineDataClient', () => {
         describe('saved object exists and transforms not', () => {
           beforeEach(() => {
             mockSavedObjectClient.find.mockResolvedValue(getSavedObjectConfiguration());
-          });
-
-          afterEach(() => {
-            mockSavedObjectClient.find.mockReset();
           });
 
           it('should return status with enabled true', async () => {
@@ -620,31 +619,43 @@ describe('RiskEngineDataClient', () => {
         });
       });
 
+      describe('#getConfiguration', () => {
+        it('retrieves configuration from the saved object', async () => {
+          mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+
+          const configuration = await riskEngineDataClient.getConfiguration();
+
+          expect(mockSavedObjectClient.find).toHaveBeenCalledTimes(1);
+
+          expect(configuration).toEqual({
+            enabled: false,
+          });
+        });
+      });
+
       describe('enableRiskEngine', () => {
-        afterEach(() => {
-          mockSavedObjectClient.find.mockReset();
+        let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
+
+        beforeEach(() => {
+          mockSavedObjectClient.find.mockResolvedValue(getSavedObjectConfiguration());
+          mockTaskManagerStart = taskManagerMock.createStart();
         });
 
-        it('should return error if saved object not exist', async () => {
-          mockSavedObjectClient.find.mockResolvedValueOnce({
+        it('returns an error if saved object does not exist', async () => {
+          mockSavedObjectClient.find.mockResolvedValue({
             page: 1,
             per_page: 20,
             total: 0,
             saved_objects: [],
           });
 
-          expect.assertions(1);
-          try {
-            await riskEngineDataClient.enableRiskEngine();
-          } catch (e) {
-            expect(e.message).toEqual('There no saved object configuration for risk engine');
-          }
+          await expect(
+            riskEngineDataClient.enableRiskEngine({ taskManager: mockTaskManagerStart })
+          ).rejects.toThrow('Risk engine configuration not found');
         });
 
-        it('should update saved object attrubute', async () => {
-          mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
-
-          await riskEngineDataClient.enableRiskEngine();
+        it('should update saved object attribute', async () => {
+          await riskEngineDataClient.enableRiskEngine({ taskManager: mockTaskManagerStart });
 
           expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
             'risk-engine-configuration',
@@ -657,11 +668,38 @@ describe('RiskEngineDataClient', () => {
             }
           );
         });
+
+        describe('if task manager throws an error', () => {
+          beforeEach(() => {
+            mockTaskManagerStart.ensureScheduled.mockRejectedValueOnce(
+              new Error('Task Manager error')
+            );
+          });
+
+          it('disables the risk engine and re-throws the error', async () => {
+            await expect(
+              riskEngineDataClient.enableRiskEngine({ taskManager: mockTaskManagerStart })
+            ).rejects.toThrow('Task Manager error');
+
+            expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
+              'risk-engine-configuration',
+              'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
+              {
+                enabled: false,
+              },
+              {
+                refresh: 'wait_for',
+              }
+            );
+          });
+        });
       });
 
       describe('disableRiskEngine', () => {
-        afterEach(() => {
-          mockSavedObjectClient.find.mockReset();
+        let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
+
+        beforeEach(() => {
+          mockTaskManagerStart = taskManagerMock.createStart();
         });
 
         it('should return error if saved object not exist', async () => {
@@ -674,16 +712,16 @@ describe('RiskEngineDataClient', () => {
 
           expect.assertions(1);
           try {
-            await riskEngineDataClient.disableRiskEngine();
+            await riskEngineDataClient.disableRiskEngine({ taskManager: mockTaskManagerStart });
           } catch (e) {
-            expect(e.message).toEqual('There no saved object configuration for risk engine');
+            expect(e.message).toEqual('Risk engine configuration not found');
           }
         });
 
         it('should update saved object attrubute', async () => {
           mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
 
-          await riskEngineDataClient.disableRiskEngine();
+          await riskEngineDataClient.disableRiskEngine({ taskManager: mockTaskManagerStart });
 
           expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
             'risk-engine-configuration',
@@ -699,6 +737,7 @@ describe('RiskEngineDataClient', () => {
       });
 
       describe('init', () => {
+        let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
         const initializeResourcesMock = jest.spyOn(
           RiskEngineDataClient.prototype,
           'initializeResources'
@@ -710,6 +749,7 @@ describe('RiskEngineDataClient', () => {
           'disableLegacyRiskEngine'
         );
         beforeEach(() => {
+          mockTaskManagerStart = taskManagerMock.createStart();
           disableLegacyRiskEngineMock.mockImplementation(() => Promise.resolve(true));
 
           initializeResourcesMock.mockImplementation(() => {
@@ -720,9 +760,9 @@ describe('RiskEngineDataClient', () => {
             return Promise.resolve(getSavedObjectConfiguration().saved_objects[0]);
           });
 
-          jest.spyOn(savedObjectConfig, 'initSavedObjects').mockImplementation(() => {
-            return Promise.resolve(getSavedObjectConfiguration().saved_objects[0]);
-          });
+          jest
+            .spyOn(savedObjectConfig, 'initSavedObjects')
+            .mockResolvedValue({} as unknown as SavedObject<RiskEngineConfiguration>);
         });
 
         afterEach(() => {
@@ -734,6 +774,7 @@ describe('RiskEngineDataClient', () => {
         it('success', async () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
+            taskManager: mockTaskManagerStart,
           });
 
           expect(initResult).toEqual({
@@ -751,6 +792,7 @@ describe('RiskEngineDataClient', () => {
           });
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
+            taskManager: mockTaskManagerStart,
           });
 
           expect(initResult).toEqual({
@@ -769,6 +811,7 @@ describe('RiskEngineDataClient', () => {
 
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
+            taskManager: mockTaskManagerStart,
           });
 
           expect(initResult).toEqual({
@@ -787,6 +830,7 @@ describe('RiskEngineDataClient', () => {
 
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
+            taskManager: mockTaskManagerStart,
           });
 
           expect(initResult).toEqual({
@@ -805,6 +849,7 @@ describe('RiskEngineDataClient', () => {
 
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
+            taskManager: mockTaskManagerStart,
           });
 
           expect(initResult).toEqual({
@@ -823,6 +868,7 @@ describe('RiskEngineDataClient', () => {
 
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
+            taskManager: mockTaskManagerStart,
           });
 
           expect(initResult).toEqual({
