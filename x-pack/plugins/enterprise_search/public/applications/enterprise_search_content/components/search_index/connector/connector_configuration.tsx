@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '../../../../../../common/types/connectors';
 import { BetaConnectorCallout } from '../../../../shared/beta/beta_connector_callout';
+import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
@@ -53,6 +54,8 @@ export const ConnectorConfiguration: React.FC = () => {
   const { index, recheckIndexLoading } = useValues(IndexViewLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { recheckIndex } = useActions(IndexViewLogic);
+  const cloudContext = useCloudDetails();
+
   if (!isConnectorIndex(index)) {
     return <></>;
   }
@@ -157,6 +160,7 @@ export const ConnectorConfiguration: React.FC = () => {
                             id: index.connector.id,
                             service_type: index.connector.service_type,
                           },
+                          host: cloudContext.elasticsearchUrl,
                         })}
                       </EuiCodeBlock>
                       <EuiSpacer />

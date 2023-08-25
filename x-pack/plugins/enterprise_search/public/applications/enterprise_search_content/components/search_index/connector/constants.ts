@@ -170,12 +170,14 @@ export const BETA_CONNECTORS = CONNECTORS.filter(({ isBeta }) => isBeta);
 export const getConnectorTemplate = ({
   apiKeyData,
   connectorData,
+  host,
 }: {
   apiKeyData: ApiKey | undefined;
   connectorData: {
     id: string;
     service_type: string | null;
   };
+  host?: string;
 }) => dedent`connectors:
   -
     connector_id: "${connectorData.id}"
@@ -187,6 +189,6 @@ export const getConnectorTemplate = ({
 }
 
   elasticsearch:
-    host: "https://locahost:9200",
+    host: "${host || 'https://locahost:9200'}"
     api_key: "${apiKeyData?.encoded || ''}"
 `;
