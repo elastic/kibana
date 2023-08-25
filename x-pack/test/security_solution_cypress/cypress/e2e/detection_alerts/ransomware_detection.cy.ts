@@ -14,49 +14,53 @@ import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../screens/timelin
 import { selectAlertsHistogram } from '../../tasks/alerts';
 import { createTimeline } from '../../tasks/timelines';
 
-describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cy.task('esArchiverLoad', 'ransomware_detection');
-  });
-
-  describe('Ransomware display in Alerts Section', () => {
-    beforeEach(() => {
-      login();
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-    });
-
-    describe('Alerts table', () => {
-      it('shows Ransomware Alerts', () => {
-        cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Detection Alert');
-      });
-    });
-
-    describe('Trend Chart', () => {
-      beforeEach(() => {
-        selectAlertsHistogram();
-      });
-
-      it('shows Ransomware Detection Alert in the trend chart', () => {
-        cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Detection Alert');
-      });
-    });
-  });
-
-  describe('Ransomware in Timelines', () => {
+describe(
+  'Ransomware Detection Alerts',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
     before(() => {
-      login();
-      visit(TIMELINES_URL);
-      createTimeline();
+      cy.task('esArchiverLoad', 'ransomware_detection');
     });
 
-    it('Renders ransomware entries in timelines table', () => {
-      cy.get(TIMELINE_QUERY).type('event.code: "ransomware"{enter}');
+    describe('Ransomware display in Alerts Section', () => {
+      beforeEach(() => {
+        login();
+        visit(ALERTS_URL);
+        waitForAlertsToPopulate();
+      });
 
-      // Wait for grid to load, it should have an analyzer icon
-      cy.get(TIMELINE_VIEW_IN_ANALYZER).should('exist');
+      describe('Alerts table', () => {
+        it('shows Ransomware Alerts', () => {
+          cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Detection Alert');
+        });
+      });
 
-      cy.get(MESSAGE).should('have.text', 'Ransomware Detection Alert');
+      describe('Trend Chart', () => {
+        beforeEach(() => {
+          selectAlertsHistogram();
+        });
+
+        it('shows Ransomware Detection Alert in the trend chart', () => {
+          cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Detection Alert');
+        });
+      });
     });
-  });
-});
+
+    describe('Ransomware in Timelines', () => {
+      before(() => {
+        login();
+        visit(TIMELINES_URL);
+        createTimeline();
+      });
+
+      it('Renders ransomware entries in timelines table', () => {
+        cy.get(TIMELINE_QUERY).type('event.code: "ransomware"{enter}');
+
+        // Wait for grid to load, it should have an analyzer icon
+        cy.get(TIMELINE_VIEW_IN_ANALYZER).should('exist');
+
+        cy.get(MESSAGE).should('have.text', 'Ransomware Detection Alert');
+      });
+    });
+  }
+);
