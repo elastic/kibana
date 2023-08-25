@@ -7,11 +7,12 @@
 
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
+import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const TEST_USERNAME = 'test_user';
-const TEST_USER_PASSWORD = 'changeme';
+const ELASTIC_USERNAME = 'elastic';
+const ELASTIC_PASSWORD = 'changeme';
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 const getMockJobParams = (obj: object) => {
@@ -24,30 +25,39 @@ const getMockJobParams = (obj: object) => {
 export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertestSvc = getService('supertest');
-  const reportingAPI = getService('svlReportingAPI');
+  const esArchiver = getService('esArchiver');
 
   const generateAPI = {
-    getCSVFromSearchSource: async (job: JobParamsDownloadCSV) => {
+    downloadCsvFromSearchSource: async (job: JobParamsDownloadCSV) => {
       return await supertestSvc
-        .post(`/internal/reporting/generate/immediate/csv_searchsource?elasticInternalOrigin=true`)
-        .auth(TEST_USERNAME, TEST_USER_PASSWORD)
+        .post(INTERNAL_ROUTES.DOWNLOAD_CSV)
+        .auth(ELASTIC_USERNAME, ELASTIC_PASSWORD)
         .set(...API_HEADER)
         .set(...INTERNAL_HEADER)
         .send(job);
     },
   };
 
+  const archives = {
+    data: 'x-pack/test/functional/es_archives/reporting/ecommerce', // ecommerce data
+    savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce', // ecommerce saved objects (no Canvas)
+  };
   const fromTime = '2019-06-20T00:00:00.000Z';
   const toTime = '2019-06-25T00:00:00.000Z';
 
-  describe('CSV Generation from SearchSource', () => {
+  describe('CSV Generation from SearchSource: Dashboard', () => {
     before(async () => {
-      await reportingAPI.initEcommerce();
-      await reportingAPI.initLogs();
+      await esArchiver.load(archives.data);
+      await kibanaServer.importExport.load(archives.savedObjects);
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
         'dateFormat:tz': 'UTC',
       });
+    });
+
+    after(async () => {
+      await esArchiver.unload(archives.data);
+      await kibanaServer.importExport.unload(archives.savedObjects);
     });
 
     describe('unquoted values', () => {
@@ -64,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
           status: resStatus,
           text: resText,
           type: resType,
-        } = await generateAPI.getCSVFromSearchSource(
+        } = await generateAPI.downloadCsvFromSearchSource(
           getMockJobParams({
             searchSource: {
               query: { query: '', language: 'kuery' },

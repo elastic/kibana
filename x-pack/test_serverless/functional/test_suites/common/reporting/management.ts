@@ -27,8 +27,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('Reporting Management app', function () {
-    const TEST_USERNAME = 'test_user';
-    const TEST_PASSWORD = 'changeme';
+    const savedObjectsArchive = 'test/functional/fixtures/kbn_archiver/discover';
+
     const job: JobParamsCsvFromSavedObject = {
       browserTimezone: 'UTC',
       objectType: 'search',
@@ -43,23 +43,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ],
     };
 
+    const TEST_USERNAME = 'test_user';
+    const TEST_PASSWORD = 'changeme';
+
     before('initialize saved object archive', async () => {
       await reportingAPI.createReportingRole();
       await reportingAPI.createReportingUser(TEST_USERNAME, TEST_PASSWORD);
 
       // add test saved search object
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(savedObjectsArchive);
     });
 
     after('clean up archives', async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(savedObjectsArchive);
     });
 
     it(`user sees a job they've created`, async () => {
       log.debug(`creating a csv report job as 'elastic'`);
 
       // requires the current logged-in user to be "elastic"
-      const reportJobId = await reportingAPI.createReportJobInternal(
+      const {
+        job: { id: jobId },
+      } = await reportingAPI.createReportJobInternal(
         CSV_REPORT_TYPE_V2,
         job,
         'elastic',
@@ -67,13 +72,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       await navigateToReportingManagement();
-      await testSubjects.existOrFail(`viewReportingLink-${reportJobId}`);
+      await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
     });
 
     it(`user doesn't see a job another user has created`, async () => {
       log.debug(`creating a csv report job as '${TEST_USERNAME}'`);
 
-      const reportJobId = await reportingAPI.createReportJobInternal(
+      const {
+        job: { id: jobId },
+      } = await reportingAPI.createReportJobInternal(
         CSV_REPORT_TYPE_V2,
         job,
         TEST_USERNAME,
@@ -81,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       await navigateToReportingManagement();
-      await testSubjects.missingOrFail(`viewReportingLink-${reportJobId}`);
+      await testSubjects.missingOrFail(`viewReportingLink-${jobId}`);
     });
   });
 };

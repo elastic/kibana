@@ -22,6 +22,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
 
   describe('Reporting Management', function () {
+    const dataArchive = 'x-pack/test/functional/es_archives/reporting/archived_reports';
+
     before(async () => {
       await reportingAPI.createReportingRole();
       await reportingAPI.createReportingUser();
@@ -29,11 +31,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
+      await esArchiver.load(dataArchive);
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
+      await esArchiver.unload(dataArchive);
     });
 
     describe('Deletion', () => {
