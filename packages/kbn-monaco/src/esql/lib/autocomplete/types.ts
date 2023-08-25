@@ -12,6 +12,9 @@ import { monaco } from '../../../..';
 export interface ESQLCustomAutocompleteCallbacks {
   getSourceIdentifiers?: CallbackFn;
   getFieldsIdentifiers?: CallbackFn;
+  getPoliciesIdentifiers?: CallbackFn;
+  getPolicyFieldsIdentifiers?: CallbackFn;
+  getPolicyMatchingFieldIdentifiers?: CallbackFn;
 }
 
 /** @internal **/
@@ -23,6 +26,7 @@ type CallbackFn = (ctx: {
 /** @internal **/
 export interface UserDefinedVariables {
   sourceIdentifiers: string[];
+  policyIdentifiers: string[];
 }
 
 /** @internal **/

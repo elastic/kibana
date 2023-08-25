@@ -11,6 +11,9 @@ import { DynamicAutocompleteItem, isDynamicAutocompleteItem } from '../autocompl
 import {
   buildFieldsDefinitions,
   buildSourcesDefinitions,
+  buildPoliciesDefinitions,
+  buildNoPoliciesAvailableDefinition,
+  buildMatchingFieldsDefinition,
 } from '../autocomplete/autocomplete_definitions/dynamic_commands';
 import { pipeDefinition } from '../autocomplete/autocomplete_definitions';
 
@@ -36,10 +39,11 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
       userDefinedVariables: UserDefinedVariables;
     }
   ): Promise<AutocompleteCommandDefinition[]> {
-    let result: AutocompleteCommandDefinition[] = [];
-
-    for (const suggestion of suggestions) {
-      if (isDynamicAutocompleteItem(suggestion)) {
+    const allSuggestions: AutocompleteCommandDefinition[][] = await Promise.all(
+      suggestions.map(async (suggestion) => {
+        if (!isDynamicAutocompleteItem(suggestion)) {
+          return [suggestion];
+        }
         let dynamicItems: AutocompleteCommandDefinition[] = [];
 
         if (suggestion === DynamicAutocompleteItem.SourceIdentifier) {
@@ -56,13 +60,34 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
             (await this.callbacks?.getFieldsIdentifiers?.(ctx)) ?? []
           );
         }
-        result = [...result, ...dynamicItems];
-      } else {
-        result = [...result, suggestion];
-      }
-    }
 
-    return result;
+        if (suggestion === DynamicAutocompleteItem.PolicyIdentifier) {
+          const results = await this.callbacks?.getPoliciesIdentifiers?.(ctx);
+          dynamicItems = results?.length
+            ? buildPoliciesDefinitions(results)
+            : buildNoPoliciesAvailableDefinition();
+        }
+
+        if (suggestion === DynamicAutocompleteItem.PolicyFieldIdentifier) {
+          dynamicItems = buildFieldsDefinitions(
+            (await this.callbacks?.getPolicyFieldsIdentifiers?.(ctx)) || []
+          );
+        }
+
+        if (suggestion === DynamicAutocompleteItem.PolicyMatchingFieldIdentifier) {
+          const [fields = [], matchingField] = await Promise.all([
+            this.callbacks?.getFieldsIdentifiers?.(ctx),
+            this.callbacks?.getPolicyMatchingFieldIdentifiers?.(ctx),
+          ]);
+          dynamicItems = matchingField?.length
+            ? buildMatchingFieldsDefinition(matchingField[0], fields)
+            : buildFieldsDefinitions(fields);
+        }
+        return dynamicItems;
+      })
+    );
+
+    return allSuggestions.flat();
   }
 
   async provideCompletionItems(
