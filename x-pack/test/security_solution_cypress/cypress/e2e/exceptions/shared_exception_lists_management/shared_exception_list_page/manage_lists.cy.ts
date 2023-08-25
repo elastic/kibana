@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 
 import { getExceptionList, expectedExportedExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
@@ -47,7 +46,7 @@ const getExceptionList2 = () => ({
 
 describe(
   'Manage lists from "Shared Exception Lists" page',
-  { tags: [tag.ESS, tag.SERVERLESS] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     describe('Create/Export/Delete List', () => {
       before(() => {
