@@ -6,7 +6,6 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
 
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -36,7 +35,7 @@ const IPS_LIST_FILE_NAME = 'ip_list.txt';
 const CIDRS_LIST_FILE_NAME = 'cidr_list.txt';
 
 describe('value lists', () => {
-  describe('management modal', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('management modal', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       deleteValueLists([TEXT_LIST_FILE_NAME, IPS_LIST_FILE_NAME, CIDRS_LIST_FILE_NAME]);
@@ -251,7 +250,7 @@ describe('value lists', () => {
     });
   });
 
-  describe('user with restricted access role', { tags: tag.ESS }, () => {
+  describe('user with restricted access role', { tags: '@ess' }, () => {
     it('Does not allow a t1 analyst user to upload a value list', () => {
       login(ROLES.t1_analyst);
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.t1_analyst);

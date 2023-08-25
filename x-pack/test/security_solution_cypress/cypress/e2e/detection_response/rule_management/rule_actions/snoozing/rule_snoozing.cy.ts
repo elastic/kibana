@@ -7,7 +7,6 @@
 
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { tag } from '../../../../../tags';
 
 import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/common';
@@ -48,7 +47,7 @@ import { TOOLTIP } from '../../../../../screens/common';
 
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
-describe('rule snoozing', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('rule snoozing', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
