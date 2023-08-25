@@ -13,7 +13,6 @@ import type { Observable } from 'rxjs';
 
 import { RecentItem } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { navigationStyles as styles } from '../../styles';
 
 import { getI18nStrings } from '../i18n_strings';
 
@@ -71,11 +70,7 @@ export const RecentlyAccessed: FC<Props> = ({
       initialIsOpen={!defaultIsCollapsed}
       data-test-subj={`nav-bucket-recentlyAccessed`}
     >
-      <EuiSideNav
-        items={navItems}
-        css={styles.euiSideNavItems}
-        mobileBreakpoints={/* turn off responsive behavior */ []}
-      />
+      <EuiSideNav items={navItems} mobileBreakpoints={/* turn off responsive behavior */ []} />
     </EuiCollapsibleNavGroup>
   );
 };

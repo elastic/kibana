@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import classnames from 'classnames';
 import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
-import { navigationStyles as styles } from '../../styles';
 import { useNavigation as useServices } from '../../services';
 import { ChromeProjectNavigationNodeEnhanced } from '../types';
 import { isAbsoluteLink } from '../../utils';
@@ -168,7 +167,6 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
           items={filteredItems.map((item) =>
             navigationNodeToEuiItem(item, { navigateToUrl, basePath })
           )}
-          css={styles.euiSideNavItems}
         />
       </EuiText>
     </EuiCollapsibleNavGroup>

@@ -23,7 +23,6 @@ import {
   EuiThemeProvider,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import { NavigationProvider } from '../services';
@@ -41,27 +40,14 @@ const SIZE_CLOSED = 40;
 const NavigationWrapper: FC = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true);
 
-  const collabsibleNavCSS = css`
-    border-inline-end-width: 1,
-    display: flex,
-    flex-direction: row,
-  `;
-
   const CollapseButton = () => {
-    const buttonCSS = css`
-      margin-left: -32px;
-      position: fixed;
-      z-index: 1000;
-    `;
     return (
-      <span css={buttonCSS}>
-        <EuiButtonIcon
-          iconType={isOpen ? 'menuLeft' : 'menuRight'}
-          color={isOpen ? 'ghost' : 'text'}
-          onClick={toggleOpen}
-          aria-label={isOpen ? 'Collapse navigation' : 'Expand navigation'}
-        />
-      </span>
+      <EuiButtonIcon
+        iconType={isOpen ? 'menuLeft' : 'menuRight'}
+        color={isOpen ? 'ghost' : 'text'}
+        onClick={toggleOpen}
+        aria-label={isOpen ? 'Collapse navigation' : 'Expand navigation'}
+      />
     );
   };
 
@@ -72,7 +58,6 @@ const NavigationWrapper: FC = ({ children }) => {
   return (
     <EuiThemeProvider>
       <EuiCollapsibleNav
-        css={collabsibleNavCSS}
         isOpen={true}
         showButtonIfDocked={true}
         onClose={toggleOpen}
