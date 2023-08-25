@@ -33,7 +33,7 @@
     "@kbn/core-execution-context-server-mocks",
     "@kbn/core-http-context-server-mocks",
     "@kbn/logging-mocks",
-    "@kbn/generate-oas-cli",
+    "@kbn/generate-oas",
   ],
   "exclude": [
     "target/**/*",

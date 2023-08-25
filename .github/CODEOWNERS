@@ -409,7 +409,7 @@ packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/platform-deployment-management
 packages/kbn-generate-csv @elastic/appex-sharedux
 packages/kbn-generate-csv-types @elastic/appex-sharedux
-packages/kbn-generate-oas-cli @elastic/kibana-core
+packages/kbn-generate-oas @elastic/kibana-core
 packages/kbn-get-repo-files @elastic/kibana-operations
 x-pack/plugins/global_search_bar @elastic/appex-sharedux
 x-pack/plugins/global_search @elastic/appex-sharedux

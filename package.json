@@ -439,7 +439,7 @@
     "@kbn/generate-console-definitions": "link:packages/kbn-generate-console-definitions",
     "@kbn/generate-csv": "link:packages/kbn-generate-csv",
     "@kbn/generate-csv-types": "link:packages/kbn-generate-csv-types",
-    "@kbn/generate-oas-cli": "link:packages/kbn-generate-oas-cli",
+    "@kbn/generate-oas": "link:packages/kbn-generate-oas",
     "@kbn/global-search-bar-plugin": "link:x-pack/plugins/global_search_bar",
     "@kbn/global-search-plugin": "link:x-pack/plugins/global_search",
     "@kbn/global-search-providers-plugin": "link:x-pack/plugins/global_search_providers",

@@ -8,7 +8,7 @@
 
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
-import { generateOpenApiDocument } from '@kbn/generate-oas-cli';
+import { generateOpenApiDocument } from '@kbn/generate-oas';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import {
