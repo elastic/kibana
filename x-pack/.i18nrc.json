@@ -23,6 +23,7 @@
     "xpack.discover": "plugins/discover_enhanced",
     "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
     "xpack.elasticAssistant": "packages/kbn-elastic-assistant",
+    "xpack.ecsDataQualityDashboard": "plugins/ecs_data_quality_dashboard",
     "xpack.embeddableEnhanced": "plugins/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "plugins/enterprise_search",
