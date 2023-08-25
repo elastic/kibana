@@ -109,7 +109,11 @@ export class CommonPageObject extends FtrService {
         ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
         : await this.browser.getCurrentUrl();
 
-      if (disableWelcomePrompt && (await this.isWelcomeScreen())) {
+      if (
+        currentUrl.includes('/app/home') &&
+        disableWelcomePrompt &&
+        (await this.isWelcomeScreen())
+      ) {
         await this.browser.setLocalStorageItem('home:welcome:show', 'false');
         // Force a new navigation again
         const msg = `Found the Welcome page in ${currentUrl}. Skipping it...`;
