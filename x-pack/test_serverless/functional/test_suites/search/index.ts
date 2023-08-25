@@ -18,6 +18,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./discover/group2'));
     loadTestFile(require.resolve('./discover/group3'));
     loadTestFile(require.resolve('./discover/x-pack'));
+    loadTestFile(require.resolve('./discover_ml_uptime/discover'));
     loadTestFile(require.resolve('./context'));
     loadTestFile(require.resolve('./management'));
   });
