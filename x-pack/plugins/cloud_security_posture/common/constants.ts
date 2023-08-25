@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { PostureTypes, VulnSeverity, AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap } from './types';
+import {
+  PostureTypes,
+  VulnSeverity,
+  AwsCredentialsTypeFieldMap,
+  GcpCredentialsTypeFieldMap,
+} from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATUS_API_CURRENT_VERSION = '1';

@@ -223,9 +223,7 @@ export interface AggFieldBucket {
   }>;
 }
 
-export type GcpCredentialsType =
-  | 'credentials-file'
-  | 'credentials-json'
+export type GcpCredentialsType = 'credentials-file' | 'credentials-json';
 
 export type GcpCredentialsTypeFieldMap = {
   [key in GcpCredentialsType]: string[];
