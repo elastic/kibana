@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { TaskEither } from 'fp-ts/lib/TaskEither';
 import { type Client } from '@elastic/elasticsearch';
 import {
   type TestServerlessESUtils,
@@ -38,6 +39,25 @@ describe('ZDT migration actions', () => {
       ignore_unavailable: true,
     });
   });
+
+  function runCreateIndexTask(indexName = TEST_INDEX_A) {
+    return ZDTActions.createIndex({
+      client,
+      indexName,
+      mappings: { dynamic: false, properties: { test: { type: 'text' } } },
+      aliases: [TEST_INDEX_A_ALIAS],
+      timeout: '1s',
+    })();
+  }
+  function runUpdateIndexMappingsTask(index = TEST_INDEX_A) {
+    return ZDTActions.updateAndPickupMappings({
+      batchSize: 10,
+      client,
+      index,
+      mappings: { dynamic: false, properties: { test: { type: 'text' } } },
+      query: { match_all: {} },
+    })();
+  }
   test('init', async () => {
     const task = ZDTActions.init({ client, indices: [TEST_INDEX_A, TEST_INDEX_B] });
     await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -48,17 +68,29 @@ describe('ZDT migration actions', () => {
     `);
   });
   test('createIndex', async () => {
-    const task = ZDTActions.createIndex({
-      client,
-      indexName: TEST_INDEX_A,
-      mappings: { dynamic: false, properties: { test: { type: 'text' } } },
-      aliases: [TEST_INDEX_A_ALIAS],
-      timeout: '1s',
-    });
-    await expect(task()).resolves.toMatchInlineSnapshot(`
+    await expect(runCreateIndexTask()).resolves.toMatchInlineSnapshot(`
       Object {
         "_tag": "Right",
         "right": "create_index_succeeded",
+      }
+    `);
+  });
+  test('updateIndexMappings', async () => {
+    await runCreateIndexTask();
+    await expect(runUpdateIndexMappingsTask()).resolves.toMatchObject({
+      right: { taskId: expect.any(String) },
+    });
+  });
+  test('waitForPickupUpdatedMappingsTask', async () => {
+    await runCreateIndexTask();
+    const {
+      right: { taskId },
+    } = (await runUpdateIndexMappingsTask()) as any;
+    const task = ZDTActions.waitForPickupUpdatedMappingsTask({ client, taskId, timeout: '30s' });
+    expect(task()).resolves.toMatchInlineSnapshot(`
+      Object {
+        "_tag": "Right",
+        "right": "pickup_updated_mappings_succeeded",
       }
     `);
   });
