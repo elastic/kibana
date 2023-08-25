@@ -50,8 +50,8 @@ const MetadataExplanationTooltipContent = React.memo(() => {
 });
 
 export const MetadataExplanationMessage = () => {
-  const { dateRangeTs } = useDateRangeProviderContext();
-  const dateFromRange = new Date(dateRangeTs.to);
+  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
+  const dateFromRange = new Date(getDateRangeInTimestamp().to);
   const dateString = dateFromRange.toLocaleDateString();
   const timeString = dateFromRange.toLocaleTimeString();
 

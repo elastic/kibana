@@ -7,12 +7,13 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Table } from './table';
 import { getAllFields } from './utils';
 import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { MetadataExplanationMessage } from '../../components/metadata_explanation';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
@@ -70,13 +71,17 @@ export const Metadata = () => {
   }
 
   return (
-    <Table
-      search={query}
-      onSearchChange={onSearchChange}
-      showActionsColumn={showActionsColumn}
-      rows={fields}
-      loading={metadataLoading}
-    />
+    <>
+      <MetadataExplanationMessage />
+      <EuiHorizontalRule margin="m" />
+      <Table
+        search={query}
+        onSearchChange={onSearchChange}
+        showActionsColumn={showActionsColumn}
+        rows={fields}
+        loading={metadataLoading}
+      />
+    </>
   );
 };
 
