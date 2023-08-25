@@ -71,7 +71,7 @@ async function readUuidFromFile(filepath: string, logger: Logger): Promise<strin
     return undefined;
   }
 
-  if (content && !content.match(uuidRegexp)) {
+  if (content !== undefined && !content.match(uuidRegexp)) {
     throw new Error(`${filepath} contains an invalid UUID`);
   }
 
