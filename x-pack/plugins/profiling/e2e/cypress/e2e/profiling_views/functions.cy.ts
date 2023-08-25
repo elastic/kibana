@@ -33,7 +33,7 @@ describe('Functions page', () => {
     cy.get(firstRowSelector).eq(2).contains('vmlinux');
     cy.get(firstRowSelector).eq(3).contains('5.46%');
     cy.get(firstRowSelector).eq(4).contains('5.46%');
-    cy.get(firstRowSelector).eq(5).contains('15.04 lbs / 6.82 kg');
+    cy.get(firstRowSelector).eq(5).contains('1.84 lbs / 0.84 kg');
     cy.get(firstRowSelector).eq(6).contains('$17.37');
     cy.get(firstRowSelector).eq(7).contains('28');
   });
@@ -61,11 +61,11 @@ describe('Functions page', () => {
       { parentKey: 'impactEstimates', key: 'annualizedSelfCoreSeconds', value: '17.03 days' },
       { parentKey: 'impactEstimates', key: 'co2Emission', value: '~0.00 lbs / ~0.00 kg' },
       { parentKey: 'impactEstimates', key: 'selfCo2Emission', value: '~0.00 lbs / ~0.00 kg' },
-      { parentKey: 'impactEstimates', key: 'annualizedCo2Emission', value: '15.04 lbs / 6.82 kg' },
+      { parentKey: 'impactEstimates', key: 'annualizedCo2Emission', value: '1.84 lbs / 0.84 kg' },
       {
         parentKey: 'impactEstimates',
         key: 'annualizedSelfCo2Emission',
-        value: '15.04 lbs / 6.82 kg',
+        value: '1.84 lbs / 0.84 kg',
       },
       { parentKey: 'impactEstimates', key: 'dollarCost', value: '$~0.00' },
       { parentKey: 'impactEstimates', key: 'selfDollarCost', value: '$~0.00' },

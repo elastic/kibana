@@ -31,7 +31,7 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '275.62 lbs / 125.02 kg' },
+        { id: 'annualizedCo2', value: '33.79 lbs / 15.33 kg' },
         { id: 'annualizedCost', value: '$318.32' },
         { id: 'totalNumberOfSamples', value: '513' },
       ].forEach((item) => {
@@ -50,7 +50,7 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '275.62 lbs / 125.02 kg' },
+        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '33.79 lbs / 15.33 kg' },
         { id: 'annualizedCost', value: '$0', comparisonValue: '$318.32' },
         { id: 'totalNumberOfSamples', value: '0', comparisonValue: '15,390' },
       ].forEach((item) => {
@@ -76,8 +76,8 @@ describe('Differential Functions page', () => {
         { id: 'overallPerformance', value: '65.89%', icon: 'sortUp_success' },
         {
           id: 'annualizedCo2',
-          value: '275.62 lbs / 125.02 kg',
-          comparisonValue: '94.02 lbs / 42.65 kg (65.89%)',
+          value: '33.79 lbs / 15.33 kg',
+          comparisonValue: '11.53 lbs / 5.23 kg (65.89%)',
           icon: 'comparison_sortUp_success',
         },
         {
@@ -116,8 +116,8 @@ describe('Differential Functions page', () => {
         { id: 'overallPerformance', value: '193.14%', icon: 'sortDown_danger' },
         {
           id: 'annualizedCo2',
-          value: '94.02 lbs / 42.65 kg',
-          comparisonValue: '275.62 lbs / 125.02 kg (193.14%)',
+          value: '11.53 lbs / 5.23 kg',
+          comparisonValue: '33.79 lbs / 15.33 kg (193.14%)',
           icon: 'comparison_sortDown_danger',
         },
         {
@@ -192,8 +192,8 @@ describe('Differential Functions page', () => {
         { id: 'overallPerformance', value: '50.00%', icon: 'sortUp_success' },
         {
           id: 'annualizedCo2',
-          value: '1.07 lbs / 0.49 kg',
-          comparisonValue: '0.54 lbs / 0.24 kg (50.00%)',
+          value: '0.13 lbs / 0.06 kg',
+          comparisonValue: '0.07 lbs / 0.03 kg (50.00%)',
           icon: 'comparison_sortUp_success',
         },
         {

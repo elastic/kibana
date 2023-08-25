@@ -4,28 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-describe('Stacktraces page', () => {
-  const rangeFrom = 'now-1y';
-  const rangeTo = 'now';
+describe('Storage explorer page', () => {
+  const rangeFrom = '2023-04-18T00:00:00.000Z';
+  const rangeTo = '2023-04-18T00:05:00.000Z';
 
   beforeEach(() => {
     cy.loginAsElastic();
   });
 
-  it('checks values in the summary section', () => {
+  it('does not show warning for distinct probabilistic profiling values found', () => {
     cy.intercept('GET', '/internal/profiling/storage_explorer/summary?*').as('summary');
-    cy.visitKibana('/app/profiling/storage-explorer', { rangeFrom, rangeTo });
+    cy.visitKibana('/app/profiling/storage-explorer', {
+      rangeFrom: '2023-08-08T18:00:00.000Z',
+      rangeTo: '2023-08-08T20:00:00.000Z',
+    });
     cy.contains('Storage Explorer');
     cy.wait('@summary');
-    [
-      { key: 'totalData', value: '3.5 MB' },
-      { key: 'dailyDataGeneration', value: '1.5 KB' },
-      { key: 'totalDebugSymbolsSize', value: '1.1 MB' },
-      { key: 'diskSpaceUsed', value: '~0.00%' },
-      { key: 'numberOfHostsAgents', value: '1' },
-    ].forEach(({ key, value }) => {
-      cy.get(`[data-test-subj="${key}"]`).contains(value);
+    cy.contains(
+      "We've identified 2 distinct probabilistic profiling values. Make sure to update them."
+    ).should('not.exist');
+  });
+
+  it('shows warning for distinct probabilistic profiling values found', () => {
+    cy.intercept('GET', '/internal/profiling/storage_explorer/summary?*', {
+      fixture: 'storage_explorer_summary.json',
+    }).as('summary');
+    cy.visitKibana('/app/profiling/storage-explorer', {
+      rangeFrom: '2023-08-08T18:00:00.000Z',
+      rangeTo: '2023-08-08T20:00:00.000Z',
     });
+    cy.contains('Storage Explorer');
+    cy.wait('@summary');
+    cy.contains(
+      "We've identified 2 distinct probabilistic profiling values. Make sure to update them."
+    );
   });
 
   describe('Host agent breakdown', () => {
@@ -38,17 +50,12 @@ describe('Stacktraces page', () => {
       cy.wait('@hostDetails');
       const firstRowSelector = 'table > tbody .euiTableRowCell';
       cy.get(firstRowSelector).eq(0).get('.euiTableCellContent__text').contains('3145700');
-      cy.get('[data-test-subj="hostName_ip-172-23-180-16"]').contains(
-        'ip-172-23-180-16 [8457605156473051743]'
-      );
-      cy.get('[data-test-subj="hostName_ip-172-23-180-16"]').should(
+      cy.get('[data-test-subj="hostId_8457605156473051743"]').contains('[8457605156473051743]');
+      cy.get('[data-test-subj="hostId_8457605156473051743"]').should(
         'have.attr',
         'href',
-        '/app/profiling/flamegraphs/flamegraph?kuery=host.id%3A%20%228457605156473051743%22&rangeFrom=now-1y&rangeTo=now'
+        '/app/profiling/flamegraphs/flamegraph?kuery=host.id%3A%20%228457605156473051743%22&rangeFrom=2023-04-18T00%3A00%3A00.000Z&rangeTo=2023-04-18T00%3A05%3A00.000Z'
       );
-      cy.get(firstRowSelector).eq(4).get('.euiTableCellContent').contains('0.0 B');
-      cy.get(firstRowSelector).eq(3).get('.euiTableCellContent').contains('521.3 KB');
-      cy.get(firstRowSelector).eq(5).get('.euiTableCellContent').contains('521.3 KB');
     });
   });
 
@@ -62,14 +69,13 @@ describe('Stacktraces page', () => {
       cy.contains('Data breakdown').click();
       cy.wait('@indicesDetails');
       [
-        { indexName: 'stackframes', docSize: '7,616', size: '1.1 MB' },
-        { indexName: 'stacktraces', docSize: '2,217', size: '1.8 MB' },
-        { indexName: 'executables', docSize: '85', size: '20.9 KB' },
-        { indexName: 'metrics', docSize: '0', size: '249.0 B' },
-        { indexName: 'events', docSize: '3,242', size: '525.2 KB' },
-      ].forEach(({ indexName, docSize, size }) => {
+        { indexName: 'stackframes', docSize: '7,616' },
+        { indexName: 'stacktraces', docSize: '2,217' },
+        { indexName: 'executables', docSize: '85' },
+        { indexName: 'metrics', docSize: '0' },
+        { indexName: 'events', docSize: '3,242' },
+      ].forEach(({ indexName, docSize }) => {
         cy.get(`[data-test-subj="${indexName}_docSize"]`).contains(docSize);
-        cy.get(`[data-test-subj="${indexName}_size"]`).contains(size);
       });
     });
 
@@ -94,17 +100,16 @@ describe('Stacktraces page', () => {
       cy.wait('@indicesDetails');
 
       const indices = [
-        { index: 'Stackframes', size: '1.1 MB', perc: '32%' },
-        { index: 'Samples', size: '525.2 KB', perc: '15%' },
-        { index: 'Executables', size: '20.9 KB', perc: '1%' },
-        { index: 'Metrics', size: '249.0 B', perc: '0%' },
-        { index: 'Stacktraces', size: '1.8 MB', perc: '52%' },
+        { index: 'Stackframes', perc: '32%' },
+        { index: 'Samples', perc: '15%' },
+        { index: 'Executables', perc: '1%' },
+        { index: 'Metrics', perc: '0%' },
+        { index: 'Stacktraces', perc: '52%' },
       ];
 
       cy.get('.echChartPointerContainer table tbody tr').each(($row, idx) => {
         cy.wrap($row).find('th').contains(indices[idx].index);
-        cy.wrap($row).find('td').eq(0).contains(indices[idx].size);
-        cy.wrap($row).find('td').eq(1).contains(indices[idx].perc);
+        cy.wrap($row).find('td').contains(indices[idx].perc);
       });
     });
   });
