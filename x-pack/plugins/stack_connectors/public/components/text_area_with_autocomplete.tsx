@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { filterSuggestions } from '../lib/filter_suggestions_for_autocomplete';
 import { templateActionVariable } from '../lib/template_action_variable';
 
@@ -120,7 +121,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
         ? { top, left, width, height }
         : old
     );
-  }, [setPopupPosition, textAreaRef]);
+  }, [setPopupPosition]);
 
   useEffect(() => {
     if (!isListOpen) return;
@@ -257,15 +258,25 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     return option.label;
   };
 
-  const selectableStyle: Properties<string | number> = {
-    position: 'absolute',
-    top: popupPosition.top,
-    width: popupPosition.width,
-    left: popupPosition.left,
-    border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-    background: backgroundColor,
-    zIndex: 3000,
-  };
+  const selectableStyle: Properties<string | number> = useMemo(
+    () => ({
+      position: 'absolute',
+      top: popupPosition.top,
+      width: popupPosition.width,
+      left: popupPosition.left,
+      border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+      background: backgroundColor,
+      zIndex: euiThemeVars.euiZLevel1,
+    }),
+    [
+      backgroundColor,
+      euiTheme.border.color,
+      euiTheme.border.width.thin,
+      popupPosition.left,
+      popupPosition.top,
+      popupPosition.width,
+    ]
+  );
 
   return (
     <EuiFormRow
