@@ -58,7 +58,7 @@ Array [
                 "goodEvents": "goodEvents",
                 "totalEvents": "totalEvents",
               },
-              "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
+              "script": "if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
           "statusCode": Object {
@@ -286,7 +286,7 @@ Array [
                 "goodEvents": "goodEvents",
                 "totalEvents": "totalEvents",
               },
-              "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
+              "script": "if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
           "statusCode": Object {
@@ -514,7 +514,7 @@ Array [
                 "goodEvents": "goodEvents",
                 "totalEvents": "totalEvents",
               },
-              "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
+              "script": "if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
           "statusCode": Object {
@@ -757,7 +757,7 @@ Array [
                 "goodEvents": "goodEvents",
                 "totalEvents": "totalEvents",
               },
-              "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
+              "script": "if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
           "statusCode": Object {
@@ -1013,7 +1013,7 @@ Array [
                 "goodEvents": "goodEvents",
                 "totalEvents": "totalEvents",
               },
-              "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
+              "script": "if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
           "statusCode": Object {

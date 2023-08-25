@@ -80,8 +80,6 @@ export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSu
 /* Insights Entities */
 
 export const INSIGHTS_ENTITIES_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsEntities';
-export const TECHNICAL_PREVIEW_ICON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutTechnicalPreviewIcon';
 export const ENTITIES_USER_OVERVIEW_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesUserOverview';
 export const ENTITIES_USER_OVERVIEW_LINK_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Link`;
@@ -126,13 +124,7 @@ export const INSIGHTS_PREVALENCE_ROW_TEST_ID =
 export const VISUALIZATIONS_SECTION_TEST_ID = 'securitySolutionDocumentDetailsVisualizationsTitle';
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
   'securitySolutionDocumentDetailsVisualizationsTitleHeader';
-
-/* Visualizations analyzer preview */
-
-export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerPreview';
-
-/* Visualizations session preview */
-
+export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalyzerPreview';
 export const SESSION_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsSessionPreview';
 
 /* Response section */
