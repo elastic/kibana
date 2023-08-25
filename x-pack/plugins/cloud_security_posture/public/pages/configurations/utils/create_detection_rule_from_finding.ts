@@ -21,6 +21,12 @@ const DEFAULT_RULE_LICENSE = 'Elastic License v2';
 const DEFAULT_MAX_ALERTS_PER_RULE = 100;
 const ALERT_SUPPRESSION_FIELD = 'resource.id';
 const ALERT_TIMESTAMP_FIELD = 'event.ingested';
+const DEFAULT_INVESTIGATION_FIELDS = [
+  'resource.name',
+  'resource.id',
+  'resource.type',
+  'resource.sub_type',
+];
 
 enum AlertSuppressionMissingFieldsStrategy {
   // per each document a separate alert will be created
@@ -112,6 +118,8 @@ export const createDetectionRuleFromFinding = async (http: HttpSetup, finding: C
       name: finding.rule.name,
       description: finding.rule.rationale,
       tags: generateFindingsTags(finding),
+      investigation_fields: DEFAULT_INVESTIGATION_FIELDS,
+      note: finding.rule.remediation,
     },
   });
 };
