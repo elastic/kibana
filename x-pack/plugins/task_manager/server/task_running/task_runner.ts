@@ -31,9 +31,11 @@ import {
   unwrap,
 } from '../lib/result_type';
 import {
+  asTaskExpiredEvent,
   asTaskMarkRunningEvent,
   asTaskRunEvent,
   startTaskTimerWithEventLoopMonitoring,
+  TaskExpired,
   TaskMarkRunning,
   TaskPersistence,
   TaskRun,
@@ -101,7 +103,7 @@ type Opts = {
   definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
+  onTaskEvent?: (event: TaskRun | TaskExpired | TaskMarkRunning) => void;
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
@@ -149,7 +151,7 @@ export class TaskManagerRunner implements TaskRunner {
   private bufferedTaskStore: Updatable;
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
-  private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
+  private onTaskEvent: (event: TaskRun | TaskExpired | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
   private readonly executionContext: ExecutionContextStart;
@@ -733,6 +735,8 @@ export class TaskManagerRunner implements TaskRunner {
     taskTiming: TaskTiming
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
+
+    this.onTaskEvent(asTaskExpiredEvent(this.id, asOk(this.isExpired)));
 
     await eitherAsync(
       result,

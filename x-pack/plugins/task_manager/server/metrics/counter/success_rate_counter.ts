@@ -6,13 +6,14 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
+import { ICounter } from './counter';
 
 export interface SuccessRate extends JsonObject {
   success: number;
   total: number;
 }
 
-export class SuccessRateCounter {
+export class SuccessRateCounter implements ICounter<SuccessRate> {
   private success = 0;
   private total = 0;
 

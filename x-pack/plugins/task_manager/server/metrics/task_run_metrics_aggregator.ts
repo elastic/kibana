@@ -8,11 +8,16 @@
 import { JsonObject } from '@kbn/utility-types';
 import { isOk, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { ErroredTask, RanTask, TaskRun } from '../task_events';
-import { SuccessRate, SuccessRateCounter } from './success_rate_counter';
+import { ErroredTask, isTaskExpiredEvent, isTaskRunEvent, RanTask, TaskRun } from '../task_events';
+import { SuccessRate, SuccessRateCounter } from './counter/success_rate_counter';
 import { ITaskMetricsAggregator } from './types';
 
 const taskTypeGrouping = new Set<string>(['alerting:', 'actions:']);
+
+enum TaskRunKeys {
+  SUCCESS = 'success',
+  TOTAL = 'total',
+}
 
 export interface TaskRunMetric extends JsonObject {
   overall: SuccessRate;
@@ -47,6 +52,14 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
   }
 
   public processTaskLifecycleEvent(taskEvent: TaskLifecycleEvent) {
+    if (isTaskRunEvent(taskEvent)) {
+      this.processTaskRunEvent(taskEvent);
+    } else if (isTaskExpiredEvent(taskEvent)) {
+      this.processTaskExpiredEvent(taskEvent);
+    }
+  }
+
+  private processTaskRunEvent(taskEvent: TaskLifecycleEvent) {
     const { task }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
     const taskType = task.taskType;
 
@@ -66,6 +79,8 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
       this.taskRunCounter.set(taskTypeGroup, taskTypeGroupSuccessRate);
     }
   }
+
+  private processTaskExpiredEvent(taskEvent: TaskLifecycleEvent) {}
 
   private collectTaskTypeEntries() {
     const collected: Record<string, SuccessRate> = {};
