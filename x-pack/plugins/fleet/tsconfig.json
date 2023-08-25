@@ -101,7 +101,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-http-common",
-    "@kbn/server-route-repository",
     "@kbn/dashboard-plugin",
   ]
 }
