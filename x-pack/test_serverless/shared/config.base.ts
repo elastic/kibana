@@ -25,7 +25,7 @@ export default async () => {
       ...kbnTestConfig.getUrlParts(kibanaServerlessSuperuser),
       protocol: 'https',
     },
-    elasticsearch: esTestConfig.getUrlParts(),
+    elasticsearch: { ...esTestConfig.getUrlParts(), protocol: 'https' },
   };
 
   // "Fake" SAML provider
