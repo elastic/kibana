@@ -20,6 +20,7 @@ import {
   getSimpleRule,
   installPrebuiltRulesAndTimelines,
 } from '../../utils';
+import { createNonSecurityRule } from '../../utils/create_non_security_rule';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -30,6 +31,36 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('coverage_overview', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
+    });
+
+    it('does NOT error when there are no security rules', async () => {
+      await createNonSecurityRule(supertest);
+      const rule1 = await createRule(supertest, log, {
+        ...getSimpleRule(),
+        threat: generateThreatArray(1),
+      });
+
+      const { body } = await supertest
+        .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
+        .send({})
+        .expect(200);
+
+      expect(body).to.eql({
+        coverage: {
+          T001: [rule1.id],
+          TA001: [rule1.id],
+          'T001.001': [rule1.id],
+        },
+        unmapped_rule_ids: [],
+        rules_data: {
+          [rule1.id]: {
+            activity: 'disabled',
+            name: 'Simple Rule Query',
+          },
+        },
+      });
     });
 
     describe('without filters', () => {

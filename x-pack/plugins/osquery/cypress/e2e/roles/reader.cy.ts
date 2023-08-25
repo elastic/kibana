@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import {
   cleanupPack,
@@ -16,7 +15,7 @@ import {
 } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('Reader - only READ', { tags: [tag.ESS] }, () => {
+describe('Reader - only READ', { tags: ['@ess'] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
   let packName: string;
