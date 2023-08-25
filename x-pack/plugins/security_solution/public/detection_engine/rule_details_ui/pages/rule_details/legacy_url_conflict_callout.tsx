@@ -23,7 +23,7 @@ export const LegacyUrlConflictCallOut = React.memo<LegacyUrlConflictCallOutProps
       // callout with a warning for the user, and provide a way for them to navigate to the other rule.
       const otherRulePath = `rules/id/${aliasTargetId}${window.location.search}${window.location.hash}`;
       return (
-        <>
+        <div data-test-subj="legacyUrlConflictCallOut-wrapper">
           <EuiSpacer />
           {spacesApi.ui.components.getLegacyUrlConflict({
             objectNoun: i18nTranslate.translate(
@@ -36,7 +36,7 @@ export const LegacyUrlConflictCallOut = React.memo<LegacyUrlConflictCallOutProps
             otherObjectId: aliasTargetId,
             otherObjectPath: otherRulePath,
           })}
-        </>
+        </div>
       );
     }
     return null;
