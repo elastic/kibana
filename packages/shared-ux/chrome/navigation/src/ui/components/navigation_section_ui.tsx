@@ -8,12 +8,10 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import {
-  EuiCollapsibleNavGroup,
-  EuiIcon,
+  EuiCollapsibleNavItem,
+  EuiCollapsibleNavSubItemProps,
   EuiLink,
-  EuiSideNav,
   EuiSideNavItemType,
-  EuiText,
 } from '@elastic/eui';
 import classnames from 'classnames';
 import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
@@ -27,7 +25,7 @@ type RenderItem = EuiSideNavItemType<unknown>['renderItem'];
 const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNodeEnhanced,
   { navigateToUrl, basePath }: { navigateToUrl: NavigateToUrlFn; basePath: BasePathService }
-): EuiSideNavItemType<unknown> => {
+): EuiCollapsibleNavSubItemProps => {
   const href = item.deepLink?.url ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
@@ -56,7 +54,7 @@ const navigationNodeToEuiItem = (
 
   return {
     id,
-    name: item.title,
+    title: item.title,
     isSelected,
     onClick:
       href !== undefined
@@ -66,14 +64,13 @@ const navigationNodeToEuiItem = (
           }
         : undefined,
     href,
-    renderItem: getRenderItem(),
+    // renderItem: getRenderItem(),
     items: item.children?.map((_item) =>
       navigationNodeToEuiItem(_item, { navigateToUrl, basePath })
     ),
     ['data-test-subj']: dataTestSubj,
-    ...(item.icon && {
-      icon: <EuiIcon type={item.icon} size="s" />,
-    }),
+    icon: item.icon,
+    iconProps: { size: 's' },
   };
 };
 
@@ -148,29 +145,24 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
     : {};
 
   return (
-    <EuiCollapsibleNavGroup
+    <EuiCollapsibleNavItem
       id={id}
       title={title}
-      iconType={icon}
-      iconSize="m"
-      isCollapsible
-      initialIsOpen={isActive}
-      onToggle={(isOpen) => {
-        setIsCollapsed(!isOpen);
-        setDoCollapseFromActiveState(false);
+      icon={icon}
+      iconProps={{ size: 'm' }}
+      accordionProps={{
+        initialIsOpen: isActive,
+        onToggle: (isOpen) => {
+          setIsCollapsed(!isOpen);
+          setDoCollapseFromActiveState(false);
+        },
       }}
       forceState={isCollapsed ? 'closed' : 'open'}
       data-test-subj={`nav-bucket-${id}`}
       {...propsForGroupAsLink}
-    >
-      <EuiText color="default">
-        <EuiSideNav
-          mobileBreakpoints={/* turn off responsive behavior */ []}
-          items={filteredItems.map((item) =>
-            navigationNodeToEuiItem(item, { navigateToUrl, basePath })
-          )}
-        />
-      </EuiText>
-    </EuiCollapsibleNavGroup>
+      items={filteredItems.map((item) =>
+        navigationNodeToEuiItem(item, { navigateToUrl, basePath })
+      )}
+    />
   );
 };
