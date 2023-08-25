@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,8 +20,9 @@ import {
 } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
+import { Index } from '../../../../../../common';
+import { loadIndex } from '../../../../services';
 import { DiscoverLink } from '../../../../lib/discover_link';
-import { useLoadIndex } from '../../../../services';
 import { Section } from '../../home';
 import { DetailsPageError } from './details_page_error';
 import { ManageIndexButton } from './manage_index_button';
@@ -73,6 +74,27 @@ export const DetailsPage: React.FunctionComponent<
   },
   history,
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
+  const [index, setIndex] = useState<Index | null>();
+
+  const fetchIndexDetails = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const { data, error: loadingError } = await loadIndex(indexName);
+      setIsLoading(false);
+      setError(loadingError);
+      setIndex(data);
+    } catch (e) {
+      setIsLoading(false);
+      setError(e);
+    }
+  }, [indexName]);
+
+  useEffect(() => {
+    fetchIndexDetails();
+  }, [fetchIndexDetails]);
+
   const onSectionChange = useCallback(
     (newSection: IndexDetailsSection) => {
       return history.push(encodeURI(`/indices/${indexName}/${newSection}`));
@@ -94,8 +116,7 @@ export const DetailsPage: React.FunctionComponent<
     }));
   }, [indexDetailsSection, onSectionChange]);
 
-  const { isLoading, error, resendRequest, data } = useLoadIndex(indexName);
-  if (isLoading && !data) {
+  if (isLoading && !index) {
     return (
       <SectionLoading>
         <FormattedMessage
@@ -105,8 +126,8 @@ export const DetailsPage: React.FunctionComponent<
       </SectionLoading>
     );
   }
-  if (error || !data) {
-    return <DetailsPageError indexName={indexName} resendRequest={resendRequest} />;
+  if (error || !index) {
+    return <DetailsPageError indexName={indexName} resendRequest={fetchIndexDetails} />;
   }
 
   return (
@@ -149,8 +170,8 @@ export const DetailsPage: React.FunctionComponent<
           <DiscoverLink indexName={indexName} asButton={true} />,
           <ManageIndexButton
             indexName={indexName}
-            indexDetails={data}
-            reloadIndexDetails={resendRequest}
+            indexDetails={index}
+            reloadIndexDetails={fetchIndexDetails}
             navigateToAllIndices={navigateToAllIndices}
           />,
         ]}
@@ -190,7 +211,7 @@ export const DetailsPage: React.FunctionComponent<
 
       <EuiSpacer size="l" />
       <div>
-        <pre>{JSON.stringify(data, null, 2)}</pre>
+        <pre>{JSON.stringify(index, null, 2)}</pre>
       </div>
     </>
   );

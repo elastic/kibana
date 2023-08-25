@@ -43,7 +43,7 @@ const getIndexStatusByName = (
 interface Props {
   indexName: string;
   indexDetails: Index;
-  reloadIndexDetails: () => void;
+  reloadIndexDetails: () => Promise<void>;
   navigateToAllIndices: () => void;
 }
 export const ManageIndexButton: FunctionComponent<Props> = ({
@@ -64,6 +64,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     setIsLoading(true);
     try {
       await closeIndicesRequest(indexNames);
+      await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
         i18n.translate('xpack.idxMgmt.closeIndicesAction.successfullyClosedIndicesMessage', {
@@ -71,7 +72,6 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
@@ -82,6 +82,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     setIsLoading(true);
     try {
       await openIndicesRequest(indexNames);
+      await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
         i18n.translate('xpack.idxMgmt.openIndicesAction.successfullyOpenedIndicesMessage', {
@@ -89,7 +90,6 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
@@ -100,6 +100,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     setIsLoading(true);
     try {
       await flushIndicesRequest(indexNames);
+      await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
         i18n.translate('xpack.idxMgmt.flushIndicesAction.successfullyFlushedIndicesMessage', {
@@ -107,7 +108,6 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
@@ -118,6 +118,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     setIsLoading(true);
     try {
       await refreshIndicesRequest(indexNames);
+      await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
         i18n.translate('xpack.idxMgmt.refreshIndicesAction.successfullyRefreshedIndicesMessage', {
@@ -125,7 +126,6 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
@@ -136,6 +136,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     setIsLoading(true);
     try {
       await clearCacheIndicesRequest(indexNames);
+      await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
         i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successMessage', {
@@ -143,7 +144,6 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
@@ -154,6 +154,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     setIsLoading(true);
     try {
       await unfreezeIndicesRequest(indexNames);
+      await reloadIndices();
       setIsLoading(false);
       notificationService.showSuccessToast(
         i18n.translate('xpack.idxMgmt.unfreezeIndicesAction.successfullyUnfrozeIndicesMessage', {
@@ -161,7 +162,6 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
@@ -173,6 +173,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       setIsLoading(true);
       try {
         await forcemergeIndicesRequest(indexNames, maxNumSegments);
+        await reloadIndices();
         setIsLoading(false);
         notificationService.showSuccessToast(
           i18n.translate(
@@ -183,7 +184,6 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
             }
           )
         );
-        reloadIndices();
       } catch (error) {
         setIsLoading(false);
         notificationService.showDangerToast(error.body.message);
@@ -218,9 +218,9 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       setIsLoading(true);
       try {
         await requestMethod(indexNames, httpService.httpClient);
+        await reloadIndices();
         setIsLoading(false);
         notificationService.showSuccessToast(successMessage);
-        reloadIndices();
       } catch (error) {
         setIsLoading(false);
         notificationService.showDangerToast(error.body.message);
