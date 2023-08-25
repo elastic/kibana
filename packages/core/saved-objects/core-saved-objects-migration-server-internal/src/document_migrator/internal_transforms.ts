@@ -105,6 +105,13 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
   const { namespace, ...otherAttrs } = doc;
   const additionalDocs: SavedObjectUnsanitizedDoc[] = [];
 
+  if (namespace == null && otherAttrs.namespaces) {
+    return {
+      additionalDocs,
+      transformedDoc: otherAttrs,
+    };
+  }
+
   // If this object exists in the default namespace, return it with the appropriate `namespaces` field without changing its ID.
   if (namespace === undefined) {
     return {
