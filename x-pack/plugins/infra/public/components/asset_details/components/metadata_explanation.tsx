@@ -12,6 +12,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDateRangeProviderContext } from '../hooks/use_date_range';
 import { Popover } from '../tabs/common/popover';
 
+const HOSTNAME_DOCS_LINK =
+  'https://www.elastic.co/guide/en/ecs/current/ecs-host.html#field-host-name';
+
 const MetadataExplanationTooltipContent = React.memo(() => {
   const onClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation();
@@ -20,13 +23,13 @@ const MetadataExplanationTooltipContent = React.memo(() => {
   return (
     <EuiText size="s" onClick={onClick} style={{ width: 200 }}>
       <FormattedMessage
-        id="xpack.infra.assetDetails.alerts.tooltip.documentationLabel"
+        id="xpack.infra.assetDetails.metadata.tooltip.documentationLabel"
         defaultMessage="{metadata} is populated from the last event detected for this {hostName} for the selected date period."
         values={{
           metadata: (
             <i>
               <FormattedMessage
-                id="xpack.infra.assetDetails.alerts.tooltip.metadata"
+                id="xpack.infra.assetDetails.metadata.tooltip.metadata"
                 defaultMessage="Metadata"
               />
             </i>
@@ -34,11 +37,11 @@ const MetadataExplanationTooltipContent = React.memo(() => {
           hostName: (
             <EuiLink
               data-test-subj="infraAssetDetailsTooltipDocumentationLink"
-              href="" // TODO
+              href={HOSTNAME_DOCS_LINK}
               target="_blank"
             >
               <FormattedMessage
-                id="xpack.infra.assetDetails.alerts.tooltip.documentationLink"
+                id="xpack.infra.assetDetails.metadata.tooltip.documentationLink"
                 defaultMessage="host.name"
               />
             </EuiLink>
@@ -56,11 +59,11 @@ export const MetadataExplanationMessage = () => {
   const timeString = dateFromRange.toLocaleTimeString();
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="flexStart">
+    <EuiFlexGroup gutterSize="xs" alignItems="baseline">
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
           <FormattedMessage
-            id="xpack.infra.assetDetails.overview.alertsSectionTitle"
+            id="xpack.infra.assetDetails.overview.metadataSectionTitle"
             defaultMessage="Showing metadata collected on {date} @ {time}"
             values={{
               date: dateString,
@@ -75,7 +78,7 @@ export const MetadataExplanationMessage = () => {
           iconColor="subdued"
           icon="questionInCircle"
           panelPaddingSize="m"
-          data-test-subj="infraAssetDetailsAlertsPopoverButton"
+          data-test-subj="infraAssetDetailsMetadataPopoverButton"
         >
           <MetadataExplanationTooltipContent />
         </Popover>

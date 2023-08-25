@@ -31,6 +31,7 @@ import {
 import { getFieldByType } from '../../../../../common/inventory_models';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { ProcessesExplanationMessage } from '../../components/processes_explanation';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,
@@ -134,6 +135,7 @@ export const Processes = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        <ProcessesExplanationMessage />
         <EuiFlexItem grow={false}>
           <EuiSearchBar
             query={searchBarState}
