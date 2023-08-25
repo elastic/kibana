@@ -185,7 +185,7 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     label: 'enrich',
     insertText: 'enrich',
     kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.mvExpandDoc', {
+    detail: i18n.translate('monaco.esql.autocomplete.enrichDoc', {
       defaultMessage: 'Enrich table with another table',
     }),
     documentation: {
