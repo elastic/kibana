@@ -1865,6 +1865,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async enableEchDebugState() {
       await elasticChart.setNewChartUiDebugFlag(true);
       await queryBar.clickQuerySubmitButton();
-    }
+    },
   });
 }
