@@ -25,7 +25,6 @@ fmt.Println(searchResp, err)`,
   "context"
   "fmt"
   "log"
-  "strings"
 
   "github.com/elastic/go-elasticsearch/v8"
 )
