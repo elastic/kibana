@@ -12,16 +12,24 @@
       "url": "https://www.elastic.co/licensing/elastic-license"
     }
   },
-  "tags": [
-    {
-      "name": "alerting",
-      "description": "Alerting APIs enable you to create and manage rules and alerts."
-    }
-  ],
   "servers": [
     {
       "url": "http://localhost:5601",
       "description": "local"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "alerting",
+      "description": "Alerting APIs enable you to create and manage rules and alerts."
     }
   ],
   "paths": {
@@ -1171,6 +1179,52 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key": {
+      "post": {
+        "summary": "Updates the API key for a rule.",
+        "operationId": "updateRuleAPIKey",
+        "description": "The new API key has the credentials of the user that submits the request.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -6595,6 +6649,32 @@
           }
         }
       },
+      "400_response": {
+        "title": "Bad request",
+        "type": "object",
+        "required": [
+          "error",
+          "message",
+          "statusCode"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": [
+              "Bad Request"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "integer",
+            "enum": [
+              400
+            ]
+          }
+        }
+      },
       "alert_response_properties": {
         "title": "Legacy alert response properties",
         "type": "object",
@@ -7504,13 +7584,5 @@
         ]
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ]
+  }
 }
