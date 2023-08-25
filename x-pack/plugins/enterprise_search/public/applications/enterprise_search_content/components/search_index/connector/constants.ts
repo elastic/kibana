@@ -24,6 +24,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.confluence_cloud,
+    platinumOnly: true,
   },
   custom: {
     docsUrl: docLinks.connectors,
@@ -42,12 +43,14 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.github,
+    platinumOnly: true,
   },
   gmail: {
     docsUrl: docLinks.connectorsGmail,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.gmail,
+    platinumOnly: true,
   },
   google_cloud_storage: {
     docsUrl: docLinks.connectorsGoogleCloudStorage,
@@ -60,12 +63,14 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: 'https://cloud.google.com/iam/docs/service-account-overview',
     externalDocsUrl: 'https://developers.google.com/drive',
     icon: CONNECTOR_ICONS.google_drive,
+    platinumOnly: true,
   },
   jira: {
     docsUrl: docLinks.connectorsJira,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.jira_cloud,
+    platinumOnly: true,
   },
   mongodb: {
     docsUrl: docLinks.connectorsMongoDB,
@@ -96,6 +101,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.onedrive,
+    platinumOnly: true,
   },
   oracle: {
     docsUrl: docLinks.connectorsOracle,
@@ -121,6 +127,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.salesforce,
+    platinumOnly: true,
   },
   servicenow: {
     docsUrl: docLinks.connectorsServiceNow,
@@ -147,7 +154,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.slack,
-    platinumOnly: false,
+    platinumOnly: true,
   },
 };
 
