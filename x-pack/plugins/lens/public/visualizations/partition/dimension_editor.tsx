@@ -170,6 +170,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
               siblingRef={props.panelRef}
               isOpen={isPaletteOpen}
               handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+              title={i18n.translate('xpack.lens.table.colorByTermsPanelTitle', {
+                defaultMessage: 'Color assignments',
+              })}
+              isTechPreview={true}
             >
               <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
                 <CategoricalColorMapping

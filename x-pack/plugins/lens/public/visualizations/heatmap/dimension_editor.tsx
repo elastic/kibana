@@ -88,6 +88,10 @@ export function HeatmapDimensionEditor(
               siblingRef={props.panelRef}
               isOpen={isPaletteOpen}
               handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+              title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
+                defaultMessage: 'Color',
+              })}
+              isTechPreview={false}
             >
               {activePalette && (
                 <CustomizablePalette

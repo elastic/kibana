@@ -185,6 +185,10 @@ export function MetricDimensionEditor(
                 siblingRef={props.panelRef}
                 isOpen={isPaletteOpen}
                 handleClose={togglePalette}
+                title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
+                  defaultMessage: 'Color',
+                })}
+                isTechPreview={false}
               >
                 <CustomizablePalette
                   palettes={props.paletteService}

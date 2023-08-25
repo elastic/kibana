@@ -20,6 +20,7 @@ import {
   EuiFocusTrap,
   EuiOutsideClickDetector,
   EuiPortal,
+  EuiBetaBadge,
 } from '@elastic/eui';
 
 export function PalettePanelContainer({
@@ -27,8 +28,12 @@ export function PalettePanelContainer({
   handleClose,
   siblingRef,
   children,
+  title,
+  isTechPreview,
 }: {
   isOpen: boolean;
+  title: string;
+  isTechPreview: boolean;
   handleClose: () => void;
   siblingRef: MutableRefObject<HTMLDivElement | null>;
   children?: React.ReactElement | React.ReactElement[];
@@ -76,16 +81,21 @@ export function PalettePanelContainer({
 
                 <EuiFlexItem>
                   <EuiTitle size="xs">
-                    <h2
+                    <h3
                       id="lnsPalettePanelContainerTitle"
                       className="lnsPalettePanelContainer__headerTitle"
                     >
-                      <strong>
-                        {i18n.translate('xpack.lens.table.palettePanelTitle', {
-                          defaultMessage: 'Color',
-                        })}
-                      </strong>
-                    </h2>
+                      {title}
+
+                      {isTechPreview && (
+                        <EuiBetaBadge
+                          label={'Tech preview'}
+                          tooltipContent={
+                            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.'
+                          }
+                        />
+                      )}
+                    </h3>
                   </EuiTitle>
                 </EuiFlexItem>
               </EuiFlexGroup>
