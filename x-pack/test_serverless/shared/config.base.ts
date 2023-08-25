@@ -49,23 +49,21 @@ export default async () => {
     },
     esTestCluster: {
       from: 'serverless',
-      files: [idpPath],
+      files: [idpPath, jwksPath],
       serverArgs: [
         'xpack.security.authc.realms.file.file1.order=-100',
 
         'xpack.security.authc.realms.jwt.jwt1.order=-98',
         `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
         'xpack.security.authc.realms.jwt.jwt1.client_authentication.type=shared_secret',
-        `xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret=my_super_secret`,
         `xpack.security.authc.realms.jwt.jwt1.allowed_issuer=https://kibana.elastic.co/jwt/`,
         `xpack.security.authc.realms.jwt.jwt1.allowed_subjects=elastic-agent`,
         'xpack.security.authc.realms.jwt.jwt1.allowed_audiences=elasticsearch',
         `xpack.security.authc.realms.jwt.jwt1.allowed_signature_algorithms=[RS256]`,
         `xpack.security.authc.realms.jwt.jwt1.claims.principal=sub`,
-        `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${jwksPath}`,
+        `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
 
-        // TODO: We should set this flag to `false` as soon as we fully migrate tests to SAML and file realms.
-        `xpack.security.authc.realms.native.native1.enabled=true`,
+        `xpack.security.authc.realms.native.native1.enabled=false`,
         `xpack.security.authc.realms.native.native1.order=-97`,
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.realms.saml.cloud-saml-kibana.order=101',
