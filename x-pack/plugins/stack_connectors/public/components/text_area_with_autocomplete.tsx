@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { filterSuggestions } from '../lib/filter_suggestions_for_autocomplete';
 import { templateActionVariable } from '../lib/template_action_variable';
 
@@ -71,11 +72,11 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
 
   const closeList = useCallback((doNoResetAutoCompleteIndex = false) => {
     if (!doNoResetAutoCompleteIndex) {
-      setAutoCompleteIndex(-1)
+      setAutoCompleteIndex(-1);
     }
     setListOpen(false);
     setSelectableHasFocus(false);
-  }, [])
+  }, []);
 
   const onOptionPick = useCallback(
     (newOptions: EuiSelectableOption[]) => {
@@ -125,7 +126,8 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     const left = textAreaClientRect.left + window.pageXOffset;
     const height = newPosition.height;
     const width = textAreaClientRect.width;
-    setPopupPosition((old) => old.top !== top || old.left !== left || old.width !== width || old.height !== height
+    setPopupPosition((old) =>
+      old.top !== top || old.left !== left || old.width !== width || old.height !== height
         ? { top, left, width, height }
         : old
     );
@@ -136,12 +138,13 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     const { value, selectionStart } = textAreaRef.current;
     const lastTwoLetter = value.slice(selectionStart - 2, selectionStart);
 
-    const currentWord = autoCompleteIndex !== -1 ? value.slice(autoCompleteIndex, selectionStart) : '';
+    const currentWord =
+      autoCompleteIndex !== -1 ? value.slice(autoCompleteIndex, selectionStart) : '';
 
-    console.log('currentWord', currentWord, 'lastTwoLetter', lastTwoLetter)
+    console.log('currentWord', currentWord, 'lastTwoLetter', lastTwoLetter);
     if (lastTwoLetter === '{{' || currentWord.startsWith('{{')) {
       if (lastTwoLetter === '{{') {
-        setAutoCompleteIndex(selectionStart - 2)
+        setAutoCompleteIndex(selectionStart - 2);
       }
       const filteredMatches = filterSuggestions({
         actionVariablesList: messageVariables
@@ -156,12 +159,20 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
         return true;
       });
     } else if (lastTwoLetter === '}}') {
-      closeList()
+      closeList();
     } else {
       setMatches([]);
     }
     editAction(paramsProperty, value, index);
-  }, [autoCompleteIndex, editAction, index, isListOpen, messageVariables, paramsProperty, recalcMenuPosition]);
+  }, [
+    autoCompleteIndex,
+    closeList,
+    editAction,
+    index,
+    messageVariables,
+    paramsProperty,
+    recalcMenuPosition,
+  ]);
 
   const textareaOnKeyPress = useCallback(
     (event) => {
@@ -182,7 +193,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
         } else if (event.code === 'Escape') {
           event.preventDefault();
           event.stopPropagation();
-          closeList()
+          closeList();
         } else if (event.code === 'Enter' || event.code === 'Space') {
           const optionIndex = selectableRef.current.state.activeOptionIndex;
           onOptionPick(
@@ -196,7 +207,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
               return ots;
             })
           );
-          closeList()
+          closeList();
         }
       } else {
         setSelectableHasFocus((prevValue) => {
@@ -210,25 +221,28 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     [closeList, isListOpen, onOptionPick, optionsToShow, selectableHasFocus]
   );
 
-  const clickOutSideTextArea = useCallback((event) => {
-    const box = document
-      .querySelector('.euiSelectableMsgAutoComplete')
-      ?.getBoundingClientRect() || {
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0,
-    };
-    if (
-      event.clientX > box.left &&
-      event.clientX < box.right &&
-      event.clientY > box.top &&
-      event.clientY < box.bottom
-    ) {
-      return;
-    }
-    closeList()
-  }, []);
+  const clickOutSideTextArea = useCallback(
+    (event) => {
+      const box = document
+        .querySelector('.euiSelectableMsgAutoComplete')
+        ?.getBoundingClientRect() || {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      };
+      if (
+        event.clientX > box.left &&
+        event.clientX < box.right &&
+        event.clientY > box.top &&
+        event.clientY < box.bottom
+      ) {
+        return;
+      }
+      closeList();
+    },
+    [closeList]
+  );
 
   const onSelectMessageVariable = useCallback(
     (variable: ActionVariable) => {
@@ -253,15 +267,25 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     return option.label;
   };
 
-  const selectableStyle: Properties<string | number> = {
-    position: 'absolute',
-    top: popupPosition.top,
-    width: popupPosition.width,
-    left: popupPosition.left,
-    border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-    background: backgroundColor,
-    zIndex: 3000,
-  };
+  const selectableStyle: Properties<string | number> = useMemo(
+    () => ({
+      position: 'absolute',
+      top: popupPosition.top,
+      width: popupPosition.width,
+      left: popupPosition.left,
+      border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+      background: backgroundColor,
+      zIndex: euiThemeVars.euiZLevel1,
+    }),
+    [
+      backgroundColor,
+      euiTheme.border.color,
+      euiTheme.border.width.thin,
+      popupPosition.left,
+      popupPosition.top,
+      popupPosition.width,
+    ]
+  );
 
   return (
     <EuiFormRow
@@ -296,10 +320,10 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
                 editAction(paramsProperty, '', index);
               }
             }, [editAction, index, inputTargetValue, isListOpen, paramsProperty])}
-            onClick={useCallback(() => closeList(), [])}
+            onClick={useCallback(() => closeList(), [closeList])}
             onScroll={useCallback(() => {
-                closeList(true);
-            }, [popupPosition.top])}
+              closeList(true);
+            }, [closeList])}
           />
         </EuiOutsideClickDetector>
         {matches.length > 0 && isListOpen && (
