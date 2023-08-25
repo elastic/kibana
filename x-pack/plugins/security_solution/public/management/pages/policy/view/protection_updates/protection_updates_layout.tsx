@@ -13,11 +13,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiPanel,
   EuiShowFor,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -271,6 +273,42 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
           <EuiSpacer size="l" />
           {renderVersionToDeployPicker()}
 
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
+            <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-note-title'}>
+              <h5>
+                {i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.note.label', {
+                  defaultMessage: 'Note',
+                })}
+              </h5>
+            </EuiTitle>
+            <EuiIconTip
+              position="right"
+              content={
+                <>
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.protectionUpdates.note.tooltip"
+                    defaultMessage="Note will help you understand why you decided to deploy a particular version next time you access policy update."
+                  />
+                </>
+              }
+            />
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+
+          <EuiTextArea
+            value={''}
+            onChange={() => console.log('test')}
+            fullWidth={true}
+            rows={3}
+            placeholder={i18n.translate(
+              'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
+              {
+                defaultMessage: 'Add relevant information about update here',
+              }
+            )}
+            data-test-subj={'protection-updates-manifest-note'}
+          />
           <EuiSpacer size="m" />
 
           <EuiButton

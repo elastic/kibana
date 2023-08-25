@@ -63,6 +63,7 @@ export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata
 export const BASE_POLICY_RESPONSE_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy_response`;
 export const BASE_POLICY_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy`;
 export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
+export const PROTECTION_UPDATES_NOTE_ROUTE = `${BASE_ENDPOINT_ROUTE}/protection_updates_note/{policy_id}`;
 
 /** Suggestions routes */
 export const SUGGESTIONS_ROUTE = `${BASE_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;

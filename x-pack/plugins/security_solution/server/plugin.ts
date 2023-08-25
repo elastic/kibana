@@ -98,6 +98,7 @@ import {
 
 import { AppFeatures } from './lib/app_features';
 import { registerRiskScoringTask } from './lib/risk_engine/tasks/risk_scoring_task';
+import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -316,6 +317,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     registerLimitedConcurrencyRoutes(core);
     registerPolicyRoutes(router, this.endpointContext);
+    registerProtectionUpdatesNoteRoutes(router, this.endpointContext);
     registerActionRoutes(
       router,
       this.endpointContext,
