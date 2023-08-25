@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { CORRELATIONS_ERROR_MESSAGE } from './translations';
+import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
 import { RelatedCases } from './related_cases';
@@ -42,27 +44,38 @@ export const CorrelationsDetails: React.FC = () => {
   const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
   const showCases = useShowRelatedCases();
 
+  const canShowAtLeastOneInsight =
+    showAlertsByAncestry || showSameSourceAlerts || showAlertsBySession || showCases;
+
   return (
     <>
-      {showAlertsByAncestry && documentId && indices && (
-        <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+      {canShowAtLeastOneInsight ? (
+        <>
+          {showAlertsByAncestry && documentId && indices && (
+            <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+          )}
+
+          <EuiSpacer />
+
+          {showSameSourceAlerts && originalEventId && (
+            <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
+          )}
+
+          <EuiSpacer />
+
+          {showAlertsBySession && entityId && (
+            <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
+          )}
+
+          <EuiSpacer />
+
+          {showCases && <RelatedCases eventId={eventId} />}
+        </>
+      ) : (
+        <div data-test-subj={`${CORRELATIONS_DETAILS_TEST_ID}Error`}>
+          {CORRELATIONS_ERROR_MESSAGE}
+        </div>
       )}
-
-      <EuiSpacer />
-
-      {showSameSourceAlerts && originalEventId && (
-        <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
-      )}
-
-      <EuiSpacer />
-
-      {showAlertsBySession && entityId && (
-        <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
-      )}
-
-      <EuiSpacer />
-
-      {showCases && <RelatedCases eventId={eventId} />}
     </>
   );
 };
