@@ -49,7 +49,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
     // eslint-disable-next-line dot-notation
     return [...root['server']['configService']['dynamicPaths'].entries()]
       .flatMap(([configPath, dynamicConfigKeys]) => {
-        return dynamicConfigKeys.map((dynamicConfigKey) => `${configPath}.${dynamicConfigKey}`);
+        return dynamicConfigKeys.map(
+          (dynamicConfigKey: string) => `${configPath}.${dynamicConfigKey}`
+        );
       })
       .sort();
   }
