@@ -37,7 +37,7 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
         {policy.name && (
           <>
             <EuiDescriptionListTitle>
-              {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.nameTitle', {
+              {i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.nameLabel', {
                 defaultMessage: 'Name',
               })}
             </EuiDescriptionListTitle>
@@ -51,7 +51,7 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
         {policy.type && (
           <>
             <EuiDescriptionListTitle>
-              {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.typeTitle', {
+              {i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.typeLabel', {
                 defaultMessage: 'Type',
               })}
             </EuiDescriptionListTitle>
@@ -65,7 +65,7 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
         {policy.matchField && (
           <>
             <EuiDescriptionListTitle>
-              {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.matchFieldTitle', {
+              {i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.matchFieldLabel', {
                 defaultMessage: 'Match field',
               })}
             </EuiDescriptionListTitle>
@@ -79,7 +79,7 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
         {policy.sourceIndices && (
           <>
             <EuiDescriptionListTitle>
-              {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.sourceIndicesTitle', {
+              {i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.matchFieldLabel', {
                 defaultMessage: 'Source indices',
               })}
             </EuiDescriptionListTitle>
@@ -101,7 +101,7 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
         {policy.enrichFields && (
           <>
             <EuiDescriptionListTitle>
-              {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.enrichFieldsTitle', {
+              {i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.enrichFieldsLabel', {
                 defaultMessage: 'Enrich fields',
               })}
             </EuiDescriptionListTitle>
@@ -123,7 +123,7 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
         {policy.query && (
           <>
             <EuiDescriptionListTitle>
-              {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.queryTitle', {
+              {i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.queryLabel', {
                 defaultMessage: 'Query',
               })}
             </EuiDescriptionListTitle>
@@ -152,7 +152,7 @@ const RequestTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.idxMgmt.enrichPolicies.create.stepCreate.requestTab.descriptionText"
+            id="xpack.idxMgmt.enrichPolicyCreate.createStep.descriptionText"
             defaultMessage="This request will create the following enrich policy."
           />
         </p>
@@ -180,14 +180,14 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
   const summaryTabs = [
     {
       id: 'summary',
-      name: i18n.translate('xpack.idxMgmt.enrichPolicies.create.stepCreate.summaryTabTitle', {
+      name: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.summaryTabLabel', {
         defaultMessage: 'Summary',
       }),
       content: <SummaryTab policy={draft as SerializedEnrichPolicy} />,
     },
     {
       id: 'request',
-      name: i18n.translate('xpack.idxMgmt.enrichPolicies.create.stepCreate.requestTabTitle', {
+      name: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.requestTabLabel', {
         defaultMessage: 'Request',
       }),
       content: <RequestTab policy={draft as SerializedEnrichPolicy} />,
@@ -202,7 +202,7 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
 
       <EuiButton fill color="primary" onClick={onSubmit} isLoading={isLoading}>
         <FormattedMessage
-          id="xpack.idxMgmt.enrichPolicies.create.stepCreate.createButtonLabel"
+          id="xpack.idxMgmt.enrichPolicyCreate.createStep.nextButtonLabel"
           defaultMessage="Create policy"
         />
       </EuiButton>

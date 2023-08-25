@@ -27,7 +27,7 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
         pageTitle={
           <span data-test-subj="appTitle">
             <FormattedMessage
-              id="xpack.idxMgmt.home.appTitle"
+              id="xpack.idxMgmt.enrichPolicyCreate.appTitle"
               defaultMessage="Create enrich policy"
             />
           </span>
@@ -41,7 +41,7 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
             data-test-subj="documentationLink"
           >
             <FormattedMessage
-              id="xpack.idxMgmt.home.idxMgmtDocsLinkText"
+              id="xpack.idxMgmt.enrichPolicyCreate.titleDocsLinkText"
               defaultMessage="Documentation"
             />
           </EuiButtonEmpty>,

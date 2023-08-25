@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getMatchingIndices } from '../../../../services/api';
@@ -36,7 +37,9 @@ const getIndexOptions = async (patternString: string) => {
     const matchingOptions = uniq([...matchingIndices]);
 
     options.push({
-      label: 'Based on your indices',
+      label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.indicesSelector.optionsLabel', {
+        defaultMessage: 'Based on your indices',
+      }),
       options: matchingOptions
         .map((match) => {
           return {

@@ -64,7 +64,7 @@ export const CreatePolicyWizard = () => {
     () => [
       {
         step: CONFIGURATION,
-        title: i18n.translate('xpack.remoteClusters.clusterWizard.addConnectionInfoLabel', {
+        title: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.configurationStepLabel', {
           defaultMessage: 'Configuration',
         }),
         status: completionState.configurationStep ? 'complete' : getStepStatus(CONFIGURATION),
@@ -75,7 +75,7 @@ export const CreatePolicyWizard = () => {
       },
       {
         step: FIELD_SELECTION,
-        title: i18n.translate('xpack.remoteClusters.clusterWizard.setupTrustLabel', {
+        title: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStepLabel', {
           defaultMessage: 'Field selection',
         }),
         status: completionState.fieldsSelectionStep ? 'complete' : getStepStatus(FIELD_SELECTION),
@@ -90,7 +90,7 @@ export const CreatePolicyWizard = () => {
       },
       {
         step: CREATE,
-        title: i18n.translate('xpack.remoteClusters.clusterWizard.setupTrustLabel', {
+        title: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStepLabel', {
           defaultMessage: 'Create',
         }),
         status: (currentStep === CREATE ? 'current' : 'incomplete') as EuiStepStatus,
@@ -116,13 +116,13 @@ export const CreatePolicyWizard = () => {
       {createError && (
         <>
           <EuiCallOut
-            title={i18n.translate('xpack.idxMgmt.editSettingsJSON.saveJSONCalloutErrorTitle', {
+            title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.errorTitle', {
               defaultMessage: 'There was an error while trying to create your policy',
             })}
             color="danger"
             iconType="error"
           >
-            <p>{createError.message}</p>
+            <p className="eui-textBreakWord">{createError?.message || createError?.error}</p>
           </EuiCallOut>
           <EuiSpacer size="xl" />
         </>

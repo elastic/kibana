@@ -31,14 +31,14 @@ interface Props {
 export const configurationFormSchema: FormSchema = {
   name: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dateDetectionFieldLabel', {
+    label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.configurationStep.policyNameField', {
       defaultMessage: 'Policy name',
     }),
     validations: [
       {
         validator: fieldValidators.emptyField(
           i18n.translate(
-            'xpack.ingestPipelines.pipelineEditor.inferenceForm.patternRequiredError',
+            'xpack.idxMgmt.enrichPolicyCreate.configurationStep.policyNameRequiredError',
             {
               defaultMessage: 'A policy name value is required.',
             }
@@ -50,16 +50,13 @@ export const configurationFormSchema: FormSchema = {
 
   type: {
     type: FIELD_TYPES.SELECT,
-    label: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.enrichForm.shapeRelationFieldLabel',
-      {
-        defaultMessage: 'Policy type',
-      }
-    ),
+    label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.configurationStep.policyTypeLabel', {
+      defaultMessage: 'Policy type',
+    }),
     validations: [
       {
         validator: fieldValidators.emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.inferenceForm.typeRequiredError', {
+          i18n.translate('xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeRequiredError', {
             defaultMessage: 'A policy type value is required.',
           })
         ),
@@ -68,15 +65,18 @@ export const configurationFormSchema: FormSchema = {
   },
 
   sourceIndices: {
-    label: i18n.translate('xpack.ingestPipelines.form.sourceIndicesFieldLabel', {
+    label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.configurationStep.sourceIndicesLabel', {
       defaultMessage: 'Source indices',
     }),
     validations: [
       {
         validator: fieldValidators.emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceError', {
-            defaultMessage: 'At least one source index is required.',
-          })
+          i18n.translate(
+            'xpack.idxMgmt.enrichPolicyCreate.configurationStep.sourceIndicesRequiredError',
+            {
+              defaultMessage: 'At least one source index is required.',
+            }
+          )
         ),
       },
     ],
@@ -84,12 +84,12 @@ export const configurationFormSchema: FormSchema = {
 
   query: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.form.queryFieldLabel', {
+    label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.configurationStep.queryLabel', {
       defaultMessage: 'Query (optional)',
     }),
     helpText: (
       <FormattedMessage
-        id="xpack.ingestPipelines.form.metaHelpText"
+        id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.queryHelpText"
         defaultMessage="Defaults to: {code}"
         values={{
           code: <EuiCode>{JSON.stringify({ match_all: {} })}</EuiCode>,
@@ -99,8 +99,8 @@ export const configurationFormSchema: FormSchema = {
     validations: [
       {
         validator: fieldValidators.isJsonField(
-          i18n.translate('xpack.ingestPipelines.form.validation.metaJsonError', {
-            defaultMessage: 'The input is not valid.',
+          i18n.translate('xpack.idxMgmt.enrichPolicyCreate.configurationStep.queryInvalidError', {
+            defaultMessage: 'The query is not valid JSON.',
           }),
           { allowEmptyString: true }
         ),
@@ -155,21 +155,21 @@ export const ConfigurationStep = ({ onNext }: Props) => {
               {
                 value: 'match',
                 text: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.enrichForm.matchOption',
+                  'xpack.idxMgmt.enrichPolicyCreate.configurationStep.matchOption',
                   { defaultMessage: 'Match' }
                 ),
               },
               {
                 value: 'geo_match',
                 text: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.enrichFrom.geoMatchOption',
+                  'xpack.idxMgmt.enrichPolicyCreate.configurationStep.geoMatchOption',
                   { defaultMessage: 'Geo match' }
                 ),
               },
               {
                 value: 'range',
                 text: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.enrichFrom.rangeOption',
+                  'xpack.idxMgmt.enrichPolicyCreate.configurationStep.rangeOption',
                   { defaultMessage: 'range' }
                 ),
               },
@@ -188,9 +188,12 @@ export const ConfigurationStep = ({ onNext }: Props) => {
           codeEditorProps: {
             height: '300px',
             allowFullScreen: true,
-            'aria-label': i18n.translate('xpack.ingestPipelines.form.metaAriaLabel', {
-              defaultMessage: 'query field data editor',
-            }),
+            'aria-label': i18n.translate(
+              'xpack.idxMgmt.enrichPolicyCreate.configurationStep.ariaLabelQuery',
+              {
+                defaultMessage: 'Query field data editor',
+              }
+            ),
             options: {
               lineNumbers: 'off',
               tabSize: 2,
@@ -211,7 +214,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
         onClick={onSubmit}
       >
         <FormattedMessage
-          id="xpack.idxMgmt.enrichPolicies.create.stepConfiguration.nextButtonLabel"
+          id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.nextButtonLabel"
           defaultMessage="Next"
         />
       </EuiButton>

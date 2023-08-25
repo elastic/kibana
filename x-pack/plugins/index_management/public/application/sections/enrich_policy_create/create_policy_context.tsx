@@ -45,7 +45,7 @@ export const CreatePolicyContextProvider = ({ children }: { children: React.Reac
 
 export const useCreatePolicyContext = () => {
   const ctx = useContext(CreatePolicyContext);
-  if (!ctx) throw new Error('Cannot use outside of app context');
+  if (!ctx) throw new Error('Cannot use outside of create policy context');
 
   return ctx;
 };

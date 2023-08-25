@@ -40,13 +40,13 @@ export const fieldSelectionFormSchema: FormSchema = {
     deserializer: (v: string) => {
       return v.length === 0 ? [] : v.split(', ');
     },
-    label: i18n.translate('xpack.ingestPipelines.form.matchFieldFieldLabel', {
+    label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldField', {
       defaultMessage: 'Match field',
     }),
     validations: [
       {
         validator: fieldValidators.emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceError', {
+          i18n.translate('xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldRequired', {
             defaultMessage: 'A match field is required.',
           })
         ),
@@ -57,15 +57,18 @@ export const fieldSelectionFormSchema: FormSchema = {
   enrichFields: {
     defaultValue: [],
     type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate('xpack.ingestPipelines.form.enrichFieldsFieldLabel', {
+    label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.enrichFieldsField', {
       defaultMessage: 'Enrich fields',
     }),
     validations: [
       {
         validator: fieldValidators.emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceError', {
-            defaultMessage: 'At least one enrich field is required.',
-          })
+          i18n.translate(
+            'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.enrichFieldsRequired',
+            {
+              defaultMessage: 'At least one enrich field is required.',
+            }
+          )
         ),
       },
     ],
@@ -145,10 +148,21 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         componentProps={{
           fullWidth: false,
           helpText: hasSelectedMultipleIndices
-            ? 'Since multiple source indices were selected in the previous step, the match field must be the same across all selected source indices.'
+            ? i18n.translate(
+                'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldHelpText',
+                {
+                  defaultMessage:
+                    'Since multiple source indices were selected in the previous step, the match field must be the same across all selected source indices.',
+                }
+              )
             : undefined,
           euiFieldProps: {
-            placeholder: 'Select a field',
+            placeholder: i18n.translate(
+              'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldPlaceholder',
+              {
+                defaultMessage: 'Select a field',
+              }
+            ),
             noSuggestions: false,
             singleSelection: { asPlainText: true },
             options: matchFieldOptions,
@@ -162,7 +176,12 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         componentProps={{
           fullWidth: false,
           euiFieldProps: {
-            placeholder: 'Select fields to enrich',
+            placeholder: i18n.translate(
+              'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.enrichFieldsPlaceholder',
+              {
+                defaultMessage: 'Select fields to enrich',
+              }
+            ),
             noSuggestions: false,
             options: fieldOptions,
           },
@@ -180,7 +199,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         onClick={onSubmit}
       >
         <FormattedMessage
-          id="xpack.idxMgmt.enrichPolicies.create.stepConfiguration.nextButtonLabel"
+          id="xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.nextButtonLabel"
           defaultMessage="Next"
         />
       </EuiButton>
