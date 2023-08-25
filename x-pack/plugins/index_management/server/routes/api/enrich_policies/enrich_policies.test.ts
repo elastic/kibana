@@ -147,7 +147,7 @@ describe('Enrich policies API', () => {
             matchField: 'my_field',
             enrichFields: ['field_1', 'field_2'],
             sourceIndex: ['index_1'],
-          }
+          },
         },
       };
 
@@ -171,7 +171,7 @@ describe('Enrich policies API', () => {
             matchField: 'my_field',
             enrichFields: ['field_1', 'field_2'],
             sourceIndex: ['index_1'],
-          }
+          },
         },
       };
 
