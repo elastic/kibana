@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,7 +16,7 @@ import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/consta
 
 import { TransformListRow } from '../../../../common';
 
-import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
+import { useDocumentationLinks, useRefreshTransformList } from '../../../../hooks';
 
 import { StatsBar, TransformStatsBarStats } from '../stats_bar';
 
@@ -109,6 +109,7 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
   transformNodes,
   transformsList,
 }) => {
+  const refreshTransformList = useRefreshTransformList();
   const { esNodeRoles } = useDocumentationLinks();
 
   const transformStats: TransformStatsBarStats = createTranformStats(
@@ -118,10 +119,8 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
 
   return (
     <>
-      <StatsBar stats={transformStats} dataTestSub={'transformStatsBar'} />
       {transformNodes === 0 && (
         <>
-          <EuiSpacer size="m" />
           <EuiCallOut
             title={
               <FormattedMessage
@@ -148,9 +147,17 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
                 }}
               />
             </p>
+            <EuiButton onClick={() => refreshTransformList()} size="s">
+              <FormattedMessage
+                id="xpack.transform.transformNodes.noTransformNodesRetryButtonText"
+                defaultMessage="Retry"
+              />
+            </EuiButton>
           </EuiCallOut>
+          <EuiSpacer size="s" />
         </>
       )}
+      <StatsBar stats={transformStats} dataTestSub={'transformStatsBar'} />
     </>
   );
 };
