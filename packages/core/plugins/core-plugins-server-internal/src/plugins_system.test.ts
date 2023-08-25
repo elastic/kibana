@@ -757,6 +757,67 @@ describe('stop', () => {
 
   const nextTick = () => new Promise((resolve) => setImmediate(resolve));
 
+  it('stops all plugins', async () => {
+    const [plugin1, plugin2, plugin3] = [
+      createPlugin('plugin-1'),
+      createPlugin('plugin-2'),
+      createPlugin('plugin-3'),
+    ].map((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+      return plugin;
+    });
+
+    const stopSpy1 = jest.spyOn(plugin1, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy3 = jest.spyOn(plugin3, 'stop').mockImplementationOnce(() => Promise.resolve());
+
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    const stopPromise = pluginsSystem.stopPlugins();
+
+    await nextTick();
+    jest.runAllTimers();
+
+    await stopPromise;
+
+    expect(stopSpy1).toHaveBeenCalledTimes(1);
+    expect(stopSpy2).toHaveBeenCalledTimes(1);
+    expect(stopSpy3).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops plugins in the correct order', async () => {
+    const [plugin1, plugin2, plugin3] = [
+      createPlugin('plugin-1', { required: ['plugin-2'] }),
+      createPlugin('plugin-2'),
+      createPlugin('plugin-3', { required: ['plugin-1', 'plugin-2'] }),
+    ].map((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+      return plugin;
+    });
+
+    const stopSpy1 = jest.spyOn(plugin1, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy3 = jest.spyOn(plugin3, 'stop').mockImplementationOnce(() => Promise.resolve());
+
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    const stopPromise = pluginsSystem.stopPlugins();
+
+    await nextTick();
+    jest.runAllTimers();
+
+    await stopPromise;
+
+    expect(stopSpy3.mock.invocationCallOrder[0]).toBeLessThan(stopSpy1.mock.invocationCallOrder[0]);
+    expect(stopSpy1.mock.invocationCallOrder[0]).toBeLessThan(stopSpy2.mock.invocationCallOrder[0]);
+  });
+
   it('waits for 30 sec to finish "stop" and move on to the next plugin.', async () => {
     const [plugin1, plugin2] = [createPlugin('timeout-stop-1'), createPlugin('timeout-stop-2')].map(
       (plugin, index) => {
