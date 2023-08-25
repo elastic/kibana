@@ -126,6 +126,8 @@ export function managementRoutes({ router, routeGuard }: RouteInitialization) {
                   trainedModelsSpaces(),
                 ]);
 
+                // filter out non NLP models if NLP is disabled !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
                 const modelStatsMapped = modelsStats.reduce((acc, cur) => {
                   acc[cur.model_id] = cur;
                   return acc;
