@@ -6,7 +6,6 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../tags';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
@@ -33,7 +32,7 @@ const waitForPageTitleToBeShown = () => {
 
 describe(
   'Detections > Need Admin Callouts indicating an admin is needed to migrate the alert data set',
-  { tags: tag.ESS },
+  { tags: '@ess' },
   () => {
     before(() => {
       // First, we have to open the app on behalf of a privileged user in order to initialize it.
