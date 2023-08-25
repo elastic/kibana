@@ -28,7 +28,7 @@ const rollupIndexPatternListName = i18n.translate(
   }
 );
 
-const isRollup = (indexPatternType: string = '') => {
+export const isRollup = (indexPatternType: string = '') => {
   return indexPatternType === 'rollup';
 };
 
@@ -87,10 +87,6 @@ export const getTags = (
     });
   }
   return tags;
-};
-
-export const areScriptedFieldsEnabled = (indexPattern: DataViewListItem | DataView) => {
-  return !isRollup(indexPattern.type);
 };
 
 export const getFieldInfo = (indexPattern: DataViewListItem | DataView, field: DataViewField) => {

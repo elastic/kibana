@@ -24,6 +24,7 @@ export interface RouteDependencies {
   config: {
     isSecurityEnabled: () => boolean;
     isLegacyTemplatesEnabled: boolean;
+    isIndexStatsEnabled: boolean;
   };
   indexDataEnricher: IndexDataEnricher;
   lib: {

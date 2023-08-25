@@ -29,7 +29,9 @@ export interface DataViewsServicePublicDeps extends DataViewsServiceDeps {
     showAllIndices?: boolean;
     isRollupIndex: (indexName: string) => boolean;
   }) => Promise<MatchedItem[]>;
+
   getRollupsEnabled: () => boolean;
+  scriptedFieldsEnabled: boolean;
 }
 
 /**
@@ -46,6 +48,7 @@ export class DataViewsServicePublic extends DataViewsService {
   }) => Promise<MatchedItem[]>;
   public hasData: HasDataService;
   private rollupsEnabled: boolean = false;
+  public readonly scriptedFieldsEnabled: boolean;
 
   /**
    * Constructor
@@ -58,6 +61,7 @@ export class DataViewsServicePublic extends DataViewsService {
     this.hasData = deps.hasData;
     this.getIndices = deps.getIndices;
     this.rollupsEnabled = deps.getRollupsEnabled();
+    this.scriptedFieldsEnabled = deps.scriptedFieldsEnabled;
   }
 
   getRollupsEnabled() {

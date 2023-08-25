@@ -45,7 +45,7 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"serverlessElasticsearch\" | \"serverlessIndexingApi\""
+          "\"serverlessElasticsearch\" | \"serverlessIndexingApi\" | \"serverlessConnectors\""
         ],
         "path": "packages/deeplinks/search/deep_links.ts",
         "deprecated": false,

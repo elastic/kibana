@@ -145,13 +145,10 @@
           {
             "parentPluginId": "@kbn/default-nav-management",
             "id": "def-common.defaultNavigation.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/default-nav/management/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -175,7 +172,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "[{ id: \"root\"; title: string; children: [{ link: \"monitoring\"; }]; }, { id: \"integration_management\"; title: any; children: [{ link: \"integrations\"; }, { link: \"fleet\"; }, { link: \"osquery\"; }]; }, { id: \"stack_management\"; title: any; children: [{ id: \"ingest\"; title: any; children: [{ link: \"management:ingest_pipelines\"; }, { link: \"management:pipelines\"; }]; }, { id: \"data\"; title: any; children: [{ link: \"management:index_management\"; }, { link: \"management:transform\"; }]; }, { id: \"alerts_and_insights\"; title: any; children: [{ link: \"management:triggersActions\"; }, { link: \"management:cases\"; }, { link: \"management:triggersActionsConnectors\"; }, { link: \"management:jobsListLink\"; }]; }, { id: \"kibana\"; title: string; children: [{ link: \"management:dataViews\"; }, { link: \"management:objects\"; }, { link: \"management:tags\"; }, { link: \"management:spaces\"; }, { link: \"management:settings\"; }]; }]; }]"
+              "[{ id: \"root\"; title: string; children: [{ link: \"monitoring\"; }]; }, { id: \"integration_management\"; title: string; children: [{ link: \"integrations\"; }, { link: \"fleet\"; }, { link: \"osquery\"; }]; }, { id: \"stack_management\"; title: string; children: [{ id: \"ingest\"; title: string; children: [{ link: \"management:ingest_pipelines\"; }, { link: \"management:pipelines\"; }]; }, { id: \"data\"; title: string; children: [{ link: \"management:index_management\"; }, { link: \"management:transform\"; }]; }, { id: \"alerts_and_insights\"; title: string; children: [{ link: \"management:triggersActions\"; }, { link: \"management:cases\"; }, { link: \"management:triggersActionsConnectors\"; }, { link: \"management:jobsListLink\"; }]; }, { id: \"kibana\"; title: string; children: [{ link: \"management:dataViews\"; }, { link: \"management:objects\"; }, { link: \"management:tags\"; }, { link: \"management:spaces\"; }, { link: \"management:settings\"; }]; }]; }]"
             ],
             "path": "packages/default-nav/management/default_navigation.ts",
             "deprecated": false,

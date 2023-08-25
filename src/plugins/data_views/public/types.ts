@@ -122,6 +122,7 @@ export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
     isRollupIndex: (indexName: string) => boolean;
   }) => Promise<MatchedItem[]>;
   getRollupsEnabled: () => boolean;
+  scriptedFieldsEnabled: boolean;
 }
 
 export type DataViewsContract = DataViewsServicePublic;
