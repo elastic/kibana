@@ -20,7 +20,9 @@ export const calculateAndPersistRiskScores = async (
   }
 ): Promise<CalculateAndPersistScoresResponse> => {
   const { riskEngineDataClient, spaceId, ...rest } = params;
-  const writer = await riskEngineDataClient.getWriter({ namespace: spaceId });
+  const writer = await riskEngineDataClient.getWriter({
+    namespace: spaceId,
+  });
   const { after_keys: afterKeys, scores } = await calculateRiskScores(rest);
 
   if (!scores.host?.length && !scores.user?.length) {

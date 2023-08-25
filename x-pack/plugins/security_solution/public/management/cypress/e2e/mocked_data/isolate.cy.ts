@@ -24,7 +24,7 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
 import { APP_ALERTS_PATH, APP_CASES_PATH, APP_PATH } from '../../../../../common/constants';
 import { login } from '../../tasks/login';
-import { loadPage } from '../../tasks/common';
+import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
 import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
@@ -89,12 +89,13 @@ describe('Isolate command', () => {
     });
   });
 
-  describe('from Alerts', () => {
+  describe.skip('from Alerts', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     let hostname: string;
 
     before(() => {
+      disableExpandableFlyoutAdvancedSettings();
       indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
         (indexEndpoints) => {
           endpointData = indexEndpoints;

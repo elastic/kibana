@@ -59,6 +59,10 @@ const HostFlyoutStateRT = rt.intersection([
     tabId: FlyoutTabIdRT,
   }),
   rt.partial({
+    dateRange: rt.type({
+      from: rt.string,
+      to: rt.string,
+    }),
     processSearch: rt.string,
     metadataSearch: rt.string,
     logsSearch: rt.string,

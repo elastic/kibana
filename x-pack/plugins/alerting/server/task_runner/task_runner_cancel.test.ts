@@ -77,6 +77,7 @@ const alertingEventLogger = alertingEventLoggerMock.create();
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const dataViewsMock = {
   dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+  getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
 } as DataViewsServerPluginStart;
 const alertsService = alertsServiceMock.create();
 

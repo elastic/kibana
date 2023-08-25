@@ -5,8 +5,63 @@
  * 2.0.
  */
 
+import { get, set } from 'lodash';
 import type { PolicyConfig } from '../types';
-import { ProtectionModes } from '../types';
+import { PolicyOperatingSystem, ProtectionModes } from '../types';
+
+interface PolicyProtectionReference {
+  keyPath: string;
+  osList: PolicyOperatingSystem[];
+  enableValue: unknown;
+  disableValue: unknown;
+}
+
+const getPolicyProtectionsReference = (): PolicyProtectionReference[] => {
+  const allOsValues = [
+    PolicyOperatingSystem.mac,
+    PolicyOperatingSystem.linux,
+    PolicyOperatingSystem.windows,
+  ];
+
+  return [
+    {
+      keyPath: 'malware.mode',
+      osList: [...allOsValues],
+      disableValue: ProtectionModes.off,
+      enableValue: ProtectionModes.prevent,
+    },
+    {
+      keyPath: 'ransomware.mode',
+      osList: [PolicyOperatingSystem.windows],
+      disableValue: ProtectionModes.off,
+      enableValue: ProtectionModes.prevent,
+    },
+    {
+      keyPath: 'memory_protection.mode',
+      osList: [...allOsValues],
+      disableValue: ProtectionModes.off,
+      enableValue: ProtectionModes.prevent,
+    },
+    {
+      keyPath: 'behavior_protection.mode',
+      osList: [...allOsValues],
+      disableValue: ProtectionModes.off,
+      enableValue: ProtectionModes.prevent,
+    },
+    {
+      keyPath: 'attack_surface_reduction.credential_hardening.enabled',
+      osList: [PolicyOperatingSystem.windows],
+      disableValue: false,
+      enableValue: true,
+    },
+    {
+      keyPath: 'antivirus_registration.enabled',
+      osList: [PolicyOperatingSystem.windows],
+      disableValue: false,
+      enableValue: true,
+    },
+  ];
+};
 
 /**
  * Returns a copy of the passed `PolicyConfig` with all protections set to disabled.
@@ -106,3 +161,46 @@ const getDisabledWindowsSpecificPopups = (policy: PolicyConfig) => ({
     enabled: false,
   },
 });
+
+/**
+ * Returns the provided with only event collection turned enabled
+ * @param policy
+ */
+export const ensureOnlyEventCollectionIsAllowed = (policy: PolicyConfig): PolicyConfig => {
+  const updatedPolicy = disableProtections(policy);
+
+  set(updatedPolicy, 'windows.antivirus_registration.enabled', false);
+
+  return updatedPolicy;
+};
+
+/**
+ * Checks to see if the provided policy is set to Event Collection only
+ */
+export const isPolicySetToEventCollectionOnly = (
+  policy: PolicyConfig
+): { isOnlyCollectingEvents: boolean; message?: string } => {
+  const protectionsRef = getPolicyProtectionsReference();
+  let message: string | undefined;
+
+  const hasEnabledProtection = protectionsRef.some(({ keyPath, osList, disableValue }) => {
+    const hasOsPropertyEnabled = osList.some((osValue) => {
+      const fullKeyPathForOs = `${osValue}.${keyPath}`;
+      const currentValue = get(policy, fullKeyPathForOs);
+      const isEnabled = currentValue !== disableValue;
+
+      if (isEnabled) {
+        message = `property [${fullKeyPathForOs}] is set to [${currentValue}]`;
+      }
+
+      return isEnabled;
+    });
+
+    return hasOsPropertyEnabled;
+  });
+
+  return {
+    isOnlyCollectingEvents: !hasEnabledProtection,
+    message,
+  };
+};

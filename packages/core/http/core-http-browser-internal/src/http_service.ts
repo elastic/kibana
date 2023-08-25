@@ -31,13 +31,14 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
 
   public setup({ injectedMetadata, fatalErrors, executionContext }: HttpDeps): HttpSetup {
     const kibanaVersion = injectedMetadata.getKibanaVersion();
+    const buildNumber = injectedMetadata.getKibanaBuildNumber();
     const basePath = new BasePath(
       injectedMetadata.getBasePath(),
       injectedMetadata.getServerBasePath(),
       injectedMetadata.getPublicBaseUrl()
     );
 
-    const fetchService = new Fetch({ basePath, kibanaVersion, executionContext });
+    const fetchService = new Fetch({ basePath, kibanaVersion, buildNumber, executionContext });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
     loadingCount.addLoadingCountSource(fetchService.getRequestCount$());
 

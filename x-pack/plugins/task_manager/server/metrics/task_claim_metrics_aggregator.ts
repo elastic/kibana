@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-// @ts-expect-error
-// eslint-disable-next-line import/no-extraneous-dependencies
-import Histogram from 'native-hdr-histogram';
 import { isOk } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRun } from '../task_events';
+import { SimpleHistogram } from './simple_histogram';
 import { SuccessRate, SuccessRateCounter } from './success_rate_counter';
 import { ITaskMetricsAggregator } from './types';
 
-const HDR_HISTOGRAM_MIN = 1; // 1 millis
 const HDR_HISTOGRAM_MAX = 30000; // 30 seconds
 const HDR_HISTOGRAM_BUCKET_SIZE = 100; // 100 millis
 
@@ -27,7 +24,7 @@ export type TaskClaimMetric = SuccessRate & {
 
 export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskClaimMetric> {
   private claimSuccessRate = new SuccessRateCounter();
-  private durationHistogram = new Histogram(HDR_HISTOGRAM_MIN, HDR_HISTOGRAM_MAX);
+  private durationHistogram = new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);
 
   public initialMetric(): TaskClaimMetric {
     return {
@@ -61,7 +58,7 @@ export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskCl
     const counts: number[] = [];
     const values: number[] = [];
 
-    for (const { count, value } of this.durationHistogram.linearcounts(HDR_HISTOGRAM_BUCKET_SIZE)) {
+    for (const { count, value } of this.durationHistogram.get(true)) {
       counts.push(count);
       values.push(value);
     }

@@ -42,6 +42,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
+import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
 import type { AuthenticatedUser } from '../../../common';
 import {
   canUserChangeDetails,
@@ -61,7 +62,6 @@ import { FormLabel } from '../../components/form_label';
 import { FormRow, OptionalText } from '../../components/form_row';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
-import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
 
 export interface UserProfileProps {
   user: AuthenticatedUser;

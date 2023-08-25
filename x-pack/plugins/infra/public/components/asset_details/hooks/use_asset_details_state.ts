@@ -6,42 +6,34 @@
  */
 
 import createContainer from 'constate';
-import { useMemo } from 'react';
-import { parseDateRange } from '../../../utils/datemath';
 import type { AssetDetailsProps } from '../types';
-import { toTimestampRange } from '../utils';
-
-const DEFAULT_DATE_RANGE = {
-  from: 'now-15m',
-  to: 'now',
-};
+import { useMetadataStateProviderContext } from './use_metadata_state';
 
 export interface UseAssetDetailsStateProps {
   state: Pick<
     AssetDetailsProps,
-    'asset' | 'assetType' | 'overrides' | 'dateRange' | 'onTabsStateChange'
+    'asset' | 'assetType' | 'overrides' | 'onTabsStateChange' | 'renderMode'
   >;
 }
 
 export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
-  const { asset, assetType, dateRange: rawDateRange, onTabsStateChange, overrides } = state;
+  const { metadata } = useMetadataStateProviderContext();
+  const { asset, assetType, onTabsStateChange, overrides, renderMode } = state;
 
-  const dateRange = useMemo(() => {
-    const { from = DEFAULT_DATE_RANGE.from, to = DEFAULT_DATE_RANGE.to } =
-      parseDateRange(rawDateRange);
-
-    return { from, to };
-  }, [rawDateRange]);
-
-  const dateRangeTs = toTimestampRange(dateRange);
+  // When the asset asset.name is known we can load the page faster
+  // Otherwise we need to use metadata response.
+  const loading = !asset.name && !metadata?.name;
 
   return {
-    asset,
+    asset: {
+      ...asset,
+      name: asset.name || metadata?.name || 'asset-name',
+    },
     assetType,
-    dateRange,
-    dateRangeTs,
     onTabsStateChange,
     overrides,
+    renderMode,
+    loading,
   };
 }
 

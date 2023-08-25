@@ -1505,6 +1505,9 @@
       },
       "prerelease_integrations_enabled": {
         "type": "boolean"
+      },
+      "secret_storage_requirements_met": {
+        "type": "boolean"
       }
     }
   },
@@ -1959,6 +1962,9 @@
         "type": "boolean"
       },
       "host": {
+        "type": "keyword"
+      },
+      "proxy_id": {
         "type": "keyword"
       }
     }
@@ -2950,8 +2956,34 @@
   "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
+      "dataViewId": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
+      },
+      "filter": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "identifierType": {
+        "type": "keyword"
+      },
+      "interval": {
+        "type": "keyword"
+      },
+      "pageSize": {
+        "type": "integer"
+      },
+      "range": {
+        "properties": {
+          "start": {
+            "type": "keyword"
+          },
+          "end": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },

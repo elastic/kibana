@@ -25,6 +25,7 @@ import { MetadataHeader } from './metadata_header';
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
   metadataLoading: boolean;
+  isCompactView: boolean;
 }
 
 export interface MetadataData {
@@ -33,6 +34,20 @@ export interface MetadataData {
   tooltipFieldLabel: string;
   tooltipLink?: string;
 }
+
+const extendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+  {
+    field: 'cloudProvider',
+    value: metadataInfo?.cloud?.provider,
+    tooltipFieldLabel: 'cloud.provider',
+    tooltipLink: 'https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html#field-cloud-provider',
+  },
+  {
+    field: 'operatingSystem',
+    value: metadataInfo?.host?.os?.name,
+    tooltipFieldLabel: 'host.os.name',
+  },
+];
 
 const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   {
@@ -48,7 +63,11 @@ const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   },
 ];
 
-export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSummaryProps) => {
+export const MetadataSummaryList = ({
+  metadata,
+  metadataLoading,
+  isCompactView,
+}: MetadataSummaryProps) => {
   const { showTab } = useTabSwitcherContext();
 
   const onClick = () => {
@@ -58,7 +77,10 @@ export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSumma
   return (
     <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
       <EuiFlexGroup alignItems="flexStart">
-        {metadataData(metadata?.info).map(
+        {(isCompactView
+          ? metadataData(metadata?.info)
+          : [...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)]
+        ).map(
           (metadataValue) =>
             metadataValue && (
               <EuiFlexItem key={metadataValue.field}>

@@ -77,12 +77,22 @@ const defaultProps: ComponentProps<typeof Component> = {
         arguments: '{ "foo": "bar" }',
         trigger: MessageRole.Assistant,
       },
-      canEdit: true,
+      actions: {
+        canEdit: false,
+        canCopy: true,
+        canGiveFeedback: true,
+        canRegenerate: true,
+      },
     }),
     buildFunctionChatItem({
       content: '{ "message": "The arguments are wrong" }',
       error: new Error(),
-      canRegenerate: false,
+      actions: {
+        canRegenerate: false,
+        canEdit: true,
+        canGiveFeedback: false,
+        canCopy: true,
+      },
     }),
     buildAssistantChatItem({
       content: '',
@@ -92,7 +102,12 @@ const defaultProps: ComponentProps<typeof Component> = {
         arguments: '{ "bar": "foo" }',
         trigger: MessageRole.Assistant,
       },
-      canEdit: true,
+      actions: {
+        canEdit: true,
+        canCopy: true,
+        canGiveFeedback: true,
+        canRegenerate: true,
+      },
     }),
     buildFunctionChatItem({
       content: '',
@@ -100,7 +115,7 @@ const defaultProps: ComponentProps<typeof Component> = {
       loading: true,
     }),
   ],
-  onEdit: () => {},
+  onEdit: async () => {},
   onFeedback: () => {},
   onRegenerate: () => {},
   onStopGenerating: () => {},

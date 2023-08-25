@@ -18,7 +18,6 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider, mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import { type Observable } from 'rxjs';
 import { DataSourceContext } from '../../hooks/use_data_source';
@@ -28,7 +27,10 @@ import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { PageHeader } from '../page_header';
 
 import { ChangePointDetectionPage } from './change_point_detection_page';
-import { ChangePointDetectionContextProvider } from './change_point_detection_context';
+import {
+  ChangePointDetectionContextProvider,
+  ChangePointDetectionControlsContextProvider,
+} from './change_point_detection_context';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 import { ReloadContextProvider } from '../../hooks/use_reload';
 
@@ -52,9 +54,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   appDependencies,
 }) => {
   const datePickerDeps = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-    toMountPoint,
-    wrapWithTheme,
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
   };
 
@@ -87,7 +87,9 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
                     <EuiSpacer />
                     <ReloadContextProvider reload$={reload$}>
                       <ChangePointDetectionContextProvider>
-                        <ChangePointDetectionPage />
+                        <ChangePointDetectionControlsContextProvider>
+                          <ChangePointDetectionPage />
+                        </ChangePointDetectionControlsContextProvider>
                       </ChangePointDetectionContextProvider>
                     </ReloadContextProvider>
                   </DatePickerContextProvider>

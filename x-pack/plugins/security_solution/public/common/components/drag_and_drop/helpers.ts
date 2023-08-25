@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { isString, keyBy } from 'lodash/fp';
-import type { DropResult } from 'react-beautiful-dnd';
+import type { DropResult } from '@hello-pangea/dnd';
 import type { Dispatch } from 'redux';
 import type { ActionCreator } from 'typescript-fsa';
 

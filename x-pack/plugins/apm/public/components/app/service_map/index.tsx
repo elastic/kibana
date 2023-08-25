@@ -40,7 +40,7 @@ import { DisabledPrompt } from './disabled_prompt';
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
     <>
-      <SearchBar showUnifiedSearchBar={false} />
+      <SearchBar showTimeComparison />
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceAround"

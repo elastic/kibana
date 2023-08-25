@@ -42,7 +42,6 @@ const IndexTemplate = (namespace: string = 'default') => ({
           name: 'test-ilm-policy',
           rollover_alias: `.alerts-test.alerts-${namespace}`,
         },
-        'index.mapping.ignore_malformed': true,
         'index.mapping.total_fields.limit': 2500,
       },
     },

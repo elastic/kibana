@@ -6,6 +6,10 @@
     "patterns": [
       "_security/oidc/authenticate"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-oidc-authenticate.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-oidc-authenticate.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }
