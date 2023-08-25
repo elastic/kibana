@@ -22,6 +22,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   IRuleTypeAlerts,
+  RuleTypeParamsValidator,
 } from './types';
 import {
   RecoveredActionGroup,
@@ -69,6 +70,9 @@ export interface RegistryRuleType
   enabledInLicense: boolean;
   hasFieldsForAAD: boolean;
   hasAlertsMappings: boolean;
+  validate?: {
+    params: RuleTypeParamsValidator<RuleTypeParams>;
+  };
 }
 
 /**
@@ -363,7 +367,9 @@ export class RuleTypeRegistry {
     >;
   }
 
-  public list(): Set<RegistryRuleType> {
+  public list({
+    addParamsValidationSchemas,
+  }: { addParamsValidationSchemas?: boolean } = {}): Set<RegistryRuleType> {
     const mapRuleTypes: Array<[string, UntypedNormalizedRuleType]> = Array.from(this.ruleTypes);
     const tempRegistryRuleType = mapRuleTypes.map<RegistryRuleType>(
       ([
@@ -382,6 +388,7 @@ export class RuleTypeRegistry {
           doesSetRecoveryContext,
           alerts,
           fieldsForAAD,
+          validate,
         },
       ]) => {
         // KEEP the type here to be safe if not the map is  ignoring it for some reason
@@ -406,6 +413,7 @@ export class RuleTypeRegistry {
           hasFieldsForAAD: Boolean(fieldsForAAD),
           hasAlertsMappings: !!alerts,
           ...(alerts ? { alerts } : {}),
+          ...(addParamsValidationSchemas ? { validate } : {}),
         };
         return ruleType;
       }

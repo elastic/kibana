@@ -44,6 +44,7 @@
     "@kbn/discover-plugin",
     "@kbn/rule-data-utils",
     "@kbn/alerts-as-data-utils",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",

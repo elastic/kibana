@@ -83,7 +83,8 @@
     "@kbn/actions-plugin",
     "@kbn/core-capabilities-common",
     "@kbn/deeplinks-analytics",
-    "@kbn/observability-ai-assistant-plugin"
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*"

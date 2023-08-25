@@ -6,7 +6,7 @@
  */
 
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
@@ -27,18 +27,18 @@ import {
 import { getRuleExecutor } from './executor';
 import { sloRuleFieldMap } from './field_map';
 
-const durationSchema = schema.object({
-  value: schema.number(),
-  unit: schema.string(),
+const durationSchema = z.object({
+  value: z.number(),
+  unit: z.string(),
 });
 
-const windowSchema = schema.object({
-  id: schema.string(),
-  burnRateThreshold: schema.number(),
-  maxBurnRateThreshold: schema.nullable(schema.number()),
+const windowSchema = z.object({
+  id: z.string(),
+  burnRateThreshold: z.number(),
+  maxBurnRateThreshold: z.nullable(z.number()),
   longWindow: durationSchema,
   shortWindow: durationSchema,
-  actionGroup: schema.string(),
+  actionGroup: z.string(),
 });
 
 type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
@@ -54,9 +54,9 @@ export function sloBurnRateRuleType(
       defaultMessage: 'SLO burn rate',
     }),
     validate: {
-      params: schema.object({
-        sloId: schema.string(),
-        windows: schema.arrayOf(windowSchema),
+      params: z.object({
+        sloId: z.string(),
+        windows: z.array(windowSchema),
       }),
     },
     defaultActionGroupId: ALERT_ACTION.id,
