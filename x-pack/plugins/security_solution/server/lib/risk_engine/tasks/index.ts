@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export const tag = {
-  SERVERLESS: '@serverless',
-  ESS: '@ess',
-  BROKEN_IN_SERVERLESS: '@brokenInServerless',
-};
+export {
+  registerRiskScoringTask,
+  startRiskScoringTask,
+  removeRiskScoringTask,
+} from './risk_scoring_task';

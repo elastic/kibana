@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../tags';
 
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 
@@ -35,7 +34,7 @@ const ABSOLUTE_DATE = {
 
 const RULE_ID = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
-describe('URL compatibility', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('URL compatibility', { tags: ['@ess', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login(ROLES.platform_engineer);
     visit(SECURITY_DETECTIONS_URL);
