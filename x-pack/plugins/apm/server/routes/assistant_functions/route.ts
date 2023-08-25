@@ -33,6 +33,11 @@ import {
   getApmTimeseries,
   getApmTimeseriesRt,
 } from './get_apm_timeseries';
+import {
+  ApmServicesListContent,
+  getApmServicesList,
+  getApmServicesListRouteRt,
+} from './get_services_list';
 
 const getApmTimeSeriesRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/assistant/get_apm_timeseries',
@@ -184,10 +189,33 @@ const getApmErrorDocRoute = createApmServerRoute({
   },
 });
 
+const getApmServicesListRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/assistant/get_services_list',
+  params: t.type({
+    query: getApmServicesListRouteRt,
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources): Promise<{ content: ApmServicesListContent }> => {
+    const { params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { query } = params;
+
+    return {
+      content: await getApmServicesList({
+        apmEventClient,
+        arguments: query,
+      }),
+    };
+  },
+});
+
 export const assistantRouteRepository = {
   ...getApmTimeSeriesRoute,
   ...getApmServiceSummaryRoute,
   ...getApmErrorDocRoute,
   ...getApmCorrelationValuesRoute,
   ...getDownstreamDependenciesRoute,
+  ...getApmServicesListRoute,
 };

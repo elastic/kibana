@@ -9,9 +9,10 @@ import type { QueryDslTextExpansionQuery } from '@elastic/elasticsearch/lib/api/
 import { serverUnavailable } from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
+import { map } from 'lodash';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
 import type { KnowledgeBaseEntry } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
@@ -30,10 +31,30 @@ function throwKnowledgeBaseNotReady(body: any) {
   throw serverUnavailable(`Knowledge base is not ready yet`, body);
 }
 
+export enum KnowledgeBaseEntryOperationType {
+  Index = 'index',
+  Delete = 'delete',
+}
+
+interface KnowledgeBaseDeleteOperation {
+  type: KnowledgeBaseEntryOperationType.Delete;
+  id?: string;
+  labels?: Record<string, string>;
+}
+
+interface KnowledgeBaseIndexOperation {
+  type: KnowledgeBaseEntryOperationType.Index;
+  document: KnowledgeBaseEntry;
+}
+
+export type KnowledgeBaseEntryOperation =
+  | KnowledgeBaseDeleteOperation
+  | KnowledgeBaseIndexOperation;
+
 export class KnowledgeBaseService {
   private hasSetup: boolean = false;
 
-  private entryQueue: KnowledgeBaseEntry[] = [];
+  private _queue: KnowledgeBaseEntryOperation[] = [];
 
   constructor(private readonly dependencies: Dependencies) {
     this.ensureTaskScheduled();
@@ -51,65 +72,92 @@ export class KnowledgeBaseService {
         },
       })
       .then(() => {
-        this.dependencies.logger.debug('Scheduled document queue task');
+        this.dependencies.logger.debug('Scheduled queue task');
         return this.dependencies.taskManagerStart.runSoon(INDEX_QUEUED_DOCUMENTS_TASK_ID);
       })
       .then(() => {
-        this.dependencies.logger.debug('Document queue task ran');
+        this.dependencies.logger.debug('Queue task ran');
       })
       .catch((err) => {
-        this.dependencies.logger.error(`Failed to schedule document queue task`);
+        this.dependencies.logger.error(`Failed to schedule queue task`);
         this.dependencies.logger.error(err);
       });
   }
 
+  private async processOperation(operation: KnowledgeBaseEntryOperation) {
+    if (operation.type === KnowledgeBaseEntryOperationType.Delete) {
+      await this.dependencies.esClient.deleteByQuery({
+        index: this.dependencies.resources.aliases.kb,
+        query: {
+          bool: {
+            filter: [
+              ...(operation.id ? [{ term: { _id: operation.id } }] : []),
+              ...(operation.labels
+                ? map(operation.labels, (value, key) => {
+                    return { term: { [key]: value } };
+                  })
+                : []),
+            ],
+          },
+        },
+      });
+      return;
+    }
+
+    await this.summarise({
+      entry: operation.document,
+    });
+  }
+
   async processQueue() {
-    if (!this.entryQueue.length) {
+    if (!this._queue.length) {
       return;
     }
 
     if (!(await this.status()).ready) {
-      this.dependencies.logger.debug(`Bailing on document queue task: KB is not ready yet`);
+      this.dependencies.logger.debug(`Bailing on queue task: KB is not ready yet`);
       return;
     }
 
-    this.dependencies.logger.debug(`Processing document queue`);
+    this.dependencies.logger.debug(`Processing queue`);
 
     this.hasSetup = true;
 
-    this.dependencies.logger.info(`Indexing ${this.entryQueue.length} queued entries into KB`);
+    this.dependencies.logger.info(`Processing ${this._queue.length} queue operations`);
     const limiter = pLimit(5);
 
-    const entries = this.entryQueue.concat();
+    const operations = this._queue.concat();
 
     await Promise.all(
-      entries.map((entry) =>
-        limiter(() => {
-          this.entryQueue.splice(entries.indexOf(entry), 1);
-          return this.summarise({ entry });
+      operations.map((operation) =>
+        limiter(async () => {
+          this._queue.splice(operations.indexOf(operation), 1);
+          await this.processOperation(operation);
         })
       )
     );
 
-    this.dependencies.logger.info('Indexed all queued entries into KB');
+    this.dependencies.logger.info('Processed all queued operations');
   }
 
-  async store(entries: KnowledgeBaseEntry[]) {
-    if (!entries.length) {
+  queue(operations: KnowledgeBaseEntryOperation[]): void {
+    if (!operations.length) {
       return;
     }
 
     if (!this.hasSetup) {
-      this.entryQueue.push(...entries);
+      this._queue.push(...operations);
       return;
     }
 
     const limiter = pLimit(5);
 
-    const limitedFunctions = entries.map((entry) => limiter(() => this.summarise({ entry })));
+    const limitedFunctions = this._queue.map((operation) =>
+      limiter(() => this.processOperation(operation))
+    );
 
     Promise.all(limitedFunctions).catch((err) => {
-      this.dependencies.logger.error(`Failed to index all knowledge base entries`);
+      this.dependencies.logger.error(`Failed to process all queued operations`);
       this.dependencies.logger.error(err);
     });
   }
@@ -122,9 +170,11 @@ export class KnowledgeBaseService {
     query: string;
     user: { name: string };
     namespace: string;
-  }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+  }): Promise<{ entries: Array<Pick<KnowledgeBaseEntry, 'text' | 'id'>> }> => {
     try {
-      const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
+      const response = await this.dependencies.esClient.search<
+        Pick<KnowledgeBaseEntry, 'text' | 'id'>
+      >({
         index: this.dependencies.resources.aliases.kb,
         query: {
           bool: {
@@ -185,6 +235,7 @@ export class KnowledgeBaseService {
           namespace,
         },
         pipeline: this.dependencies.resources.pipelines.kb,
+        refresh: false,
       });
     } catch (error) {
       if (error instanceof errors.ResponseError && error.body.error.type === 'status_exception') {
@@ -261,8 +312,13 @@ export class KnowledgeBaseService {
         wait_for: 'fully_allocated',
       });
     } catch (error) {
+      this.dependencies.logger.debug('Error starting model deployment');
+      this.dependencies.logger.debug(error);
       if (
-        !(error instanceof errors.ResponseError && error.body.error.type === 'status_exception')
+        !(
+          (error instanceof errors.ResponseError && error.body.error.type === 'status_exception') ||
+          error.body.error.type === 'resource_not_found_exception'
+        )
       ) {
         throw error;
       }
@@ -282,10 +338,11 @@ export class KnowledgeBaseService {
         }
 
         this.dependencies.logger.debug('Model is not allocated yet');
+        this.dependencies.logger.debug(JSON.stringify(response));
 
         return Promise.reject(new Error('Not Ready'));
       },
-      { factor: 1, minTimeout: 10000, maxRetryTime: 20 * 60 * 1000 }
+      { factor: 1, minTimeout: 10000, retries: 12 }
     );
 
     this.dependencies.logger.info('Model is ready');

@@ -10,39 +10,25 @@ import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant
 import { callApmApi } from '../services/rest/create_call_apm_api';
 import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
 
-export function registerGetApmServiceSummaryFunction({
+export function registerGetApmServicesListFunction({
   registerFunction,
 }: {
   registerFunction: RegisterFunctionDefinition;
 }) {
   registerFunction(
     {
-      name: 'get_apm_service_summary',
+      name: 'get_apm_services_list',
       contexts: ['apm'],
-      description: `Gets a summary of a single service, including: the language, service version, 
-deployments, the environments, and the infrastructure that it is running in, for instance on how 
-many pods, and a list of its downstream dependencies. It also returns active 
-alerts and anomalies.`,
+      description: `Gets a list of services`,
       descriptionForUser: i18n.translate(
-        'xpack.apm.observabilityAiAssistant.functions.registerGetApmServiceSummary.descriptionForUser',
+        'xpack.apm.observabilityAiAssistant.functions.registerGetApmServicesList.descriptionForUser',
         {
-          defaultMessage: `Gets a summary of a single service, including: the language, service version, 
-deployments, the environments, and the infrastructure that it is running in, for instance on how 
-many pods, and a list of its downstream dependencies. It also returns active 
-alerts and anomalies.`,
+          defaultMessage: `Gets the list of monitored services. Only returns the service names`,
         }
       ),
       parameters: {
         type: 'object',
         properties: {
-          'service.name': {
-            ...NON_EMPTY_STRING,
-            description: 'The name of the service that should be summarized.',
-          },
-          'service.environment': {
-            ...NON_EMPTY_STRING,
-            description: 'The environment that the service is running in',
-          },
           start: {
             ...NON_EMPTY_STRING,
             description:
@@ -54,11 +40,11 @@ alerts and anomalies.`,
               'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
         },
-        required: ['service.name', 'start', 'end'],
+        required: ['start', 'end'],
       } as const,
     },
     async ({ arguments: args }, signal) => {
-      return callApmApi('GET /internal/apm/assistant/get_service_summary', {
+      return callApmApi('GET /internal/apm/assistant/get_services_list', {
         signal,
         params: {
           query: args,
