@@ -74,7 +74,7 @@ export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) =>
     <>
       <EuiFlexGroup>
         {config.enableIndexStats && (
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="overviewTabIndexStats">
             <EuiPanel>
               <EuiFlexGroup>
                 <EuiFlexItem>
@@ -117,7 +117,7 @@ export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) =>
           </EuiFlexItem>
         )}
 
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="overviewTabIndexDetails">
           <EuiPanel>
             <EuiFlexGroup>
               <EuiFlexItem>

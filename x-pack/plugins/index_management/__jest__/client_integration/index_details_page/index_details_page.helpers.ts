@@ -39,6 +39,9 @@ export interface IndexDetailsPageTestBed extends TestBed {
     getActiveTabContent: () => string;
     clickBackToIndicesButton: () => Promise<void>;
     discoverLinkExists: () => boolean;
+    indexStatsContentExists: () => boolean;
+    indexDetailsContentExists: () => boolean;
+    addDocCodeBlockExists: () => boolean;
     contextMenu: {
       clickManageIndexButton: () => Promise<void>;
       isOpened: () => boolean;
@@ -98,6 +101,18 @@ export const setup = async (
     return exists('discoverButtonLink');
   };
 
+  const indexStatsContentExists = () => {
+    return exists('overviewTabIndexStats');
+  };
+
+  const indexDetailsContentExists = () => {
+    return exists('overviewTabIndexDetails');
+  };
+
+  const addDocCodeBlockExists = () => {
+    return exists('codeBox');
+  };
+
   const contextMenu = {
     clickManageIndexButton: async () => {
       await act(async () => {
@@ -118,6 +133,9 @@ export const setup = async (
       getActiveTabContent,
       clickBackToIndicesButton,
       discoverLinkExists,
+      indexStatsContentExists,
+      indexDetailsContentExists,
+      addDocCodeBlockExists,
       contextMenu,
       errorSection,
     },

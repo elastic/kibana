@@ -65,9 +65,24 @@ describe('<IndexDetailsPage />', () => {
     expect(header).toEqual('test_index');
   });
 
-  it('defaults to overview tab', () => {
-    const tabContent = testBed.actions.getActiveTabContent();
-    expect(tabContent).toEqual('Overview');
+  describe('Overview tab', () => {
+    it('renders index detail', () => {
+      expect(testBed.actions.indexDetailsContentExists()).toBe(true);
+      expect(testBed.actions.indexStatsContentExists()).toBe(true);
+      expect(testBed.actions.addDocCodeBlockExists()).toBe(true);
+    });
+
+    it('hides index stats from detail panels if enableIndexStats===false', async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          config: { enableIndexStats: false },
+        });
+      });
+      testBed.component.update();
+
+      expect(testBed.actions.indexDetailsContentExists()).toBe(true);
+      expect(testBed.actions.indexStatsContentExists()).toBe(false);
+    });
   });
 
   it('documents tab', async () => {
