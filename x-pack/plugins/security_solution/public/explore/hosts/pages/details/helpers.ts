@@ -6,24 +6,6 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { prepareKQLStringParam } from '../../../../../common/utils/kql';
-
-/** Returns the kqlQueryExpression for the `Events` widget on the `Host Details` page */
-export const getHostDetailsEventsKqlQueryExpression = ({
-  filterQueryExpression,
-  hostName,
-}: {
-  filterQueryExpression: string;
-  hostName: string;
-}): string => {
-  if (filterQueryExpression.length) {
-    return `${filterQueryExpression}${
-      hostName.length ? ` and host.name: ${prepareKQLStringParam(hostName)}` : ''
-    }`;
-  } else {
-    return hostName.length ? `host.name: ${prepareKQLStringParam(hostName)}` : '';
-  }
-};
 
 export const getHostDetailsPageFilters = (hostName: string): Filter[] => [
   {
