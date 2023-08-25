@@ -75,14 +75,13 @@ describe('TaskRunMetricsAggregator', () => {
 
   test('should correctly initialize', () => {
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, total: 0 },
-      by_type: {},
+      overall: { success: 0, total: 0, delay: { counts: [], values: [] } },
     });
   });
 
   test('should correctly return initialMetrics', () => {
     expect(taskRunMetricsAggregator.initialMetric()).toEqual({
-      overall: { success: 0, total: 0 },
+      overall: { success: 0, total: 0, delay: { counts: [], values: [] } },
       by_type: {},
     });
   });
@@ -91,7 +90,7 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 2, total: 2 },
+      overall: { success: 2, total: 2, delay: { counts: [], values: [] } },
       by_type: {
         telemetry: { success: 2, total: 2 },
       },
@@ -102,7 +101,7 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, total: 2 },
+      overall: { success: 0, total: 2, delay: { counts: [], values: [] } },
       by_type: {
         telemetry: { success: 0, total: 2 },
       },
@@ -115,7 +114,7 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 3, total: 4 },
+      overall: { success: 3, total: 4, delay: { counts: [], values: [] } },
       by_type: {
         report: { success: 2, total: 2 },
         telemetry: { success: 1, total: 2 },
@@ -143,7 +142,7 @@ describe('TaskRunMetricsAggregator', () => {
       getTaskRunSuccessEvent('alerting:.index-threshold')
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 11, total: 14 },
+      overall: { success: 11, total: 14, delay: { counts: [], values: [] } },
       by_type: {
         actions: { success: 3, total: 3 },
         'actions:.email': { success: 1, total: 1 },
@@ -177,7 +176,7 @@ describe('TaskRunMetricsAggregator', () => {
       getTaskRunSuccessEvent('alerting:.index-threshold')
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 11, total: 14 },
+      overall: { success: 11, total: 14, delay: { counts: [], values: [] } },
       by_type: {
         actions: { success: 3, total: 3 },
         'actions:.email': { success: 1, total: 1 },

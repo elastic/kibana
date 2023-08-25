@@ -11,7 +11,7 @@ import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRun } from '../task_events';
 import { SimpleHistogram } from './simple_histogram';
 import { ITaskMetricsAggregator } from './types';
-import { CounterService } from './counter/counter_service';
+import { MetricCounterService } from './counter/metric_counter_service';
 
 const HDR_HISTOGRAM_MAX = 30000; // 30 seconds
 const HDR_HISTOGRAM_BUCKET_SIZE = 100; // 100 millis
@@ -33,23 +33,20 @@ export type TaskClaimMetric = TaskClaimCounts & {
 };
 
 export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskClaimMetric> {
-  private counter: CounterService = new CounterService();
+  private counter: MetricCounterService<TaskClaimCounts> = new MetricCounterService(
+    Object.values(TaskClaimKeys)
+  );
   private durationHistogram = new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);
-
-  constructor() {
-    this.counter.createCounter(TaskClaimKeys.SUCCESS);
-    this.counter.createCounter(TaskClaimKeys.TOTAL);
-  }
 
   public initialMetric(): TaskClaimMetric {
     return {
-      ...(this.counter.initialCounter() as TaskClaimCounts),
+      ...this.counter.initialMetrics(),
       duration: { counts: [], values: [] },
     };
   }
   public collect(): TaskClaimMetric {
     return {
-      ...(this.counter.toJson() as TaskClaimCounts),
+      ...this.counter.collect(),
       duration: this.serializeHistogram(),
     };
   }
