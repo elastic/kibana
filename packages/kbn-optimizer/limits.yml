@@ -28,7 +28,7 @@ pageLoadAssetSize:
   dashboard: 82025
   dashboardEnhanced: 65646
   data: 454087
-  dataViewEditor: 13000
+  dataViewEditor: 28082
   dataViewFieldEditor: 27000
   dataViewManagement: 5000
   dataViews: 47000
@@ -98,6 +98,7 @@ pageLoadAssetSize:
   newsfeed: 42228
   observability: 115443
   observabilityAIAssistant: 25000
+  observabilityLogExplorer: 23686
   observabilityOnboarding: 19573
   observabilityShared: 52256
   osquery: 107090
