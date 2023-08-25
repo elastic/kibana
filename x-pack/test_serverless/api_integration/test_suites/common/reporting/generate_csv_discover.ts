@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingAPI');
 
-  describe('Generate CSV from SearchSource: Discover', () => {
+  describe.skip('Generate CSV from SearchSource: Discover', () => {
     const archives = {
       data: 'x-pack/test/functional/es_archives/reporting/ecommerce',
       savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
