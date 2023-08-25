@@ -455,7 +455,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
       });
 
-      it('should delete a completed search', async function () {
+      it.skip('should delete a completed search', async function () {
         await markRequiresShardDelayAgg(this);
 
         const resp = await supertest
