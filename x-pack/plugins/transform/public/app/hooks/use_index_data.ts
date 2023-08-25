@@ -138,13 +138,13 @@ export const useIndexData = (
       // Get all field names for each returned doc and flatten it
       // to a list of unique field names used across all docs.
       const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
-      const dataViewFields = populatedDataViewFields
+      const filteredDataViewFields = populatedDataViewFields
         .filter((d) => allDataViewFields.includes(d))
         .sort();
 
       setCcsWarning(isCrossClusterSearch && isMissingFields);
       setStatus(INDEX_STATUS.LOADED);
-      setDataViewFields(dataViewFields);
+      setDataViewFields(filteredDataViewFields);
     };
 
     fetchDataGridSampleDocuments();
