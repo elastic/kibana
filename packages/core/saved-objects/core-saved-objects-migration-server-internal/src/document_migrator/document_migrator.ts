@@ -31,6 +31,8 @@ export interface DocumentMigrateOptions {
    * Defaults to `false`.
    */
   allowDowngrade?: boolean;
+
+  convertNamespaceTypes?: boolean;
 }
 
 interface TransformOptions {
@@ -149,10 +151,11 @@ export class DocumentMigrator implements VersionedTransformer {
    */
   public migrate(
     doc: SavedObjectUnsanitizedDoc,
-    { allowDowngrade = false }: DocumentMigrateOptions = {}
+    { allowDowngrade = false, convertNamespaceTypes = false }: DocumentMigrateOptions = {}
   ): SavedObjectUnsanitizedDoc {
     const { document } = this.transform(doc, {
       allowDowngrade,
+      convertNamespaceTypes,
     });
     return document;
   }

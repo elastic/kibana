@@ -65,6 +65,8 @@ export interface MigrateDocumentOptions {
    * Defaults to `false`.
    */
   allowDowngrade?: boolean;
+
+  convertNamespaceTypes?: boolean;
 }
 
 /** @internal */
