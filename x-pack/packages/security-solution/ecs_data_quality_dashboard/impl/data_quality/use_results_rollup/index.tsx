@@ -53,7 +53,7 @@ interface UseResultsRollup {
 export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRollup => {
   const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>({});
   const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>({});
-  const { telemetryEvents } = useDataQualityContext();
+  const { telemetryEvents, isILMAvailable } = useDataQualityContext();
   const updatePatternRollup = useCallback((patternRollup: PatternRollup) => {
     setPatternRollups((current) =>
       onPatternRollupUpdated({ patternRollup, patternRollups: current })
@@ -101,6 +101,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
           formatBytes,
           formatNumber,
           indexName,
+          isILMAvailable,
           partitionedFieldMetadata,
           pattern,
           patternRollups: current,
@@ -119,7 +120,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
             batchId,
             ecsVersion: EcsVersion,
             errorCount: error ? 1 : 0,
-            ilmPhase: getIlmPhase(ilmExplain[indexName]),
+            ilmPhase: getIlmPhase(ilmExplain[indexName], isILMAvailable),
             indexId,
             indexName,
             isCheckAll: true,
@@ -157,7 +158,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
         return updated;
       });
     },
-    [patternRollups, telemetryEvents]
+    [isILMAvailable, patternRollups, telemetryEvents]
   );
 
   useEffect(() => {
