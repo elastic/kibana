@@ -28,6 +28,7 @@ import {
   LanguageClientPanel,
   InstallClientPanel,
   getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
 } from '@kbn/search-api-panels';
 
 import React, { useMemo, useState } from 'react';
@@ -43,7 +44,6 @@ import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
-import { showTryInConsole } from './languages/utils';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
@@ -91,7 +91,7 @@ export const ElasticsearchOverview = () => {
             'installClient',
             codeSnippetArguments
           )}
-          showTryInConsole={showTryInConsole('installClient')}
+          consoleRequest={getConsoleRequest('installClient')}
           languages={languageDefinitions}
           language={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
@@ -134,7 +134,7 @@ export const ElasticsearchOverview = () => {
                 'configureClient',
                 codeSnippetArguments
               )}
-              showTryInConsole={showTryInConsole('configureClient')}
+              consoleRequest={getConsoleRequest('configureClient')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
               http={http}
@@ -177,7 +177,7 @@ export const ElasticsearchOverview = () => {
                 'testConnection',
                 codeSnippetArguments
               )}
-              showTryInConsole={showTryInConsole('testConnection')}
+              consoleRequest={getConsoleRequest('testConnection')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
               http={http}
@@ -199,7 +199,7 @@ export const ElasticsearchOverview = () => {
             'ingestData',
             codeSnippetArguments
           )}
-          showTryInConsole={showTryInConsole('ingestData')}
+          showTryInConsole={getConsoleRequest('ingestData')}
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
@@ -224,7 +224,7 @@ export const ElasticsearchOverview = () => {
                 'buildSearchQuery',
                 codeSnippetArguments
               )}
-              showTryInConsole={showTryInConsole('buildSearchQuery')}
+              consoleRequest={getConsoleRequest('buildSearchQuery')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
               http={http}
