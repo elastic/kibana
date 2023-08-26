@@ -31,8 +31,7 @@ export const getMessageContentAndRole = (prompt: string): Pick<Message, 'content
 
 export interface ResponseBody {
   status: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   connector_id: string;
 }
 

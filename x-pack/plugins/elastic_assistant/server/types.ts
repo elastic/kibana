@@ -12,7 +12,9 @@ import type {
 import { CustomRequestHandlerContext } from '@kbn/core/server';
 
 /** The plugin setup interface */
-export interface ElasticAssistantPluginSetup {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface ElasticAssistantPluginSetup {
+  actions: ActionsPluginSetup;
+}
 
 /** The plugin start interface */
 export interface ElasticAssistantPluginStart {

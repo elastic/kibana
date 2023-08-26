@@ -37,29 +37,27 @@ export const postActionsConnectorExecuteRoute = (
       const resp = buildResponse(response);
 
       try {
+        const connectorId = decodeURIComponent(request.params.connectorId);
+        const rawSubActionParamsBody = request.body.params.subActionParams.body;
+
         // get the actions plugin start contract from the request context:
         const actions = (await context.elasticAssistant).actions;
-
-        // get the connector id from the request params:
-        const connectorId = decodeURIComponent(request.params.connectorId);
-
-        const rawSubActionParamsBody = request.body.params.subActionParams.body;
 
         // get the assistant messages from the request body:
         const assistantMessages = unsafeGetAssistantMessagesFromRequest(rawSubActionParamsBody);
 
         // convert the assistant messages to LangChain messages:
-        const langchainMessages = getLangChainMessages(assistantMessages);
+        const langChainMessages = getLangChainMessages(assistantMessages);
 
-        const langchainResponseBody = await executeCustomLlmChain({
+        const langChainResponseBody = await executeCustomLlmChain({
           actions,
           connectorId,
-          langchainMessages,
+          langChainMessages,
           request,
         });
 
         return response.ok({
-          body: langchainResponseBody,
+          body: langChainResponseBody,
         });
       } catch (err) {
         const error = transformError(err);

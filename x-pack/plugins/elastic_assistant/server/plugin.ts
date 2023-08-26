@@ -50,7 +50,7 @@ export class ElasticAssistantPlugin
     };
   };
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: ElasticAssistantPluginSetupDependencies) {
     this.logger.debug('elasticAssistant: Setup');
     const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
 
@@ -63,13 +63,17 @@ export class ElasticAssistantPlugin
     );
 
     postActionsConnectorExecuteRoute(router);
-    return {};
+    return {
+      actions: plugins.actions,
+    };
   }
 
   public start(core: CoreStart, plugins: ElasticAssistantPluginStartDependencies) {
     this.logger.debug('elasticAssistant: Started');
 
-    return {};
+    return {
+      actions: plugins.actions,
+    };
   }
 
   public stop() {}
