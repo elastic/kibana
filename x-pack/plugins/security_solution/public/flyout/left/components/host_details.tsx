@@ -20,6 +20,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { getSourcererScopeId } from '../../../helpers';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../common/search_strategy';
@@ -67,11 +68,16 @@ export interface HostDetailsProps {
    * timestamp of alert or event
    */
   timestamp: string;
+  /**
+   * Maintain backwards compatibility // TODO remove when possible
+   */
+  scopeId: string;
 }
+
 /**
  * Host details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
-export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp }) => {
+export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, scopeId }) => {
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
   const dispatch = useDispatch();
@@ -126,14 +132,16 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
         render: (user: string) => (
           <EuiText grow={false} size="xs">
             <SecurityCellActions
-              mode={CellActionsMode.HOVER_RIGHT}
-              visibleCellActions={5}
-              showActionTooltips
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
               data={{
                 field: 'user.name',
                 value: user,
               }}
+              mode={CellActionsMode.HOVER_RIGHT}
+              triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+              visibleCellActions={6}
+              sourcererScopeId={getSourcererScopeId(scopeId)}
+              metadata={{ scopeId }}
+              showActionTooltips
             >
               {user}
             </SecurityCellActions>
@@ -180,7 +188,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized]
+    [isEntityAnalyticsAuthorized, scopeId]
   );
 
   const relatedUsersCount = useMemo(

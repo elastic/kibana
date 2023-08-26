@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CellActionsMode } from '@kbn/cell-actions';
+import { getSourcererScopeId } from '../../../helpers';
 import { SecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger } from '../../../actions/constants';
 import { SEVERITY_TITLE } from './translations';
@@ -25,7 +26,7 @@ const isSeverity = (x: unknown): x is Severity =>
  * Document details severity displayed in flyout right section header
  */
 export const DocumentSeverity: FC = memo(() => {
-  const { getFieldsData } = useRightPanelContext();
+  const { getFieldsData, scopeId } = useRightPanelContext();
   const fieldsData = getFieldsData(ALERT_SEVERITY);
 
   if (!fieldsData) {
@@ -55,8 +56,10 @@ export const DocumentSeverity: FC = memo(() => {
             value: alertSeverity,
           }}
           mode={CellActionsMode.HOVER_RIGHT}
-          triggerId={SecurityCellActionsTrigger.DEFAULT}
+          triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
           visibleCellActions={6}
+          sourcererScopeId={getSourcererScopeId(scopeId)}
+          metadata={{ scopeId }}
         >
           <SeverityBadge value={alertSeverity} />
         </SecurityCellActions>

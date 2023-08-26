@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { CellActionsMode } from '@kbn/cell-actions';
+import { getSourcererScopeId } from '../../../helpers';
 import { SecurityCellActions } from '../../../common/components/cell_actions';
 import type {
   EnrichedFieldInfo,
@@ -61,8 +62,10 @@ export const DocumentStatus: FC = () => {
         value: statusData.values[0],
       }}
       mode={CellActionsMode.HOVER_RIGHT}
-      triggerId={SecurityCellActionsTrigger.DEFAULT}
+      triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
       visibleCellActions={6}
+      sourcererScopeId={getSourcererScopeId(scopeId)}
+      metadata={{ scopeId }}
     >
       <StatusPopoverButton
         eventId={eventId}
