@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const svlCommonApi = getService('svlCommonApi');
 
-  describe.only('main', () => {
+  describe('main', () => {
     const basicIndex = 'ba*ic_index';
     let indexPattern: any;
 
