@@ -124,7 +124,7 @@ export function registerErrorCountRuleType({
           savedObjectsClient,
         });
 
-        const termFilterQuery = !ruleParams.kqlFilter
+        const termFilterQuery = !ruleParams.searchConfiguration
           ? [
               ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
                 queryEmptyString: false,
@@ -153,7 +153,9 @@ export function registerErrorCountRuleType({
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
                   ...termFilterQuery,
-                  ...getParsedFilterQuery(ruleParams.kqlFilter),
+                  ...getParsedFilterQuery(
+                    ruleParams.searchConfiguration?.query?.query as string
+                  ),
                 ],
               },
             },
