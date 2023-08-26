@@ -9,22 +9,25 @@
 import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
-import { fieldMappings } from './field_mappings';
+import { auditbeatFieldMappings } from './auditbeat_field_mappings';
 import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
 
-const auditbeatName = i18n.translate('home.sampleData.auditbeatSpecTitle', {
-  defaultMessage: 'Sample auditbeat data',
+const securitysolutionName = i18n.translate('home.sampleData.securitySolutionSpecTitle', {
+  defaultMessage: 'Sample Security Solution data',
 });
-const auditbeatDescription = i18n.translate('home.sampleData.auditbeatSpecDescription', {
-  defaultMessage: 'Sample data, visualizations, and dashboards for monitoring auditbeat routes.',
-});
+const securitysolutionDescription = i18n.translate(
+  'home.sampleData.securitySolutionSpecDescription',
+  {
+    defaultMessage:
+      'Sample data, visualizations, and dashboards for monitoring Security Solution routes.',
+  }
+);
 
-export const auditbeatSpecProvider = function (): SampleDatasetSchema {
+export const securitySolutionSpecProvider = function (): SampleDatasetSchema {
   return {
-    id: 'auditbeat',
-    index: 'auditbeat-sample-data',
-    name: auditbeatName,
-    description: auditbeatDescription,
+    id: 'securitysolution',
+    name: securitysolutionName,
+    description: securitysolutionDescription,
     previewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard.webp',
     // darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard_dark.webp',
     // overviewDashboard: '',
@@ -34,13 +37,16 @@ export const auditbeatSpecProvider = function (): SampleDatasetSchema {
       {
         id: 'auditbeat',
         dataPath: path.join(__dirname, './auditbeat.json.gz'),
-        fields: fieldMappings,
+        fields: auditbeatFieldMappings,
         timeFields: ['@timestamp'],
         currentTimeMarker: '2018-01-09T00:00:00',
         preserveDayOfWeekTimeOfDay: true,
+        aliases: {
+          'auditbeat-sample-data': {},
+        },
       },
     ],
     status: 'not_installed',
-    iconPath: '/plugins/home/assets/sample_data_resources/flights/icon.svg',
+    // iconPath: '/plugins/home/assets/sample_data_resources/flights/icon.svg',
   };
 };

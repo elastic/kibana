@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const fieldMappings = {
+export const auditbeatFieldMappings = {
   '@timestamp': {
     type: 'date',
   },

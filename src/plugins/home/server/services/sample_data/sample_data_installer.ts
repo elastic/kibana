@@ -72,7 +72,7 @@ export class SampleDataInstaller {
 
     for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
       const dataIndex = sampleDataset.dataIndices[i];
-      const indexName = createIndexName(sampleDataset.id, dataIndex.id, sampleDataset.index);
+      const indexName = createIndexName(sampleDataset.id, dataIndex.id);
       // clean up any old installation of dataset
       await this.uninstallDataIndex(sampleDataset, dataIndex);
       await this.installDataIndex(sampleDataset, dataIndex);
@@ -154,7 +154,7 @@ export class SampleDataInstaller {
   }
 
   private async installDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
-    const index = createIndexName(dataset.id, dataIndex.id, dataset.index);
+    const index = createIndexName(dataset.id, dataIndex.id);
     try {
       if (dataIndex.isDataStream) {
         const request = {
@@ -166,6 +166,7 @@ export class SampleDataInstaller {
             },
             index_patterns: [index],
             data_stream: {},
+            aliases: dataIndex.aliases,
           },
         };
         await this.esClient.asCurrentUser.indices.putIndexTemplate(request);
@@ -185,6 +186,7 @@ export class SampleDataInstaller {
               },
             },
             mappings: { properties: dataIndex.fields },
+            aliases: dataIndex.aliases,
           },
         });
       }

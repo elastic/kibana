@@ -110,7 +110,7 @@ async function getSampleDatasetStatus(
 
   for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
     const dataIndexConfig = sampleDataset.dataIndices[i];
-    const index = createIndexName(sampleDataset.id, dataIndexConfig.id, sampleDataset.index);
+    const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
     try {
       const indexExists = await elasticsearch.client.asCurrentUser.indices.exists({
         index,

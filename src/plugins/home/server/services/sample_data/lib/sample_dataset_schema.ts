@@ -18,6 +18,8 @@ const dataIndexSchema = schema.object({
     },
   }),
 
+  aliases: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+
   // path to newline delimented JSON file containing data relative to KIBANA_HOME
   dataPath: schema.string(),
 
@@ -62,15 +64,6 @@ export const sampleDataSchema = schema.object({
       }
     },
   }),
-  index: schema.maybe(
-    schema.string({
-      validate(value: string) {
-        if (!idRegExp.test(value)) {
-          return `Does not satisfy regexp: ${idRegExp.toString()}`;
-        }
-      },
-    })
-  ),
   name: schema.string(),
   description: schema.string(),
   previewImagePath: schema.string(),
