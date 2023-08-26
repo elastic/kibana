@@ -63,8 +63,11 @@ export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
 export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsAgentStatusCell';
 
-export const INVESTIGATION_GUIDE_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInvestigationGuideButton';
+export const INVESTIGATION_GUIDE_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInvestigationGuide';
+export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button`;
+export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading`;
+export const INVESTIGATION_GUIDE_NO_DATA_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}NoData`;
 
 /* Insights section */
 
@@ -116,8 +119,6 @@ export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
 
 export const INSIGHTS_PREVALENCE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsPrevalence';
-export const INSIGHTS_PREVALENCE_ROW_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsPrevalenceRow';
 
 /* Visualizations section */
 
