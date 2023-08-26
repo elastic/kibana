@@ -18,7 +18,7 @@ export interface RuleStatsState {
   error: number;
   snoozed: number;
 }
-type StatType = 'disabled' | 'snoozed' | 'error';
+type StatType = 'total' | 'disabled' | 'snoozed' | 'error';
 
 const Divider = euiStyled.div`
   border-right: 1px solid ${euiThemeVars.euiColorLightShade};
@@ -69,6 +69,32 @@ export const renderRuleStats = (
     }
     return statsLink;
   };
+
+  const ruleCountStatsComponent = (
+    <ConditionalWrap
+      condition={ruleStats.total > 0}
+      wrap={(wrappedChildren) => (
+        <EuiButtonEmpty
+          data-test-subj="o11yTotalStatsComponentButton"
+          href={createRuleStatsLink(ruleStats, 'total')}
+        >
+          {wrappedChildren}
+        </EuiButtonEmpty>
+      )}
+    >
+      <StyledStat
+        title={ruleStats.total}
+        description={i18n.translate('xpack.observability.alerts.ruleStats.ruleCount', {
+          defaultMessage: 'Rule count',
+        })}
+        color="primary"
+        titleColor={ruleStats.total > 0 ? 'primary' : ''}
+        titleSize="xs"
+        isLoading={ruleStatsLoading}
+        data-test-subj="statRuleCount"
+      />
+    </ConditionalWrap>
+  );
 
   const disabledStatsComponent = (
     <ConditionalWrap
@@ -147,17 +173,9 @@ export const renderRuleStats = (
       />
     </ConditionalWrap>
   );
+
   return [
-    <StyledStat
-      title={ruleStats.total}
-      description={i18n.translate('xpack.observability.alerts.ruleStats.ruleCount', {
-        defaultMessage: 'Rule count',
-      })}
-      color="primary"
-      titleSize="xs"
-      isLoading={ruleStatsLoading}
-      data-test-subj="statRuleCount"
-    />,
+    ruleCountStatsComponent,
     disabledStatsComponent,
     snoozedStatsComponent,
     errorStatsComponent,

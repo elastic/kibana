@@ -28,6 +28,64 @@ describe('Rule stats', () => {
     );
     expect(stats.length).toEqual(6);
   });
+
+  test('total stat is not clickable, when there are no rules', async () => {
+    const stats = renderRuleStats(
+      {
+        total: 0,
+        disabled: 0,
+        muted: 0,
+        error: 0,
+        snoozed: 0,
+      },
+      RULES_PAGE_LINK,
+      false
+    );
+    const { findByText, container } = render(stats[5]);
+    const ruleCountElement = await findByText('Rule count');
+    expect(ruleCountElement).toBeInTheDocument();
+    expect(container.getElementsByClassName(STAT_CLASS).length).toBe(1);
+    expect(container.querySelector(STAT_TITLE_PRIMARY_SELECTOR)).toBeFalsy();
+    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(0);
+  });
+
+  test('total stat is clickable, when there are any rules', async () => {
+    const stats = renderRuleStats(
+      {
+        total: 11,
+        disabled: 0,
+        muted: 0,
+        error: 0,
+        snoozed: 0,
+      },
+      RULES_PAGE_LINK,
+      false
+    );
+    const { container } = render(stats[5]);
+    expect(screen.getByText('Rule count').closest('a')).toHaveAttribute(
+      'href',
+      `${RULES_PAGE_LINK}?_a=(lastResponse:!(),status:!())`
+    );
+
+    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(1);
+  });
+
+  test('total stat count is link-colored, when there are any rules', async () => {
+    const stats = renderRuleStats(
+      {
+        total: 11,
+        disabled: 0,
+        muted: 0,
+        error: 0,
+        snoozed: 0,
+      },
+      RULES_PAGE_LINK,
+      false
+    );
+    const { container } = render(stats[5]);
+    expect(container.querySelector(STAT_TITLE_PRIMARY_SELECTOR)).toBeTruthy();
+  });
+
   test('disabled stat is not clickable, when there are no disabled rules', async () => {
     const stats = renderRuleStats(
       {
