@@ -51,7 +51,7 @@ export const benchmarksLink: LinkItem = {
   description: i18n.translate(
     'xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription',
     {
-      defaultMessage: 'View benchmark rules.',
+      defaultMessage: 'View benchmark rules for Cloud Security Posture management.',
     }
   ),
   landingIcon: IconEndpoints,

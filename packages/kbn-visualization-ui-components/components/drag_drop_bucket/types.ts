@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { DraggableProvided } from 'react-beautiful-dnd';
+import type { DraggableProvided } from '@hello-pangea/dnd';
 
 export interface BucketContainerProps {
   children: React.ReactNode;

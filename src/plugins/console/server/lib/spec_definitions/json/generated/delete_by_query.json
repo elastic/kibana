@@ -1,50 +1,68 @@
 {
   "delete_by_query": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_indices": "__flag__",
       "analyzer": "",
       "analyze_wildcard": "__flag__",
-      "default_operator": [
-        "AND",
-        "OR"
-      ],
-      "df": "",
-      "from": "0",
-      "ignore_unavailable": "__flag__",
-      "allow_no_indices": "__flag__",
       "conflicts": [
         "abort",
         "proceed"
       ],
+      "default_operator": [
+        "and",
+        "or"
+      ],
+      "df": "",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
+        "none"
       ],
+      "from": "",
+      "ignore_unavailable": "__flag__",
       "lenient": "__flag__",
-      "preference": "random",
+      "max_docs": "",
+      "preference": "",
+      "refresh": "__flag__",
+      "request_cache": "__flag__",
+      "requests_per_second": "",
+      "routing": "",
       "q": "",
-      "routing": [],
-      "scroll": "",
+      "scroll": [
+        "-1",
+        "0"
+      ],
+      "scroll_size": "",
+      "search_timeout": [
+        "-1",
+        "0"
+      ],
       "search_type": [
         "query_then_fetch",
         "dfs_query_then_fetch"
       ],
-      "search_timeout": "",
-      "max_docs": "all documents",
-      "sort": [],
+      "slices": [
+        "auto"
+      ],
+      "sort": "",
+      "stats": "",
       "terminate_after": "",
-      "stats": [],
+      "timeout": [
+        "-1",
+        "0"
+      ],
       "version": "__flag__",
-      "request_cache": "__flag__",
-      "refresh": "__flag__",
-      "timeout": "",
-      "wait_for_active_shards": "",
-      "scroll_size": "",
-      "wait_for_completion": "__flag__",
-      "requests_per_second": "",
-      "slices": ""
+      "wait_for_active_shards": [
+        "all",
+        "index-setting"
+      ],
+      "wait_for_completion": "__flag__"
     },
     "methods": [
       "POST"
@@ -52,6 +70,10 @@
     "patterns": [
       "{index}/_delete_by_query"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete-by-query.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete-by-query.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

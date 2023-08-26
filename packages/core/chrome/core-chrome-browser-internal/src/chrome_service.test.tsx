@@ -158,6 +158,7 @@ describe('start', () => {
             ]
           `);
   });
+
   it('strips off "snapshot" from the kibana version if present', async () => {
     const { chrome, service } = await start({
       options: { browserSupportsCsp: false, kibanaVersion: '8.0.0-SnAPshot' },
@@ -338,6 +339,24 @@ describe('start', () => {
                         false,
                       ]
                   `);
+    });
+
+    it('change visibility when EUI component in full screen', async () => {
+      const body = document.body;
+      const startDeps = defaultStartDeps([new FakeApp('foo')], 'foo');
+      const { chrome } = await start({ startDeps });
+
+      // Chrome is initially visible
+      let isVisible = await Rx.lastValueFrom(chrome.getIsVisible$().pipe(Rx.take(1)));
+      expect(isVisible).toBe(true);
+
+      // Add EUI class that should hide the chrome
+      body.classList.add('euiDataGrid__restrictBody');
+      await new Promise((resolve) => setTimeout(resolve)); // wait next tick
+
+      // Chrome should be hidden
+      isVisible = await Rx.lastValueFrom(chrome.getIsVisible$().pipe(Rx.take(1)));
+      expect(isVisible).toBe(false);
     });
   });
 

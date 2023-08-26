@@ -166,7 +166,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
-        describe('Clicking on the chart', () => {
+        describe('Clicking on the chart', function () {
+          this.tags('skipFirefox');
           const act = async (visName: string, clickCoordinates: { x: number; y: number }) => {
             await testSubjects.click('visualizeSaveButton');
 

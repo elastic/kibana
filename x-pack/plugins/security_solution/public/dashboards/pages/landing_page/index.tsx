@@ -132,7 +132,7 @@ export const DashboardsLandingPage = () => {
       />
       <EuiSpacer size="m" />
 
-      {canReadDashboard && securityTagsExist && initialFilter ? (
+      {canReadDashboard && securityTagsExist && initialFilter && (
         <>
           <EuiSpacer size="m" />
           <EuiTitle size="xxxs">
@@ -148,8 +148,11 @@ export const DashboardsLandingPage = () => {
             urlStateEnabled={false}
           />
         </>
-      ) : (
-        <EuiEmptyPrompt icon={<EuiLoadingSpinner size="l" />} />
+      )}
+      {canReadDashboard && !securityTagsExist && (
+        <EuiEmptyPrompt
+          icon={<EuiLoadingSpinner size="l" data-test-subj="dashboardLoadingIcon" />}
+        />
       )}
 
       <SpyRoute pageName={SecurityPageName.dashboards} />

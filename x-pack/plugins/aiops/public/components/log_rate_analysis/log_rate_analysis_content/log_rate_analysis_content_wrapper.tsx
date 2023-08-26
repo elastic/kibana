@@ -18,9 +18,7 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
-import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../../../../common/constants';
 import { timeSeriesDataViewWarning } from '../../../application/utils/time_series_dataview_check';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../../hooks/use_data_source';
@@ -38,8 +36,6 @@ const localStorage = new Storage(window.localStorage);
 export interface LogRateAnalysisContentWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** The type of analysis, whether it's a spike or dip */
-  analysisType?: LogRateAnalysisType;
   /** Option to make main histogram sticky */
   stickyHistogram?: boolean;
   /** App dependencies */
@@ -65,7 +61,6 @@ export interface LogRateAnalysisContentWrapperProps {
 
 export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
   dataView,
-  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   appDependencies,
   setGlobalState,
   initialAnalysisStart,
@@ -85,9 +80,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   }
 
   const datePickerDeps = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-    toMountPoint,
-    wrapWithTheme,
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
   };
 
@@ -100,7 +93,6 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
               <DatePickerContextProvider {...datePickerDeps}>
                 <LogRateAnalysisContent
                   dataView={dataView}
-                  analysisType={analysisType}
                   setGlobalState={setGlobalState}
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}

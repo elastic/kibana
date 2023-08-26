@@ -11,10 +11,11 @@ import {
   useGetLinkUrl,
   useGetLinkProps,
   withLink,
-  isExternalId,
+  isSecurityId,
   getAppIdsFromId,
   formatPath,
   isModified,
+  concatPaths,
 } from './links';
 import { mockGetAppUrl, mockNavigateTo } from '../mocks/navigation';
 
@@ -102,23 +103,23 @@ describe('links', () => {
     });
   });
 
-  describe('isExternalId', () => {
-    it('should return true for an external id', () => {
+  describe('isSecurityId', () => {
+    it('should return false for an external id', () => {
       const id = 'externalAppId:12345';
-      const result = isExternalId(id);
-      expect(result).toBe(true);
-    });
-
-    it('should return false for an internal id', () => {
-      const id = 'internalId';
-      const result = isExternalId(id);
+      const result = isSecurityId(id);
       expect(result).toBe(false);
     });
 
-    it('should return true for a root external id', () => {
-      const id = 'externalAppId:';
-      const result = isExternalId(id);
+    it('should return true for an internal id', () => {
+      const id = 'internalId';
+      const result = isSecurityId(id);
       expect(result).toBe(true);
+    });
+
+    it('should return false for a root external id', () => {
+      const id = 'externalAppId:';
+      const result = isSecurityId(id);
+      expect(result).toBe(false);
     });
   });
 
@@ -126,19 +127,62 @@ describe('links', () => {
     it('should return the correct app and deep link ids for an external id', () => {
       const id = 'externalAppId:12345';
       const result = getAppIdsFromId(id);
-      expect(result).toEqual({ appId: 'externalAppId', deepLinkId: '12345' });
+      expect(result).toEqual(
+        expect.objectContaining({ appId: 'externalAppId', deepLinkId: '12345' })
+      );
     });
 
     it('should return the correct deep link id for an internal id', () => {
       const id = 'internalId';
       const result = getAppIdsFromId(id);
-      expect(result).toEqual({ deepLinkId: 'internalId' });
+      expect(result).toEqual(expect.objectContaining({ deepLinkId: 'internalId' }));
     });
 
     it('should return the correct app id for a root external id', () => {
       const id = 'externalAppId:';
       const result = getAppIdsFromId(id);
-      expect(result).toEqual({ appId: 'externalAppId', deepLinkId: '' });
+      expect(result).toEqual(expect.objectContaining({ appId: 'externalAppId', deepLinkId: '' }));
+    });
+
+    it('should return the correct path', () => {
+      expect(getAppIdsFromId('externalAppId:12345')).toEqual({
+        appId: 'externalAppId',
+        deepLinkId: '12345',
+        path: '',
+      });
+
+      expect(getAppIdsFromId('externalAppId:/some/path')).toEqual({
+        appId: 'externalAppId',
+        deepLinkId: '',
+        path: '/some/path',
+      });
+
+      expect(getAppIdsFromId('externalAppId:12345/some/path')).toEqual({
+        appId: 'externalAppId',
+        deepLinkId: '12345',
+        path: '/some/path',
+      });
+    });
+  });
+
+  describe('concatPaths', () => {
+    it('should return empty path for undefined or empty paths', () => {
+      expect(concatPaths(undefined, undefined)).toEqual('');
+      expect(concatPaths('', '')).toEqual('');
+    });
+    it('should return path if sub-path not defined or empty', () => {
+      expect(concatPaths('/main/path', undefined)).toEqual('/main/path');
+      expect(concatPaths('/main/path', '')).toEqual('/main/path');
+    });
+    it('should return sub-path if path not defined or empty', () => {
+      expect(concatPaths(undefined, '/some/sub-path')).toEqual('/some/sub-path');
+      expect(concatPaths('', '/some/sub-path')).toEqual('/some/sub-path');
+    });
+    it('should concatenate path and sub-path if defined', () => {
+      expect(concatPaths('/main/path', '/some/sub-path')).toEqual('/main/path/some/sub-path');
+    });
+    it('should clean path before merging', () => {
+      expect(concatPaths('/main/path/', '/some/sub-path')).toEqual('/main/path/some/sub-path');
     });
   });
 

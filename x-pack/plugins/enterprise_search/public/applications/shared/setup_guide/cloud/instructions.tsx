@@ -9,13 +9,7 @@
 
 import React from 'react';
 
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiSteps,
-  EuiText,
-  EuiLink,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiPageSection, EuiSteps, EuiText, EuiLink, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -27,7 +21,7 @@ interface Props {
 }
 
 export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDeploymentLink }) => (
-  <EuiPageContent>
+  <EuiPageSection>
     <EuiSteps
       headingElement="h2"
       steps={[
@@ -176,5 +170,5 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
         },
       ]}
     />
-  </EuiPageContent>
+  </EuiPageSection>
 );

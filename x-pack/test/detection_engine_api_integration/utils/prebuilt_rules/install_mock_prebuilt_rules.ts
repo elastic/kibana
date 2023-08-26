@@ -24,5 +24,5 @@ export const installMockPrebuiltRules = async (
 ): Promise<InstallPrebuiltRulesAndTimelinesResponse> => {
   // Ensure there are prebuilt rule saved objects before installing rules
   await createPrebuiltRuleAssetSavedObjects(es);
-  return installPrebuiltRulesAndTimelines(supertest);
+  return installPrebuiltRulesAndTimelines(es, supertest);
 };

@@ -15,12 +15,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  toMountPoint,
-  wrapWithTheme,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
@@ -102,6 +97,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
       savedObjectsManagement: deps.savedObjectsManagement,
       savedSearch: deps.savedSearch,
       contentManagement: deps.contentManagement,
+      presentationUtil: deps.presentationUtil,
       ...coreStart,
       mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
     };
@@ -127,9 +123,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   if (!licenseReady || !mlCapabilities) return null;
 
   const datePickerDeps = {
-    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-    toMountPoint,
-    wrapWithTheme,
+    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
   };
 

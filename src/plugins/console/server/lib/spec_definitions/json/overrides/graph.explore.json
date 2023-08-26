@@ -1,5 +1,5 @@
 {
-  "xpack.graph.explore": {
+  "graph.explore": {
     "data_autocomplete_rules": {
       "query": {},
       "vertices": [{}],

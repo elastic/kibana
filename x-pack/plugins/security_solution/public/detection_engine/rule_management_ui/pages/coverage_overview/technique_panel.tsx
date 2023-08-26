@@ -10,8 +10,9 @@ import { css } from '@emotion/css';
 import React, { memo, useCallback, useMemo } from 'react';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { coverageOverviewPanelWidth } from './constants';
-import { getCardBackgroundColor } from './helpers';
-import { CoverageOverviewPanelMetadata } from './shared_components/panel_metadata';
+import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
+import { getCardBackgroundColor, getTotalRuleCount } from './helpers';
+import { CoverageOverviewPanelRuleStats } from './shared_components/panel_rule_stats';
 import * as i18n from './translations';
 
 export interface CoverageOverviewMitreTechniquePanelProps {
@@ -29,9 +30,13 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
   isPopoverOpen,
   isExpanded,
 }: CoverageOverviewMitreTechniquePanelProps) => {
+  const {
+    state: { filter },
+  } = useCoverageOverviewDashboardContext();
+  const totalRuleCount = getTotalRuleCount(technique, filter.activity);
   const techniqueBackgroundColor = useMemo(
-    () => getCardBackgroundColor(technique.enabledRules.length),
-    [technique.enabledRules.length]
+    () => getCardBackgroundColor(totalRuleCount),
+    [totalRuleCount]
   );
 
   const handlePanelOnClick = useCallback(
@@ -80,7 +85,7 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
         </EuiFlexItem>
         {isExpanded && (
           <EuiFlexItem grow={false}>
-            <CoverageOverviewPanelMetadata
+            <CoverageOverviewPanelRuleStats
               enabledRules={technique.enabledRules.length}
               disabledRules={technique.disabledRules.length}
             />

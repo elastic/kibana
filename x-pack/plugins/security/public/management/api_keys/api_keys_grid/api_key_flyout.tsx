@@ -31,6 +31,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
 
+import type { CategorizedApiKey } from './api_keys_grid_page';
+import { ApiKeyBadge, ApiKeyStatus, TimeToolTip, UsernameWithIcon } from './api_keys_grid_page';
 import type { ApiKeyRoleDescriptors } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
 import { FormField } from '../../../components/form_field';
@@ -47,8 +49,6 @@ import type {
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
 } from '../api_keys_api_client';
-import type { CategorizedApiKey } from './api_keys_grid_page';
-import { ApiKeyBadge, ApiKeyStatus, TimeToolTip, UsernameWithIcon } from './api_keys_grid_page';
 
 export interface ApiKeyFormValues {
   name: string;
