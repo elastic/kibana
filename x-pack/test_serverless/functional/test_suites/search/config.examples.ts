@@ -16,7 +16,7 @@ export default createTestConfig({
   junit: {
     reportName: 'Serverless Search Examples Functional Tests',
   },
-  serverArgs: findTestPluginPaths([
+  kbnServerArgs: findTestPluginPaths([
     resolve(REPO_ROOT, 'examples'),
     resolve(REPO_ROOT, 'x-pack/examples'),
   ]),
