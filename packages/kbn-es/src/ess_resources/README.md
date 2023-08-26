@@ -8,13 +8,13 @@ The resources in this directory are used for seeding Elasticsearch Serverless (E
 The default superuser authentication to login to Kibana is:
 
 ```
-username: kibana_serverless_superuser
+username: elastic_serverless
 password: changeme
 ```
 
 ### Adding users
 
-1. Add the user:encrypted_password to `users` file. The encrypted password for `kibana_serverless_superuser` is `changeme` if you want to reuse the value.
+1. Add the user:encrypted_password to `users` file. The encrypted password for `elastic_serverless` is `changeme` if you want to reuse the value.
 1. Set the new user's roles in `users_roles` file.
 1. Add the username to `operator_users.yml` in the array for file realm users.
 

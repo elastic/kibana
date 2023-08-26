@@ -13,7 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import {
   esTestConfig,
   kbnTestConfig,
-  kibanaServerlessSuperuser,
+  kibanaTestSuperuserServerless,
   getDockerFileMountPath,
 } from '@kbn/test';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
@@ -22,7 +22,7 @@ import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 export default async () => {
   const servers = {
     kibana: {
-      ...kbnTestConfig.getUrlParts(kibanaServerlessSuperuser),
+      ...kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless),
       protocol: 'https',
       certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
     },

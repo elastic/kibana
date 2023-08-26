@@ -38,7 +38,7 @@ export {
   kibanaTestUser,
   adminTestUser,
   systemIndicesSuperuser,
-  kibanaServerlessSuperuser,
+  kibanaTestSuperuserServerless,
 } from './src/kbn';
 
 // @internal

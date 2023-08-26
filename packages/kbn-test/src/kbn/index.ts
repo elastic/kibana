@@ -11,5 +11,5 @@ export {
   kibanaServerTestUser,
   adminTestUser,
   systemIndicesSuperuser,
-  kibanaServerlessSuperuser,
+  kibanaTestSuperuserServerless,
 } from './users';

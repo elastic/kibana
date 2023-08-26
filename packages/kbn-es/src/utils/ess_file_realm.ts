@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const KIBANA_SERVERLESS_SUPERUSER = 'kibana_serverless_superuser';
-export const KIBANA_SERVERLESS_SUPERUSER_PASSWORD = 'changeme';
+export const ELASTIC_SERVERLESS_SUPERUSER = 'elastic_serverless';
+export const ELASTIC_SERVERLESS_SUPERUSER_PASSWORD = 'changeme';

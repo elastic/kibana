@@ -8,8 +8,8 @@
 
 import {
   SYSTEM_INDICES_SUPERUSER,
-  KIBANA_SERVERLESS_SUPERUSER,
-  KIBANA_SERVERLESS_SUPERUSER_PASSWORD,
+  ELASTIC_SERVERLESS_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
 } from '@kbn/es';
 
 const env = process.env;
@@ -37,7 +37,7 @@ export const systemIndicesSuperuser = {
   password: env.TEST_ES_PASS || 'changeme',
 };
 
-export const kibanaServerlessSuperuser = {
-  username: KIBANA_SERVERLESS_SUPERUSER,
-  password: KIBANA_SERVERLESS_SUPERUSER_PASSWORD,
+export const kibanaTestSuperuserServerless = {
+  username: ELASTIC_SERVERLESS_SUPERUSER,
+  password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
 };
