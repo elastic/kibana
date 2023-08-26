@@ -12,6 +12,10 @@ if [[ "$SERVERLESS_ENVIRONMENT" == "search" ]]; then
     "x-pack/test_serverless/api_integration/test_suites/search/config.feature_flags.ts"
     "x-pack/test_serverless/functional/test_suites/search/config.ts"
   )
+elif [[ "$SERVERLESS_ENVIRONMENT" == "search.discover" ]]; then
+  SERVERLESS_CONFIGS=(
+    "x-pack/test_serverless/functional/test_suites/search/config.discover.ts"
+  )
 elif [[ "$SERVERLESS_ENVIRONMENT" == "observability" ]]; then
   SERVERLESS_CONFIGS=(
     "x-pack/test_serverless/api_integration/test_suites/observability/config.ts"

@@ -82,6 +82,19 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: SERVERLESS_ENVIRONMENT=search.discover .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Search Tests - Discover'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    soft_fail:
+      - exit_status: 10
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: SERVERLESS_ENVIRONMENT=security .buildkite/scripts/steps/functional/serverless_ftr.sh
     label: 'Serverless Security Tests'
     agents:

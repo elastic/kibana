@@ -13,13 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./empty_page'));
     loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./cases/attachment_framework'));
-    loadTestFile(require.resolve('./discover/embeddable'));
-    loadTestFile(require.resolve('./discover/group1'));
-    loadTestFile(require.resolve('./discover/group2'));
-    loadTestFile(require.resolve('./discover/group3'));
-    loadTestFile(require.resolve('./discover/x_pack'));
-    loadTestFile(require.resolve('./discover_ml_uptime/discover'));
-    loadTestFile(require.resolve('./context'));
     loadTestFile(require.resolve('./management'));
   });
 }
