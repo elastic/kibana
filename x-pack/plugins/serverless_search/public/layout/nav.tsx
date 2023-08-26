@@ -125,30 +125,25 @@ const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'settings',
-          children: [
-            {
-              link: 'management',
-              title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
-                defaultMessage: 'Management',
-              }),
-            },
-            {
-              id: 'cloudLinkDeployment',
-              cloudLink: 'deployment',
-              title: i18n.translate('xpack.serverlessSearch.nav.performance', {
-                defaultMessage: 'Performance',
-              }),
-            },
-            {
-              id: 'cloudLinkUserAndRoles',
-              cloudLink: 'userAndRoles',
-            },
-            {
-              id: 'cloudLinkBilling',
-              cloudLink: 'billingAndSub',
-            },
-          ],
+          link: 'management',
+          title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
+            defaultMessage: 'Management',
+          }),
+        },
+        {
+          id: 'cloudLinkDeployment',
+          cloudLink: 'deployment',
+          title: i18n.translate('xpack.serverlessSearch.nav.performance', {
+            defaultMessage: 'Performance',
+          }),
+        },
+        {
+          id: 'cloudLinkUserAndRoles',
+          cloudLink: 'userAndRoles',
+        },
+        {
+          id: 'cloudLinkBilling',
+          cloudLink: 'billingAndSub',
         },
       ],
     },
