@@ -19,8 +19,8 @@ export const ERROR_MESSAGE = (message: string) =>
     defaultMessage: 'There was an error displaying {message}',
   });
 
-export const CORRELATIONS_SUPRESSED_ALERTS = (count: number) =>
-  i18n.translate('xpack.securitySolution.flyout.documentDetails.correlations.supressedAlerts', {
+export const CORRELATIONS_SUPPRESSED_ALERTS = (count: number) =>
+  i18n.translate('xpack.securitySolution.flyout.documentDetails.correlations.suppressedAlerts', {
     defaultMessage: 'suppressed {count, plural, =1 {alert} other {alerts}}',
     values: { count },
   });

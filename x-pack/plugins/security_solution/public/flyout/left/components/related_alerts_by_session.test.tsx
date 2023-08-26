@@ -11,7 +11,6 @@ import { TestProviders } from '../../../common/mock';
 import {
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
-  INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
@@ -82,7 +81,9 @@ describe('<RelatedAlertsBySession />', () => {
     expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toBeInTheDocument();
-    expect(getByTestId(INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(
+      getByTestId(`${CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}InvestigateInTimeline`)
+    ).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
   });
 

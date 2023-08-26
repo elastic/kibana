@@ -19,7 +19,6 @@ import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../detections/components/alerts_table/translations';
 import { getDataProvider } from '../../../common/components/event_details/table/use_action_cell_data_provider';
-import { INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID } from './test_ids';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
@@ -144,7 +143,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         title,
         iconType: 'warning',
         headerContent: (
-          <div data-test-subj={INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID}>
+          <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
             <InvestigateInTimelineButton
               dataProviders={dataProviders}
               filters={filters}

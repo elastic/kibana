@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EuiBetaBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { CORRELATIONS_SUPRESSED_ALERTS } from '../../shared/translations';
+import { CORRELATIONS_SUPPRESSED_ALERTS } from '../../shared/translations';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import {
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
@@ -38,7 +38,7 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
   const title = (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem>
-        {`${alertSuppressionCount} ${CORRELATIONS_SUPRESSED_ALERTS(alertSuppressionCount)}`}
+        {`${alertSuppressionCount} ${CORRELATIONS_SUPPRESSED_ALERTS(alertSuppressionCount)}`}
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiBetaBadge
@@ -52,7 +52,11 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
   );
 
   const headerContent = alertSuppressionCount > 0 && (
-    <InvestigateInTimelineAction ecsRowData={dataAsNestedObject} buttonType={'emptyButton'} />
+    <div
+      data-test-subj={`${CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID}InvestigateInTimeline`}
+    >
+      <InvestigateInTimelineAction ecsRowData={dataAsNestedObject} buttonType={'emptyButton'} />
+    </div>
   );
 
   return (

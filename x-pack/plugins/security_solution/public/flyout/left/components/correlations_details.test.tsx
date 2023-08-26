@@ -54,7 +54,7 @@ const renderCorrelationDetails = () => {
   );
 };
 
-const CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TEXT_LINK_TEST_ID =
+const CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID =
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
     CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID
   );
@@ -108,9 +108,7 @@ describe('CorrelationsDetails', () => {
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
-    expect(
-      getByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TEXT_LINK_TEST_ID)
-    ).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render no section and show error message if show values are false', () => {
@@ -139,7 +137,7 @@ describe('CorrelationsDetails', () => {
     ).not.toBeInTheDocument();
     expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).not.toBeInTheDocument();
     expect(
-      queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TEXT_LINK_TEST_ID)
+      queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)
     ).not.toBeInTheDocument();
     expect(getByTestId(`${CORRELATIONS_DETAILS_TEST_ID}Error`)).toBeInTheDocument();
   });
@@ -164,7 +162,7 @@ describe('CorrelationsDetails', () => {
     ).not.toBeInTheDocument();
     expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).not.toBeInTheDocument();
     expect(
-      queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TEXT_LINK_TEST_ID)
+      queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)
     ).not.toBeInTheDocument();
   });
 });

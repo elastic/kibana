@@ -85,5 +85,3 @@ export const SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID =
 export const RESPONSE_BASE_TEST_ID = `${PREFIX}Responses` as const;
 export const RESPONSE_DETAILS_TEST_ID = `${RESPONSE_BASE_TEST_ID}Details` as const;
 export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_BASE_TEST_ID}Empty` as const;
-
-export const INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = 'send-alert-to-timeline' as const;

@@ -11,7 +11,6 @@ import { TestProviders } from '../../../common/mock';
 import {
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
   SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID,
-  INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
 import { SuppressedAlerts } from './suppressed_alerts';
 import {
@@ -35,6 +34,7 @@ const TITLE_ICON = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(
 const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID
 );
+const INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = `${CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID}InvestigateInTimeline`;
 
 describe('<SuppressedAlerts />', () => {
   it('should render zero component correctly', () => {
