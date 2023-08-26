@@ -30,7 +30,7 @@ describe('Home page', () => {
     }).as('getEsResources');
     cy.visitKibana('/app/profiling', { rangeFrom, rangeTo });
     cy.wait('@getEsResources');
-    cy.contains('Top 53');
+    cy.contains('Top 46');
     cy.contains('User privilege limitation');
   });
 
