@@ -22,7 +22,7 @@ export function getAssistantSetupMessage({ contexts }: { contexts: ContextDefini
           
           If you are unsure about which function should be used and with what arguments, asked the user for clarification or confirmation.
           
-          You can use (Github-flavored) Markdown in your responses. Use it to nicely format output, like a table.`
+          You can use (Github-flavored) Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.`
         ),
       ]
         .concat(contexts.map((context) => context.description))
