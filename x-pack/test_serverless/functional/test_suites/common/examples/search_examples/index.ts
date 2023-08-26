@@ -39,8 +39,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     // TODO: Removed `search_session_example` since
     // search sessions are not supported in Serverless
     loadTestFile(require.resolve('./search_example'));
-    loadTestFile(require.resolve('./search_sessions_cache'));
+    // TODO: Removed `search_sessions_cache` since
+    // search sessions are not supported in Serverless
     loadTestFile(require.resolve('./partial_results_example'));
-    loadTestFile(require.resolve('./sql_search_example'));
+    // TODO: Removed `sql_search_example` since
+    // SQL is not supported in Serverless
   });
 }
