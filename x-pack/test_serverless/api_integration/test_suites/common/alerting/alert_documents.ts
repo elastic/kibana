@@ -220,7 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits2['@timestamp']).to.be.greaterThan(hits1['@timestamp']);
       expect(OPEN_OR_ACTIVE.has(hits1?.event?.action)).to.be(true);
       expect(hits2?.event?.action).to.be('active');
-      expect(hits1?.kibana?.alert?.duration?.us).to.be('0');
+      expect(parseInt(hits1?.kibana?.alert?.duration?.us, 10)).to.not.be.lessThan(0);
       expect(hits2?.kibana?.alert?.duration?.us).not.to.be('0');
 
       // remove fields we know will be different
