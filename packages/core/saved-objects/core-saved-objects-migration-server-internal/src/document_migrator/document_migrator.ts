@@ -82,7 +82,7 @@ export interface VersionedTransformer {
 }
 
 export function createNewerModelVersionError(message: string) {
-  return Boom.badData(message);
+  return Boom.boomify(Boom.badData(message), { message: '[NewerModelVersionError]' });
 }
 /**
  * A concrete implementation of the {@link VersionedTransformer} interface.
@@ -184,10 +184,11 @@ export class DocumentMigrator implements VersionedTransformer {
       const currentVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
       const latestVersion = this.migrations[doc.type].latestVersion[TransformType.Migrate];
       if (!allowDowngrade) {
-        const newerVersionModelError = createNewerModelVersionError(
-          `Document "${doc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
-        );
-        throw Boom.boomify(newerVersionModelError, { message: '[NewerModelVersionError]' });
+        if (!allowDowngrade) {
+          throw createNewerModelVersionError(
+            `Document "${doc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
+          );
+        }
       }
       return this.transformDown(doc, { targetTypeVersion: latestVersion! });
     } else {

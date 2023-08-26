@@ -28,7 +28,7 @@ export class MigrationHelper {
    * before storing it in the index. It will therefore throw if the document is in a higher / unknown version.
    */
   migrateInputDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    return this.migrator.migrateDocument(document, { allowDowngrade: false }); // if false (as by default), allows documents to be indeed without a downgrade option
+    return this.migrator.migrateDocument(document, { allowDowngrade: false });
   }
 
   /**
