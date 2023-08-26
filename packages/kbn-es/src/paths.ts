@@ -35,6 +35,8 @@ export const ESS_ROLE_MAPPING_PATH = resolve(__dirname, './ess_resources/role_ma
 
 export const ESS_SECRETS_PATH = resolve(__dirname, './ess_resources/secrets.json');
 
+export const ESS_JWKS_PATH  = resolve(__dirname, './ess_resources/jwks.json');
+
 export const ESS_RESOURCES_PATHS = [
   ESS_OPERATOR_USERS_PATH,
   ESS_ROLE_MAPPING_PATH,

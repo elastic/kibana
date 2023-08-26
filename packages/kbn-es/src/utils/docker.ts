@@ -17,7 +17,7 @@ import { ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
-import { ESS_RESOURCES_PATHS, ESS_SECRETS_PATH, ESS_CONFIG_PATH, ESS_FILES_PATH } from '../paths';
+import { ESS_RESOURCES_PATHS, ESS_SECRETS_PATH, ESS_JWKS_PATH, ESS_CONFIG_PATH, ESS_FILES_PATH } from '../paths';
 
 interface BaseOptions {
   tag?: string;
@@ -147,6 +147,18 @@ const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 
   ['xpack.security.operator_privileges.enabled', 'true'],
+
+  ['xpack.security.authc.realms.jwt.jwt1.client_authentication.type', 'shared_secret'],
+
+  ['xpack.security.authc.realms.jwt.jwt1.order', '-98'],
+
+  ['xpack.security.authc.realms.jwt.jwt1.allowed_issuer', 'https://kibana.elastic.co/jwt/'],
+
+  ['xpack.security.authc.realms.jwt.jwt1.allowed_audiences', 'elasticsearch'],
+
+  ['xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path', `${ESS_CONFIG_PATH}secrets/jwks.json`],
+
+  ['xpack.security.authc.realms.jwt.jwt1.claims.principal', 'sub']
 ];
 
 const DOCKER_SSL_ESARGS: Array<[string, string]> = [
@@ -452,7 +464,10 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
       ...essResources,
 
       '--volume',
-      `${ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`
+      `${ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`,
+
+      '--volume',
+      `${ESS_JWKS_PATH}:${ESS_CONFIG_PATH}secrets/jwks.json:z`,
     );
   }
 
