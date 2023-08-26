@@ -13,11 +13,10 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import {
   esTestConfig,
   kbnTestConfig,
-  kibanaServiceAccount,
   kibanaServerlessSuperuser,
   getDockerFileMountPath,
 } from '@kbn/test';
-import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
 export default async () => {
@@ -100,7 +99,7 @@ export default async () => {
             Object.entries(servers.elasticsearch).filter(([key]) => key.toLowerCase() !== 'auth')
           )
         )}`,
-        `--elasticsearch.serviceAccountToken=${kibanaServiceAccount.token}`,
+        `--elasticsearch.serviceAccountToken=${kibanaDevServiceAccount.token}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         '--telemetry.sendUsageTo=staging',
         `--logging.appenders.deprecation=${JSON.stringify({

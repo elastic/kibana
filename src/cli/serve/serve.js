@@ -15,7 +15,7 @@ import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
-import { kibanaServiceAccount } from '@kbn/test';
+import { kibanaDevServiceAccount } from '@kbn/dev-utils';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
@@ -70,7 +70,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   if (opts.dev) {
     if (opts.serverless) {
-      set('elasticsearch.serviceAccountToken', kibanaServiceAccount.token);
+      set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {

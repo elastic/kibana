@@ -37,16 +37,6 @@ export const systemIndicesSuperuser = {
   password: env.TEST_ES_PASS || 'changeme',
 };
 
-/**
- * `kibana-dev` service account token for connecting to ESS
- * See packages/kbn-es/src/ess_resources/README.md
- */
-export const kibanaServiceAccount = {
-  token:
-    env.TEST_KIBANA_SERVICE_ACCOUNT_TOKEN ||
-    'AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
-};
-
 export const kibanaServerlessSuperuser = {
   username: KIBANA_SERVERLESS_SUPERUSER,
   password: KIBANA_SERVERLESS_SUPERUSER_PASSWORD,
