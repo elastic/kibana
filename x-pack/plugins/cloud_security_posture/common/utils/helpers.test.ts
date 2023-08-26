@@ -185,5 +185,37 @@ describe('test helper methods', () => {
         shared_credential_file: { value: undefined, type: 'text' },
       });
     });
+
+    it('cleans unused gcp credential methods, when using credentials-file method ', () => {
+      const mockPackagePolicy = createPackagePolicyMock();
+      mockPackagePolicy.inputs = [
+        {
+          type: 'cloudbeat/cis_gcp',
+          enabled: true,
+          streams: [
+            {
+              id: 'findings',
+              enabled: true,
+              data_stream: {
+                dataset: 'cloud_security_posture.findings',
+                type: 'logs',
+              },
+              vars: {
+                'gcp.credentials.type': { value: 'credentials-file' },
+                'gcp.credentials.file': { value: 'used' },
+                'gcp.credentials.json': { value: 'unused' },
+              },
+            },
+          ],
+        },
+      ];
+
+      const cleanedPackage = cleanupCredentials(mockPackagePolicy);
+      expect(cleanedPackage.inputs[0].streams[0].vars).toEqual({
+        'gcp.credentials.type': { value: 'credentials-file' },
+        'gcp.credentials.file': { value: 'used' },
+        'gcp.credentials.json': { value: undefined },
+      });
+    });
   });
 });

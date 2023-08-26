@@ -19,8 +19,9 @@ import {
   CLOUDBEAT_VANILLA,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
   AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP,
+  GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP,
 } from '../constants';
-import type { BenchmarkId, Score, BaseCspSetupStatus, AwsCredentialsType } from '../types';
+import type { BenchmarkId, Score, BaseCspSetupStatus, AwsCredentialsType, GcpCredentialsType } from '../types';
 
 /**
  * @example
@@ -103,12 +104,22 @@ export const getStatusForIndexName = (indexName: string, status?: BaseCspSetupSt
 
 export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePackagePolicy) => {
   const enabledInput = packagePolicy.inputs.find((i) => i.enabled);
-  const credentialType: AwsCredentialsType | undefined =
+  const awsCredentialType: AwsCredentialsType | undefined =
     enabledInput?.streams?.[0].vars?.['aws.credentials.type']?.value;
-
-  if (credentialType) {
-    const credsToKeep = AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP[credentialType];
-    const credFields = Object.values(AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
+  const gcpCredentialType: GcpCredentialsType | undefined =
+    enabledInput?.streams?.[0].vars?.['gcp.credentials.type']?.value;
+    
+  if (awsCredentialType || gcpCredentialType) {
+    let credsToKeep: string[] = [' ']
+    let credFields: string[] = [' '];
+    if(awsCredentialType){
+      credsToKeep = AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP[awsCredentialType];
+      credFields = Object.values(AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
+    }
+    else if(gcpCredentialType){
+      credsToKeep = GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP[gcpCredentialType];
+      credFields = Object.values(GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
+    }
 
     if (credsToKeep) {
       // we need to return a copy of the policy with the unused
