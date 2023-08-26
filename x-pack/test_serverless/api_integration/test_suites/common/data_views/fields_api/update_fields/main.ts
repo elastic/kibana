@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const svlCommonApi = getService('svlCommonApi');
 
-  describe('main', () => {
+  describe.only('main', () => {
     const basicIndex = 'ba*ic_index';
     let indexPattern: any;
 
@@ -515,72 +515,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response3.body[config.serviceKey].fieldFormats.foo).to.be(undefined);
           });
 
-          it('can set field "format" on an existing field', async () => {
-            const title = indexPattern.title;
-            await supertest
-              .delete(`${config.path}/${indexPattern.id}`)
-              // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader());
-            const response1 = await supertest
-              .post(config.path)
-              // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader())
-              .send({
-                override: true,
-                [config.serviceKey]: {
-                  title,
-                  fields: {
-                    foo: {
-                      name: 'foo',
-                      type: 'string',
-                      scripted: true,
-                      format: {
-                        id: 'string',
-                      },
-                    },
-                  },
-                },
-              });
-
-            expect(response1.status).to.be(200);
-            expect(response1.body[config.serviceKey].fieldFormats.foo).to.be(undefined);
-            expect(response1.body[config.serviceKey].fields.foo.format).to.eql({
-              id: 'string',
-            });
-
-            const response2 = await supertest
-              .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
-              // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader())
-              .send({
-                fields: {
-                  foo: {
-                    format: { id: 'number' },
-                  },
-                },
-              });
-
-            expect(response2.status).to.be(200);
-            expect(response2.body[config.serviceKey].fieldFormats.foo).to.eql({
-              id: 'number',
-            });
-            expect(response2.body[config.serviceKey].fields.foo.format).to.eql({
-              id: 'number',
-            });
-
-            const response3 = await supertest
-              .get(`${config.path}/${response1.body[config.serviceKey].id}`)
-              // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader());
-
-            expect(response3.status).to.be(200);
-            expect(response3.body[config.serviceKey].fieldFormats.foo).to.eql({
-              id: 'number',
-            });
-            expect(response3.body[config.serviceKey].fields.foo.format).to.eql({
-              id: 'number',
-            });
-          });
+          // TODO: Scripted fields code dropped since they are not supported in Serverless
         });
       });
     });
