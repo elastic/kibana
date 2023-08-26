@@ -17,7 +17,13 @@ import { ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
-import { ESS_RESOURCES_PATHS, ESS_SECRETS_PATH, ESS_JWKS_PATH, ESS_CONFIG_PATH, ESS_FILES_PATH } from '../paths';
+import {
+  ESS_RESOURCES_PATHS,
+  ESS_SECRETS_PATH,
+  ESS_JWKS_PATH,
+  ESS_CONFIG_PATH,
+  ESS_FILES_PATH,
+} from '../paths';
 
 interface BaseOptions {
   tag?: string;
@@ -158,7 +164,7 @@ const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path', `${ESS_CONFIG_PATH}secrets/jwks.json`],
 
-  ['xpack.security.authc.realms.jwt.jwt1.claims.principal', 'sub']
+  ['xpack.security.authc.realms.jwt.jwt1.claims.principal', 'sub'],
 ];
 
 const DOCKER_SSL_ESARGS: Array<[string, string]> = [
@@ -467,7 +473,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
       `${ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`,
 
       '--volume',
-      `${ESS_JWKS_PATH}:${ESS_CONFIG_PATH}secrets/jwks.json:z`,
+      `${ESS_JWKS_PATH}:${ESS_CONFIG_PATH}secrets/jwks.json:z`
     );
   }
 
