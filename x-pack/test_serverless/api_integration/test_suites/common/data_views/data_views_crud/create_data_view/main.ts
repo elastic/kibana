@@ -120,9 +120,8 @@ export default function ({ getService }: FtrProviderContext) {
                   fields: {
                     foo: {
                       name: 'foo',
-                      type: 'string',
-                      scripted: true,
-                      script: "doc['field_name'].value",
+                      // TODO: Scripted fields code dropped since they are not supported in Serverless
+                      customLabel: 'Custom Label',
                     },
                   },
                 },
@@ -131,11 +130,8 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response.status).to.be(200);
             expect(response.body[config.serviceKey].title).to.be(title);
             expect(response.body[config.serviceKey].fields.foo.name).to.be('foo');
-            expect(response.body[config.serviceKey].fields.foo.type).to.be('string');
-            expect(response.body[config.serviceKey].fields.foo.scripted).to.be(true);
-            expect(response.body[config.serviceKey].fields.foo.script).to.be(
-              "doc['field_name'].value"
-            );
+            // TODO: Scripted fields code dropped since they are not supported in Serverless
+            expect(response.body[config.serviceKey].fields.foo.customLabel).to.be('Custom Label');
 
             expect(response.body[config.serviceKey].fields.bar.name).to.be('bar'); // created from es index
             expect(response.body[config.serviceKey].fields.bar.type).to.be('boolean');
