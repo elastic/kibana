@@ -190,27 +190,3 @@ export const CORRELATIONS_CASE_NAME_COLUMN_TITLE = i18n.translate(
     defaultMessage: 'Name',
   }
 );
-
-export const ANCESTRY_ALERTS_HEADING = (count: number) =>
-  i18n.translate('xpack.securitySolution.flyout.correlations.ancestryAlertsHeading', {
-    defaultMessage: '{count, plural, one {# alert} other {# alerts}} related by ancestry',
-    values: { count },
-  });
-
-export const SOURCE_ALERTS_HEADING = (count: number) =>
-  i18n.translate('xpack.securitySolution.flyout.correlations.sourceAlertsHeading', {
-    defaultMessage: '{count, plural, one {# alert} other {# alerts}} related by source event',
-    values: { count },
-  });
-
-export const SESSION_ALERTS_HEADING = (count: number) =>
-  i18n.translate('xpack.securitySolution.flyout.correlations.sessionAlertsHeading', {
-    defaultMessage: '{count, plural, one {# alert} other {# alerts}} related by session',
-    values: { count },
-  });
-
-export const RELATED_CASES_HEADING = (count: number) =>
-  i18n.translate('xpack.securitySolution.flyout.correlations.relatedCasesHeading', {
-    defaultMessage: '{count} related {count, plural, one {case} other {cases}}',
-    values: { count },
-  });

@@ -6,6 +6,7 @@
  */
 
 /* Visualization tab */
+
 const PREFIX = 'securitySolutionDocumentDetailsFlyout' as const;
 
 export const ANALYZER_GRAPH_TEST_ID = `${PREFIX}AnalyzerGraph` as const;
@@ -81,3 +82,6 @@ export const CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID =
 export const RESPONSE_BASE_TEST_ID = `${PREFIX}Responses` as const;
 export const RESPONSE_DETAILS_TEST_ID = `${RESPONSE_BASE_TEST_ID}Details` as const;
 export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_BASE_TEST_ID}Empty` as const;
+
+export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${PREFIX}InvestigationGuideLoading`;
+export const INVESTIGATION_GUIDE_NO_DATA_TEST_ID = `${PREFIX}NoData`;
