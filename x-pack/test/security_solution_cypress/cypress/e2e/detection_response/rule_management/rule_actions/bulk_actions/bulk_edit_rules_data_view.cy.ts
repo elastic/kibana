@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../../tags';
-
 import {
   RULES_BULK_EDIT_DATA_VIEWS_WARNING,
   RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX,
@@ -57,7 +55,7 @@ const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
 
 describe(
   'Bulk editing index patterns of rules with a data view only',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     before(() => {
       cleanKibana();
@@ -250,7 +248,7 @@ describe(
 
 describe(
   'Bulk editing index patterns of rules with index patterns and rules with a data view',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     before(() => {
       cleanKibana();

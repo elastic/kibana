@@ -13,8 +13,10 @@ import { TestProviders } from '../../../../common/mock';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_popover';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
+import { useUserData } from '../../../../detections/components/user_info';
 
 jest.mock('./coverage_overview_dashboard_context');
+jest.mock('../../../../detections/components/user_info');
 
 const mockEnableAllDisabled = jest.fn();
 
@@ -31,9 +33,10 @@ const renderTechniquePanelPopover = (
 describe('CoverageOverviewMitreTechniquePanelPopover', () => {
   beforeEach(() => {
     (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
-      state: { showExpandedCells: false },
+      state: { showExpandedCells: false, filter: {} },
       actions: { enableAllDisabled: mockEnableAllDisabled },
     });
+    (useUserData as jest.Mock).mockReturnValue([{ loading: false, canUserCRUD: true }]);
   });
 
   afterEach(() => {
@@ -49,7 +52,7 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
 
   test('it renders panel with expanded view', () => {
     (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
-      state: { showExpandedCells: true },
+      state: { showExpandedCells: true, filter: {} },
       actions: { enableAllDisabled: mockEnableAllDisabled },
     });
     const wrapper = renderTechniquePanelPopover();
@@ -97,6 +100,16 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
       disabledRules: [],
     };
     const wrapper = renderTechniquePanelPopover(mockTechnique);
+
+    act(() => {
+      fireEvent.click(wrapper.getByTestId('coverageOverviewTechniquePanel'));
+    });
+    expect(wrapper.getByTestId('enableAllDisabledButton')).toBeDisabled();
+  });
+
+  test('"Enable all disabled" button is disabled when user does not have CRUD permissions', async () => {
+    (useUserData as jest.Mock).mockReturnValue([{ loading: false, canUserCRUD: false }]);
+    const wrapper = renderTechniquePanelPopover();
 
     act(() => {
       fireEvent.click(wrapper.getByTestId('coverageOverviewTechniquePanel'));

@@ -26,7 +26,6 @@ import * as i18n from '../translations';
 
 interface OwnProps {
   currentConversation: Conversation;
-  currentTitle: { title: string | JSX.Element; titleIcon: string };
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
   docLinks: Omit<DocLinksStart, 'links'>;
@@ -39,6 +38,7 @@ interface OwnProps {
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   shouldDisableKeyboardShortcut?: () => boolean;
   showAnonymizedValues: boolean;
+  title: string | JSX.Element;
 }
 
 type Props = OwnProps;
@@ -49,7 +49,6 @@ type Props = OwnProps;
  */
 export const AssistantHeader: React.FC<Props> = ({
   currentConversation,
-  currentTitle,
   defaultConnectorId,
   defaultProvider,
   docLinks,
@@ -62,6 +61,7 @@ export const AssistantHeader: React.FC<Props> = ({
   setSelectedConversationId,
   shouldDisableKeyboardShortcut,
   showAnonymizedValues,
+  title,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -81,10 +81,10 @@ export const AssistantHeader: React.FC<Props> = ({
       >
         <EuiFlexItem grow={false}>
           <AssistantTitle
-            {...currentTitle}
             isDisabled={isDisabled}
             docLinks={docLinks}
             selectedConversation={currentConversation}
+            title={title}
           />
         </EuiFlexItem>
 
