@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   expandFirstAlert,
@@ -42,9 +40,10 @@ import {
 } from '../../../screens/exceptions';
 import { goToEndpointExceptionsTab } from '../../../tasks/rule_details';
 
-describe(
+// See https://github.com/elastic/kibana/issues/163967
+describe.skip(
   'Endpoint Exceptions workflows from Alert',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     const ITEM_NAME = 'Sample Exception List Item';
     const ITEM_NAME_EDIT = 'Sample Exception List Item';

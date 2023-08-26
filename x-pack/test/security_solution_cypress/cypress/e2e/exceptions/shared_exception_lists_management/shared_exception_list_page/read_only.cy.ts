@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../../tags';
 
 import { getExceptionList } from '../../../../objects/exception';
 import {
@@ -17,13 +16,12 @@ import {
   dismissCallOut,
   getCallOut,
   waitForCallOutToBeShown,
+  MISSING_PRIVILEGES_CALLOUT,
 } from '../../../../tasks/common/callouts';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
-const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
-
-describe('Shared exception lists - read only', { tags: tag.ESS }, () => {
+describe('Shared exception lists - read only', { tags: '@ess' }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
   });

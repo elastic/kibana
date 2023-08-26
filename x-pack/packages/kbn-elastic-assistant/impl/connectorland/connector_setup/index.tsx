@@ -13,8 +13,7 @@ import styled from 'styled-components';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import { ActionType, ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   GEN_AI_CONNECTOR_ID,
   OpenAiProviderType,
@@ -29,6 +28,8 @@ import { useConversation } from '../../assistant/use_conversation';
 import { clearPresentationData, conversationHasNoPresentationData } from './helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
+import { useLoadConnectors } from '../use_load_connectors';
+import { AssistantAvatar } from '../../assistant/assistant_avatar/assistant_avatar';
 
 const ConnectorButtonWrapper = styled.div`
   margin-bottom: 10px;
@@ -43,21 +44,13 @@ interface Config {
 }
 
 export interface ConnectorSetupProps {
-  isConnectorConfigured: boolean;
-  actionTypeRegistry: ActionTypeRegistryContract;
   conversation?: Conversation;
-  http: HttpSetup;
   onSetupComplete?: () => void;
-  refetchConnectors?: () => void;
 }
 
 export const useConnectorSetup = ({
-  actionTypeRegistry,
   conversation = WELCOME_CONVERSATION,
-  http,
-  isConnectorConfigured = false,
   onSetupComplete,
-  refetchConnectors,
 }: ConnectorSetupProps): {
   comments: EuiCommentProps[];
   prompt: React.ReactElement;
@@ -65,7 +58,13 @@ export const useConnectorSetup = ({
   const { appendMessage, setApiConfig, setConversation } = useConversation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   // Access all conversations so we can add connector to all on initial setup
-  const { conversations } = useAssistantContext();
+  const { actionTypeRegistry, conversations, http } = useAssistantContext();
+  const {
+    data: connectors,
+    isSuccess: areConnectorsFetched,
+    refetch: refetchConnectors,
+  } = useLoadConnectors({ http });
+  const isConnectorConfigured = areConnectorsFetched && !!connectors?.length;
 
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
   const [showAddConnectorButton, setShowAddConnectorButton] = useState<boolean>(() => {
@@ -188,21 +187,14 @@ export const useConnectorSetup = ({
               name={i18n.CONNECTOR_SETUP_USER_ASSISTANT}
               size="l"
               color="subdued"
-              iconType={conversation?.theme?.assistant?.icon ?? 'logoElastic'}
+              iconType={AssistantAvatar}
             />
           ),
           timestamp: `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${message.timestamp}`,
         };
         return commentProps;
       }),
-    [
-      assistantName,
-      commentBody,
-      conversation.messages,
-      conversation?.theme?.assistant?.icon,
-      currentMessageIndex,
-      userName,
-    ]
+    [assistantName, commentBody, conversation.messages, currentMessageIndex, userName]
   );
 
   return {

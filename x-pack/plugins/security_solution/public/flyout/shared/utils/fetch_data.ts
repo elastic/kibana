@@ -8,28 +8,6 @@
 import type { IEsSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 
-export const AGG_KEY = 'aggregation';
-
-/**
- * Interface for aggregation responses
- */
-export interface RawAggregatedDataResponse {
-  aggregations: {
-    [AGG_KEY]: {
-      buckets: unknown[];
-    };
-  };
-}
-
-/**
- * Interface for non-aggregated responses
- */
-export interface RawResponse {
-  hits: {
-    total: number;
-  };
-}
-
 /**
  * Reusable method that returns a promise wrapping the search functionality of Kibana search service
  */

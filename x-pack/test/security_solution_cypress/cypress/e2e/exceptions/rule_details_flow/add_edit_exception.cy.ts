@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getException, getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
@@ -60,7 +59,7 @@ import {
 } from '../../../tasks/api_calls/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
-describe('Add/edit exception from rule details', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Add/edit exception from rule details', { tags: ['@ess', '@brokenInServerless'] }, () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
   const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
   const ITEM_FIELD = 'unique_value.test';

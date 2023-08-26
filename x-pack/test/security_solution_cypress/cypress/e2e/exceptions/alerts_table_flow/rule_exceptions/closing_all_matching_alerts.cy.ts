@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   addExceptionFromFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
   waitForAlerts,
 } from '../../../../tasks/alerts';
 import { deleteAlertsAndRules, postDataView } from '../../../../tasks/common';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 import { goToRuleDetails } from '../../../../tasks/alerts_detection_rules';
@@ -27,6 +27,7 @@ import {
   submitNewExceptionItem,
 } from '../../../../tasks/exceptions';
 
+// See https://github.com/elastic/kibana/issues/163967
 describe('Close matching Alerts ', () => {
   const newRule = getNewRule();
   const ITEM_NAME = 'Sample Exception Item';
