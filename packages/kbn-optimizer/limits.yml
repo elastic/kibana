@@ -25,10 +25,10 @@ pageLoadAssetSize:
   core: 435325
   crossClusterReplication: 65408
   customIntegrations: 22034
-  dashboard: 82025
+  dashboard: 136103
   dashboardEnhanced: 65646
   data: 454087
-  dataViewEditor: 13000
+  dataViewEditor: 28082
   dataViewFieldEditor: 27000
   dataViewManagement: 5000
   dataViews: 47000
