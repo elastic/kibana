@@ -11,7 +11,7 @@ import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithB
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
   SavedObjectsBulkResolveObject,
-  SavedObjectsResolveOptions,
+  SavedObjectsGetOptions,
   SavedObjectsResolveResponse,
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
@@ -74,7 +74,7 @@ export interface InternalBulkResolveParams {
   encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
   securityExtension: ISavedObjectsSecurityExtension | undefined;
   objects: SavedObjectsBulkResolveObject[];
-  options?: SavedObjectsResolveOptions;
+  options?: SavedObjectsGetOptions;
 }
 
 /**

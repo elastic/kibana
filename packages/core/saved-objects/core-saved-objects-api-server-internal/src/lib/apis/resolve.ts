@@ -7,7 +7,7 @@
  */
 
 import {
-  SavedObjectsResolveOptions,
+  SavedObjectsGetOptions,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { ApiExecutionContext } from './types';
@@ -17,7 +17,7 @@ import { incrementCounterInternal } from './internals/increment_counter_internal
 export interface PerformCreateParams<T = unknown> {
   type: string;
   id: string;
-  options: SavedObjectsResolveOptions;
+  options: SavedObjectsGetOptions;
 }
 
 export const performResolve = async <T>(

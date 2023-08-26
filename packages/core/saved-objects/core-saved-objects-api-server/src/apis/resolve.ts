@@ -6,19 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsBaseOptions } from './base';
 import type { SavedObject } from '../..';
-
-/**
- * Options for the saved objects get operation
- *
- * @public
- */
-export interface SavedObjectsResolveOptions extends SavedObjectsBaseOptions {
-  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
-  migrationVersionCompatibility?: 'compatible' | 'raw';
-  downwardConversion?: 'allow' | 'forbid';
-}
 
 /**
  *

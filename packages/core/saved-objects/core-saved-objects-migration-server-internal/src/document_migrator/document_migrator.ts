@@ -188,6 +188,7 @@ export class DocumentMigrator implements VersionedTransformer {
           throw createNewerModelVersionError(
             `Document "${doc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
           );
+          
         }
       }
       return this.transformDown(doc, { targetTypeVersion: latestVersion! });

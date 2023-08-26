@@ -10,7 +10,7 @@ import { type SavedObject, BulkResolveError } from '@kbn/core-saved-objects-serv
 import {
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkResolveResponse,
-  SavedObjectsResolveOptions,
+  SavedObjectsGetOptions,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { errorContent } from './utils';
@@ -20,7 +20,7 @@ import { incrementCounterInternal } from './internals/increment_counter_internal
 
 export interface PerformCreateParams<T = unknown> {
   objects: SavedObjectsBulkResolveObject[];
-  options: SavedObjectsResolveOptions;
+  options: SavedObjectsGetOptions;
 }
 
 export const performBulkResolve = async <T>(
