@@ -44,6 +44,19 @@ describe('Home page with empty state', () => {
   });
 
   describe('Delete Data View', () => {
+    it('shows Delete page when setup is false', () => {
+      cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+        body: {
+          has_setup: false,
+          has_data: true,
+          pre_8_9_1_data: true,
+        },
+      }).as('getEsResources');
+      cy.visitKibana('/app/profiling');
+      cy.wait('@getEsResources');
+      cy.contains('Delete existing profiling data');
+    });
+
     it('shows Delete page when data pre 8.9.1 is still available and data is found', () => {
       cy.intercept('GET', '/internal/profiling/setup/es_resources', {
         body: {

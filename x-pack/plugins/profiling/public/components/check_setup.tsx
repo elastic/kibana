@@ -85,7 +85,10 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   }
 
   const displaySetupScreen =
-    (status === AsyncStatus.Settled && data?.has_setup !== true) || !!error;
+    (status === AsyncStatus.Settled &&
+      data?.has_setup !== true &&
+      data?.pre_8_9_1_data === false) ||
+    !!error;
 
   if (displaySetupScreen) {
     return (
