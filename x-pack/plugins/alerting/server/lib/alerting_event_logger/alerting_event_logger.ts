@@ -168,6 +168,14 @@ export class AlertingEventLogger {
     this.eventLogger.logEvent(createExecuteTimeoutRecord(this.ruleContext));
   }
 
+  public logShutdown() {
+    if (!this.isInitialized || !this.ruleContext) {
+      throw new Error('AlertingEventLogger not initialized');
+    }
+
+    this.eventLogger.logEvent(createSystemShutdownRecord(this.ruleContext));
+  }
+
   public logAlert(alert: AlertOpts) {
     if (!this.isInitialized || !this.ruleContext) {
       throw new Error('AlertingEventLogger not initialized');
@@ -316,6 +324,31 @@ export function createExecuteTimeoutRecord(context: RuleContextOpts) {
     }' execution cancelled due to timeout - exceeded rule type timeout of ${
       context.ruleType.ruleTaskTimeout
     }`,
+    savedObjects: [
+      {
+        id: context.ruleId,
+        type: 'alert',
+        typeId: context.ruleType.id,
+        relation: SAVED_OBJECT_REL_PRIMARY,
+      },
+    ],
+    ruleName: context.ruleName,
+    ruleRevision: context.ruleRevision,
+  });
+}
+
+export function createSystemShutdownRecord(context: RuleContextOpts) {
+  return createAlertEventLogRecordObject({
+    ruleId: context.ruleId,
+    ruleType: context.ruleType,
+    consumer: context.consumer,
+    namespace: context.namespace,
+    spaceId: context.spaceId,
+    executionId: context.executionId,
+    action: EVENT_LOG_ACTIONS.executeCancelled,
+    message: `rule: ${context.ruleType.id}:${context.ruleId}: '${
+      context.ruleName ?? ''
+    }' execution cancelled due to system shutdown`,
     savedObjects: [
       {
         id: context.ruleId,

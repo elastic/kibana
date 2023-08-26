@@ -35,6 +35,7 @@ import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
+import { TaskCancellationReason } from './task_pool';
 import { metricsStream, Metrics } from './metrics';
 
 export interface TaskManagerSetupContract {
@@ -223,7 +224,6 @@ export class TaskManagerPlugin
     savedObjects,
     elasticsearch,
     executionContext,
-    docLinks,
   }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
@@ -317,6 +317,14 @@ export class TaskManagerPlugin
         this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
       getRegisteredTypes: () => this.definitions.getAllTypes(),
     };
+  }
+
+  public async stop() {
+    this.logger.info(`Stopping task manager plugin`);
+
+    if (this.taskPollingLifecycle) {
+      await this.taskPollingLifecycle.stop(TaskCancellationReason.Shutdown);
+    }
   }
 }
 

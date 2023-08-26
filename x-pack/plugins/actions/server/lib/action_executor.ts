@@ -13,6 +13,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { TaskCancellationReason } from '@kbn/task-manager-plugin/server/task_pool';
 import {
   validateParams,
   validateConfig,
@@ -357,6 +358,7 @@ export class ActionExecutor {
   public async logCancellation<Source = unknown>({
     actionId,
     request,
+    reason,
     relatedSavedObjects,
     source,
     executionId,
@@ -367,13 +369,14 @@ export class ActionExecutor {
     actionId: string;
     actionExecutionId: string;
     request: KibanaRequest;
+    reason?: TaskCancellationReason;
     taskInfo?: TaskInfo;
     executionId?: string;
     relatedSavedObjects: RelatedSavedObjects;
     source?: ActionExecutionSource<Source>;
     consumer?: string;
   }) {
-    const { spaces, eventLogger } = this.actionExecutorContext!;
+    const { spaces, logger, eventLogger } = this.actionExecutorContext!;
 
     const spaceId = spaces && spaces.getSpaceId(request);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
@@ -388,14 +391,30 @@ export class ActionExecutor {
           },
         }
       : {};
+
+    let cancelMessage = '';
+    let eventLogAction;
+    if (reason === TaskCancellationReason.Expired) {
+      eventLogAction = EVENT_LOG_ACTIONS.executeTimeout;
+      cancelMessage = `execution cancelled due to timeout - exceeded default timeout of "5m"`;
+    } else if (reason === TaskCancellationReason.Shutdown) {
+      eventLogAction = EVENT_LOG_ACTIONS.executeCancelled;
+      cancelMessage = `system shutdown`;
+    } else {
+      eventLogAction = EVENT_LOG_ACTIONS.executeCancelled;
+      cancelMessage = `unknown reason`;
+    }
+
+    logger.debug(`Cancelling action task for action with id ${actionId} - ${cancelMessage}`);
+
     // Write event log entry
     const event = createActionEventLogRecordObject({
       actionId,
       consumer,
-      action: EVENT_LOG_ACTIONS.executeTimeout,
+      action: eventLogAction,
       message: `action: ${this.actionInfo.actionTypeId}:${actionId}: '${
         this.actionInfo.name ?? ''
-      }' execution cancelled due to timeout - exceeded default timeout of "5m"`,
+      }' ${cancelMessage}`,
       ...namespace,
       ...task,
       executionId,

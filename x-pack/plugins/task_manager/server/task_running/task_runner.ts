@@ -55,6 +55,7 @@ import {
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { createSkipError, isRetryableError, isSkipError, isUnrecoverableError } from './errors';
 import type { EventLoopDelayConfig, RequeueInvalidTasksConfig } from '../config';
+import { TaskCancellationReason } from '../task_pool';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -149,6 +150,7 @@ export class TaskManagerRunner implements TaskRunner {
   private bufferedTaskStore: Updatable;
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
+  private cancelled: boolean = false;
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
@@ -533,12 +535,13 @@ export class TaskManagerRunner implements TaskRunner {
    *
    * @returns {Promise<void>}
    */
-  public async cancel() {
+  public async cancel(reason?: TaskCancellationReason) {
+    this.cancelled = true;
     const { task } = this;
     if (task?.cancel) {
       // it will cause the task state of "running" to be cleared
       this.task = undefined;
-      return task.cancel();
+      return task.cancel(reason);
     }
 
     this.logger.debug(`The task ${this} is not cancellable.`);
@@ -575,6 +578,11 @@ export class TaskManagerRunner implements TaskRunner {
 
     if (this.isExpired) {
       this.logger.warn(`Skipping reschedule for task ${this} due to the task expiring`);
+      return false;
+    }
+
+    if (this.cancelled) {
+      this.logger.warn(`Skipping reschedule for task ${this} due to the task being cancelled`);
       return false;
     }
 
@@ -684,6 +692,10 @@ export class TaskManagerRunner implements TaskRunner {
         counterType: 'taskManagerTaskRunner',
         incrementBy: 1,
       });
+    } else if (this.cancelled) {
+      this.logger.debug(
+        `Task update skipped due to cancellation. Task will be retried at the retryAt time.`
+      );
     } else if (fieldUpdates.status === TaskStatus.Failed) {
       // Delete the SO instead so it doesn't remain in the index forever
       this.instance = asRan(this.instance.task);

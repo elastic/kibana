@@ -35,6 +35,7 @@ export const ruleExecutionStatusErrorReasonAttributes = {
   TIMEOUT: 'timeout',
   DISABLED: 'disabled',
   VALIDATE: 'validate',
+  SHUTDOWN: 'shutdown',
 } as const;
 
 export const ruleExecutionStatusWarningReasonAttributes = {

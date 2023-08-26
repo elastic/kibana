@@ -55,6 +55,7 @@ export enum RuleExecutionStatusErrorReasons {
   Timeout = 'timeout',
   Disabled = 'disabled',
   Validate = 'validate',
+  Shutdown = 'shutdown',
 }
 
 export enum RuleExecutionStatusWarningReasons {

@@ -26,6 +26,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { LoadedIndirectParams } from '@kbn/task-manager-plugin/server/task';
+import { TaskCancellationReason } from '@kbn/task-manager-plugin/server/task_pool';
 import { ActionExecutorContract, ActionInfo } from './action_executor';
 import {
   ActionTaskExecutorParams,
@@ -204,7 +205,7 @@ export class TaskRunnerFactory {
           );
         }
       },
-      cancel: async () => {
+      cancel: async (reason?: TaskCancellationReason) => {
         // Write event log entry
         const { spaceId } = actionTaskExecutorParams;
 
@@ -226,6 +227,7 @@ export class TaskRunnerFactory {
           request,
           consumer,
           executionId,
+          reason,
           relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
           actionExecutionId,
           ...getSource(references, source),
@@ -233,9 +235,6 @@ export class TaskRunnerFactory {
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
 
-        logger.debug(
-          `Cancelling action task for action with id ${actionId} - execution error due to timeout.`
-        );
         return { state: {} };
       },
       cleanup: async () => {

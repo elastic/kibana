@@ -46,6 +46,7 @@ export const ruleExecutionStatusSchema = schema.object({
         schema.literal(ruleExecutionStatusErrorReason.TIMEOUT),
         schema.literal(ruleExecutionStatusErrorReason.DISABLED),
         schema.literal(ruleExecutionStatusErrorReason.VALIDATE),
+        schema.literal(ruleExecutionStatusErrorReason.SHUTDOWN),
       ]),
       message: schema.string(),
     })
@@ -79,6 +80,7 @@ export const ruleLastRunSchema = schema.object({
         schema.literal(ruleExecutionStatusErrorReason.TIMEOUT),
         schema.literal(ruleExecutionStatusErrorReason.DISABLED),
         schema.literal(ruleExecutionStatusErrorReason.VALIDATE),
+        schema.literal(ruleExecutionStatusErrorReason.SHUTDOWN),
         schema.literal(ruleExecutionStatusWarningReason.MAX_EXECUTABLE_ACTIONS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_ALERTS),
       ])

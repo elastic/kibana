@@ -20,6 +20,7 @@ import { asOk, Err, isErr, isOk, Result } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { TaskCancellationReason } from './task_pool';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -179,6 +180,29 @@ describe('TaskPollingLifecycle', () => {
       mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockClear();
       clock.tick(150);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
+    });
+
+    test('stops polling if stop() is called', () => {
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const pollingLifecycle = new TaskPollingLifecycle({
+        elasticsearchAndSOAvailability$,
+        ...taskManagerOpts,
+        config: {
+          ...taskManagerOpts.config,
+          poll_interval: 100,
+        },
+      });
+
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(0);
+      elasticsearchAndSOAvailability$.next(true);
+
+      clock.tick(50);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
+
+      pollingLifecycle.stop(TaskCancellationReason.Shutdown);
+
+      clock.tick(100);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
     });
 
     test('restarts polling once the ES and SavedObjects services become available again', () => {

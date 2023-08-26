@@ -20,6 +20,7 @@ import {
   asSavedObjectExecutionSource,
 } from './action_execution_source';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { TaskCancellationReason } from '@kbn/task-manager-plugin/server/task_pool';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -1622,6 +1623,7 @@ test('writes to event log for execute timeout', async () => {
     relatedSavedObjects: [],
     request: {} as KibanaRequest,
     actionExecutionId: '2',
+    reason: TaskCancellationReason.Expired,
   });
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
   expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
@@ -1659,6 +1661,63 @@ test('writes to event log for execute timeout', async () => {
     message:
       'action: test:action1: \'action-1\' execution cancelled due to timeout - exceeded default timeout of "5m"',
   });
+
+  expect(loggerMock.debug).toHaveBeenCalledWith(
+    `Cancelling action task for action with id action1 - execution cancelled due to timeout - exceeded default timeout of "5m"`
+  );
+});
+
+test('writes to event log for cancellation due to shutdown', async () => {
+  setupActionExecutorMock();
+
+  await actionExecutor.logCancellation({
+    actionId: 'action1',
+    executionId: '123abc',
+    consumer: 'test-consumer',
+    relatedSavedObjects: [],
+    request: {} as KibanaRequest,
+    actionExecutionId: '2',
+    reason: TaskCancellationReason.Shutdown,
+  });
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+    event: {
+      action: 'execute-cancelled',
+      kind: 'action',
+    },
+    kibana: {
+      action: {
+        execution: {
+          uuid: '2',
+        },
+        name: undefined,
+        id: 'action1',
+      },
+      alert: {
+        rule: {
+          consumer: 'test-consumer',
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          id: 'action1',
+          namespace: 'some-namespace',
+          rel: 'primary',
+          type: 'action',
+          type_id: 'test',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: "action: test:action1: 'action-1' system shutdown",
+  });
+
+  expect(loggerMock.debug).toHaveBeenCalledWith(
+    `Cancelling action task for action with id action1 - system shutdown`
+  );
 });
 
 test('writes to event log for execute and execute start', async () => {
