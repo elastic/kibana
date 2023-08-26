@@ -1801,7 +1801,7 @@ instanceStateValue: true
             pattern: { alertA: [true, true, false, false, false, false] },
           });
 
-          logger.error(createdRule);
+          logger.error(JSON.stringify(createdRule));
           const ruleId = createdRule.body.id;
 
           switch (scenario.id) {
