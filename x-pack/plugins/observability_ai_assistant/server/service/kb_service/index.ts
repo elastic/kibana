@@ -204,9 +204,9 @@ export class KnowledgeBaseService {
             ],
           },
         },
-        size: 3,
+        size: 5,
         _source: {
-          includes: ['text', 'id'],
+          includes: ['text', 'id', 'is_correction', 'confidence', 'labels'],
         },
       });
 
