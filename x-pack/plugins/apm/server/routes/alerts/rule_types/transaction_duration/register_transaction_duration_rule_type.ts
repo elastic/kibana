@@ -139,7 +139,7 @@ export function registerTransactionDurationRuleType({
         searchAggregatedTransactions
       );
 
-      const termFilterQuery = !ruleParams.kqlFilter
+      const termFilterQuery = !ruleParams.searchConfiguration
         ? [
             ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
               queryEmptyString: false,
@@ -173,7 +173,9 @@ export function registerTransactionDurationRuleType({
                   searchAggregatedTransactions
                 ),
                 ...termFilterQuery,
-                ...getParsedFilterQuery(ruleParams.kqlFilter),
+                ...getParsedFilterQuery(
+                  ruleParams.searchConfiguration?.query?.query as string
+                ),
               ] as QueryDslQueryContainer[],
             },
           },
