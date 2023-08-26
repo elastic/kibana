@@ -17,7 +17,8 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe(
+// Skipped as a part of https://github.com/elastic/kibana/pull/164903
+describe.skip(
   'Alert details expandable flyout right panel json tab',
   { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
