@@ -106,6 +106,10 @@ export const INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID = `${INSIGHTS_THREAT
 
 export const INSIGHTS_CORRELATIONS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsCorrelations';
+export const INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsSupressedAlerts';
+export const SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutSupressedAlertsTechnicalPreview';
 export const INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsRelatedCases';
 export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID =
