@@ -8,6 +8,8 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
+import { EuiLink, EuiMark } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { ALERTS_ACTIONS } from '../../../common/lib/apm/user_actions';
@@ -17,7 +19,7 @@ import { useRightPanelContext } from '../context';
 import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
-import { ANALYZER_PREVIEW_ERROR, ANALYZER_PREVIEW_TITLE } from './translations';
+import { ANALYZER_PREVIEW_TITLE } from './translations';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
 const timelineId = 'timeline-1';
@@ -65,7 +67,27 @@ export const AnalyzerPreviewContainer: React.FC = () => {
       {isEnabled ? (
         <AnalyzerPreview />
       ) : (
-        <div data-test-subj={`${ANALYZER_PREVIEW_TEST_ID}Error`}>{ANALYZER_PREVIEW_ERROR}</div>
+        <div data-test-subj={`${ANALYZER_PREVIEW_TEST_ID}Error`}>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.analyzerPreviewError"
+            defaultMessage="You can only visualize events triggered by hosts configured with the Elastic Defend integration or any {sysmon} data from {winlogbeat}. Refer to {link} for more information."
+            values={{
+              sysmon: <EuiMark>sysmon</EuiMark>,
+              winlogbeat: <EuiMark>winlogbeat</EuiMark>,
+              link: (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/security/current/visual-event-analyzer.html"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.documentDetails.analyzerPreviewErrorLink"
+                    defaultMessage="Visual event analyzer"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </div>
       )}
     </ExpandablePanel>
   );
