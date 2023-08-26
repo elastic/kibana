@@ -75,6 +75,7 @@ export default async () => {
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:${servers.kibana.port}/api/security/saml/callback`,
         'xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=urn:oid:0.0.7',
       ],
+      ssl: true // not needed as for serverless ssl is always on but added it anyway
     },
 
     kbnTestServer: {
