@@ -23,12 +23,17 @@ export function registerGetApmServicesListFunction({
       descriptionForUser: i18n.translate(
         'xpack.apm.observabilityAiAssistant.functions.registerGetApmServicesList.descriptionForUser',
         {
-          defaultMessage: `Gets the list of monitored services. Only returns the service names`,
+          defaultMessage: `Gets the list of monitored services, their health status, and alerts.`,
         }
       ),
       parameters: {
         type: 'object',
         properties: {
+          'service.environment': {
+            ...NON_EMPTY_STRING,
+            description:
+              'Optionally filter the services by the environments that they are running in',
+          },
           start: {
             ...NON_EMPTY_STRING,
             description:
