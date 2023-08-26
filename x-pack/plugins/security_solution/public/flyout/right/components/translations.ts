@@ -157,6 +157,11 @@ export const PREVALENCE_TITLE = i18n.translate(
   { defaultMessage: 'Prevalence' }
 );
 
+export const PREVALENCE_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.prevalenceNoData',
+  { defaultMessage: 'No field/value pairs are uncommon' }
+);
+
 export const THREAT_MATCH_DETECTED = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatMatch',
   {
