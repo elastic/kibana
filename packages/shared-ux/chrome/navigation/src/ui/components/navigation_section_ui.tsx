@@ -9,7 +9,8 @@
 import React, { FC, useEffect, useState } from 'react';
 import {
   EuiCollapsibleNavItem,
-  EuiCollapsibleNavSubItemProps,
+  EuiCollapsibleNavItemProps,
+  EuiCollapsibleNavSubItemGroupTitle,
   EuiLink,
   EuiSideNavItemType,
 } from '@elastic/eui';
@@ -25,7 +26,7 @@ type RenderItem = EuiSideNavItemType<unknown>['renderItem'];
 const navigationNodeToEuiItem = (
   item: ChromeProjectNavigationNodeEnhanced,
   { navigateToUrl, basePath }: { navigateToUrl: NavigateToUrlFn; basePath: BasePathService }
-): EuiCollapsibleNavSubItemProps => {
+): EuiCollapsibleNavSubItemGroupTitle | EuiCollapsibleNavItemProps => {
   const href = item.deepLink?.url ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
@@ -54,6 +55,7 @@ const navigationNodeToEuiItem = (
 
   return {
     id,
+    isGroupTitle: item.isGroupTitle,
     title: item.title,
     isSelected,
     onClick:
@@ -89,7 +91,11 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
 
   // If the item has no link and no cildren, we don't want to render it
   const itemHasLinkOrChildren = (item: ChromeProjectNavigationNodeEnhanced) => {
+    const isGroupTitle = Boolean(item.isGroupTitle);
     const hasLink = Boolean(item.deepLink) || Boolean(item.href);
+    if (isGroupTitle) {
+      return true;
+    }
     if (hasLink) {
       return true;
     }

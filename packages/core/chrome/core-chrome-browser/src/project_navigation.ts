@@ -68,6 +68,8 @@ export interface ChromeProjectNavigationNode {
   deepLink?: ChromeNavLink;
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
+  /** Optional flag to indicate if the node must be treated as a group title */
+  isGroupTitle?: boolean;
   /** Optional children of the navigation node */
   children?: ChromeProjectNavigationNode[];
   /**
@@ -139,6 +141,8 @@ export interface NodeDefinition<
   cloudLink?: CloudLinkId;
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
+  /** Optional flag to indicate if the node must be treated as a group title */
+  isGroupTitle?: boolean;
   /** Optional children of the navigation node */
   children?: NonEmptyArray<NodeDefinition<LinkId, Id, ChildrenId>>;
   /**
