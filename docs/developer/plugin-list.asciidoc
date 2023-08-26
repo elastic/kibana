@@ -149,7 +149,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 It is possible to add comments to expressions by starting them with a `//` sequence
@@ -523,8 +523,10 @@ Plugin server-side only. Plugin has three main functions:
 |{kib-repo}blob/{branch}/x-pack/plugins/ecs_data_quality_dashboard/README.md[ecsDataQualityDashboard]
 |This plugin implements (server) APIs used to render the content of the Data Quality dashboard.
 
+
 |{kib-repo}blob/{branch}/x-pack/plugins/elastic_assistant/README.md[elasticAssistant]
-|This plugin implements (server) APIs for the Elastic AI Assistant.
+|This plugin implements (only) server APIs for the Elastic AI Assistant.
+
 
 |<<enhanced-embeddables-plugin>>
 |Enhances Embeddables by registering a custom factory provider. The enhanced factory provider
