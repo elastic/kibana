@@ -15,15 +15,17 @@ import { IntegrationsPopover } from '../../../../../detections/components/rules/
 import { SeverityBadge } from '../../../../../detections/components/rules/severity_badge';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
-import type { RuleInstallationInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  RuleSignatureId,
+  RuleResponse,
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getNormalizedSeverity } from '../helpers';
 
-export type TableColumn = EuiBasicTableColumn<RuleInstallationInfoForReview>;
+export type TableColumn = EuiBasicTableColumn<RuleResponse>;
 
 interface RuleNameProps {
   name: string;
@@ -32,13 +34,13 @@ interface RuleNameProps {
 
 const RuleName = ({ name, ruleId }: RuleNameProps) => {
   const {
-    actions: { openFlyoutForRuleId },
+    actions: { openRulePreview },
   } = useAddPrebuiltRulesTableContext();
 
   return (
     <EuiLink
       onClick={() => {
-        openFlyoutForRuleId(ruleId);
+        openRulePreview(ruleId);
       }}
     >
       {name}
@@ -49,8 +51,8 @@ const RuleName = ({ name, ruleId }: RuleNameProps) => {
 export const RULE_NAME_COLUMN: TableColumn = {
   field: 'name',
   name: i18n.COLUMN_RULE,
-  render: (value: RuleInstallationInfoForReview['name'], rule: RuleInstallationInfoForReview) => (
-    <RuleName name={value} ruleId={rule.rule_id} />
+  render: (value: RuleResponse['name'], rule: RuleResponse) => (
+    <RuleName name={value} ruleId={rule.id} />
   ),
   sortable: true,
   truncateText: true,
@@ -62,7 +64,7 @@ const TAGS_COLUMN: TableColumn = {
   field: 'tags',
   name: null,
   align: 'center',
-  render: (tags: RuleInstallationInfoForReview['tags']) => {
+  render: (tags: RuleResponse['tags']) => {
     if (tags == null || tags.length === 0) {
       return null;
     }
@@ -91,7 +93,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   field: 'related_integrations',
   name: null,
   align: 'center',
-  render: (integrations: RuleInstallationInfoForReview['related_integrations']) => {
+  render: (integrations: RuleResponse['related_integrations']) => {
     if (integrations == null || integrations.length === 0) {
       return null;
     }
@@ -159,7 +161,7 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         field: 'severity',
         name: i18n.COLUMN_SEVERITY,
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-        sortable: ({ severity }: RuleInstallationInfoForReview) => getNormalizedSeverity(severity),
+        sortable: ({ severity }: RuleResponse) => getNormalizedSeverity(severity),
         truncateText: true,
         width: '12%',
       },
