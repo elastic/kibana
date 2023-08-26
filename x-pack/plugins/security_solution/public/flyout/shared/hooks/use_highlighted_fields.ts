@@ -26,19 +26,15 @@ export interface UseHighlightedFieldsParams {
 }
 
 export interface UseHighlightedFieldsResult {
-  /**
-   * Highlighted field name (label or if null, falls back to id)
-   */
-  field: string;
-  description: {
+  [fieldName: string]: {
     /**
-     * Highlighted field name (overrideField or if null, falls back to id)
+     * If the field has a custom override
      */
-    field: string;
+    overrideField?: string;
     /**
-     * Highlighted field value
+     * Values for the field
      */
-    values: string[] | null | undefined;
+    values: string[];
   };
 }
 
@@ -48,8 +44,8 @@ export interface UseHighlightedFieldsResult {
 export const useHighlightedFields = ({
   dataFormattedForFieldBrowser,
   investigationFields,
-}: UseHighlightedFieldsParams): UseHighlightedFieldsResult[] => {
-  if (!dataFormattedForFieldBrowser) return [];
+}: UseHighlightedFieldsParams): UseHighlightedFieldsResult => {
+  if (!dataFormattedForFieldBrowser) return {};
 
   const eventCategories = getEventCategoriesFromData(dataFormattedForFieldBrowser);
 
@@ -78,19 +74,26 @@ export const useHighlightedFields = ({
     highlightedFieldsOverride: investigationFields ?? [],
   });
 
-  return tableFields.reduce<UseHighlightedFieldsResult[]>((acc, field) => {
+  return tableFields.reduce<UseHighlightedFieldsResult>((acc, field) => {
     const item = dataFormattedForFieldBrowser.find(
       (data) => data.field === field.id || (field.legacyId && data.field === field.legacyId)
     );
-    if (!item || isEmpty(item.values)) {
+    if (!item) {
       return acc;
     }
 
-    // If we found the data by its legacy id we swap the ids to display the correct one
+    // if there aren't any values we can skip this highlighted field
+    const fieldValues = item.values;
+    if (!fieldValues || isEmpty(fieldValues)) {
+      return acc;
+    }
+
+    // if we found the data by its legacy id we swap the ids to display the correct one
     if (item.field === field.legacyId) {
       field.id = field.legacyId;
     }
 
+    // if the field is agent.id and the event is not an endpoint event we skip it
     if (
       field.id === 'agent.id' &&
       !isAlertFromEndpointEvent({ data: dataFormattedForFieldBrowser })
@@ -98,15 +101,12 @@ export const useHighlightedFields = ({
       return acc;
     }
 
-    return [
+    return {
       ...acc,
-      {
-        field: field.label ?? field.id,
-        description: {
-          field: field.overrideField ?? field.id,
-          values: item.values,
-        },
+      [field.id]: {
+        ...(field.overrideField && { overrideField: field.overrideField }),
+        values: fieldValues,
       },
-    ];
-  }, []);
+    };
+  }, {});
 };
