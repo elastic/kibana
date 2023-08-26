@@ -299,3 +299,11 @@ export const RESPONSE_TITLE = i18n.translate(
 export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
   defaultMessage: 'There are no response actions defined for this event.',
 });
+
+export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
