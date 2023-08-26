@@ -20,7 +20,6 @@ import type {
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesResponse,
-  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsRemoveReferencesToOptions,
@@ -217,7 +216,7 @@ export interface SavedObjectsClientContract {
    * See documentation for `.resolve`.
    *
    * @param objects - an array of objects to resolve (contains id and type)
-   * @param options {@link SavedObjectsResolveOptions} - options for the bulk resolve operation
+   * @param options {@link SavedObjectsGetOptions} - options for the bulk resolve operation
    * @returns the {@link SavedObjectsBulkResolveResponse}
    * @example
    *
@@ -232,7 +231,7 @@ export interface SavedObjectsClientContract {
    */
   bulkResolve<T = unknown>(
     objects: SavedObjectsBulkResolveObject[],
-    options?: SavedObjectsResolveOptions
+    options?: SavedObjectsGetOptions
   ): Promise<SavedObjectsBulkResolveResponse<T>>;
 
   /**
@@ -248,13 +247,13 @@ export interface SavedObjectsClientContract {
    *
    * @param type - The type of SavedObject to retrieve
    * @param id - The ID of the SavedObject to retrieve
-   * @param options {@link SavedObjectsResolveOptions} - options for the resolve operation
+   * @param options {@link SavedObjectsGetOptions} - options for the resolve operation
    * @returns the {@link SavedObjectsResolveResponse}
    */
   resolve<T = unknown>(
     type: string,
     id: string,
-    options?: SavedObjectsResolveOptions
+    options?: SavedObjectsGetOptions
   ): Promise<SavedObjectsResolveResponse<T>>;
 
   /**
