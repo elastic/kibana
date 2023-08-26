@@ -224,10 +224,7 @@ export const cli = () => {
                   },
                 },
                 kbnTestServer: {
-                  serverArgs: [
-                    `--server.port=${kibanaPort}`,
-                    `--elasticsearch.hosts=http://localhost:${esPort}`,
-                  ],
+                  serverArgs: [`--server.port=${kibanaPort}`],
                 },
               },
               (vars) => {
@@ -242,9 +239,10 @@ export const cli = () => {
                   vars.kbnTestServer.serverArgs,
                   (value) =>
                     !(
-                      value.includes('--elasticsearch.hosts=http://localhost:9220') ||
+                      value.includes('--elasticsearch.hosts=') ||
                       value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
-                      value.includes('--xpack.fleet.agents.elasticsearch.host')
+                      value.includes('--xpack.fleet.agents.elasticsearch.host') ||
+                      value.includes('--server.publicBaseUrl')
                     )
                 );
 
@@ -294,7 +292,24 @@ export const cli = () => {
                 if (vars.serverless) {
                   log.info(`Serverless mode detected`);
 
-                  if (configFromTestFile?.productTypes) {
+                  vars.kbnTestServer.serverArgs.push(
+                    `--elasticsearch.hosts=https://localhost:${esPort}`,
+                    `--server.publicBaseUrl=https://localhost:${kibanaPort}`
+                  );
+                  vars.esTestCluster.serverArgs.push(
+                    `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://host.docker.internal:${kibanaPort}`,
+                    `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://host.docker.internal:${kibanaPort}/logout`,
+                    `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://host.docker.internal:${kibanaPort}/api/security/saml/callback`
+                  );
+                } else {
+                  vars.kbnTestServer.serverArgs.push(
+                    `--elasticsearch.hosts=http://localhost:${esPort}`,
+                    `--server.publicBaseUrl=http://localhost:${kibanaPort}`
+                  );
+                }
+
+                if (configFromTestFile?.productTypes) {
+                  if (vars.serverless) {
                     vars.kbnTestServer.serverArgs.push(
                       `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
                         ...configFromTestFile.productTypes,
@@ -307,11 +322,11 @@ export const cli = () => {
                         ...configFromTestFile.productTypes,
                       ])}`
                     );
+                  } else {
+                    log.warning(
+                      `'ftrConfig.productTypes' ignored. Value applies only when running kibana is serverless.\nFile: ${filePath}`
+                    );
                   }
-                } else if (configFromTestFile?.productTypes) {
-                  log.warning(
-                    `'ftrConfig.productTypes' ignored. Value applies only when running kibana is serverless.\nFile: ${filePath}`
-                  );
                 }
 
                 return vars;
@@ -356,20 +371,16 @@ ${JSON.stringify(config.getAll(), null, 2)}
               { retries: 2, forever: false }
             );
 
-            await pRetry(
-              async () =>
-                runKibanaServer({
-                  procs,
-                  config,
-                  installDir: options?.installDir,
-                  extraKbnOpts:
-                    options?.installDir || options?.ci || !isOpen
-                      ? []
-                      : ['--dev', '--no-dev-config', '--no-dev-credentials'],
-                  onEarlyExit,
-                }),
-              { retries: 2, forever: false }
-            );
+            await runKibanaServer({
+              procs,
+              config,
+              installDir: options?.installDir,
+              extraKbnOpts:
+                options?.installDir || options?.ci || !isOpen
+                  ? []
+                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+              onEarlyExit,
+            });
 
             await providers.loadAll();
 
