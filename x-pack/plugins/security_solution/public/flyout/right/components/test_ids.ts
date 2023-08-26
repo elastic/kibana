@@ -116,8 +116,6 @@ export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
 
 export const INSIGHTS_PREVALENCE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsPrevalence';
-export const INSIGHTS_PREVALENCE_ROW_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsPrevalenceRow';
 
 /* Visualizations section */
 

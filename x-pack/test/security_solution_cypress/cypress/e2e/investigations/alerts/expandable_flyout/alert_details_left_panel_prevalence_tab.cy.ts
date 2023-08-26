@@ -23,6 +23,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_HOST_PREVALENCE_CELL,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_USER_PREVALENCE_CELL,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_DATE_PICKER,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_prevalence_tab';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
@@ -52,6 +53,8 @@ describe('Alert details expandable flyout left panel prevalence', () => {
     cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON)
       .should('be.visible')
       .and('have.text', 'Prevalence');
+
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_DATE_PICKER).should('be.visible');
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE).should('be.visible');
     cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_TYPE_CELL)
