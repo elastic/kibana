@@ -81,12 +81,14 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof hits1.kibana.alert.time_range).to.be('object');
       expect(typeof hits1.kibana.alert.uuid).to.be('string');
       expect(typeof hits1.kibana.alert.url).to.be('string');
+      expect(typeof hits1.kibana.alert.duration.us).to.be('string');
       expect(typeof hits1.kibana.version).to.be('string');
 
       // remove fields we aren't going to compare directly
       const fields = [
         '@timestamp',
         'event.action',
+        'kibana.alert.duration.us',
         'kibana.alert.flapping_history',
         'kibana.alert.maintenance_window_ids',
         'kibana.alert.reason',
@@ -118,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             action_group: 'query matched',
             flapping: false,
-            duration: { us: '0' },
+            duration: {},
             instance: { id: 'query matched' },
             status: 'active',
             workflow_status: 'open',
