@@ -207,8 +207,6 @@ export const cli = () => {
             const fleetServerPort: number = getFleetServerPort();
             const configFromTestFile = parseTestFileConfig(filePath);
 
-            debugger;
-
             const config = await readConfigFile(
               log,
               EsVersion.getDefault(),
