@@ -197,3 +197,10 @@ export const CORRELATIONS_CASE_NAME_COLUMN_TITLE = i18n.translate(
     defaultMessage: 'Name',
   }
 );
+
+export const CORRELATIONS_DETAILS_TABLE_FILTER = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.correlationsDetailsTableFilter',
+  {
+    defaultMessage: 'Correlations Details Table Alert IDs',
+  }
+);
