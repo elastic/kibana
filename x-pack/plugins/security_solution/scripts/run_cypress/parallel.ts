@@ -239,8 +239,8 @@ export const cli = () => {
                 vars.kbnTestServer.serverArgs.concat([
                   `--server.port=${kibanaPort}`,
                   `--elasticsearch.hosts=http://localhost:${esPort}`,
-                  `--server.publicBaseUrl=http://localhost:${kibanaPort}`
-                ])
+                  `--server.publicBaseUrl=http://localhost:${kibanaPort}`,
+                ]);
 
                 const hasFleetServerArgs = _.some(
                   vars.kbnTestServer.serverArgs,
