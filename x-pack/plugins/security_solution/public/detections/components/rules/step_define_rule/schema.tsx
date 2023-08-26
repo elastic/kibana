@@ -78,7 +78,6 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  // TODO: populate the dataViewTitle in a better way
   dataViewId: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
@@ -119,7 +118,6 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  // TODO: populate the dataViewTitle in a better way
   dataViewTitle: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewTitleSelector',
