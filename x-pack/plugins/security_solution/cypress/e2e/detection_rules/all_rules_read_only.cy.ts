@@ -16,11 +16,14 @@ import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../screens/lists';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-import { dismissCallOut, getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
+import {
+  dismissCallOut,
+  getCallOut,
+  waitForCallOutToBeShown,
+  MISSING_PRIVILEGES_CALLOUT,
+} from '../../tasks/common/callouts';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-
-const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
 describe('All rules - read only', () => {
   before(() => {

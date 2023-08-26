@@ -68,6 +68,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
+    // @ts-expect-error ts upgrade v4.7.4
     experimentalFeatures: {
       agentTamperProtectionEnabled: true,
       diagnosticFileUploadEnabled: true,

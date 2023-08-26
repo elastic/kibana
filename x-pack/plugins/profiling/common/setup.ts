@@ -26,6 +26,9 @@ export interface SetupState {
     symbolizer: {
       installed: boolean;
     };
+    apm: {
+      profilingEnabled: boolean;
+    };
   };
   resource_management: {
     enabled: boolean;
@@ -59,6 +62,9 @@ export function createDefaultSetupState(): SetupState {
       symbolizer: {
         installed: false,
       },
+      apm: {
+        profilingEnabled: false,
+      },
     },
     resource_management: {
       enabled: false,
@@ -72,13 +78,19 @@ export function createDefaultSetupState(): SetupState {
   };
 }
 
-export function areResourcesSetup(state: SetupState): boolean {
+export function areResourcesSetupForViewer(state: SetupState): boolean {
+  return (
+    state.policies.collector.installed &&
+    state.policies.symbolizer.installed &&
+    !state.policies.apm.profilingEnabled
+  );
+}
+
+export function areResourcesSetupForAdmin(state: SetupState): boolean {
   return (
     state.resource_management.enabled &&
     state.resources.created &&
     state.permissions.configured &&
-    state.policies.collector.installed &&
-    state.policies.symbolizer.installed &&
     state.settings.configured
   );
 }

@@ -114,7 +114,10 @@ export const Reroute: FunctionComponent = () => {
   const [{ fields }] = useFormData({ watch: ['fields.dataset', 'fields.namespace'] });
 
   useEffect(() => {
-    if (fields?.dataset.length > 0 || fields?.namespace.length > 0) {
+    if (
+      (fields?.dataset && fields.dataset.length > 0) ||
+      (fields?.namespace && fields.namespace.length > 0)
+    ) {
       form.setFieldValue('fields.destination', '');
     }
   }, [form, fields]);
@@ -127,7 +130,9 @@ export const Reroute: FunctionComponent = () => {
         component={Field}
         componentProps={{
           euiFieldProps: {
-            disabled: fields?.dataset.length > 0 || fields?.namespace.length > 0,
+            disabled:
+              (fields?.dataset && fields.dataset.length > 0) ||
+              (fields?.namespace && fields.namespace.length > 0),
           },
         }}
         path="fields.destination"

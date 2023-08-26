@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const CLOSE_BTN = '[data-test-subj="close"]';
+export const FIELD_BROWSER_CLOSE_BTN = '[data-test-subj="close"]';
 
 export const FIELDS_BROWSER_CONTAINER = '[data-test-subj="fields-browser-container"]';
 
@@ -33,6 +33,9 @@ export const FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER =
   '[data-test-subj="timeline"] [data-test-subj="header-text-host.geo.continent_name"]';
 
 export const FIELDS_BROWSER_MESSAGE_CHECKBOX = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="field-message-checkbox"]`;
+
+export const GET_FIELD_CHECKBOX = (fieldName: string) =>
+  `${FIELDS_BROWSER_CONTAINER} [data-test-subj="field-${fieldName}-checkbox"]`;
 
 export const FIELDS_BROWSER_MESSAGE_HEADER =
   '[data-test-subj="timeline"] [data-test-subj="header-text-message"]';

@@ -169,7 +169,7 @@ export const RULES_SELECTED_TAG = '.euiSelectableListItem[aria-checked="true"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
 
-export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
+export const AUTO_REFRESH_POPOVER_TRIGGER_BUTTON = '[data-test-subj="autoRefreshButton"]';
 
 export const REFRESH_RULES_TABLE_BUTTON = '[data-test-subj="refreshRulesAction-linkIcon"]';
 

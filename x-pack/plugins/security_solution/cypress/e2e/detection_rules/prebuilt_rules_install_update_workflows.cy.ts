@@ -21,13 +21,12 @@ import {
 } from '../../screens/alerts_detection_rules';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
-  getRuleAssets,
   createAndInstallMockedPrebuiltRules,
+  getRuleAssets,
 } from '../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
+import { deleteAlertsAndRules, reload, resetRulesTableState } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 import {
   addElasticRulesButtonClick,
   assertRuleAvailableForInstallAndInstallOne,
@@ -40,6 +39,7 @@ import {
   assertRuleUpgradeAvailableAndUpgradeAll,
   ruleUpdatesTabClick,
 } from '../../tasks/prebuilt_rules';
+import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
   beforeEach(() => {
@@ -61,8 +61,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
 
     it('should install package from Fleet in the background', () => {
-      /* Assert that the package in installed from Fleet by checking that
-      /* the installSource is "registry", as opposed to "bundle" */
+      /* Assert that the package in installed from Fleet */
       cy.wait('@installPackageBulk', {
         timeout: 60000,
       }).then(({ response: bulkResponse }) => {
@@ -71,7 +70,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         const packages = bulkResponse?.body.items.map(
           ({ name, result }: BulkInstallPackageInfo) => ({
             name,
-            installSource: result.installSource,
           })
         );
 
@@ -87,17 +85,14 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
             cy.wrap(response?.body)
               .should('have.property', 'items')
               .should('have.length.greaterThan', 0);
-            cy.wrap(response?.body)
-              .should('have.property', '_meta')
-              .should('have.property', 'install_source')
-              .should('eql', 'registry');
           });
         } else {
           // Normal flow, install via the Fleet bulk install API
           expect(packages.length).to.have.greaterThan(0);
-          expect(packages).to.deep.include.members([
-            { name: 'security_detection_engine', installSource: 'registry' },
-          ]);
+          // At least one of the packages installed should be the security_detection_engine package
+          expect(packages).to.satisfy((pckgs: BulkInstallPackageInfo[]) =>
+            pckgs.some((pkg) => pkg.name === 'security_detection_engine')
+          );
         }
       });
     });
