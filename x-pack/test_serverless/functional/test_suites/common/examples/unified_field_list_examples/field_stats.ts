@@ -100,22 +100,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         );
       });
 
-      it('should return histograms for scripted date fields', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('scripted_date');
-        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be(
-          'timeDistribution'
-        );
-        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
-      });
-
-      it('should return top values for scripted string fields', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('scripted_string');
-        expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('topValues');
-        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
-        expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
-          'hello\n100%'
-        );
-      });
+      // TODO: Scripted fields tests dropped since they're not supported in Serverless
 
       it('should return examples for non-aggregatable or geo fields', async () => {
         await PageObjects.unifiedFieldList.clickFieldListItem('geo.coordinates');

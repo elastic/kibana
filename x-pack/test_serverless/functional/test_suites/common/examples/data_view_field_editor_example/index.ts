@@ -14,6 +14,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const es = getService('es');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'svlCommonNavigation']);
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
+  const retry = getService('retry');
 
   describe('data view field editor example', function () {
     before(async () => {
@@ -35,7 +37,17 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
       // TODO: Navigation to Data View Management is different in Serverless
       await PageObjects.common.navigateToApp('management');
-      await testSubjects.click('app-card-dataViews');
+      await retry.waitFor('data views link', async () => {
+        if (await testSubjects.exists('app-card-dataViews')) {
+          await testSubjects.click('app-card-dataViews');
+          return true;
+        }
+        if (await find.existsByCssSelector('[href*="/dataViews"]')) {
+          await find.clickByCssSelector('[href*="/dataViews"]');
+          return true;
+        }
+        return false;
+      });
       await PageObjects.settings.createIndexPattern('blogs', null);
       await PageObjects.common.navigateToApp('dataViewFieldEditorExample');
     });
