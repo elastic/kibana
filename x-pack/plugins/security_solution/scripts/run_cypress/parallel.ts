@@ -139,8 +139,6 @@ export const cli = () => {
       };
 
       const getKibanaPort = <T>(): T | number => {
-        return 5690;
-
         if (isOpen) {
           return 5620;
         }
