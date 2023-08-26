@@ -137,12 +137,12 @@ export const useMatrixHistogram = ({
                   buckets: histogramBuckets,
                 }));
                 endTracking('success');
-                searchSubscription$.current.unsubscribe();
+                searchSubscription$.current?.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
                 addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
                 endTracking('invalid');
-                searchSubscription$.current.unsubscribe();
+                searchSubscription$.current?.unsubscribe();
               }
             },
             error: (msg) => {
@@ -151,11 +151,11 @@ export const useMatrixHistogram = ({
                 title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
               });
               endTracking('error');
-              searchSubscription$.current.unsubscribe();
+              searchSubscription$.current?.unsubscribe();
             },
           });
       };
-      searchSubscription$.current.unsubscribe();
+      searchSubscription$.current?.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
@@ -201,7 +201,7 @@ export const useMatrixHistogram = ({
       search(matrixHistogramRequest);
     }
     return () => {
-      searchSubscription$.current.unsubscribe();
+      searchSubscription$.current?.unsubscribe();
       abortCtrl.current.abort();
     };
   }, [matrixHistogramRequest, search, skip]);
@@ -209,7 +209,7 @@ export const useMatrixHistogram = ({
   useEffect(() => {
     if (skip) {
       setLoading(false);
-      searchSubscription$.current.unsubscribe();
+      searchSubscription$.current?.unsubscribe();
       abortCtrl.current.abort();
     }
   }, [skip]);
