@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
-import type { ClusterInfo } from './get_cluster_info';
+import { firstValueFrom } from 'rxjs';
+import type {
+  ElasticsearchCapabilities,
+  ElasticsearchClient,
+} from '@kbn/core-elasticsearch-server';
+import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 
 const SERVERLESS_BUILD_FLAVOR = 'serverless';
 
@@ -21,4 +25,16 @@ export const getElasticsearchCapabilities = ({
   return {
     serverless: buildFlavor === SERVERLESS_BUILD_FLAVOR,
   };
+};
+
+/**
+ * Returns the capabilities for the ES cluster the provided client is connected to.
+ *
+ * @internal
+ */
+export const getCapabilitiesFromClient = async (
+  client: ElasticsearchClient
+): Promise<ElasticsearchCapabilities> => {
+  const clusterInfo = await firstValueFrom(getClusterInfo$(client));
+  return getElasticsearchCapabilities({ clusterInfo });
 };
