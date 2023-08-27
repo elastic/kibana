@@ -21,8 +21,7 @@ export const FIELD = (value: string) => {
   return `[data-test-subj="event-field-${value}"]`;
 };
 
-export const FILTER_INPUT =
-  '[data-test-subj="securitySolutionDocumentDetailsFlyoutBody"] [data-test-subj="search-input"]';
+export const FILTER_INPUT = '[data-test-subj="eventDetails"] .euiFieldSearch';
 
 export const INDICATOR_MATCH_ENRICHMENT_SECTION = '[data-test-subj="threat-match-detected"]';
 
@@ -56,7 +55,7 @@ export const CELL_EXPANSION_POPOVER = '[data-test-subj="euiDataGridExpansionPopo
 
 export const USER_DETAILS_LINK = '[data-test-subj="users-link-anchor"]';
 
-export const TABLE_TAB = '[data-test-subj="securitySolutionDocumentDetailsFlyoutTableTab"]';
+export const TABLE_TAB = '[data-test-subj="tableTab"]';
 
 export const TABLE_CONTAINER = '[data-test-subj="event-fields-browser"]';
 

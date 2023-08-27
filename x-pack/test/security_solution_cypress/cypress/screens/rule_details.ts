@@ -80,7 +80,7 @@ export const FIELDS_BROWSER_BTN =
   '[data-test-subj="alertsTable"] [data-test-subj="show-field-browser"]';
 
 export const LAST_EXECUTION_STATUS_REFRESH_BUTTON =
-  '[data-test-subj="ruleExecutionStatusRefreshButton"]';
+  '[data-test-subj="ruleLastExecutionStatusRefreshButton"]';
 
 export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
 

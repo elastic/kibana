@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import { PerformRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { filterBy, openTable } from '../../../../tasks/rule_details_flyout';
 import { generateEvent } from '../../../../objects/event';
 import { createDocument, deleteAllDocuments } from '../../../../tasks/api_calls/elasticsearch';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
@@ -34,7 +35,6 @@ import {
   visitWithoutDateRange,
 } from '../../../../tasks/login';
 import { expandFirstAlert } from '../../../../tasks/alerts';
-import { filterBy, openTable } from '../../../../tasks/alerts_details';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   installIntegrations,
