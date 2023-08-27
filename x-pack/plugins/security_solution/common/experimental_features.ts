@@ -92,11 +92,11 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables Protections/Detections Coverage Overview page (Epic link https://github.com/elastic/security-team/issues/2905)
    *
-   * This flag aims to facilitate the development process as the feature may not make it to 8.9 release.
+   * This flag aims to facilitate the development process as the feature may not make it to 8.10 release.
    *
    * The flag doesn't have to be documented and has to be removed after the feature is ready to release.
    */
-  detectionsCoverageOverview: false,
+  detectionsCoverageOverview: true,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings

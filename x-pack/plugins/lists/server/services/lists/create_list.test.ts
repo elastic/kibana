@@ -15,7 +15,7 @@ import { getIndexESListMock } from '../../schemas/elastic_query/index_es_list_sc
 import { CreateListOptions, createList } from './create_list';
 import { getCreateListOptionsMock } from './create_list.mock';
 
-describe('crete_list', () => {
+describe('create_list', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -27,7 +27,7 @@ describe('crete_list', () => {
   test('it returns a list as expected with the id changed out for the elastic id', async () => {
     const options = getCreateListOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.index.mockResponse(
+    esClient.create.mockResponse(
       // @ts-expect-error not full response interface
       { _id: 'elastic-id-123' }
     );
@@ -43,7 +43,7 @@ describe('crete_list', () => {
       serializer: '(?<value>)',
     };
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.index.mockResponse(
+    esClient.create.mockResponse(
       // @ts-expect-error not full response interface
       { _id: 'elastic-id-123' }
     );
@@ -67,14 +67,14 @@ describe('crete_list', () => {
       index: LIST_INDEX,
       refresh: 'wait_for',
     };
-    expect(options.esClient.index).toBeCalledWith(expected);
+    expect(options.esClient.create).toBeCalledWith(expected);
   });
 
   test('It returns an auto-generated id if id is sent in undefined', async () => {
     const options = getCreateListOptionsMock();
     options.id = undefined;
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.index.mockResponse(
+    esClient.create.mockResponse(
       // @ts-expect-error not full response interface
       { _id: 'elastic-id-123' }
     );

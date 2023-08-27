@@ -16,7 +16,7 @@ export * from './get_timeline/get_timeline_route';
 export * from './get_timelines/get_timelines_route';
 export * from './import_timelines/import_timelines_route';
 export * from './patch_timelines/patch_timelines_schema';
-export * from './persist_favorite/persist_favorite_schema';
+export * from './persist_favorite/persist_favorite_route';
 export * from './persist_note/persist_note_route';
 export * from './pinned_events/pinned_events_route';
 export * from './install_prepackaged_timelines/install_prepackaged_timelines';

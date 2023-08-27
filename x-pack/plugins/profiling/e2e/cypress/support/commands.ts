@@ -42,10 +42,10 @@ Cypress.Commands.add('getByTestSubj', (selector: string) => {
   return cy.get(`[data-test-subj="${selector}"]`);
 });
 
-Cypress.Commands.add('visitKibana', (url: string, rangeFrom?: string, rangeTo?: string) => {
+Cypress.Commands.add('visitKibana', (url, query) => {
   const urlPath = URL.format({
     pathname: url,
-    query: { rangeFrom, rangeTo },
+    query,
   });
 
   cy.visit(urlPath);
@@ -54,3 +54,20 @@ Cypress.Commands.add('visitKibana', (url: string, rangeFrom?: string, rangeTo?: 
     timeout: 50000,
   });
 });
+
+Cypress.Commands.add(
+  'addKqlFilter',
+  ({ key, value, dataTestSubj = 'profilingUnifiedSearchBar', waitForSuggestion = true }) => {
+    cy.getByTestSubj(dataTestSubj).type(key);
+    cy.contains(key);
+    cy.getByTestSubj(`autocompleteSuggestion-field-${key}-`).click();
+    // Do not close quotes here as it will not display the suggestion box
+    cy.getByTestSubj(dataTestSubj).type(`: "${value}`);
+    if (waitForSuggestion) {
+      cy.getByTestSubj(
+        Cypress.$.escapeSelector(`autocompleteSuggestion-value-"${value}"-`)
+      ).click();
+    }
+    cy.getByTestSubj(dataTestSubj).type('{enter}');
+  }
+);
