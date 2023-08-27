@@ -48,6 +48,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
@@ -70,6 +71,7 @@ describe('Detection rules, override', { tags: ['@ess', '@brokenInServerless'] },
 
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
   });
 
   it('Creates and enables a new custom rule with override option', function () {
