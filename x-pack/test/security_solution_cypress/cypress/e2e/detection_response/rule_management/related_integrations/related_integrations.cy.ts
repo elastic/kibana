@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { PerformRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { filterBy, openTable } from '../../../../tasks/rule_details_flyout';
 import { generateEvent } from '../../../../objects/event';
-import { createDocument, deleteAllDocuments } from '../../../../tasks/api_calls/elasticsearch';
+import { createDocument, deleteDataStream } from '../../../../tasks/api_calls/elasticsearch';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import { FIELD } from '../../../../screens/alerts_details';
 import { INTEGRATION_LINK, INTEGRATION_STATUS } from '../../../../screens/rule_details';
@@ -48,7 +48,7 @@ import { ruleDetailsUrl } from '../../../../urls/navigation';
 import { enablesRule, waitForPageToBeLoaded } from '../../../../tasks/rule_details';
 
 describe('Related integrations', { tags: ['@ess', '@brokenInServerless'] }, () => {
-  const TEST_INDEX = 'logs-related-integrations-test';
+  const DATA_STREAM_NAME = 'logs-related-integrations-test';
   const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
   const RULE_RELATED_INTEGRATIONS: IntegrationDefinition[] = [
     {
@@ -70,7 +70,7 @@ describe('Related integrations', { tags: ['@ess', '@brokenInServerless'] }, () =
   ];
   const PREBUILT_RULE = createRuleAssetSavedObject({
     name: PREBUILT_RULE_NAME,
-    index: [TEST_INDEX],
+    index: [DATA_STREAM_NAME],
     query: '*:*',
     rule_id: 'rule_1',
     related_integrations: RULE_RELATED_INTEGRATIONS.map((x) => omit(x, ['installed', 'enabled'])),
@@ -210,8 +210,8 @@ describe('Related integrations', { tags: ['@ess', '@brokenInServerless'] }, () =
       it('the alerts generated should have a "kibana.alert.rule.parameters.related_integrations" field containing the integrations', () => {
         const RELATED_INTEGRATION_FIELD = 'kibana.alert.rule.parameters.related_integrations';
 
-        deleteAllDocuments(TEST_INDEX);
-        createDocument(TEST_INDEX, generateEvent());
+        deleteDataStream(DATA_STREAM_NAME);
+        createDocument(DATA_STREAM_NAME, generateEvent());
 
         waitForPageToBeLoaded(PREBUILT_RULE_NAME);
         enablesRule();

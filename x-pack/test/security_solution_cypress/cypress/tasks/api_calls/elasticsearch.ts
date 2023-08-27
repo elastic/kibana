@@ -15,6 +15,15 @@ export const deleteIndex = (index: string) => {
   });
 };
 
+export const deleteDataStream = (dataStreamName: string) => {
+  rootRequest({
+    method: 'DELETE',
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/_data_stream/${dataStreamName}`,
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    failOnStatusCode: false,
+  });
+};
+
 export const deleteAllDocuments = (target: string) =>
   rootRequest({
     method: 'POST',
