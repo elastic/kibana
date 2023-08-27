@@ -30,7 +30,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'confluence_cloud.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['confluence', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.confluence.name', {
@@ -51,7 +51,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'jira_cloud.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['jira', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.jira.name', {
@@ -121,7 +121,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'network_drive.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['network', 'drive', 'file', 'directory', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.networkDrive.name', {
