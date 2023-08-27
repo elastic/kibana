@@ -22,7 +22,7 @@ module.exports = {
   // An array of regexp pattern strings that are matched against, matched files will skip transformation:
   transformIgnorePatterns: [
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))[/\\\\].+\\.js$',
+    'node_modules/(?!langchain|langsmith/.*)',
   ],
   setupFilesAfterEnv: [
     '<rootDir>/packages/kbn-test/src/jest/setup/after_env.integration.js',
