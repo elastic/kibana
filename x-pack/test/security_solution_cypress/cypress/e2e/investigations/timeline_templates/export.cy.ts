@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { exportTimeline } from '../../../tasks/timelines';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
@@ -18,7 +17,7 @@ import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../../tasks/common';
 import { searchByTitle } from '../../../tasks/table_pagination';
 
-describe('Export timelines', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
 
