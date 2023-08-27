@@ -789,6 +789,7 @@ describe('stop', () => {
   });
 
   it('stops plugins in the correct order', async () => {
+    // stop order: 3 => 1 => 2
     const [plugin1, plugin2, plugin3] = [
       createPlugin('plugin-1', { required: ['plugin-2'] }),
       createPlugin('plugin-2'),
@@ -850,6 +851,44 @@ describe('stop', () => {
       expect.arrayContaining([
         `"timeout-stop-1" plugin didn't stop in 30sec., move on to the next.`,
       ])
+    );
+  });
+
+  it('logs a message if a plugin fails top stop', async () => {
+    // stop order: 3 => 1 => 2
+    const [plugin1, plugin2, plugin3] = [
+      createPlugin('plugin-1', { required: ['plugin-2'] }),
+      createPlugin('plugin-2'),
+      createPlugin('plugin-3', { required: ['plugin-1', 'plugin-2'] }),
+    ].map((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+      return plugin;
+    });
+
+    const stopSpy1 = jest
+      .spyOn(plugin1, 'stop')
+      .mockImplementationOnce(() => Promise.reject('woups'));
+    const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
+    const stopSpy3 = jest.spyOn(plugin3, 'stop').mockImplementationOnce(() => Promise.resolve());
+
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    const stopPromise = pluginsSystem.stopPlugins();
+
+    await nextTick();
+    jest.runAllTimers();
+
+    await stopPromise;
+
+    expect(stopSpy1).toHaveBeenCalledTimes(1);
+    expect(stopSpy2).toHaveBeenCalledTimes(1);
+    expect(stopSpy3).toHaveBeenCalledTimes(1);
+
+    expect(loggingSystemMock.collect(logger).warn.flat()).toEqual(
+      expect.arrayContaining([`"plugin-1" thrown during stop: woups`])
     );
   });
 });

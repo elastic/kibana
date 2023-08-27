@@ -238,19 +238,22 @@ export class PluginsSystem<T extends PluginType> {
       const pluginStopPromise = Promise.all(dependantPromises).then(async () => {
         this.log.debug(`Stopping plugin "${pluginName}"...`);
 
-        const resultMaybe = await withTimeout({
-          promise: plugin.stop(),
-          timeoutMs: 30 * Sec,
-        });
-
-        if (resultMaybe?.timedout) {
-          this.log.warn(`"${pluginName}" plugin didn't stop in 30sec., move on to the next.`);
+        try {
+          const resultMaybe = await withTimeout({
+            promise: plugin.stop(),
+            timeoutMs: 30 * Sec,
+          });
+          if (resultMaybe?.timedout) {
+            this.log.warn(`"${pluginName}" plugin didn't stop in 30sec., move on to the next.`);
+          }
+        } catch (e) {
+          this.log.warn(`"${pluginName}" thrown during stop: ${e}`);
         }
       });
       pluginStopPromiseMap.set(pluginName, pluginStopPromise);
     }
 
-    await Promise.all(pluginStopPromiseMap.values());
+    await Promise.allSettled(pluginStopPromiseMap.values());
 
     this.log.info(`All plugins stopped.`);
   }
