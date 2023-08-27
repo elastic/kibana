@@ -8,7 +8,6 @@ import { Dispatch, SetStateAction, useCallback } from 'react';
 import { type DataView } from '@kbn/data-views-plugin/common';
 import { BoolQuery } from '@kbn/es-query';
 import { CriteriaWithPagination } from '@elastic/eui';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { useUrlQuery } from '../use_url_query';
 import { usePageSize } from '../use_page_size';
 import { getDefaultQuery, useBaseEsQuery, usePersistedQuery } from './utils';
@@ -28,7 +27,7 @@ export interface CloudPostureTableResult {
   pageIndex: number;
   // TODO: remove any, urlQuery is an object with query fields but we also add custom fields to it, need to assert usages
   urlQuery: any;
-  setTableOptions: (options: CriteriaWithPagination<CspFinding>) => void;
+  setTableOptions: (options: CriteriaWithPagination<object>) => void;
   handleUpdateQuery: (query: any) => void;
   pageSize: number;
   setPageSize: Dispatch<SetStateAction<number | undefined>>;
