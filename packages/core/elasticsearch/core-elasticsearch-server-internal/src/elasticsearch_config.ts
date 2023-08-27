@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
 import { Duration } from 'moment';
@@ -58,10 +58,6 @@ export const configSchema = schema.object({
     })
   ),
   password: schema.maybe(schema.string()),
-  stateless: offeringBasedSchema({
-    traditional: schema.boolean({ defaultValue: false }),
-    serverless: schema.boolean({ defaultValue: true }),
-  }),
   serviceAccountToken: schema.maybe(
     schema.conditional(
       schema.siblingRef('username'),
@@ -308,13 +304,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   public readonly healthCheckDelay: Duration;
 
   /**
-   * Indicates whether we're connecting to traditional or stateless ES.
-   * Required because some options aren't working for stateless and code
-   * needs to have the info to react accordingly.
-   */
-  public readonly stateless: boolean;
-
-  /**
    * Whether to allow kibana to connect to a non-compatible elasticsearch node.
    */
   public readonly ignoreVersionMismatch: boolean;
@@ -446,7 +435,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.healthCheckDelay = rawConfig.healthCheck.delay;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
-    this.stateless = rawConfig.stateless;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
     this.maxSockets = rawConfig.maxSockets;

@@ -10,9 +10,6 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 # Cloud links
 xpack.cloud.base_url: "https://cloud.elastic.co"
 
-# Inform that we're connecting to a stateless version of ES
-elasticsearch.stateless: true
-
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
 
@@ -20,7 +17,7 @@ migrations.algorithm: zdt
 # until the controller is able to spawn the migrator job/pod
 migrations.zdt:
   metaPickupSyncDelaySec: 5
-  runOnRoles: ['ui']
+  runOnRoles: [ 'ui' ]
 
 # Ess plugins
 xpack.securitySolutionEss.enabled: false
@@ -87,7 +84,7 @@ xpack.spaces.allowFeatureVisibility: false
 console.autocompleteDefinitions.endpointsAvailability: serverless
 
 # Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
-elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]
+elasticsearch.requestHeadersWhitelist: [ "authorization", "es-client-authentication" ]
 
 # Visualizations editors readonly settings
 vis_type_gauge.readOnly: true

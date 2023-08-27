@@ -128,7 +128,7 @@ export interface ElasticsearchServiceStart {
   ) => ICustomClusterClient;
 
   /**
-   * Returns the capabilities for the default cluster client.
+   * Returns the capabilities for the default cluster.
    */
   getCapabilities: () => ElasticsearchCapabilities;
 }
@@ -140,10 +140,10 @@ export interface ElasticsearchServiceStart {
  */
 export interface ElasticsearchCapabilities {
   /**
-   * Indicates whether we're connected to a stateful or stateless version of elasticsearch.
-   * Required because some options aren't working for stateless and code needs to have the info to react accordingly.
+   * Indicates whether we're connected to a serverless version of elasticsearch.
+   * Required because some options aren't working for serverless and code needs to have the info to react accordingly.
    */
-  stateless: boolean;
+  serverless: boolean;
 }
 
 /**

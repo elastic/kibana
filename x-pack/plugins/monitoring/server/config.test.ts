@@ -83,7 +83,6 @@ describe('config schema', () => {
               "truststore": Object {},
               "verificationMode": "full",
             },
-            "stateless": false,
           },
           "enabled": true,
           "kibana": Object {

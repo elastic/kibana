@@ -36,8 +36,8 @@ describe('createIndex', () => {
     elasticsearchClientMock.createErrorTransportRequestPromise(nonRetryableError)
   );
 
-  it('calls client.indices.create with the correct parameter for stateful ES', async () => {
-    const statefulCapabilities = elasticsearchServiceMock.createCapabilities({ stateless: false });
+  it('calls client.indices.create with the correct parameter for default ES', async () => {
+    const statefulCapabilities = elasticsearchServiceMock.createCapabilities({ serverless: false });
     const task = createIndex({
       client,
       indexName: 'my_index',
@@ -75,8 +75,8 @@ describe('createIndex', () => {
     `);
   });
 
-  it('calls client.indices.create with the correct parameter for stateless ES', async () => {
-    const statelessCapabilities = elasticsearchServiceMock.createCapabilities({ stateless: true });
+  it('calls client.indices.create with the correct parameter for serverless ES', async () => {
+    const statelessCapabilities = elasticsearchServiceMock.createCapabilities({ serverless: true });
     const task = createIndex({
       client,
       indexName: 'my_index',

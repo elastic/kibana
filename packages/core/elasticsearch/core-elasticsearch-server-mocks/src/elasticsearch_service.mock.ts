@@ -95,6 +95,7 @@ const createInternalSetupContractMock = () => {
       cluster_uuid: 'cluster-uuid',
       cluster_name: 'cluster-name',
       cluster_version: '8.0.0',
+      cluster_build_flavor: 'default',
     }),
     status$: new BehaviorSubject<ServiceStatus<ElasticsearchStatusMeta>>({
       level: ServiceStatusLevels.available,
@@ -126,7 +127,7 @@ const createCapabilities = (
   parts: Partial<ElasticsearchCapabilities> = {}
 ): ElasticsearchCapabilities => {
   return {
-    stateless: false,
+    serverless: false,
     ...parts,
   };
 };

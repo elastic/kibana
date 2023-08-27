@@ -85,7 +85,7 @@ describe('createInitialState', () => {
         "discardCorruptObjects": false,
         "discardUnknownObjects": false,
         "esCapabilities": Object {
-          "stateless": false,
+          "serverless": false,
         },
         "excludeFromUpgradeFilterHooks": Object {},
         "excludeOnUpgradeQuery": Object {

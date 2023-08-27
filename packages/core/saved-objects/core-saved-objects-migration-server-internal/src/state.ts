@@ -188,6 +188,7 @@ export interface BaseState extends ControlState {
    */
   readonly indexTypesMap: IndexTypesMap;
 
+  /** Capabilities of the ES cluster we're using */
   readonly esCapabilities: ElasticsearchCapabilities;
 }
 

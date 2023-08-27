@@ -36,8 +36,8 @@ describe('cloneIndex', () => {
     elasticsearchClientMock.createErrorTransportRequestPromise(nonRetryableError)
   );
 
-  it('calls client.indices.clone with the correct parameter for stateful ES', async () => {
-    const statefulCapabilities = elasticsearchServiceMock.createCapabilities({ stateless: false });
+  it('calls client.indices.clone with the correct parameter for default ES', async () => {
+    const statefulCapabilities = elasticsearchServiceMock.createCapabilities({ serverless: false });
     const task = cloneIndex({
       client,
       source: 'my_source_index',
@@ -73,8 +73,8 @@ describe('cloneIndex', () => {
     `);
   });
 
-  it('calls client.indices.clone with the correct parameter for stateless ES', async () => {
-    const statelessCapabilities = elasticsearchServiceMock.createCapabilities({ stateless: true });
+  it('calls client.indices.clone with the correct parameter for serverless ES', async () => {
+    const statelessCapabilities = elasticsearchServiceMock.createCapabilities({ serverless: true });
     const task = cloneIndex({
       client,
       source: 'my_source_index',
