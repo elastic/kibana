@@ -1560,6 +1560,7 @@
     "val-loader": "^1.1.1",
     "vinyl-fs": "^4.0.0",
     "watchpack": "^1.6.0",
+    "web-streams-polyfill": "^3.2.1",
     "webpack": "^4.41.5",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^4.10.0",
