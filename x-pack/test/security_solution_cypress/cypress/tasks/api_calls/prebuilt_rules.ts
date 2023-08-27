@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  PerformRuleInstallationResponseBody,
+  PERFORM_RULE_INSTALLATION_URL,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
@@ -34,10 +38,10 @@ export const SAMPLE_PREBUILT_RULE = createRuleAssetSavedObject({
  * `createNewRuleAsset` to create mocked prebuilt rules and install only those
  * instead of all rules available in the `security_detection_engine` package
  */
-export const installAllPrebuiltRulesRequest = () => {
-  return cy.request({
+export const installAllPrebuiltRulesRequest = () =>
+  cy.request<PerformRuleInstallationResponseBody>({
     method: 'POST',
-    url: 'internal/detection_engine/prebuilt_rules/installation/_perform',
+    url: PERFORM_RULE_INSTALLATION_URL,
     headers: {
       'kbn-xsrf': 'cypress-creds',
       'x-elastic-internal-origin': 'security-solution',
@@ -47,7 +51,6 @@ export const installAllPrebuiltRulesRequest = () => {
       mode: 'ALL_RULES',
     },
   });
-};
 
 export const getAvailablePrebuiltRulesCount = () => {
   cy.log('Get prebuilt rules count');
@@ -195,6 +198,18 @@ export const preventPrebuiltRulesPackageInstallation = () => {
   cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*', {});
 };
 
+export const addAvailableToInstallPrebuiltRules = (
+  rules: Array<typeof SAMPLE_PREBUILT_RULE>
+): void => {
+  cy.log('Create mocked available to install prebuilt rules', rules.length);
+  preventPrebuiltRulesPackageInstallation();
+  // TODO: use this bulk method once the issue with Cypress is fixed
+  // bulkCreateRuleAssets({ rules });
+  rules.forEach((rule) => {
+    createNewRuleAsset({ rule });
+  });
+};
+
 /**
  * Prevent the installation of the `security_detection_engine` package from Fleet.
  * The create a `security-rule` asset for each rule provided in the `rules` array.
@@ -213,15 +228,10 @@ export const createAndInstallMockedPrebuiltRules = ({
   rules: Array<typeof SAMPLE_PREBUILT_RULE>;
   installToKibana?: boolean;
 }) => {
-  cy.log('Install prebuilt rules', rules?.length);
-  preventPrebuiltRulesPackageInstallation();
-  // TODO: use this bulk method once the issue with Cypress is fixed
-  // bulkCreateRuleAssets({ rules });
-  rules.forEach((rule) => {
-    createNewRuleAsset({ rule });
-  });
+  addAvailableToInstallPrebuiltRules(rules);
 
   if (installToKibana) {
+    cy.log('Install prebuilt rules', rules.length);
     return installAllPrebuiltRulesRequest();
   }
 };
