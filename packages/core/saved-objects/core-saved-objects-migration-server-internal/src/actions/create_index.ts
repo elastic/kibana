@@ -82,7 +82,7 @@ export const createIndex = ({
 
     const indexSettings = {
       // settings not being supported on stateless ES
-      ...(esCapabilities.stateless
+      ...(esCapabilities.serverless
         ? {}
         : {
             // ES rule of thumb: shards should be several GB to 10's of GB, so

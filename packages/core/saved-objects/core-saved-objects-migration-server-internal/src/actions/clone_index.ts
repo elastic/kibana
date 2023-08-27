@@ -74,7 +74,7 @@ export const cloneIndex = ({
         total_fields: { limit: 1500 },
       },
       // settings not being supported on stateless ES
-      ...(esCapabilities.stateless
+      ...(esCapabilities.serverless
         ? {}
         : {
             // The rest of the index settings should have already been applied
