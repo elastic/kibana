@@ -4750,14 +4750,6 @@
             "path": "x-pack/plugins/security_solution/public/flyout/left/context.tsx"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/hooks/use_prevalence.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/hooks/use_prevalence.tsx"
-          },
-          {
             "plugin": "@kbn/securitysolution-data-table",
             "path": "x-pack/packages/security-solution/data_table/mock/mock_source.ts"
           },
