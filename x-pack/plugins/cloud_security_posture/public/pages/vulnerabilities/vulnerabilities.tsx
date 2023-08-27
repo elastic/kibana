@@ -19,7 +19,6 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import {
   CloudPostureTableResult,
@@ -128,7 +127,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
 
   const { data, isLoading, isFetching } = useLatestVulnerabilities({
     query: cloudPostureTable.query,
-    sort: multiFieldsSort as Sort,
+    sort: multiFieldsSort,
     enabled: !cloudPostureTable.queryError,
     pageIndex: cloudPostureTable.pageIndex,
     pageSize: cloudPostureTable.pageSize,
