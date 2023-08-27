@@ -15,12 +15,7 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  toMountPoint,
-  wrapWithTheme,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
@@ -88,9 +83,7 @@ export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppState
     ...coreStart,
   };
   const datePickerDeps = {
-    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-    toMountPoint,
-    wrapWithTheme,
+    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
   };
   const location = useLocation();

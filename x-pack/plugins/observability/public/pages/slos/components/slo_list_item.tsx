@@ -27,7 +27,6 @@ import { sloKeys } from '../../../hooks/slo/query_key_factory';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
 import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
-import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
 import type { RulesParams } from '../../../locators/rules';
@@ -46,7 +45,7 @@ export interface SloListItemProps {
   rules: Array<Rule<SloRule>> | undefined;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
-  activeAlerts?: ActiveAlerts;
+  activeAlerts?: number;
 }
 
 export function SloListItem({

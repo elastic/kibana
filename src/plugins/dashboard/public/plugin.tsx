@@ -51,6 +51,7 @@ import type {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -66,7 +67,6 @@ import {
   SEARCH_SESSION_ID,
 } from './dashboard_constants';
 import { DashboardMountContextProps } from './dashboard_app/types';
-import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
@@ -107,6 +107,7 @@ export interface DashboardStartDependencies {
   usageCollection?: UsageCollectionStart;
   visualizations: VisualizationsStart;
   customBranding: CustomBrandingStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface DashboardSetup {
@@ -218,9 +219,6 @@ export class DashboardPlugin
         dashboardContainerFactory.type,
         dashboardContainerFactory
       );
-
-      const placeholderFactory = new PlaceholderEmbeddableFactory();
-      embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
     });
 
     this.stopUrlTracking = () => {

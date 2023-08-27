@@ -1,11 +1,21 @@
 {
   "security.update_api_key": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_security/api_key/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-update-api-key.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-update-api-key.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

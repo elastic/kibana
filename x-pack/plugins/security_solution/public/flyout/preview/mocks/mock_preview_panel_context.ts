@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { mockDataAsNestedObject } from '../../shared/mocks/mock_context';
 import type { PreviewPanelContext } from '../context';
 
 /**
@@ -15,4 +17,6 @@ export const mockContextValue: PreviewPanelContext = {
   indexName: 'index',
   scopeId: 'scopeId',
   ruleId: '',
+  indexPattern: { fields: [], title: 'test index' },
+  dataAsNestedObject: mockDataAsNestedObject as unknown as Ecs,
 };

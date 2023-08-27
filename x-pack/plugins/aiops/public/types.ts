@@ -13,7 +13,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesUiSetup } from '@kbn/cases-plugin/public';
@@ -24,6 +24,8 @@ export interface AiopsPluginSetupDeps {
   embeddable: EmbeddableSetup;
   cases: CasesUiSetup;
   licensing: LicensingPluginSetup;
+
+  uiActions: UiActionsSetup;
 }
 
 export interface AiopsPluginStartDeps {

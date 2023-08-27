@@ -23,7 +23,7 @@ declare global {
 }
 
 const EXPOSED_CONFIG_SETTINGS_ERROR =
-  'Actual config settings exposed to the browser do not match what is expected; this assertion fails if extra settings are present and/or expected settings are missing';
+  'Actual config settings exposed to the browser do not match list defined in test; this assertion fails if extra settings are present and/or expected settings are missing';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const appsMenu = getService('appsMenu');
@@ -104,9 +104,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.management.refreshTimeout (duration)',
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
+        'data_views.scriptedFieldsEnabled (any)', // It's a boolean (any because schema.conditional)
         'dev_tools.deeplinks.navLinkStatus (string)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
+        'enterpriseSearch.ui.enabled (boolean)',
         'home.disableWelcomeScreen (boolean)',
         'management.deeplinks.navLinkStatus (string)',
         'map.emsFileApiUrl (string)',
@@ -197,6 +199,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
         'xpack.cases.markdownPlugins.lens (boolean)',
+        'xpack.cases.stack.enabled (boolean)',
         'xpack.ccr.ui.enabled (boolean)',
         'xpack.cloud.base_url (string)',
         'xpack.cloud.cname (string)',
@@ -238,7 +241,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.index_management.enableIndexActions (boolean)',
+        'xpack.index_management.enableIndexActions (any)',
+        'xpack.index_management.enableLegacyTemplates (any)',
+        'xpack.index_management.dev.enableIndexDetailsPage (boolean)',
+        'xpack.index_management.enableIndexStats (any)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
          * xpack.infra.logs is conditional and will resolve to an object of properties

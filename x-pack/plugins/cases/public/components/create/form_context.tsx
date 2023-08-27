@@ -26,6 +26,7 @@ import {
   getConnectorsFormDeserializer,
   getConnectorsFormSerializer,
 } from '../utils';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
@@ -68,6 +69,25 @@ export const FormContext: React.FC<Props> = ({
   const { mutateAsync: createAttachments } = useCreateAttachments();
   const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
+  const availableOwners = useAvailableCasesOwners();
+
+  const trimUserFormData = (userFormData: CaseUI) => {
+    let formData = {
+      ...userFormData,
+      title: userFormData.title.trim(),
+      description: userFormData.description.trim(),
+    };
+
+    if (userFormData.category) {
+      formData = { ...formData, category: userFormData.category.trim() };
+    }
+
+    if (userFormData.tags) {
+      formData = { ...formData, tags: userFormData.tags.map((tag: string) => tag.trim()) };
+    }
+
+    return formData;
+  };
 
   const submitCase = useCallback(
     async (
@@ -82,6 +102,7 @@ export const FormContext: React.FC<Props> = ({
       if (isValid) {
         const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
+        const defaultOwner = owner[0] ?? availableOwners[0];
 
         startTransaction({ appId, attachments });
 
@@ -89,12 +110,14 @@ export const FormContext: React.FC<Props> = ({
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
+        const trimmedData = trimUserFormData(userFormData);
+
         const theCase = await postCase({
           request: {
-            ...userFormData,
+            ...trimmedData,
             connector: connectorToUpdate,
             settings: { syncAlerts },
-            owner: selectedOwner ?? owner[0],
+            owner: selectedOwner ?? defaultOwner,
           },
         });
 
@@ -131,6 +154,7 @@ export const FormContext: React.FC<Props> = ({
       attachments,
       postCase,
       owner,
+      availableOwners,
       afterCaseCreated,
       onSuccess,
       createAttachments,

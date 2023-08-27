@@ -74,6 +74,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     inspector,
   } = useDiscoverServices();
+  const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
     state.query,
@@ -195,20 +196,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [onAddColumn, draggingFieldName, currentColumns]);
 
   const mainDisplay = useMemo(() => {
-    if (resultState === 'none') {
-      const globalQueryState = data.query.getState();
-
-      return (
-        <DiscoverNoResults
-          isTimeBased={isTimeBased}
-          query={globalQueryState.query}
-          filters={globalQueryState.filters}
-          dataView={dataView}
-          onDisableFilters={onDisableFilters}
-        />
-      );
-    }
-
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
       return <DiscoverUninitialized onRefresh={() => stateContainer.dataState.fetch()} />;
@@ -232,12 +219,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     );
   }, [
     currentColumns,
-    data,
     dataView,
     isPlainRecord,
-    isTimeBased,
     onAddFilter,
-    onDisableFilters,
     onFieldEdited,
     resultState,
     stateContainer,
@@ -316,14 +300,25 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             </EuiFlexItem>
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper">
-            {resultState === 'none' && dataState.error ? (
-              <ErrorCallout
-                title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
-                  defaultMessage: 'Unable to retrieve search results',
-                })}
-                error={dataState.error}
-                data-test-subj="discoverNoResultsError"
-              />
+            {resultState === 'none' ? (
+              dataState.error ? (
+                <ErrorCallout
+                  title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+                    defaultMessage: 'Unable to retrieve search results',
+                  })}
+                  error={dataState.error}
+                  data-test-subj="discoverNoResultsError"
+                />
+              ) : (
+                <DiscoverNoResults
+                  stateContainer={stateContainer}
+                  isTimeBased={isTimeBased}
+                  query={globalQueryState.query}
+                  filters={globalQueryState.filters}
+                  dataView={dataView}
+                  onDisableFilters={onDisableFilters}
+                />
+              )
             ) : (
               <EuiPanel
                 role="main"

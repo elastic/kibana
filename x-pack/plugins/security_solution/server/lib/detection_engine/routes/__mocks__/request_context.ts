@@ -34,7 +34,7 @@ import type {
 
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
-import { riskEngineDataClientMock } from '../../../risk_engine/__mocks__/risk_engine_data_client_mock';
+import { riskEngineDataClientMock } from '../../../risk_engine/risk_engine_data_client.mock';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();

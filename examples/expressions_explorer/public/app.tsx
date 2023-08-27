@@ -12,8 +12,8 @@ import {
   EuiPage,
   EuiPageHeader,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiSpacer,
   EuiText,
   EuiLink,
@@ -55,9 +55,11 @@ const ExpressionsExplorer = ({
     <KibanaReactContextProvider>
       <EuiPage>
         <EuiPageBody>
-          <EuiPageHeader>Expressions Explorer</EuiPageHeader>
-          <EuiPageContent>
-            <EuiPageContentBody>
+          <EuiPageSection>
+            <EuiPageHeader pageTitle="Expressions Explorer" />
+          </EuiPageSection>
+          <EuiPageTemplate.Section>
+            <EuiPageSection>
               <EuiText>
                 <p>
                   There are a couple of ways to run the expressions. Below some of the options are
@@ -87,8 +89,8 @@ const ExpressionsExplorer = ({
               <EuiSpacer />
 
               <ActionsExpressionsExample2 expressions={expressions} actions={actions} />
-            </EuiPageContentBody>
-          </EuiPageContent>
+            </EuiPageSection>
+          </EuiPageTemplate.Section>
         </EuiPageBody>
       </EuiPage>
     </KibanaReactContextProvider>

@@ -1923,6 +1923,68 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: true,
       },
+      fetch_unique_list_permissions: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListPermissionsLabel',
+          {
+            defaultMessage: 'Fetch unique list permissions',
+          }
+        ),
+        options: [],
+        order: 10,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListPermissionsTooltip',
+          {
+            defaultMessage:
+              'Enable this option to fetch unique list permissions. This setting can increase sync time. If this setting is disabled a list will inherit permissions from its parent site.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      fetch_unique_list_item_permissions: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListItemPermissionsLabel',
+          {
+            defaultMessage: 'Fetch unique list item permissions',
+          }
+        ),
+        options: [],
+        order: 11,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListItemPermissionsTooltip',
+          {
+            defaultMessage:
+              'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {

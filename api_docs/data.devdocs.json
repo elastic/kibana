@@ -8744,22 +8744,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/core-saved-objects-api-browser",
-                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -8772,8 +8756,16 @@
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-api-browser",
+                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
                 "plugin": "home",
@@ -8810,6 +8802,18 @@
               {
                 "plugin": "home",
                 "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "fleet",
@@ -8962,6 +8966,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/packages/get.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.test.ts"
               }
             ]
           },
@@ -9042,6 +9050,65 @@
               "boolean | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.SavedQuery",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedQuery",
+        "description": [],
+        "path": "src/plugins/data/common/query/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SavedQuery.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/data/common/query/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SavedQuery.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.SavedQueryAttributes",
+                "text": "SavedQueryAttributes"
+              }
+            ],
+            "path": "src/plugins/data/common/query/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SavedQuery.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data/common/query/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -11089,13 +11156,10 @@
           {
             "parentPluginId": "data",
             "id": "def-public.AggGroupLabels.AggGroupNames.Buckets",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "[AggGroupNames.Buckets]",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11103,13 +11167,10 @@
           {
             "parentPluginId": "data",
             "id": "def-public.AggGroupLabels.AggGroupNames.Metrics",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "[AggGroupNames.Metrics]",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11117,13 +11178,10 @@
           {
             "parentPluginId": "data",
             "id": "def-public.AggGroupLabels.AggGroupNames.None",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "[AggGroupNames.None]",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11735,7 +11793,7 @@
                 "label": "intervalOptions",
                 "description": [],
                 "signature": [
-                  "({ display: any; val: string; enabled(agg: ",
+                  "({ display: string; val: string; enabled(agg: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -11743,7 +11801,7 @@
                     "section": "def-common.IBucketAggConfig",
                     "text": "IBucketAggConfig"
                   },
-                  "): boolean; } | { display: any; val: string; })[]"
+                  "): boolean; } | { display: string; val: string; })[]"
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false,
@@ -12052,13 +12110,10 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.search.aggs.parentPipelineType",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "parentPipelineType",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12161,13 +12216,10 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.search.aggs.siblingPipelineType",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "siblingPipelineType",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12233,7 +12285,7 @@
                 "label": "boundsDescendingRaw",
                 "description": [],
                 "signature": [
-                  "({ bound: number; interval: moment.Duration; boundLabel: any; intervalLabel: any; } | { bound: moment.Duration; interval: moment.Duration; boundLabel: any; intervalLabel: any; })[]"
+                  "({ bound: number; interval: moment.Duration; boundLabel: string; intervalLabel: string; } | { bound: moment.Duration; interval: moment.Duration; boundLabel: string; intervalLabel: string; })[]"
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false,
@@ -12793,6 +12845,10 @@
               "path": "src/plugins/dashboard/public/services/data/data_service.ts"
             },
             {
+              "plugin": "stackAlerts",
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
+            },
+            {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
             },
@@ -12803,10 +12859,6 @@
             {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_expanded_row/choropleth_map.tsx"
-            },
-            {
-              "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
             },
             {
               "plugin": "expressionPartitionVis",
@@ -12999,7 +13051,7 @@
                 "section": "def-server.DataPluginStart",
                 "text": "DataPluginStart"
               },
-              ">, { bfetch, expressions, usageCollection, fieldFormats, taskManager, security, }: ",
+              ">, { bfetch, expressions, usageCollection, fieldFormats, security }: ",
               "DataPluginSetupDependencies",
               ") => { search: ",
               "ISearchSetup",
@@ -13056,7 +13108,7 @@
                 "id": "def-server.DataServerPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      bfetch,\n      expressions,\n      usageCollection,\n      fieldFormats,\n      taskManager,\n      security,\n    }",
+                "label": "{ bfetch, expressions, usageCollection, fieldFormats, security }",
                 "description": [],
                 "signature": [
                   "DataPluginSetupDependencies"
@@ -13085,7 +13137,7 @@
                 "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              ", { fieldFormats, dataViews, taskManager }: ",
+              ", { fieldFormats, dataViews }: ",
               "DataPluginStartDependencies",
               ") => { datatableUtilities: ",
               "DatatableUtilitiesService",
@@ -13155,7 +13207,7 @@
                 "id": "def-server.DataServerPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ fieldFormats, dataViews, taskManager }",
+                "label": "{ fieldFormats, dataViews }",
                 "description": [],
                 "signature": [
                   "DataPluginStartDependencies"
@@ -13365,6 +13417,10 @@
                 "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+              },
+              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
@@ -13569,6 +13625,10 @@
                 "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
               },
               {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
               },
@@ -13605,10 +13665,6 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -13627,6 +13683,42 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -13707,46 +13799,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",
@@ -13835,6 +13887,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
               },
               {
                 "plugin": "timelines",
@@ -15824,6 +15880,17 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataViewsService.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataViewsService.Unnamed",
             "type": "Function",
             "tags": [],
@@ -16320,6 +16387,44 @@
             ],
             "returnComment": [
               "FieldSpec[]"
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsService.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<string[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list"
             ]
           },
           {
@@ -17291,6 +17396,21 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "allowNoIndices",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.IndexPatternsFetcher.Unnamed.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "rollupsEnabled",
                 "description": [],
                 "signature": [
                   "boolean"
@@ -19098,6 +19218,24 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsServerPluginStart.getScriptedFieldsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "getScriptedFieldsEnabled",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -21044,6 +21182,10 @@
                 "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+              },
+              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
@@ -21248,6 +21390,10 @@
                 "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
               },
               {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
               },
@@ -21284,10 +21430,6 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -21306,6 +21448,42 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -21386,46 +21564,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",
@@ -21514,6 +21652,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
               },
               {
                 "plugin": "timelines",
@@ -24374,6 +24516,17 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.Unnamed",
             "type": "Function",
             "tags": [],
@@ -24870,6 +25023,44 @@
             ],
             "returnComment": [
               "FieldSpec[]"
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewsService.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<string[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list"
             ]
           },
           {
@@ -27612,22 +27803,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/core-saved-objects-api-browser",
-                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -27640,8 +27815,16 @@
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-api-browser",
+                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
                 "plugin": "home",
@@ -27678,6 +27861,18 @@
               {
                 "plugin": "home",
                 "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "fleet",
@@ -27830,6 +28025,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/packages/get.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.test.ts"
               }
             ]
           },
@@ -28292,7 +28491,7 @@
             "section": "def-common.FieldSpec",
             "text": "FieldSpec"
           },
-          "[]>; getFieldsForIndexPattern: (indexPattern: ",
+          "[]>; getExistingIndices: (indices: string[]) => Promise<string[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -28787,6 +28986,21 @@
           "{ query: string | { [key: string]: any; }; language: string; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SAVED_QUERY_BASE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_QUERY_BASE_URL",
+        "description": [],
+        "signature": [
+          "\"/internal/saved_query\""
+        ],
+        "path": "src/plugins/data/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

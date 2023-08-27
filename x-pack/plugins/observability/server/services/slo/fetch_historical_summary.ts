@@ -25,11 +25,13 @@ export class FetchHistoricalSummary {
     const sloIds = params.list.map((slo) => slo.sloId);
     const sloList = await this.repository.findAllByIds(sloIds);
 
-    const list: SLOWithInstanceId[] = params.list.map(({ sloId, instanceId }) => ({
-      sloId,
-      instanceId,
-      slo: sloList.find((slo) => slo.id === sloId)!,
-    }));
+    const list: SLOWithInstanceId[] = params.list
+      .filter(({ sloId }) => sloList.find((slo) => slo.id === sloId))
+      .map(({ sloId, instanceId }) => ({
+        sloId,
+        instanceId,
+        slo: sloList.find((slo) => slo.id === sloId)!,
+      }));
 
     const historicalSummary = await this.historicalSummaryClient.fetch(list);
 

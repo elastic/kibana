@@ -13,6 +13,7 @@ export interface CspmUsage {
   accounts_stats: CspmAccountsStats[];
   rules_stats: CspmRulesStats[];
   installation_stats: CloudSecurityInstallationStats[];
+  alerts_stats: CloudSecurityAlertsStats[];
 }
 
 export interface PackageSetupStatus {
@@ -87,4 +88,13 @@ export interface CloudSecurityInstallationStats {
   created_at: string;
   agent_count: number;
   account_type?: 'single-account' | 'organization-account';
+}
+
+export interface CloudSecurityAlertsStats {
+  posture_type: string;
+  rules_count: number;
+  alerts_count: number;
+  alerts_open_count: number;
+  alerts_closed_count: number;
+  alerts_acknowledged_count: number;
 }

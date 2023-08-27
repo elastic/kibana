@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters, LogRateHistogramItem } from '@kbn/aiops-utils';
 import React, { FC } from 'react';
-import { DocumentCountChart, type DocumentCountChartPoint } from '@kbn/aiops-components';
+import { DocumentCountChart } from '@kbn/aiops-components';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { DocumentCountChartProps } from '@kbn/aiops-components';
+import type { BrushSelectionUpdateHandler, DocumentCountChartProps } from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { Filter } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
@@ -29,7 +29,7 @@ export interface DocumentCountContentProps
     | 'interval'
     | 'chartPointsSplitLabel'
   > {
-  brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
+  brushSelectionUpdateHandler: BrushSelectionUpdateHandler;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
   documentCountStatsSplitLabel?: string;
@@ -131,14 +131,14 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
     return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
   }
 
-  const chartPoints: DocumentCountChartPoint[] = Object.entries(documentCountStats.buckets).map(
+  const chartPoints: LogRateHistogramItem[] = Object.entries(documentCountStats.buckets).map(
     ([time, value]) => ({
       time: +time,
       value,
     })
   );
 
-  let chartPointsSplit: DocumentCountChartPoint[] | undefined;
+  let chartPointsSplit: LogRateHistogramItem[] | undefined;
   if (documentCountStatsSplit?.buckets !== undefined) {
     chartPointsSplit = Object.entries(documentCountStatsSplit?.buckets).map(([time, value]) => ({
       time: +time,

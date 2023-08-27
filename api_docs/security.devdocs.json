@@ -999,42 +999,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-public.UpdateUserProfileHook",
-        "type": "Type",
-        "tags": [],
-        "label": "UpdateUserProfileHook",
-        "description": [],
-        "signature": [
-          "(props?: Props | undefined) => { update: (data: ",
-          "UserProfileData",
-          ") => void; showSuccessNotification: (props: { isRefreshRequired: boolean; }) => void; isLoading: boolean; userProfileData?: ",
-          "UserProfileData",
-          " | null | undefined; }"
-        ],
-        "path": "x-pack/plugins/security/public/account_management/user_profile/use_update_user_profile.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-public.UpdateUserProfileHook.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "Props | undefined"
-            ],
-            "path": "x-pack/plugins/security/public/account_management/user_profile/use_update_user_profile.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -1163,9 +1127,21 @@
           ],
           "signature": [
             "{ update: <D extends ",
-            "UserProfileData",
+            {
+              "pluginId": "@kbn/user-profile-components",
+              "scope": "common",
+              "docId": "kibKbnUserProfileComponentsPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
+            },
             ">(data: D) => Promise<void>; suggest: <D extends ",
-            "UserProfileData",
+            {
+              "pluginId": "@kbn/user-profile-components",
+              "scope": "common",
+              "docId": "kibKbnUserProfileComponentsPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
+            },
             ">(path: string, params: ",
             {
               "pluginId": "security",
@@ -1183,7 +1159,13 @@
               "text": "UserProfile"
             },
             "<D>[]>; bulkGet: <D extends ",
-            "UserProfileData",
+            {
+              "pluginId": "@kbn/user-profile-components",
+              "scope": "common",
+              "docId": "kibKbnUserProfileComponentsPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
+            },
             ">(params: ",
             {
               "pluginId": "security",
@@ -1201,7 +1183,13 @@
               "text": "UserProfile"
             },
             "<D>[]>; getCurrent: <D extends ",
-            "UserProfileData",
+            {
+              "pluginId": "@kbn/user-profile-components",
+              "scope": "common",
+              "docId": "kibKbnUserProfileComponentsPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
+            },
             ">(params?: ",
             {
               "pluginId": "security",
@@ -1221,32 +1209,14 @@
             "<D>>; readonly userProfile$: ",
             "Observable",
             "<",
-            "UserProfileData",
-            " | null>; }"
-          ],
-          "path": "x-pack/plugins/security/public/plugin.tsx",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "security",
-          "id": "def-public.SecurityPluginStart.hooks",
-          "type": "Object",
-          "tags": [],
-          "label": "hooks",
-          "description": [
-            "\nA set of hooks to work with Kibana user profiles"
-          ],
-          "signature": [
-            "{ useUpdateUserProfile: ",
             {
-              "pluginId": "security",
-              "scope": "public",
-              "docId": "kibSecurityPluginApi",
-              "section": "def-public.UpdateUserProfileHook",
-              "text": "UpdateUserProfileHook"
+              "pluginId": "@kbn/user-profile-components",
+              "scope": "common",
+              "docId": "kibKbnUserProfileComponentsPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
             },
-            "; }"
+            " | null>; }"
           ],
           "path": "x-pack/plugins/security/public/plugin.tsx",
           "deprecated": false,
@@ -3269,18 +3239,6 @@
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
             },
             {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_init_route.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_enable_route.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_disable_route.ts"
-            },
-            {
               "plugin": "cloudChat",
               "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/routes/chat.ts"
             },
@@ -4841,70 +4799,6 @@
             ],
             "signature": [
               "{ [P in keyof D]?: D[P] | undefined; }"
-            ],
-            "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-common.UserProfileAvatarData",
-        "type": "Interface",
-        "tags": [],
-        "label": "UserProfileAvatarData",
-        "description": [
-          "\nAvatar stored in user profile."
-        ],
-        "path": "x-pack/plugins/security/common/model/user_profile.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-common.UserProfileAvatarData.initials",
-            "type": "string",
-            "tags": [],
-            "label": "initials",
-            "description": [
-              "\nOptional initials (two letters) of the user to use as avatar if avatar picture isn't specified."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.UserProfileAvatarData.color",
-            "type": "string",
-            "tags": [],
-            "label": "color",
-            "description": [
-              "\nBackground color of the avatar when initials are used."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.UserProfileAvatarData.imageUrl",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "imageUrl",
-            "description": [
-              "\nBase64 data URL for the user avatar image."
-            ],
-            "signature": [
-              "string | null | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
             "deprecated": false,
