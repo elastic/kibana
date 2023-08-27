@@ -82,7 +82,7 @@ export const getFTRConfig = ({
       // like key and certificate
       vars.kbnTestServer.serverArgs.push(
         `--server.port=${kibanaPort}`,
-        `--elasticsearch.hosts=http://localhost:${esPort}`,
+        `--elasticsearch.hosts=http://localhost:${esPort}`
       );
 
       // apply right protocol on hosts
