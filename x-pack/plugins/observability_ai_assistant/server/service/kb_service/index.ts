@@ -172,10 +172,10 @@ export class KnowledgeBaseService {
 
   recall = async ({
     user,
-    query,
+    queries,
     namespace,
   }: {
-    query: string;
+    queries: string[];
     user: { name: string };
     namespace: string;
   }): Promise<{ entries: Array<Pick<KnowledgeBaseEntry, 'text' | 'id'>> }> => {
@@ -186,16 +186,14 @@ export class KnowledgeBaseService {
         index: this.dependencies.resources.aliases.kb,
         query: {
           bool: {
-            should: [
-              {
-                text_expansion: {
-                  'ml.tokens': {
-                    model_text: query,
-                    model_id: '.elser_model_1',
-                  },
-                } as unknown as QueryDslTextExpansionQuery,
-              },
-            ],
+            should: queries.map((query) => ({
+              text_expansion: {
+                'ml.tokens': {
+                  model_text: query,
+                  model_id: '.elser_model_1',
+                },
+              } as unknown as QueryDslTextExpansionQuery,
+            })),
             filter: [
               ...getAccessQuery({
                 user,

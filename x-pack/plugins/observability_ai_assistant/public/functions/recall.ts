@@ -27,20 +27,25 @@ export function registerRecallFunction({
         type: 'object',
         additionalProperties: false,
         properties: {
-          query: {
-            type: 'string',
-            description: 'The query for the semantic search',
+          queries: {
+            type: 'array',
+            additionalItems: false,
+            additionalProperties: false,
+            items: {
+              type: 'string',
+              description: 'The query for the semantic search',
+            },
           },
         },
-        required: ['query' as const],
+        required: ['queries' as const],
       },
     },
-    ({ arguments: { query } }, signal) => {
+    ({ arguments: { queries } }, signal) => {
       return service
         .callApi('POST /internal/observability_ai_assistant/functions/recall', {
           params: {
             body: {
-              query,
+              queries,
             },
           },
           signal,
