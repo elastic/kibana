@@ -112,7 +112,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   });
 
   const multiFieldsSort = useMemo(() => {
-    return cloudPostureTable.sort.map(({ id, direction }) => {
+    return cloudPostureTable.sort.map(({ id, direction }: { id: string; direction: string }) => {
       if (id === vulnerabilitiesColumns.severity) {
         return severitySortScript(direction);
       }
