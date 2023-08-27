@@ -60,14 +60,6 @@ export const getFTRConfig = ({
     (vars) => {
       const hostRealIp = getLocalhostRealIp();
 
-      // NOTE: extending server args here as settingOverrides above is removing some important SSL configs
-      // like key and certificate
-      vars.kbnTestServer.serverArgs.concat([
-        `--server.port=${kibanaPort}`,
-        `--elasticsearch.hosts=http://localhost:${esPort}`,
-        `--server.publicBaseUrl=http://localhost:${kibanaPort}`,
-      ]);
-
       const hasFleetServerArgs = _.some(
         vars.kbnTestServer.serverArgs,
         (value) =>
@@ -79,15 +71,19 @@ export const getFTRConfig = ({
         vars.kbnTestServer.serverArgs,
         (value) =>
           !(
-            value.includes('--elasticsearch.hosts=http://localhost:9220') ||
-            value.includes('--elasticsearch.hosts=https://localhost:9220') ||
+            value.includes('--elasticsearch.hosts') ||
             value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
             value.includes('--xpack.fleet.agents.elasticsearch.host') ||
-            (value.includes('--server.port=5620') && !isOpen) ||
-            (value.includes('--server.publicBaseUrl=http://localhost:5620') && !isOpen) ||
-            (value.includes('--server.publicBaseUrl=https://localhost:5620') && !isOpen)
+            value.includes('--server.port')
           )
       );
+
+      // NOTE: extending server args here as settingOverrides above is removing some important SSL configs
+      // like key and certificate
+      vars.kbnTestServer.serverArgs.push([
+        `--server.port=${kibanaPort}`,
+        `--elasticsearch.hosts=http://localhost:${esPort}`,
+      ]);
 
       // apply right protocol on hosts
       vars.kbnTestServer.serverArgs = _.map(vars.kbnTestServer.serverArgs, (value) => {
