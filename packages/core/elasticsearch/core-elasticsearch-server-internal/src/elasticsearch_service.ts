@@ -21,6 +21,7 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
   UnauthorizedErrorHandler,
   ElasticsearchClientConfig,
+  ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
 import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 
@@ -142,6 +143,8 @@ export class ElasticsearchService
       }
     });
 
+    let capabilities: ElasticsearchCapabilities;
+
     if (!config.skipStartupConnectionCheck) {
       // Ensure that the connection is established and the product is valid before moving on
       await isValidConnection(this.esNodesCompatibility$);
@@ -157,11 +160,16 @@ export class ElasticsearchService
             'Refer to https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-security.html for more info.'
         );
       }
-    }
 
-    const capabilities = getElasticsearchCapabilities({
-      clusterInfo: await firstValueFrom(this.clusterInfo$!),
-    });
+      capabilities = getElasticsearchCapabilities({
+        clusterInfo: await firstValueFrom(this.clusterInfo$!),
+      });
+    } else {
+      // skipStartupConnectionCheck is only used for unit testing, we default to base capabilities
+      capabilities = {
+        serverless: false,
+      };
+    }
 
     return {
       client: this.client!,
