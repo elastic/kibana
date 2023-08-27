@@ -7,21 +7,16 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { getSummaryRows } from '../../../common/components/event_details/get_alert_summary_rows';
 import { LeftPanelContext } from '../context';
 import { PrevalenceDetails } from './prevalence_details';
 import {
+  PREVALENCE_DETAILS_LOADING_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
 } from './test_ids';
-import { useFetchFieldValuePairByEventType } from '../../shared/hooks/use_fetch_field_value_pair_by_event_type';
-import { useFetchFieldValuePairWithAggregation } from '../../shared/hooks/use_fetch_field_value_pair_with_aggregation';
-import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_field';
+import { usePrevalence } from '../../shared/hooks/use_prevalence';
 
-jest.mock('../../../common/components/event_details/get_alert_summary_rows');
-jest.mock('../../shared/hooks/use_fetch_field_value_pair_by_event_type');
-jest.mock('../../shared/hooks/use_fetch_field_value_pair_with_aggregation');
-jest.mock('../../shared/hooks/use_fetch_unique_by_field');
+jest.mock('../../shared/hooks/use_prevalence');
 
 const panelContextValue = {
   eventId: 'event id',
@@ -31,33 +26,31 @@ const panelContextValue = {
 } as unknown as LeftPanelContext;
 
 describe('PrevalenceDetails', () => {
-  jest.mocked(useFetchFieldValuePairByEventType).mockReturnValue({
-    loading: false,
-    error: false,
-    count: 1,
-  });
-  jest.mocked(useFetchFieldValuePairWithAggregation).mockReturnValue({
-    loading: false,
-    error: false,
-    count: 1,
-  });
-  jest.mocked(useFetchUniqueByField).mockReturnValue({
-    loading: false,
-    error: false,
-    count: 1,
-  });
-
   it('should render the table', () => {
-    const mockSummaryRow = {
-      title: 'test',
-      description: {
-        data: {
-          field: 'field',
+    const field1 = 'field1';
+    const field2 = 'field2';
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          field: field1,
+          value: 'value1',
+          alertCount: 1,
+          docCount: 1,
+          hostPrevalence: 0.05,
+          userPrevalence: 0.1,
         },
-        values: ['value'],
-      },
-    };
-    (getSummaryRows as jest.Mock).mockReturnValue([mockSummaryRow]);
+        {
+          field: field2,
+          value: 'value2',
+          alertCount: 1,
+          docCount: 1,
+          hostPrevalence: 0.5,
+          userPrevalence: 0.05,
+        },
+      ],
+    });
 
     const { getByTestId } = render(
       <LeftPanelContext.Provider value={panelContextValue}>
@@ -68,11 +61,91 @@ describe('PrevalenceDetails', () => {
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render the error message if no highlighted fields', () => {
-    jest.mocked(getSummaryRows).mockReturnValue([]);
+  it('should render loading', () => {
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: true,
+      error: false,
+      data: [],
+    });
 
     const { getByTestId } = render(
       <LeftPanelContext.Provider value={panelContextValue}>
+        <PrevalenceDetails />
+      </LeftPanelContext.Provider>
+    );
+
+    expect(getByTestId(PREVALENCE_DETAILS_LOADING_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render error if call errors out', () => {
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: true,
+      data: [],
+    });
+
+    const { getByTestId } = render(
+      <LeftPanelContext.Provider value={panelContextValue}>
+        <PrevalenceDetails />
+      </LeftPanelContext.Provider>
+    );
+
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render error if event is null', () => {
+    const contextValue = {
+      ...panelContextValue,
+      eventId: null,
+    } as unknown as LeftPanelContext;
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: true,
+      data: [],
+    });
+
+    const { getByTestId } = render(
+      <LeftPanelContext.Provider value={contextValue}>
+        <PrevalenceDetails />
+      </LeftPanelContext.Provider>
+    );
+
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render error if dataFormattedForFieldBrowser is null', () => {
+    const contextValue = {
+      ...panelContextValue,
+      dataFormattedForFieldBrowser: null,
+    };
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: true,
+      data: [],
+    });
+
+    const { getByTestId } = render(
+      <LeftPanelContext.Provider value={contextValue}>
+        <PrevalenceDetails />
+      </LeftPanelContext.Provider>
+    );
+
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render error if browserFields is null', () => {
+    const contextValue = {
+      ...panelContextValue,
+      browserFields: null,
+    };
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: true,
+      data: [],
+    });
+
+    const { getByTestId } = render(
+      <LeftPanelContext.Provider value={contextValue}>
         <PrevalenceDetails />
       </LeftPanelContext.Provider>
     );

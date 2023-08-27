@@ -101,6 +101,8 @@ export interface CoreUsageStats {
   'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no'?: number;
   'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes'?: number;
   'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'?: number;
+  'apiCalls.savedObjectsImport.compatibilityModeEnabled.yes'?: number;
+  'apiCalls.savedObjectsImport.compatibilityModeEnabled.no'?: number;
   'apiCalls.savedObjectsImport.overwriteEnabled.yes'?: number;
   'apiCalls.savedObjectsImport.overwriteEnabled.no'?: number;
   'apiCalls.savedObjectsResolveImportErrors.total'?: number;

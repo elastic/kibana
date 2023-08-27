@@ -20,6 +20,10 @@ export interface RelatedAlertsBySessionProps {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * Id of the document
+   */
+  eventId: string;
 }
 
 /**
@@ -28,6 +32,7 @@ export interface RelatedAlertsBySessionProps {
 export const RelatedAlertsBySession: React.VFC<RelatedAlertsBySessionProps> = ({
   entityId,
   scopeId,
+  eventId,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySession({
     entityId,
@@ -44,6 +49,8 @@ export const RelatedAlertsBySession: React.VFC<RelatedAlertsBySessionProps> = ({
       title={title}
       loading={loading}
       alertIds={data}
+      scopeId={scopeId}
+      eventId={eventId}
       data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}
     />
   );
