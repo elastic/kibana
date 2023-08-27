@@ -450,6 +450,7 @@ function getPatternFiringAlertType() {
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
     ),
     reference: schema.maybe(schema.string()),
+    index: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State extends RuleTypeState {
@@ -521,12 +522,12 @@ function getPatternFiringAlertType() {
 
 function getPatternFiringAlertsAsDataRuleType() {
   const paramsSchema = schema.object({
+    index: schema.maybe(schema.string()),
+    reference: schema.maybe(schema.string()),
     pattern: schema.recordOf(
       schema.string(),
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
     ),
-    index: schema.maybe(schema.string()),
-    reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State extends RuleTypeState {
@@ -682,6 +683,7 @@ function getPatternFiringAutoRecoverFalseAlertType() {
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
     ),
     reference: schema.maybe(schema.string()),
+    index: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State extends RuleTypeState {
