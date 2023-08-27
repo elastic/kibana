@@ -12,18 +12,25 @@ import { stat } from 'fs/promises';
 
 import {
   DOCKER_IMG,
+  detectRunningNodes,
   maybeCreateDockerNetwork,
+  maybePullDockerImage,
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
+  resolvePort,
   runDockerContainer,
   runServerlessCluster,
   runServerlessEsNode,
   SERVERLESS_IMG,
   setupServerlessVolumes,
+  stopServerlessCluster,
+  teardownServerlessClusterSync,
   verifyDockerInstalled,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { ES_P12_PATH } from '@kbn/dev-utils';
+import { ESS_RESOURCES_PATHS } from '../paths';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -62,7 +69,7 @@ const volumeCmdTest = async (volumeCmd: string[]) => {
 
   // extract only permission from mode
   // eslint-disable-next-line no-bitwise
-  expect((await stat(serverlessObjectStorePath)).mode & 0o777).toBe(0o766);
+  expect((await stat(serverlessObjectStorePath)).mode & 0o777).toBe(0o777);
 };
 
 describe('resolveDockerImage()', () => {
@@ -99,6 +106,32 @@ describe('resolveDockerImage()', () => {
     ).toThrowErrorMatchingInlineSnapshot(`
       "Only verified images from docker.elastic.co are currently allowed.
       If you require this functionality in @kbn/es please contact the Kibana Operations Team."
+    `);
+  });
+});
+
+describe('resolvePort()', () => {
+  test('should return default port when no options', () => {
+    const port = resolvePort({});
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9200:9200",
+      ]
+    `);
+  });
+
+  test('should return custom port when passed in options', () => {
+    const port = resolvePort({ port: 9220 });
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9220:9220",
+        "--env",
+        "http.port=9220",
+      ]
     `);
   });
 });
@@ -190,6 +223,55 @@ describe('maybeCreateDockerNetwork()', () => {
   });
 });
 
+describe('maybePullDockerImage()', () => {
+  test('should pull the passed image', async () => {
+    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+
+    await maybePullDockerImage(log, DOCKER_IMG);
+
+    expect(execa.mock.calls[0][0]).toEqual('docker');
+    expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+  });
+});
+
+describe('detectRunningNodes()', () => {
+  const nodes = ['es01', 'es02', 'es03'];
+
+  test('should not error if no nodes detected', async () => {
+    execa.mockImplementationOnce(() => Promise.resolve({ stdout: '' }));
+
+    await detectRunningNodes(log, {});
+
+    expect(execa.mock.calls).toHaveLength(1);
+    expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['ps', '--quiet', '--filter']));
+  });
+
+  test('should kill nodes if detected and kill passed', async () => {
+    execa.mockImplementationOnce(() =>
+      Promise.resolve({
+        stdout: nodes.join('\n'),
+      })
+    );
+
+    await detectRunningNodes(log, { kill: true });
+
+    expect(execa.mock.calls).toHaveLength(2);
+    expect(execa.mock.calls[1][1]).toEqual(expect.arrayContaining(nodes.concat('kill')));
+  });
+
+  test('should error if nodes detected and kill not passed', async () => {
+    execa.mockImplementationOnce(() =>
+      Promise.resolve({
+        stdout: nodes.join('\n'),
+      })
+    );
+
+    await expect(detectRunningNodes(log, {})).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"ES has already been started, pass --kill to automatically stop the nodes on startup."`
+    );
+  });
+});
+
 describe('resolveEsArgs()', () => {
   const defaultEsArgs: Array<[string, string]> = [
     ['foo', 'bar'],
@@ -253,6 +335,39 @@ describe('resolveEsArgs()', () => {
       ]
     `);
   });
+
+  test('should add SSL args and enable security when SSL is passed', () => {
+    const esArgs = resolveEsArgs([...defaultEsArgs, ['xpack.security.enabled', 'false']], {
+      ssl: true,
+    });
+
+    expect(esArgs).toHaveLength(20);
+    expect(esArgs).not.toEqual(expect.arrayContaining(['xpack.security.enabled=false']));
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "foo=bar",
+        "--env",
+        "qux=zip",
+        "--env",
+        "xpack.security.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.transport.ssl.enabled=true",
+        "--env",
+        "xpack.security.transport.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.transport.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.operator_privileges.enabled=true",
+      ]
+    `);
+  });
 });
 
 describe('setupServerlessVolumes()', () => {
@@ -291,6 +406,20 @@ describe('setupServerlessVolumes()', () => {
 
     volumeCmdTest(volumeCmd);
     expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(false);
+  });
+
+  test('should add SSL volumes when ssl is passed', async () => {
+    mockFs(existingObjectStore);
+
+    const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, ssl: true });
+
+    const requiredPaths = [`${baseEsPath}:/objectstore:z`, ES_P12_PATH, ...ESS_RESOURCES_PATHS];
+    const pathsNotIncludedInCmd = requiredPaths.filter(
+      (path) => !volumeCmd.some((cmd) => cmd.includes(path))
+    );
+
+    expect(volumeCmd).toHaveLength(18);
+    expect(pathsNotIncludedInCmd).toEqual([]);
   });
 });
 
@@ -333,8 +462,49 @@ describe('runServerlessCluster()', () => {
 
     await runServerlessCluster(log, { basePath: baseEsPath });
 
-    // Verify Docker and network then run three nodes
-    expect(execa.mock.calls).toHaveLength(5);
+    // setupDocker execa calls then run three nodes and attach logger
+    expect(execa.mock.calls).toHaveLength(8);
+  });
+});
+
+describe('stopServerlessCluster()', () => {
+  test('should stop passed in nodes', async () => {
+    const nodes = ['es01', 'es02', 'es03'];
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await stopServerlessCluster(log, nodes);
+
+    expect(execa.mock.calls[0][0]).toEqual('docker');
+    expect(execa.mock.calls[0][1]).toEqual(
+      expect.arrayContaining(['container', 'stop'].concat(nodes))
+    );
+  });
+});
+
+describe('teardownServerlessClusterSync()', () => {
+  const defaultOptions = { basePath: 'foo/bar' };
+
+  test('should kill running serverless nodes', () => {
+    const nodes = ['es01', 'es02', 'es03'];
+    execa.commandSync.mockImplementation(() => ({
+      stdout: nodes.join('\n'),
+    }));
+
+    teardownServerlessClusterSync(log, defaultOptions);
+
+    expect(execa.commandSync.mock.calls).toHaveLength(2);
+    expect(execa.commandSync.mock.calls[0][0]).toEqual(expect.stringContaining(SERVERLESS_IMG));
+    expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
+  });
+
+  test('should not kill if no serverless nodes', () => {
+    execa.commandSync.mockImplementation(() => ({
+      stdout: '\n',
+    }));
+
+    teardownServerlessClusterSync(log, defaultOptions);
+
+    expect(execa.commandSync.mock.calls).toHaveLength(1);
   });
 });
 
@@ -364,7 +534,7 @@ describe('runDockerContainer()', () => {
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await expect(runDockerContainer(log, {})).resolves.toEqual({ stdout: '' });
-    // Verify Docker and network then run container
-    expect(execa.mock.calls).toHaveLength(3);
+    // setupDocker execa calls then run container
+    expect(execa.mock.calls).toHaveLength(5);
   });
 });

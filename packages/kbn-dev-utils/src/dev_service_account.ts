@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { run } from './src/cli';
-export { Cluster } from './src/cluster';
-export {
-  SYSTEM_INDICES_SUPERUSER,
-  ELASTIC_SERVERLESS_SUPERUSER,
-  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
-  getDockerFileMountPath,
-} from './src/utils';
+const env = process.env;
+
+/**
+ * `kibana-dev` service account token for connecting to ESS
+ * See packages/kbn-es/src/ess_resources/README.md
+ */
+export const kibanaDevServiceAccount = {
+  token:
+    env.TEST_KIBANA_SERVICE_ACCOUNT_TOKEN ||
+    'AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
+};

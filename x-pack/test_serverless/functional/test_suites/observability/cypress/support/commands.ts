@@ -10,7 +10,7 @@ import 'cypress-axe';
 Cypress.Commands.add('loginAsElasticUser', (path?: string) => {
   cy.visit(path ?? '/', {
     auth: {
-      username: 'elastic',
+      username: 'elastic_serverless',
       password: 'changeme',
     },
   });

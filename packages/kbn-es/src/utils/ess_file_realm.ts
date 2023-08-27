@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { run } from './src/cli';
-export { Cluster } from './src/cluster';
-export {
-  SYSTEM_INDICES_SUPERUSER,
-  ELASTIC_SERVERLESS_SUPERUSER,
-  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
-  getDockerFileMountPath,
-} from './src/utils';
+export const ELASTIC_SERVERLESS_SUPERUSER = 'elastic_serverless';
+export const ELASTIC_SERVERLESS_SUPERUSER_PASSWORD = 'changeme';

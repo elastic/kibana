@@ -7,15 +7,26 @@
 
 import { resolve } from 'path';
 import { format as formatUrl } from 'url';
+import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
+import {
+  esTestConfig,
+  kbnTestConfig,
+  kibanaTestSuperuserServerless,
+  getDockerFileMountPath,
+} from '@kbn/test';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
 export default async () => {
   const servers = {
-    kibana: kbnTestConfig.getUrlParts(),
-    elasticsearch: esTestConfig.getUrlParts(),
+    kibana: {
+      ...kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless),
+      protocol: 'https',
+      certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
+    },
+    elasticsearch: { ...esTestConfig.getUrlParts(), protocol: 'https' },
   };
 
   // "Fake" SAML provider
@@ -32,37 +43,39 @@ export default async () => {
 
   return {
     servers,
-
+    browser: {
+      acceptInsecureCerts: true,
+    },
     esTestCluster: {
-      license: 'trial',
-      from: 'snapshot',
+      from: 'serverless',
+      files: [idpPath, jwksPath],
       serverArgs: [
         'xpack.security.authc.realms.file.file1.order=-100',
 
         'xpack.security.authc.realms.jwt.jwt1.order=-98',
         `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
         'xpack.security.authc.realms.jwt.jwt1.client_authentication.type=shared_secret',
-        `xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret=my_super_secret`,
         `xpack.security.authc.realms.jwt.jwt1.allowed_issuer=https://kibana.elastic.co/jwt/`,
         `xpack.security.authc.realms.jwt.jwt1.allowed_subjects=elastic-agent`,
         'xpack.security.authc.realms.jwt.jwt1.allowed_audiences=elasticsearch',
         `xpack.security.authc.realms.jwt.jwt1.allowed_signature_algorithms=[RS256]`,
         `xpack.security.authc.realms.jwt.jwt1.claims.principal=sub`,
-        `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${jwksPath}`,
+        `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
 
-        // TODO: We should set this flag to `false` as soon as we fully migrate tests to SAML and file realms.
-        `xpack.security.authc.realms.native.native1.enabled=true`,
+        `xpack.security.authc.realms.native.native1.enabled=false`,
         `xpack.security.authc.realms.native.native1.order=-97`,
-
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.realms.saml.cloud-saml-kibana.order=101',
-        `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${idpPath}`,
+        `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${getDockerFileMountPath(
+          idpPath
+        )}`,
         'xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:${servers.kibana.port}`,
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:${servers.kibana.port}/logout`,
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:${servers.kibana.port}/api/security/saml/callback`,
         'xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=urn:oid:0.0.7',
       ],
+      ssl: true, // not needed as for serverless ssl is always on but added it anyway
     },
 
     kbnTestServer: {
@@ -72,6 +85,10 @@ export default async () => {
       },
       sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
+        '--server.ssl.enabled=true',
+        `--server.ssl.key=${KBN_KEY_PATH}`,
+        `--server.ssl.certificate=${KBN_CERT_PATH}`,
+        `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--server.restrictInternalApis=true`,
         `--server.port=${servers.kibana.port}`,
         '--status.allowAnonymous=true',
@@ -83,8 +100,8 @@ export default async () => {
             Object.entries(servers.elasticsearch).filter(([key]) => key.toLowerCase() !== 'auth')
           )
         )}`,
-        `--elasticsearch.username=${kibanaServerTestUser.username}`,
-        `--elasticsearch.password=${kibanaServerTestUser.password}`,
+        `--elasticsearch.serviceAccountToken=${kibanaDevServiceAccount.token}`,
+        `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         '--telemetry.sendUsageTo=staging',
         `--logging.appenders.deprecation=${JSON.stringify({
           type: 'console',
