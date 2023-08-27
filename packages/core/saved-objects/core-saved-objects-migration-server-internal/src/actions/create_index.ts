@@ -81,7 +81,7 @@ export const createIndex = ({
     const aliasesObject = aliasArrayToRecord(aliases);
 
     const indexSettings = {
-      // settings not being supported on stateless ES
+      // settings not being supported on serverless ES
       ...(esCapabilities.serverless
         ? {}
         : {

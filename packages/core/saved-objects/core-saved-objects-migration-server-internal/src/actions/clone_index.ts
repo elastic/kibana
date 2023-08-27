@@ -73,7 +73,7 @@ export const cloneIndex = ({
       mapping: {
         total_fields: { limit: 1500 },
       },
-      // settings not being supported on stateless ES
+      // settings not being supported on serverless ES
       ...(esCapabilities.serverless
         ? {}
         : {
