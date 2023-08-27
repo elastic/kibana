@@ -35,7 +35,7 @@ export function registerSummarisationFunction({
           text: {
             type: 'string',
             description:
-              'A human-readable summary of what you have learned, described in such a way that you can recall it later with semantic search.',
+              "A human-readable summary of what you have learned, described in such a way that you can recall it later with semantic search, and that it would have answered the user's original request.",
           },
           is_correction: {
             type: 'boolean',
