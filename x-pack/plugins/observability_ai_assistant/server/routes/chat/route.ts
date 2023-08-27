@@ -45,11 +45,13 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     const isStartOfConversation =
       messages.some((message) => message.message.role === MessageRole.Assistant) === false;
 
+    const isRecallFunctionAvailable = functions.some((fn) => fn.name === 'recall') === true;
+
     return client.chat({
       messages,
       connectorId,
       functions,
-      functionCall: isStartOfConversation ? 'recall' : undefined,
+      functionCall: isStartOfConversation && isRecallFunctionAvailable ? 'recall' : undefined,
     });
   },
 });
