@@ -204,12 +204,16 @@ export class KnowledgeBaseService {
         },
         size: 5,
         _source: {
-          includes: ['text', 'id', 'is_correction', 'confidence', 'labels'],
+          includes: ['text', 'is_correction', 'labels'],
         },
       });
 
       return {
-        entries: response.hits.hits.map((hit) => ({ ...hit._source!, score: hit._score })),
+        entries: response.hits.hits.map((hit) => ({
+          ...hit._source!,
+          score: hit._score,
+          id: hit._id,
+        })),
       };
     } catch (error) {
       if (isAlreadyExistsError(error)) {

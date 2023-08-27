@@ -20,7 +20,7 @@ export function registerSummarisationFunction({
       name: 'summarise',
       contexts: ['core'],
       description:
-        'Use this function to summarise things learned from the conversation. You can score the learnings with a confidence metric, whether it is a correction on a previous learning. An embedding will be created that you can recall later with a semantic search. There is no need to ask the user for permission to store something you have learned, unless you do not feel confident.',
+        "Use this function to summarise things learned from the conversation. You can score the learnings with a confidence metric, whether it is a correction on a previous learning. An embedding will be created that you can recall later with a semantic search. There is no need to ask the user for permission to store something you have learned, unless you do not feel confident. When you create this summarisation, make sure you craft it in a way that can be recalled with a semantic search later, and that it would have answered the user's original request.",
       descriptionForUser:
         'This function allows the Elastic Assistant to summarise things from the conversation.',
       parameters: {
