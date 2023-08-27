@@ -80,10 +80,10 @@ export const getFTRConfig = ({
 
       // NOTE: extending server args here as settingOverrides above is removing some important SSL configs
       // like key and certificate
-      vars.kbnTestServer.serverArgs.push([
+      vars.kbnTestServer.serverArgs.push(
         `--server.port=${kibanaPort}`,
         `--elasticsearch.hosts=http://localhost:${esPort}`,
-      ]);
+      );
 
       // apply right protocol on hosts
       vars.kbnTestServer.serverArgs = _.map(vars.kbnTestServer.serverArgs, (value) => {
