@@ -39,7 +39,7 @@ export async function getExitSpanLatency({
       start,
       end,
       operationName: 'assistant_get_exit_span_latency',
-      unit: 'rpm',
+      unit: 'ms',
       documentType: ApmDocumentType.ServiceDestinationMetric,
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
