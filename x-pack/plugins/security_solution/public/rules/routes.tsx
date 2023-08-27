@@ -10,7 +10,12 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
-import { RULES_LANDING_PATH, RULES_PATH, SecurityPageName } from '../../common/constants';
+import {
+  COVERAGE_OVERVIEW_PATH,
+  RULES_LANDING_PATH,
+  RULES_PATH,
+  SecurityPageName,
+} from '../../common/constants';
 import { NotFoundPage } from '../app/404';
 import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
 import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
@@ -26,6 +31,8 @@ import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/
 import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
+import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
 
 const RulesSubRoutes = [
   {
@@ -102,6 +109,22 @@ const RulesContainerComponent: React.FC = () => {
 
 const Rules = React.memo(RulesContainerComponent);
 
+const CoverageOverviewRoutes = () => {
+  const isDetectionsCoverageOverviewEnabled = useIsExperimentalFeatureEnabled(
+    'detectionsCoverageOverview'
+  );
+
+  return isDetectionsCoverageOverviewEnabled ? (
+    <PluginTemplateWrapper>
+      <TrackApplicationView viewId={SecurityPageName.coverageOverview}>
+        <CoverageOverviewPage />
+      </TrackApplicationView>
+    </PluginTemplateWrapper>
+  ) : (
+    <Redirect to={SecurityPageName.landing} />
+  );
+};
+
 export const routes: SecuritySubPluginRoutes = [
   {
     path: RULES_LANDING_PATH,
@@ -110,5 +133,9 @@ export const routes: SecuritySubPluginRoutes = [
   {
     path: RULES_PATH,
     component: Rules,
+  },
+  {
+    path: COVERAGE_OVERVIEW_PATH,
+    component: CoverageOverviewRoutes,
   },
 ];

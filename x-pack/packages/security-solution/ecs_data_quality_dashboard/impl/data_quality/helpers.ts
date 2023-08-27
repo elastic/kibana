@@ -31,17 +31,21 @@ const EMPTY_INDEX_NAMES: string[] = [];
 export const getIndexNames = ({
   ilmExplain,
   ilmPhases,
+  isILMAvailable,
   stats,
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   ilmPhases: string[];
+  isILMAvailable: boolean;
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): string[] => {
-  if (ilmExplain != null && stats != null) {
+  if (((isILMAvailable && ilmExplain != null) || !isILMAvailable) && stats != null) {
     const allIndexNames = Object.keys(stats);
-    const filteredByIlmPhase = allIndexNames.filter((indexName) =>
-      ilmPhases.includes(getIlmPhase(ilmExplain[indexName]) ?? '')
-    );
+    const filteredByIlmPhase = isILMAvailable
+      ? allIndexNames.filter((indexName) =>
+          ilmPhases.includes(getIlmPhase(ilmExplain?.[indexName], isILMAvailable) ?? '')
+        )
+      : allIndexNames;
 
     return filteredByIlmPhase;
   } else {

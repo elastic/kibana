@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
@@ -26,7 +24,7 @@ import {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Error handling',
-  { tags: tag.ESS },
+  { tags: '@ess' },
   () => {
     beforeEach(() => {
       login();

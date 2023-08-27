@@ -139,6 +139,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
+  isILMAvailable$: Observable<boolean>;
   isSidebarEnabled$: Observable<boolean>;
   getStartedComponent$: Observable<React.ComponentType | null>;
   upselling: UpsellingService;
@@ -175,6 +176,7 @@ export interface PluginSetup {
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
+  setIsILMAvailable: (isILMAvailable: boolean) => void;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;

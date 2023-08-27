@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import { getNewRule } from '../../objects/rule';
 import {
   clickAlertTag,
@@ -26,7 +24,7 @@ import {
   UNSELECTED_ALERT_TAG,
 } from '../../screens/alerts';
 
-describe('Alert tagging', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverResetKibana');

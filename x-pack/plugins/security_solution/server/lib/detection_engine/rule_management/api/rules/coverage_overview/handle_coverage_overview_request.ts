@@ -17,6 +17,7 @@ import {
   CoverageOverviewRuleActivity,
 } from '../../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../../rule_schema';
+import { findRules } from '../../../logic/search/find_rules';
 
 type CoverageOverviewRuleParams = Pick<RuleParams, 'threat'>;
 
@@ -34,26 +35,25 @@ export async function handleCoverageOverviewRequest({
   deps: { rulesClient },
 }: HandleCoverageOverviewRequestArgs): Promise<CoverageOverviewResponse> {
   const activitySet = new Set(filter?.activity);
-  const kqlFilter = filter
-    ? convertRulesFilterToKQL({
-        filter: filter.search_term,
-        showCustomRules: filter.source?.includes(CoverageOverviewRuleSource.Custom) ?? false,
-        showElasticRules: filter.source?.includes(CoverageOverviewRuleSource.Prebuilt) ?? false,
-        enabled: getIsEnabledFilter(activitySet),
-      })
-    : undefined;
+  const kqlFilter = convertRulesFilterToKQL({
+    filter: filter?.search_term,
+    showCustomRules: filter?.source?.includes(CoverageOverviewRuleSource.Custom) ?? false,
+    showElasticRules: filter?.source?.includes(CoverageOverviewRuleSource.Prebuilt) ?? false,
+    enabled: getIsEnabledFilter(activitySet),
+  });
 
   // rulesClient.find uses ES Search API to fetch the rules. It has some limitations when the number of rules exceeds
   // index.max_result_window (set to 10K by default) Kibana fails. A proper way to handle it is via ES PIT API.
   // This way the endpoint handles max 10K rules for now while support for the higher number of rules will be addressed
   // in https://github.com/elastic/kibana/issues/160698
-  const rules = await rulesClient.find<CoverageOverviewRuleParams>({
-    options: {
-      filter: kqlFilter,
-      fields: ['name', 'enabled', 'params.threat'],
-      page: 1,
-      perPage: 10000,
-    },
+  const rules = await findRules({
+    rulesClient,
+    filter: kqlFilter,
+    fields: ['name', 'enabled', 'params.threat'],
+    page: 1,
+    perPage: 10000,
+    sortField: undefined,
+    sortOrder: undefined,
   });
 
   return rules.data.reduce(appendRuleToResponse, {

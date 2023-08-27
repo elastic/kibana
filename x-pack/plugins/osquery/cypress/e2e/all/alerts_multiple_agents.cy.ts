@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import {
   clickRuleName,
@@ -16,7 +15,7 @@ import {
 } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('Alert Event Details - dynamic params', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Alert Event Details - dynamic params', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
   let ruleName: string;
 
