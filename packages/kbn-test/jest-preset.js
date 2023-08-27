@@ -108,6 +108,7 @@ module.exports = {
     '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|vscode-languageserver-types|react-monaco-editor|d3-interpolate|d3-color|langchain|langsmith))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))/dist/[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))/dist/util/[/\\\\].+\\.js$',
   ],
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files to include/exclude for code coverage
