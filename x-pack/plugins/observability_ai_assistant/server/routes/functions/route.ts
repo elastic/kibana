@@ -143,7 +143,7 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/recall',
   params: t.type({
     body: t.type({
-      query: nonEmptyStringRt,
+      queries: t.array(nonEmptyStringRt),
     }),
   }),
   options: {
@@ -158,7 +158,7 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return client.recall(resources.params.body.query);
+    return client.recall(resources.params.body.queries);
   },
 });
 
