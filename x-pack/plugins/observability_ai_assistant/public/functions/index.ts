@@ -49,7 +49,7 @@ export async function registerFunctions({
       if (isReady) {
         description += `You can use the "summarise" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. When you create this summarisation, make sure you craft it in a way that can be recalled with a semantic search later, and that it would have answered the user's original request.
 
-        Additionally, you can use the "recall" function to retrieve relevant information from the knowledge database. Using the "recall" function will allow you to create a much more tailored and improved user experience. Assume the user has told you before.`;
+        Additionally, you can use the "recall" function to retrieve relevant information from the knowledge database. Using the "recall" function will allow you to create a much more tailored and improved user experience. Assume the user has told you before. When using the recall function, make sure you include things you have inferred from the user's request in the semantic search query. E.g., when the user asks "can you visualise the request rate for opbeans-go over the last 24 hours", the query should be something like "visualise request rate for APM service".`;
 
         description += `Here are principles you MUST adhere to, in order:
 
