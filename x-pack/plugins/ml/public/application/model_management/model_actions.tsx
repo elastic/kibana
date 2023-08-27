@@ -54,6 +54,7 @@ export function useModelActions({
       application: { navigateToUrl, capabilities },
       overlays,
       theme,
+      i18n: i18nStart,
       docLinks,
       mlServices: { mlApiServices },
     },
@@ -93,14 +94,19 @@ export function useModelActions({
   }, [mlApiServices]);
 
   const getUserConfirmation = useMemo(
-    () => getUserConfirmationProvider(overlays, theme),
-    [overlays, theme]
+    () => getUserConfirmationProvider(overlays, theme, i18nStart),
+    [i18nStart, overlays, theme]
   );
 
   const getUserInputModelDeploymentParams = useMemo(
     () =>
-      getUserInputModelDeploymentParamsProvider(overlays, theme.theme$, startModelDeploymentDocUrl),
-    [overlays, theme.theme$, startModelDeploymentDocUrl]
+      getUserInputModelDeploymentParamsProvider(
+        overlays,
+        theme,
+        i18nStart,
+        startModelDeploymentDocUrl
+      ),
+    [overlays, theme, i18nStart, startModelDeploymentDocUrl]
   );
 
   const isBuiltInModel = useCallback(
@@ -450,7 +456,11 @@ export function useModelActions({
           onModelDeployRequest(model);
         },
         available: (item) => {
-          const isDfaTrainedModel = item.metadata?.analytics_config !== undefined;
+          const isDfaTrainedModel =
+            item.metadata?.analytics_config !== undefined ||
+            item.inference_config?.regression !== undefined ||
+            item.inference_config?.classification !== undefined;
+
           return (
             isDfaTrainedModel &&
             !isBuiltInModel(item) &&

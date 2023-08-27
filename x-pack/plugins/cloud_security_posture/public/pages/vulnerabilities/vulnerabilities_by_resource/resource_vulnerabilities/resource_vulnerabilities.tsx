@@ -125,10 +125,8 @@ const ResourceVulnerabilitiesDataGrid = ({
         (vulnerabilityRecord: VulnerabilitiesQueryData['page'][number]) =>
           vulnerabilityRecord.vulnerability?.id === vulnerabilityRow.vulnerability?.id &&
           vulnerabilityRecord.resource?.id === vulnerabilityRow.resource?.id &&
-          vulnerabilityRecord.vulnerability.package.name ===
-            vulnerabilityRow.vulnerability.package.name &&
-          vulnerabilityRecord.vulnerability.package.version ===
-            vulnerabilityRow.vulnerability.package.version
+          vulnerabilityRecord.package.name === vulnerabilityRow.package.name &&
+          vulnerabilityRecord.package.version === vulnerabilityRow.package.version
       );
       setUrlQuery({
         vulnerabilityIndex,
@@ -233,13 +231,13 @@ const ResourceVulnerabilitiesDataGrid = ({
       }
 
       if (columnId === vulnerabilitiesColumns.package) {
-        return <>{vulnerabilityRow.vulnerability?.package?.name}</>;
+        return <>{vulnerabilityRow?.package?.name}</>;
       }
       if (columnId === vulnerabilitiesColumns.version) {
-        return <>{vulnerabilityRow.vulnerability?.package?.version}</>;
+        return <>{vulnerabilityRow?.package?.version}</>;
       }
       if (columnId === vulnerabilitiesColumns.fixedVersion) {
-        return <>{vulnerabilityRow.vulnerability?.package?.fixed_version}</>;
+        return <>{vulnerabilityRow?.package?.fixed_version}</>;
       }
 
       return null;

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 
 import { scrollWithinDocumentDetailsExpandableFlyoutRightSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel_json_tab';
 import { openJsonTab } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
@@ -19,7 +18,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout right panel json tab',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       cleanKibana();

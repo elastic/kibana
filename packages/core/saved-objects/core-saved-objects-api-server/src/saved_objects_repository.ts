@@ -20,7 +20,6 @@ import type {
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesResponse,
-  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsRemoveReferencesToOptions,
@@ -201,7 +200,7 @@ export interface ISavedObjectsRepository {
    * Resolves an array of objects by id, using any legacy URL aliases if they exist
    *
    * @param {array} objects - an array of objects containing id, type
-   * @param {object} [options={}] {@link SavedObjectsResolveOptions} - options for the bulk resolve operation
+   * @param {object} [options={}] {@link SavedObjectsGetOptions} - options for the bulk resolve operation
    * @property {string} [options.migrationVersionCompatibility]
    * @property {string} [options.namespace]
    * @returns {promise} - { resolved_objects: [{ saved_object, outcome }] }
@@ -214,7 +213,7 @@ export interface ISavedObjectsRepository {
    */
   bulkResolve<T = unknown>(
     objects: SavedObjectsBulkResolveObject[],
-    options?: SavedObjectsResolveOptions
+    options?: SavedObjectsGetOptions
   ): Promise<SavedObjectsBulkResolveResponse<T>>;
 
   /**
@@ -238,7 +237,7 @@ export interface ISavedObjectsRepository {
    *
    * @param {string} type - the type of the object to resolve
    * @param {string} id - the id of the object to resolve
-   * @param {object} [options={}] {@link SavedObjectsResolveOptions} - options for the resolve operation
+   * @param {object} [options={}] {@link SavedObjectsGetOptions} - options for the resolve operation
    * @property {string} [options.migrationVersionCompatibility]
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_object, outcome }
@@ -246,7 +245,7 @@ export interface ISavedObjectsRepository {
   resolve<T = unknown>(
     type: string,
     id: string,
-    options?: SavedObjectsResolveOptions
+    options?: SavedObjectsGetOptions
   ): Promise<SavedObjectsResolveResponse<T>>;
 
   /**
