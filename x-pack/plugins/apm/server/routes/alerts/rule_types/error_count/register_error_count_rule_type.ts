@@ -59,6 +59,20 @@ import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
+export const errorCountActionVariables = [
+  apmActionVariables.alertDetailsUrl,
+  apmActionVariables.environment,
+  apmActionVariables.errorGroupingKey,
+  apmActionVariables.errorGroupingName,
+  apmActionVariables.interval,
+  apmActionVariables.reason,
+  apmActionVariables.serviceName,
+  apmActionVariables.threshold,
+  apmActionVariables.transactionName,
+  apmActionVariables.triggerValue,
+  apmActionVariables.viewInAppUrl,
+];
+
 export function registerErrorCountRuleType({
   alerting,
   alertsLocator,
@@ -80,19 +94,7 @@ export function registerErrorCountRuleType({
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: { params: errorCountParamsSchema },
       actionVariables: {
-        context: [
-          apmActionVariables.alertDetailsUrl,
-          apmActionVariables.environment,
-          apmActionVariables.interval,
-          apmActionVariables.reason,
-          apmActionVariables.serviceName,
-          apmActionVariables.transactionName,
-          apmActionVariables.errorGroupingKey,
-          apmActionVariables.errorGroupingName,
-          apmActionVariables.threshold,
-          apmActionVariables.triggerValue,
-          apmActionVariables.viewInAppUrl,
-        ],
+        context: errorCountActionVariables,
       },
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
