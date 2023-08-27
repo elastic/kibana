@@ -125,7 +125,6 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(_source.created_at && { created_at: _source.created_at }),
       ...(version && { version }),
     };
-    // console.log('SERIALIZER > rawToSavedObject; savedObject:', savedObject);
     return savedObject;
   }
 
@@ -152,7 +151,6 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       typeMigrationVersion,
       managed,
     } = savedObj;
-    // console.log('In serializer, creating raw doc to send to es, references:', references);
     const source = {
       [type]: attributes,
       type,
@@ -167,7 +165,6 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(updated_at && { updated_at }),
       ...(createdAt && { created_at: createdAt }),
     };
-    // console.log('SERIALIZER > savedObjectToRaw; source:', source);
     return {
       _id: this.generateRawId(namespace, type, id),
       _source: source,

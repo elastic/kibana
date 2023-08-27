@@ -142,7 +142,9 @@ export const executeUpdate = async <T>(
       { migrationVersionCompatibility }
     );
     try {
-      migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
+      migrated = migrationHelper.migrateStorageDocument(document, {
+        downwardConversion: 'allow',
+      }) as SavedObject<T>;
     } catch (migrateStorageDocError) {
       throw SavedObjectsErrorHelpers.decorateGeneralError(
         migrateStorageDocError,
@@ -313,7 +315,6 @@ export const executeUpdate = async <T>(
       { migrationVersionCompatibility }
     );
 
-    // NEXT: assume the updatedSavedObject is the updated object we can use to construct the final response.
     const { originId } = updatedSavedObject ?? {};
     let namespaces: string[] = [];
     if (!registry.isNamespaceAgnostic(type)) {
