@@ -126,6 +126,13 @@ export const FALSE_POSITIVES_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const INVESTIGATION_FIELDS_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.investigationFieldsFieldLabel',
+  {
+    defaultMessage: 'Custom highlighted fields',
+  }
+);
+
 export const LICENSE_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.licenseFieldLabel',
   {
@@ -203,6 +210,13 @@ export const MACHINE_LEARNING_JOB_ID_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const ANOMALY_THRESHOLD_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.anomalyThresholdFieldLabel',
+  {
+    defaultMessage: 'Anomaly score threshold',
+  }
+);
+
 export const RELATED_INTEGRATIONS_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.relatedIntegrationsFieldLabel',
   {
@@ -242,6 +256,20 @@ export const THREAT_FILTERS_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.threatFiltersFieldLabel',
   {
     defaultMessage: 'Filters',
+  }
+);
+
+export const NEW_TERMS_FIELDS_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.newTermsFieldsFieldLabel',
+  {
+    defaultMessage: 'Fields',
+  }
+);
+
+export const HISTORY_WINDOW_SIZE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.historyWindowSizeFieldLabel',
+  {
+    defaultMessage: 'History Window Size',
   }
 );
 

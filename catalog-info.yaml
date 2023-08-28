@@ -50,7 +50,7 @@ spec:
       description: Pipeline that tests the service integration in various environments
     spec:
       repository: elastic/kibana
-      pipeline_file: ./.buildkite/pipelines/pipeline.kibana-tests.yaml
+      pipeline_file: ./.buildkite/pipelines/quality-gates/pipeline.kibana-tests.yaml
       provider_settings:
         trigger_mode: none
       teams:
@@ -74,7 +74,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: Kibana-UI-Service
-  description: Kibana UI Service provides the UX for visualizing Elasticsearch data.  It is comprised of a client side for presentation and user event handling and a server side application for UX servicing and interaction with Elasticsearch.  
+  description: Kibana UI Service provides the UX for visualizing Elasticsearch data.  It is comprised of a client side for presentation and user event handling and a server side application for UX servicing and interaction with Elasticsearch.
   annotations:
     backstage.io/source-location: url:https://github.com/elastic/kibana/tree/main
     github.com/project-slug: elastic/kibana
@@ -101,7 +101,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: Kibana-Background-Tasks-Service
-  description: Kibana Background Tasks Service provides additional task processing parallelism for an instance of the Kibana UI Service.  It is comprised of the same codebase as Kibana UI Service but is launched with an alternative configuration.   
+  description: Kibana Background Tasks Service provides additional task processing parallelism for an instance of the Kibana UI Service.  It is comprised of the same codebase as Kibana UI Service but is launched with an alternative configuration.
   annotations:
     backstage.io/source-location: url:https://github.com/elastic/kibana/tree/main
     github.com/project-slug: elastic/kibana

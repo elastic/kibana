@@ -20,6 +20,10 @@ export interface RelatedAlertsBySameSourceEventProps {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * Id of the document
+   */
+  eventId: string;
 }
 
 /**
@@ -28,6 +32,7 @@ export interface RelatedAlertsBySameSourceEventProps {
 export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSourceEventProps> = ({
   originalEventId,
   scopeId,
+  eventId,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
     originalEventId,
@@ -44,6 +49,8 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
       title={title}
       loading={loading}
       alertIds={data}
+      scopeId={scopeId}
+      eventId={eventId}
       data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}
     />
   );
