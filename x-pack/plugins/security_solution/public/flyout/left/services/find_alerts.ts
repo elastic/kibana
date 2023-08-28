@@ -57,7 +57,7 @@ export const createFindAlerts =
           error: (err) => {
             $subscription.unsubscribe();
             reject(new Error(`Error while loading alerts`));
-          }
+          },
         });
     });
   };
