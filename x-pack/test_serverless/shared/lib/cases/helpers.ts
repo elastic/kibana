@@ -46,20 +46,10 @@ export const createAndNavigateToCase = async (
   owner: string
 ) => {
   const cases = getService('cases');
-  const testSubjects = getService('testSubjects');
 
   const header = getPageObject('header');
-  const common = getPageObject('common');
-  const svlCommonNavigation = getPageObject('svlCommonNavigation');
-
-  // navigate to cases
-  await common.navigateToApp('landingPage');
-
-  if (owner === SECURITY_SOLUTION_OWNER) {
-    await testSubjects.click('solutionSideNavItemLink-cases');
-  } else {
-    await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
-  }
+ 
+  await navigateToCasesApp(getPageObject, getService, owner)
 
   const theCase = await cases.api.createCase({ owner });
   await cases.casesTable.waitForCasesToBeListed();
@@ -67,4 +57,23 @@ export const createAndNavigateToCase = async (
   await header.waitUntilLoadingHasFinished();
 
   return theCase;
+};
+
+export const navigateToCasesApp = async (
+  getPageObject: FtrProviderContext['getPageObject'],
+  getService: FtrProviderContext['getService'],
+  owner: string
+) => {
+  const testSubjects = getService('testSubjects');
+
+  const common = getPageObject('common');
+  const svlCommonNavigation = getPageObject('svlCommonNavigation');
+
+  await common.navigateToApp('landingPage');
+
+  if (owner === SECURITY_SOLUTION_OWNER) {
+    await testSubjects.click('solutionSideNavItemLink-cases');
+  } else {
+    await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+  }
 };
