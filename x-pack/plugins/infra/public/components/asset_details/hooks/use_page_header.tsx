@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   useEuiTheme,
   EuiIcon,
@@ -31,12 +30,12 @@ type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 export const usePageHeader = (tabs: Tab[] = [], links: LinkOptions[] = []) => {
   const { rightSideItems } = useRightSideItems(links);
   const { tabEntries } = useTabs(tabs);
-  const { breadcrumbs } = useBreadcrumbs();
+  const { breadcrumbs } = useTemplateHeaderBreadcrumbs();
 
   return { rightSideItems, tabEntries, breadcrumbs };
 };
 
-const useBreadcrumbs = () => {
+export const useTemplateHeaderBreadcrumbs = () => {
   const history = useHistory();
   const location = useLocation<RouteState>();
 
@@ -44,7 +43,7 @@ const useBreadcrumbs = () => {
     if (location.state) {
       history.replace({
         pathname: location.state.originPathname,
-        search: location.state.data,
+        search: location.state.originData,
       });
     } else {
       history.goBack();

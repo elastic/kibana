@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
-
 import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
 import {
@@ -23,7 +22,6 @@ interface QueryParams {
   from?: number;
   to?: number;
   assetName?: string;
-  state?: RouteState;
 }
 
 export const RedirectToNodeDetail = () => {
@@ -59,28 +57,42 @@ export const RedirectToNodeDetail = () => {
   );
 };
 
-export const getNodeDetailUrl = ({
-  nodeType,
-  nodeId,
-  search,
-}: {
-  nodeType: InventoryItemType;
-  nodeId: string;
-  search: QueryParams;
-}): LinkDescriptor => {
-  const { to, from, state, ...rest } = search;
-  return {
-    app: 'metrics',
-    pathname: `link-to/${nodeType}-detail/${nodeId}`,
-    search: {
-      ...rest,
-      ...(state ? { state: JSON.stringify(state) } : undefined),
-      ...(to && from
-        ? {
-            to: `${to}`,
-            from: `${from}`,
-          }
-        : undefined),
+export const useNodeDetailsRedirect = () => {
+  const location = useLocation();
+
+  const getNodeDetailUrl = useCallback(
+    ({
+      nodeType,
+      nodeId,
+      search,
+    }: {
+      nodeType: InventoryItemType;
+      nodeId: string;
+      search: QueryParams;
+    }): LinkDescriptor => {
+      const { to, from, ...rest } = search;
+
+      return {
+        app: 'metrics',
+        pathname: `link-to/${nodeType}-detail/${nodeId}`,
+        search: {
+          ...rest,
+          ...(to && from
+            ? {
+                to: `${to}`,
+                from: `${from}`,
+              }
+            : undefined),
+          // While we don't have a shared state between all page in infra, this makes it possible to restore a page state when returning to the previous route
+          state: JSON.stringify({
+            originData: location.search,
+            originPathname: location.pathname,
+          } as RouteState),
+        },
+      };
     },
-  };
+    [location.pathname, location.search]
+  );
+
+  return { getNodeDetailUrl };
 };

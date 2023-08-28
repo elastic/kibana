@@ -6,9 +6,8 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip, IconType } from '@elastic/eui';
-import { useLocation } from 'react-router-dom';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { getNodeDetailUrl } from '../../../../link_to';
+import { useNodeDetailsRedirect } from '../../../../link_to';
 import type { CloudProvider, HostNodeRow } from '../../hooks/use_hosts_table';
 
 const cloudIcons: Record<CloudProvider, IconType> = {
@@ -26,7 +25,7 @@ interface EntryTitleProps {
 
 export const EntryTitle = ({ onClick, dateRangeTs, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
-  const location = useLocation();
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
 
   const link = useLinkProps({
     ...getNodeDetailUrl({
@@ -36,10 +35,6 @@ export const EntryTitle = ({ onClick, dateRangeTs, title }: EntryTitleProps) => 
         from: dateRangeTs.from,
         to: dateRangeTs.to,
         assetName: name,
-        state: {
-          originPathname: location.pathname,
-          data: location.search,
-        },
       },
     }),
   });

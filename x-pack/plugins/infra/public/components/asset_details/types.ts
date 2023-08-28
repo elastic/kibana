@@ -91,5 +91,5 @@ export interface ContentTemplateProps {
 
 export interface RouteState {
   originPathname?: string;
-  data?: Search;
+  originData?: Search;
 }

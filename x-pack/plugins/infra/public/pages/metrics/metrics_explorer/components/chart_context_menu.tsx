@@ -17,7 +17,6 @@ import {
 import DateMath from '@kbn/datemath';
 import { Capabilities } from '@kbn/core/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { useLocation } from 'react-router-dom';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
@@ -27,7 +26,7 @@ import {
   MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
-import { getNodeDetailUrl } from '../../../link_to/redirect_to_node_detail';
+import { useNodeDetailsRedirect } from '../../../link_to/redirect_to_node_detail';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
 
@@ -72,7 +71,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   uiCapabilities,
   chartOptions,
 }: Props) => {
-  const location = useLocation();
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const supportFiltering = options.groupBy != null && onFilter != null;
@@ -115,10 +114,6 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
           search: {
             from: dateMathExpressionToEpoch(timeRange.from),
             to: dateMathExpressionToEpoch(timeRange.to, true),
-            state: {
-              originPathname: location.pathname,
-              data: location.search,
-            },
           },
         })
       : {}),

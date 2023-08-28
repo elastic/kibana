@@ -9,9 +9,8 @@ import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { useLocation } from 'react-router-dom';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { getNodeDetailUrl } from '../../../../pages/link_to';
+import { useNodeDetailsRedirect } from '../../../../pages/link_to';
 import type { MetricsExplorerTimeOptions } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 type ExtractStrict<T, U extends T> = Extract<T, U>;
@@ -29,7 +28,7 @@ export const MetricsNodeDetailsLink = ({
   nodeType,
   timerange,
 }: MetricsNodeDetailsLinkProps) => {
-  const location = useLocation();
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const linkProps = useLinkProps(
     getNodeDetailUrl({
       nodeType,
@@ -38,10 +37,6 @@ export const MetricsNodeDetailsLink = ({
         from: parse(timerange.from)?.valueOf(),
         to: parse(timerange.to)?.valueOf(),
         assetName: id,
-        state: {
-          originPathname: location.pathname,
-          data: location.search,
-        },
       },
     })
   );
