@@ -407,7 +407,16 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       });
       setupFleetAndAgents(providerContext);
+      const createdPolicyIds: string[] = [];
       after(async () => {
+        const deletedPromises = createdPolicyIds.map((agentPolicyId) =>
+          supertest
+            .post(`/api/fleet/agent_policies/delete`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ agentPolicyId })
+            .expect(200)
+        );
+        await Promise.all(deletedPromises);
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
         if (systemPkgVersion) {
           await supertest.delete(`/api/fleet/epm/packages/system-${systemPkgVersion}`);
@@ -484,18 +493,61 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should copy tamper protection', async () => {
         const {
-          body: { item: policyWithTamperProtection },
+          body: { item: originalPolicy },
         } = await supertest
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'Tamper Protection test',
+            description: 'Original',
             namespace: 'default',
-            is_managed: true,
-            is_protected: true,
           })
           .expect(200);
 
+        /* const res = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .query({
+            sys_monitoring: true,
+          })
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Policy with system monitoring ${Date.now()}`,
+            namespace: 'default',
+          })
+          .expect(200);*/
+
+        /*
+        // load fake endpoint package policy
+        await kibanaServer.savedObjects.create({
+          id: 'endpoint-1',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          overwrite: true,
+          attributes: {
+            name: 'endpoint-1',
+            policy_id: originalPolicy.id,
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '0.9.0',
+            },
+          },
+        });
+
+        packagePoliciesToDeleteIds.push('endpoint-1');
+
+       */
+        const {
+          body: { item: policyWithTamperProtection },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${originalPolicy.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated name',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        createdPolicyIds.push(policyWithTamperProtection.id);
         const {
           body: { item: newPolicy },
         } = await supertest
