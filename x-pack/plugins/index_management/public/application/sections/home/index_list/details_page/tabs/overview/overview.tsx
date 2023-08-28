@@ -184,8 +184,7 @@ export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) =>
             )}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={core.http}
-            pluginId={'indexManagement'}
+            assetBasePath={core.http.basePath.prepend(`/plugins/indexManagement/assets`)}
             sharePlugin={plugins.share}
             application={core.application}
             consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}

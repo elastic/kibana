@@ -31,18 +31,14 @@ export const getConsoleRequest = (
   args?: LanguageDefinitionSnippetArguments
 ): string | undefined => {
   if (code in consoleDefinition) {
-    const codeType:
-      | string
-      | ((args: LanguageDefinitionSnippetArguments) => string)
-      | { link: string; label: string }
-      | undefined = consoleDefinition[code];
+    const codeType = consoleDefinition[code];
 
     switch (typeof codeType) {
       case 'string':
-        return codeType;
+        return codeType as string;
       case 'function':
         if (args) {
-          return codeType(args);
+          return codeType(args) as string;
         }
         return undefined;
       default:
