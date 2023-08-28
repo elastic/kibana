@@ -80,7 +80,7 @@ export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.0') => {
+export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.2') => {
   return {
     version: packageVersion,
     name: 'cspm',
