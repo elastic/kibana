@@ -7,10 +7,18 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Serverless search API', function () {
-    loadTestFile(require.resolve('./telemetry/snapshot_telemetry'));
-    loadTestFile(require.resolve('./cases/find_cases'));
-    loadTestFile(require.resolve('./cases/post_case'));
+export default function ({ getService }: FtrProviderContext) {
+  // eslint-disable-next-line ban/ban
+  describe.only('Serverless search API', function () {
+    const esArchiver = getService('esArchiver');
+
+    before(async () => {
+      await esArchiver.emptyKibanaIndex();
+    });
+
+    it('should fail to run due to esArchiver.emptyKibanaIndex() throwing an exception', () => {
+      // eslint-disable-next-line no-console
+      console.log("I'm a failure!");
+    });
   });
 }
