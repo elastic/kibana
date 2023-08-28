@@ -10,6 +10,7 @@ import { type Observable, firstValueFrom } from 'rxjs';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { RequestHandler } from '@kbn/core-http-server';
+import { labelsSchema } from '../config/telemetry_labels';
 import type { TelemetryConfigType } from '../config';
 import { v2 } from '../../common/types';
 import {
@@ -84,6 +85,7 @@ export function registerTelemetryConfigRoutes({
           optIn: schema.oneOf([schema.boolean(), schema.literal(null)]),
           sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')]),
           telemetryNotifyUserAboutOptInDefault: schema.boolean(),
+          labels: labelsSchema,
         }),
       },
     },
