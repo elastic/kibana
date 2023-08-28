@@ -8,7 +8,6 @@ import { map, mergeMap, catchError } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { from, of } from 'rxjs';
-import { isEmpty } from 'lodash';
 import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
