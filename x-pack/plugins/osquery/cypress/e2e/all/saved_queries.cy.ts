@@ -18,11 +18,11 @@ import {
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE, login } from '../../tasks/login';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { loadCase, cleanupCase, loadPack, cleanupPack } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Saved queries', () => {
+describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   let caseId: string;
 
   before(() => {
@@ -32,7 +32,7 @@ describe('ALL - Saved queries', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');
   });
 

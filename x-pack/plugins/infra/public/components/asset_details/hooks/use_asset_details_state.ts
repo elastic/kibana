@@ -6,66 +6,34 @@
  */
 
 import createContainer from 'constate';
-import { useMemo } from 'react';
-import { findInventoryModel } from '../../../../common/inventory_models';
-import { useSourceContext } from '../../../containers/metrics_source';
-import { useMetadata } from './use_metadata';
-import { parseDateRange } from '../../../utils/datemath';
 import type { AssetDetailsProps } from '../types';
-import { toTimestampRange } from '../utils';
-
-const DEFAULT_DATE_RANGE = {
-  from: 'now-15m',
-  to: 'now',
-};
+import { useMetadataStateProviderContext } from './use_metadata_state';
 
 export interface UseAssetDetailsStateProps {
   state: Pick<
     AssetDetailsProps,
-    'asset' | 'assetType' | 'overrides' | 'dateRange' | 'onTabsStateChange' | 'renderMode'
+    'asset' | 'assetType' | 'overrides' | 'onTabsStateChange' | 'renderMode'
   >;
 }
 
 export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
-  const {
-    asset,
-    assetType,
-    dateRange: rawDateRange,
-    onTabsStateChange,
-    overrides,
-    renderMode,
-  } = state;
+  const { metadata } = useMetadataStateProviderContext();
+  const { asset, assetType, onTabsStateChange, overrides, renderMode } = state;
 
-  const dateRange = useMemo(() => {
-    const { from = DEFAULT_DATE_RANGE.from, to = DEFAULT_DATE_RANGE.to } =
-      parseDateRange(rawDateRange);
-
-    return { from, to };
-  }, [rawDateRange]);
-
-  const dateRangeTs = toTimestampRange(dateRange);
-
-  const inventoryModel = findInventoryModel(assetType);
-  const { sourceId } = useSourceContext();
-  const {
-    loading: metadataLoading,
-    error: fetchMetadataError,
-    metadata,
-  } = useMetadata(asset.name, assetType, inventoryModel.requiredMetrics, sourceId, dateRangeTs);
+  // When the asset asset.name is known we can load the page faster
+  // Otherwise we need to use metadata response.
+  const loading = !asset.name && !metadata?.name;
 
   return {
-    asset,
+    asset: {
+      ...asset,
+      name: asset.name || metadata?.name || 'asset-name',
+    },
     assetType,
-    dateRange,
-    dateRangeTs,
     onTabsStateChange,
     overrides,
     renderMode,
-    metadataResponse: {
-      metadataLoading,
-      fetchMetadataError,
-      metadata,
-    },
+    loading,
   };
 }
 

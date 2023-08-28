@@ -1,17 +1,24 @@
 {
   "indices.get_mapping": {
     "url_params": {
-      "ignore_unavailable": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_indices": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
+        "none"
       ],
-      "master_timeout": "",
-      "local": "__flag__"
+      "ignore_unavailable": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
@@ -20,6 +27,10 @@
       "_mapping",
       "{index}/_mapping"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-mapping.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-mapping.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -109,7 +109,8 @@ describe('ingest_integration tests ', () => {
       cloud = cloudService.isCloudEnabled,
       licenseUuid = 'updated-uid',
       clusterUuid = '',
-      clusterName = ''
+      clusterName = '',
+      isServerlessEnabled = cloudService.isServerlessEnabled
     ) => ({
       type: 'endpoint',
       enabled: true,
@@ -118,7 +119,14 @@ describe('ingest_integration tests ', () => {
         integration_config: {},
         policy: {
           value: disableProtections(
-            policyFactory(license, cloud, licenseUuid, clusterUuid, clusterName)
+            policyFactory(
+              license,
+              cloud,
+              licenseUuid,
+              clusterUuid,
+              clusterName,
+              isServerlessEnabled
+            )
           ),
         },
         artifact_manifest: { value: manifest },
@@ -527,6 +535,7 @@ describe('ingest_integration tests ', () => {
     beforeEach(() => {
       licenseEmitter.next(Platinum); // set license level to platinum
     });
+
     it('updates successfully when meta fields differ from services', async () => {
       const mockPolicy = policyFactory();
       mockPolicy.meta.cloud = true; // cloud mock will return true
@@ -534,6 +543,7 @@ describe('ingest_integration tests ', () => {
       mockPolicy.meta.cluster_name = 'updated-name';
       mockPolicy.meta.cluster_uuid = 'updated-uuid';
       mockPolicy.meta.license_uid = 'updated-uid';
+      mockPolicy.meta.serverless = false;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
         logger,
@@ -552,6 +562,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'original-name';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'original-uuid';
       policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'original-uid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.serverless = true;
       const updatedPolicyConfig = await callback(
         policyConfig,
         soClient,
@@ -569,6 +580,7 @@ describe('ingest_integration tests ', () => {
       mockPolicy.meta.cluster_name = 'updated-name';
       mockPolicy.meta.cluster_uuid = 'updated-uuid';
       mockPolicy.meta.license_uid = 'updated-uid';
+      mockPolicy.meta.serverless = false;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
         logger,
@@ -586,6 +598,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'updated-name';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'updated-uuid';
       policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'updated-uid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.serverless = false;
       const updatedPolicyConfig = await callback(
         policyConfig,
         soClient,

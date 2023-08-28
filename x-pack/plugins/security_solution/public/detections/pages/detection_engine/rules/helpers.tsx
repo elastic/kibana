@@ -144,7 +144,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     rule.alert_suppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
 });
 
-const convertHistoryStartToSize = (relativeTime: string) => {
+export const convertHistoryStartToSize = (relativeTime: string) => {
   if (relativeTime.startsWith('now-')) {
     return relativeTime.substring(4);
   } else {
@@ -200,6 +200,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     severity,
     false_positives: falsePositives,
     risk_score: riskScore,
+    investigation_fields: investigationFields,
     tags,
     threat,
     threat_indicator_path: threatIndicatorPath,
@@ -230,6 +231,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
+    investigationFields: investigationFields ?? [],
     threat: threat as Threats,
     threatIndicatorPath,
   };
@@ -343,6 +345,7 @@ const commonRuleParamsKeys = [
   'name',
   'description',
   'false_positives',
+  'investigation_fields',
   'rule_id',
   'max_signals',
   'risk_score',

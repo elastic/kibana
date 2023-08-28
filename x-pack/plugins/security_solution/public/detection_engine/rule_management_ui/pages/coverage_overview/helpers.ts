@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { EuiSelectableOption } from '@elastic/eui';
+import type { CoverageOverviewRuleSource } from '../../../../../common/api/detection_engine';
+import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
 import type { CoverageOverviewMitreTactic } from '../../../rule_management/model/coverage_overview/mitre_tactic';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { coverageOverviewCardColorThresholds } from './constants';
@@ -21,4 +24,37 @@ export const getCardBackgroundColor = (value: number) => {
       return color;
     }
   }
+};
+
+export const extractSelected = <
+  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
+>(
+  options: Array<{ checked?: string; label: T }>
+): T[] => {
+  return options.filter((option) => option.checked === 'on').map((option) => option.label);
+};
+
+export const populateSelected = (
+  allOptions: EuiSelectableOption[],
+  selected: string[]
+): EuiSelectableOption[] =>
+  allOptions.map((option) =>
+    selected.includes(option.label) ? { ...option, checked: 'on' } : option
+  );
+
+export const getTotalRuleCount = (
+  technique: CoverageOverviewMitreTechnique,
+  activity?: CoverageOverviewRuleActivity[]
+): number => {
+  if (!activity) {
+    return technique.enabledRules.length + technique.disabledRules.length;
+  }
+  let totalRuleCount = 0;
+  if (activity.includes(CoverageOverviewRuleActivity.Enabled)) {
+    totalRuleCount += technique.enabledRules.length;
+  }
+  if (activity.includes(CoverageOverviewRuleActivity.Disabled)) {
+    totalRuleCount += technique.disabledRules.length;
+  }
+  return totalRuleCount;
 };

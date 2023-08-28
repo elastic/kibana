@@ -1,0 +1,126 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: kibana
+  description: Kibana is a user interface that lets you visualize your Elasticsearch data and navigate the Elastic Stack.
+
+  annotations:
+    backstage.io/source-location: url:https://github.com/elastic/kibana/tree/main
+    github.com/project-slug: elastic/kibana
+    github.com/team-slug: elastic/kibana-tech-leads
+    buildkite.com/project-slug: elastic/kibana
+
+  tags:
+    - typescript
+    - javascript
+    - dashboards
+    - metrics
+    - visualizations
+    - observability
+
+  links:
+    - title: Documentation
+      url: https://www.elastic.co/guide/en/kibana/current/index.html
+
+spec:
+  type: monorepo
+  owner: group:kibana-tech-leads
+  lifecycle: production
+
+---
+
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana-tests-pipeline
+  description: Definition of the kibana pipeline
+  links:
+    - title: Pipeline
+      url: https://buildkite.com/elastic/kibana-tests
+spec:
+  type: buildkite-pipeline
+  owner: group:kibana-tech-leads
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana-tests
+      description: Pipeline that tests the service integration in various environments
+    spec:
+      repository: elastic/kibana
+      pipeline_file: ./.buildkite/pipelines/quality-gates/pipeline.kibana-tests.yaml
+      provider_settings:
+        trigger_mode: none
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        security-engineering-productivity:
+          access_level: BUILD_AND_READ
+        fleet:
+          access_level: BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: BUILD_AND_READ
+        kibana-core:
+          access_level: BUILD_AND_READ
+        cloud-tooling:
+          access_level: BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: Kibana-UI-Service
+  description: Kibana UI Service provides the UX for visualizing Elasticsearch data.  It is comprised of a client side for presentation and user event handling and a server side application for UX servicing and interaction with Elasticsearch.
+  annotations:
+    backstage.io/source-location: url:https://github.com/elastic/kibana/tree/main
+    github.com/project-slug: elastic/kibana
+    github.com/team-slug: elastic/kibana-tech-leads
+    buildkite.com/project-slug: elastic/kibana
+  tags:
+    - typescript
+    - javascript
+    - dashboards
+    - metrics
+    - visualizations
+    - observability
+  links:
+    - title: Documentation
+      url: https://www.elastic.co/guide/en/kibana/current/index.html
+spec:
+  type: service
+  owner: group:kibana-tech-leads
+  lifecycle: production
+  system: control-plane
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: Kibana-Background-Tasks-Service
+  description: Kibana Background Tasks Service provides additional task processing parallelism for an instance of the Kibana UI Service.  It is comprised of the same codebase as Kibana UI Service but is launched with an alternative configuration.
+  annotations:
+    backstage.io/source-location: url:https://github.com/elastic/kibana/tree/main
+    github.com/project-slug: elastic/kibana
+    github.com/team-slug: elastic/kibana-tech-leads
+    buildkite.com/project-slug: elastic/kibana
+  tags:
+    - typescript
+    - javascript
+    - dashboards
+    - metrics
+    - visualizations
+    - observability
+  links:
+    - title: Documentation
+      url: https://www.elastic.co/guide/en/kibana/current/index.html
+spec:
+  type: service
+  owner: group:kibana-tech-leads
+  lifecycle: production
+  system: control-plane
+
+

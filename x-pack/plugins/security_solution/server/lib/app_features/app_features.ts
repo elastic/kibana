@@ -22,9 +22,16 @@ import {
 import { AppFeaturesConfigMerger } from './app_features_config_merger';
 import { casesSubFeaturesMap } from './security_cases_kibana_sub_features';
 import { securitySubFeaturesMap } from './security_kibana_sub_features';
+import { assistantSubFeaturesMap } from './security_assistant_kibana_sub_features';
+import {
+  getAssistantAppFeaturesConfig,
+  getAssistantBaseKibanaFeature,
+  getAssistantBaseKibanaSubFeatureIds,
+} from './security_assistant_kibana_features';
 
 export class AppFeatures {
   private securityFeatureConfigMerger: AppFeaturesConfigMerger;
+  private assistantFeatureConfigMerger: AppFeaturesConfigMerger;
   private casesFeatureConfigMerger: AppFeaturesConfigMerger;
   private appFeatures?: Set<AppFeatureKey>;
   private featuresSetup?: FeaturesPluginSetup;
@@ -38,6 +45,10 @@ export class AppFeatures {
       securitySubFeaturesMap
     );
     this.casesFeatureConfigMerger = new AppFeaturesConfigMerger(this.logger, casesSubFeaturesMap);
+    this.assistantFeatureConfigMerger = new AppFeaturesConfigMerger(
+      this.logger,
+      assistantSubFeaturesMap
+    );
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
@@ -98,6 +109,23 @@ export class AppFeatures {
     this.logger.info(JSON.stringify(completeCasesAppFeatureConfig));
 
     this.featuresSetup.registerKibanaFeature(completeCasesAppFeatureConfig);
+
+    // register security assistant Kibana features
+    const securityAssistantBaseKibanaFeature = getAssistantBaseKibanaFeature();
+    const securityAssistantBaseKibanaSubFeatureIds = getAssistantBaseKibanaSubFeatureIds();
+    const enabledAssistantAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
+      getAssistantAppFeaturesConfig()
+    );
+    const completeAssistantAppFeatureConfig =
+      this.assistantFeatureConfigMerger.mergeAppFeatureConfigs(
+        securityAssistantBaseKibanaFeature,
+        securityAssistantBaseKibanaSubFeatureIds,
+        enabledAssistantAppFeaturesConfigs
+      );
+
+    this.logger.info(JSON.stringify(completeAssistantAppFeatureConfig));
+
+    this.featuresSetup.registerKibanaFeature(completeAssistantAppFeatureConfig);
   }
 
   private getEnabledAppFeaturesConfigs(

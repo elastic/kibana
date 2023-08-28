@@ -22,7 +22,10 @@ import { getThreatIntelligenceAnalyst } from '../../../../scripts/endpoint/commo
 import { getSocManager } from '../../../../scripts/endpoint/common/roles_users/soc_manager';
 import { getPlatformEngineer } from '../../../../scripts/endpoint/common/roles_users/platform_engineer';
 import { getEndpointOperationsAnalyst } from '../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
-import { getEndpointSecurityPolicyManager } from '../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
+import {
+  getEndpointSecurityPolicyManagementReadRole,
+  getEndpointSecurityPolicyManager,
+} from '../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
 import { getDetectionsEngineer } from '../../../../scripts/endpoint/common/roles_users/detections_engineer';
 
 export enum ROLE {
@@ -37,6 +40,7 @@ export enum ROLE {
   endpoint_security_policy_manager = 'endpointSecurityPolicyManager',
   endpoint_response_actions_access = 'endpointResponseActionsAccess',
   endpoint_response_actions_no_access = 'endpointResponseActionsNoAccess',
+  endpoint_security_policy_management_read = 'endpointSecurityPolicyManagementRead',
 }
 
 export const rolesMapping: { [key in ROLE]: Omit<Role, 'name'> } = {
@@ -51,6 +55,7 @@ export const rolesMapping: { [key in ROLE]: Omit<Role, 'name'> } = {
   detectionsEngineer: getDetectionsEngineer(),
   endpointResponseActionsAccess: getWithResponseActionsRole(),
   endpointResponseActionsNoAccess: getNoResponseActionsRole(),
+  endpointSecurityPolicyManagementRead: getEndpointSecurityPolicyManagementReadRole(),
 };
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
