@@ -67,7 +67,15 @@ export const MetadataExplanationMessage = () => {
               date: (
                 <FormattedDate value={dateFromRange} month="short" day="numeric" year="numeric" />
               ),
-              time: <FormattedTime value={dateFromRange} hour12={false} />,
+              time: (
+                <FormattedTime
+                  value={dateFromRange}
+                  hour12={false}
+                  hour="2-digit"
+                  minute="2-digit"
+                  second="2-digit"
+                />
+              ),
             }}
           />
         </EuiText>
