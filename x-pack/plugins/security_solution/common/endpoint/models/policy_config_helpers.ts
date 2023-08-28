@@ -119,10 +119,7 @@ const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: PolicyOpera
   },
 });
 
-const getDisabledCommonPopupsForOS = (
-  policy: PolicyConfig,
-  os: keyof Omit<PolicyConfig, 'meta' | 'global_manifest_version'>
-) => ({
+const getDisabledCommonPopupsForOS = (policy: PolicyConfig, os: PolicyOperatingSystem) => ({
   behavior_protection: {
     ...policy[os].popup.behavior_protection,
     enabled: false,
