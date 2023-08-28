@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -26,7 +25,7 @@ import { getAdvancedButton } from '../../screens/integrations';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Live Query run custom and saved', { tags: [tag.ESS] }, () => {
+describe('ALL - Live Query run custom and saved', { tags: ['@ess'] }, () => {
   let savedQueryId: string;
   let savedQueryName: string;
 

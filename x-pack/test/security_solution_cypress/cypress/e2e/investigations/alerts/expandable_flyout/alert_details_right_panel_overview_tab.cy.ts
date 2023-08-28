@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { collapseDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT } from '../../../../screens/expandable_flyout/alert_details_left_panel_investigation_tab';
 import {
@@ -71,7 +69,7 @@ import {
 
 describe(
   'Alert details expandable flyout right panel overview tab',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     const rule = getNewRule();
 
@@ -171,7 +169,7 @@ describe(
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON)
           .should('be.visible')
-          .and('have.text', 'Investigation guide');
+          .and('have.text', 'Show investigation guide');
 
         cy.log('should navigate to left Investigation tab');
 
@@ -295,7 +293,9 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_CONTENT)
           .should('be.visible')
           .within(() => {
-            // TODO the order in which these appear is not deterministic currently, hence this can cause flakiness
+            // cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_SUPPRESSED_ALERTS)
+            //   .should('be.visible')
+            //   .and('have.text', '1 suppressed alert'); // TODO populate rule with alert suppression
             cy.get(
               DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_ANCESTRY
             )

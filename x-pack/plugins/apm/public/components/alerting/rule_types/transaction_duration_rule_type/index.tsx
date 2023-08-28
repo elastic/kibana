@@ -18,6 +18,7 @@ import {
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
+import { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -67,7 +68,7 @@ export interface TransactionDurationRuleParams {
   windowUnit: string;
   groupBy?: string[] | undefined;
   useKqlFilter?: boolean;
-  kqlFilter?: string;
+  searchConfiguration?: SearchConfigurationType;
 }
 
 const TRANSACTION_ALERT_AGGREGATION_TYPES: Record<AggregationType, string> = {
@@ -135,7 +136,7 @@ export function TransactionDurationRuleType(props: Props) {
                 start,
                 end,
                 groupBy: params.groupBy,
-                kqlFilter: params.kqlFilter,
+                searchConfiguration: JSON.stringify(params.searchConfiguration),
               },
             },
           }
@@ -151,7 +152,7 @@ export function TransactionDurationRuleType(props: Props) {
       params.windowSize,
       params.windowUnit,
       params.groupBy,
-      params.kqlFilter,
+      params.searchConfiguration,
     ]
   );
 
@@ -314,7 +315,9 @@ export function TransactionDurationRuleType(props: Props) {
     setRuleParams('transactionType', undefined);
     setRuleParams('transactionName', undefined);
     setRuleParams('environment', ENVIRONMENT_ALL.value);
-    setRuleParams('kqlFilter', undefined);
+    setRuleParams('searchConfiguration', {
+      query: { query: '', language: 'kuery' },
+    });
     setRuleParams('useKqlFilter', e.target.checked);
   };
 

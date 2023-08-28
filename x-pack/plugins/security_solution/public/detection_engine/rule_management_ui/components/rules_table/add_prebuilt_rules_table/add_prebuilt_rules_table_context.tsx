@@ -9,10 +9,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
-import type {
-  RuleInstallationInfoForReview,
-  RuleSignatureId,
-} from '../../../../../../common/api/detection_engine';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
 import { invariant } from '../../../../../../common/utils/invariant';
 import {
   usePerformInstallAllRules,
@@ -22,16 +19,19 @@ import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic
 import type { AddPrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_install';
 import { useFilterPrebuiltRulesToInstall } from './use_filter_prebuilt_rules_to_install';
 import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import { RuleDetailsFlyout } from '../../../../rule_management/components/rule_details/rule_details_flyout';
+import * as i18n from './translations';
 
 export interface AddPrebuiltRulesTableState {
   /**
    * Rules available to be installed
    */
-  rules: RuleInstallationInfoForReview[];
+  rules: RuleResponse[];
   /**
    * Rules to display in table after applying filters
    */
-  filteredRules: RuleInstallationInfoForReview[];
+  filteredRules: RuleResponse[];
   /**
    * Currently selected table filter
    */
@@ -68,17 +68,7 @@ export interface AddPrebuiltRulesTableState {
   /**
    * Rule rows selected in EUI InMemory Table
    */
-  selectedRules: RuleInstallationInfoForReview[];
-  /**
-   * Rule that is currently displayed in the flyout or null if flyout is closed
-   */
-  flyoutRule: RuleInstallationInfoForReview | null;
-  /**
-   * Is true when the install button in the flyout is disabled
-   * (e.g. when the rule is already being installed or when the table is being refetched)
-   *
-   **/
-  isFlyoutInstallButtonDisabled: boolean;
+  selectedRules: RuleResponse[];
 }
 
 export interface AddPrebuiltRulesTableActions {
@@ -87,9 +77,8 @@ export interface AddPrebuiltRulesTableActions {
   installAllRules: () => void;
   installSelectedRules: () => void;
   setFilterOptions: Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>;
-  selectRules: (rules: RuleInstallationInfoForReview[]) => void;
-  openFlyoutForRuleId: (ruleId: RuleSignatureId) => void;
-  closeFlyout: () => void;
+  selectRules: (rules: RuleResponse[]) => void;
+  openRulePreview: (ruleId: RuleSignatureId) => void;
 }
 
 export interface AddPrebuiltRulesContextType {
@@ -107,7 +96,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   children,
 }: AddPrebuiltRulesTableContextProviderProps) => {
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
-  const [selectedRules, setSelectedRules] = useState<RuleInstallationInfoForReview[]>([]);
+  const [selectedRules, setSelectedRules] = useState<RuleResponse[]>([]);
 
   const [filterOptions, setFilterOptions] = useState<AddPrebuiltRulesTableFilterOptions>({
     filter: '',
@@ -144,9 +133,9 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const filteredRules = useFilterPrebuiltRulesToInstall({ filterOptions, rules });
 
-  const { openFlyoutForRuleId, closeFlyout, flyoutRule } = useRuleDetailsFlyout(filteredRules);
-  const isFlyoutInstallButtonDisabled = Boolean(
-    (flyoutRule?.rule_id && loadingRules.includes(flyoutRule.rule_id)) ||
+  const { openRulePreview, closeRulePreview, previewedRule } = useRuleDetailsFlyout(filteredRules);
+  const canPreviewedRuleBeInstalled = Boolean(
+    (previewedRule?.rule_id && loadingRules.includes(previewedRule.rule_id)) ||
       isRefetching ||
       isUpgradingSecurityPackages
   );
@@ -199,17 +188,9 @@ export const AddPrebuiltRulesTableContextProvider = ({
       installSelectedRules,
       reFetchRules: refetch,
       selectRules: setSelectedRules,
-      openFlyoutForRuleId,
-      closeFlyout,
+      openRulePreview,
     }),
-    [
-      installAllRules,
-      installOneRule,
-      installSelectedRules,
-      refetch,
-      openFlyoutForRuleId,
-      closeFlyout,
-    ]
+    [installAllRules, installOneRule, installSelectedRules, refetch, openRulePreview]
   );
 
   const providerValue = useMemo<AddPrebuiltRulesContextType>(() => {
@@ -226,8 +207,6 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isUpgradingSecurityPackages,
         selectedRules,
         lastUpdated: dataUpdatedAt,
-        flyoutRule,
-        isFlyoutInstallButtonDisabled,
       },
       actions,
     };
@@ -243,14 +222,23 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isUpgradingSecurityPackages,
     selectedRules,
     dataUpdatedAt,
-    flyoutRule,
-    isFlyoutInstallButtonDisabled,
     actions,
   ]);
 
   return (
     <AddPrebuiltRulesTableContext.Provider value={providerValue}>
-      {children}
+      <>
+        {children}
+        {previewedRule && (
+          <RuleDetailsFlyout
+            rule={previewedRule}
+            actionButtonLabel={i18n.INSTALL_BUTTON_LABEL}
+            isActionButtonDisabled={canPreviewedRuleBeInstalled}
+            onActionButtonClick={installOneRule}
+            closeFlyout={closeRulePreview}
+          />
+        )}
+      </>
     </AddPrebuiltRulesTableContext.Provider>
   );
 };

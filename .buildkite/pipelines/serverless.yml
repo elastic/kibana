@@ -75,7 +75,7 @@ steps:
       - "target/kibana-security-serverless/**/*"
 
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
-    label: 'Explore - Security Solution Cypress Tests'
+    label: 'Serverless Explore - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -89,7 +89,7 @@ steps:
       - "target/kibana-security-serverless/**/*"
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
-    label: 'Investigations - Security Solution Cypress Tests'
+    label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
