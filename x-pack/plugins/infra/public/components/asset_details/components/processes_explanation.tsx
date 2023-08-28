@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDateRangeProviderContext } from '../hooks/use_date_range';
 import { Popover } from '../tabs/common/popover';
@@ -70,8 +70,6 @@ const ProcessesExplanationTooltipContent = React.memo(() => {
 export const ProcessesExplanationMessage = () => {
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const dateFromRange = new Date(getDateRangeInTimestamp().to);
-  const dateString = dateFromRange.toLocaleDateString();
-  const timeString = dateFromRange.toLocaleTimeString();
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="baseline">
@@ -81,8 +79,10 @@ export const ProcessesExplanationMessage = () => {
             id="xpack.infra.assetDetails.overview.processesSectionTitle"
             defaultMessage="Showing process data collected for the 1 minute preceding {date} @ {time}"
             values={{
-              date: dateString,
-              time: timeString,
+              date: (
+                <FormattedDate value={dateFromRange} month="short" day="numeric" year="numeric" />
+              ),
+              time: <FormattedTime value={dateFromRange} hour12={false} />,
             }}
           />
         </EuiText>
