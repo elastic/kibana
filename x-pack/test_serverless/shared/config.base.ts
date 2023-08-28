@@ -141,7 +141,7 @@ export default async () => {
       ...commonFunctionalServices,
       // TODO: this can be abstracted into @kbn/ftr-common-functional-services
       // We can use the implementation at test/server_integration/services in the function createKibanaSupertestProvider
-      supertest: supertest.agent(formatUrl(servers.kibana, { ca: [Fs.readFileSync(CA_CERT_PATH)] })),
+      supertest: ({ getService }) => supertest.agent(formatUrl(servers.kibana, { ca: [Fs.readFileSync(CA_CERT_PATH)] })),
     },
 
     // overriding default timeouts from packages/kbn-test/src/functional_test_runner/lib/config/schema.ts
