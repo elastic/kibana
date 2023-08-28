@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const COVERAGE_OVERVIEW_DASHBOARD_TITLE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.pageTitle',
   {
-    defaultMessage: 'MITRE ATT&CK\u00AE Coverage',
+    defaultMessage: 'MITRE ATT&CK\u00AE coverage',
   }
 );
 
@@ -174,13 +174,6 @@ export const CoverageOverviewDashboardInformation = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.dashboardInformation',
   {
     defaultMessage:
-      'The interactive MITRE ATT&CK coverage below shows the current state of your coverage from installed rules, click on a cell to view further details. Unmapped rules will not be displayed. View further information from our',
-  }
-);
-
-export const CoverageOverviewDashboardInformationLink = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.dashboardInformationLink',
-  {
-    defaultMessage: 'docs.',
+      "Your current coverage of MITRE ATT&CK\u00AE tactics and techniques, based on installed rules. Click a cell to view and enable a technique's rules. Rules must be mapped to the MITRE ATT&CK\u00AE framework to be displayed.",
   }
 );
