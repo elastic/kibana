@@ -979,7 +979,7 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('GCP Credentials input fields', () => {
-    it(`renders ${CLOUDBEAT_GCP} Not supported when version is not at least version 1.5.0`, () => {
+    it(`renders ${CLOUDBEAT_GCP} Not supported when version is not at least version 1.5.2`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         credentials_type: { value: 'credentials-file' },

@@ -24,6 +24,12 @@ export type AwsCredentialsTypeFieldMap = {
   [key in AwsCredentialsType]: string[];
 };
 
+export type GcpCredentialsType = 'credentials-file' | 'credentials-json';
+
+export type GcpCredentialsTypeFieldMap = {
+  [key in GcpCredentialsType]: string[];
+};
+
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
 export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
@@ -222,9 +228,3 @@ export interface AggFieldBucket {
     doc_count?: string;
   }>;
 }
-
-export type GcpCredentialsType = 'credentials-file' | 'credentials-json';
-
-export type GcpCredentialsTypeFieldMap = {
-  [key in GcpCredentialsType]: string[];
-};

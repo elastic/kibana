@@ -50,7 +50,7 @@ export const GoogleCloudShellGuide = (props: { commandText: string }) => {
               <>
                 <FormattedMessage
                   id="xpack.fleet.googleCloudShell.guide.steps.copy"
-                  defaultMessage="Copy the following command and replace <PROJECT_ID> with your project ID."
+                  defaultMessage="Replace <PROJECT_ID> in the following command with your project ID and copy the command"
                 />
                 <EuiSpacer size="m" />
                 <EuiCodeBlock language="bash" isCopyable contentEditable="true">
