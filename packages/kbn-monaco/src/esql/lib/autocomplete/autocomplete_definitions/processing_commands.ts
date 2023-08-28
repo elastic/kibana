@@ -133,6 +133,18 @@ export const processingRawCommandsDefinition: RawSignatureDefinition[] = [
     signature: 'mv_expand field',
     examples: ['ROW a=[1,2,3], b="b", j=["a","b"] | MV_EXPAND a'],
   },
+  {
+    label: 'enrich',
+    insertText: 'enrich',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.enrichDoc', {
+      defaultMessage: 'Enrich table with another table',
+    }),
+    documentation: {
+      value: buildDocumentation('enrich policy', ['... | ENRICH a']),
+    },
+    sortText: 'B',
+  },
 ];
 
 export const processingCommandsDefinitions: AutocompleteCommandDefinition[] =

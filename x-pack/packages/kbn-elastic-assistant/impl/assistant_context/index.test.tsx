@@ -11,15 +11,23 @@ import React from 'react';
 import { AssistantProvider, useAssistantContext } from '.';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { AssistantAvailability } from '../..';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockGetInitialConversations = jest.fn(() => ({}));
 const mockGetComments = jest.fn(() => []);
 const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+const mockAssistantAvailability: AssistantAvailability = {
+  hasAssistantPrivilege: false,
+  hasConnectorsAllPrivilege: true,
+  hasConnectorsReadPrivilege: true,
+  isAssistantEnabled: true,
+};
 
 const ContextWrapper: React.FC = ({ children }) => (
   <AssistantProvider
     actionTypeRegistry={actionTypeRegistry}
+    assistantAvailability={mockAssistantAvailability}
     augmentMessageCodeBlocks={jest.fn()}
     baseAllow={[]}
     baseAllowReplacement={[]}
