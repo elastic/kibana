@@ -11,8 +11,17 @@ declare namespace Cypress {
       username: string;
       password: string;
     }): Cypress.Chainable<Cypress.Response<any>>;
+    loginAsViewerUser(): Cypress.Chainable<Cypress.Response<any>>;
+    loginAsEditorUser(): Cypress.Chainable<Cypress.Response<any>>;
+    loginAsLogMonitoringUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsElastic(): Cypress.Chainable<Cypress.Response<any>>;
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;
     visitKibana(url: string, rangeFrom?: string, rangeTo?: string): void;
+    deleteIntegration(integrationName: string): void;
+    updateInstallationStepStatus(
+      onboardingId: string,
+      step: InstallationStep,
+      status: InstallationStepStatus
+    ): void;
   }
 }
