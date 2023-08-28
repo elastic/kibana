@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import {SupertestProvider, SupertestWithoutAuthProvider} from './supertest';
+import { SupertestProvider, SupertestWithoutAuthProvider } from './supertest';
 export const services = {
   supertest: SupertestProvider,
-  supertestWithoutAuth: SupertestWithoutAuthProvider
+  supertestWithoutAuth: SupertestWithoutAuthProvider,
 };
