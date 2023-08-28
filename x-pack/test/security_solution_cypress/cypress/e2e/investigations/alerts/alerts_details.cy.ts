@@ -38,7 +38,7 @@ import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 
 describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Basic functions', () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       login();
       disableExpandableFlyout();
