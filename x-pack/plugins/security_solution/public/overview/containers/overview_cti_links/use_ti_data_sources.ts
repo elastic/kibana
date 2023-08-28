@@ -9,7 +9,7 @@ import { filter } from 'rxjs/operators';
 import { useEffect, useState } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isRunningResponse, isErrorResponse } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
   Bucket,
@@ -51,7 +51,11 @@ export const getTiDataSourcesComplete = (
 ): Observable<CtiDataSourceStrategyResponse> => {
   return getTiDataSources(props).pipe(
     filter((response) => {
+<<<<<<< HEAD
       return isErrorResponse(response) || !isRunningResponse(response);
+=======
+      return isCompleteResponse(response);
+>>>>>>> 35b7b08595d02964c1931beb2f9d52634268b82c
     })
   );
 };

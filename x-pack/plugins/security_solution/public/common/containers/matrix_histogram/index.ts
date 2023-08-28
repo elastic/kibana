@@ -10,7 +10,7 @@ import { getOr, noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isErrorResponse, isRunningResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import type { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
@@ -92,7 +92,7 @@ export const useMatrixHistogram = ({
       ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
       ...(includeMissingData != null ? { includeMissingData } : {}),
     });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
     data: [],
@@ -138,11 +138,6 @@ export const useMatrixHistogram = ({
                 }));
                 endTracking('success');
                 searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
-                endTracking('invalid');
-                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
@@ -160,7 +155,7 @@ export const useMatrixHistogram = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, histogramType, addWarning, addError, errorMessage, startTracking]
+    [data.search, histogramType, addError, errorMessage, startTracking]
   );
 
   useEffect(() => {

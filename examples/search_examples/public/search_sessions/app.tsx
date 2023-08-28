@@ -40,7 +40,6 @@ import {
   IEsSearchRequest,
   IEsSearchResponse,
   isRunningResponse,
-  isErrorResponse,
   QueryState,
   SearchSessionState,
 } from '@kbn/data-plugin/public';
@@ -724,8 +723,6 @@ function doSearch(
             title: 'Query result',
             text: mountReactNode(message),
           });
-        } else if (isErrorResponse(res)) {
-          notifications.toasts.addWarning('An error has occurred');
         }
       }),
       map((res) => ({ response: res, request: req, tookMs: performance.now() - startTs })),

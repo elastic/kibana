@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
 import type { DataView } from '@kbn/data-plugin/common';
-import { isRunningResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
@@ -32,7 +32,6 @@ import type {
 } from '../../../common/search_strategy';
 import { Direction, TimelineEventsQueries } from '../../../common/search_strategy';
 import type { InspectResponse } from '../../types';
-import * as i18n from './translations';
 import type { KueryFilterQueryKind } from '../../../common/types/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
@@ -42,7 +41,6 @@ import type {
   TimelineEqlRequestOptions,
   TimelineEqlResponse,
 } from '../../../common/search_strategy/timeline/events/eql';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
 
@@ -221,8 +219,6 @@ export const useTimelineEventsHandler = ({
     }
   }, [setUpdated, timelineResponse.updatedAt]);
 
-  const { addWarning } = useAppToasts();
-
   const timelineSearch = useCallback(
     async (
       request: TimelineRequest<typeof language> | null,
@@ -275,11 +271,6 @@ export const useTimelineEventsHandler = ({
                   return newTimelineResponse;
                 });
 
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                endTracking('invalid');
-                setLoading(false);
-                addWarning(i18n.ERROR_TIMELINE_EVENTS);
                 searchSubscription$.current.unsubscribe();
               }
             },
@@ -335,17 +326,7 @@ export const useTimelineEventsHandler = ({
       await asyncSearch();
       refetch.current = asyncSearch;
     },
-    [
-      pageName,
-      skip,
-      id,
-      startTracking,
-      data.search,
-      dataViewId,
-      addWarning,
-      refetchGrid,
-      wrappedLoadPage,
-    ]
+    [pageName, skip, id, startTracking, data.search, dataViewId, refetchGrid, wrappedLoadPage]
   );
 
   useEffect(() => {

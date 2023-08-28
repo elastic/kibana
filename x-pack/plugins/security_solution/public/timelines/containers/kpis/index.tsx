@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
-import { isRunningResponse, isErrorResponse } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
 import type { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
@@ -46,7 +46,7 @@ export const useTimelineKpis = ({
   );
   const [timelineKpiResponse, setTimelineKpiResponse] =
     useState<TimelineKpiStrategyResponse | null>(null);
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const timelineKpiSearch = useCallback(
     (request: TimelineKpiStrategyRequest | null) => {
@@ -68,10 +68,6 @@ export const useTimelineKpis = ({
                 setLoading(false);
                 setTimelineKpiResponse(response);
                 searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.FAIL_TIMELINE_KPI_DETAILS);
-                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
@@ -86,7 +82,7 @@ export const useTimelineKpis = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning]
+    [data.search, addError]
   );
 
   useEffect(() => {

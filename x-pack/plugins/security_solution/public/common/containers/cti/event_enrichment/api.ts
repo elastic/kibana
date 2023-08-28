@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isErrorResponse, isRunningResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
@@ -46,6 +46,10 @@ export const getEventEnrichment = ({
 export const getEventEnrichmentComplete = (
   props: GetEventEnrichmentProps
 ): Observable<CtiEventEnrichmentStrategyResponse> =>
+<<<<<<< HEAD
   getEventEnrichment(props).pipe(
     filter((response) => isErrorResponse(response) || !isRunningResponse(response))
   );
+=======
+  getEventEnrichment(props).pipe(filter((response) => isCompleteResponse(response)));
+>>>>>>> 35b7b08595d02964c1931beb2f9d52634268b82c

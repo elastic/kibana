@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isRunningResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
@@ -70,7 +70,7 @@ export const useNetworkKpiUniqueFlows = ({
       isInspected: false,
       refetch: refetch.current,
     });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const networkKpiUniqueFlowsSearch = useCallback(
     (request: NetworkKpiUniqueFlowsRequestOptions | null) => {
@@ -100,10 +100,6 @@ export const useNetworkKpiUniqueFlows = ({
                   refetch: refetch.current,
                 }));
                 searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_NETWORK_KPI_UNIQUE_FLOWS);
-                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
@@ -120,7 +116,7 @@ export const useNetworkKpiUniqueFlows = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip]
+    [data.search, addError, skip]
   );
 
   useEffect(() => {
