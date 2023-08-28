@@ -110,12 +110,6 @@ jest.mock('./security_assistant_kibana_features', () => {
   };
 });
 
-class AppFeaturesServiceMock extends AppFeaturesService {
-  protected registerEnabledKibanaFeatures() {
-    // NOOP
-  }
-}
-
 export const createAppFeaturesServiceMock = (
   /** What features keys should be enabled. Default is all */
   enabledFeatureKeys: AppFeatureKeys = [...ALL_APP_FEATURE_KEYS],
@@ -123,7 +117,7 @@ export const createAppFeaturesServiceMock = (
   featuresPluginSetupContract: FeaturesPluginSetup = featuresPluginMock.createSetup(),
   logger: Logger = loggingSystemMock.create().get('appFeatureMock')
 ) => {
-  const appFeaturesService = new AppFeaturesServiceMock(logger, experimentalFeatures);
+  const appFeaturesService = new AppFeaturesService(logger, experimentalFeatures);
 
   appFeaturesService.init(featuresPluginSetupContract);
 

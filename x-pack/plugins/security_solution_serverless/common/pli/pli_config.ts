@@ -32,7 +32,6 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
     complete: [
       AppFeatureKey.endpointResponseActions,
       AppFeatureKey.osqueryAutomatedResponseActions,
-      AppFeatureKey.endpointExceptions,
     ],
   },
   cloud: {

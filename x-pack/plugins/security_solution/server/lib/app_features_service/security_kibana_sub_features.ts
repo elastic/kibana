@@ -551,7 +551,6 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          api: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].all.api,
           id: 'endpoint_exceptions_all',
           includeIn: 'all',
           name: 'All',
@@ -559,10 +558,9 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ui: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].all.ui,
+          ...AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].all,
         },
         {
-          api: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].read.api,
           id: 'endpoint_exceptions_read',
           includeIn: 'read',
           name: 'Read',
@@ -570,7 +568,7 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ui: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].read.ui,
+          ...AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].read,
         },
       ],
     },
