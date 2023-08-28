@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export default function ({ getService, loadTestFile }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('home app', function () {
