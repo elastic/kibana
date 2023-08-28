@@ -15,11 +15,18 @@ import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_po
 import { CoverageOverviewFiltersPanel } from './filters_panel';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 
-const CoverageOverviewSubtitle = (
-  <EuiText color="subdued" size="s">
-    <span>{i18n.CoverageOverviewDashboardInformation}</span> <CoverageOverviewLink />
-  </EuiText>
+const CoverageOverviewHeaderComponent = () => (
+  <HeaderPage
+    title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE}
+    subtitle={
+      <EuiText color="subdued" size="s">
+        <span>{i18n.CoverageOverviewDashboardInformation}</span> <CoverageOverviewLink />
+      </EuiText>
+    }
+  />
 );
+
+const CoverageOverviewHeader = React.memo(CoverageOverviewHeaderComponent);
 
 const CoverageOverviewDashboardComponent = () => {
   const {
@@ -28,10 +35,7 @@ const CoverageOverviewDashboardComponent = () => {
 
   return (
     <>
-      <HeaderPage
-        title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE}
-        subtitle={CoverageOverviewSubtitle}
-      />
+      <CoverageOverviewHeader />
       <CoverageOverviewFiltersPanel />
       <EuiSpacer />
       <EuiFlexGroup gutterSize="m" className="eui-xScroll">
