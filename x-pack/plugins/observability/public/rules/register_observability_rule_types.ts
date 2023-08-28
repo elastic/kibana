@@ -9,7 +9,7 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 
-import { SLO_ID_FIELD } from '../../common/field_names/slo';
+import { SLO_ID_FIELD, SLO_INSTANCE_ID_FIELD } from '../../common/field_names/slo';
 import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import {
@@ -86,7 +86,9 @@ export const registerObservabilityRuleTypes = (
     format: ({ fields }) => {
       return {
         reason: fields[ALERT_REASON] ?? '-',
-        link: `/app/observability/slos/${fields[SLO_ID_FIELD]}`,
+        link: `/app/observability/slos/${fields[SLO_ID_FIELD]}?instanceId=${
+          fields[SLO_INSTANCE_ID_FIELD] ?? '*'
+        }`,
       };
     },
     iconClass: 'bell',

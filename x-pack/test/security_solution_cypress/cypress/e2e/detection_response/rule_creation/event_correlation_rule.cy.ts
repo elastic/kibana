@@ -151,7 +151,7 @@ describe('EQL rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
     const rule = getEqlSequenceRule();
 
     beforeEach(() => {
-      cy.task('esArchiverLoad', 'auditbeat_big');
+      cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
     });
     afterEach(() => {
       cy.task('esArchiverUnload', 'auditbeat_big');
