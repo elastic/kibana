@@ -16,10 +16,10 @@ import {
   aggregateRulesRequestBodySchemaV1,
   AggregateRulesRequestBodyV1,
 } from '../../../../../common/routes/rule/apis/aggregate';
-import { getDefaultRuleAggregationV1 } from './factories';
 import { formatDefaultAggregationResultV1 } from './transforms';
 import { transformAggregateQueryRequestV1, transformAggregateBodyResponseV1 } from './transforms';
 import { DefaultRuleAggregationResultV1 } from './types';
+import { getDefaultRuleAggregationV1 } from './factories/get_default_rule_aggregation';
 
 export const aggregateRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

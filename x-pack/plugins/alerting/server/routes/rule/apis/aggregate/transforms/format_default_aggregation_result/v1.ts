@@ -7,10 +7,10 @@
 
 import { RuleAggregationFormattedResult } from '../../../../../../../common/routes/rule/apis/aggregate';
 import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../../../../../../../common';
-import { DefaultRuleAggregationResult } from '../../types/v1';
+import { DefaultRuleAggregationResultV1 } from '../../types';
 
 export const formatDefaultAggregationResult = (
-  aggregations: DefaultRuleAggregationResult
+  aggregations: DefaultRuleAggregationResultV1
 ): RuleAggregationFormattedResult => {
   if (!aggregations) {
     // Return a placeholder with all zeroes

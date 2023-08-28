@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export { formatDefaultAggregationResult } from './format_default_aggregation_result/latest';
-export { transformAggregateQueryRequest } from './transform_aggregate_query_request/latest';
-export { transformAggregateBodyResponse } from './transform_aggregate_body_response/latest';
-
 export { formatDefaultAggregationResult as formatDefaultAggregationResultV1 } from './format_default_aggregation_result/v1';
 export { transformAggregateQueryRequest as transformAggregateQueryRequestV1 } from './transform_aggregate_query_request/v1';
 export { transformAggregateBodyResponse as transformAggregateBodyResponseV1 } from './transform_aggregate_body_response/v1';
