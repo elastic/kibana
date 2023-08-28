@@ -10,6 +10,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { last } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
+import usePrevious from 'react-use/lib/usePrevious';
 import { i18n } from '@kbn/i18n';
 import {
   ContextDefinition,
@@ -52,12 +53,14 @@ export type UseTimelineResult = Pick<
 export function useTimeline({
   messages,
   connectors,
+  conversationId,
   currentUser,
   chatService,
   onChatUpdate,
   onChatComplete,
 }: {
   messages: Message[];
+  conversationId?: string;
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   chatService: ObservabilityAIAssistantChatService;
@@ -88,6 +91,13 @@ export function useTimeline({
   const controllerRef = useRef(new AbortController());
 
   const [pendingMessage, setPendingMessage] = useState<PendingMessage>();
+
+  const prevConversationId = usePrevious(conversationId);
+  useEffect(() => {
+    if (prevConversationId !== conversationId && pendingMessage?.error) {
+      setPendingMessage(undefined);
+    }
+  }, [conversationId, pendingMessage?.error, prevConversationId]);
 
   function chat(nextMessages: Message[]): Promise<Message[]> {
     const controller = new AbortController();
