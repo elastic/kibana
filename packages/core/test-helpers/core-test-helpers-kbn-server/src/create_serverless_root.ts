@@ -76,6 +76,7 @@ function createServerlessES() {
     es,
     start: async () => {
       await es.runServerless({
+        clean: true,
         basePath: Path.join(REPO_ROOT, '.es/es_test_serverless'),
       });
       // runServerless doesn't wait until the nodes are up

@@ -66,6 +66,12 @@ export const runActionTestSuite = ({
   let client: ElasticsearchClient;
   let esCapabilities: ElasticsearchCapabilities;
 
+  const runOnTraditionalOnly = (fn: Function) => {
+    if (environment === 'traditional') {
+      fn();
+    }
+  };
+
   beforeAll(async () => {
     const { esServer: _esServer, client: _client } = await startEs();
     esServer = _esServer;
@@ -133,6 +139,10 @@ export const runActionTestSuite = ({
   });
 
   afterAll(async () => {
+    await client.indices.delete({ index: 'existing_index_with_docs' }).catch(() => ({}));
+    await client.indices.delete({ index: 'existing_index_2' }).catch(() => ({}));
+    await client.indices.delete({ index: 'existing_index_with_write_block' }).catch(() => ({}));
+
     await esServer.stop();
   });
 
@@ -166,13 +176,13 @@ export const runActionTestSuite = ({
 
       expect(res.right).toEqual(
         expect.objectContaining({
-          existing_index_with_docs: {
+          existing_index_with_docs: expect.objectContaining({
             aliases: {
               existing_index_with_docs_alias: {},
             },
             mappings: expect.anything(),
             settings: expect.anything(),
-          },
+          }),
         })
       );
     });
@@ -185,7 +195,7 @@ export const runActionTestSuite = ({
 
       expect(res.right).toEqual(
         expect.objectContaining({
-          existing_index_with_docs: {
+          existing_index_with_docs: expect.objectContaining({
             aliases: {
               existing_index_with_docs_alias: {},
             },
@@ -200,7 +210,7 @@ export const runActionTestSuite = ({
               },
             },
             settings: expect.anything(),
-          },
+          }),
         })
       );
     });
@@ -396,12 +406,8 @@ export const runActionTestSuite = ({
 
   describe('waitForIndexStatus', () => {
     afterEach(async () => {
-      try {
-        await client.indices.delete({ index: 'red_then_yellow_index' });
-        await client.indices.delete({ index: 'red_index' });
-      } catch (e) {
-        /** ignore */
-      }
+      await client.indices.delete({ index: 'red_then_yellow_index' }).catch(() => ({}));
+      await client.indices.delete({ index: 'red_index' }).catch(() => ({}));
     });
     it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
       // Create a red index
@@ -1795,9 +1801,9 @@ export const runActionTestSuite = ({
       await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: null } } });
     });
     afterAll(async () => {
-      await client.indices.delete({ index: 'red_then_yellow_index' }).catch();
-      await client.indices.delete({ index: 'yellow_then_green_index' }).catch();
-      await client.indices.delete({ index: 'create_new_index' }).catch();
+      await client.indices.delete({ index: 'red_then_yellow_index' }).catch(() => ({}));
+      await client.indices.delete({ index: 'yellow_then_green_index' }).catch(() => ({}));
+      await client.indices.delete({ index: 'create_new_index' }).catch(() => ({}));
     });
     it('resolves right after waiting for an index status to become green when cluster state is not propagated within the timeout', async () => {
       // By specifying a very short timeout Elasticsearch will respond before the shard is allocated
@@ -2046,19 +2052,21 @@ export const runActionTestSuite = ({
       `);
     });
 
-    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
-      const newDocs = new Array(10000).fill({
-        _source: {
-          title:
-            'how do I create a document thats large enoug to exceed the limits without typing long sentences',
-        },
-      }) as SavedObjectsRawDoc[];
-      const task = bulkOverwriteTransformedDocuments({
-        client,
-        index: 'existing_index_with_docs',
-        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
-      });
-      await expect(task()).resolves.toMatchInlineSnapshot(`
+    // no way to configure http.max_content_length on the serverless instance for now.
+    runOnTraditionalOnly(() => {
+      it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
+        const newDocs = new Array(10000).fill({
+          _source: {
+            title:
+              'how do I create a document thats large enoug to exceed the limits without typing long sentences',
+          },
+        }) as SavedObjectsRawDoc[];
+        const task = bulkOverwriteTransformedDocuments({
+          client,
+          index: 'existing_index_with_docs',
+          operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
+        });
+        await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
           "left": Object {
@@ -2066,6 +2074,7 @@ export const runActionTestSuite = ({
           },
         }
       `);
+      });
     });
   });
 };
