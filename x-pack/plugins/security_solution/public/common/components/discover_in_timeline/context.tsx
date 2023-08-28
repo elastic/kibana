@@ -6,10 +6,11 @@
  */
 
 import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import type { RefObject } from 'react';
 import { createContext } from 'react';
 
 interface DiscoverInTimelineContextType {
-  discoverStateContainer: DiscoverStateContainer | undefined;
+  discoverStateContainer: RefObject<DiscoverStateContainer | undefined>;
   setDiscoverStateContainer: (stateContainer: DiscoverStateContainer) => void;
 }
 

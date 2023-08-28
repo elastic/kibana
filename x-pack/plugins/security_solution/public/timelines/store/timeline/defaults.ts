@@ -78,6 +78,7 @@ export const timelineDefaults: SubsetTimelineModel &
   selectedEventIds: {},
   isSelectAllChecked: false,
   filters: [],
+  savedSearchId: null,
 };
 
 export const getTimelineManageDefaults = (id: string) => ({

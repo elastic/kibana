@@ -21,6 +21,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDiscoverInTimelineContext } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -70,9 +71,35 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       timelineType: TimelineType.default,
     });
 
+    const { discoverStateContainer } = useDiscoverInTimelineContext();
+    const { saveCurrentSearch } = useDiscoverInTimelineActions(discoverStateContainer);
+    const { addError } = useAppToasts();
+
     const handleSubmit = useCallback(
-      (titleAndDescription, isValid) => {
+      async (titleAndDescription, isValid) => {
+        debugger;
         if (isValid) {
+          const response = await saveCurrentSearch({
+            name: `Saved Search for timeline - ${titleAndDescription.title}`,
+            description: `Description of Saved Search for timeline - ${titleAndDescription.description}`,
+          });
+
+          if (!response || !response.id) {
+            addError('Error Saving Saved Search.', {
+              title: 'Error Saving Saved Search.',
+            });
+            throw new Error('Error Saving Saved Search.');
+          }
+
+          const savedSearchId = response.id;
+
+          dispatch(
+            timelineActions.updateSavedSearchId({
+              id: timelineId,
+              savedSearchId,
+            })
+          );
+
           dispatch(
             timelineActions.updateTitleAndDescription({
               id: timelineId,
@@ -83,7 +110,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
 
         return Promise.resolve();
       },
-      [dispatch, timelineId]
+      [dispatch, timelineId, addError, saveCurrentSearch]
     );
 
     const initialState = useMemo(
@@ -105,15 +132,10 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     });
     const { isSubmitted, isSubmitting, submit } = form;
 
-    const { discoverStateContainer } = useDiscoverInTimelineContext();
-    const { saveCurrentSearch } = useDiscoverInTimelineActions(discoverStateContainer);
-
-    const onSubmit = useCallback(() => {
-      debugger;
-      saveCurrentSearch();
+    const onSubmit = useCallback(async () => {
       startTransaction({ name: TIMELINE_ACTIONS.SAVE });
       submit();
-    }, [submit, startTransaction, saveCurrentSearch]);
+    }, [submit, startTransaction]);
 
     const handleCancel = useCallback(() => {
       if (showWarning) {

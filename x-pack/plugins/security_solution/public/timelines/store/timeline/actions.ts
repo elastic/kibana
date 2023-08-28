@@ -271,3 +271,8 @@ export const clearEventsDeleted = actionCreator<{
 export const updateTotalCount = actionCreator<{ id: string; totalCount: number }>(
   'UPDATE_TOTAL_COUNT'
 );
+
+export const updateSavedSearchId = actionCreator<{
+  id: string;
+  savedSearchId: string;
+}>('UPDATE_DISCOVER_SAVED_SEARCH_ID');
