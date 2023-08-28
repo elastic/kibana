@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isCompleteResponse } from '@kbn/data-plugin/common';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
@@ -62,7 +62,7 @@ export const useTimelineEventsDetails = ({
   const [loading, setLoading] = useState(true);
   const [timelineDetailsRequest, setTimelineDetailsRequest] =
     useState<TimelineEventsDetailsRequestOptions | null>(null);
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] =
     useState<EventsArgs['detailsData']>(null);
@@ -99,10 +99,6 @@ export const useTimelineEventsDetails = ({
                     searchSubscription$.current.unsubscribe();
                   });
                 });
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.FAIL_TIMELINE_DETAILS);
-                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
@@ -117,7 +113,7 @@ export const useTimelineEventsDetails = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip]
+    [data.search, addError, skip]
   );
 
   useEffect(() => {
