@@ -8,7 +8,7 @@
 import { getIndexConnector } from '../../../objects/connector';
 import { getSimpleCustomQueryRule } from '../../../objects/rule';
 
-import { goToTheRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
+import { goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { deleteIndex, waitForNewDocumentToBeIndexed } from '../../../tasks/api_calls/elasticsearch';
 import {
   cleanKibana,
@@ -59,7 +59,7 @@ describe(
       fillRuleAction(actions);
       createAndEnableRule();
 
-      goToTheRuleDetailsOf(rule.name);
+      goToRuleDetailsOf(rule.name);
 
       /* When the rule is executed, the action is triggered. We wait for the new document to be indexed */
       waitForNewDocumentToBeIndexed(index, initialNumberOfDocuments);

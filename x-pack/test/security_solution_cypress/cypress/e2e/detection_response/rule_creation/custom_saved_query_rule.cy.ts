@@ -22,7 +22,7 @@ import {
   CUSTOM_QUERY_DETAILS,
 } from '../../../screens/rule_details';
 
-import { editFirstRule, goToTheRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
+import { editFirstRule, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { createSavedQuery, deleteSavedQueries } from '../../../tasks/api_calls/saved_queries';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
@@ -91,7 +91,7 @@ describe('Custom saved_query rules', { tags: ['@ess', '@brokenInServerless'] }, 
         cy.wrap(response?.body.type).should('equal', 'saved_query');
       });
 
-      goToTheRuleDetailsOf(rule.name);
+      goToRuleDetailsOf(rule.name);
 
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
 

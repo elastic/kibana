@@ -193,7 +193,7 @@ export const filterByDisabledRules = () => {
   cy.get(DISABLED_RULES_BTN).click();
 };
 
-export const goToTheRuleDetailsOf = (ruleName: string) => {
+export const goToRuleDetailsOf = (ruleName: string) => {
   cy.contains(RULE_NAME, ruleName).click();
 
   cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
@@ -495,7 +495,7 @@ export const closeErrorToast = () => {
 };
 
 export const goToEditRuleActionsSettingsOf = (name: string) => {
-  goToTheRuleDetailsOf(name);
+  goToRuleDetailsOf(name);
   goToRuleEditSettings();
   // wait until first step loads completely. Otherwise cypress stuck at the first edit page
   cy.get(EDIT_SUBMIT_BUTTON).should('be.enabled');

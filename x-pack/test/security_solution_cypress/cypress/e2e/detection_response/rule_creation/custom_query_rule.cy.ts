@@ -75,7 +75,7 @@ import {
   deleteRuleFromDetailsPage,
   expectManagementTableRules,
   getRulesManagementTableRows,
-  goToTheRuleDetailsOf,
+  goToRuleDetailsOf,
   selectRulesByName,
 } from '../../../tasks/alerts_detection_rules';
 import { deleteSelectedRules } from '../../../tasks/rules_bulk_actions';
@@ -182,7 +182,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
         });
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-      goToTheRuleDetailsOf(ruleFields.ruleName);
+      goToRuleDetailsOf(ruleFields.ruleName);
 
       cy.log('Asserting rule details');
       cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
@@ -318,7 +318,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
           const initialNumberOfRules = rules.length;
           const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-          goToTheRuleDetailsOf('New Rule Test');
+          goToRuleDetailsOf('New Rule Test');
           cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
 
           deleteRuleFromDetailsPage();

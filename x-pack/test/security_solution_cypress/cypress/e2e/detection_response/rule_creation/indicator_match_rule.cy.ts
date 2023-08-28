@@ -62,7 +62,7 @@ import {
   checkDuplicatedRule,
   expectNumberOfRules,
   selectAllRules,
-  goToTheRuleDetailsOf,
+  goToRuleDetailsOf,
 } from '../../../tasks/alerts_detection_rules';
 import { duplicateSelectedRulesWithExceptions } from '../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -457,7 +457,7 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
         cy.get(SEVERITY).should('have.text', 'Critical');
         cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-        goToTheRuleDetailsOf(rule.name);
+        goToRuleDetailsOf(rule.name);
 
         cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
         cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
@@ -573,7 +573,7 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
       });
 
       it('Allows the rule to be duplicated from the edit screen', () => {
-        goToTheRuleDetailsOf('Indicator rule duplicate test');
+        goToRuleDetailsOf('Indicator rule duplicate test');
         duplicateRuleFromMenu();
         goBackToRuleDetails();
         goBackToRulesTable();
