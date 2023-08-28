@@ -88,7 +88,7 @@ export const StatsTab: React.FunctionComponent<Props> = ({ indexName }) => {
 
   if (indexStats) {
     return (
-      <EuiFlexGroup alignItems="flexStart">
+      <EuiFlexGroup alignItems="flexStart" data-test-subj="statsTabContent">
         <EuiFlexItem grow={7}>
           <EuiPanel>
             <EuiCodeBlock isCopyable language="json" fontSize="m" paddingSize="m">
@@ -120,7 +120,7 @@ export const StatsTab: React.FunctionComponent<Props> = ({ indexName }) => {
               <p>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexDetails.indexStatsTab.indexStatsDescription"
-                  defaultMessage="Index stats contains high-level aggregation and statistics for an index. The {primariesField} field represents the values for only primary shards, while the {totalField} field contains the accumulated values for both primary and replica shards."
+                  defaultMessage="Index stats contain high-level aggregation and statistics for an index. The {primariesField} field represents the values for only primary shards, while the {totalField} field contains the accumulated values for both primary and replica shards."
                   values={{
                     primariesField: <EuiCode>primaries</EuiCode>,
                     totalField: <EuiCode>total</EuiCode>,

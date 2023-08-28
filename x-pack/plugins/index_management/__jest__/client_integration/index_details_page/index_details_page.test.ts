@@ -60,6 +60,39 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
+  describe('Stats tab', () => {
+    it('loads index stats from the API', async () => {
+      const numberOfRequests = 1;
+      // Expect initial request to fetch index details
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/stats/${testIndexName}`, {
+        asSystemRequest: undefined,
+        body: undefined,
+        query: undefined,
+        version: undefined,
+      });
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+
+    it('renders index stats', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      expect(testBed.actions.statsTab.indexStatsContentExists()).toBe(true);
+    });
+
+    it('hides index stats tab if enableIndexStats===false', async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          config: { enableIndexStats: false },
+        });
+      });
+      testBed.component.update();
+
+      expect(testBed.actions.statsTab.indexStatsTabExists()).toBe(false);
+    });
+  });
+
   it('loads index details from the API', async () => {
     expect(httpSetup.get).toHaveBeenLastCalledWith(
       `${INTERNAL_API_BASE_PATH}/indices/${testIndexName}`,

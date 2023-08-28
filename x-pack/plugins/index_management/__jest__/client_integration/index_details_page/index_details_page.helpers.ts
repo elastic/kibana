@@ -51,6 +51,10 @@ export interface IndexDetailsPageTestBed extends TestBed {
       isDisplayed: () => boolean;
       clickReloadButton: () => Promise<void>;
     };
+    statsTab: {
+      indexStatsContentExists: () => boolean;
+      indexStatsTabExists: () => boolean;
+    };
   };
 }
 
@@ -135,6 +139,15 @@ export const setup = async (
       component.update();
     },
   };
+
+  const statsTab = {
+    indexStatsContentExists: () => {
+      return exists('statsTabContent');
+    },
+    indexStatsTabExists: () => {
+      return exists('indexDetailsTab-stats');
+    },
+  };
   return {
     ...testBed,
     routerMock,
@@ -146,6 +159,7 @@ export const setup = async (
       discoverLinkExists,
       contextMenu,
       errorSection,
+      statsTab,
     },
   };
 };
