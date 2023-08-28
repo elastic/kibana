@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 
 import { EuiFieldText } from '@elastic/eui';
@@ -30,13 +30,39 @@ export const ExternalLinkDestinationPicker = ({
   const [validUrl, setValidUrl] = useState<boolean>(true);
   const [currentUrl, setCurrentUrl] = useState<string>(initialSelection ?? '');
 
+  const validateUrl = useCallback(
+    (url: string) => {
+      try {
+        const allowedUrl = coreServices.http.externalUrl.validateUrl(url);
+        if (allowedUrl === null) {
+          throw new DisallowedUrlError();
+        }
+        const validatedUrl = urlDrilldownValidateUrl(url);
+        if (validatedUrl.isValid) {
+          setDestinationError(undefined);
+          return true;
+        } else {
+          throw new Error();
+        }
+      } catch (error) {
+        setDestinationError(
+          error instanceof DisallowedUrlError
+            ? ExternalLinkStrings.getDisallowedUrlError()
+            : ExternalLinkStrings.getUrlFormatError()
+        );
+        return false;
+      }
+    },
+    [setDestinationError]
+  );
+
   useMount(() => {
     if (initialSelection) {
-      const url = coreServices.http.externalUrl.validateUrl(initialSelection);
-      if (url === null) {
+      const isValid = validateUrl(initialSelection);
+
+      if (!isValid) {
         setValidUrl(false);
-        onDestinationPicked(undefined);
-        setDestinationError(ExternalLinkStrings.getDisallowedUrlError());
+        onDestinationPicked(undefined); // prevent re-saving an invalid link
       } else {
         onDestinationPicked(initialSelection);
       }
@@ -55,33 +81,19 @@ export const ExternalLinkDestinationPicker = ({
           setCurrentUrl(url);
 
           if (url === '') {
+            /* no need to validate the empty string - not an error, but also not a valid destination */
             setValidUrl(true);
             onDestinationPicked(undefined);
             setDestinationError(undefined);
             return;
           }
 
-          try {
-            const allowedUrl = coreServices.http.externalUrl.validateUrl(url); // TODO: rename this
-            if (allowedUrl === null) {
-              throw new DisallowedUrlError();
-            }
-            const validatedUrl = urlDrilldownValidateUrl(url);
-            if (validatedUrl.isValid) {
-              setValidUrl(true);
-              onDestinationPicked(url);
-              setDestinationError(undefined);
-            } else {
-              throw new Error();
-            }
-          } catch (error) {
-            setValidUrl(false);
+          const isValid = validateUrl(url);
+          setValidUrl(isValid);
+          if (isValid) {
+            onDestinationPicked(url);
+          } else {
             onDestinationPicked(undefined);
-            setDestinationError(
-              error instanceof DisallowedUrlError
-                ? ExternalLinkStrings.getDisallowedUrlError()
-                : ExternalLinkStrings.getUrlFormatError()
-            );
           }
         }}
       />
