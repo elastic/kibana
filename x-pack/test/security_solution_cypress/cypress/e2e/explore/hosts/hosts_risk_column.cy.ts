@@ -16,7 +16,7 @@ describe('All hosts table', { tags: ['@ess', '@serverless', '@brokenInServerless
   before(() => {
     cleanKibana();
     // illegal_argument_exception: unknown setting [index.lifecycle.name]
-    cy.task('esArchiverLoad', 'risk_hosts');
+    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
   });
 
   beforeEach(() => {

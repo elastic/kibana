@@ -21,7 +21,9 @@ describe(
   () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'process_ancestry');
+      cy.task('esArchiverLoad', {
+        archiveName: 'process_ancestry',
+      });
     });
 
     beforeEach(() => {

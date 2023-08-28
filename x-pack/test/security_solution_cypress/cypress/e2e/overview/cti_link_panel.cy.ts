@@ -33,7 +33,7 @@ describe('CTI Link Panel', { tags: ['@ess', '@serverless'] }, () => {
   describe('enabled threat intel module', { tags: ['@brokenInServerless'] }, () => {
     before(() => {
       // illegal_argument_exception: unknown setting [index.lifecycle.name]
-      cy.task('esArchiverLoad', 'threat_indicator');
+      cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
     });
 
     beforeEach(() => {

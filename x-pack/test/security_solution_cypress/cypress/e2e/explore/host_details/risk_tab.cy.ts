@@ -14,7 +14,7 @@ describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, (
   before(() => {
     cleanKibana();
     // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
-    cy.task('esArchiverLoad', 'risk_hosts');
+    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
   });
 
   beforeEach(() => {

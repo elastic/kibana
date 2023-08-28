@@ -19,7 +19,9 @@ describe(
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     before(() => {
-      cy.task('esArchiverLoad', 'ransomware_detection');
+      cy.task('esArchiverLoad', {
+        archiveName: 'ransomware_detection',
+      });
     });
 
     describe('Ransomware display in Alerts Section', () => {
