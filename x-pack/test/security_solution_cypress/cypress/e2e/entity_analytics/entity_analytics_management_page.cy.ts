@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import {
   PAGE_TITLE,
   HOST_RISK_PREVIEW_TABLE,
@@ -21,9 +19,9 @@ import {
 
 import { deleteRiskScore, installRiskScoreModule } from '../../tasks/api_calls/risk_scores';
 import { RiskScoreEntity } from '../../tasks/risk_scores/common';
-import { login, visit, visitWithoutDateRange } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { cleanKibana } from '../../tasks/common';
-import { ENTITY_ANALYTICS_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
+import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import { createRule } from '../../tasks/api_calls/rules';
 import {
@@ -44,8 +42,10 @@ import {
 describe(
   'Entity analytics management page',
   {
-    env: { ftrConfig: { enableExperimental: ['riskScoringRoutesEnabled'] } },
-    tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS],
+    env: {
+      ftrConfig: { enableExperimental: ['riskScoringRoutesEnabled', 'riskScoringPersistence'] },
+    },
+    tags: ['@ess', '@brokenInServerless'],
   },
   () => {
     before(() => {
@@ -55,7 +55,6 @@ describe(
 
     beforeEach(() => {
       login();
-      visitWithoutDateRange(ALERTS_URL);
       createRule(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
       deleteConfiguration();
       visit(ENTITY_ANALYTICS_MANAGEMENT_URL);

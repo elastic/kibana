@@ -11,6 +11,7 @@ import { NewChatById } from '@kbn/elastic-assistant';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/react';
+import { useGetAlertDetailsFlyoutLink } from '../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
 import { DocumentStatus } from './status';
 import { useAssistant } from '../hooks/use_assistant';
 import {
@@ -19,7 +20,7 @@ import {
 } from '../../../common/components/event_details/translations';
 import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
-import { DOCUMENT_DETAILS } from './translations';
+import { EVENT_DETAILS } from './translations';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { useRightPanelContext } from '../context';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
@@ -37,15 +38,22 @@ export interface HeaderTitleProps {
  * Document details flyout right section header
  */
 export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) => {
-  const { dataFormattedForFieldBrowser } = useRightPanelContext();
-  const { isAlert, ruleName, timestamp, alertUrl } = useBasicDataFromDetailsData(
+  const { dataFormattedForFieldBrowser, eventId, indexName } = useRightPanelContext();
+  const { isAlert, ruleName, timestamp } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
+  const alertDetailsLink = useGetAlertDetailsFlyoutLink({
+    _id: eventId,
+    _index: indexName,
+    timestamp,
+  });
+
+  const showShareAlertButton = isAlert && alertDetailsLink;
+
   const { showAssistant, promptContextId } = useAssistant({
     dataFormattedForFieldBrowser,
     isAlert,
   });
-  const showShareAlertButton = isAlert && alertUrl;
 
   return (
     <>
@@ -71,7 +79,7 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) 
           )}
           {showShareAlertButton && (
             <EuiFlexItem grow={false}>
-              <ShareButton alertUrl={alertUrl} />
+              <ShareButton alertUrl={alertDetailsLink} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -79,11 +87,11 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) 
       <EuiSpacer size="s" />
       <EuiTitle size="s">
         <h4 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
-          {isAlert && !isEmpty(ruleName) ? ruleName : DOCUMENT_DETAILS}
+          {isAlert && !isEmpty(ruleName) ? ruleName : EVENT_DETAILS}
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row" gutterSize="m">
+      <EuiFlexGroup direction="row" gutterSize={isAlert ? 'm' : 'none'}>
         <EuiFlexItem grow={false}>
           <DocumentStatus />
         </EuiFlexItem>

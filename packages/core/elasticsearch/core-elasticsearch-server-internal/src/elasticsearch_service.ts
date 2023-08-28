@@ -21,6 +21,7 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
   UnauthorizedErrorHandler,
   ElasticsearchClientConfig,
+  ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
 import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 
@@ -37,7 +38,8 @@ import { calculateStatus$ } from './status';
 import { isValidConnection } from './is_valid_connection';
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
-import { getClusterInfo$ } from './get_cluster_info';
+import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
+import { getElasticsearchCapabilities } from './get_capabilities';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -57,6 +59,7 @@ export class ElasticsearchService
   private executionContextClient?: IExecutionContext;
   private esNodesCompatibility$?: Observable<NodesVersionCompatibility>;
   private client?: ClusterClient;
+  private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager: AgentManager;
 
@@ -104,14 +107,14 @@ export class ElasticsearchService
 
     this.esNodesCompatibility$ = esNodesCompatibility$;
 
-    const clusterInfo$ = getClusterInfo$(this.client.asInternalUser);
-    registerAnalyticsContextProvider(deps.analytics, clusterInfo$);
+    this.clusterInfo$ = getClusterInfo$(this.client.asInternalUser);
+    registerAnalyticsContextProvider(deps.analytics, this.clusterInfo$);
 
     return {
       legacy: {
         config$: this.config$,
       },
-      clusterInfo$,
+      clusterInfo$: this.clusterInfo$,
       esNodesCompatibility$,
       status$: calculateStatus$(esNodesCompatibility$),
       setUnauthorizedErrorHandler: (handler) => {
@@ -140,6 +143,8 @@ export class ElasticsearchService
       }
     });
 
+    let capabilities: ElasticsearchCapabilities;
+
     if (!config.skipStartupConnectionCheck) {
       // Ensure that the connection is established and the product is valid before moving on
       await isValidConnection(this.esNodesCompatibility$);
@@ -155,11 +160,21 @@ export class ElasticsearchService
             'Refer to https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-security.html for more info.'
         );
       }
+
+      capabilities = getElasticsearchCapabilities({
+        clusterInfo: await firstValueFrom(this.clusterInfo$!),
+      });
+    } else {
+      // skipStartupConnectionCheck is only used for unit testing, we default to base capabilities
+      capabilities = {
+        serverless: false,
+      };
     }
 
     return {
       client: this.client!,
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
+      getCapabilities: () => capabilities,
     };
   }
 
