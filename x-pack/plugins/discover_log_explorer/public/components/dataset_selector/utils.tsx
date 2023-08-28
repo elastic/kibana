@@ -61,6 +61,7 @@ export const buildIntegrationsTree = ({
       integrationsTree.items.push({
         name: title,
         icon: <PackageIcon packageName={name} version={version} size="m" icons={icons} tryApi />,
+        'data-test-subj': integration.id,
         panel: integration.id,
         ...(isLastIntegration && { buttonRef: spyRef }),
       });
@@ -85,6 +86,7 @@ export const createAllLogDatasetsItem = ({ onClick }: { onClick(): void }) => {
   const allLogDataset = Dataset.createAllLogsDataset();
   return {
     name: allLogDataset.title,
+    'data-test-subj': 'allLogDatasets',
     icon: allLogDataset.iconType && <EuiIcon type={allLogDataset.iconType} />,
     onClick,
   };
@@ -93,6 +95,7 @@ export const createAllLogDatasetsItem = ({ onClick }: { onClick(): void }) => {
 export const createUnmanagedDatasetsItem = ({ onClick }: { onClick: LoadDatasets }) => {
   return {
     name: uncategorizedLabel,
+    'data-test-subj': 'unmanagedDatasets',
     icon: <EuiIcon type="documents" />,
     onClick,
     panel: UNMANAGED_STREAMS_PANEL_ID,
@@ -103,5 +106,6 @@ export const createIntegrationStatusItem = (props: IntegrationsListStatusProps) 
   return {
     disabled: true,
     name: <IntegrationsListStatus {...props} />,
+    'data-test-subj': 'integrationStatusItem',
   };
 };

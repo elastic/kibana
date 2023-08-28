@@ -16,7 +16,7 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
-import { convertRulesFilterToKQL } from '../../../../common/utils/kql';
+import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   UpgradeSpecificRulesRequest,
   PerformRuleUpgradeResponseBody,
@@ -94,6 +94,7 @@ import type {
 export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RuleResponse> =>
   KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
     method: 'POST',
+    version: '2023-10-31',
     body: JSON.stringify(rule),
     signal,
   });
@@ -104,11 +105,17 @@ export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<Ru
  * @param rule RuleUpdateProps to be updated
  * @param signal to cancel request
  *
+ * @returns Promise<Rule> An updated rule
+ *
+ * In fact this function should return Promise<RuleResponse> but it'd require massive refactoring.
+ * It should be addressed as a part of OpenAPI schema adoption.
+ *
  * @throws An error if response is not OK
  */
-export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RuleResponse> =>
-  KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<Rule> =>
+  KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'PUT',
+    version: '2023-10-31',
     body: JSON.stringify(rule),
     signal,
   });
@@ -130,6 +137,7 @@ export const patchRule = async ({
 }: PatchRuleProps): Promise<RuleResponse> =>
   KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
     method: 'PATCH',
+    version: '2023-10-31',
     body: JSON.stringify(ruleProperties),
     signal,
   });
@@ -187,6 +195,7 @@ export const fetchRules = async ({
 
   return KibanaServices.get().http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
     method: 'GET',
+    version: '2023-10-31',
     query,
     signal,
   });
@@ -198,11 +207,17 @@ export const fetchRules = async ({
  * @param id Rule ID's (not rule_id)
  * @param signal to cancel request
  *
+ * @returns Promise<Rule>
+ *
+ * In fact this function should return Promise<RuleResponse> but it'd require massive refactoring.
+ * It should be addressed as a part of OpenAPI schema adoption.
+ *
  * @throws An error if response is not OK
  */
 export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> =>
   KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
+    version: '2023-10-31',
     query: { id },
     signal,
   });
@@ -257,6 +272,7 @@ export const fetchCoverageOverview = async ({
 }: FetchCoverageOverviewProps): Promise<CoverageOverviewResponse> =>
   KibanaServices.get().http.fetch<CoverageOverviewResponse>(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       filter,
     }),
@@ -359,6 +375,7 @@ export async function performBulkAction({
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
     method: 'POST',
+    version: '2023-10-31',
     body: JSON.stringify(params),
     query: { dry_run: dryRun },
   });
@@ -382,6 +399,7 @@ export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExpor
 
   return KibanaServices.get().http.fetch<BulkExportResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
     method: 'POST',
+    version: '2023-10-31',
     body: JSON.stringify(params),
   });
 }
@@ -416,6 +434,7 @@ export const importRules = async ({
     `${DETECTION_ENGINE_RULES_URL}/_import`,
     {
       method: 'POST',
+      version: '2023-10-31',
       headers: { 'Content-Type': undefined },
       query: {
         overwrite,
@@ -451,6 +470,7 @@ export const exportRules = async ({
 
   return KibanaServices.get().http.fetch<Blob>(`${DETECTION_ENGINE_RULES_URL}/_export`, {
     method: 'POST',
+    version: '2023-10-31',
     body,
     query: {
       exclude_export_details: excludeExportDetails,
@@ -474,6 +494,7 @@ export const fetchRuleManagementFilters = async ({
 }): Promise<GetRuleManagementFiltersResponse> =>
   KibanaServices.get().http.fetch<GetRuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
     method: 'GET',
+    version: '1',
     signal,
   });
 
@@ -487,10 +508,11 @@ export const fetchRuleManagementFilters = async ({
 export const getPrePackagedRulesStatus = async ({
   signal,
 }: {
-  signal: AbortSignal | undefined;
+  signal?: AbortSignal;
 }): Promise<PrePackagedRulesStatusResponse> =>
   KibanaServices.get().http.fetch<PrePackagedRulesStatusResponse>(PREBUILT_RULES_STATUS_URL, {
     method: 'GET',
+    version: '2023-10-31',
     signal,
   });
 
@@ -632,6 +654,7 @@ export const getPrebuiltRulesStatus = async ({
     GET_PREBUILT_RULES_STATUS_URL,
     {
       method: 'GET',
+      version: '1',
       signal,
     }
   );
@@ -650,6 +673,7 @@ export const reviewRuleUpgrade = async ({
 }): Promise<ReviewRuleUpgradeResponseBody> =>
   KibanaServices.get().http.fetch(REVIEW_RULE_UPGRADE_URL, {
     method: 'POST',
+    version: '1',
     signal,
   });
 
@@ -667,12 +691,14 @@ export const reviewRuleInstall = async ({
 }): Promise<ReviewRuleInstallationResponseBody> =>
   KibanaServices.get().http.fetch(REVIEW_RULE_INSTALLATION_URL, {
     method: 'POST',
+    version: '1',
     signal,
   });
 
 export const performInstallAllRules = async (): Promise<PerformRuleInstallationResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_INSTALLATION_URL, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       mode: 'ALL_RULES',
     }),
@@ -683,6 +709,7 @@ export const performInstallSpecificRules = async (
 ): Promise<PerformRuleInstallationResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_INSTALLATION_URL, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       mode: 'SPECIFIC_RULES',
       rules,
@@ -692,6 +719,7 @@ export const performInstallSpecificRules = async (
 export const performUpgradeAllRules = async (): Promise<PerformRuleUpgradeResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       mode: 'ALL_RULES',
       pick_version: 'TARGET',
@@ -703,6 +731,7 @@ export const performUpgradeSpecificRules = async (
 ): Promise<PerformRuleUpgradeResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       mode: 'SPECIFIC_RULES',
       rules,

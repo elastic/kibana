@@ -210,6 +210,9 @@ components:
           $ref: '#/components/schemas/RiskEngineStatus'
         risk_engine_status:
           $ref: '#/components/schemas/RiskEngineStatus'
+        is_max_amount_of_risk_engines_reached:
+          description: Indicates whether the maximum amount of risk engines has been reached
+          type: boolean
     RiskEngineInitResponse:
       type: object
       properties:

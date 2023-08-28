@@ -432,7 +432,7 @@ class OutputService {
 
     // ensure only default output exists
     if (data.is_default) {
-      if (defaultDataOutputId) {
+      if (defaultDataOutputId && defaultDataOutputId !== options?.id) {
         await this._updateDefaultOutput(
           soClient,
           defaultDataOutputId,
@@ -443,7 +443,7 @@ class OutputService {
     }
     if (data.is_default_monitoring) {
       const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
-      if (defaultMonitoringOutputId) {
+      if (defaultMonitoringOutputId && defaultMonitoringOutputId !== options?.id) {
         await this._updateDefaultOutput(
           soClient,
           defaultMonitoringOutputId,
@@ -764,6 +764,11 @@ class OutputService {
         ) {
           updateData.compression_level = 4;
         }
+        if (data.compression && data.compression !== kafkaCompressionType.Gzip) {
+          // Clear compression level if compression is not gzip
+          updateData.compression_level = null;
+        }
+
         if (!data.client_id) {
           updateData.client_id = 'Elastic';
         }

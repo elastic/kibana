@@ -771,7 +771,7 @@
           "\nReturns a user-friendly description of a field type"
         ],
         "signature": [
-          "(type: string | undefined) => any"
+          "(type: string | undefined) => string"
         ],
         "path": "packages/kbn-unified-field-list/src/utils/field_types/get_field_type_description.ts",
         "deprecated": false,
@@ -806,7 +806,7 @@
           "\nReturns a user-friendly name of a field type"
         ],
         "signature": [
-          "(type: string | undefined) => any"
+          "(type: string | undefined) => string"
         ],
         "path": "packages/kbn-unified-field-list/src/utils/field_types/get_field_type_name.ts",
         "deprecated": false,
@@ -2083,7 +2083,7 @@
                 "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              ", \"uiSettings\">; data: ",
+              ", \"analytics\" | \"uiSettings\">; data: ",
               {
                 "pluginId": "data",
                 "scope": "public",

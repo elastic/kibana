@@ -33,6 +33,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   core,
   plugins,
   isHidden,
+  stackVersion,
 }): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   description,
@@ -41,7 +42,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
     return `${docLinks.links.observability.monitorStatus}`;
   },
   ruleParamsExpression: (params: any) => (
-    <MonitorStatusAlert core={core} plugins={plugins} params={params} />
+    <MonitorStatusAlert core={core} plugins={plugins} params={params} stackVersion={stackVersion} />
   ),
   validate: (ruleParams: any) => {
     if (!validateFunc) {

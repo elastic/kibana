@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCode, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
-import React, { useMemo, type FC, useCallback } from 'react';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
+import { EuiCode, EuiIcon, useEuiTheme } from '@elastic/eui';
+import React, { useMemo, type FC } from 'react';
+import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
+import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-
 import { useProcessData } from '../hooks/use_process_data';
-import { SESSION_PREVIEW_TEST_ID, SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID } from './test_ids';
 import {
   SESSION_PREVIEW_COMMAND_TEXT,
   SESSION_PREVIEW_PROCESS_TEXT,
   SESSION_PREVIEW_RULE_TEXT,
   SESSION_PREVIEW_TIME_TEXT,
-  SESSION_PREVIEW_TITLE,
 } from './translations';
-import { LeftPanelKey, LeftPanelVisualizeTabPath } from '../../left';
 import { RenderRuleName } from '../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
 
 /**
@@ -41,23 +37,10 @@ const ValueContainer: FC<{ text?: string }> = ({ text, children }) => (
 );
 
 /**
- * Renders session preview under visualistions section in the flyout right EuiPanel
+ * Renders session preview under Visualizations section in the flyout right EuiPanel
  */
 export const SessionPreview: FC = () => {
-  const { eventId, indexName, scopeId } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
-
-  const goToSessionViewTab = useCallback(() => {
-    openLeftPanel({
-      id: LeftPanelKey,
-      path: LeftPanelVisualizeTabPath,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
-  }, [eventId, openLeftPanel, indexName, scopeId]);
+  const { eventId, scopeId } = useRightPanelContext();
 
   const { processName, userName, startAt, ruleName, ruleId, workdir, command } = useProcessData();
   const { euiTheme } = useEuiTheme();
@@ -120,29 +103,16 @@ export const SessionPreview: FC = () => {
   }, [command, workdir]);
 
   return (
-    <EuiPanel hasBorder={true} paddingSize="none" data-test-subj={SESSION_PREVIEW_TEST_ID}>
-      <EuiPanel color="subdued" paddingSize="s">
-        <EuiButtonEmpty
-          color="primary"
-          iconType="sessionViewer"
-          onClick={goToSessionViewTab}
-          data-test-subj={SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID}
-        >
-          {SESSION_PREVIEW_TITLE}
-        </EuiButtonEmpty>
-
-        <div>
-          <ValueContainer>
-            <EuiIcon type="user" />
-            &nbsp;
-            <span style={emphasisStyles}>{userName}</span>
-          </ValueContainer>
-          {processNameFragment}
-          {timeFragment}
-          {ruleFragment}
-          {commandFragment}
-        </div>
-      </EuiPanel>
-    </EuiPanel>
+    <div data-test-subj={SESSION_PREVIEW_TEST_ID}>
+      <ValueContainer>
+        <EuiIcon type="user" />
+        &nbsp;
+        <span style={emphasisStyles}>{userName}</span>
+      </ValueContainer>
+      {processNameFragment}
+      {timeFragment}
+      {ruleFragment}
+      {commandFragment}
+    </div>
   );
 };

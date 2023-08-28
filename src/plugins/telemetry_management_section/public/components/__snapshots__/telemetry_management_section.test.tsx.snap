@@ -253,7 +253,6 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "timeZone": null,
     }
   }
-  onQueryMatchChange={[MockFunction]}
   showAppliesSettingMessage={true}
   telemetryService={
     TelemetryService {

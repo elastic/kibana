@@ -7,8 +7,9 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { cloneDeepWith } from 'lodash';
+import { cloneDeepWith, isString } from 'lodash';
 import { Key, Origin, WebDriver } from 'selenium-webdriver';
+import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
 import { modifyUrl } from '@kbn/std';
 
 import sharp from 'sharp';
@@ -16,6 +17,7 @@ import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
+import { NetworkOptions, NetworkProfile, NETWORK_PROFILES } from '../remote/network_profiles';
 
 export type Browser = BrowserService;
 
@@ -25,19 +27,20 @@ class BrowserService extends FtrService {
    */
   public readonly keys = Key;
   public readonly isFirefox: boolean;
-  public readonly isChromium: boolean;
 
   private readonly log = this.ctx.getService('log');
 
   constructor(
     ctx: FtrProviderContext,
     public readonly browserType: string,
-    private readonly driver: WebDriver
+    protected readonly driver: WebDriver | ChromiumWebDriver
   ) {
     super(ctx);
     this.isFirefox = this.browserType === Browsers.Firefox;
-    this.isChromium =
-      this.browserType === Browsers.Chrome || this.browserType === Browsers.ChromiumEdge;
+  }
+
+  public isChromium(): this is { driver: ChromiumWebDriver } {
+    return this.driver instanceof ChromiumWebDriver;
   }
 
   /**
@@ -664,6 +667,68 @@ class BrowserService extends FtrService {
         }
         return false;
       }
+    }
+  }
+
+  /**
+   * Get the network simulation for chromium browsers if available.
+   * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#getNetworkConditions
+   *
+   * @return {Promise<NetworkOptions>}
+   */
+  public async getNetworkConditions() {
+    if (this.isChromium()) {
+      return this.driver.getNetworkConditions().catch(() => undefined); // Return undefined instead of throwing if no conditions are set.
+    } else {
+      const message =
+        'WebDriver does not support the .getNetworkConditions method.\nProbably the browser in used is not chromium based.';
+      this.log.error(message);
+      throw new Error(message);
+    }
+  }
+
+  /**
+   * Delete the network simulation for chromium browsers if available.
+   *
+   * @return {Promise<void>}
+   */
+  public async restoreNetworkConditions() {
+    this.log.debug('Restore network conditions simulation.');
+    return this.setNetworkConditions('NO_THROTTLING');
+  }
+
+  /**
+   * Set the network conditions for chromium browsers if available.
+   *
+   * __Sample Usage:__
+   *
+   * browser.setNetworkConditions('FAST_3G')
+   * browser.setNetworkConditions('SLOW_3G')
+   * browser.setNetworkConditions('OFFLINE')
+   * browser.setNetworkConditions({
+   *   offline: false,
+   *   latency: 5, // Additional latency (ms).
+   *   download_throughput: 500 * 1024, // Maximal aggregated download throughput.
+   *   upload_throughput: 500 * 1024, // Maximal aggregated upload throughput.
+   * });
+   *
+   * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#setNetworkConditions
+   *
+   * @return {Promise<void>}
+   */
+  public async setNetworkConditions(profileOrOptions: NetworkProfile | NetworkOptions) {
+    const networkOptions = isString(profileOrOptions)
+      ? NETWORK_PROFILES[profileOrOptions]
+      : profileOrOptions;
+
+    if (this.isChromium()) {
+      this.log.debug(`Set network conditions with profile "${profileOrOptions}".`);
+      return this.driver.setNetworkConditions(networkOptions);
+    } else {
+      const message =
+        'WebDriver does not support the .setNetworkCondition method.\nProbably the browser in used is not chromium based.';
+      this.log.error(message);
+      throw new Error(message);
     }
   }
 }

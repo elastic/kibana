@@ -32,7 +32,10 @@ export interface AutomaticCrawlSchedulerLogicValues {
   useConnectorSchedule: CrawlSchedule['useConnectorSchedule'];
 }
 
-const DEFAULT_VALUES: Pick<AutomaticCrawlSchedulerLogicValues, 'crawlFrequency' | 'crawlUnit'> = {
+export const DEFAULT_VALUES: Pick<
+  AutomaticCrawlSchedulerLogicValues,
+  'crawlFrequency' | 'crawlUnit'
+> = {
   crawlFrequency: 24,
   crawlUnit: CrawlUnits.hours,
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/server';
@@ -12,7 +13,7 @@ import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { AlertsLocatorParams, sloFeatureId } from '../../../../common';
+import { AlertsLocatorParams, observabilityPaths, sloFeatureId } from '../../../../common';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -85,6 +86,8 @@ export function sloBurnRateRuleType(
       useEcs: false,
       useLegacyAlerts: true,
     },
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   };
 }
 

@@ -582,10 +582,6 @@
                 "path": "src/plugins/visualizations/public/plugin.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/public/kibana_services.ts"
               },

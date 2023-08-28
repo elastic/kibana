@@ -35,7 +35,14 @@
     "@kbn/io-ts-utils",
     "@kbn/std",
     "@kbn/alerting-plugin",
-    "@kbn/features-plugin"
+    "@kbn/features-plugin",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/i18n-react",
+    "@kbn/field-formats-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/task-manager-plugin"
   ],
   "exclude": ["target/**/*"]
 }

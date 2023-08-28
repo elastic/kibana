@@ -232,4 +232,65 @@ describe('Rule response schema', () => {
       expect(message.schema).toEqual({});
     });
   });
+
+  describe('investigation_fields', () => {
+    test('it should validate rule with empty array for "investigation_fields"', () => {
+      const payload = getRulesSchemaMock();
+      payload.investigation_fields = [];
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = { ...getRulesSchemaMock(), investigation_fields: [] };
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should validate rule with "investigation_fields"', () => {
+      const payload = getRulesSchemaMock();
+      payload.investigation_fields = ['foo', 'bar'];
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = { ...getRulesSchemaMock(), investigation_fields: ['foo', 'bar'] };
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should validate undefined for "investigation_fields"', () => {
+      const payload: RuleResponse = {
+        ...getRulesSchemaMock(),
+        investigation_fields: undefined,
+      };
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = { ...getRulesSchemaMock(), investigation_fields: undefined };
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should NOT validate a string for "investigation_fields"', () => {
+      const payload: Omit<RuleResponse, 'investigation_fields'> & {
+        investigation_fields: string;
+      } = {
+        ...getRulesSchemaMock(),
+        investigation_fields: 'foo',
+      };
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "foo" supplied to "investigation_fields"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+  });
 });

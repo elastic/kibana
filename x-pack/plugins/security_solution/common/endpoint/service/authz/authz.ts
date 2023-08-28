@@ -7,6 +7,8 @@
 
 import type { ENDPOINT_PRIVILEGES, FleetAuthz } from '@kbn/fleet-plugin/common';
 
+import { omit } from 'lodash';
+import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ } from '../response_actions/constants';
 import type { LicenseService } from '../../../license';
 import type { EndpointAuthz } from '../../types/authz';
 import type { MaybeImmutable } from '../../types';
@@ -82,7 +84,7 @@ export const calculateEndpointAuthz = (
 
   const canWriteExecuteOperations = hasKibanaPrivilege(fleetAuthz, 'writeExecuteOperations');
 
-  return {
+  const authz: EndpointAuthz = {
     canWriteSecuritySolution,
     canReadSecuritySolution,
     canAccessFleet: fleetAuthz?.fleet.all ?? false,
@@ -95,22 +97,22 @@ export const calculateEndpointAuthz = (
     canWriteActionsLogManagement,
     canReadActionsLogManagement: canReadActionsLogManagement && isEnterpriseLicense,
     canAccessEndpointActionsLogManagement: canReadActionsLogManagement && isPlatinumPlusLicense,
+
+    // ---------------------------------------------------------
     // Response Actions
+    // ---------------------------------------------------------
     canIsolateHost: canIsolateHost && isPlatinumPlusLicense,
     canUnIsolateHost,
     canKillProcess: canWriteProcessOperations && isEnterpriseLicense,
     canSuspendProcess: canWriteProcessOperations && isEnterpriseLicense,
     canGetRunningProcesses: canWriteProcessOperations && isEnterpriseLicense,
-    canAccessResponseConsole:
-      isEnterpriseLicense &&
-      (canIsolateHost ||
-        canUnIsolateHost ||
-        canWriteProcessOperations ||
-        canWriteFileOperations ||
-        canWriteExecuteOperations),
+    canAccessResponseConsole: false, // set further below
     canWriteExecuteOperations: canWriteExecuteOperations && isEnterpriseLicense,
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
+
+    // ---------------------------------------------------------
     // artifacts
+    // ---------------------------------------------------------
     canWriteTrustedApplications,
     canReadTrustedApplications,
     canWriteHostIsolationExceptions: canWriteHostIsolationExceptions && isPlatinumPlusLicense,
@@ -122,6 +124,20 @@ export const calculateEndpointAuthz = (
     canWriteEventFilters,
     canReadEventFilters,
   };
+
+  // Response console is only accessible when license is Enterprise and user has access to any
+  // of the response actions except `release`. Sole access to `release` is something
+  // that is supported for a user in a license downgrade scenario, and in that case, we don't want
+  // to allow access to Response Console.
+  authz.canAccessResponseConsole =
+    isEnterpriseLicense &&
+    Object.values(omit(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ, 'release')).some(
+      (responseActionAuthzKey) => {
+        return authz[responseActionAuthzKey];
+      }
+    );
+
+  return authz;
 };
 
 export const getEndpointAuthzInitialState = (): EndpointAuthz => {
