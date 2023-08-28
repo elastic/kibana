@@ -8,7 +8,9 @@
 import type { Message } from '@kbn/elastic-assistant';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
 
-export const getLangChainMessage = (assistantMessage: Message): BaseMessage => {
+export const getLangChainMessage = (
+  assistantMessage: Pick<Message, 'content' | 'role'>
+): BaseMessage => {
   switch (assistantMessage.role) {
     case 'system':
       return new SystemMessage(assistantMessage.content);
@@ -21,8 +23,9 @@ export const getLangChainMessage = (assistantMessage: Message): BaseMessage => {
   }
 };
 
-export const getLangChainMessages = (assistantMessages: Message[]): BaseMessage[] =>
-  assistantMessages.map(getLangChainMessage);
+export const getLangChainMessages = (
+  assistantMessages: Array<Pick<Message, 'content' | 'role'>>
+): BaseMessage[] => assistantMessages.map(getLangChainMessage);
 
 export const getMessageContentAndRole = (prompt: string): Pick<Message, 'content' | 'role'> => ({
   content: prompt,
@@ -38,7 +41,7 @@ export interface ResponseBody {
 /** An unsafe, temporary stub that parses assistant messages from the request with no validation */
 export const unsafeGetAssistantMessagesFromRequest = (
   rawSubActionParamsBody: string | undefined
-): Message[] => {
+): Array<Pick<Message, 'content' | 'role'>> => {
   try {
     if (rawSubActionParamsBody == null) {
       return [];

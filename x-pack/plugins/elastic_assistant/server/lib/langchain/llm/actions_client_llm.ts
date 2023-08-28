@@ -84,7 +84,7 @@ export class ActionsClientLlm extends LLM {
 
       if (typeof content !== 'string') {
         throw new Error(
-          `${LLM_TYPE}: choices[0] message content should be a string, but it had an unexpected type: %{typeof content}`
+          `${LLM_TYPE}: choices[0] message content should be a string, but it had an unexpected type: ${typeof content}`
         );
       }
 
