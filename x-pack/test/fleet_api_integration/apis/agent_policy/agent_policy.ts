@@ -499,55 +499,66 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'Tamper Protection test',
-            description: 'Original',
+            description: '',
             namespace: 'default',
           })
           .expect(200);
 
-        /* const res = await supertest
-          .post(`/api/fleet/agent_policies`)
-          .query({
-            sys_monitoring: true,
-          })
+        // add endpoint package policy, which is required for tamper protection
+        await supertest
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: `Policy with system monitoring ${Date.now()}`,
-            namespace: 'default',
-          })
-          .expect(200);*/
-
-        /*
-        // load fake endpoint package policy
-        await kibanaServer.savedObjects.create({
-          id: 'endpoint-1',
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          overwrite: true,
-          attributes: {
             name: 'endpoint-1',
+            description: '',
+            namespace: 'default',
             policy_id: originalPolicy.id,
+            enabled: true,
+            inputs: [
+              {
+                enabled: true,
+                streams: [],
+                type: 'ENDPOINT_INTEGRATION_CONFIG',
+                config: {
+                  _config: {
+                    value: {
+                      type: 'endpoint',
+                      endpointConfig: {
+                        preset: 'EDRComplete',
+                      },
+                    },
+                  },
+                },
+              },
+            ],
             package: {
               name: 'endpoint',
               title: 'Elastic Endpoint',
-              version: '0.9.0',
+              version: '8.10.2',
             },
-          },
-        });
+          })
+          .expect(200);
 
         packagePoliciesToDeleteIds.push('endpoint-1');
 
-       */
+        // switch is protected to true
         const {
           body: { item: policyWithTamperProtection },
         } = await supertest
           .put(`/api/fleet/agent_policies/${originalPolicy.id}`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'Updated name',
+            name: 'Tamper Protection test',
+            is_managed: false,
             namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+            is_protected: true,
           })
           .expect(200);
 
         createdPolicyIds.push(policyWithTamperProtection.id);
+
+        // test copy
         const {
           body: { item: newPolicy },
         } = await supertest
