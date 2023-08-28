@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { IKibanaSearchResponse } from './types';
 import { isMalformedResponse, isRunningResponse } from './utils';
 
 describe('utils', () => {
@@ -16,7 +17,7 @@ describe('utils', () => {
     });
 
     it('returns `true` if rawResponse is undefined', () => {
-      const isError = isMalformedResponse({});
+      const isError = isMalformedResponse({} as unknown as IKibanaSearchResponse);
       expect(isError).toBe(true);
     });
   });
