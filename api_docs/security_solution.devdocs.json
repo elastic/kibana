@@ -1847,6 +1847,38 @@
         },
         {
           "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.setIsILMAvailable",
+          "type": "Function",
+          "tags": [],
+          "label": "setIsILMAvailable",
+          "description": [],
+          "signature": [
+            "(isILMAvailable: boolean) => void"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginStart.setIsILMAvailable.$1",
+              "type": "boolean",
+              "tags": [],
+              "label": "isILMAvailable",
+              "description": [],
+              "signature": [
+                "boolean"
+              ],
+              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
           "id": "def-public.PluginStart.setIsSidebarEnabled",
           "type": "Function",
           "tags": [],

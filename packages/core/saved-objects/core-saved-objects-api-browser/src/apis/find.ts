@@ -25,6 +25,7 @@ export type SavedObjectsFindOptions = Omit<
   | 'sortOrder'
   | 'typeToNamespacesMap'
   | 'migrationVersionCompatibility'
+  | 'downwardConversion'
 >;
 
 /**
