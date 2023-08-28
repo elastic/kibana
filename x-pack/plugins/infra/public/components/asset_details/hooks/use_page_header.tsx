@@ -18,6 +18,7 @@ import React, { useCallback, useMemo } from 'react';
 import { capitalize } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { APM_HOST_FILTER_FIELD } from '../constants';
 import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails } from '../links';
 import { FlyoutTabIds, type RouteState, type LinkOptions, type Tab, type TabIds } from '../types';
@@ -38,12 +39,17 @@ export const usePageHeader = (tabs: Tab[] = [], links: LinkOptions[] = []) => {
 export const useTemplateHeaderBreadcrumbs = () => {
   const history = useHistory();
   const location = useLocation<RouteState>();
+  const {
+    services: {
+      application: { navigateToApp },
+    },
+  } = useKibanaContextForPlugin();
 
   const onClick = (e: React.MouseEvent) => {
     if (location.state) {
-      history.replace({
-        pathname: location.state.originPathname,
-        search: location.state.originData,
+      navigateToApp(location.state.originAppId, {
+        replace: true,
+        path: `${location.state.originPathname}${location.state.originData}`,
       });
     } else {
       history.goBack();
@@ -52,6 +58,8 @@ export const useTemplateHeaderBreadcrumbs = () => {
   };
 
   const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] =
+    // If there is a state object in location, it's persisted in case the page is opened in a new tab or after page refresh
+    // With that, we can show the return button. Otherwise, it will be hidden (ex: the user opened a shared URL or opened the page from their bookmarks)
     location.state || history.length > 1
       ? [
           {

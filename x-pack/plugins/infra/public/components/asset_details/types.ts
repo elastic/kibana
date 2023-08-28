@@ -90,6 +90,7 @@ export interface ContentTemplateProps {
 }
 
 export interface RouteState {
+  originAppId: string;
   originPathname?: string;
   originData?: Search;
 }
