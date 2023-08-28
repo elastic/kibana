@@ -123,4 +123,38 @@ spec:
   lifecycle: production
   system: control-plane
 
+---
 
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana-release
+  description: Definition of the kibana release pipeline
+  links:
+    - title: Pipeline
+      url: https://buildkite.com/elastic/kibana-release
+spec:
+  type: buildkite-pipeline
+  owner: group:kibana-operations
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana-release
+      description: Pipeline that releases kibana by triggering the release flow through qa, staging, and production
+    spec:
+      repository: elastic/kibana
+      pipeline_file: ./.buildkite/pipelines/pipeline.kibana-release.yaml
+      provider_settings:
+        build_branches: false
+        build_pull_request_forks: false
+        build_tags: true
+        # https://regex101.com/r/ScgA8Y/1
+        filter_condition: 'build.tag =~ "/^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$$/
+"'
+        filter_enabled: true
+        trigger_mode: none
+      teams:
+        kibana-operations:
+          access_level: BUILD_AND_READ

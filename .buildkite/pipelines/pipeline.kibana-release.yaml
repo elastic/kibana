@@ -1,0 +1,10 @@
+steps:
+  - label: ":releasethekraken: Release kibana"
+    # https://regex101.com/r/ScgA8Y/1
+    if: 'BUILDKITE_TAG =~ "/^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$$/
+"'
+    trigger: gpctl-promote
+    build:
+      env:
+        SERVICE_COMMIT_HASH: "${BUILDKITE_COMMIT:0:12}"
+        REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/tagged-release.yaml
