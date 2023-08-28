@@ -144,6 +144,13 @@ import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 
+const RULE_EXCEPTION_LIST_TYPES = [
+  ExceptionListTypeEnum.DETECTION,
+  ExceptionListTypeEnum.RULE_DEFAULT,
+];
+
+const RULE_ENDPOINT_EXCEPTION_LIST_TYPE = [ExceptionListTypeEnum.ENDPOINT];
+
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -159,29 +166,6 @@ const StyledFullHeightContainer = styled.div`
 const StyledMinHeightTabContainer = styled.div`
   min-height: 800px;
 `;
-
-export enum RuleDetailTabs {
-  alerts = 'alerts',
-  exceptions = 'rule_exceptions',
-  endpointExceptions = 'endpoint_exceptions',
-  executionResults = 'execution_results',
-  executionEvents = 'execution_events',
-}
-
-export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
-  [RuleDetailTabs.alerts]: detectionI18n.ALERT,
-  [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
-  [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
-  [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
-  [RuleDetailTabs.executionEvents]: i18n.EXECUTION_EVENTS_TAB,
-};
-
-const RULE_EXCEPTION_LIST_TYPES = [
-  ExceptionListTypeEnum.DETECTION,
-  ExceptionListTypeEnum.RULE_DEFAULT,
-];
-
-const RULE_ENDPOINT_EXCEPTION_LIST_TYPE = [ExceptionListTypeEnum.ENDPOINT];
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
