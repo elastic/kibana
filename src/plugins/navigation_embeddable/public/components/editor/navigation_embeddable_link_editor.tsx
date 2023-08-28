@@ -76,7 +76,9 @@ export const NavigationEmbeddableLinkEditor = ({
   const [destinationError, setDestinationError] = useState<string | undefined>();
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
   const [linkOptions, setLinkOptions] = useState<NavigationLinkOptions | undefined>({
-    ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+    ...(link?.type === EXTERNAL_LINK_TYPE
+      ? DEFAULT_URL_DRILLDOWN_OPTIONS
+      : DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS),
     ...link?.options,
   });
 

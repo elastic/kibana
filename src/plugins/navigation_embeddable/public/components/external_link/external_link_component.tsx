@@ -6,15 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
+import {
+  UrlDrilldownOptions,
+  DEFAULT_URL_DRILLDOWN_OPTIONS,
+} from '@kbn/ui-actions-enhanced-plugin/public';
 import { EuiListGroupItem } from '@elastic/eui';
-import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/public';
 
 import { coreServices } from '../../services/kibana_services';
 import { NavigationEmbeddableLink } from '../../../common/content_management';
 
 export const ExternalLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
+  const linkOptions = useMemo(() => {
+    return {
+      ...DEFAULT_URL_DRILLDOWN_OPTIONS,
+      ...link.options,
+    } as UrlDrilldownOptions;
+  }, [link.options]);
+
+  const destination = useMemo(() => {
+    return linkOptions.encodeUrl ? encodeURI(link.destination) : link.destination;
+  }, [linkOptions, link.destination]);
+
   return (
     <EuiListGroupItem
       size="s"
@@ -22,15 +36,12 @@ export const ExternalLinkComponent = ({ link }: { link: NavigationEmbeddableLink
       className={'navigationLink'}
       id={`externalLink--${link.id}`}
       label={link.label || link.destination}
+      href={destination}
       onClick={async (event) => {
+        /** Only use `navigateToUrl` if we **aren't** opening in a new window/tab; otherwise, just use default href handling */
         const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
-        const destination =
-          !link.options || (link.options as UrlDrilldownOptions)?.encodeUrl
-            ? encodeURI(link.destination)
-            : link.destination;
-        if (modifiedClick || !link.options || link.options.openInNewTab) {
-          window.open(destination, '_blank', 'noopener');
-        } else {
+        if (!modifiedClick && !linkOptions.openInNewTab) {
+          event.preventDefault();
           await coreServices.application.navigateToUrl(destination);
         }
       }}

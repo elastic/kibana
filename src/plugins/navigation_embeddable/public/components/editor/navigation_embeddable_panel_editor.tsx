@@ -12,6 +12,7 @@ import {
   EuiForm,
   EuiTitle,
   EuiButton,
+  EuiSwitch,
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
@@ -25,7 +26,6 @@ import {
   EuiDragDropContext,
   euiDragDropReorder,
   EuiButtonGroupOptionProps,
-  EuiSwitch,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 

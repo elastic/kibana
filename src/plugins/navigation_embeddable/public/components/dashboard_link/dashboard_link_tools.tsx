@@ -106,17 +106,13 @@ export const fetchDashboards = async ({
  * ----------------------------------
  */
 
-interface NavigateToDashboardProps {
+interface GetDashboardLocatorProps {
   link: NavigationEmbeddableLink;
   navEmbeddable: NavigationEmbeddable;
-  modifiedClick: boolean; // true if either shift, ctrl, or meta (command on Mac) is pressed on click
 }
 
-export const navigateToDashboard = async ({
-  link,
-  navEmbeddable,
-  modifiedClick,
-}: NavigateToDashboardProps) => {
+/** TODO: maybe store this in component state??? */
+export const getDashboardLocator = async ({ link, navEmbeddable }: GetDashboardLocatorProps) => {
   const options: DashboardDrilldownOptions = {
     ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
     ...link.options,
@@ -128,32 +124,31 @@ export const navigateToDashboard = async ({
 
   const locator = dashboardServices.locator; // TODO: Make this generic as part of https://github.com/elastic/kibana/issues/164748
   if (locator) {
-    const { app, path, state }: KibanaLocation<DashboardAppLocatorParams> =
-      await locator.getLocation(params);
-
-    /**
-     * the app state should be sent via URL if either (a) the `openInNewTab` setting is `true`
-     * or if (b) the click is modified (i.e. ctrl/shift/meta key was pressed on click)
-     */
-    if (options.openInNewTab || modifiedClick) {
-      const url = coreServices.application.getUrlForApp(app, {
-        path: setStateToKbnUrl(
-          '_a',
-          cleanEmptyKeys({
-            query: state.query,
-            filters: state.filters?.filter((f) => !isFilterPinned(f)),
-          }),
-          { useHash: false, storeInHashQuery: true },
-          path
-        ),
-        absolute: true,
-      });
-      window.open(url, '_blank');
-    } else {
-      await coreServices.application.navigateToApp(app, {
-        path,
-        state,
-      });
-    }
+    const location: KibanaLocation<DashboardAppLocatorParams> = await locator.getLocation(params);
+    return location;
   }
+};
+
+/**
+ * Get URL for dashboard app - should only be used when relying on native `href` functionality
+ * @param locator Locator that should be used to get the URL
+ * @returns A full URL to the dashboard, with all state included
+ */
+export const getDashboardHref = ({
+  app,
+  path,
+  state,
+}: KibanaLocation<DashboardAppLocatorParams>): string => {
+  return coreServices.application.getUrlForApp(app, {
+    path: setStateToKbnUrl(
+      '_a',
+      cleanEmptyKeys({
+        query: state.query,
+        filters: state.filters?.filter((f) => !isFilterPinned(f)),
+      }),
+      { useHash: false, storeInHashQuery: true },
+      path
+    ),
+    absolute: true,
+  });
 };

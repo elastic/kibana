@@ -8,9 +8,13 @@
 
 import classNames from 'classnames';
 import useAsync from 'react-use/lib/useAsync';
-import useObservable from 'react-use/lib/useObservable';
 import React, { useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 
+import {
+  DashboardDrilldownOptions,
+  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+} from '@kbn/presentation-util-plugin/public';
 import { EuiButtonEmpty, EuiListGroupItem, EuiToolTip } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
@@ -19,9 +23,10 @@ import {
   NavigationLayoutType,
   NavigationEmbeddableLink,
 } from '../../../common/content_management';
+import { coreServices } from '../../services/kibana_services';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { fetchDashboard, navigateToDashboard } from './dashboard_link_tools';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
+import { fetchDashboard, getDashboardHref, getDashboardLocator } from './dashboard_link_tools';
 
 export const DashboardLinkComponent = ({
   link,
@@ -66,12 +71,36 @@ export const DashboardLinkComponent = ({
       : [destinationDashboard?.attributes.title, destinationDashboard?.attributes.description];
   }, [link.destination, parentDashboardId, parentDashboardInput, destinationDashboard]);
 
-  /** Label of the `EuiListGroupItem` for the given link */
+  /**
+   * Dashboard-to-dashboard navigation
+   */
+  const { value: dashboardLocator } = useAsync(async () => {
+    return await getDashboardLocator({
+      link,
+      navEmbeddable,
+    });
+  }, [link]);
+
+  const dashboardHref = useMemo(() => {
+    if (dashboardLocator) {
+      return getDashboardHref(dashboardLocator);
+    }
+  }, [dashboardLocator]);
+
+  /**
+   * Memoized link information
+   */
+  const linkOptions = useMemo(() => {
+    return {
+      ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+      ...link.options,
+    } as DashboardDrilldownOptions;
+  }, [link.options]);
+
   const linkLabel = useMemo(() => {
     return link.label || (dashboardTitle ?? DashboardLinkStrings.getDashboardErrorLabel());
   }, [link, dashboardTitle]);
 
-  /** Tooltip info of the `EuiListGroupItem` for the given link */
   const { tooltipTitle, tooltipMessage } = useMemo(() => {
     if (error) {
       return {
@@ -95,7 +124,7 @@ export const DashboardLinkComponent = ({
     <EuiListGroupItem
       size="s"
       color="text"
-      isDisabled={Boolean(error)}
+      isDisabled={Boolean(error) || !dashboardLocator}
       id={`dashboardLink--${link.id}`}
       iconType={error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
@@ -104,15 +133,31 @@ export const DashboardLinkComponent = ({
         dashboardLinkError: Boolean(error),
         'dashboardLinkError--noLabel': !link.label,
       })}
+      href={dashboardHref}
       onClick={
         link.destination === parentDashboardId
           ? undefined // no `onClick` event should exist if the link points to the current dashboard
-          : (event) => {
-              navigateToDashboard({
-                link,
-                navEmbeddable,
-                modifiedClick: event.ctrlKey || event.metaKey || event.shiftKey,
-              });
+          : async (event) => {
+              /**
+               * If the link is being opened via a new tab (either by modifying the click or due to `openInNewTab`
+               * being `true`), then we should use the default `href` navigation behaviour by passing all the dashboard
+               * state via the URL - this will keep behaviour consistent across all browsers.
+               */
+              const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
+              if (modifiedClick || linkOptions.openInNewTab) {
+                return;
+              }
+
+              /** Otherwise, if we're remaining in the current tab, then rely on Core to navigate */
+              if (dashboardLocator) {
+                // this check should always be true, since the button is disabled otherwise - this is just for type safety
+                event.preventDefault();
+                const { app, path, state } = dashboardLocator;
+                await coreServices.application.navigateToApp(app, {
+                  path,
+                  state,
+                });
+              }
             }
       }
       label={
