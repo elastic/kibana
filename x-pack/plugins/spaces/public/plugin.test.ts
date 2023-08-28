@@ -17,13 +17,33 @@ import { SpacesPlugin } from './plugin';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
-    it('should register the spaces API and the space selector app', () => {
+    it('should register the spaces API and the space selector app when buildFlavor is traditional', () => {
+      const coreSetup = coreMock.createSetup();
+      const mockInitializerContext = coreMock.createPluginInitializerContext();
+
+      // @ts-expect-error buildFlavor marked as readonly
+      mockInitializerContext.env.packageInfo.buildFlavor = 'traditional';
+
+      const plugin = new SpacesPlugin(mockInitializerContext);
+      plugin.setup(coreSetup, {});
+
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'space_selector',
+          chromeless: true,
+          appRoute: '/spaces/space_selector',
+          mount: expect.any(Function),
+        })
+      );
+    });
+
+    it('should not register the spaces API and the space selector app when buildFlavor is serverless', () => {
       const coreSetup = coreMock.createSetup();
 
       const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(coreSetup, {});
 
-      expect(coreSetup.application.register).toHaveBeenCalledWith(
+      expect(coreSetup.application.register).not.toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'space_selector',
           chromeless: true,
@@ -68,7 +88,7 @@ describe('Spaces plugin', () => {
       );
     });
 
-    it('should not register the management and feature catalogue sections when the management and home plugins are both available when buildFlavor is serverless', () => {
+    it('should not register spaces in the management plugin or the feature catalog when the management and home plugins are both available when buildFlavor is serverless', () => {
       const coreSetup = coreMock.createSetup();
       const home = homePluginMock.createSetupContract();
 
@@ -100,7 +120,7 @@ describe('Spaces plugin', () => {
   });
 
   describe('#start', () => {
-    it('should register the spaces nav control when build flavor is traditional', () => {
+    it('should register the spaces nav control when buildFlavor is traditional', () => {
       const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
 
@@ -117,7 +137,7 @@ describe('Spaces plugin', () => {
       expect(coreStart.chrome.navControls.registerLeft).toHaveBeenCalled();
     });
 
-    it('should not register the spaces nav control when build flavor is serverless', () => {
+    it('should not register the spaces nav control when buildFlavor is serverless', () => {
       const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
 

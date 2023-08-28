@@ -77,11 +77,13 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
-    spaceSelectorApp.create({
-      getStartServices: core.getStartServices,
-      application: core.application,
-      spacesManager: this.spacesManager,
-    });
+    if (!this.isServerless) {
+      spaceSelectorApp.create({
+        getStartServices: core.getStartServices,
+        application: core.application,
+        spacesManager: this.spacesManager,
+      });
+    }
 
     return {};
   }
