@@ -13,7 +13,7 @@ export const cpuUsageSoftirq: FormulaValueConfig = {
   format: {
     id: 'percent',
     params: {
-      decimals: 0,
+      decimals: 1,
     },
   },
 };

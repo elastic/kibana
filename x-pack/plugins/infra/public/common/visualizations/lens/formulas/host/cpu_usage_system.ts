@@ -13,7 +13,7 @@ export const cpuUsageSystem: FormulaValueConfig = {
   format: {
     id: 'percent',
     params: {
-      decimals: 0,
+      decimals: 1,
     },
   },
 };

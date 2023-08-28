@@ -13,7 +13,7 @@ export const load1m: FormulaValueConfig = {
   format: {
     id: 'number',
     params: {
-      decimals: 2,
+      decimals: 1,
     },
   },
 };

@@ -10,7 +10,7 @@ import { hostLensFormulas } from '../../../../constants';
 import { XY_OVERRIDES } from '../../constants';
 import type { XYConfig } from './types';
 
-const TOP_VALUES_TYPE = 'top_values';
+const TOP_VALUES_SIZE = 5;
 
 export const diskSpaceUsageAvailable: XYConfig = {
   id: 'diskSpaceUsageAvailable',
@@ -67,10 +67,10 @@ export const diskSpaceUsageByMountPoint: XYConfig = {
       options: {
         seriesType: 'area',
         breakdown: {
-          type: TOP_VALUES_TYPE,
+          type: 'top_values',
           field: 'system.filesystem.mount_point',
           params: {
-            size: 5,
+            size: TOP_VALUES_SIZE,
           },
         },
       },

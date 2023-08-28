@@ -13,7 +13,7 @@ export const cpuUsageIowait: FormulaValueConfig = {
   format: {
     id: 'percent',
     params: {
-      decimals: 0,
+      decimals: 1,
     },
   },
 };
