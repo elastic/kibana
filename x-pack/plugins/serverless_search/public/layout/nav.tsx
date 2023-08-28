@@ -72,6 +72,12 @@ const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Alerts',
               }),
             },
+            {
+              link: 'serverlessConnectors',
+              title: i18n.translate('xpack.serverlessSearch.nav.connectors', {
+                defaultMessage: 'Connectors',
+              }),
+            },
           ],
         },
         {
@@ -91,13 +97,6 @@ const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Pipelines',
               }),
               link: 'management:ingest_pipelines',
-            },
-            {
-              id: 'content_indexing_api',
-              link: 'serverlessIndexingApi',
-              title: i18n.translate('xpack.serverlessSearch.nav.content.indexingApi', {
-                defaultMessage: 'Indexing API',
-              }),
             },
           ],
         },

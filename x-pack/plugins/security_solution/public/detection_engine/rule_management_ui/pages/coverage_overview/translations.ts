@@ -152,7 +152,7 @@ export const CoverageOverviewSearchBarPlaceholder = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.searchBarPlaceholder',
   {
     defaultMessage:
-      'Search for the tactic, technique (e.g.,"defence evasion" or "TA0005") or rule name, index pattern (e.g.,"filebeat-*")',
+      'Search for the tactic, technique (e.g.,"defense evasion" or "TA0005") or rule name',
   }
 );
 
@@ -167,5 +167,20 @@ export const CoverageOverviewFilterPopoverClearAll = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.filterPopoverClearAll',
   {
     defaultMessage: 'Clear all',
+  }
+);
+
+export const CoverageOverviewDashboardInformation = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.dashboardInformation',
+  {
+    defaultMessage:
+      'The interactive MITRE ATT&CK coverage below shows the current state of your coverage from installed rules, click on a cell to view further details. Unmapped rules will not be displayed. View further information from our',
+  }
+);
+
+export const CoverageOverviewDashboardInformationLink = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.dashboardInformationLink',
+  {
+    defaultMessage: 'docs.',
   }
 );

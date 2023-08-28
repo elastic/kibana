@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateRandomStringName } from '@kbn/osquery-plugin/cypress/tasks/integrations';
+import { generateRandomStringName } from '../../../tasks/utils';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../../types';
 import { indexEndpointRuleAlerts } from '../../../tasks/index_endpoint_rule_alerts';
