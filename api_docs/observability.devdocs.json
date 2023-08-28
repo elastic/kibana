@@ -498,7 +498,7 @@
         "label": "formatAlertEvaluationValue",
         "description": [],
         "signature": [
-          "(ruleTypeId?: string | undefined, evaluationValue?: number | undefined) => any"
+          "(ruleTypeId?: string | undefined, evaluationValue?: number | undefined) => string | number"
         ],
         "path": "x-pack/plugins/observability/public/utils/format_alert_evaluation_value.ts",
         "deprecated": false,
@@ -3207,7 +3207,7 @@
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
-              "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }) => { reason: string; link?: string | undefined; }"
+              "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link?: string | undefined; }"
             ],
             "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
             "deprecated": false,
@@ -3226,7 +3226,7 @@
                   "Maybe",
                   "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
                   "Maybe",
-                  "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }"
+                  "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }"
                 ],
                 "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
                 "deprecated": false,
@@ -4220,7 +4220,7 @@
           "Maybe",
           "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
           "Maybe",
-          "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }) => { reason: string; link?: string | undefined; }"
+          "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link?: string | undefined; }"
         ],
         "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
         "deprecated": false,
@@ -4239,7 +4239,7 @@
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
-              "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }"
+              "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }"
             ],
             "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
             "deprecated": false,
@@ -4470,7 +4470,7 @@
           "text": "LocatorPublic"
         },
         "<",
-        "RulesLocatorParams",
+        "RulesParams",
         ">; ruleDetailsLocator: ",
         {
           "pluginId": "share",
@@ -7898,7 +7898,7 @@
             "label": "config",
             "description": [],
             "signature": [
-              "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
+              "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
             "deprecated": false,
@@ -8410,10 +8410,10 @@
           "<{ type: ",
           "LiteralC",
           "<\"sli.kql.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "StringC",
@@ -8421,15 +8421,19 @@
           "StringC",
           "; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.metric.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "TypeC",
@@ -8473,17 +8477,21 @@
           "StringC",
           "; }>; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.histogram.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
           "StringC",
           "; timestampField: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "UnionC",
@@ -8545,7 +8553,11 @@
           "PartialC",
           "<{ filter: ",
           "StringC",
-          "; }>]>]>; }>; }>]>; }>; }> | undefined; handler: ({}: ",
+          "; }>]>]>; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>]>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8553,7 +8565,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { body: { indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; }; }; }) => Promise<{ date: string; sliValue: number; }[]>; } & ",
+          " & { params: { body: { indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; }; }; }) => Promise<{ date: string; sliValue: number; }[]>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8629,7 +8641,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; }; }) => Promise<{ sloResources: { \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; \".slo-observability.sli.pipeline\": string; } | undefined; sloSummaryResources: { \".slo-observability.summary\": string; \".slo-observability.summary-mappings\": string; \".slo-observability.summary-settings\": string; } | undefined; slo: string | { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; timeWindow: { duration: ",
+          " & { params: { path: { id: string; }; }; }) => Promise<{ sloResources: { \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; \".slo-observability.sli.pipeline\": string; } | undefined; sloSummaryResources: { \".slo-observability.summary\": string; \".slo-observability.summary-mappings\": string; \".slo-observability.summary-settings\": string; } | undefined; slo: string | { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -8800,10 +8812,10 @@
           "<{ type: ",
           "LiteralC",
           "<\"sli.kql.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "StringC",
@@ -8811,15 +8823,19 @@
           "StringC",
           "; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.metric.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "TypeC",
@@ -8863,17 +8879,21 @@
           "StringC",
           "; }>; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.histogram.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
           "StringC",
           "; timestampField: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "UnionC",
@@ -8935,7 +8955,11 @@
           "PartialC",
           "<{ filter: ",
           "StringC",
-          "; }>]>]>; }>; }>]>; timeWindow: ",
+          "; }>]>]>; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
           "TypeC",
@@ -9031,7 +9055,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; body: { name?: string | undefined; description?: string | undefined; indicator?: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; } | undefined; timeWindow?: { duration: ",
+          " & { params: { path: { id: string; }; body: { name?: string | undefined; description?: string | undefined; indicator?: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; } | undefined; timeWindow?: { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -9071,7 +9095,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          " | undefined; } | undefined; tags?: string[] | undefined; groupBy?: string | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; }>; } & ",
+          " | undefined; } | undefined; tags?: string[] | undefined; groupBy?: string | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9105,7 +9129,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; } & { query?: { instanceId?: string | undefined; } | undefined; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
+          " & { params: { path: { id: string; }; } & { query?: { instanceId?: string | undefined; } | undefined; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9147,7 +9171,29 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params?: { query?: { kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
+          " & { params?: { query?: { kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"GET /internal/observability/slos/_definitions\": { endpoint: \"GET /internal/observability/slos/_definitions\"; params?: ",
+          "TypeC",
+          "<{ query: ",
+          "TypeC",
+          "<{ search: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { query: { search: string; }; }; }) => Promise<({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; })[]>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9348,10 +9394,10 @@
           "<{ type: ",
           "LiteralC",
           "<\"sli.kql.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "StringC",
@@ -9359,15 +9405,19 @@
           "StringC",
           "; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.metric.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "TypeC",
@@ -9411,17 +9461,21 @@
           "StringC",
           "; }>; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.histogram.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
           "StringC",
           "; timestampField: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "UnionC",
@@ -9483,7 +9537,11 @@
           "PartialC",
           "<{ filter: ",
           "StringC",
-          "; }>]>]>; }>; }>]>; timeWindow: ",
+          "; }>]>]>; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
           "TypeC",
@@ -9583,7 +9641,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { body: { name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; timeWindow: { duration: ",
+          " & { params: { body: { name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -9674,7 +9732,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
+          "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -10124,10 +10182,10 @@
           "<{ type: ",
           "LiteralC",
           "<\"sli.kql.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "StringC",
@@ -10135,15 +10193,19 @@
           "StringC",
           "; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.metric.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "TypeC",
@@ -10187,17 +10249,21 @@
           "StringC",
           "; }>; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.histogram.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
           "StringC",
           "; timestampField: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "UnionC",
@@ -10259,7 +10325,11 @@
           "PartialC",
           "<{ filter: ",
           "StringC",
-          "; }>]>]>; }>; }>]>; }>; }> | undefined; handler: ({}: ",
+          "; }>]>]>; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>]>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10267,7 +10337,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { body: { indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; }; }; }) => Promise<{ date: string; sliValue: number; }[]>; } & ",
+          " & { params: { body: { indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; }; }; }) => Promise<{ date: string; sliValue: number; }[]>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10343,7 +10413,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; }; }) => Promise<{ sloResources: { \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; \".slo-observability.sli.pipeline\": string; } | undefined; sloSummaryResources: { \".slo-observability.summary\": string; \".slo-observability.summary-mappings\": string; \".slo-observability.summary-settings\": string; } | undefined; slo: string | { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; timeWindow: { duration: ",
+          " & { params: { path: { id: string; }; }; }) => Promise<{ sloResources: { \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; \".slo-observability.sli.pipeline\": string; } | undefined; sloSummaryResources: { \".slo-observability.summary\": string; \".slo-observability.summary-mappings\": string; \".slo-observability.summary-settings\": string; } | undefined; slo: string | { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -10514,10 +10584,10 @@
           "<{ type: ",
           "LiteralC",
           "<\"sli.kql.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "StringC",
@@ -10525,15 +10595,19 @@
           "StringC",
           "; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.metric.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "TypeC",
@@ -10577,17 +10651,21 @@
           "StringC",
           "; }>; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.histogram.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
           "StringC",
           "; timestampField: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "UnionC",
@@ -10649,7 +10727,11 @@
           "PartialC",
           "<{ filter: ",
           "StringC",
-          "; }>]>]>; }>; }>]>; timeWindow: ",
+          "; }>]>]>; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
           "TypeC",
@@ -10745,7 +10827,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; body: { name?: string | undefined; description?: string | undefined; indicator?: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; } | undefined; timeWindow?: { duration: ",
+          " & { params: { path: { id: string; }; body: { name?: string | undefined; description?: string | undefined; indicator?: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; } | undefined; timeWindow?: { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -10785,7 +10867,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          " | undefined; } | undefined; tags?: string[] | undefined; groupBy?: string | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; }>; } & ",
+          " | undefined; } | undefined; tags?: string[] | undefined; groupBy?: string | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10819,7 +10901,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; } & { query?: { instanceId?: string | undefined; } | undefined; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
+          " & { params: { path: { id: string; }; } & { query?: { instanceId?: string | undefined; } | undefined; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10861,7 +10943,29 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params?: { query?: { kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
+          " & { params?: { query?: { kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"GET /internal/observability/slos/_definitions\": { endpoint: \"GET /internal/observability/slos/_definitions\"; params?: ",
+          "TypeC",
+          "<{ query: ",
+          "TypeC",
+          "<{ search: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { query: { search: string; }; }; }) => Promise<({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; })[]>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -11062,10 +11166,10 @@
           "<{ type: ",
           "LiteralC",
           "<\"sli.kql.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "StringC",
@@ -11073,15 +11177,19 @@
           "StringC",
           "; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.metric.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "TypeC",
@@ -11125,17 +11233,21 @@
           "StringC",
           "; }>; timestampField: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
           "TypeC",
           "<{ type: ",
           "LiteralC",
           "<\"sli.histogram.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
           "StringC",
           "; timestampField: ",
-          "StringC",
-          "; filter: ",
           "StringC",
           "; good: ",
           "UnionC",
@@ -11197,7 +11309,11 @@
           "PartialC",
           "<{ filter: ",
           "StringC",
-          "; }>]>]>; }>; }>]>; timeWindow: ",
+          "; }>]>]>; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
           "TypeC",
@@ -11297,7 +11413,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { body: { name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; timeWindow: { duration: ",
+          " & { params: { body: { name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -11522,13 +11638,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInspectEsQueries.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11550,13 +11663,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInspectEsQueries.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11626,13 +11736,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.maxSuggestions.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11651,13 +11758,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.maxSuggestions.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11713,13 +11817,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableComparisonByDefault.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11741,13 +11842,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableComparisonByDefault.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11817,13 +11915,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.defaultApmServiceEnvironment.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11831,13 +11926,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.defaultApmServiceEnvironment.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11904,13 +11996,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11918,13 +12007,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12041,13 +12127,10 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.off",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.off]",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -12055,13 +12138,10 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.low",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.low]",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -12069,13 +12149,10 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.medium",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.medium]",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -12083,13 +12160,10 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.high",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.high]",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -12140,13 +12214,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12154,13 +12225,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12272,13 +12340,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12297,13 +12362,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12359,13 +12421,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmTraceExplorerTab.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12373,13 +12432,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmTraceExplorerTab.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12491,13 +12547,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmLabsButton.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12505,13 +12558,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmLabsButton.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12609,13 +12659,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInfrastructureHostsView.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12637,13 +12684,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInfrastructureHostsView.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12699,13 +12743,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAwsLambdaMetrics.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12713,13 +12754,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAwsLambdaMetrics.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12831,13 +12869,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAgentExplorerView.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12845,13 +12880,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAgentExplorerView.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12949,13 +12981,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12988,13 +13017,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13066,13 +13092,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13139,13 +13162,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableServiceMetrics.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13167,13 +13187,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableServiceMetrics.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13243,13 +13260,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableContinuousRollups.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13271,13 +13285,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableContinuousRollups.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13347,13 +13358,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableCriticalPath.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13361,13 +13369,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableCriticalPath.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13479,13 +13484,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.syntheticsThrottlingEnabled.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13507,13 +13509,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.syntheticsThrottlingEnabled.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13583,13 +13582,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableLegacyUptimeApp.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13611,13 +13607,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableLegacyUptimeApp.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13687,13 +13680,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableProfilingIntegration.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13964,7 +13954,7 @@
         "label": "asInteger",
         "description": [],
         "signature": [
-          "(value: number | null | undefined) => any"
+          "(value: number | null | undefined) => string"
         ],
         "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
         "deprecated": false,
@@ -13999,7 +13989,7 @@
         "signature": [
           "(numerator: ",
           "Maybe",
-          "<number>, denominator: number | undefined, fallbackResult: any) => any"
+          "<number>, denominator: number | undefined, fallbackResult: string) => string"
         ],
         "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
         "deprecated": false,
@@ -14039,12 +14029,12 @@
           {
             "parentPluginId": "observability",
             "id": "def-common.asPercent.$3",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "fallbackResult",
             "description": [],
             "signature": [
-              "any"
+              "string"
             ],
             "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
@@ -14928,7 +14918,7 @@
         "signature": [
           "(numerator: ",
           "Maybe",
-          "<number>, denominator: number | undefined, fallbackResult?: any) => any"
+          "<number>, denominator: number | undefined, fallbackResult?: string) => string"
         ],
         "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
         "deprecated": false,
@@ -14966,13 +14956,10 @@
           {
             "parentPluginId": "observability",
             "id": "def-common.AsPercent.$3",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "fallbackResult",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
             "trackAdoption": false

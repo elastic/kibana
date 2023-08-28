@@ -10,4 +10,6 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Security Solution Cypress tests (Chrome)"
 
-yarn --cwd x-pack/test/security_solution_cypress cypress:run:ess
+cd x-pack/test/security_solution_cypress
+
+yarn cypress:run:ess; status=$?; yarn junit:merge && exit $status

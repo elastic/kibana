@@ -8,12 +8,15 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
-tags:
-  - name: connectors
-    description: Connector APIs enable you to create and manage connectors.
 servers:
   - url: http://localhost:5601
     description: local
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
+tags:
+  - name: connectors
+    description: Connector APIs enable you to create and manage connectors.
 paths:
   /s/{spaceId}/api/actions/connector:
     post:
@@ -58,6 +61,8 @@ paths:
             examples:
               createIndexConnectorRequest:
                 $ref: '#/components/examples/create_index_connector_request'
+              createWebhookConnectorRequest:
+                $ref: '#/components/examples/create_webhook_connector_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -68,6 +73,8 @@ paths:
               examples:
                 createIndexConnectorResponse:
                   $ref: '#/components/examples/create_index_connector_response'
+                createWebhookConnectorResponse:
+                  $ref: '#/components/examples/create_webhook_connector_response'
         '401':
           $ref: '#/components/responses/401'
       servers:
@@ -322,6 +329,8 @@ paths:
                       $ref: '#/components/schemas/is_missing_secrets'
                     is_preconfigured:
                       $ref: '#/components/schemas/is_preconfigured'
+                    is_system_action:
+                      $ref: '#/components/schemas/is_system_action'
                     name:
                       type: string
                       description: The display name for the connector.
@@ -1748,12 +1757,77 @@ components:
       title: Connector request properties for a Webhook connector
       description: Defines properties for connectors when type is `.webhook`.
       type: object
-      additionalProperties: true
+      properties:
+        authType:
+          type: string
+          enum:
+            - webhook-authentication-basic
+            - webhook-authentication-ssl
+            - 'null'
+          description: |
+            The type of authentication to use: basic, SSL, or none.
+        ca:
+          type: string
+          description: |
+            A base64 encoded version of the certificate authority file that the connector can trust to sign and validate certificates. This option is available for all authentication types.
+        certType:
+          type: string
+          description: |
+            If the `authType` is `webhook-authentication-ssl`, specifies whether the certificate authentication data is in a CRT and key file format or a PFX file format.
+          enum:
+            - ssl-crt-key
+            - ssl-pfx
+        hasAuth:
+          type: boolean
+          description: |
+            If `true`, a user name and password must be provided for login type authentication.
+        headers:
+          type: object
+          nullable: true
+          description: A set of key-value pairs sent as headers with the request.
+        method:
+          type: string
+          default: post
+          enum:
+            - post
+            - put
+          description: |
+            The HTTP request method, either `post` or `put`.
+        url:
+          type: string
+          description: |
+            The request URL. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
+        verificationMode:
+          type: string
+          enum:
+            - certificate
+            - full
+            - none
+          default: full
+          description: |
+            Controls the verification of certificates. Use `full` to validate that the certificate has an issue date within the `not_before` and `not_after` dates, chains to a trusted certificate authority (CA), and has a hostname or IP address that matches the names within the certificate. Use `certificate` to validate the certificate and verify that it is signed by a trusted authority; this option does not check the certificate hostname. Use `none` to skip certificate validation.
     secrets_properties_webhook:
       title: Connector secrets properties for a Webhook connector
       description: Defines secrets for connectors when type is `.webhook`.
       type: object
-      additionalProperties: true
+      properties:
+        crt:
+          type: string
+          description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-crt-key`, it is a base64 encoded version of the CRT or CERT file.
+        key:
+          type: string
+          description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-crt-key`, it is a base64 encoded version of the KEY file.
+        pfx:
+          type: string
+          description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-pfx`, it is a base64 encoded version of the PFX or P12 file.
+        password:
+          type: string
+          description: |
+            The password for HTTP basic authentication or the passphrase for the SSL certificate files. If `hasAuth` is set to `true` and `authType` is `webhook-authentication-basic`, this property is required.
+        user:
+          type: string
+          description: |
+            The username for HTTP basic authentication. If `hasAuth` is set to `true`  and `authType` is `webhook-authentication-basic`, this property is required.
     create_connector_request_webhook:
       title: Create Webhook connector request
       description: |
@@ -1826,6 +1900,10 @@ components:
       type: boolean
       description: Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.
       example: false
+    is_system_action:
+      type: boolean
+      description: Indicates whether the connector is used for system actions.
+      example: false
     connector_response_properties_cases_webhook:
       title: Connector request properties for a Webhook - Case Management connector
       type: object
@@ -1853,6 +1931,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -1883,6 +1963,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -1913,6 +1995,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -1943,6 +2027,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -1973,6 +2059,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2003,6 +2091,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2033,6 +2123,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2064,6 +2156,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2094,6 +2188,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2124,6 +2220,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2154,6 +2252,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2181,6 +2281,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2208,6 +2310,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2238,6 +2342,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2265,6 +2371,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2295,6 +2403,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2325,6 +2435,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2355,6 +2467,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2504,8 +2618,6 @@ components:
           type: string
           description: The display name for the connector.
         secrets:
-          type: object
-          description: The secrets object containing the necessary fields for authentication.
           $ref: '#/components/schemas/secrets_properties_slack_api'
     update_connector_request_slack_webhook:
       title: Update Slack connector request
@@ -2518,8 +2630,6 @@ components:
           type: string
           description: The display name for the connector.
         secrets:
-          type: object
-          description: The secrets object containing the necessary fields for authentication.
           $ref: '#/components/schemas/secrets_properties_slack_webhook'
     update_connector_request_swimlane:
       title: Update Swimlane connector request
@@ -3089,6 +3199,20 @@ components:
         connector_type_id: .index
         config:
           index: test-index
+    create_webhook_connector_request:
+      summary: Create a webhook connector with SSL authentication.
+      value:
+        name: my-webhook-connector
+        connector_type_id: .webhook
+        config:
+          method: post
+          url: https://example.com
+          authType: webhook-authentication-ssl
+          certType: ssl-crt-key
+        secrets:
+          crt: QmFnIEF0dH...
+          key: LS0tLS1CRUdJ...
+          password: my-passphrase
     create_index_connector_response:
       summary: A new index connector.
       value:
@@ -3102,6 +3226,25 @@ components:
         is_preconfigured: false
         is_deprecated: false
         is_missing_secrets: false
+        is_system_action: false
+    create_webhook_connector_response:
+      summary: A new webhook connector.
+      value:
+        id: 900eb010-3b9d-11ee-a642-8ffbb94e38bd
+        name: my-webhook-connector
+        config:
+          method: post
+          url: https://example.com
+          authType: webhook-authentication-ssl
+          certType: ssl-crt-key
+          verificationMode: full
+          headers: null
+          hasAuth: true
+        connector_type_id: .webhook
+        is_preconfigured: false
+        is_deprecated: false
+        is_missing_secrets: false
+        is_system_action: false
     get_connector_response:
       summary: A list of connector types
       value:
@@ -3112,6 +3255,7 @@ components:
         is_preconfigured: false
         is_deprecated: false
         is_missing_secrets: false
+        is_system_action: false
     update_index_connector_request:
       summary: Update an index connector.
       value:
@@ -3127,6 +3271,7 @@ components:
           is_preconfigured: true
           is_deprecated: false
           referenced_by_count: 0
+          is_system_action: false
         - id: e07d0c80-8b8b-11ed-a780-3b746c987a81
           name: my-index-connector
           config:
@@ -3138,6 +3283,7 @@ components:
           is_deprecated: false
           referenced_by_count: 2
           is_missing_secrets: false
+          is_system_action: false
     get_connector_types_response:
       summary: A list of connector types
       value:
@@ -3358,6 +3504,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/action_response_properties'
-security:
-  - basicAuth: []
-  - apiKeyAuth: []

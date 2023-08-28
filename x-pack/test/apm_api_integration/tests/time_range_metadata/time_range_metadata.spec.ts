@@ -22,8 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
-
-  const esClient = getService('es');
+  const es = getService('es');
 
   const start = moment('2022-01-01T00:00:00.000Z');
   const end = moment('2022-01-02T00:00:00.000Z').subtract(1, 'millisecond');
@@ -386,7 +385,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('when service metrics are only available in the current time range', () => {
         before(async () => {
-          await esClient.deleteByQuery({
+          await es.deleteByQuery({
             index: 'metrics-apm*',
             query: {
               bool: {
@@ -436,7 +435,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('after deleting a specific data set', () => {
         before(async () => {
-          await esClient.deleteByQuery({
+          await es.deleteByQuery({
             index: 'metrics-apm*',
             query: {
               bool: {

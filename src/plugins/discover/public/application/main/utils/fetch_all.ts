@@ -19,6 +19,8 @@ import {
   sendErrorMsg,
   sendErrorTo,
   sendLoadingMsg,
+  sendLoadingMoreMsg,
+  sendLoadingMoreFinishedMsg,
   sendResetMsg,
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
@@ -163,6 +165,60 @@ export function fetchAll(
     sendErrorMsg(dataSubjects.main$, error);
     // We also want to return a resolved promise in an error case, since it just indicates we're done with querying.
     return Promise.resolve();
+  }
+}
+
+export async function fetchMoreDocuments(
+  dataSubjects: SavedSearchData,
+  fetchDeps: FetchDeps
+): Promise<void> {
+  try {
+    const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
+    const searchSource = savedSearch.searchSource.createChild();
+
+    const dataView = searchSource.getField('index')!;
+    const query = getAppState().query;
+    const recordRawType = getRawRecordType(query);
+
+    if (recordRawType === RecordRawType.PLAIN) {
+      // not supported yet
+      return;
+    }
+
+    const lastDocuments = dataSubjects.documents$.getValue().result || [];
+    const lastDocumentSort = lastDocuments[lastDocuments.length - 1]?.raw?.sort;
+
+    if (!lastDocumentSort) {
+      return;
+    }
+
+    searchSource.setField('searchAfter', lastDocumentSort);
+
+    // Mark as loading
+    sendLoadingMoreMsg(dataSubjects.documents$);
+
+    // Update the searchSource
+    updateVolatileSearchSource(searchSource, {
+      dataView,
+      services,
+      sort: getAppState().sort as SortOrder[],
+      customFilters: getInternalState().customFilters,
+    });
+
+    // Fetch more documents
+    const { records, interceptedWarnings } = await fetchDocuments(searchSource, fetchDeps);
+
+    // Update the state and finish the loading state
+    sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
+      moreRecords: records,
+      interceptedWarnings,
+    });
+  } catch (error) {
+    sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
+      moreRecords: [],
+      interceptedWarnings: undefined,
+    });
+    sendErrorTo(dataSubjects.main$)(error);
   }
 }
 
