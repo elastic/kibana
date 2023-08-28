@@ -26,6 +26,7 @@ describe('<HighlightedFields />', () => {
   it('should render the component', () => {
     const panelContextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      scopeId: 'scopeId',
     } as unknown as RightPanelContext;
     (useHighlightedFields as jest.Mock).mockReturnValue({
       field: {
@@ -48,6 +49,7 @@ describe('<HighlightedFields />', () => {
   it(`should render empty component if there aren't any highlighted fields`, () => {
     const panelContextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      scopeId: 'scopeId',
     } as unknown as RightPanelContext;
     (useHighlightedFields as jest.Mock).mockReturnValue({});
 
@@ -63,6 +65,7 @@ describe('<HighlightedFields />', () => {
   it('should render empty component if dataFormattedForFieldBrowser is null', () => {
     const panelContextValue = {
       dataFormattedForFieldBrowser: null,
+      scopeId: 'scopeId',
     } as unknown as RightPanelContext;
     (useHighlightedFields as jest.Mock).mockReturnValue({
       field: {
