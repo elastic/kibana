@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiSuperDatePicker } from '@elastic/eui';
 import {
+  EuiSuperDatePicker,
+  useEuiTheme,
   EuiFlexItem,
-  EuiSpacer,
   EuiFieldSearch,
   EuiBasicTable,
   EuiFlexGroup,
@@ -22,19 +22,19 @@ import {
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
-  EuiIcon,
-  EuiText,
-  OnTimeChangeProps,
+  type OnTimeChangeProps,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
-import { withTheme } from '@kbn/kibana-react-plugin/common';
 import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { css } from '@emotion/react';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
-import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
+import type { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import { useSorting } from '../../../../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../hooks/use_metrics_k8s_anomalies';
 import { useMetricsHostsAnomaliesResults } from '../../../../hooks/use_metrics_hosts_anomalies';
-import {
+import type {
   Metric,
   MetricsHostsAnomaly,
   Sort,
@@ -45,8 +45,10 @@ import { AnomalySeverityIndicator } from '../../../../../../../components/loggin
 import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
 import { useWaffleViewState, WaffleViewState } from '../../../../hooks/use_waffle_view_state';
+
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
+
 interface JobOption {
   id: JobType;
   label: string;
@@ -159,40 +161,59 @@ const AnomalyActionMenu = ({
     </>
   );
 };
-export const NoAnomaliesFound = withTheme(({ theme }) => (
-  <EuiText>
-    <EuiSpacer size="xl" />
-    <p>
-      <EuiIcon type="eyeClosed" size="xl" color={theme.eui.euiColorMediumShade} />
-    </p>
-    <h3 data-test-subj="noAnomaliesFoundMsg">
-      <FormattedMessage
-        id="xpack.infra.ml.anomalyFlyout.anomalyTable.noAnomaliesFound"
-        defaultMessage="No anomalies found"
+export const NoAnomaliesFound = () => {
+  const euiTheme = useEuiTheme();
+  return (
+    <div
+      css={css`
+        align-self: center;
+      `}
+    >
+      <EuiEmptyPrompt
+        iconType="eyeClosed"
+        iconColor={euiTheme.euiTheme.colors.mediumShade}
+        title={
+          <h3 data-test-subj="noAnomaliesFoundMsg">
+            <FormattedMessage
+              id="xpack.infra.ml.anomalyFlyout.anomalyTable.noAnomaliesFound"
+              defaultMessage="No anomalies found"
+            />
+          </h3>
+        }
+        body={
+          <FormattedMessage
+            id="xpack.infra.ml.anomalyFlyout.anomalyTable.noAnomaliesSuggestion"
+            defaultMessage="Try modifying your search or selected time range."
+          />
+        }
       />
-    </h3>
-    <EuiSpacer size="m" />
-    <EuiText color="subdued">
-      <FormattedMessage
-        id="xpack.infra.ml.anomalyFlyout.anomalyTable.noAnomaliesSuggestion"
-        defaultMessage="Try modifying your search or selected time range."
-      />
-    </EuiText>
-  </EuiText>
-));
+    </div>
+  );
+};
 interface Props {
   closeFlyout(): void;
   hostName?: string;
+  dateRange?: TimeRange;
+  // In case the date picker is managed outside this component
+  hideDatePicker?: boolean;
 }
-export const AnomaliesTable = (props: Props) => {
-  const { closeFlyout, hostName } = props;
+
+const DEFAULT_DATE_RANGE: TimeRange = {
+  from: 'now-30d',
+  to: 'now',
+};
+
+export const AnomaliesTable = ({
+  closeFlyout,
+  hostName,
+  dateRange = DEFAULT_DATE_RANGE,
+  hideDatePicker = false,
+}: Props) => {
   const [search, setSearch] = useState('');
-  const [start, setStart] = useState('now-30d');
-  const [end, setEnd] = useState('now');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
   const [timeRange, setTimeRange] = useState<{ start: number; end: number }>({
-    start: datemathToEpochMillis(start) || 0,
-    end: datemathToEpochMillis(end, 'up') || 0,
+    start: datemathToEpochMillis(dateRange.from) || 0,
+    end: datemathToEpochMillis(dateRange.to, 'up') || 0,
   });
   const { sorting, setSorting } = useSorting<MetricsHostsAnomaly>({
     field: 'startTime',
@@ -224,8 +245,6 @@ export const AnomaliesTable = (props: Props) => {
   const onTimeChange = useCallback(
     ({ isInvalid, start: startChange, end: endChange }: OnTimeChangeProps) => {
       if (!isInvalid) {
-        setStart(startChange);
-        setEnd(endChange);
         setTimeRange({
           start: datemathToEpochMillis(startChange)!,
           end: datemathToEpochMillis(endChange, 'up')!,
@@ -436,73 +455,77 @@ export const AnomaliesTable = (props: Props) => {
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={1}>
-        <EuiSuperDatePicker
-          start={start}
-          end={end}
-          showUpdateButton={false}
-          onTimeChange={onTimeChange}
-          width="full"
+      {!hideDatePicker && (
+        <EuiFlexItem grow={false}>
+          <EuiSuperDatePicker
+            start={dateRange.from}
+            end={dateRange.to}
+            showUpdateButton={false}
+            onTimeChange={onTimeChange}
+            width="full"
+          />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        {!hostName && (
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={3}>
+              <EuiFieldSearch
+                data-test-subj="infraAnomaliesTableFieldSearch"
+                fullWidth
+                placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.searchPlaceholder', {
+                  defaultMessage: 'Search',
+                })}
+                value={search}
+                onChange={onSearchChange}
+                isClearable={true}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiComboBox
+                placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.jobTypeSelect', {
+                  defaultMessage: 'Select group',
+                })}
+                singleSelection={{ asPlainText: true }}
+                options={jobOptions}
+                selectedOptions={selectedJobType}
+                onChange={changeJobType}
+                fullWidth
+                isClearable={false}
+                data-test-subj="anomaliesComboBoxType"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBasicTable<MetricsHostsAnomaly>
+          columns={columns}
+          items={results}
+          sorting={{ sort: sorting }}
+          onChange={onTableChange}
+          hasActions={true}
+          loading={isLoading}
+          noItemsMessage={
+            isLoading ? (
+              <FormattedMessage
+                id="xpack.infra.ml.anomalyFlyout.anomalyTable.loading"
+                defaultMessage="Loading anomalies"
+              />
+            ) : (
+              <NoAnomaliesFound />
+            )
+          }
         />
       </EuiFlexItem>
-
-      {!hostName && (
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={3}>
-            <EuiFieldSearch
-              data-test-subj="infraAnomaliesTableFieldSearch"
-              fullWidth
-              placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.searchPlaceholder', {
-                defaultMessage: 'Search',
-              })}
-              value={search}
-              onChange={onSearchChange}
-              isClearable={true}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <EuiComboBox
-              placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.jobTypeSelect', {
-                defaultMessage: 'Select group',
-              })}
-              singleSelection={{ asPlainText: true }}
-              options={jobOptions}
-              selectedOptions={selectedJobType}
-              onChange={changeJobType}
-              isClearable={false}
-              data-test-subj="anomaliesComboBoxType"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-
-      <EuiSpacer size={'m'} />
-
-      <EuiBasicTable<MetricsHostsAnomaly>
-        columns={columns}
-        items={results}
-        sorting={{ sort: sorting }}
-        onChange={onTableChange}
-        hasActions={true}
-        loading={isLoading}
-        noItemsMessage={
-          isLoading ? (
-            <FormattedMessage
-              id="xpack.infra.ml.anomalyFlyout.anomalyTable.loading"
-              defaultMessage="Loading anomalies"
-            />
-          ) : (
-            <NoAnomaliesFound />
-          )
-        }
-      />
-      <EuiSpacer size="l" />
-      <PaginationControls
-        fetchNextPage={fetchNextPage}
-        fetchPreviousPage={fetchPreviousPage}
-        page={page}
-        isLoading={isLoading}
-      />
+      <EuiFlexItem grow={false}>
+        <PaginationControls
+          fetchNextPage={fetchNextPage}
+          fetchPreviousPage={fetchPreviousPage}
+          page={page}
+          isLoading={isLoading}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
