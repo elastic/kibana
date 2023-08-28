@@ -116,6 +116,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
+      await testSubjects.click('messageAddVariableButton');
+      await commonScreenshots.takeScreenshot(
+        'es-query-rule-action-variables',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('cancelSaveRuleButton');
     });
 
@@ -144,14 +152,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
-      await testSubjects.click('messageAddVariableButton');
-      await commonScreenshots.takeScreenshot(
-        'es-query-rule-action-variables',
-        screenshotDirectories,
-        1400,
-        1024
-      );
-      await browser.pressKeys(browser.keys.ESCAPE);
       /* Reposition so that the details are visible for the second action */
       await testSubjects.scrollIntoView('alertActionAccordion-1');
       await commonScreenshots.takeScreenshot(
