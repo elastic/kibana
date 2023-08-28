@@ -48,11 +48,7 @@ export interface MainRouteProps {
   mode?: DiscoverDisplayMode;
 }
 
-export function DiscoverMainRoute({
-  customizationCallbacks,
-  isDev,
-  mode = 'standalone',
-}: MainRouteProps) {
+export function DiscoverMainRoute({ customizationCallbacks, mode = 'standalone' }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
   const {
@@ -109,7 +105,7 @@ export function DiscoverMainRoute({
       const hasUserDataViewValue = await data.dataViews.hasData
         .hasUserDataView()
         .catch(() => false);
-      const hasESDataValue = isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
+      const hasESDataValue = await data.dataViews.hasData.hasESData().catch(() => false);
       setHasUserDataView(hasUserDataViewValue);
       setHasESData(hasESDataValue);
 
@@ -134,7 +130,7 @@ export function DiscoverMainRoute({
       setError(e);
       return false;
     }
-  }, [data.dataViews, isDev, savedSearchId]);
+  }, [data.dataViews, savedSearchId]);
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
@@ -256,11 +252,12 @@ export function DiscoverMainRoute({
 
           // We've already called this, so we can optimize the analytics services to
           // use the already-retrieved data to avoid a double-call.
-          hasESData: () => Promise.resolve(isDev ? true : hasESData),
+          hasESData: () => Promise.resolve(hasESData),
           hasUserDataView: () => Promise.resolve(hasUserDataView),
         },
       },
       dataViewEditor,
+      noDataPage: services.noDataPage,
     };
 
     return (
