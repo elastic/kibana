@@ -15,6 +15,12 @@ import {
   expectNumberOfRulesShownOnPage,
 } from '../../../../tasks/rule_filters';
 
+import {
+  expectManagementTableRules,
+  filterByTags,
+  unselectTags,
+} from '../../../../tasks/alerts_detection_rules';
+
 import { createRule, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
 import {
   deleteIndex,
@@ -103,6 +109,47 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       filterByExecutionStatus('Failed');
       expectNumberOfRulesShownOnPage(1);
       expectRulesWithExecutionStatus(1, 'Failed');
+    });
+  });
+
+  describe('Tags filter', () => {
+    beforeEach(() => {
+      createRule(
+        getNewRule({
+          name: 'Rule 1',
+          tags: [],
+        })
+      );
+
+      createRule(
+        getNewRule({
+          name: 'Rule 2',
+          tags: ['simpleTag'],
+        })
+      );
+
+      createRule(
+        getNewRule({
+          name: 'Rule 3',
+          tags: ['category:tag'],
+        })
+      );
+    });
+
+    it('filter by different tags', () => {
+      visitSecurityDetectionRulesPage();
+
+      expectManagementTableRules(['Rule 1', 'Rule 2', 'Rule 3']);
+
+      filterByTags(['simpleTag']);
+
+      expectManagementTableRules(['Rule 2']);
+
+      unselectTags();
+
+      filterByTags(['category:tag']);
+
+      expectManagementTableRules(['Rule 3']);
     });
   });
 });
