@@ -19,6 +19,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
   ALERT_WORKFLOW_STATUS,
   ALERT_UUID,
   EVENT_ACTION,
@@ -1669,6 +1670,135 @@ describe('createLifecycleExecutor', () => {
               [EVENT_ACTION]: 'close',
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: false,
+            }),
+          ]),
+        })
+      );
+    });
+  });
+
+  describe('untrackLifecycleAlerts', () => {
+    it('updates existing documents for untracked alerts', async () => {
+      const logger = loggerMock.create();
+      const ruleDataClientMock = createRuleDataClientMock();
+      ruleDataClientMock.getReader().search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
+                [ALERT_UUID]: 'ALERT_0_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: ['fake-space-id'],
+                labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
+                [TAGS]: ['source-tag1', 'source-tag2'],
+              },
+            },
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+                [ALERT_UUID]: 'ALERT_1_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: ['fake-space-id'],
+                labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
+                [TAGS]: ['source-tag3', 'source-tag4'],
+              },
+            },
+          ],
+        },
+      } as any);
+      const executor = createLifecycleExecutor(
+        logger,
+        ruleDataClientMock
+      )<{}, TestRuleState, never, never, never>(async ({ services, state }) => {
+        services.alertWithLifecycle({
+          id: 'TEST_ALERT_0',
+          fields: { [TAGS]: ['source-tag1', 'source-tag2'] },
+        });
+        services.alertWithLifecycle({
+          id: 'TEST_ALERT_1',
+          fields: { [TAGS]: ['source-tag3', 'source-tag4'] },
+        });
+
+        return { state };
+      });
+
+      await executor(
+        createDefaultAlertExecutorOptions({
+          params: {},
+          state: {
+            wrapped: initialRuleState,
+            trackedAlerts: {
+              TEST_ALERT_0: {
+                alertId: 'TEST_ALERT_0',
+                alertUuid: 'TEST_ALERT_0_UUID',
+                started: '2020-01-01T12:00:00.000Z',
+                flappingHistory: [false, false],
+                flapping: false,
+                pendingRecoveredCount: 0,
+              },
+
+              TEST_ALERT_1: {
+                alertId: 'TEST_ALERT_1',
+                alertUuid: 'TEST_ALERT_1_UUID',
+                started: '2020-01-02T12:00:00.000Z',
+                flappingHistory: [false, false],
+                flapping: false,
+                pendingRecoveredCount: 0,
+              },
+            },
+            trackedAlertsRecovered: {},
+          },
+          logger,
+        })
+      );
+
+      await executor.untrackLifecycleAlerts();
+
+      expect((await ruleDataClientMock.getWriter()).bulk).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          body: [
+            // alert documents
+            { index: { _id: expect.any(String) } },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
+              [ALERT_STATUS]: ALERT_STATUS_UNTRACKED,
+              [EVENT_ACTION]: 'active',
+              [EVENT_KIND]: 'signal',
+              [TAGS]: ['source-tag1', 'source-tag2', 'rule-tag1', 'rule-tag2'],
+            }),
+            { index: { _id: expect.any(String) } },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+              [ALERT_STATUS]: ALERT_STATUS_UNTRACKED,
+              [EVENT_ACTION]: 'active',
+              [EVENT_KIND]: 'signal',
+              [TAGS]: ['source-tag3', 'source-tag4', 'rule-tag1', 'rule-tag2'],
+            }),
+          ],
+        })
+      );
+      expect((await ruleDataClientMock.getWriter()).bulk).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            // evaluation documents
+            { index: {} },
+            expect.objectContaining({
+              [EVENT_KIND]: 'event',
             }),
           ]),
         })

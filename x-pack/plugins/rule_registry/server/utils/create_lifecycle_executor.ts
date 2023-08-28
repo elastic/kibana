@@ -119,7 +119,20 @@ export const createLifecycleExecutor =
       InstanceContext,
       ActionGroupIds
     >
-  ) => {
+  ): {
+    (
+      options: RuleExecutorOptions<
+        Params,
+        WrappedLifecycleRuleState<State>,
+        InstanceState,
+        InstanceContext,
+        ActionGroupIds
+      >
+    ): Promise<{ state: WrappedLifecycleRuleState<State> }>;
+    untrackLifecycleAlerts: () => void;
+  } => {
+    // Initialize the untrackLifecycleAlerts method. This will be assigned to the executor function before
+    // it's returned. `executor` will be a function that also implements .untrackLifecycleAlerts as a method
     let untrackLifecycleAlerts = () => {};
     const executor = async (
       options: RuleExecutorOptions<
@@ -129,7 +142,7 @@ export const createLifecycleExecutor =
         InstanceContext,
         ActionGroupIds
       >
-    ): Promise<{ state: WrappedLifecycleRuleState<State> }> => {
+    ) => {
       const {
         services: { alertFactory, shouldWriteAlerts },
         state: previousState,
@@ -400,11 +413,11 @@ export const createLifecycleExecutor =
           )
       );
 
+      // Define the function to untrack alerts
       untrackLifecycleAlerts = async () => {
-        const untrackedEventsToIndex = makeEventsDataMapFor(
-          [...trackedAlertIds, ...trackedAlertRecoveredIds],
-          true
-        );
+        const untrackedEventsToIndex = makeEventsDataMapFor([...trackedAlertIds], true);
+
+        await new Promise((res) => setTimeout(res, 1000));
 
         if (untrackedEventsToIndex.length > 0 && writeAlerts) {
           logger.debug(
@@ -437,11 +450,7 @@ export const createLifecycleExecutor =
       };
     };
 
-    // Typescript doesn't like when you directly assign properties to async functions, so we make untrackLifecycleAlerts
-    // available this way
-    Object.defineProperty(executor, 'untrackLifecycleAlerts', {
-      get: () => untrackLifecycleAlerts,
-    });
+    executor.untrackLifecycleAlerts = () => untrackLifecycleAlerts();
 
     return executor;
   };
