@@ -38,7 +38,8 @@ export default function ({ getService }: FtrProviderContext) {
     }
   }
 
-  describe('search', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/164996
+  describe.skip('search', () => {
     before(async () => {
       // ensure es not empty
       await es.index({
