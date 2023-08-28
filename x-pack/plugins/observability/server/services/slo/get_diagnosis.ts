@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import {
@@ -28,27 +29,23 @@ export async function getGlobalDiagnosis(
   esClient: ElasticsearchClient,
   licensing: LicensingApiRequestHandlerContext
 ) {
-  try {
-    const licenseInfo = licensing.license.toJSON();
-    const userPrivileges = await esClient.security.getUserPrivileges();
-    const sloResources = await getSloResourcesDiagnosis(esClient);
-    const sloSummaryResources = await getSloSummaryResourcesDiagnosis(esClient);
+  const licenseInfo = licensing.license.toJSON();
+  const userPrivileges = await esClient.security.getUserPrivileges();
+  const sloResources = await getSloResourcesDiagnosis(esClient);
+  const sloSummaryResources = await getSloSummaryResourcesDiagnosis(esClient);
 
-    const sloSummaryTransformsStats = await esClient.transform.getTransformStats({
-      transform_id: `${SLO_SUMMARY_TRANSFORM_NAME_PREFIX}*`,
-      allow_no_match: true,
-    });
+  const sloSummaryTransformsStats = await esClient.transform.getTransformStats({
+    transform_id: `${SLO_SUMMARY_TRANSFORM_NAME_PREFIX}*`,
+    allow_no_match: true,
+  });
 
-    return {
-      licenseAndFeatures: licenseInfo,
-      userPrivileges,
-      sloResources,
-      sloSummaryResources,
-      sloSummaryTransformsStats,
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    licenseAndFeatures: licenseInfo,
+    userPrivileges,
+    sloResources,
+    sloSummaryResources,
+    sloSummaryTransformsStats,
+  };
 }
 
 export async function getSloDiagnosis(
@@ -115,7 +112,10 @@ async function getSloResourcesDiagnosis(esClient: ElasticsearchClient) {
       [SLO_INGEST_PIPELINE_NAME]: ingestPipelineExists ? OK : NOT_OK,
     };
   } catch (err) {
-    if (err.meta.statusCode === 403) {
+    if (
+      err instanceof errors.ResponseError &&
+      (err.statusCode === 403 || err.meta.statusCode === 403)
+    ) {
       throw new Error('Insufficient permissions to access Elasticsearch Cluster', { cause: err });
     }
   }
@@ -141,7 +141,10 @@ async function getSloSummaryResourcesDiagnosis(esClient: ElasticsearchClient) {
       [SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME]: settingsTemplateExists ? OK : NOT_OK,
     };
   } catch (err) {
-    if (err.meta.statusCode === 403) {
+    if (
+      err instanceof errors.ResponseError &&
+      (err.statusCode === 403 || err.meta.statusCode === 403)
+    ) {
       throw new Error('Insufficient permissions to access Elasticsearch Cluster', { cause: err });
     }
   }
