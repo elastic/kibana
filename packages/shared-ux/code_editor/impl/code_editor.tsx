@@ -137,6 +137,7 @@ export const CodeEditor: React.FC<Props> = ({
   value,
   onChange,
   width,
+  height = '100px',
   options,
   overrideEditorWillMount,
   editorDidMount,
@@ -478,7 +479,7 @@ export const CodeEditor: React.FC<Props> = ({
           onChange={onChange}
           width={isFullScreen ? '100vw' : width}
           // previously defaulted to height which defaulted to 100% but this makes it unviewable
-          height={isFullScreen ? '100vh' : '100px'}
+          height={isFullScreen ? '100vh' : height}
           editorWillMount={_editorWillMount}
           editorDidMount={_editorDidMount}
           options={{
