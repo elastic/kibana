@@ -37,9 +37,11 @@ export function createTestServerlessInstances({
 }: {
   adjustTimeout: (timeout: number) => void;
 }): TestServerlessUtils {
+  adjustTimeout?.(150_000);
+
   const esUtils = createServerlessES();
   const kbUtils = createServerlessKibana();
-  adjustTimeout?.(120_000);
+
   return {
     startES: async () => {
       const { stop, getClient } = await esUtils.start();
@@ -107,28 +109,33 @@ const waitUntilClusterReady = async (client: Client, timeoutMs = 60 * 1000) => {
 
 const getServerlessESClient = () => {
   return new Client({
-    // node ports not configurable from
+    // master node port binding hardcoded on 9200 on host for now
     node: 'http://localhost:9200',
     Connection: HttpConnection,
   });
 };
 
-const defaults = {
-  server: {
-    restrictInternalApis: true,
-    versioned: {
-      versionResolution: 'newest',
-      strictClientVersionCheck: false,
+const getServerlessDefault = () => {
+  return {
+    server: {
+      restrictInternalApis: true,
+      versioned: {
+        versionResolution: 'newest',
+        strictClientVersionCheck: false,
+      },
     },
-  },
-  migrations: {
-    algorithm: 'zdt',
-  },
-  elasticsearch: {
-    serviceAccountToken: 'BEEF',
-  },
+    migrations: {
+      algorithm: 'zdt',
+    },
+    elasticsearch: {
+      hosts: ['http://localhost:9200'],
+    },
+  };
 };
 
 function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
-  return createRoot(defaultsDeep(settings, defaults), { ...cliArgs, serverless: true });
+  return createRoot(defaultsDeep(settings, getServerlessDefault()), {
+    ...cliArgs,
+    serverless: true,
+  });
 }
