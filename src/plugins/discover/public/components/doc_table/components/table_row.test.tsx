@@ -45,6 +45,7 @@ const mountComponent = (props: TableRowProps) => {
         },
         unifiedDocViewer: {
           getDocViews: () => [],
+          DocViewerComponent: () => <div>test</div>,
         },
       }}
     >

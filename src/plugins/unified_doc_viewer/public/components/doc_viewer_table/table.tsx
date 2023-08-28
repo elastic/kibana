@@ -111,15 +111,12 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  console.log(2);
   const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
 
   const { fieldFormats, storage, uiSettings } = useUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
   const isSingleDocView = !filter;
-  console.log(3);
-
   const [searchText, setSearchText] = useState(getSearchText(storage));
   const [pinnedFields, setPinnedFields] = useState<string[]>(
     getPinnedFields(currentDataViewId, storage)

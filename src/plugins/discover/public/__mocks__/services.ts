@@ -225,6 +225,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
+    unifiedDocViewer: {
+      getDocViews: () => [],
+      DocViewerComponent: () => void(0),
+    },
   } as unknown as DiscoverServices;
 }
 

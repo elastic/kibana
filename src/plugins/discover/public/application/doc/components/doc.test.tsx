@@ -67,6 +67,7 @@ async function mountDoc(update = false) {
     chrome: { setBreadcrumbs: jest.fn() },
     unifiedDocViewer: {
       getDocViews: () => [],
+      DocViewerComponent: () => <div>test</div>,
     },
   };
   await act(async () => {

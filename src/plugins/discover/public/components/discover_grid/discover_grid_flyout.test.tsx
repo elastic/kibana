@@ -57,6 +57,7 @@ describe('Discover flyout', function () {
       singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url') },
       unifiedDocViewer: {
         getDocViews: () => [],
+        DocViewerComponent: () => <div>test</div>,
       },
     } as unknown as DiscoverServices;
 
