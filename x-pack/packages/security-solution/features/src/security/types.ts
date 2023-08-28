@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import type { AppFeatureSecurityKey, SecuritySubFeatureId } from '../app_features_keys';
 import type { AppFeatureKibanaConfig } from '../types';
 
 export interface SecurityFeatureParams {
-  experimentalFeatures: ExperimentalFeatures;
+  experimentalFeatures: Record<string, boolean>;
   savedObjects: string[];
 }
 
