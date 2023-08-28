@@ -75,7 +75,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', { archiveName: 'unmapped_fields' });
+      cy.task('esArchiverUnload', 'unmapped_fields');
     });
 
     it('should display user and system defined highlighted fields', () => {
