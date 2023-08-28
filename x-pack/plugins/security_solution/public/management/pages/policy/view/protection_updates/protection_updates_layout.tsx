@@ -20,7 +20,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -77,55 +77,51 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       ? AUTOMATIC_UPDATES_CHECKBOX_LABEL
       : AUTOMATIC_UPDATES_OFF_CHECKBOX_LABEL;
 
-    useEffect(() => {
-      if (automaticUpdatesEnabled && selectedDate !== today) {
-        // Clear selected date on user enabling automatic updates
-        setSelectedDate(today);
-      }
-    }, [automaticUpdatesEnabled, selectedDate, today]);
+    const onSave = useCallback(
+      (version: string) => {
+        const update = cloneDeep(policy);
+        update.inputs[0].config.policy.value.global_manifest_version = version;
+        sendPolicyUpdate({ policy: update })
+          .then(({ item: policyItem }) => {
+            toasts.addSuccess({
+              'data-test-subj': 'protectionUpdatesSuccessfulMessage',
+              title: i18n.translate(
+                'xpack.securitySolution.endpoint.protectionUpdates.updateSuccessTitle',
+                {
+                  defaultMessage: 'Success!',
+                }
+              ),
+              text: i18n.translate(
+                'xpack.securitySolution.endpoint.protectionUpdates.updateSuccessMessage',
+                {
+                  defaultMessage: 'Manifest updates successfully saved',
+                }
+              ),
+            });
 
-    const onSave = useCallback(() => {
-      const update = cloneDeep(policy);
-      update.inputs[0].config.policy.value.global_manifest_version = manifestVersion;
-      sendPolicyUpdate({ policy: update })
-        .then(({ item: policyItem }) => {
-          toasts.addSuccess({
-            'data-test-subj': 'protectionUpdatesSuccessfulMessage',
-            title: i18n.translate(
-              'xpack.securitySolution.endpoint.protectionUpdates.updateSuccessTitle',
-              {
-                defaultMessage: 'Success!',
-              }
-            ),
-            text: i18n.translate(
-              'xpack.securitySolution.endpoint.protectionUpdates.updateSuccessMessage',
-              {
-                defaultMessage: 'Manifest updates successfully saved',
-              }
-            ),
+            // Since the 'policyItem' is stored in a store and fetched as a result of an action on urlChange, we still need to dispatch an action even though Redux was removed from this component.
+            dispatch({
+              type: 'serverReturnedPolicyDetailsData',
+              payload: {
+                policyItem,
+              },
+            });
+          })
+          .catch((err) => {
+            toasts.addDanger({
+              'data-test-subj': 'protectionUpdatesFailureMessage',
+              title: i18n.translate(
+                'xpack.securitySolution.endpoint.protectionUpdates.updateErrorTitle',
+                {
+                  defaultMessage: 'Failed!',
+                }
+              ),
+              text: err.message,
+            });
           });
-
-          // Since the 'policyItem' is stored in a store and fetched as a result of an action on urlChange, we still need to dispatch an action even though Redux was removed from this component.
-          dispatch({
-            type: 'serverReturnedPolicyDetailsData',
-            payload: {
-              policyItem,
-            },
-          });
-        })
-        .catch((err) => {
-          toasts.addDanger({
-            'data-test-subj': 'protectionUpdatesFailureMessage',
-            title: i18n.translate(
-              'xpack.securitySolution.endpoint.protectionUpdates.updateErrorTitle',
-              {
-                defaultMessage: 'Failed!',
-              }
-            ),
-            text: err.message,
-          });
-        });
-    }, [dispatch, manifestVersion, policy, sendPolicyUpdate, toasts]);
+      },
+      [dispatch, policy, sendPolicyUpdate, toasts]
+    );
 
     const toggleAutomaticUpdates = useCallback(
       (event: EuiSwitchEvent) => {
@@ -133,19 +129,20 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
         if (checked && !automaticUpdatesEnabled) {
           setManifestVersion('latest');
+          // Clear selected date on user enabling automatic updates
+          if (selectedDate !== today) {
+            setSelectedDate(today);
+          }
+          // We need to save the policy without the user clicking save button
+          if (deployedVersion !== 'latest') {
+            onSave('latest');
+          }
         } else {
           setManifestVersion(selectedDate.format(internalDateFormat));
         }
       },
-      [automaticUpdatesEnabled, selectedDate]
+      [automaticUpdatesEnabled, deployedVersion, onSave, selectedDate, today]
     );
-
-    useEffect(() => {
-      // User turned on automatic updates, we need to save the policy without the user clicking save button
-      if (deployedVersion !== manifestVersion && manifestVersion === 'latest') {
-        onSave();
-      }
-    }, [deployedVersion, manifestVersion, onSave]);
 
     const renderVersionToDeployPicker = () => {
       return (
@@ -278,7 +275,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
             disabled={!canWritePolicyManagement}
             iconType="save"
             data-test-subj="policyDetailsSaveButton"
-            onClick={onSave}
+            onClick={() => onSave(manifestVersion)}
             isLoading={isUpdating}
           >
             <FormattedMessage
