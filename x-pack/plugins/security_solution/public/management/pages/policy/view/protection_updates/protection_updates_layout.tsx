@@ -295,7 +295,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
           <EuiTextArea
             value={''}
-            onChange={() => console.log('test')}
+            onChange={() => undefined}
             fullWidth={true}
             rows={3}
             placeholder={i18n.translate(
