@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { z } from 'zod';
+
 export enum HostsQueries {
   details = 'hostDetails',
   hosts = 'hosts',
@@ -18,13 +20,6 @@ export enum NetworkKpiQueries {
   tlsHandshakes = 'networkKpiTlsHandshakes',
   uniqueFlows = 'networkKpiUniqueFlows',
   uniquePrivateIps = 'networkKpiUniquePrivateIps',
-}
-
-export enum HostsQueries {
-  details = 'hostDetails',
-  hosts = 'hosts',
-  overview = 'overviewHost',
-  uncommonProcesses = 'uncommonProcesses',
 }
 
 export enum HostsKpiQueries {
@@ -83,3 +78,42 @@ export type FactoryQueryTypes =
   | typeof MatrixHistogramQuery
   | typeof FirstLastSeenQuery
   | RelatedEntitiesQueries;
+
+export const factoryQueryType = z
+  .enum([
+    CtiQueries.dataSource,
+    CtiQueries.eventEnrichment,
+    FirstLastSeenQuery,
+    HostsKpiQueries.kpiHosts,
+    HostsKpiQueries.kpiUniqueIps,
+    HostsQueries.details,
+    HostsQueries.hosts,
+    HostsQueries.overview,
+    HostsQueries.uncommonProcesses,
+    MatrixHistogramQuery,
+    NetworkKpiQueries.dns,
+    NetworkKpiQueries.networkEvents,
+    NetworkKpiQueries.tlsHandshakes,
+    NetworkKpiQueries.uniqueFlows,
+    NetworkKpiQueries.uniquePrivateIps,
+    NetworkQueries.details,
+    NetworkQueries.dns,
+    NetworkQueries.http,
+    NetworkQueries.overview,
+    NetworkQueries.tls,
+    NetworkQueries.topCountries,
+    NetworkQueries.topNFlow,
+    NetworkQueries.users,
+    RelatedEntitiesQueries.relatedHosts,
+    RelatedEntitiesQueries.relatedUsers,
+    RiskQueries.hostsRiskScore,
+    RiskQueries.kpiRiskScore,
+    RiskQueries.usersRiskScore,
+    UsersQueries.authentications,
+    UsersQueries.kpiAuthentications,
+    UsersQueries.kpiTotalUsers,
+    UsersQueries.managedDetails,
+    UsersQueries.observedDetails,
+    UsersQueries.users,
+  ])
+  .optional();

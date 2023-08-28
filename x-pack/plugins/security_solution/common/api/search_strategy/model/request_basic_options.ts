@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { factoryQueryType } from './factory_query_type';
 import { filterQuery } from './filter_query';
 import { timerange } from './timerange';
 
@@ -14,10 +15,7 @@ export const requestBasicOptionsSchema = z
     timerange: timerange.optional(),
     filterQuery,
     defaultIndex: z.array(z.string()).optional(),
-
-    // This comes from the IKibanaSearchRequest
-    // TODO: make it an enum of the available factory types
-    factoryQueryType: z.any().optional(),
+    factoryQueryType,
     id: z.string().optional(),
     params: z.any().optional(),
   })
