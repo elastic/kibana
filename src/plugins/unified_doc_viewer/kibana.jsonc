@@ -7,6 +7,6 @@
     "id": "unifiedDocViewer",
     "server": false,
     "browser": true,
-    "requiredBundles": ["kibanaReact", "kibanaUtils"]
+    "requiredBundles": ["kibanaReact"]
   }
 }

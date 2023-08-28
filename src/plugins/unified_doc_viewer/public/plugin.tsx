@@ -10,7 +10,6 @@ import React from 'react';
 import type { Plugin } from '@kbn/core/public';
 import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { DeferredSpinner, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { EuiSkeletonText } from '@elastic/eui';
 import { useUnifiedDocViewerServices } from './hooks';
@@ -43,12 +42,17 @@ export class UnifiedDocViewerPublicPlugin
         const { uiSettings } = useUnifiedDocViewerServices();
         const DocView = uiSettings.get(DOC_TABLE_LEGACY) ? DocViewerLegacyTable : DocViewerTable;
 
-        return withSuspense(
-          DocView,
-          <DeferredSpinner>
-            <EuiSkeletonText />
-          </DeferredSpinner>
-        )(props);
+        return (
+          <React.Suspense
+            fallback={
+              <DeferredSpinner>
+                <EuiSkeletonText />
+              </DeferredSpinner>
+            }
+          >
+            <DocView {...props} />
+          </React.Suspense>
+        );
       },
     });
 

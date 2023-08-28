@@ -54,6 +54,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -108,6 +109,7 @@ export interface DiscoverServices {
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedSearch: SavedSearchPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  unifiedDocViewer: UnifiedDocViewerStart;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
   contentClient: ContentClient;
@@ -169,6 +171,7 @@ export const buildServices = memoize(function (
     savedObjectsManagement: plugins.savedObjectsManagement,
     savedSearch: plugins.savedSearch,
     unifiedSearch: plugins.unifiedSearch,
+    unifiedDocViewer: plugins.unifiedDocViewer,
     lens: plugins.lens,
     uiActions: plugins.uiActions,
     contentClient: plugins.contentManagement.client,

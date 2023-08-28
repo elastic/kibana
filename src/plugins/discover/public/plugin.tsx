@@ -40,6 +40,7 @@ import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-taggin
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
@@ -190,6 +191,7 @@ export interface DiscoverStartPlugins {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  unifiedDocViewer: UnifiedDocViewerStart;
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
