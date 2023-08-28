@@ -153,7 +153,7 @@ export function DataDimensionEditor(
   const { splitAccessor } = layer;
   const splitCategories = getColorCategories(table?.rows ?? [], splitAccessor);
 
-  const canUseColorMapping = true;
+  const canUseColorMapping = layer.colorMapping ? true : false;
   if (props.groupId === 'breakdown' && !layer.collapseFn) {
     return canUseColorMapping ? (
       <EuiFlexGroup

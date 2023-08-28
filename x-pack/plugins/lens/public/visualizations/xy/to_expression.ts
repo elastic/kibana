@@ -511,7 +511,7 @@ const dataLayerToExpression = (
             name: 'default',
           }),
     ]).toAst(),
-    colorMapping: JSON.stringify(layer.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG),
+    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
   });
 
   return {

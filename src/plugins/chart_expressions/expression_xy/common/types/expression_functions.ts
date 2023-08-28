@@ -136,7 +136,7 @@ export interface DataLayerArgs {
   isStacked: boolean;
   isHorizontal: boolean;
   palette: PaletteOutput;
-  colorMapping: string; // JSON stringified object of the color mapping
+  colorMapping?: string; // JSON stringified object of the color mapping
   decorations?: DataDecorationConfigResult[];
   curveType?: XYCurveType;
 }
@@ -164,7 +164,7 @@ export interface ExtendedDataLayerArgs {
   isStacked: boolean;
   isHorizontal: boolean;
   palette: PaletteOutput;
-  colorMapping: string;
+  colorMapping?: string;
   // palette will always be set on the expression
   decorations?: DataDecorationConfigResult[];
   curveType?: XYCurveType;

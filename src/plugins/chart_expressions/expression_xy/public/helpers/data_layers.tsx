@@ -23,7 +23,12 @@ import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import { ColorMapping, PaletteRegistry, SeriesLayer } from '@kbn/coloring';
+import {
+  ColorMapping,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  PaletteRegistry,
+  SeriesLayer,
+} from '@kbn/coloring';
 import { getPalette, availablePalettes, NeutralPalette } from '@kbn/coloring';
 import { SPECIAL_RULE_MATCHES } from '@kbn/coloring/src/shared_components/color_mapping/color/rule_matching';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
@@ -490,10 +495,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     splitColumnIds.length > 0 ? splitColumnIds[0] : undefined
   );
 
-  const colorMappingModel: ColorMapping.Config = JSON.parse(layer.colorMapping);
+  const colorMappingModel: ColorMapping.Config = layer.colorMapping
+    ? JSON.parse(layer.colorMapping)
+    : { ...DEFAULT_COLOR_MAPPING_CONFIG };
 
   // TODO: to be replaced by a check for new chart vs existing charts
-  const canUseColorMapping = true;
+  // if no colorMapping, check if is new chart, if so, add, if not use old
+
+  const canUseColorMapping = layer.colorMapping ? true : false;
   const colorFn: SeriesColorAccessorFn =
     // for the MVP just apply color mapping if we have a breakdown by configured
     canUseColorMapping && splitColumnIds.length > 0

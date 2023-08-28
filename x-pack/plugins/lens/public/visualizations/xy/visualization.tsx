@@ -418,14 +418,21 @@ export const getXyVisualization = ({
         }
       ).length < 2;
 
+    const canUseColorMapping = layer.colorMapping ? true : false;
     let colors: string[] = [];
-    kibanaTheme.theme$
-      .subscribe({
-        next(theme) {
-          colors = getPaletteColors(theme.darkMode, layer.colorMapping);
-        },
-      })
-      .unsubscribe();
+    if (canUseColorMapping) {
+      kibanaTheme.theme$
+        .subscribe({
+          next(theme) {
+            colors = getPaletteColors(theme.darkMode, layer.colorMapping);
+          },
+        })
+        .unsubscribe();
+    } else {
+      colors = paletteService
+        .get(dataLayer.palette?.name || 'default')
+        .getCategoricalColors(10, dataLayer.palette?.params);
+    }
 
     return {
       groups: [
