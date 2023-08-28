@@ -138,9 +138,9 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       };
     },
 
-    /* 
-    * This function is only used in the API tests 
-    */ 
+    /*
+     * This function is only used in the API tests
+     */
     async waitForJobToFinish(
       downloadReportPath: string,
       username: string,
@@ -175,9 +175,9 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       );
     },
 
-   /* 
-    * This function is only used in the API tests, funtional tests we have to click the download link in the UI 
-   */ 
+    /*
+     * This function is only used in the API tests, funtional tests we have to click the download link in the UI
+     */
     async getCompletedJobOutput(downloadReportPath: string, username: string, password: string) {
       const response = await supertest
         .get(`${downloadReportPath}?elasticInternalOrigin=true`)
