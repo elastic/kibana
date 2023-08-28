@@ -10,7 +10,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiModalHeaderTitle,
   EuiPopover,
@@ -19,21 +18,21 @@ import {
 } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import * as i18n from '../translations';
 import type { Conversation } from '../../..';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
+import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
 
 /**
- * Renders a header title with an icon, a tooltip button, and a popover with
+ * Renders a header title, a tooltip button, and a popover with
  * information about the assistant feature and access to documentation.
  */
 export const AssistantTitle: React.FC<{
+  isDisabled?: boolean;
   title: string | JSX.Element;
-  titleIcon: string;
   docLinks: Omit<DocLinksStart, 'links'>;
   selectedConversation: Conversation | undefined;
-}> = ({ title, titleIcon, docLinks, selectedConversation }) => {
+}> = ({ isDisabled = false, title, docLinks, selectedConversation }) => {
   const selectedConnectorId = selectedConversation?.apiConfig?.connectorId;
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
@@ -74,13 +73,8 @@ export const AssistantTitle: React.FC<{
   return (
     <EuiModalHeaderTitle>
       <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            margin-top: 3px;
-          `}
-        >
-          <EuiIcon data-test-subj="titleIcon" type={titleIcon} size="xl" />
+        <EuiFlexItem grow={false}>
+          <AssistantAvatar data-test-subj="titleIcon" size={'m'} />
         </EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
           <EuiFlexItem grow={false}>
@@ -116,7 +110,7 @@ export const AssistantTitle: React.FC<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ConnectorSelectorInline
-              isDisabled={selectedConversation === undefined}
+              isDisabled={isDisabled || selectedConversation === undefined}
               onConnectorModalVisibilityChange={() => {}}
               onConnectorSelectionChange={() => {}}
               selectedConnectorId={selectedConnectorId}

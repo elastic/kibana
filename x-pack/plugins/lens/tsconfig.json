@@ -86,6 +86,7 @@
     "@kbn/text-based-languages",
     "@kbn/content-management-utils",
     "@kbn/serverless",
+    "@kbn/ebt-tools",
   ],
   "exclude": [
     "target/**/*",
