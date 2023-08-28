@@ -15,7 +15,6 @@ import {
   findSLOParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
-  getSLODiagnosisParamsSchema,
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
@@ -35,7 +34,7 @@ import {
 import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
 import { FindSLODefinitions } from '../../services/slo/find_slo_definitions';
 import { getBurnRates } from '../../services/slo/get_burn_rates';
-import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
+import { getGlobalDiagnosis } from '../../services/slo/get_diagnosis';
 import { GetPreviewData } from '../../services/slo/get_preview_data';
 import { GetSLOInstances } from '../../services/slo/get_slo_instances';
 import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
@@ -310,21 +309,6 @@ const getDiagnosisRoute = createObservabilityServerRoute({
   },
 });
 
-const getSloDiagnosisRoute = createObservabilityServerRoute({
-  endpoint: 'GET /internal/observability/slos/{id}/_diagnosis',
-  options: {
-    tags: [],
-  },
-  params: getSLODiagnosisParamsSchema,
-  handler: async ({ context, params }) => {
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const soClient = (await context.core).savedObjects.client;
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
-
-    return getSloDiagnosis(params.path.id, { esClient, repository });
-  },
-});
-
 const getSloBurnRates = createObservabilityServerRoute({
   endpoint: 'POST /internal/observability/slos/{id}/_burn_rates',
   options: {
@@ -375,7 +359,6 @@ export const sloRouteRepository = {
   ...getSLORoute,
   ...updateSLORoute,
   ...getDiagnosisRoute,
-  ...getSloDiagnosisRoute,
   ...getSloBurnRates,
   ...getPreviewData,
   ...getSLOInstancesRoute,
