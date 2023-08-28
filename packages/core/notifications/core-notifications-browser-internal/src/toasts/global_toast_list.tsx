@@ -7,16 +7,18 @@
  */
 
 import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
-import React from 'react';
-import { Observable, type Subscription } from 'rxjs';
+import React, { useEffect, useState, type FunctionComponent } from 'react';
+import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
 import type { Toast } from '@kbn/core-notifications-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import { deduplicateToasts, ToastWithRichTitle } from './deduplicate_toasts';
+import { EventReporter } from './telemetry';
 
 interface Props {
   toasts$: Observable<Toast[]>;
+  reportEvent: EventReporter;
   dismissToast: (toastId: string) => void;
 }
 
@@ -31,50 +33,47 @@ const convertToEui = (toast: ToastWithRichTitle): EuiToast => ({
   text: toast.text instanceof Function ? <MountWrapper mount={toast.text} /> : toast.text,
 });
 
-export class GlobalToastList extends React.Component<Props, State> {
-  public state: State = {
-    toasts: [],
-    idToToasts: {},
+export const GlobalToastList: FunctionComponent<Props> = ({
+  toasts$,
+  dismissToast,
+  reportEvent,
+}) => {
+  const [toasts, setToasts] = useState<State['toasts']>([]);
+  const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
+
+  useEffect(() => {
+    const { unsubscribe } = toasts$.subscribe((redundantToastList) => {
+      const { toasts: reducedToasts, idToToasts: reducedIdToasts } =
+        deduplicateToasts(redundantToastList);
+      setIdToToasts(reducedIdToasts);
+      setToasts(reducedToasts);
+    });
+
+    return unsubscribe;
+  }, [toasts$]);
+
+  const closeToastsRepresentedById = (id: string) => {
+    const representedToasts = idToToasts[id];
+    if (representedToasts) {
+      representedToasts.forEach((toast) => dismissToast(toast.id));
+    }
   };
 
-  private subscription?: Subscription;
-
-  public componentDidMount() {
-    this.subscription = this.props.toasts$.subscribe((redundantToastList) => {
-      const { toasts, idToToasts } = deduplicateToasts(redundantToastList);
-      this.setState({ toasts, idToToasts });
-    });
-  }
-
-  public componentWillUnmount() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  }
-
-  private closeToastsRepresentedById(id: string) {
-    const representedToasts = this.state.idToToasts[id];
-    if (representedToasts) {
-      representedToasts.forEach((toast) => this.props.dismissToast(toast.id));
-    }
-  }
-
-  public render() {
-    return (
-      <EuiGlobalToastList
-        aria-label={i18n.translate('core.notifications.globalToast.ariaLabel', {
-          defaultMessage: 'Notification message list',
-        })}
-        data-test-subj="globalToastList"
-        toasts={this.state.toasts.map(convertToEui)}
-        dismissToast={({ id }) => this.closeToastsRepresentedById(id)}
-        /**
-         * This prop is overridden by the individual toasts that are added.
-         * Use `Infinity` here so that it's obvious a timeout hasn't been
-         * provided in development.
-         */
-        toastLifeTimeMs={Infinity}
-      />
-    );
-  }
-}
+  return (
+    <EuiGlobalToastList
+      aria-label={i18n.translate('core.notifications.globalToast.ariaLabel', {
+        defaultMessage: 'Notification message list',
+      })}
+      data-test-subj="globalToastList"
+      toasts={toasts.map(convertToEui)}
+      dismissToast={({ id }) => closeToastsRepresentedById(id)}
+      /**
+       * This prop is overridden by the individual toasts that are added.
+       * Use `Infinity` here so that it's obvious a timeout hasn't been
+       * provided in development.
+       */
+      toastLifeTimeMs={Infinity}
+      // onClearAllToasts={reportEvent.onClearAllToasts}
+    />
+  );
+};
