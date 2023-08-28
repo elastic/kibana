@@ -535,6 +535,7 @@
     "@kbn/navigation-plugin": "link:src/plugins/navigation",
     "@kbn/newsfeed-plugin": "link:src/plugins/newsfeed",
     "@kbn/newsfeed-test-plugin": "link:test/common/plugins/newsfeed",
+    "@kbn/no-data-page-plugin": "link:src/plugins/no_data_page",
     "@kbn/notifications-plugin": "link:x-pack/plugins/notifications",
     "@kbn/object-versioning": "link:packages/kbn-object-versioning",
     "@kbn/observability-ai-assistant-plugin": "link:x-pack/plugins/observability_ai_assistant",
