@@ -22,12 +22,13 @@ export const ExternalLinkComponent = ({ link }: { link: NavigationEmbeddableLink
       className={'navigationLink'}
       id={`externalLink--${link.id}`}
       label={link.label || link.destination}
-      onClick={async () => {
+      onClick={async (event) => {
+        const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
         const destination =
           !link.options || (link.options as UrlDrilldownOptions)?.encodeUrl
             ? encodeURI(link.destination)
             : link.destination;
-        if (!link.options || link.options.openInNewTab) {
+        if (modifiedClick || !link.options || link.options.openInNewTab) {
           window.open(destination, '_blank', 'noopener');
         } else {
           await coreServices.application.navigateToUrl(destination);

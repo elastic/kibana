@@ -37,7 +37,7 @@ const navigationEmbeddableLinkSchema = schema.object({
       schema.object(
         {
           openInNewTab: schema.boolean(),
-          encodeUrl: schema.maybe(schema.boolean()),
+          encodeUrl: schema.boolean(),
         },
         { unknowns: 'forbid' }
       ),
