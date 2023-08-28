@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
+import type {
+  RequestHandler,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { protectionUpdatesNoteSavedObjectType } from '../../lib/protection_updates_note/saved_object_mappings';
@@ -13,6 +17,49 @@ import type {
   UpdateProtectionUpdatesNoteSchema,
   GetProtectionUpdatesNoteSchema,
 } from '../../../../common/api/endpoint/protection_updates_note/protection_updates_note_schema';
+
+const findProtectionNote = async (SOClient: SavedObjectsClientContract, policyId: string) => {
+  return SOClient.find<{ note: string }>({
+    type: protectionUpdatesNoteSavedObjectType,
+    hasReference: { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
+  });
+};
+
+const updateProtectionNote = async (
+  SOClient: SavedObjectsClientContract,
+  noteId: string,
+  note: string,
+  references: SavedObjectReference[]
+) => {
+  return SOClient.update(
+    protectionUpdatesNoteSavedObjectType,
+    noteId,
+    {
+      note,
+    },
+    {
+      references,
+      refresh: 'wait_for',
+    }
+  );
+};
+
+const createProtectionNote = async (
+  SOClient: SavedObjectsClientContract,
+  note: string,
+  references: SavedObjectReference[]
+) => {
+  return SOClient.create(
+    protectionUpdatesNoteSavedObjectType,
+    {
+      note,
+    },
+    {
+      references,
+      refresh: 'wait_for',
+    }
+  );
+};
 
 export const postProtectionUpdatesNoteHandler = function (): RequestHandler<
   TypeOf<typeof UpdateProtectionUpdatesNoteSchema.params>,
@@ -24,33 +71,32 @@ export const postProtectionUpdatesNoteHandler = function (): RequestHandler<
     const { policy_id: policyId } = request.params;
     const { note } = request.body;
 
-    const soClientResponse = await SOClient.find<{ note: string }>({
-      type: protectionUpdatesNoteSavedObjectType,
-      hasReference: { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
-    });
+    const soClientResponse = await findProtectionNote(SOClient, policyId);
 
     if (soClientResponse.saved_objects[0]) {
-      return response.badRequest({ body: 'Note already exists for this policy' });
+      const { references } = soClientResponse.saved_objects[0];
+
+      const updatedNoteSO = await updateProtectionNote(
+        SOClient,
+        soClientResponse.saved_objects[0].id,
+        note,
+        references
+      );
+
+      const { attributes } = updatedNoteSO;
+
+      return response.ok({ body: attributes });
     }
 
-    const references = [
+    const references: SavedObjectReference[] = [
       {
         id: policyId,
-        name: 'policy',
+        name: 'package_policy',
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       },
     ];
 
-    const noteSO = await SOClient.create(
-      protectionUpdatesNoteSavedObjectType,
-      {
-        note,
-      },
-      {
-        references,
-        refresh: 'wait_for',
-      }
-    );
+    const noteSO = await createProtectionNote(SOClient, note, references);
 
     const { attributes } = noteSO;
 
@@ -67,10 +113,7 @@ export const getProtectionUpdatesNoteHandler = function (): RequestHandler<
     const SOClient = (await context.core).savedObjects.client;
     const { policy_id: policyId } = request.params;
 
-    const soClientResponse = await SOClient.find<{ note: string }>({
-      type: protectionUpdatesNoteSavedObjectType,
-      hasReference: { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
-    });
+    const soClientResponse = await findProtectionNote(SOClient, policyId);
 
     if (!soClientResponse.saved_objects[0] || !soClientResponse.saved_objects[0].attributes) {
       return response.badRequest({ body: 'No note found for this policy' });
@@ -91,10 +134,7 @@ export const putProtectionUpdatesNoteHandler = function (): RequestHandler<
     const SOClient = (await context.core).savedObjects.client;
     const { policy_id: policyId } = request.params;
 
-    const soClientResponse = await SOClient.find<{ note: string }>({
-      type: protectionUpdatesNoteSavedObjectType,
-      hasReference: { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
-    });
+    const soClientResponse = await findProtectionNote(SOClient, policyId);
 
     if (!soClientResponse.saved_objects[0] || !soClientResponse.saved_objects[0].attributes) {
       return response.badRequest({ body: 'No note found for this policy' });
@@ -102,16 +142,11 @@ export const putProtectionUpdatesNoteHandler = function (): RequestHandler<
 
     const { references } = soClientResponse.saved_objects[0];
 
-    const updatedNoteSO = await SOClient.update(
-      protectionUpdatesNoteSavedObjectType,
+    const updatedNoteSO = await updateProtectionNote(
+      SOClient,
       soClientResponse.saved_objects[0].id,
-      {
-        note: request.body.note,
-      },
-      {
-        references,
-        refresh: 'wait_for',
-      }
+      request.body.note,
+      references
     );
 
     const { attributes } = updatedNoteSO;
@@ -129,11 +164,7 @@ export const deleteProtectionUpdatesNoteHandler = function (): RequestHandler<
     const SOClient = (await context.core).savedObjects.client;
     const { policy_id: policyId } = request.params;
 
-    const soClientResponse = await SOClient.find<{ note: string }>({
-      type: protectionUpdatesNoteSavedObjectType,
-      hasReference: { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
-    });
-
+    const soClientResponse = await findProtectionNote(SOClient, policyId);
     if (!soClientResponse.saved_objects[0]) {
       return response.badRequest({ body: 'No note found for this policy' });
     }
