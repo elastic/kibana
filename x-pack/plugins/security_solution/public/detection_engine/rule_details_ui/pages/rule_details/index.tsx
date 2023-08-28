@@ -160,6 +160,29 @@ const StyledMinHeightTabContainer = styled.div`
   min-height: 800px;
 `;
 
+export enum RuleDetailTabs {
+  alerts = 'alerts',
+  exceptions = 'rule_exceptions',
+  endpointExceptions = 'endpoint_exceptions',
+  executionResults = 'execution_results',
+  executionEvents = 'execution_events',
+}
+
+export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
+  [RuleDetailTabs.alerts]: detectionI18n.ALERT,
+  [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
+  [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
+  [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
+  [RuleDetailTabs.executionEvents]: i18n.EXECUTION_EVENTS_TAB,
+};
+
+const RULE_EXCEPTION_LIST_TYPES = [
+  ExceptionListTypeEnum.DETECTION,
+  ExceptionListTypeEnum.RULE_DEFAULT,
+];
+
+const RULE_ENDPOINT_EXCEPTION_LIST_TYPE = [ExceptionListTypeEnum.ENDPOINT];
+
 type DetectionEngineComponentProps = PropsFromRedux;
 
 const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
@@ -603,6 +626,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         <RuleSwitch
                           id={rule?.id ?? '-1'}
                           isDisabled={
+                            !rule?.id ||
                             !isExistingRule ||
                             !canEditRuleWithActions(rule, hasActionsPrivileges) ||
                             !hasUserCRUDPermission(canUserCRUD) ||
@@ -760,10 +784,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                   <ExceptionsViewer
                     rule={rule}
-                    listTypes={[
-                      ExceptionListTypeEnum.DETECTION,
-                      ExceptionListTypeEnum.RULE_DEFAULT,
-                    ]}
+                    listTypes={RULE_EXCEPTION_LIST_TYPES}
                     onRuleChange={refreshRule}
                     isViewReadOnly={!isExistingRule}
                     data-test-subj="exceptionTab"
@@ -774,7 +795,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 >
                   <ExceptionsViewer
                     rule={rule}
-                    listTypes={[ExceptionListTypeEnum.ENDPOINT]}
+                    listTypes={RULE_ENDPOINT_EXCEPTION_LIST_TYPE}
                     onRuleChange={refreshRule}
                     isViewReadOnly={!isExistingRule}
                     data-test-subj="endpointExceptionsTab"

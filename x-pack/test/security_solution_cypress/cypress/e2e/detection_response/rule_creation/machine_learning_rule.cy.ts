@@ -40,7 +40,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { getDetails } from '../../../tasks/rule_details';
-import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToTheRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../../tasks/common';
 import {
   createAndEnableRule,
@@ -86,7 +86,7 @@ describe('Detection rules, machine learning', { tags: ['@ess', '@brokenInServerl
     cy.get(SEVERITY).should('have.text', 'Critical');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-    goToRuleDetails();
+    goToTheRuleDetailsOf(mlRule.name);
 
     cy.get(RULE_NAME_HEADER).should('contain', `${mlRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', mlRule.description);

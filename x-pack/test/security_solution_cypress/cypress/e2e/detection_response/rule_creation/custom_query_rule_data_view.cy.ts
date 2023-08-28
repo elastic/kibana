@@ -50,7 +50,7 @@ import {
 
 import {
   getRulesManagementTableRows,
-  goToRuleDetails,
+  goToTheRuleDetailsOf,
 } from '../../../tasks/alerts_detection_rules';
 import { postDataView } from '../../../tasks/common';
 import {
@@ -104,7 +104,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
       cy.get(SEVERITY).should('have.text', 'High');
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-      goToRuleDetails();
+      goToTheRuleDetailsOf(rule.name);
 
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
@@ -160,7 +160,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
       fillScheduleRuleAndContinue(rule);
       createRuleWithoutEnabling();
 
-      goToRuleDetails();
+      goToTheRuleDetailsOf(rule.name);
 
       cy.get(EDIT_RULE_SETTINGS_LINK).click();
 

@@ -193,13 +193,6 @@ export const filterByDisabledRules = () => {
   cy.get(DISABLED_RULES_BTN).click();
 };
 
-/**
- * @deprecated use goToTheRuleDetailsOf
- */
-export const goToRuleDetails = () => {
-  cy.get(RULE_NAME).first().click();
-};
-
 export const goToTheRuleDetailsOf = (ruleName: string) => {
   cy.contains(RULE_NAME, ruleName).click();
 

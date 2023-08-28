@@ -44,7 +44,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
-import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToTheRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   createAndEnableRule,
@@ -94,7 +94,7 @@ describe('New Terms rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
       cy.get(SEVERITY).should('have.text', 'High');
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-      goToRuleDetails();
+      goToTheRuleDetailsOf(rule.name);
 
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);

@@ -13,7 +13,6 @@ import {
 import { DATA_VIEW_DETAILS, INDEX_PATTERNS_DETAILS } from '../../../../../screens/rule_details';
 
 import {
-  goToRuleDetails,
   goToTheRuleDetailsOf,
   expectManagementTableRules,
   selectAllRules,
@@ -151,7 +150,7 @@ describe(
         });
 
         // check if rule still has data view and index patterns field does not exist
-        goToRuleDetails();
+        goToTheRuleDetailsOf('New Rule Test 1');
         getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
         assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
       });
@@ -174,7 +173,7 @@ describe(
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
         // check if rule has been updated with index patterns and data view does not exist
-        goToRuleDetails();
+        goToTheRuleDetailsOf('New Rule Test 1');
         hasIndexPatterns(expectedIndexPatterns.join(''));
         assertDetailsNotExist(DATA_VIEW_DETAILS);
       });
@@ -195,7 +194,7 @@ describe(
         });
 
         // check if rule still has data view and index patterns field does not exist
-        goToRuleDetails();
+        goToTheRuleDetailsOf('New Rule Test 1');
         getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
         assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
       });
@@ -215,7 +214,7 @@ describe(
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
         // check if rule has been overwritten with index patterns and data view does not exist
-        goToRuleDetails();
+        goToTheRuleDetailsOf('New Rule Test 1');
         hasIndexPatterns(expectedIndexPatterns.join(''));
         assertDetailsNotExist(DATA_VIEW_DETAILS);
       });
@@ -239,7 +238,7 @@ describe(
         });
 
         // check if rule still has data view and index patterns field does not exist
-        goToRuleDetails();
+        goToTheRuleDetailsOf('New Rule Test 1');
         getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
       });
     });
@@ -304,7 +303,7 @@ describe(
       });
 
       // check if rule still has data view and index patterns field does not exist
-      goToRuleDetails();
+      goToTheRuleDetailsOf('with dataview');
       assertDetailsNotExist(DATA_VIEW_DETAILS);
     });
   }
