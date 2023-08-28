@@ -14,8 +14,7 @@ export const cloudSecurityMetringTaskProperties: MetringTaskProperties = {
   taskType: 'cloud-security-usage-reporting-task',
   taskTitle: 'Cloud Security Metring Periodic Tasks',
   meteringCallback: cloudSecurityMetringCallback,
-  // interval: `${TASK_INTERVAL.toString()}s`,
-  interval: `120s`,
+  interval: '120s',
   periodSeconds: TASK_INTERVAL,
   version: '1',
 };

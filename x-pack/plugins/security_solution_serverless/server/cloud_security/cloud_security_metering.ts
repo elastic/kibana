@@ -27,10 +27,6 @@ export const cloudSecurityMetringCallback = async ({
   lastSuccessfulReport,
   config,
 }: MeteringCallbackInput): Promise<UsageRecord[]> => {
-  logger.error(`cloudSetup: ${cloudSetup}`);
-  logger.error(`cloudSetup.serverless: ${cloudSetup.serverless}`);
-  logger.error(`cloudSetup.serverless,projectId: ${cloudSetup.serverless.projectId}`);
-
   const projectId = cloudSetup?.serverless?.projectId || 'missing_project_id';
 
   if (!cloudSetup?.serverless?.projectId) {
