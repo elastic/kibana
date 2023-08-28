@@ -23,6 +23,7 @@ import type { BehaviorProtectionOSes } from '../../../../../types';
 import { useLicense } from '../../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../../setting_locked_card';
 import type { PolicyFormComponentCommonProps } from '../../../types';
+import type { ProtectionSettingCardSwitchProps } from '../../protection_setting_card_switch';
 
 export const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.behavior',
@@ -38,6 +39,15 @@ const BEHAVIOUR_OS_VALUES: Immutable<BehaviorProtectionOSes[]> = [
 ];
 
 export type BehaviourProtectionCardProps = PolicyFormComponentCommonProps;
+
+const adjustReputationServiceSettingsOnProtectionSwitch: ProtectionSettingCardSwitchProps['additionalOnSwitchChange'] =
+  ({ value, policyConfigData, protectionOsList }) => {
+    for (const os of protectionOsList) {
+      policyConfigData[os].behavior_protection.reputation_service = value;
+    }
+
+    return policyConfigData;
+  };
 
 export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
@@ -80,6 +90,7 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
             protection={protection}
             protectionLabel={protectionLabel}
             osList={BEHAVIOUR_OS_VALUES}
+            additionalOnSwitchChange={adjustReputationServiceSettingsOnProtectionSwitch}
             data-test-subj={getTestId('enableDisableSwitch')}
           />
         }
@@ -98,6 +109,8 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
           onChange={onChange}
           mode={mode}
           protection={protection}
+          osList={BEHAVIOUR_OS_VALUES}
+          additionalOnSwitchChange={adjustReputationServiceSettingsOnProtectionSwitch}
           data-test-subj={getTestId('reputationService')}
         />
 

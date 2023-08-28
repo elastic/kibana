@@ -23,9 +23,24 @@ import { SettingCardHeader } from '../../../setting_card';
 import type { PolicyProtection } from '../../../../../../types';
 import type { PolicyFormComponentCommonProps } from '../../../../types';
 import { ProtectionModes } from '../../../../../../../../../../common/endpoint/types';
+import type {
+  ImmutableArray,
+  PolicyConfig,
+  UIPolicyConfig,
+} from '../../../../../../../../../../common/endpoint/types';
 
 interface ReputationServiceProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
+  additionalOnSwitchChange: ({
+    value,
+    policyConfigData,
+    protectionOsList,
+  }: {
+    value: boolean;
+    policyConfigData: PolicyConfig;
+    protectionOsList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+  }) => PolicyConfig;
+  osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
 }
 
 const USE_REPUTATION_SERVICE_CHECKBOX_LABEL = i18n.translate(
@@ -48,6 +63,8 @@ export const ReputationService = React.memo(
     onChange,
     mode,
     protection,
+    additionalOnSwitchChange,
+    osList,
     'data-test-subj': dataTestSubj,
   }: ReputationServiceProps) => {
     const isEditMode = mode === 'edit';
@@ -65,9 +82,16 @@ export const ReputationService = React.memo(
     const handleChange = useCallback(
       (event) => {
         const newPayload = cloneDeep(policy);
-        newPayload.windows.behavior_protection.reputation_service = event.target.checked;
-        newPayload.mac.behavior_protection.reputation_service = event.target.checked;
-        newPayload.linux.behavior_protection.reputation_service = event.target.checked;
+        const value = event.target.checked;
+        newPayload.windows.behavior_protection.reputation_service = value;
+        newPayload.mac.behavior_protection.reputation_service = value;
+        newPayload.linux.behavior_protection.reputation_service = value;
+
+        additionalOnSwitchChange({
+          value,
+          policyConfigData: newPayload,
+          protectionOsList: osList,
+        });
 
         onChange({ isValid: true, updatedPolicy: newPayload });
       },
