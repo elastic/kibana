@@ -171,8 +171,8 @@ const EventDetailsComponent: React.FC<Props> = ({
   const goToTableTab = useCallback(() => setSelectedTabId(EventsViewType.tableView), []);
 
   const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
-  const { ruleId } = useBasicDataFromDetailsData(data);
-  const { rule: maybeRule } = useRuleWithFallback(ruleId);
+  const basicAlertData = useBasicDataFromDetailsData(data);
+  const { rule: maybeRule } = useRuleWithFallback(basicAlertData.ruleId);
   const existingEnrichments = useMemo(
     () =>
       isAlert
@@ -222,6 +222,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
+
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
@@ -319,7 +320,9 @@ const EventDetailsComponent: React.FC<Props> = ({
                   </>
                 )}
 
-                <InvestigationGuideView data={data} />
+                {basicAlertData.ruleId && maybeRule?.note && (
+                  <InvestigationGuideView basicData={basicAlertData} ruleNote={maybeRule.note} />
+                )}
               </>
             ),
           }
@@ -332,17 +335,19 @@ const EventDetailsComponent: React.FC<Props> = ({
       id,
       handleOnEventClosed,
       isReadOnly,
+      threatDetails,
       renderer,
       detailsEcsData,
       isDraggable,
       goToTableTab,
-      threatDetails,
+      maybeRule?.investigation_fields,
+      maybeRule?.note,
       showThreatSummary,
       hostRisk,
       userRisk,
       allEnrichments,
       isEnrichmentsLoading,
-      maybeRule,
+      basicAlertData,
     ]
   );
 
