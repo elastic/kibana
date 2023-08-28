@@ -26,7 +26,7 @@ import { ALERTS_URL, HOSTS_URL } from '../../../urls/navigation';
 describe('Bulk Investigate in Timeline', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'bulk_process');
+    cy.task('esArchiverLoad', { archiveName: 'bulk_process' });
     login();
   });
 
