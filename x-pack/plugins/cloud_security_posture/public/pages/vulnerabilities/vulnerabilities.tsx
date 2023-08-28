@@ -66,43 +66,6 @@ const getDefaultQuery = ({ query, filters }: any): any => ({
   pageIndex: 0,
 });
 
-export const Vulnerabilities = () => {
-  const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
-  const getSetupStatus = useCspSetupStatusApi();
-
-  if (getSetupStatus?.data?.vuln_mgmt?.status !== 'indexed') return <NoVulnerabilitiesStates />;
-
-  if (error) {
-    return <ErrorCallout error={error as Error} />;
-  }
-  if (isLoading) {
-    return defaultLoadingRenderer();
-  }
-
-  if (!data) {
-    return defaultNoDataRenderer();
-  }
-
-  return (
-    <Routes>
-      <Route
-        exact
-        path={findingsNavigation.resource_vulnerabilities.path}
-        render={() => <ResourceVulnerabilities dataView={data} />}
-      />
-      <Route
-        exact
-        path={findingsNavigation.vulnerabilities_by_resource.path}
-        render={() => <VulnerabilitiesByResource dataView={data} />}
-      />
-      <Route
-        path={findingsNavigation.vulnerabilities.path}
-        render={() => <VulnerabilitiesContent dataView={data} />}
-      />
-    </Routes>
-  );
-};
-
 const VulnerabilitiesDataGrid = ({
   dataView,
   data,
@@ -486,5 +449,42 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         />
       )}
     </>
+  );
+};
+
+export const Vulnerabilities = () => {
+  const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
+  const getSetupStatus = useCspSetupStatusApi();
+
+  if (getSetupStatus?.data?.vuln_mgmt?.status !== 'indexed') return <NoVulnerabilitiesStates />;
+
+  if (error) {
+    return <ErrorCallout error={error as Error} />;
+  }
+  if (isLoading) {
+    return defaultLoadingRenderer();
+  }
+
+  if (!data) {
+    return defaultNoDataRenderer();
+  }
+
+  return (
+    <Routes>
+      <Route
+        exact
+        path={findingsNavigation.resource_vulnerabilities.path}
+        render={() => <ResourceVulnerabilities dataView={data} />}
+      />
+      <Route
+        exact
+        path={findingsNavigation.vulnerabilities_by_resource.path}
+        render={() => <VulnerabilitiesByResource dataView={data} />}
+      />
+      <Route
+        path={findingsNavigation.vulnerabilities.path}
+        render={() => <VulnerabilitiesContent dataView={data} />}
+      />
+    </Routes>
   );
 };
