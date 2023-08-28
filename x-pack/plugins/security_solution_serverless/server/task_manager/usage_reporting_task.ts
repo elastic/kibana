@@ -132,11 +132,11 @@ export class SecurityUsageReportingTask {
         config: this.config,
       });
     } catch (err) {
-      this.logger.error(`failed to retrieve usage records: ${JSON.stringify(err)}`);
+      this.logger.error(`failed to retrieve usage records: ${err}`);
       return;
     }
 
-    this.logger.info(`received usage records: ${JSON.stringify(usageRecords)}`);
+    this.logger.error(`received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
 

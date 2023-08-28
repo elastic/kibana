@@ -95,7 +95,8 @@ export const getCloudSecurityUsageRecord = async ({
       },
     };
 
-    logger.debug(`Fetched ${postureType} metring data`);
+    logger.error(`Fetched ${postureType} metring data`);
+    logger.error(`usageRecord ${usageRecord}`);
 
     return usageRecord;
   } catch (err) {
