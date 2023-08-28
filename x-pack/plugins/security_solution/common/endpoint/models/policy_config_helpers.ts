@@ -179,7 +179,7 @@ export const isPolicySetToEventCollectionOnly = (
   let message: string | undefined;
 
   const hasEnabledProtection = protectionsRef.some(({ keyPath, osList, disableValue }) => {
-    const hasOsPropertyEnabled = osList.some((osValue) => {
+    return osList.some((osValue) => {
       const fullKeyPathForOs = `${osValue}.${keyPath}`;
       const currentValue = get(policy, fullKeyPathForOs);
       const isEnabled = currentValue !== disableValue;
@@ -190,8 +190,6 @@ export const isPolicySetToEventCollectionOnly = (
 
       return isEnabled;
     });
-
-    return hasOsPropertyEnabled;
   });
 
   return {
