@@ -86,11 +86,11 @@ export const PolicyDetails = React.memo(() => {
       return (
         <EuiPageTemplate.Section grow={false} alignment="center">
           <EuiLoadingSpinner
-              className="essentialAnimation"
-              size="xl"
-              data-test-subj="policyDetailsLoading"
-            />
-          </EuiPageTemplate.Section>
+            className="essentialAnimation"
+            size="xl"
+            data-test-subj="policyDetailsLoading"
+          />
+        </EuiPageTemplate.Section>
       );
     }
 
