@@ -164,6 +164,14 @@ const FalsePositives = ({ falsePositives }: { falsePositives: string[] }) => (
   </EuiText>
 );
 
+interface InvestigationFieldsProps {
+  investigationFields: string[];
+}
+
+const InvestigationFields = ({ investigationFields }: InvestigationFieldsProps) => (
+  <BadgeList badges={investigationFields} />
+);
+
 interface LicenseProps {
   license: string;
 }
@@ -208,13 +216,10 @@ interface TagsProps {
 
 const Tags = ({ tags }: TagsProps) => <BadgeList badges={tags} />;
 
-// eslint-disable-next-line complexity
-const prepareAboutSectionListItems = (
-  rule: Partial<RuleResponse>
-): EuiDescriptionListProps['listItems'] => {
+const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListProps['listItems'] => {
   const aboutSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
-  if (rule.author) {
+  if (rule.author.length > 0) {
     aboutSectionListItems.push({
       title: i18n.AUTHOR_FIELD_LABEL,
       description: <Author author={rule.author} />,
@@ -228,14 +233,12 @@ const prepareAboutSectionListItems = (
     });
   }
 
-  if (rule.severity) {
-    aboutSectionListItems.push({
-      title: i18n.SEVERITY_FIELD_LABEL,
-      description: <SeverityBadge value={rule.severity} />,
-    });
-  }
+  aboutSectionListItems.push({
+    title: i18n.SEVERITY_FIELD_LABEL,
+    description: <SeverityBadge value={rule.severity} />,
+  });
 
-  if (rule.severity_mapping && rule.severity_mapping.length > 0) {
+  if (rule.severity_mapping.length > 0) {
     aboutSectionListItems.push(
       ...rule.severity_mapping
         .filter((severityMappingItem) => severityMappingItem.field !== '')
@@ -248,14 +251,12 @@ const prepareAboutSectionListItems = (
     );
   }
 
-  if (rule.risk_score) {
-    aboutSectionListItems.push({
-      title: i18n.RISK_SCORE_FIELD_LABEL,
-      description: <RiskScore riskScore={rule.risk_score} />,
-    });
-  }
+  aboutSectionListItems.push({
+    title: i18n.RISK_SCORE_FIELD_LABEL,
+    description: <RiskScore riskScore={rule.risk_score} />,
+  });
 
-  if (rule.risk_score_mapping && rule.risk_score_mapping.length > 0) {
+  if (rule.risk_score_mapping.length > 0) {
     aboutSectionListItems.push(
       ...rule.risk_score_mapping
         .filter((riskScoreMappingItem) => riskScoreMappingItem.field !== '')
@@ -268,17 +269,24 @@ const prepareAboutSectionListItems = (
     );
   }
 
-  if (rule.references && rule.references.length > 0) {
+  if (rule.references.length > 0) {
     aboutSectionListItems.push({
       title: i18n.REFERENCES_FIELD_LABEL,
       description: <References references={rule.references} />,
     });
   }
 
-  if (rule.false_positives && rule.false_positives.length > 0) {
+  if (rule.false_positives.length > 0) {
     aboutSectionListItems.push({
       title: i18n.FALSE_POSITIVES_FIELD_LABEL,
       description: <FalsePositives falsePositives={rule.false_positives} />,
+    });
+  }
+
+  if (rule.investigation_fields && rule.investigation_fields.length > 0) {
+    aboutSectionListItems.push({
+      title: i18n.INVESTIGATION_FIELDS_FIELD_LABEL,
+      description: <InvestigationFields investigationFields={rule.investigation_fields} />,
     });
   }
 
@@ -296,7 +304,7 @@ const prepareAboutSectionListItems = (
     });
   }
 
-  if (rule.threat && rule.threat.length > 0) {
+  if (rule.threat.length > 0) {
     aboutSectionListItems.push({
       title: i18n.THREAT_FIELD_LABEL,
       description: <Threat threat={rule.threat} />,
@@ -317,7 +325,7 @@ const prepareAboutSectionListItems = (
     });
   }
 
-  if (rule.tags && rule.tags.length > 0) {
+  if (rule.tags.length > 0) {
     aboutSectionListItems.push({
       title: i18n.TAGS_FIELD_LABEL,
       description: <Tags tags={rule.tags} />,
@@ -328,7 +336,7 @@ const prepareAboutSectionListItems = (
 };
 
 export interface RuleAboutSectionProps {
-  rule: Partial<RuleResponse>;
+  rule: RuleResponse;
 }
 
 export const RuleAboutSection = ({ rule }: RuleAboutSectionProps) => {
