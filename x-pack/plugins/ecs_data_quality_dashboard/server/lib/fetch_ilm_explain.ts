@@ -8,7 +8,7 @@
 import { IlmExplainLifecycleResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-export const fetchILMExplain = async (
+export const fetchILMExplain = (
   client: IScopedClusterClient,
   indexPattern: string
 ): Promise<IlmExplainLifecycleResponse> =>

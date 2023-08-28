@@ -17,7 +17,7 @@ export const mockContextValue: RightPanelContext = {
   scopeId: 'scopeId',
   getFieldsData: mockGetFieldsData,
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-  browserFields: null,
+  browserFields: {},
   dataAsNestedObject: null,
   searchHit: undefined,
   investigationFields: [],

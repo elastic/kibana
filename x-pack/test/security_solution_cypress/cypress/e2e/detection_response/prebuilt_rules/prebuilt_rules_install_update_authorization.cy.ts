@@ -11,10 +11,8 @@ import {
   RULES_UPDATES,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
-import { waitForRulesTableToBeLoaded } from '../../../tasks/alerts_detection_rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
 import { login, waitForPageWithoutDateRange } from '../../../tasks/login';
@@ -59,14 +57,13 @@ const loadPageAsReadOnlyUser = (url: string) => {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
-  { tags: tag.ESS },
+  { tags: '@ess' },
   () => {
     beforeEach(() => {
       login();
       resetRulesTableState();
       deleteAlertsAndRules();
       cy.task('esArchiverResetKibana');
-      waitForRulesTableToBeLoaded();
       createAndInstallMockedPrebuiltRules({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
     });
 
@@ -83,7 +80,6 @@ describe(
         // Now login with read-only user in preparation for test
         createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
         loadPageAsReadOnlyUser(SECURITY_DETECTIONS_RULES_URL);
-        waitForRulesTableToBeLoaded();
       });
 
       it('should not be able to install prebuilt rules', () => {
@@ -111,7 +107,6 @@ describe(
         });
         // Now login with read-only user in preparation for test
         loadPageAsReadOnlyUser(SECURITY_DETECTIONS_RULES_URL);
-        waitForRulesTableToBeLoaded();
       });
 
       it('should not be able to upgrade prebuilt rules', () => {

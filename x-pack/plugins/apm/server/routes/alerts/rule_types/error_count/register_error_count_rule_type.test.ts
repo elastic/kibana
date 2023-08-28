@@ -709,7 +709,12 @@ describe('Error count alert', () => {
       windowSize: 5,
       windowUnit: 'm',
       serviceName: undefined,
-      kqlFilter: 'service.name: foo and service.environment: env-foo',
+      searchConfiguration: {
+        query: {
+          query: 'service.name: foo and service.environment: env-foo',
+          language: 'kuery',
+        },
+      },
       groupBy: ['service.name', 'service.environment'],
     };
 

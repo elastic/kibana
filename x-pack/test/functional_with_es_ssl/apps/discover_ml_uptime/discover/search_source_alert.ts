@@ -199,7 +199,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getResultsLink = async () => {
     // getting the link
     await dataGrid.clickRowToggle();
-    await testSubjects.click('collapseBtn');
     const contextMessageElement = await testSubjects.find('tableDocViewRow-context_message-value');
     const contextMessage = await contextMessageElement.getVisibleText();
     const [, link] = contextMessage.split(`Link\: `);

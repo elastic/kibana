@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from '@kbn/core/server';
+import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { SavedQueryRouteHandlerContext } from './route_handler_context';
 import { SavedQueryRestResponse } from './route_types';
 import { SAVED_QUERY_BASE_URL } from '../../common/constants';
@@ -29,6 +30,7 @@ const SAVED_QUERY_ATTRS_CONFIG = schema.object({
 const savedQueryResponseSchema = schema.object({
   id: schema.string(),
   attributes: SAVED_QUERY_ATTRS_CONFIG,
+  namespaces: schema.arrayOf(schema.string()),
 });
 
 const access = 'internal';
@@ -57,8 +59,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         const body: SavedQueryRestResponse = await savedQuery.create(request.body);
         return response.ok({ body });
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );
@@ -85,8 +87,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         const body: SavedQueryRestResponse = await savedQuery.update(id, request.body);
         return response.ok({ body });
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );
@@ -112,8 +114,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         const body: SavedQueryRestResponse = await savedQuery.get(id);
         return response.ok({ body });
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );
@@ -136,8 +138,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         const count: number = await savedQuery.count();
         return response.ok({ body: `${count}` });
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );
@@ -170,8 +172,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
           await savedQuery.find(request.body);
         return response.ok({ body });
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );
@@ -198,8 +200,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
           await savedQuery.getAll();
         return response.ok({ body });
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );
@@ -225,8 +227,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         await savedQuery.delete(id);
         return response.ok();
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );

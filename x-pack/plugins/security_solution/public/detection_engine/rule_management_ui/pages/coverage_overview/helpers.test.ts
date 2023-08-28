@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
+import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
 import { getCoverageOverviewFilterMock } from '../../../../../common/api/detection_engine/rule_management/coverage_overview/coverage_overview_route.mock';
 import {
   getMockCoverageOverviewMitreSubTechnique,
@@ -17,6 +17,7 @@ import {
   extractSelected,
   getNumOfCoveredSubtechniques,
   getNumOfCoveredTechniques,
+  getTotalRuleCount,
   populateSelected,
 } from './helpers';
 
@@ -86,6 +87,28 @@ describe('helpers', () => {
         { label: 'enabled', checked: 'on' },
         { label: 'disabled' },
       ]);
+    });
+  });
+
+  describe('getTotalRuleCount', () => {
+    it('returns count of all rules when no activity filter is present', () => {
+      const payload = getMockCoverageOverviewMitreTechnique();
+      expect(getTotalRuleCount(payload)).toEqual(2);
+    });
+
+    it('returns count of one rule type when an activity filter is present', () => {
+      const payload = getMockCoverageOverviewMitreTechnique();
+      expect(getTotalRuleCount(payload, [CoverageOverviewRuleActivity.Disabled])).toEqual(1);
+    });
+
+    it('returns count of multiple rule type when multiple activity filter is present', () => {
+      const payload = getMockCoverageOverviewMitreTechnique();
+      expect(
+        getTotalRuleCount(payload, [
+          CoverageOverviewRuleActivity.Enabled,
+          CoverageOverviewRuleActivity.Disabled,
+        ])
+      ).toEqual(2);
     });
   });
 });

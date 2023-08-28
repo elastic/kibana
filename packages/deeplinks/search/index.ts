@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { SERVERLESS_ES_APP_ID, SERVERLESS_ES_INDEXING_API_ID } from './constants';
+export { SERVERLESS_ES_APP_ID, SERVERLESS_ES_CONNECTORS_ID } from './constants';
 
 export type { AppId, DeepLinkId } from './deep_links';
