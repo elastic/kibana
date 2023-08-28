@@ -13,8 +13,8 @@ import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
 import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
 import {
-  useGetAppendCustomIntegrations,
-  useGetReplacementCustomIntegrations,
+  useGetAppendCustomIntegrationsQuery,
+  useGetReplacementCustomIntegrationsQuery,
 } from '../../../../../hooks';
 import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_merge_epr_with_replacements';
 
@@ -133,6 +133,7 @@ export const useAvailablePackages = () => {
     error: eprPackageLoadingError,
   } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
+  // TODO move to another function
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
     eprPackages.items.forEach(function (element) {
@@ -146,10 +147,13 @@ export const useAvailablePackages = () => {
     () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
   );
-  const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
+  const {
+    data: replacementCustomIntegrations,
+    isInitialLoading: isLoadingReplacmentCustomIntegrations,
+  } = useGetReplacementCustomIntegrationsQuery();
 
-  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
-    useGetAppendCustomIntegrations();
+  const { isInitialLoading: isLoadingAppendCustomIntegrations, data: appendCustomIntegrations } =
+    useGetAppendCustomIntegrationsQuery();
 
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
     useMergeEprPackagesWithReplacements(
@@ -231,6 +235,11 @@ export const useAvailablePackages = () => {
     setUrlandReplaceHistory,
     preference,
     setPreference,
+    isLoading:
+      isLoadingReplacmentCustomIntegrations ||
+      isLoadingAppendCustomIntegrations ||
+      isLoadingCategories ||
+      isLoadingAllPackages,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,

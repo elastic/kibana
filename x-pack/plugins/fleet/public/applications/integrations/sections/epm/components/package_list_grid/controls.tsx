@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, ReactNode, useEffect } from 'react';
 import { css } from '@emotion/react';
 
 import {
@@ -17,8 +16,10 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiText,
+  EuiAutoSizer,
 } from '@elastic/eui';
 
+import { VariableSizeList as List } from 'react-window';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Loading } from '../../../../components';
@@ -63,35 +64,39 @@ interface GridColumnProps {
   showCardLabels?: boolean;
 }
 
+const VirtualizedRow: React.FC<any> = ({ children, style, onHeightChange }) => {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    onHeightChange(ref.current.clientHeight);
+  }, []);
+
+  return (
+    <div style={style}>
+      <div ref={ref}>
+        <EuiFlexGrid gutterSize="l" columns={3}>
+          {children}
+        </EuiFlexGrid>
+        <EuiSpacer size="m" />
+      </div>
+    </div>
+  );
+};
+
 export const GridColumn = ({
   list,
   showMissingIntegrationMessage = false,
   showCardLabels = false,
   isLoading,
 }: GridColumnProps) => {
+  const itemsSizeRefs = useRef(new Map<number, number>());
+  const listRef = useRef(React.createRef());
+
   if (isLoading) return <Loading />;
 
-  return (
-    <EuiFlexGrid gutterSize="l" columns={3}>
-      {list.length ? (
-        list.map((item) => {
-          return (
-            <EuiFlexItem
-              key={item.id}
-              // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
-              css={css`
-                & > .euiPopover,
-                & > .euiPopover > .euiPopover__anchor,
-                & > .euiPopover > .euiPopover__anchor > .euiCard {
-                  height: 100%;
-                }
-              `}
-            >
-              <PackageCard {...item} showLabels={showCardLabels} />
-            </EuiFlexItem>
-          );
-        })
-      ) : (
+  if (!list.length) {
+    return (
+      <EuiFlexGrid gutterSize="l" columns={3}>
         <EuiFlexItem grow={3}>
           <EuiText>
             <p>
@@ -109,8 +114,98 @@ export const GridColumn = ({
             </p>
           </EuiText>
         </EuiFlexItem>
+      </EuiFlexGrid>
+    );
+  }
+
+  return (
+    <EuiAutoSizer style={{ minHeight: '300px' }}>
+      {({ height, width }: { height: number; width: number }) => (
+        <List
+          ref={listRef}
+          layout="vertical"
+          itemCount={Math.ceil(list.length / 3)}
+          itemSize={(index) => {
+            const test = itemsSizeRefs.current.get(index) ?? 600;
+
+            return test;
+          }}
+          height={height}
+          estimatedItemSize={600}
+          width={width}
+        >
+          {({ index, style }) => {
+            return (
+              <VirtualizedRow
+                style={style}
+                onHeightChange={(size: number) => {
+                  itemsSizeRefs.current.set(index, size);
+                  listRef.current.resetAfterIndex(index);
+                }}
+              >
+                {list.slice(index * 3, index * 3 + 3).map((item) => {
+                  return (
+                    <EuiFlexItem
+                      key={item.id}
+                      // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
+                      css={css`
+                        & > .euiPopover,
+                        & > .euiPopover > .euiPopover__anchor,
+                        & > .euiPopover > .euiPopover__anchor > .euiCard {
+                          height: 100%;
+                        }
+                      `}
+                    >
+                      <PackageCard {...item} showLabels={showCardLabels} />
+                    </EuiFlexItem>
+                  );
+                })}
+              </VirtualizedRow>
+            );
+          }}
+        </List>
       )}
-    </EuiFlexGrid>
+      {/* <EuiFlexGrid gutterSize="l" columns={3}></EuiFlexGrid> */}
+      {/* <EuiFlexGrid gutterSize="l" columns={3}>
+        {list.length ? (
+          list.map((item) => {
+            return (
+              <EuiFlexItem
+                key={item.id}
+                // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
+                css={css`
+                  & > .euiPopover,
+                  & > .euiPopover > .euiPopover__anchor,
+                  & > .euiPopover > .euiPopover__anchor > .euiCard {
+                    height: 100%;
+                  }
+                `}
+              >
+                <PackageCard {...item} showLabels={showCardLabels} />
+              </EuiFlexItem>
+            );
+          })
+        ) : (
+          <EuiFlexItem grow={3}>
+            <EuiText>
+              <p>
+                {showMissingIntegrationMessage ? (
+                  <FormattedMessage
+                    id="xpack.fleet.epmList.missingIntegrationPlaceholder"
+                    defaultMessage="We didn't find any integrations matching your search term. Please try another keyword or browse using the categories on the left."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
+                    defaultMessage="No integrations found"
+                  />
+                )}
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGrid> */}
+    </EuiAutoSizer>
   );
 };
 
