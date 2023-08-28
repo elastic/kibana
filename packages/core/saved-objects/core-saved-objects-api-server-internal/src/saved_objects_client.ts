@@ -31,7 +31,6 @@ import type {
   SavedObjectsBulkUpdateObject,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
-  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesObject,
@@ -122,7 +121,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /** {@inheritDoc SavedObjectsClientContract.bulkResolve} */
   async bulkResolve<T = unknown>(
     objects: SavedObjectsBulkResolveObject[],
-    options?: SavedObjectsResolveOptions
+    options?: SavedObjectsGetOptions
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
     return await this._repository.bulkResolve(objects, options);
   }
@@ -131,7 +130,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   async resolve<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsResolveOptions = {}
+    options: SavedObjectsGetOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
     return await this._repository.resolve(type, id, options);
   }

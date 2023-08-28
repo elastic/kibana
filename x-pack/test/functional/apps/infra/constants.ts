@@ -47,3 +47,5 @@ export const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
 
 export const NODE_DETAILS_PATH = 'detail/host';
 export const HOSTS_VIEW_PATH = 'metrics/hosts';
+
+export const DATE_PICKER_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';

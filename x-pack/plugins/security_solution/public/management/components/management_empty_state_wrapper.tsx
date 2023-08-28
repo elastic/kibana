@@ -24,9 +24,7 @@ export const ManagementEmptyStateWrapper = memo(
     return (
       <StyledEuiFlexGroup justifyContent="center" direction="column" data-test-subj={dataTestSubj}>
         <EuiPageTemplate.Section grow={false} alignment="center">
-          <EuiPanel color="subdued">
-            {children}
-          </EuiPanel>
+          <EuiPanel color="subdued">{children}</EuiPanel>
         </EuiPageTemplate.Section>
       </StyledEuiFlexGroup>
     );
