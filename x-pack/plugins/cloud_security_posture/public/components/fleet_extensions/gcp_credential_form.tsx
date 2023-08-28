@@ -151,9 +151,12 @@ export const gcpField: GcpInputFields = {
       type: 'text',
     },
     'gcp.credentials.type': {
-      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle', {
-        defaultMessage: 'Credential',
-      }),
+      label: i18n.translate(
+        'xpack.csp.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
+        {
+          defaultMessage: 'Credential',
+        }
+      ),
       type: 'text',
     },
   },

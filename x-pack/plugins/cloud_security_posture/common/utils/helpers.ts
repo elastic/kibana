@@ -21,7 +21,13 @@ import {
   AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP,
   GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP,
 } from '../constants';
-import type { BenchmarkId, Score, BaseCspSetupStatus, AwsCredentialsType, GcpCredentialsType } from '../types';
+import type {
+  BenchmarkId,
+  Score,
+  BaseCspSetupStatus,
+  AwsCredentialsType,
+  GcpCredentialsType,
+} from '../types';
 
 /**
  * @example
@@ -108,15 +114,14 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
     enabledInput?.streams?.[0].vars?.['aws.credentials.type']?.value;
   const gcpCredentialType: GcpCredentialsType | undefined =
     enabledInput?.streams?.[0].vars?.['gcp.credentials.type']?.value;
-    
+
   if (awsCredentialType || gcpCredentialType) {
-    let credsToKeep: string[] = [' ']
+    let credsToKeep: string[] = [' '];
     let credFields: string[] = [' '];
-    if(awsCredentialType){
+    if (awsCredentialType) {
       credsToKeep = AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP[awsCredentialType];
       credFields = Object.values(AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
-    }
-    else if(gcpCredentialType){
+    } else if (gcpCredentialType) {
       credsToKeep = GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP[gcpCredentialType];
       credFields = Object.values(GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
     }
