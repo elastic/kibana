@@ -7,7 +7,7 @@
 
 import { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import { DEFAULT_COLOR_MAPPING_CONFIG, PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry } from '@kbn/coloring';
 import {
   buildExpression,
   buildExpressionFunction,
