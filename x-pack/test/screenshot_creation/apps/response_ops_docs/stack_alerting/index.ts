@@ -15,6 +15,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const actions = getService('actions');
   const rules = getService('rules');
+  const emailConnectorName = 'Email connector 1';
   const validQueryJson = JSON.stringify({
     query: {
       bool: {
@@ -34,7 +35,9 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     let mtRuleId: string;
     let esRuleId: string;
     let serverLogConnectorId: string;
+    let emailConnectorId: string;
     before(async () => {
+      // Create server log connector
       await browser.setWindowSize(1920, 1080);
       ({ id: serverLogConnectorId } = await actions.api.createConnector({
         name: 'my-server-log-connector',
@@ -42,6 +45,22 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
         secrets: {},
         connectorTypeId: '.server-log',
       }));
+      // Create email connector
+      ({ id: emailConnectorId } = await actions.api.createConnector({
+        name: emailConnectorName,
+        config: {
+          service: 'other',
+          from: 'bob@example.com',
+          host: 'some.non.existent.com',
+          port: 25,
+        },
+        secrets: {
+          user: 'bob',
+          password: 'supersecret',
+        },
+        connectorTypeId: '.email',
+      }));
+      // Create index threshold rule
       ({ id: itRuleId } = await rules.api.createRule({
         consumer: 'alerts',
         name: indexThresholdRuleName,
@@ -72,6 +91,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
           },
         ],
       }));
+      // Create metric threshold rule
       ({ id: mtRuleId } = await rules.api.createRule({
         consumer: 'infrastructure',
         name: metricThresholdRuleName,
@@ -105,6 +125,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
           },
         ],
       }));
+      // Create Elasticsearch query rule
       ({ id: esRuleId } = await rules.api.createRule({
         consumer: 'alerts',
         name: esQueryRuleName,
@@ -123,14 +144,15 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: serverLogConnectorId,
+            id: emailConnectorId,
             frequency: {
               throttle: '2d',
               summary: true,
               notify_when: 'onThrottleInterval',
             },
             params: {
-              level: 'info',
+              to: ['test@example.com'],
+              subject: 'Alert summary',
               message:
                 'The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts.',
             },
