@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { CoverageOverviewLink } from '../../../../common/components/links_to_docs';
 import { HeaderPage } from '../../../../common/components/header_page';
 
 import * as i18n from './translations';
@@ -14,26 +15,23 @@ import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_po
 import { CoverageOverviewFiltersPanel } from './filters_panel';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 
+const CoverageOverviewSubtitle = (
+  <EuiText color="subdued" size="s">
+    <span>{i18n.CoverageOverviewDashboardInformation}</span> <CoverageOverviewLink />
+  </EuiText>
+);
+
 const CoverageOverviewDashboardComponent = () => {
   const {
     state: { data },
   } = useCoverageOverviewDashboardContext();
-  const subtitle = (
-    <EuiText color="subdued" size="s">
-      <span>{i18n.CoverageOverviewDashboardInformation}</span>{' '}
-      <EuiLink
-        external={true}
-        href={'https://www.elastic.co/'} // TODO: change to actual docs link before release
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        {i18n.CoverageOverviewDashboardInformationLink}
-      </EuiLink>
-    </EuiText>
-  );
+
   return (
     <>
-      <HeaderPage title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE} subtitle={subtitle} />
+      <HeaderPage
+        title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE}
+        subtitle={CoverageOverviewSubtitle}
+      />
       <CoverageOverviewFiltersPanel />
       <EuiSpacer />
       <EuiFlexGroup gutterSize="m" className="eui-xScroll">

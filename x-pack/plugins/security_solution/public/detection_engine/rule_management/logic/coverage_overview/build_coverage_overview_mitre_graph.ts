@@ -66,10 +66,30 @@ export function buildCoverageOverviewMitreGraph(
       }
     }
   }
+  const tacticOrder = [
+    'TA0043',
+    'TA0042',
+    'TA0001',
+    'TA0002',
+    'TA0003',
+    'TA0004',
+    'TA0005',
+    'TA0006',
+    'TA0007',
+    'TA0008',
+    'TA0009',
+    'TA0011',
+    'TA0010',
+    'TA0040',
+  ];
+
+  const sortedTactics = tactics.sort(
+    (a, b) => tacticOrder.indexOf(a.id) - tacticOrder.indexOf(b.id)
+  );
 
   const result: CoverageOverviewMitreTactic[] = [];
 
-  for (const tactic of tactics) {
+  for (const tactic of sortedTactics) {
     result.push({
       id: tactic.id,
       name: tactic.name,
