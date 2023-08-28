@@ -31,8 +31,6 @@ export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
 };
 
-const EMPTY_FIELDS: estypes.QueryDslFieldAndFormat[] = [{ field: '*', include_unmapped: true }];
-
 export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrategy';
 
 export const ruleRegistrySearchStrategyProvider = (
@@ -124,7 +122,7 @@ export const ruleRegistrySearchStrategyProvider = (
                   },
                 }),
           };
-          let fields = request?.fields ?? EMPTY_FIELDS;
+          let fields = request?.fields ?? [];
           fields.push({ field: 'kibana.alert.*', include_unmapped: false });
 
           if (siemRequest) {
