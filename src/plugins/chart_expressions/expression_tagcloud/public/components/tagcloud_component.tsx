@@ -130,7 +130,7 @@ export const TagCloudChart = ({
     return visData.rows.map((row) => {
       const tag = tagColumn === undefined ? 'all' : row[tagColumn];
 
-      const category = isMultiFieldKey(tag) ? tag.keys : tag;
+      const category = isMultiFieldKey(tag) ? tag.keys.map(String) : `${tag}`;
       return {
         text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         weight:
@@ -318,7 +318,7 @@ export function getColorCategories(rows: DatatableRow[], accessor?: string) {
           if (value === undefined) {
             return acc;
           }
-          const key = value.hasOwnProperty('keys') ? [...value.keys] : [value];
+          const key = (isMultiFieldKey(value) ? [...value.keys] : [value]).map(String);
           const stringifiedKeys = key.join(',');
           if (!acc.keys.has(stringifiedKeys)) {
             acc.keys.add(stringifiedKeys);

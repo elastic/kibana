@@ -13,12 +13,13 @@ import { getColorFactory } from '@kbn/coloring';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
 import { ChartTypes } from '../../../common/types';
 
-function getCategoryKeys(category: string | MultiFieldKey): string | string[] {
-  return isMultiFieldKey(category) ? category.keys : category;
+export function getCategoryKeys(category: string | MultiFieldKey): string | string[] {
+  return isMultiFieldKey(category) ? category.keys.map(String) : `${category}`;
 }
 
 /**
- * Pie, donut, treemap and waffle shares the same color mechanism.
+ * Get the color of a specific slice/section in Pie,donut,waffle and treemap.
+ * These chart type shares the same color assignment mechanism.
  */
 const getPieFillColor =
   (
@@ -26,7 +27,7 @@ const getPieFillColor =
     numOfLayers: number,
     getColorFn: ReturnType<typeof getColorFactory>
   ): NodeColorAccessor =>
-  (key, sortIndex, node) => {
+  (_key, _sortIndex, node) => {
     const path = node[PATH_KEY];
     // the category used to color the pie/donut is at the third level of the path
     // first two are: small multiple and pie whole center.
@@ -37,7 +38,11 @@ const getPieFillColor =
   };
 
 /**
- * Mosaic has a slight variation in the way color are applied
+ * Get the color of a section in a Mosaic chart.
+ * This chart has a slight variation in the way color are applied. Mosaic can represent up to 2 layers,
+ * described in lens as the horizontal and vertical axes.
+ * With a single layer the color is simply applied per each category, with 2 layer, the color is applied only
+ * to the category that describe a row, not by column.
  */
 const getMosaicFillColor =
   (
@@ -45,10 +50,10 @@ const getMosaicFillColor =
     numOfLayers: number,
     getColorFn: ReturnType<typeof getColorFactory>
   ): NodeColorAccessor =>
-  (key, sortIndex, node) => {
+  (_key, _sortIndex, node) => {
     // Special case for 2 layer mosaic where the color is per rows and the columns are not colored
     if (numOfLayers === 2 && layerIndex === 0) {
-      // TODO: the chart or kibana background should be used instead.
+      // transparent color will fallback to the kibana/context background
       return 'rgba(0,0,0,0)';
     }
     const path = node[PATH_KEY];
@@ -57,9 +62,7 @@ const getMosaicFillColor =
     // and are at fourth level of `path` when using 2 layer mosaic
     // first two are: small multiple and pie whole center.
     const category = getCategoryKeys(numOfLayers === 2 ? path[3].value : path[2].value);
-    const color = getColorFn(category);
-    // increase the lightness of the color on each layer.
-    return lightenColor(color, layerIndex, numOfLayers);
+    return getColorFn(category);
   };
 
 export const getPartitionFillColor = (

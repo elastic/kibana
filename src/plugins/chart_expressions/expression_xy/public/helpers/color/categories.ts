@@ -7,6 +7,7 @@
  */
 
 import { DatatableRow } from '@kbn/expressions-plugin/common';
+import { isMultiFieldKey } from '@kbn/data-plugin/common';
 
 export function getColorCategories(rows: DatatableRow[], accessor?: string) {
   return accessor
@@ -16,7 +17,7 @@ export function getColorCategories(rows: DatatableRow[], accessor?: string) {
           if (value === undefined) {
             return acc;
           }
-          const key = value.hasOwnProperty('keys') ? [...value.keys] : [value];
+          const key = (isMultiFieldKey(value) ? [...value.keys] : [value]).map(String);
           const stringifiedKeys = key.join(',');
           if (!acc.keys.has(stringifiedKeys)) {
             acc.keys.add(stringifiedKeys);

@@ -7,7 +7,7 @@
  */
 
 import { scaleSequential } from 'd3-scale';
-import { interpolateHsl, piecewise } from 'd3-interpolate';
+import { interpolateLab, piecewise } from 'd3-interpolate';
 import { ColorMapping } from '../config';
 import { changeAlpha } from './color_math';
 import { generateAutoAssignmentsForCategories } from '../config/assignment_from_categories';
@@ -42,7 +42,7 @@ export function getAssignmentColor(
             ]
           : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode));
       steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
-      const colorScale = scaleSequential(piecewise(interpolateHsl, steps));
+      const colorScale = scaleSequential(piecewise(interpolateLab, steps));
       return colorScale(index / total);
     }
   }
@@ -66,7 +66,7 @@ export function getColorFactory(
   getPaletteFn: ReturnType<typeof getPalette>,
   isDarkMode: boolean,
   data: ColorMappingInputData
-): (category: string | number | string[]) => Color {
+): (category: string | string[]) => Color {
   const palette = getPaletteFn(model.paletteId);
   // generate on-the-fly assignments in auto-mode based on current data.
   // This simplify the code by always using assignments, even if there is no real static assigmnets
@@ -93,8 +93,7 @@ export function getColorFactory(
         })
       : [];
 
-  // TODO: check if number type is needed here
-  return (category: string | number | string[]) => {
+  return (category: string | string[]) => {
     if (typeof category === 'string' || Array.isArray(category)) {
       const nonAssignedCategoryIndex = nonAssignedCategories.indexOf(category);
 
