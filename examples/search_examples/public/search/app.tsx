@@ -391,7 +391,7 @@ export const SearchExamplesApp = ({
       .subscribe({
         next: (res) => {
           setResponse(res);
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             notifications.toasts.addSuccess({
               title: 'Query result',
