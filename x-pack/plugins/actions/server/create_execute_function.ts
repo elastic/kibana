@@ -16,12 +16,14 @@ import {
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
+import { ActionsConfigurationUtilities } from './actions_config';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   isESOCanEncrypt: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
   inMemoryConnectors: InMemoryConnector[];
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 export interface ExecuteOptions
@@ -30,6 +32,7 @@ export interface ExecuteOptions
   spaceId: string;
   apiKey: string | null;
   executionId: string;
+  actionTypeId: string;
 }
 
 interface ActionTaskParams
@@ -140,6 +143,7 @@ export function createBulkExecutionEnqueuerFunction({
   actionTypeRegistry,
   isESOCanEncrypt,
   inMemoryConnectors,
+  configurationUtilities,
 }: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<void> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
@@ -148,6 +152,18 @@ export function createBulkExecutionEnqueuerFunction({
     if (!isESOCanEncrypt) {
       throw new Error(
         `Unable to execute actions because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+      );
+    }
+
+    if (
+      await hasReachedTheQueuedActionsLimit(
+        taskManager,
+        configurationUtilities,
+        actionsToExecute.length
+      )
+    ) {
+      throw new Error(
+        `Unable to execute actions because the maximum number of queued actions has been reached.`
       );
     }
 
@@ -266,6 +282,32 @@ export function createEphemeralExecutionEnqueuerFunction({
       scope: ['actions'],
     });
   };
+}
+
+export async function hasReachedTheQueuedActionsLimit(
+  taskManager: TaskManagerStartContract,
+  configurationUtilities: ActionsConfigurationUtilities,
+  numberOfActions: number
+) {
+  const limit = configurationUtilities.getMaxQueued();
+  const { docs: tasks } = await taskManager.fetch({
+    query: {
+      bool: {
+        filter: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'task.scope': 'actions',
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  });
+  return tasks.length + numberOfActions >= limit;
 }
 
 function validateCanActionBeUsed(action: InMemoryConnector | RawAction) {

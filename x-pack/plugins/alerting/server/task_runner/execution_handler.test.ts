@@ -238,39 +238,40 @@ describe('Execution Handler', () => {
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
-                  "contextVal": "My  goes here",
-                  "foo": true,
-                  "stateVal": "My  goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
 
     expect(alertingEventLogger.logAction).toHaveBeenCalledTimes(1);
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, {
@@ -334,6 +335,7 @@ describe('Execution Handler', () => {
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
       {
+        actionTypeId: 'test2',
         consumer: 'rule-consumer',
         id: '2',
         params: {
@@ -423,39 +425,40 @@ describe('Execution Handler', () => {
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
+              "contextVal": "My context-val goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
-                  "contextVal": "My context-val goes here",
-                  "foo": true,
-                  "stateVal": "My  goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
   });
 
   test('state attribute gets parameterized', async () => {
@@ -463,39 +466,40 @@ describe('Execution Handler', () => {
     await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My state-val goes here",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
-                  "contextVal": "My  goes here",
-                  "foo": true,
-                  "stateVal": "My state-val goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
   });
 
   test(`logs an error when action group isn't part of actionGroups available for the ruleType`, async () => {
@@ -653,10 +657,11 @@ describe('Execution Handler', () => {
   });
 
   test('Stops triggering actions when the number of total queued actions is reached the number of max queued actions', async () => {
-    actionsClient.hasReachedTheQueuedActionsLimit
-      .mockImplementationOnce(() => Promise.resolve(false))
-      .mockImplementationOnce(() => Promise.resolve(false))
-      .mockImplementationOnce(() => Promise.resolve(true));
+    actionsClient.bulkEnqueueExecution.mockImplementationOnce(() =>
+      Promise.reject(
+        'Unable to execute actions because the maximum number of queued actions has been reached.'
+      )
+    );
     const actions = [
       {
         id: '1',
@@ -700,10 +705,10 @@ describe('Execution Handler', () => {
     );
     await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
-    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(2);
+    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(3);
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(3);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
   });
 
@@ -735,39 +740,40 @@ describe('Execution Handler', () => {
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
-                  "contextVal": "My  goes here",
-                  "foo": true,
-                  "stateVal": "My  goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
   });
 
   test('does not schedule alerts with recovered actions that are muted', async () => {
@@ -950,36 +956,37 @@ describe('Execution Handler', () => {
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "testActionTypeId",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "message": "New: 1 Ongoing: 0 Recovered: 0",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "message": "New: 1 Ongoing: 0 Recovered: 0",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
     expect(alertingEventLogger.logAction).toBeCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
@@ -1077,36 +1084,37 @@ describe('Execution Handler', () => {
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "testActionTypeId",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "message": "New: 1 Ongoing: 0 Recovered: 0",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "message": "New: 1 Ongoing: 0 Recovered: 0",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
     expect(alertingEventLogger.logAction).toBeCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
@@ -1300,67 +1308,69 @@ describe('Execution Handler', () => {
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
-                  "contextVal": "My  goes here",
-                  "foo": true,
-                  "stateVal": "My  goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
-              },
-              Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-                "id": "2",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
-                  "contextVal": "My  goes here",
-                  "foo": true,
-                  "stateVal": "My  goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "2",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
+              },
+            ],
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
   });
 
   test('does not schedule actions for the summarized alerts that are filtered out (for each alert)', async () => {
@@ -1541,6 +1551,7 @@ describe('Execution Handler', () => {
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
       {
+        actionTypeId: 'testActionTypeId',
         apiKey: 'MTIzOmFiYw==',
         consumer: 'rule-consumer',
         executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',

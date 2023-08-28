@@ -190,4 +190,13 @@ export class RuleRunMetricsStore {
     const currentVal = this.state.connectorTypes[actionTypeId]?.numberOfGeneratedActions || 0;
     set(this.state, `connectorTypes["${actionTypeId}"].numberOfGeneratedActions`, currentVal + 1);
   };
+
+  // Decrementer
+  public decrementNumberOfTriggeredActions = () => {
+    this.state.numberOfTriggeredActions--;
+  };
+  public decrementNumberOfTriggeredActionsByConnectorType = (actionTypeId: string) => {
+    const currentVal = this.state.connectorTypes[actionTypeId]?.numberOfTriggeredActions || 0;
+    set(this.state, `connectorTypes["${actionTypeId}"].numberOfTriggeredActions`, currentVal - 1);
+  };
 }

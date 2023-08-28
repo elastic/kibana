@@ -223,19 +223,6 @@ export class ExecutionHandler<
           continue;
         }
 
-        if (await this.actionsClient!.hasReachedTheQueuedActionsLimit()) {
-          ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-            actionTypeId,
-            status: ActionsCompletion.PARTIAL,
-          });
-          ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
-
-          logger.debug(
-            `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of queued actions has been reached.`
-          );
-          break;
-        }
-
         ruleRunMetricsStore.incrementNumberOfTriggeredActions();
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
@@ -344,7 +331,19 @@ export class ExecutionHandler<
 
       if (!!bulkActions.length) {
         for (const c of chunk(bulkActions, CHUNK_SIZE)) {
-          await this.actionsClient!.bulkEnqueueExecution(c);
+          try {
+            await this.actionsClient!.bulkEnqueueExecution(c);
+          } catch (error) {
+            if (
+              error ===
+              'Unable to execute actions because the maximum number of queued actions has been reached.'
+            ) {
+              ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
+              this.setBulkActionsStatus(logger, ruleRunMetricsStore, c);
+            } else {
+              throw error;
+            }
+          }
         }
       }
 
@@ -355,6 +354,25 @@ export class ExecutionHandler<
       }
     }
     return { throttledSummaryActions };
+  }
+
+  private setBulkActionsStatus(
+    logger: Logger,
+    ruleRunMetricsStore: RuleRunMetricsStore,
+    actions: EnqueueExecutionOptions[]
+  ) {
+    for (const action of actions) {
+      ruleRunMetricsStore.decrementNumberOfTriggeredActions();
+      ruleRunMetricsStore.decrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
+      ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+        actionTypeId: action.actionTypeId,
+        status: ActionsCompletion.PARTIAL,
+      });
+
+      logger.debug(
+        `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of queued actions has been reached.`
+      );
+    }
   }
 
   private logNumberOfFilteredAlerts({
@@ -522,6 +540,7 @@ export class ExecutionHandler<
           typeId: this.ruleType.id,
         },
       ],
+      actionTypeId: action.actionTypeId,
     };
   }
 

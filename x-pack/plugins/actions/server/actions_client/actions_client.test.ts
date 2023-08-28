@@ -109,7 +109,6 @@ const mockTaskManager = taskManagerMock.createSetup();
 const configurationUtilities = actionsConfigMock.create();
 const eventLogClient = eventLogClientMock.create();
 const getEventLogClient = jest.fn();
-const reachedQueuedActionsLimit = jest.fn();
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -154,7 +153,6 @@ beforeEach(() => {
     usageCounter: mockUsageCounter,
     connectorTokenClient,
     getEventLogClient,
-    reachedQueuedActionsLimit,
   });
   (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -621,7 +619,6 @@ describe('create()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     const savedObjectCreateResult = {
@@ -749,7 +746,6 @@ describe('create()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     await expect(
@@ -825,7 +821,6 @@ describe('create()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     await expect(
@@ -892,7 +887,6 @@ describe('get()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
-        reachedQueuedActionsLimit,
       });
 
       await actionsClient.get({ id: 'testPreconfigured' });
@@ -927,7 +921,6 @@ describe('get()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
-        reachedQueuedActionsLimit,
       });
 
       await expect(actionsClient.get({ id: 'system-connector-.cases' })).rejects.toThrow();
@@ -990,7 +983,6 @@ describe('get()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
-        reachedQueuedActionsLimit,
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -1031,7 +1023,6 @@ describe('get()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
-        reachedQueuedActionsLimit,
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -1159,7 +1150,6 @@ describe('get()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     const result = await actionsClient.get({ id: 'testPreconfigured' });
@@ -1202,7 +1192,6 @@ describe('get()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     await expect(
@@ -1238,7 +1227,6 @@ describe('get()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     expect(
@@ -1312,7 +1300,6 @@ describe('getBulk()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
-        reachedQueuedActionsLimit,
       });
       return actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
     }
@@ -1463,7 +1450,6 @@ describe('getBulk()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     const result = await actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
@@ -1560,7 +1546,6 @@ describe('getBulk()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     await expect(
@@ -1636,7 +1621,6 @@ describe('getBulk()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     expect(
@@ -1712,7 +1696,6 @@ describe('getOAuthAccessToken()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
     return actionsClient.getOAuthAccessToken(requestBody, configurationUtilities);
   }
@@ -2082,7 +2065,6 @@ describe('delete()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     await expect(
@@ -2120,7 +2102,6 @@ describe('delete()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     await expect(
@@ -2637,7 +2618,6 @@ describe('update()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     await expect(
@@ -2682,7 +2662,6 @@ describe('update()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     await expect(
@@ -2794,7 +2773,6 @@ describe('execute()', () => {
         usageCounter: mockUsageCounter,
         connectorTokenClient,
         getEventLogClient,
-        reachedQueuedActionsLimit,
       });
 
       actionTypeRegistry.register({
@@ -2860,7 +2838,6 @@ describe('execute()', () => {
         usageCounter: mockUsageCounter,
         connectorTokenClient,
         getEventLogClient,
-        reachedQueuedActionsLimit,
       });
 
       actionTypeRegistry.register({
@@ -2925,7 +2902,6 @@ describe('execute()', () => {
         usageCounter: mockUsageCounter,
         connectorTokenClient,
         getEventLogClient,
-        reachedQueuedActionsLimit,
       });
 
       actionTypeRegistry.register({
@@ -3066,6 +3042,7 @@ describe('enqueueExecution()', () => {
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'my-action-type',
       });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         operation: 'execute',
@@ -3088,6 +3065,7 @@ describe('enqueueExecution()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
@@ -3108,6 +3086,7 @@ describe('enqueueExecution()', () => {
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'my-action-type',
       });
 
       expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith(
@@ -3125,6 +3104,7 @@ describe('enqueueExecution()', () => {
       executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
       source: asHttpRequestExecutionSource(request),
+      actionTypeId: 'my-action-type',
     };
     await expect(actionsClient.enqueueExecution(opts)).resolves.toMatchInlineSnapshot(`undefined`);
 
@@ -3146,6 +3126,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
         {
           id: uuidv4(),
@@ -3154,6 +3135,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '456def',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
       ]);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
@@ -3178,6 +3160,7 @@ describe('bulkEnqueueExecution()', () => {
             executionId: '123abc',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
+            actionTypeId: 'my-action-type',
           },
           {
             id: uuidv4(),
@@ -3186,6 +3169,7 @@ describe('bulkEnqueueExecution()', () => {
             executionId: '456def',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
+            actionTypeId: 'my-action-type',
           },
         ])
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
@@ -3208,6 +3192,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
         {
           id: uuidv4(),
@@ -3216,6 +3201,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '456def',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
       ]);
 
@@ -3239,6 +3225,7 @@ describe('bulkEnqueueExecution()', () => {
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'my-action-type',
       },
       {
         id: uuidv4(),
@@ -3247,6 +3234,7 @@ describe('bulkEnqueueExecution()', () => {
         executionId: '456def',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'my-action-type',
       },
     ];
     await expect(actionsClient.bulkEnqueueExecution(opts)).resolves.toMatchInlineSnapshot(
@@ -3504,7 +3492,6 @@ describe('isPreconfigured()', () => {
         logger,
       }),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     expect(actionsClient.isPreconfigured('testPreconfigured')).toEqual(true);
@@ -3556,7 +3543,6 @@ describe('isPreconfigured()', () => {
         logger,
       }),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     expect(actionsClient.isPreconfigured(uuidv4())).toEqual(false);
@@ -3610,7 +3596,6 @@ describe('isSystemAction()', () => {
         logger,
       }),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     expect(actionsClient.isSystemAction('system-connector-.cases')).toEqual(true);
@@ -3662,7 +3647,6 @@ describe('isSystemAction()', () => {
         logger,
       }),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     expect(actionsClient.isSystemAction(uuidv4())).toEqual(false);
@@ -3782,14 +3766,5 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
       }
     `);
     expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
-  });
-});
-
-describe('hasReachedTheQueuedActionsLimit()', () => {
-  test('calls the reachedQueuedActionsLimit function', async () => {
-    await expect(actionsClient.hasReachedTheQueuedActionsLimit()).resolves.toMatchInlineSnapshot(
-      `undefined`
-    );
-    expect(reachedQueuedActionsLimit).toHaveBeenCalled();
   });
 });

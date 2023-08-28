@@ -78,7 +78,6 @@ const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const eventLogClient = eventLogClientMock.create();
 const getEventLogClient = jest.fn();
 const connectorTokenClient = connectorTokenClientMock.create();
-const reachedQueuedActionsLimit = jest.fn();
 
 let actionsClient: ActionsClient;
 let actionTypeRegistry: ActionTypeRegistry;
@@ -103,7 +102,6 @@ describe('getAll()', () => {
       usageCounter: mockUsageCounter,
       connectorTokenClient,
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
     (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -172,7 +170,6 @@ describe('getAll()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
-        reachedQueuedActionsLimit,
       });
       return actionsClient.getAll();
     }
@@ -334,7 +331,6 @@ describe('getAll()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     const result = await actionsClient.getAll();
@@ -434,7 +430,6 @@ describe('getAll()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     const result = await actionsClient.getAll({ includeSystemActions: true });
@@ -530,7 +525,6 @@ describe('getAll()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
-      reachedQueuedActionsLimit,
     });
 
     const result = await actionsClient.getAll({ includeSystemActions: true });

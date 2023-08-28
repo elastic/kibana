@@ -107,7 +107,6 @@ import {
 } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { createSystemConnectors } from './create_system_actions';
-import { createQueuedActionsLimitFunction } from './create_queued_actions_limit_function';
 
 export interface PluginSetupContract {
   registerType<
@@ -446,18 +445,21 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
+          configurationUtilities: actionsConfigUtils,
         }),
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
+          configurationUtilities: actionsConfigUtils,
         }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
+          configurationUtilities: actionsConfigUtils,
         }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
@@ -469,10 +471,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
         },
-        reachedQueuedActionsLimit: createQueuedActionsLimitFunction({
-          taskManager: plugins.taskManager,
-          configurationUtilities: actionsConfigUtils,
-        }),
       });
     };
 
@@ -685,18 +683,21 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
+              configurationUtilities: actionsConfigUtils,
             }),
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
+              configurationUtilities: actionsConfigUtils,
             }),
             bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
+              configurationUtilities: actionsConfigUtils,
             }),
             auditLogger: security?.audit.asScoped(request),
             usageCounter,
@@ -710,10 +711,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             async getEventLogClient() {
               return eventLog.getClient(request);
             },
-            reachedQueuedActionsLimit: createQueuedActionsLimitFunction({
-              taskManager,
-              configurationUtilities: actionsConfigUtils,
-            }),
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),

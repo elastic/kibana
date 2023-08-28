@@ -88,7 +88,6 @@ import {
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
-import { ReachedQueuedActionsLimit } from '../create_queued_actions_limit_function';
 
 interface ActionUpdate {
   name: string;
@@ -122,7 +121,6 @@ interface ConstructorOptions {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
-  reachedQueuedActionsLimit: ReachedQueuedActionsLimit;
 }
 
 export interface UpdateOptions {
@@ -152,7 +150,6 @@ export interface ActionsClientContext {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
-  reachedQueuedActionsLimit: ReachedQueuedActionsLimit;
 }
 
 export class ActionsClient {
@@ -175,7 +172,6 @@ export class ActionsClient {
     usageCounter,
     connectorTokenClient,
     getEventLogClient,
-    reachedQueuedActionsLimit,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -194,7 +190,6 @@ export class ActionsClient {
       usageCounter,
       connectorTokenClient,
       getEventLogClient,
-      reachedQueuedActionsLimit,
     };
   }
 
@@ -998,9 +993,5 @@ export class ActionsClient {
       );
       throw err;
     }
-  }
-
-  public async hasReachedTheQueuedActionsLimit() {
-    return await this.context.reachedQueuedActionsLimit();
   }
 }
