@@ -24,6 +24,31 @@ export function createIndexDocRecordsStream(
   progress: Progress,
   useCreate: boolean = false
 ) {
+  return new Writable({
+    highWaterMark: 300,
+    objectMode: true,
+
+    async write(record, enc, callback) {
+      try {
+        await indexDocs([record.value]);
+        progress.addToComplete(1);
+        callback(null);
+      } catch (err) {
+        callback(err);
+      }
+    },
+
+    async writev(chunks, callback) {
+      try {
+        await indexDocs(chunks.map(({ chunk: record }) => record.value));
+        progress.addToComplete(chunks.length);
+        callback(null);
+      } catch (err) {
+        callback(err);
+      }
+    },
+  });
+
   async function indexDocs(docs: any[]) {
     const operation = useCreate === true ? BulkOperation.Create : BulkOperation.Index;
     const ops = new WeakMap<any, any>();
@@ -66,29 +91,4 @@ export function createIndexDocRecordsStream(
       stats.indexedDoc(doc.data_stream || doc.index);
     }
   }
-
-  return new Writable({
-    highWaterMark: 300,
-    objectMode: true,
-
-    async write(record, enc, callback) {
-      try {
-        await indexDocs([record.value]);
-        progress.addToComplete(1);
-        callback(null);
-      } catch (err) {
-        callback(err);
-      }
-    },
-
-    async writev(chunks, callback) {
-      try {
-        await indexDocs(chunks.map(({ chunk: record }) => record.value));
-        progress.addToComplete(chunks.length);
-        callback(null);
-      } catch (err) {
-        callback(err);
-      }
-    },
-  });
 }
