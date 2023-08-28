@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { DocViewer } from '@kbn/unified-doc-viewer';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { DocTableEmbeddable, DocTableEmbeddableProps } from './doc_table_embeddable';
 
 export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps) {
@@ -35,7 +35,7 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps)
         isPlainRecord={renderProps.isPlainRecord}
         interceptedWarnings={renderProps.interceptedWarnings}
         dataTestSubj="embeddedSavedSearchDocTable"
-        DocViewer={DocViewer}
+        DocViewer={UnifiedDocViewer}
       />
     </I18nProvider>
   );

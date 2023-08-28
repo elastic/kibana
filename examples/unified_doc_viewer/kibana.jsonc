@@ -10,9 +10,6 @@
     "requiredPlugins": [
       "data",
       "developerExamples",
-      "fieldFormats",
-      "kibanaReact",
-      "kibanaUtils",
       "unifiedDocViewer"
     ]
   }

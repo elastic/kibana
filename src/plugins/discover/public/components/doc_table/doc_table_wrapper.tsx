@@ -16,6 +16,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DocViewerProps } from '@kbn/unified-doc-viewer/src/components/doc_viewer/doc_viewer';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { TableHeader } from './components/table_header/table_header';
 import { TableRow } from './components/table_row';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -192,7 +193,7 @@ export const DocTableWrapper = forwardRef(
             shouldShowFieldHandler={shouldShowFieldHandler}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
-            DocViewer={DocViewer}
+            DocViewer={UnifiedDocViewer}
             isPlainRecord={isPlainRecord}
             rows={rows}
           />

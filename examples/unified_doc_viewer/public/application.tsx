@@ -12,52 +12,28 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
-  UnifiedDocViewer,
-  useUnifiedDocViewerServices,
-} from '@kbn/unified-doc-viewer-plugin/public';
-import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { StartDeps } from './plugin';
 
-export const renderApp = (core: CoreStart, deps: StartDeps, { element }: AppMountParameters) => {
-  const { analytics, uiSettings } = core;
-  const { data, fieldFormats, unifiedDocViewer } = deps;
-  const storage = new Storage(localStorage);
-  const services: UnifiedDocViewerServices = {
-    analytics,
-    data,
-    fieldFormats,
-    storage,
-    uiSettings,
-    unifiedDocViewer,
-  };
-  ReactDOM.render(
-    <KibanaContextProvider services={services}>
-      <UnifiedDocViewerExamplesApp />
-    </KibanaContextProvider>,
-    element
-  );
+export const renderApp = (
+  core: CoreStart,
+  { data }: StartDeps,
+  { element }: AppMountParameters
+) => {
+  ReactDOM.render(<UnifiedDocViewerExamplesApp data={data} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
   };
 };
 
-function UnifiedDocViewerExamplesApp() {
-  const services = useUnifiedDocViewerServices();
-  const { data } = services;
+function UnifiedDocViewerExamplesApp({ data }: { data: DataPublicPluginStart }) {
   const [dataView, setDataView] = useState<DataView | null>();
   const [hit, setHit] = useState<DataTableRecord | null>();
 
   useEffect(() => {
-    const setDefaultDataView = async () => {
-      const defaultDataView = await data.dataViews.getDefault();
-      setDataView(defaultDataView);
-    };
-
-    setDefaultDataView();
+    data.dataViews.getDefault().then((defaultDataView) => setDataView(defaultDataView));
   }, [data]);
 
   useEffect(() => {
@@ -87,7 +63,7 @@ function UnifiedDocViewerExamplesApp() {
   return (
     <>
       {dataView?.id && hit ? (
-        <UnifiedDocViewer services={services} hit={hit} dataView={dataView} />
+        <UnifiedDocViewer hit={hit} dataView={dataView} />
       ) : (
         'Loading... (make sure you have a default data view and at least one matching document)'
       )}

@@ -28,10 +28,7 @@ import {
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import {
-  UnifiedDocViewer,
-  useUnifiedDocViewerServices,
-} from '@kbn/unified-doc-viewer-plugin/public';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
@@ -229,7 +226,6 @@ export function DiscoverGridFlyout({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <UnifiedDocViewer
-            services={useUnifiedDocViewerServices()}
             hit={actualHit}
             columns={columns}
             dataView={dataView}

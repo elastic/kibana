@@ -19,9 +19,6 @@
     "@kbn/data-views-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/discover-utils",
-    "@kbn/field-formats-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
     "@kbn/unified-doc-viewer-plugin",
   ]
 }

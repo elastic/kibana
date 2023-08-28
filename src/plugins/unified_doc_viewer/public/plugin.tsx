@@ -7,12 +7,19 @@
  */
 
 import React from 'react';
-import type { Plugin } from '@kbn/core/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
 import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { DeferredSpinner, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { EuiSkeletonText } from '@elastic/eui';
-import { useUnifiedDocViewerServices } from './hooks';
+import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { type UnifiedDocViewerServices, useUnifiedDocViewerServices } from './hooks';
+
+export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] = createGetterSetter<
+  Promise<UnifiedDocViewerServices>
+>('UnifiedDocViewerServices');
 
 const DocViewerLegacyTable = React.lazy(() => import('./components/doc_viewer_table/legacy'));
 const DocViewerTable = React.lazy(() => import('./components/doc_viewer_table'));
@@ -26,12 +33,17 @@ export interface UnifiedDocViewerStart {
   getDocViews: DocViewsRegistry['getDocViewsSorted'];
 }
 
+export interface UnifiedDocViewerStartDeps {
+  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+}
+
 export class UnifiedDocViewerPublicPlugin
-  implements Plugin<UnifiedDocViewerSetup, UnifiedDocViewerStart>
+  implements Plugin<UnifiedDocViewerSetup, UnifiedDocViewerStart, UnifiedDocViewerStartDeps>
 {
   private docViewsRegistry = new DocViewsRegistry();
 
-  public setup() {
+  public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
     this.docViewsRegistry.addDocView({
       title: i18n.translate('unifiedDocViewer.docViews.table.tableTitle', {
         defaultMessage: 'Table',
@@ -82,6 +94,22 @@ export class UnifiedDocViewerPublicPlugin
         );
       },
     });
+
+    const { analytics, uiSettings } = core;
+    setUnifiedDocViewerServices(
+      core.getStartServices().then(([, depsStart, unifiedDocViewer]) => {
+        const { data, fieldFormats } = depsStart;
+        const storage = new Storage(localStorage);
+        return {
+          analytics,
+          data,
+          fieldFormats,
+          storage,
+          uiSettings,
+          unifiedDocViewer,
+        };
+      })
+    );
 
     return {
       addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),

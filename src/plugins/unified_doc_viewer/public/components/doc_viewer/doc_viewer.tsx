@@ -6,17 +6,27 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { DocViewer } from '@kbn/unified-doc-viewer';
+import { DeferredSpinner, DocViewer } from '@kbn/unified-doc-viewer';
+import { EuiSkeletonText } from '@elastic/eui';
+import { getUnifiedDocViewerServices } from '../../plugin';
 import type { UnifiedDocViewerServices } from '../../types';
 
-interface UnifiedDocViewerProps extends DocViewRenderProps {
-  services: UnifiedDocViewerServices;
-}
+export function UnifiedDocViewer(props: DocViewRenderProps) {
+  const [services, setServices] = useState<UnifiedDocViewerServices | null>(null);
+  useEffect(() => {
+    getUnifiedDocViewerServices().then((value) => setServices(value));
+  }, []);
 
-export function UnifiedDocViewer({ services, ...renderProps }: UnifiedDocViewerProps) {
-  const { hit } = renderProps;
-  const { unifiedDocViewer } = services;
-  return <DocViewer docViews={unifiedDocViewer.getDocViews(hit)} {...renderProps} />;
+  return services === null ? (
+    <DeferredSpinner>
+      <EuiSkeletonText />
+    </DeferredSpinner>
+  ) : (
+    <KibanaContextProvider services={services}>
+      <DocViewer docViews={services.unifiedDocViewer.getDocViews(props.hit)} {...props} />
+    </KibanaContextProvider>
+  );
 }
