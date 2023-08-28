@@ -11,8 +11,6 @@ import {
   HOST_BY_RISK_TABLE_FILTER_LOW,
   HOST_BY_RISK_TABLE_PERPAGE_BUTTON,
   HOST_BY_RISK_TABLE_PERPAGE_OPTIONS,
-  USER_BY_RISK_TABLE_FILTER,
-  USER_BY_RISK_TABLE_FILTER_LOW,
   LOADING_SPINNER,
   RISK_DETAILS_NAV,
 } from '../screens/hosts/host_risk';
@@ -35,16 +33,6 @@ export const openHostRiskTableFilterAndSelectTheLowOption = () => {
 export const removeLowFilterAndCloseHostRiskTableFilter = () => {
   cy.get(HOST_BY_RISK_TABLE_FILTER_LOW).click();
   cy.get(HOST_BY_RISK_TABLE_FILTER).first().click();
-};
-
-export const openUserRiskTableFilterAndSelectTheLowOption = () => {
-  cy.get(USER_BY_RISK_TABLE_FILTER).first().click();
-  cy.get(USER_BY_RISK_TABLE_FILTER_LOW).click();
-};
-
-export const removeLowFilterAndCloseUserRiskTableFilter = () => {
-  cy.get(USER_BY_RISK_TABLE_FILTER_LOW).click();
-  cy.get(USER_BY_RISK_TABLE_FILTER).first().click();
 };
 
 export const removeCriticalFilterAndCloseHostRiskTableFilter = () => {

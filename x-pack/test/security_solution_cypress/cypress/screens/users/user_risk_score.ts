@@ -7,3 +7,8 @@
 
 export const RISK_SCORE_TAB = '[data-test-subj="navigation-userRisk"]';
 export const RISK_SCORE_TAB_CONTENT = '[data-test-subj="table-userRisk-loading-false"]';
+
+export const USER_BY_RISK_TABLE_FILTER =
+  '[data-test-subj="user-risk-score-header-content"] [data-test-subj="risk-filter-button"]';
+
+export const USER_BY_RISK_TABLE_FILTER_LOW = '[data-test-subj="risk-filter-item-Low"]';

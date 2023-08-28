@@ -33,9 +33,11 @@ import {
 import {
   openHostRiskTableFilterAndSelectTheLowOption,
   removeLowFilterAndCloseHostRiskTableFilter,
+} from '../../../tasks/host_risk';
+import {
   removeLowFilterAndCloseUserRiskTableFilter,
   openUserRiskTableFilterAndSelectTheLowOption,
-} from '../../../tasks/host_risk';
+} from '../../../tasks/user_risk';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { getNewRule } from '../../../objects/rule';
