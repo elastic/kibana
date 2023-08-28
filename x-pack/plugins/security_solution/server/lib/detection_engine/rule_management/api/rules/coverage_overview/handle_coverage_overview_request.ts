@@ -7,7 +7,7 @@
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { convertRulesFilterToKQL } from '../../../../../../../common/utils/kql';
+import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   CoverageOverviewRequestBody,
   CoverageOverviewResponse,

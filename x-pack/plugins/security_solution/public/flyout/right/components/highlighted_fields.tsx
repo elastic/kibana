@@ -6,9 +6,11 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
+import { getSourcererScopeId } from '../../../helpers';
+import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
@@ -17,7 +19,6 @@ import {
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../common/components/cell_actions';
-import type { UseHighlightedFieldsResult } from '../hooks/use_highlighted_fields';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import {
   HIGHLIGHTED_FIELDS_FIELD_COLUMN,
@@ -25,28 +26,54 @@ import {
   HIGHLIGHTED_FIELDS_VALUE_COLUMN,
 } from './translations';
 import { useRightPanelContext } from '../context';
-import { useHighlightedFields } from '../hooks/use_highlighted_fields';
+import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 
-const columns: Array<EuiBasicTableColumn<UseHighlightedFieldsResult>> = [
+export interface HighlightedFieldsTableRow {
+  /**
+   * Highlighted field name (overrideField or if null, falls back to id)
+   */
+  field: string;
+  description: {
+    /**
+     * Highlighted field name (overrideField or if null, falls back to id)
+     */
+    field: string;
+    /**
+     * Highlighted field value
+     */
+    values: string[] | null | undefined;
+    /**
+     * Maintain backwards compatibility // TODO remove when possible
+     */
+    scopeId: string;
+  };
+}
+
+const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
   {
     field: 'field',
     name: HIGHLIGHTED_FIELDS_FIELD_COLUMN,
     'data-test-subj': 'fieldCell',
-    width: '125px',
   },
   {
     field: 'description',
     name: HIGHLIGHTED_FIELDS_VALUE_COLUMN,
     'data-test-subj': 'valueCell',
-    render: (description: { field: string; values: string[] | null | undefined }) => (
+    render: (description: {
+      field: string;
+      values: string[] | null | undefined;
+      scopeId: string;
+    }) => (
       <SecurityCellActions
         data={{
           field: description.field,
           value: description.values,
         }}
         mode={CellActionsMode.HOVER_RIGHT}
-        triggerId={SecurityCellActionsTrigger.DEFAULT}
-        visibleCellActions={6}
+        triggerId={SecurityCellActionsTrigger.DEFAULT} // TODO use SecurityCellActionsTrigger.DETAILS_FLYOUT when https://github.com/elastic/kibana/issues/155243 is fixed
+        visibleCellActions={5} // TODO use 6 when https://github.com/elastic/kibana/issues/155243 is fixed
+        sourcererScopeId={getSourcererScopeId(description.scopeId)}
+        metadata={{ scopeId: description.scopeId }}
       >
         <HighlightedFieldsCell values={description.values} field={description.field} />
       </SecurityCellActions>
@@ -58,7 +85,7 @@ const columns: Array<EuiBasicTableColumn<UseHighlightedFieldsResult>> = [
  * Component that displays the highlighted fields in the right panel under the Investigation section.
  */
 export const HighlightedFields: FC = () => {
-  const { dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, scopeId } = useRightPanelContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
@@ -66,8 +93,12 @@ export const HighlightedFields: FC = () => {
     dataFormattedForFieldBrowser,
     investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
   });
+  const items = useMemo(
+    () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId),
+    [highlightedFields, scopeId]
+  );
 
-  if (!dataFormattedForFieldBrowser || highlightedFields.length === 0) {
+  if (!dataFormattedForFieldBrowser || items.length === 0) {
     return null;
   }
 
@@ -80,7 +111,7 @@ export const HighlightedFields: FC = () => {
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
         <EuiPanel hasBorder hasShadow={false}>
-          <EuiInMemoryTable items={highlightedFields} columns={columns} compressed />
+          <EuiInMemoryTable items={items} columns={columns} compressed tableLayout="auto" />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -144,7 +144,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     rule.alert_suppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
 });
 
-const convertHistoryStartToSize = (relativeTime: string) => {
+export const convertHistoryStartToSize = (relativeTime: string) => {
   if (relativeTime.startsWith('now-')) {
     return relativeTime.substring(4);
   } else {
