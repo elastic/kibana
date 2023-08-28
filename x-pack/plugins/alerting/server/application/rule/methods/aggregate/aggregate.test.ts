@@ -72,6 +72,8 @@ describe('aggregate()', () => {
       name: 'myType',
       producer: 'myApp',
       enabledInLicense: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
     },
   ]);
   beforeEach(() => {
@@ -154,6 +156,8 @@ describe('aggregate()', () => {
             myApp: { read: true, all: true },
           },
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ])
     );

@@ -134,6 +134,7 @@ export const getAllIncompatibleMarkdownComments = ({
   formatNumber,
   ilmPhase,
   indexName,
+  isILMAvailable,
   partitionedFieldMetadata,
   patternDocsCount,
   sizeInBytes,
@@ -143,6 +144,7 @@ export const getAllIncompatibleMarkdownComments = ({
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  isILMAvailable: boolean;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
   sizeInBytes: number | undefined;
@@ -169,6 +171,7 @@ export const getAllIncompatibleMarkdownComments = ({
       formatNumber,
       ilmPhase,
       indexName,
+      isILMAvailable,
       partitionedFieldMetadata,
       patternDocsCount,
       sizeInBytes,
