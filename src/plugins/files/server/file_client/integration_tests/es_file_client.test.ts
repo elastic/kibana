@@ -30,9 +30,13 @@ describe('ES-index-backed file client', () => {
     refreshIndex?: boolean;
   }) => {
     if (refreshIndex) {
-      // Make sure to refresh the index before deleting the file to avoid an conflict error thrown by
-      // ES when deleting by query documents that don't exist yet.
-      await esClient.indices.refresh({ index: blobStorageIndex });
+      try {
+        // Make sure to refresh the index before deleting the file to avoid an conflict error thrown by
+        // ES when deleting by query documents that don't exist yet.
+        await esClient.indices.refresh({ index: blobStorageIndex });
+      } catch (e) {
+        // Silently fail if the index does not exist
+      }
     }
     await fileClient.delete({ id, hasContent });
   };
