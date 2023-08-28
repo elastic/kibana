@@ -19,7 +19,7 @@ export const ENTITIES_TAB_ID = 'entities-details';
  * Entities displayed in the document details expandable flyout left section under the Insights tab
  */
 export const EntitiesDetails: React.FC = () => {
-  const { getFieldsData } = useLeftPanelContext();
+  const { getFieldsData, scopeId } = useLeftPanelContext();
   const hostName = getField(getFieldsData('host.name'));
   const userName = getField(getFieldsData('user.name'));
   const timestamp = getField(getFieldsData('@timestamp'));
@@ -28,12 +28,12 @@ export const EntitiesDetails: React.FC = () => {
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj={ENTITIES_DETAILS_TEST_ID}>
       {userName && timestamp && (
         <EuiFlexItem>
-          <UserDetails userName={userName} timestamp={timestamp} />
+          <UserDetails userName={userName} timestamp={timestamp} scopeId={scopeId} />
         </EuiFlexItem>
       )}
       {hostName && timestamp && (
         <EuiFlexItem>
-          <HostDetails hostName={hostName} timestamp={timestamp} />
+          <HostDetails hostName={hostName} timestamp={timestamp} scopeId={scopeId} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
