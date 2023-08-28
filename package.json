@@ -90,6 +90,7 @@
   "dependencies": {
     "@appland/sql-parser": "^1.5.1",
     "@babel/runtime": "^7.21.0",
+    "@cfworker/json-schema": "^1.12.7",
     "@dnd-kit/core": "^3.1.1",
     "@dnd-kit/sortable": "^4.0.0",
     "@dnd-kit/utilities": "^2.0.0",
@@ -944,7 +945,7 @@
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.9.9",
-    "re2": "1.20.1",
+    "re2": "^1.20.3",
     "react": "^17.0.2",
     "react-ace": "^7.0.5",
     "react-color": "^2.13.8",
