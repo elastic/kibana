@@ -371,7 +371,9 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         expect(updatedAlert.snooze_schedule).to.eql([
           {
             ...SNOOZE_SCHEDULE,
-            duration: 3000,
+            // updating the dtstart to the current time because otherwise the snooze might be over already
+            dtstart: new Date().toISOString(),
+            duration: 1000,
           },
         ]);
       });
