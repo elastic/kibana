@@ -75,7 +75,9 @@ export const IntegrationsAppContext: React.FC<{
     theme$,
     fleetStatus,
   }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const theme = useObservable(theme$);
+    const isDarkMode = theme && theme.darkMode;
+
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (

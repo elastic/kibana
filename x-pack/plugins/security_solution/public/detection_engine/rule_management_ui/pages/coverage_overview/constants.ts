@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { euiPalettePositive } from '@elastic/eui';
 import {
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 
-export const coverageOverviewPaletteColors = euiPalettePositive(5);
+export const coverageOverviewPaletteColors = ['#00BFB326', '#00BFB34D', '#00BFB399', '#00BFB3'];
 
 export const coverageOverviewPanelWidth = 160;
 
