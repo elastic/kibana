@@ -35,8 +35,17 @@ export class MigrationHelper {
    * Migrate the given SO document, accepting downgrades.
    * This function is meant to be used by read APIs (get, find) for documents fetched from the index.
    * It will therefore accept downgrading the document before returning it from the API.
+   *
+   * Note: to opt out of downgrades, use the downwardConversion: 'forbid' API option in READ API operations:
+   * get, resolve, find, bulk_get, bulk_resolve
    */
-  migrateStorageDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    return this.migrator.migrateDocument(document, { allowDowngrade: true });
+  migrateStorageDocument(
+    document: SavedObjectUnsanitizedDoc,
+    options: { downwardConversion?: 'allow' | 'forbid' }
+  ): SavedObjectUnsanitizedDoc {
+    return this.migrator.migrateDocument(document, {
+      allowDowngrade:
+        options?.downwardConversion && options.downwardConversion === 'forbid' ? false : true,
+    }); // allowDowngrade conditional on downwardConversion
   }
 }

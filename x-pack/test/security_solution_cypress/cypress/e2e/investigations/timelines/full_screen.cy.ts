@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { TIMELINE_HEADER, TIMELINE_TABS } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
@@ -19,7 +18,7 @@ import { populateTimeline } from '../../../tasks/timeline';
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('Toggle full screen', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
