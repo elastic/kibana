@@ -15,7 +15,7 @@ import { useDateRangeProviderContext } from './use_date_range';
 export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'asset' | 'assetType'>;
 
 export function useMetadataProvider({ asset, assetType }: UseMetadataProviderProps) {
-  const { dateRangeTs } = useDateRangeProviderContext();
+  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const inventoryModel = findInventoryModel(assetType);
   const { sourceId } = useSourceContext();
 
@@ -24,7 +24,7 @@ export function useMetadataProvider({ asset, assetType }: UseMetadataProviderPro
     assetType,
     inventoryModel.requiredMetrics,
     sourceId,
-    dateRangeTs
+    getDateRangeInTimestamp()
   );
 
   return {

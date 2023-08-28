@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { cleanKibana } from '../../../tasks/common';
 import {
@@ -22,7 +21,7 @@ import { login, visit } from '../../../tasks/login';
 import { HOSTS_URL } from '../../../urls/navigation';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 
-describe('risk tab', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'risk_entities');
@@ -45,6 +44,7 @@ describe('risk tab', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Low');
     clearSearchBar();
   });
+
 
   it('filters the table', () => {
     openHostRiskTableFilterAndSelectTheCriticalOption();

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   ENABLE_HOST_RISK_SCORE_BUTTON,
@@ -22,7 +21,7 @@ import { PAGE_TITLE } from '../../../screens/entity_analytics_management';
 
 const spaceId = 'default';
 
-describe('Enable risk scores', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Enable risk scores', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import {
   PAGE_TITLE,
   HOST_RISK_PREVIEW_TABLE,
@@ -47,7 +45,7 @@ describe(
     env: {
       ftrConfig: { enableExperimental: ['riskScoringPersistence'] },
     },
-    tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS],
+    tags: ['@ess', '@brokenInServerless'],
   },
   () => {
     before(() => {
