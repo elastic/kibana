@@ -275,9 +275,7 @@ describe('useSearchStrategy', () => {
 
     it('should handle search error', () => {
       mockResponse.mockImplementation(() => {
-        throw new Error(
-          'simulated search error'
-        );
+        throw new Error('simulated search error');
       });
 
       const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));

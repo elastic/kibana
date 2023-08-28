@@ -287,9 +287,7 @@ describe('useFetchAlerts', () => {
   });
 
   it('handles search error', () => {
-    const obs$ = throwError(
-      'simulated search error'
-    );
+    const obs$ = throwError('simulated search error');
     dataSearchMock.mockReturnValue(obs$);
     const { result } = renderHook(() => useFetchAlerts(args));
 
