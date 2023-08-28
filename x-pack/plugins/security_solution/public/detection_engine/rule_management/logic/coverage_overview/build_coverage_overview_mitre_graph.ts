@@ -66,6 +66,7 @@ export function buildCoverageOverviewMitreGraph(
       }
     }
   }
+
   const tacticOrder = [
     'TA0043',
     'TA0042',
