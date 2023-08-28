@@ -276,7 +276,7 @@ describe('useSearchStrategy', () => {
     it('should handle search error', () => {
       mockResponse.mockImplementation(() => {
         throw new Error(
-          'simulated search response error, which could be 1) undefined response, 2) response without rawResponse, or 3) partial response'
+          'simulated search error'
         );
       });
 
