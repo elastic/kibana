@@ -17,7 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
 
-  describe('Threshold rule - AVG - PCT - NoData', () => {
+  // Error: self-signed certificate in certificate chain
+  describe.skip('Threshold rule - AVG - PCT - NoData', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id-no-data';

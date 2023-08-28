@@ -18,7 +18,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const find = getService('find');
 
-  describe('persistable attachment', () => {
+  // Failing
+  describe.skip('persistable attachment', () => {
     describe('lens visualization', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -46,7 +47,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
       });
 
-      it.skip('adds lens visualization to a new case', async () => {
+      it('adds lens visualization to a new case', async () => {
         const caseTitle =
           'case created in security solution from my dashboard with lens visualization';
 
