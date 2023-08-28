@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { AppFeatureCasesKey } from '@kbn/security-solution-features';
+import type {
+  AppFeatureKibanaConfig,
+  AppFeaturesCasesConfig,
+  AppFeatureKeys,
+} from '@kbn/security-solution-features';
 import {
   getCasesDefaultAppFeaturesConfig,
   createEnabledAppFeaturesConfigMap,
-  type AppFeatureKibanaConfig,
-  type AppFeaturesCasesConfig,
-  type AppFeatureKeys,
-  type CasesSubFeatureId,
-} from '@kbn/security-solution-features';
-
+} from '@kbn/security-solution-features/config';
+import type { AppFeatureCasesKey, CasesSubFeatureId } from '@kbn/security-solution-features/keys';
 import {
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,

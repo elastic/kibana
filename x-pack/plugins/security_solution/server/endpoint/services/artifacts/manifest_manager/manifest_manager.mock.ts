@@ -16,6 +16,7 @@ import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { AppFeatureKeys } from '@kbn/security-solution-features';
 import {
   createPackagePolicyWithInitialManifestMock,
   createPackagePolicyWithManifestMock,
@@ -28,7 +29,6 @@ import type { ManifestManagerContext } from './manifest_manager';
 import { ManifestManager } from './manifest_manager';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 import { createAppFeaturesServiceMock } from '../../../../lib/app_features_service/mocks';
-import type { AppFeatureKeys } from '../../../../../common';
 import type { AppFeaturesService } from '../../../../lib/app_features_service/app_features_service';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({

@@ -2,10 +2,13 @@
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node"]
+    "types": [
+      "jest",
+      "node",
+      "react",
+    ]
   },
-  "include": ["**/*.ts"],
-  "exclude": ["target/**/*"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "kbn_references": [
     "@kbn/features-plugin",
     "@kbn/utility-types",
@@ -14,5 +17,6 @@
     "@kbn/cases-plugin",
     "@kbn/securitysolution-rules",
     "@kbn/securitysolution-list-constants",
-  ]
+  ],
+  "exclude": ["target/**/*"]
 }

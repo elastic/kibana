@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { AppFeaturesConfig } from '@kbn/security-solution-features';
 import type {
-  AppFeaturesConfig,
   SecuritySubFeatureId,
   CasesSubFeatureId,
   AssistantSubFeatureId,
-} from '@kbn/security-solution-features';
+} from '@kbn/security-solution-features/keys';
 import type { ExperimentalFeatures } from '../../../common';
 
 export interface AppFeaturesConfigurator {

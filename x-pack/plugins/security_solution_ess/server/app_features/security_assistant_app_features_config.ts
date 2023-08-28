@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { AppFeatureAssistantKey } from '@kbn/security-solution-features';
+import type {
+  AppFeatureKeys,
+  AppFeatureKibanaConfig,
+  AppFeaturesAssistantConfig,
+} from '@kbn/security-solution-features';
 import {
   assistantDefaultAppFeaturesConfig,
   createEnabledAppFeaturesConfigMap,
-  type AppFeatureKeys,
-  type AppFeatureKibanaConfig,
-  type AppFeaturesAssistantConfig,
-  type AssistantSubFeatureId,
-} from '@kbn/security-solution-features';
+} from '@kbn/security-solution-features/config';
+import type {
+  AppFeatureAssistantKey,
+  AssistantSubFeatureId,
+} from '@kbn/security-solution-features/keys';
 
 export const getSecurityAssistantAppFeaturesConfigurator =
   (enabledAppFeatureKeys: AppFeatureKeys) => (): AppFeaturesAssistantConfig => {

@@ -10,7 +10,8 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-p
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
-import { ALL_APP_FEATURE_KEYS, type AppFeatureKeys } from '@kbn/security-solution-features';
+import type { AppFeatureKeys } from '@kbn/security-solution-features';
+import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { allowedExperimentalValues, type ExperimentalFeatures } from '../../../common';
 import { AppFeaturesService } from './app_features_service';
 
@@ -26,7 +27,7 @@ const ASSISTANT_BASE_CONFIG = {
   bar: 'bar',
 };
 
-jest.mock('@kbn/security-solution-features', () => ({
+jest.mock('@kbn/security-solution-features/app_features', () => ({
   getSecurityFeature: jest.fn(() => ({
     baseKibanaFeature: SECURITY_BASE_CONFIG,
     baseKibanaSubFeatureIds: ['subFeature1'],

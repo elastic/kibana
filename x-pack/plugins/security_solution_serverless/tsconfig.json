@@ -10,8 +10,6 @@
     "public/**/*.tsx",
     "server/**/*.ts",
     "../../../typings/**/*"
-    ,
-    "../../packages/security-solution/upselling/sections/generic_upselling_section.tsx"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [

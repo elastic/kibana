@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { type ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
+import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
+import type {
+  AppFeatureKeys,
+  AppFeatureKibanaConfig,
+  AppFeaturesSecurityConfig,
+} from '@kbn/security-solution-features';
 import {
-  AppFeatureSecurityKey,
-  SecuritySubFeatureId,
   securityDefaultAppFeaturesConfig,
   createEnabledAppFeaturesConfigMap,
-  type AppFeatureKeys,
-  type AppFeatureKibanaConfig,
-  type AppFeaturesSecurityConfig,
-} from '@kbn/security-solution-features';
+} from '@kbn/security-solution-features/config';
+import { AppFeatureSecurityKey, SecuritySubFeatureId } from '@kbn/security-solution-features/keys';
 
 export const getSecurityAppFeaturesConfigurator =
   (enabledAppFeatureKeys: AppFeatureKeys) =>

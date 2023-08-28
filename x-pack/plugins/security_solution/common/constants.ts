@@ -7,11 +7,9 @@
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
-
 import * as i18n from './translations';
 
 export { SecurityPageName } from '@kbn/security-solution-navigation';
-export { ASSISTANT_FEATURE_ID, CASES_FEATURE_ID } from '@kbn/security-solution-features';
 
 /**
  * as const
@@ -22,6 +20,8 @@ export { ASSISTANT_FEATURE_ID, CASES_FEATURE_ID } from '@kbn/security-solution-f
  */
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
+export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
+export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON = 'securityAnalyticsApp' as const;

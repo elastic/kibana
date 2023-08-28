@@ -7,15 +7,15 @@
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type {
   MessageUpsellings,
+  UpsellingMessageId,
   PageUpsellings,
   SectionUpsellings,
   UpsellingSectionId,
-  UpsellingMessageId,
-  UpsellingService,
-} from '@kbn/security-solution-upselling/service';
+} from '@kbn/security-solution-upselling/service/types';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import React from 'react';
 import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
-import { AppFeatureKey } from '@kbn/security-solution-features';
+import { AppFeatureKey } from '@kbn/security-solution-features/src/app_features_keys';
 import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';

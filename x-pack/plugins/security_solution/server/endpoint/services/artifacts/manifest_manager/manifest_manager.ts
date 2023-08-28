@@ -20,8 +20,9 @@ import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { AppFeatureKey } from '@kbn/security-solution-features/keys';
 import type { AppFeaturesService } from '../../../../lib/app_features_service/app_features_service';
-import { AppFeatureKey, type ExperimentalFeatures } from '../../../../../common';
+import type { ExperimentalFeatures } from '../../../../../common';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
   manifestDispatchSchema,

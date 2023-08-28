@@ -7,7 +7,7 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
-import { AppFeatureSecurityKey } from '@kbn/security-solution-features';
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,

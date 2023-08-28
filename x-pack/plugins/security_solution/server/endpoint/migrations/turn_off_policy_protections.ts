@@ -8,7 +8,7 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { AppFeatureSecurityKey } from '@kbn/security-solution-features';
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,

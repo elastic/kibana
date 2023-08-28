@@ -30,6 +30,7 @@ import {
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
 import type { KibanaRequest } from '@kbn/core/server';
+import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
@@ -54,7 +55,6 @@ import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
-import { ALL_APP_FEATURE_KEYS } from '../../common';
 import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
 import { createAppFeaturesServiceMock } from '../lib/app_features_service/mocks';
 

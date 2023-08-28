@@ -4,10 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { UpsellingService } from './upselling_service';
-export type {
-  PageUpsellings,
-  SectionUpsellings,
-  UpsellingSectionId,
-  UpsellingMessageId,
-} from './types';
+
+export * from './src/app_features_keys';

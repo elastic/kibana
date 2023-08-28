@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 
-import { ALL_APP_FEATURE_KEYS } from '../../../common';
+import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { turnOffPolicyProtectionsIfNotSupported } from './turn_off_policy_protections';
 import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyData } from '../../../common/endpoint/types';

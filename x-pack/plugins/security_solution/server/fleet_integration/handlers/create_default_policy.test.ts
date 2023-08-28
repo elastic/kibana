@@ -8,6 +8,7 @@ import { Subject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { LicenseService } from '../../../common/license';
 import { createDefaultPolicy } from './create_default_policy';
 import { ProtectionModes } from '../../../common/endpoint/types';
@@ -19,7 +20,6 @@ import type {
   PolicyCreateCloudConfig,
   PolicyCreateEndpointConfig,
 } from '../types';
-import { ALL_APP_FEATURE_KEYS } from '../../../common';
 import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
 import { createAppFeaturesServiceMock } from '../../lib/app_features_service/mocks';
 

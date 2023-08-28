@@ -19,7 +19,7 @@ import {
   getSecurityFeature,
   getCasesFeature,
   getAssistantFeature,
-} from '@kbn/security-solution-features';
+} from '@kbn/security-solution-features/app_features';
 import type { ExperimentalFeatures } from '../../../common';
 import { AppFeatures } from './app_features';
 import type { AppFeaturesConfigurator } from './types';
