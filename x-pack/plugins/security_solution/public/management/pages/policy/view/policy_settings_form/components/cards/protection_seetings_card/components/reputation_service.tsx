@@ -95,7 +95,7 @@ export const ReputationService = React.memo(
 
         onChange({ isValid: true, updatedPolicy: newPayload });
       },
-      [policy, onChange]
+      [policy, onChange, osList, additionalOnSwitchChange]
     );
 
     const checkboxLabel = checkboxChecked
