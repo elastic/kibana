@@ -11,6 +11,7 @@ import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react'
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDateRangeProviderContext } from '../hooks/use_date_range';
 import { Popover } from '../tabs/common/popover';
+import { useMetadataStateProviderContext } from '../hooks/use_metadata_state';
 
 const HOSTNAME_DOCS_LINK =
   'https://www.elastic.co/guide/en/ecs/current/ecs-host.html#field-host-name';
@@ -54,7 +55,9 @@ const MetadataExplanationTooltipContent = React.memo(() => {
 
 export const MetadataExplanationMessage = () => {
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
-  const dateFromRange = new Date(getDateRangeInTimestamp().to);
+  const { metadata } = useMetadataStateProviderContext();
+
+  const dateFromRange = new Date(metadata?.info?.['@timestamp'] ?? getDateRangeInTimestamp().to);
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="baseline">

@@ -83,6 +83,7 @@ export const InfraMetadataInfoRT = rt.partial({
   cloud: InfraMetadataCloudRT,
   host: InfraMetadataHostRT,
   agent: InfraMetadataAgentRT,
+  '@timestamp': rt.string,
 });
 
 const InfraMetadataRequiredRT = rt.type({
