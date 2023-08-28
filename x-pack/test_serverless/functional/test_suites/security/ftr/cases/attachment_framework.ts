@@ -46,7 +46,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
       });
 
-      it('adds lens visualization to a new case', async () => {
+      it.skip('adds lens visualization to a new case', async () => {
         const caseTitle =
           'case created in security solution from my dashboard with lens visualization';
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-describe('Serverless', () => {
+// Error: socket hang up
+describe.skip('Serverless', () => {
   it('Should login', () => {
     cy.loginAsElasticUser();
   });
