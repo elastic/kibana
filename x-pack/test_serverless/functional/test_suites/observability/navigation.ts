@@ -36,12 +36,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectSectionClosed('project_settings_project_nav');
 
       // navigate to log explorer
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observabilityLogExplorer' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-log-explorer' });
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observabilityLogExplorer',
+        deepLinkId: 'observability-log-explorer',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'observabilityLogExplorer',
+        deepLinkId: 'observability-log-explorer',
       });
       await expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
 
@@ -77,15 +77,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await browser.refresh();
       await svlCommonNavigation.expectExists();
       await svlCommonNavigation.sidenav.expectSectionOpen('project_settings_project_nav');
-    });
-
-    it('navigate using search', async () => {
-      await svlCommonNavigation.search.showSearch();
-      await svlCommonNavigation.search.searchFor('discover log explorer');
-      await svlCommonNavigation.search.clickOnOption(0);
-      await svlCommonNavigation.search.hideSearch();
-
-      await expect(await browser.getCurrentUrl()).contain('/app/discover#/p/log-explorer');
     });
 
     it('shows cases in sidebar navigation', async () => {

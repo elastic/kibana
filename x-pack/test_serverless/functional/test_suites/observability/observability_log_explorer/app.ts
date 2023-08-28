@@ -9,8 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['navigationalSearch']);
-  const serverlessNavigation = getService('svlObltNavigation');
+  const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonNavigation']);
 
   describe('Application', () => {
     before('initialize tests', async () => {
@@ -22,11 +21,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('is shown in the global search', async () => {
-      await serverlessNavigation.navigateToLandingPage();
-      await PageObjects.navigationalSearch.searchFor('log explorer');
+      await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.svlCommonNavigation.search.showSearch();
+      await PageObjects.svlCommonNavigation.search.searchFor('log explorer');
 
-      const results = await PageObjects.navigationalSearch.getDisplayedResults();
+      const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
       expect(results[0].label).to.eql('Log Explorer');
+
+      await PageObjects.svlCommonNavigation.search.hideSearch();
     });
   });
 }
