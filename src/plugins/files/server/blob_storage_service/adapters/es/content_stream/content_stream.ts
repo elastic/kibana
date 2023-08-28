@@ -215,7 +215,6 @@ export class ContentStream extends Duplex {
     await this.client.deleteByQuery({
       index: this.index,
       ignore_unavailable: true,
-      conflicts: 'proceed',
       query: {
         bool: {
           must: { match: { bid } },
