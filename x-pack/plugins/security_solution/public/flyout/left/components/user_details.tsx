@@ -138,8 +138,8 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
                 field: 'host.name',
               }}
               mode={CellActionsMode.HOVER_RIGHT}
-              triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-              visibleCellActions={6}
+              triggerId={SecurityCellActionsTrigger.DEFAULT} // TODO use SecurityCellActionsTrigger.DETAILS_FLYOUT when https://github.com/elastic/kibana/issues/155243 is fixed
+              visibleCellActions={5} // TODO use 6 when https://github.com/elastic/kibana/issues/155243 is fixed
               sourcererScopeId={getSourcererScopeId(scopeId)}
               metadata={{ scopeId }}
               showActionTooltips
