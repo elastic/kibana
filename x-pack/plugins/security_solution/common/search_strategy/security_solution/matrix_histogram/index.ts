@@ -23,7 +23,7 @@ export * from './dns';
 export * from './events';
 export * from './preview';
 
-export const MatrixHistogramQuery = 'matrixHistogram';
+export { MatrixHistogramQuery } from '../../../api/search_strategy';
 
 export enum MatrixHistogramType {
   authentications = 'authentications',

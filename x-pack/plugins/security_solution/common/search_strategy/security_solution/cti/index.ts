@@ -10,10 +10,7 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/public';
 import { EVENT_ENRICHMENT_INDICATOR_FIELD_MAP } from '../../../cti/constants';
 import type { Inspect, Maybe } from '../../common';
 
-export enum CtiQueries {
-  eventEnrichment = 'eventEnrichment',
-  dataSource = 'dataSource',
-}
+export { CtiQueries } from '../../../api/search_strategy';
 
 export type CtiEnrichment = Record<string, unknown[]>;
 export type EventFields = Record<string, unknown>;

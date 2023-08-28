@@ -22,3 +22,5 @@ export * from './risk_score/risk_score';
 export * from './cti/cti';
 
 export * from './model/pagination';
+
+export * from './model/factory_query_type';

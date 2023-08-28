@@ -14,11 +14,6 @@ export * from './kpi';
 export * from './overview';
 export * from './uncommon_processes';
 
-export enum HostsQueries {
-  details = 'hostDetails',
-  hosts = 'hosts',
-  overview = 'overviewHost',
-  uncommonProcesses = 'uncommonProcesses',
-}
+export { HostsQueries } from '../../../api/search_strategy';
 
 export { HostsFields };
