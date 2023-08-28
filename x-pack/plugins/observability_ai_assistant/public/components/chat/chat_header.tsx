@@ -57,12 +57,17 @@ export function ChatHeader({
 
   return (
     <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false} borderRadius="none">
-      <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
-          {loading ? <EuiLoadingSpinner size="xl" /> : <AssistantAvatar size="m" />}
+          {loading ? <EuiLoadingSpinner size="xl" /> : <AssistantAvatar size="s" />}
         </EuiFlexItem>
         <EuiFlexItem grow className={minWidthClassName}>
-          <EuiFlexGroup direction="column" gutterSize="none" className={minWidthClassName}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            className={minWidthClassName}
+            justifyContent="center"
+          >
             <EuiFlexItem grow={false} className={minWidthClassName}>
               <EuiFlexGroup
                 direction="row"
@@ -92,6 +97,9 @@ export function ChatHeader({
                   ) : null}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} className={minWidthClassName}>
+                  <ConnectorSelectorBase {...connectors} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <TechnicalPreviewBadge />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -100,9 +108,6 @@ export function ChatHeader({
               {!disabled ? <KnowledgeBaseCallout knowledgeBase={knowledgeBase} /> : null}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ConnectorSelectorBase {...connectors} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
