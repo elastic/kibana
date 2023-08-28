@@ -6,7 +6,7 @@
  */
 
 import type { UseTableState } from '@kbn/ml-in-memory-table';
-import React, { ReactNode, useMemo, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTableColumn,
@@ -55,6 +55,8 @@ export const DataComparisonOverviewTable = ({
     referenceColor: euiTheme.euiColorVis2,
     productionColor: euiTheme.euiColorVis1,
   };
+  // const [featureNamesToExpandRow, setFeatureNamesToExpandRow] = useState<string[]>([]);
+
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -73,6 +75,24 @@ export const DataComparisonOverviewTable = ({
       values: { label: COMPARISON_LABEL },
     }
   );
+
+  useEffect(() => {
+    const updatedItemIdToExpandedRowMap = { ...itemIdToExpandedRowMap };
+    // Update expanded row in case data is stale
+    Object.keys(updatedItemIdToExpandedRowMap).forEach((itemId) => {
+      const item = data.find((d) => d.featureName === itemId);
+      if (item) {
+        const { featureName } = item;
+
+        updatedItemIdToExpandedRowMap[featureName] = (
+          <DataComparisonDistributionChart item={item} colors={colors} />
+        );
+      }
+    });
+    setItemIdToExpandedRowMap(updatedItemIdToExpandedRowMap);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   const columns: Array<EuiBasicTableColumn<Feature>> = [
     {
@@ -230,6 +250,7 @@ export const DataComparisonOverviewTable = ({
   };
 
   const toggleDetails = (item: Feature) => {
+    // console.log(`--@@item`, item);
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
     if (itemIdToExpandedRowMapValues[item.featureName]) {
@@ -237,14 +258,7 @@ export const DataComparisonOverviewTable = ({
     } else {
       const { featureName, comparisonDistribution } = item;
       itemIdToExpandedRowMapValues[item.featureName] = (
-        <div css={{ width: '100%', height: 200 }}>
-          <DataComparisonDistributionChart
-            featureName={featureName}
-            fieldType={item.fieldType}
-            data={comparisonDistribution}
-            colors={colors}
-          />
-        </div>
+        <DataComparisonDistributionChart item={item} colors={colors} />
       );
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);

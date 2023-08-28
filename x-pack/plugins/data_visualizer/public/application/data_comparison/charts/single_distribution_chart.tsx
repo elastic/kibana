@@ -6,11 +6,12 @@
  */
 
 import { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-import { BarSeries, Chart, ScaleType, Settings } from '@elastic/charts';
-import React from 'react';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
+import React, { useMemo } from 'react';
 import { NoChartsData } from './no_charts_data';
 import { DATA_COMPARISON_TYPE } from '../constants';
 import { DataComparisonField, Histogram } from '../types';
+const defaultFormatter = (d: unknown) => Number(d).toFixed(2);
 
 export const SingleDistributionChart = ({
   data,
@@ -23,11 +24,24 @@ export const SingleDistributionChart = ({
   color?: SeriesColorAccessor;
   fieldType?: DataComparisonField['type'];
 }) => {
+  const valueFormatter = useMemo(
+    () => (fieldType === DATA_COMPARISON_TYPE.NUMERIC ? defaultFormatter : undefined),
+    [fieldType]
+  );
+
   if (data.length === 0) return <NoChartsData textAlign="left" />;
 
   return (
     <Chart>
       <Settings />
+      <Axis
+        id="bottom"
+        position={Position.Bottom}
+        tickFormat={valueFormatter}
+        labelFormat={valueFormatter}
+        hide={true}
+      />
+
       <BarSeries
         id={`${name}-distr-viz`}
         name={name}
