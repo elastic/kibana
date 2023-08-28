@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { aggregateRulesRequestBodySchemaV1 } from '..';
+import { aggregateRulesRequestBodySchemaV1, ruleAggregationFormattedResultSchemaV1 } from '..';
 
 export type AggregateRulesRequestBody = TypeOf<typeof aggregateRulesRequestBodySchemaV1>;
+export type RuleAggregationFormattedResult = TypeOf<typeof ruleAggregationFormattedResultSchemaV1>;

@@ -25,3 +25,20 @@ export const aggregateRulesRequestBodySchema = schema.object({
   ),
   filter: schema.maybe(schema.string()),
 });
+
+export const ruleAggregationFormattedResultSchema = schema.object({
+  ruleExecutionStatus: schema.recordOf(schema.string(), schema.number()),
+  ruleLastRunOutcome: schema.recordOf(schema.string(), schema.number()),
+  ruleEnabledStatus: schema.object({
+    enabled: schema.number(),
+    disabled: schema.number(),
+  }),
+  ruleMutedStatus: schema.object({
+    muted: schema.number(),
+    unmuted: schema.number(),
+  }),
+  ruleSnoozedStatus: schema.object({
+    snoozed: schema.number(),
+  }),
+  ruleTags: schema.arrayOf(schema.string()),
+});

@@ -4,8 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { aggregateRulesRequestBodySchema } from './schemas/latest';
-export type { AggregateRulesRequestBody } from './types/latest';
+export {
+  aggregateRulesRequestBodySchema,
+  ruleAggregationFormattedResultSchema,
+} from './schemas/latest';
+export type { AggregateRulesRequestBody, RuleAggregationFormattedResult } from './types/latest';
 
-export { aggregateRulesRequestBodySchema as aggregateRulesRequestBodySchemaV1 } from './schemas/v1';
-export type { AggregateRulesRequestBody as AggregateRulesRequestBodyV1 } from './types/v1';
+export {
+  aggregateRulesRequestBodySchema as aggregateRulesRequestBodySchemaV1,
+  ruleAggregationFormattedResultSchema as ruleAggregationFormattedResultSchemaV1,
+} from './schemas/v1';
+export type {
+  AggregateRulesRequestBody as AggregateRulesRequestBodyV1,
+  RuleAggregationFormattedResult as RuleAggregationFormattedResultV1,
+} from './types/v1';

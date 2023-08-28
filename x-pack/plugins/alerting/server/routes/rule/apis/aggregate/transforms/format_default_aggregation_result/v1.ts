@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  RuleAggregationFormattedResult,
-  RuleExecutionStatusValues,
-  RuleLastRunOutcomeValues,
-} from '../../../../../../../common';
+import { RuleAggregationFormattedResult } from '../../../../../../../common/routes/rule/apis/aggregate';
+import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../../../../../../../common';
 import { DefaultRuleAggregationResult } from '../../types/v1';
 
 export const formatDefaultAggregationResult = (
@@ -86,7 +83,9 @@ export const formatDefaultAggregationResult = (
   }
 
   const tagsBuckets = aggregations.tags?.buckets || [];
-  result.ruleTags = tagsBuckets.map((bucket) => bucket.key);
+  tagsBuckets.forEach((bucket) => {
+    result.ruleTags.push(bucket.key);
+  });
 
   return result;
 };

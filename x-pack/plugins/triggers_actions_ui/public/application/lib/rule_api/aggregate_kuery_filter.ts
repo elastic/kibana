@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { AsApiContract } from '@kbn/actions-plugin/common';
-import { RuleAggregationFormattedResult } from '@kbn/alerting-plugin/common';
+import { RuleAggregationFormattedResult } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { LoadRuleAggregationsProps, rewriteBodyRes } from './aggregate_helpers';
 import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
@@ -31,7 +31,6 @@ export async function loadRuleAggregationsWithKueryFilter({
   const res = await http.post<AsApiContract<RuleAggregationFormattedResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
-      // TODO: validate body schema
       body: JSON.stringify({
         ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
         default_search_operator: 'AND',
@@ -39,6 +38,5 @@ export async function loadRuleAggregationsWithKueryFilter({
     }
   );
 
-  // TODO: import from alerting/common
   return rewriteBodyRes(res);
 }

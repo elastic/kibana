@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { AsApiContract } from '@kbn/actions-plugin/common';
-import { RuleAggregationFormattedResult } from '@kbn/alerting-plugin/common';
+import { RuleAggregationFormattedResult } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
 import {
@@ -54,7 +54,6 @@ export async function loadRuleAggregations({
   const res = await http.post<AsApiContract<RuleAggregationFormattedResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
-      // TODO: validate body schema
       body: JSON.stringify({
         search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
         search: searchText,
@@ -63,6 +62,5 @@ export async function loadRuleAggregations({
       }),
     }
   );
-  // TODO: import from alerting/common
   return rewriteBodyRes(res);
 }

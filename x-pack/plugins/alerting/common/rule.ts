@@ -117,15 +117,6 @@ export interface RuleAction {
   alertsFilter?: AlertsFilter;
 }
 
-export interface RuleAggregationFormattedResult {
-  ruleExecutionStatus: { [status: string]: number };
-  ruleLastRunOutcome: { [status: string]: number };
-  ruleEnabledStatus: { enabled: number; disabled: number };
-  ruleMutedStatus: { muted: number; unmuted: number };
-  ruleSnoozedStatus: { snoozed: number };
-  ruleTags: string[];
-}
-
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
   outcomeOrder?: number;

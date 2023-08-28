@@ -6,7 +6,7 @@
  */
 
 import { RewriteResponseCase } from '@kbn/actions-plugin/common';
-import { RuleAggregationFormattedResult } from '../../../../../../../common';
+import { RuleAggregationFormattedResult } from '../../../../../../../common/routes/rule/apis/aggregate';
 
 export const transformAggregateBodyResponse: RewriteResponseCase<
   RuleAggregationFormattedResult

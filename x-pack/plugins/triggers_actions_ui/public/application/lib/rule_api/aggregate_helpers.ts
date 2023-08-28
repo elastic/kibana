@@ -7,10 +7,9 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { RuleAggregationFormattedResult } from '@kbn/alerting-plugin/common';
+import { RuleAggregationFormattedResult } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
 import { RuleStatus } from '../../../types';
 
-// TODO: This should be in alerting/common only
 export const rewriteBodyRes: RewriteRequestCase<RuleAggregationFormattedResult> = ({
   rule_execution_status: ruleExecutionStatus,
   rule_last_run_outcome: ruleLastRunOutcome,
