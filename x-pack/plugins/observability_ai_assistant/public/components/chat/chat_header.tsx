@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
-import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
+import { EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import { KnowledgeBaseCallout } from './knowledge_base_callout';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import { useUnmountAndRemountWhenPropChanges } from '../../hooks/use_unmount_and_remount_when_prop_changes';
@@ -31,19 +31,21 @@ const minWidthClassName = css`
 export function ChatHeader({
   title,
   loading,
-  knowledgeBase,
+  disabled,
   connectors,
+  knowledgeBase,
   onSaveTitle,
 }: {
   title: string;
   loading: boolean;
-  knowledgeBase: UseKnowledgeBaseResult;
+  disabled: boolean;
   connectors: UseGenAIConnectorsResult;
+  knowledgeBase: UseKnowledgeBaseResult;
   onSaveTitle?: (title: string) => void;
 }) {
   const hasTitle = !!title;
 
-  const displayedTitle = title || EMPTY_CONVERSATION_TITLE;
+  const displayedTitle = disabled ? UPGRADE_LICENSE_TITLE : title || EMPTY_CONVERSATION_TITLE;
 
   const theme = useEuiTheme();
 
@@ -84,7 +86,7 @@ export function ChatHeader({
                         { defaultMessage: 'Edit conversation' }
                       )}
                       editModeProps={{ inputProps: { inputRef } }}
-                      isReadOnly={!Boolean(onSaveTitle)}
+                      isReadOnly={disabled || !Boolean(onSaveTitle)}
                       onSave={onSaveTitle}
                     />
                   ) : null}
@@ -95,7 +97,7 @@ export function ChatHeader({
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <KnowledgeBaseCallout knowledgeBase={knowledgeBase} />
+              {!disabled ? <KnowledgeBaseCallout knowledgeBase={knowledgeBase} /> : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

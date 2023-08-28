@@ -29,6 +29,7 @@ import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   ContextDefinition,
   FunctionDefinition,
@@ -90,20 +91,21 @@ export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssi
 
 export interface ObservabilityAIAssistantPluginSetup {}
 export interface ObservabilityAIAssistantPluginSetupDependencies {
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  security: SecurityPluginSetup;
-  features: FeaturesPluginSetup;
-  observabilityShared: ObservabilitySharedPluginSetup;
-  lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
+  features: FeaturesPluginSetup;
+  lens: LensPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
+  security: SecurityPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
-  security: SecurityPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  observabilityShared: ObservabilitySharedPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
   lens: LensPublicStart;
-  dataViews: DataViewsPublicPluginStart;
+  licensing: LicensingPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
+  security: SecurityPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface ConfigSchema {}

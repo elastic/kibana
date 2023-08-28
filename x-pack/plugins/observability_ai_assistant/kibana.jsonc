@@ -7,8 +7,19 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "observabilityAIAssistant"],
-    "requiredPlugins": ["triggersActionsUi", "actions", "security", "features", "observabilityShared", "taskManager", "lens", "dataViews", "ruleRegistry"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "fieldFormats"],
+    "requiredPlugins": [
+      "actions",
+      "dataViews",
+      "features",
+      "lens",
+      "licensing",
+      "observabilityShared",
+      "ruleRegistry",
+      "security",
+      "taskManager",
+      "triggersActionsUi"
+    ],
+    "requiredBundles": ["fieldFormats", "kibanaReact", "kibanaUtils"],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }

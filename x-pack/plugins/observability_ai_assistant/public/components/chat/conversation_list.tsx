@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { useLicense } from '../../hooks/use_license';
 import { NewChatButton } from '../buttons/new_chat_button';
 
 const containerClassName = css`
@@ -43,20 +44,22 @@ const newChatButtonWrapperClassName = css`
 
 export function ConversationList({
   selected,
-  onClickNewChat,
   loading,
   error,
   conversations,
+  onClickNewChat,
   onClickDeleteConversation,
 }: {
   selected: string;
   loading: boolean;
   error?: any;
   conversations?: Array<{ id: string; label: string; href?: string }>;
-  onClickConversation: (conversationId: string) => void;
   onClickNewChat: () => void;
   onClickDeleteConversation: (id: string) => void;
 }) {
+  const { hasAtLeast } = useLicense();
+  const hasCorrectLicense = hasAtLeast('enterprise');
+
   return (
     <EuiPanel paddingSize="s" hasShadow={false} className={panelClassName}>
       <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
@@ -113,7 +116,7 @@ export function ConversationList({
                       label={conversation.label}
                       size="s"
                       isActive={conversation.id === selected}
-                      isDisabled={loading}
+                      isDisabled={!hasCorrectLicense || loading}
                       href={conversation.href}
                       wrapText
                       extraAction={
@@ -151,7 +154,7 @@ export function ConversationList({
           <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow className={newChatButtonWrapperClassName}>
-                <NewChatButton onClick={onClickNewChat} />
+                <NewChatButton onClick={onClickNewChat} disabled={!hasCorrectLicense} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
