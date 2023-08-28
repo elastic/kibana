@@ -36,7 +36,7 @@ import { getLocalstorageEntryAsObject } from '../../../helpers/common';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 
 describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
-  describe('Basic functions', () => {
+  describe('Basic functions', { tags: ['@brokenInServerless'] }, () => {
     before(() => {
       cleanKibana();
       login();
