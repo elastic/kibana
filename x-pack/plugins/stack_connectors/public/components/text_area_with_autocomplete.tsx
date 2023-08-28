@@ -70,8 +70,8 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     }));
   }, [matches]);
 
-  const closeList = useCallback((doNoResetAutoCompleteIndex = false) => {
-    if (!doNoResetAutoCompleteIndex) {
+  const closeList = useCallback((doNotResetAutoCompleteIndex = false) => {
+    if (!doNotResetAutoCompleteIndex) {
       setAutoCompleteIndex(-1);
     }
     setListOpen(false);
@@ -141,7 +141,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     const currentWord =
       autoCompleteIndex !== -1 ? value.slice(autoCompleteIndex, selectionStart) : '';
 
-    console.log('currentWord', currentWord, 'lastTwoLetter', lastTwoLetter);
     if (lastTwoLetter === '{{' || currentWord.startsWith('{{')) {
       if (lastTwoLetter === '{{') {
         setAutoCompleteIndex(selectionStart - 2);
@@ -154,10 +153,8 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
       });
       setSearchWord(currentWord.slice(2));
       setMatches(filteredMatches);
-      setListOpen(() => {
-        setTimeout(() => recalcMenuPosition(), 0);
-        return true;
-      });
+      setTimeout(() => recalcMenuPosition(), 0);
+      setListOpen(true);
     } else if (lastTwoLetter === '}}') {
       closeList();
     } else {
