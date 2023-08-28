@@ -76,7 +76,7 @@ export const MetadataExplanationMessage = () => {
         <Popover
           iconSize="s"
           iconColor="subdued"
-          icon="questionInCircle"
+          icon="iInCircle"
           panelPaddingSize="m"
           data-test-subj="infraAssetDetailsMetadataPopoverButton"
         >
