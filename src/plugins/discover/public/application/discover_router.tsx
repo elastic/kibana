@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Redirect, useParams, useLocation } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
 import { History } from 'history';
@@ -21,11 +21,13 @@ import { ViewAlertRoute } from './view_alert';
 import type { CustomizationCallback } from '../customizations';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
+import { useHeadlessRoutes } from './use_headless';
 
 interface DiscoverRoutesProps {
   prefix?: string;
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
+  config?: { headlessLocation?: string };
 }
 
 export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
@@ -33,7 +35,8 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
     (path: string) => (prefix ? `${prefix}/${path}` : `/${path}`),
     [prefix]
   );
-
+  const { config } = mainRouteProps;
+  useHeadlessRoutes(config);
   return (
     <Routes>
       <Route path={prefixPath('context/:dataViewId/:id')}>
@@ -75,7 +78,6 @@ export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscov
     () => profileRegistry.get(profile)?.customizationCallbacks,
     [profile, profileRegistry]
   );
-  console.log({props});
   if (customizationCallbacks) {
     return (
       <DiscoverRoutes
@@ -94,31 +96,19 @@ export interface DiscoverRouterProps {
   profileRegistry: DiscoverProfileRegistry;
   history: History;
   isDev: boolean;
+  config?: { headlessLocation?: string };
 }
 
 export const DiscoverRouter = ({
   services,
   history,
   profileRegistry,
-  config,
   ...routeProps
 }: DiscoverRouterProps) => {
   const customizationCallbacks = useMemo(
     () => profileRegistry.get('default')?.customizationCallbacks ?? [],
     [profileRegistry]
   );
-  const { application } = services;
-  const { headlessLocation } = config;
-  const location = useLocation();
-  console.log({ config });
-  if (headlessLocation) {
-    const { hash, search } = location;
-    const newUrl = application.getUrlForApp(headlessLocation, {
-      deepLinkId: 'alerts',
-      path: `${search}${hash}`,
-    });
-    console.log('newUrl', newUrl);
-  }
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
