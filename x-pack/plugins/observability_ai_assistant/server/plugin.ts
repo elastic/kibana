@@ -31,6 +31,7 @@ import {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
+import { addLensDocsToKb } from './service/kb_service/kb_docs/lens';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -114,7 +115,7 @@ export class ObservabilityAIAssistantPlugin
       taskManager: plugins.taskManager,
     });
 
-    // addLensDocsToKb(service);
+    addLensDocsToKb(service);
 
     registerServerRoutes({
       core,

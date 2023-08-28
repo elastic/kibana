@@ -29,6 +29,7 @@ import { clearPresentationData, conversationHasNoPresentationData } from './help
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../use_load_connectors';
+import { AssistantAvatar } from '../../assistant/assistant_avatar/assistant_avatar';
 
 const ConnectorButtonWrapper = styled.div`
   margin-bottom: 10px;
@@ -186,21 +187,14 @@ export const useConnectorSetup = ({
               name={i18n.CONNECTOR_SETUP_USER_ASSISTANT}
               size="l"
               color="subdued"
-              iconType={conversation?.theme?.assistant?.icon ?? 'logoElastic'}
+              iconType={AssistantAvatar}
             />
           ),
           timestamp: `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${message.timestamp}`,
         };
         return commentProps;
       }),
-    [
-      assistantName,
-      commentBody,
-      conversation.messages,
-      conversation?.theme?.assistant?.icon,
-      currentMessageIndex,
-      userName,
-    ]
+    [assistantName, commentBody, conversation.messages, currentMessageIndex, userName]
   );
 
   return {
