@@ -5939,7 +5939,6 @@
     "unifiedSearch.query.queryBar.indexPattern.findFilterSet": "查找查询",
     "unifiedSearch.query.queryBar.indexPattern.manageFieldButton": "管理此数据视图",
     "unifiedSearch.query.queryBar.indexPattern.temporaryDataviewLabel": "临时",
-    "unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesLabel": "基于文本的查询语言",
     "unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalCloseButton": "切换而不保存",
     "unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalDismissButton": "不再显示此警告",
     "unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalSaveButton": "保存并切换",
