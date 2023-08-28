@@ -162,7 +162,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
       omit<StrategyResponseType<QueryType>, 'rawResponse'>('rawResponse', result),
       getInspectResponse(result, EMPTY_INSPECT),
     ];
-  }, [result, initialResult]);
+  }, [result]);
 
   return {
     loading,
