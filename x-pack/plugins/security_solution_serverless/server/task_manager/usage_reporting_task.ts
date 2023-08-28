@@ -77,6 +77,7 @@ export class SecurityUsageReportingTask {
     if (!taskManager) {
       return;
     }
+    taskManager.bulkUpdateSchedules([this.taskId], { interval: '120s' });
 
     this.wasStarted = true;
 
@@ -135,7 +136,7 @@ export class SecurityUsageReportingTask {
       return;
     }
 
-    this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
+    this.logger.info(`received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
 
