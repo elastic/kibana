@@ -24,6 +24,7 @@ import { DiscoverLink } from '../../../../lib/discover_link';
 import { Section } from '../../home';
 import { DetailsPageError } from './details_page_error';
 import { ManageIndexButton } from './manage_index_button';
+import { StatsTab } from './tabs';
 
 export enum IndexDetailsSection {
   Overview = 'overview',
@@ -31,6 +32,7 @@ export enum IndexDetailsSection {
   Mappings = 'mappings',
   Settings = 'settings',
   Pipelines = 'pipelines',
+  Stats = 'stats',
 }
 const tabs = [
   {
@@ -62,6 +64,10 @@ const tabs = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.pipelinesTitle" defaultMessage="Pipelines" />
     ),
+  },
+  {
+    id: IndexDetailsSection.Stats,
+    name: <FormattedMessage id="xpack.idxMgmt.indexDetails.statsTitle" defaultMessage="Stats" />,
   },
 ];
 export const DetailsPage: React.FunctionComponent<
@@ -185,6 +191,10 @@ export const DetailsPage: React.FunctionComponent<
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Pipelines}`}
             render={() => <div>Pipelines</div>}
+          />
+          <Route
+            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Stats}`}
+            render={() => <StatsTab indexName={indexName} />}
           />
           <Redirect
             from={`/${Section.Indices}/${indexName}`}
