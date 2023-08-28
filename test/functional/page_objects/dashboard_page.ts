@@ -138,7 +138,7 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.existOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
   }
 
-  public async expectUnsavedChangesDoesNotExist(title: string) {
+  public async expectUnsavedChangesListingDoesNotExist(title: string) {
     this.log.debug(`Expect Unsaved Changes Listing Does Not Exist for `, title);
     await this.testSubjects.missingOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
   }
@@ -174,9 +174,13 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.existOrFail('dashboardLandingPage');
   }
 
-  public async clickDashboardBreadcrumbLink() {
+  public async clickDashboardBreadcrumbLink(isServerless: boolean = false) {
     this.log.debug('clickDashboardBreadcrumbLink');
-    await this.testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
+    if (!isServerless) {
+      await this.testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
+    } else {
+      await this.testSubjects.click('breadcrumb breadcrumb-deepLinkId-dashboards');
+    }
   }
 
   public async expectOnDashboard(expectedTitle: string) {
@@ -190,11 +194,19 @@ export class DashboardPageObject extends FtrService {
     );
   }
 
-  public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
+  public async gotoDashboardLandingPage(
+    {
+      ignorePageLeaveWarning = true,
+      isServerless = false,
+    }: {
+      ignorePageLeaveWarning?: boolean;
+      isServerless?: boolean;
+    } = { ignorePageLeaveWarning: true, isServerless: false }
+  ) {
     this.log.debug('gotoDashboardLandingPage');
     const onPage = await this.onDashboardLandingPage();
     if (!onPage) {
-      await this.clickDashboardBreadcrumbLink();
+      await this.clickDashboardBreadcrumbLink(isServerless);
       await this.retry.try(async () => {
         const warning = await this.testSubjects.exists('confirmModalTitleText');
         if (warning) {
@@ -333,6 +345,12 @@ export class DashboardPageObject extends FtrService {
   public async expectUnsavedChangesBadge() {
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+    });
+  }
+
+  public async expectMissingUnsavedChangesBadge() {
+    await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
     });
   }
 
