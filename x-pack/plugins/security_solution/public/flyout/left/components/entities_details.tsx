@@ -45,9 +45,7 @@ export const EntitiesDetails: React.FC = () => {
           )}
         </EuiFlexGroup>
       ) : (
-        <div data-test-subj={`${ENTITIES_DETAILS_NO_DATA_TEST_ID}NoData`}>
-          {ENTITIES_NO_DATA_MESSAGE}
-        </div>
+        <div data-test-subj={ENTITIES_DETAILS_NO_DATA_TEST_ID}>{ENTITIES_NO_DATA_MESSAGE}</div>
       )}
     </>
   );

@@ -71,9 +71,7 @@ export const EntitiesOverview: React.FC = () => {
             )}
           </EuiFlexGroup>
         ) : (
-          <div data-test-subj={`${INSIGHTS_ENTITIES_NO_DATA_TEST_ID}NoData`}>
-            {ENTITIES_NO_DATA_MESSAGE}
-          </div>
+          <div data-test-subj={INSIGHTS_ENTITIES_NO_DATA_TEST_ID}>{ENTITIES_NO_DATA_MESSAGE}</div>
         )}
       </ExpandablePanel>
     </>

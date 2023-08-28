@@ -68,7 +68,7 @@ describe('<EntitiesDetails />', () => {
         </LeftPanelContext.Provider>
       </TestProviders>
     );
-    expect(getByTestId(`${ENTITIES_DETAILS_NO_DATA_TEST_ID}NoData`)).toBeInTheDocument();
+    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
@@ -95,7 +95,7 @@ describe('<EntitiesDetails />', () => {
         </LeftPanelContext.Provider>
       </TestProviders>
     );
-    expect(getByTestId(`${ENTITIES_DETAILS_NO_DATA_TEST_ID}NoData`)).toBeInTheDocument();
+    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });

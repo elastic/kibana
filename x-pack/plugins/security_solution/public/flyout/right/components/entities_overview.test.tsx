@@ -115,7 +115,7 @@ describe('<EntitiesOverview />', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId(`${INSIGHTS_ENTITIES_NO_DATA_TEST_ID}NoData`)).toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_ENTITIES_NO_DATA_TEST_ID)).toBeInTheDocument();
   });
 
   it('should not render if eventId is null', () => {
