@@ -8,10 +8,7 @@
 import { EuiFormRow, EuiLink, EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import {
-  ActionConnector,
-  ActionTypeRegistryContract,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
@@ -28,16 +25,6 @@ import { ConversationSelectorSettings } from '../conversation_selector_settings'
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getGenAiConfig } from '../../../connectorland/helpers';
-
-export interface OnConnectorSelectionChangeProps {
-  connector: ActionConnector | undefined;
-  isNew: boolean;
-}
-
-export type OnConnectorSelectionChange = ({
-  connector,
-  isNew,
-}: OnConnectorSelectionChangeProps) => void;
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -162,7 +149,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     );
 
     const handleOnConnectorSelectionChange = useCallback(
-      ({ connector, isNew }: OnConnectorSelectionChangeProps) => {
+      (connector) => {
         if (selectedConversation != null) {
           const config = getGenAiConfig(connector);
 

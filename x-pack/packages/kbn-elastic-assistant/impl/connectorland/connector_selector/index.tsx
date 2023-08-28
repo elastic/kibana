@@ -20,7 +20,6 @@ import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
-import { OnConnectorSelectionChange } from '../../assistant/conversations/conversation_settings/conversation_settings';
 import { getGenAiConfig } from '../helpers';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
@@ -28,7 +27,7 @@ interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;
   http: HttpSetup;
   isDisabled?: boolean;
-  onConnectorSelectionChange: OnConnectorSelectionChange;
+  onConnectorSelectionChange: (connector: ActionConnector | undefined) => void;
   selectedConnectorId?: string;
   onConnectorModalVisibilityChange?: (isVisible: boolean) => void;
 }
@@ -134,7 +133,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         }
 
         const connector = connectors?.find((c) => c.id === connectorId);
-        onConnectorSelectionChange({ connector, isNew: false });
+        onConnectorSelectionChange(connector);
       },
       [connectors, onConnectorSelectionChange, onConnectorModalVisibilityChange]
     );
@@ -156,7 +155,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             actionType={actionType}
             onClose={cleanupAndCloseModal}
             postSaveEventHandler={(connector: ActionConnector) => {
-              onConnectorSelectionChange({ connector, isNew: true });
+              onConnectorSelectionChange(connector);
               refetchConnectors?.();
               cleanupAndCloseModal();
             }}
