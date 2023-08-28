@@ -8,10 +8,10 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { INSIGHTS_ENTITIES_NO_DATA_TEST_ID, INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useRightPanelContext } from '../context';
-import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
-import { ENTITIES_TITLE } from './translations';
+import { ENTITIES_NO_DATA_MESSAGE, ENTITIES_TITLE } from './translations';
 import { getField } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
@@ -42,7 +42,7 @@ export const EntitiesOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  if (!eventId || (!userName && !hostName)) {
+  if (!eventId || !indexName || !scopeId) {
     return null;
   }
 
@@ -56,19 +56,25 @@ export const EntitiesOverview: React.FC = () => {
         }}
         data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
       >
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {userName && (
-            <EuiFlexItem>
-              <UserEntityOverview userName={userName} />
-            </EuiFlexItem>
-          )}
-          <EuiSpacer size="s" />
-          {hostName && (
-            <EuiFlexItem>
-              <HostEntityOverview hostName={hostName} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        {userName || hostName ? (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {userName && (
+              <EuiFlexItem>
+                <UserEntityOverview userName={userName} />
+              </EuiFlexItem>
+            )}
+            <EuiSpacer size="s" />
+            {hostName && (
+              <EuiFlexItem>
+                <HostEntityOverview hostName={hostName} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ) : (
+          <div data-test-subj={`${INSIGHTS_ENTITIES_NO_DATA_TEST_ID}NoData`}>
+            {ENTITIES_NO_DATA_MESSAGE}
+          </div>
+        )}
       </ExpandablePanel>
     </>
   );

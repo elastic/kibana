@@ -130,6 +130,13 @@ export const ENTITIES_TITLE = i18n.translate(
   { defaultMessage: 'Entities' }
 );
 
+export const ENTITIES_NO_DATA_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.entitiesNoDataMessage',
+  {
+    defaultMessage: 'No user or host data available',
+  }
+);
+
 export const THREAT_INTELLIGENCE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle',
   { defaultMessage: 'Threat Intelligence' }

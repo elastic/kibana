@@ -83,6 +83,7 @@ export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSu
 /* Insights Entities */
 
 export const INSIGHTS_ENTITIES_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsEntities';
+export const INSIGHTS_ENTITIES_NO_DATA_TEST_ID = `${INSIGHTS_ENTITIES_TEST_ID}NoData` as const;
 export const ENTITIES_USER_OVERVIEW_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesUserOverview';
 export const ENTITIES_USER_OVERVIEW_LINK_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Link`;
