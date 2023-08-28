@@ -8,6 +8,7 @@
 import { resolve } from 'path';
 import { format as formatUrl } from 'url';
 import Fs from 'fs';
+import supertest from 'supertest';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
@@ -18,7 +19,6 @@ import {
 } from '@kbn/test';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { createKibanaSupertestProvider } from '../../../test/server_integration/services';
 
 export default async () => {
   const servers = {
@@ -139,9 +139,9 @@ export default async () => {
 
     services: {
       ...commonFunctionalServices,
-      supertest: createKibanaSupertestProvider({
-        certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
-      }),
+      // TODO: this can be abstracted into @kbn/ftr-common-functional-services
+      // We can use the implementation at test/server_integration/services in the function createKibanaSupertestProvider
+      supertest: supertest.agent(formatUrl(servers.kibana, { ca: [Fs.readFileSync(CA_CERT_PATH)] })),
     },
 
     // overriding default timeouts from packages/kbn-test/src/functional_test_runner/lib/config/schema.ts
