@@ -452,6 +452,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       [getPoliciesIdentifiers]
     );
 
+  const getCurrentPolicies = useCallback(() => {
+    return policiesRef.current;
+  }, []);
+  const getResultPreview = useCallback(
+    async (partialExpression: string) => {
+      const esqlQuery = {
+        esql: `${partialExpression} | limit 0`,
+      };
+      try {
+        const table = await fetchFieldsFromESQL(esqlQuery, expressions);
+        return table;
+      } catch (e) {
+        // no action yet
+      }
+    },
+    [expressions]
+  );
+
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
     accessibilitySupport: 'off',
@@ -667,6 +685,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                               getPoliciesIdentifiers,
                               getPolicyFieldsIdentifiers,
                               getPolicyMatchingFieldIdentifiers,
+                            })
+                          : undefined
+                      }
+                      hoverProvider={
+                        language === 'esql'
+                          ? ESQLLang.getHoverProvider?.({
+                              getCurrentPolicies,
+                              getResultPreview,
                             })
                           : undefined
                       }
