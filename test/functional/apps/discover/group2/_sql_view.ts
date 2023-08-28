@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('field-@message-showDetails');
         expect(await testSubjects.exists('discoverFieldListPanelEdit-@message')).to.be(true);
 
-        await PageObjects.discover.selectTextBaseLang('ES|QL');
+        await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should perform test query correctly', async function () {
-        await PageObjects.discover.selectTextBaseLang('ES|QL');
+        await PageObjects.discover.selectTextBaseLang();
         const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render when switching to a time range with no data, then back to a time range with data', async () => {
-        await PageObjects.discover.selectTextBaseLang('ES|QL');
+        await PageObjects.discover.selectTextBaseLang();
         const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should query an index pattern that doesnt translate to a dataview correctly', async function () {
-        await PageObjects.discover.selectTextBaseLang('ES|QL');
+        await PageObjects.discover.selectTextBaseLang();
         const testQuery = `from logstash* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
 
         await monacoEditor.setCodeEditorValue(testQuery);

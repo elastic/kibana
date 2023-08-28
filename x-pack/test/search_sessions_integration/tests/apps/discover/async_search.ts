@@ -137,7 +137,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await searchSessions.exists()).to.be(true);
-      await PageObjects.discover.selectTextBaseLang('ES|QL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.missingOrFail();
       await browser.goBack();

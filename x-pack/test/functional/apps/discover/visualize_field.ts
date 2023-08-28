@@ -144,7 +144,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should visualize correctly text based language queries in Discover', async () => {
-      await PageObjects.discover.selectTextBaseLang('ES|QL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
         'from logstash-* | stats averageB = avg(bytes) by extension'
@@ -161,7 +161,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should allow changing dimensions', async () => {
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.discover.selectTextBaseLang('ES|QL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
         'from logstash-* | stats averageB = avg(bytes) by extension'
@@ -187,7 +187,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should visualize correctly text based language queries in Lens', async () => {
-      await PageObjects.discover.selectTextBaseLang('ES|QL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
         'from logstash-* | stats averageB = avg(bytes) by extension'
@@ -206,7 +206,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should visualize correctly text based language queries based on index patterns', async () => {
-      await PageObjects.discover.selectTextBaseLang('ES|QL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
         'from logstash* | stats averageB = avg(bytes) by extension'
@@ -225,7 +225,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should save and edit chart in the dashboard on the fly', async () => {
-      await PageObjects.discover.selectTextBaseLang('ES|QL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
         'from logstash-* | stats averageB = avg(bytes) by extension'

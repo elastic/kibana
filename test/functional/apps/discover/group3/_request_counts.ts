@@ -222,7 +222,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const type = 'sql';
 
       beforeEach(async () => {
-        await PageObjects.discover.selectTextBaseLang('SQL');
+        await PageObjects.discover.selectTextBaseLang();
         monacoEditor.setCodeEditorValue('SELECT count(*) FROM "logstash-*" WHERE bytes > 1000');
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();

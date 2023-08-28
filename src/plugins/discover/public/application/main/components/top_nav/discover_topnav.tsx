@@ -169,7 +169,6 @@ export const DiscoverTopNav = ({
   const isESQLModeEnabled = uiSettings.get(ENABLE_ESQL);
   const supportedTextBasedLanguages = [];
   if (isESQLModeEnabled) {
-    supportedTextBasedLanguages.push('SQL');
     supportedTextBasedLanguages.push('ESQL');
   }
   const dataViewPickerProps: DataViewPickerProps = {

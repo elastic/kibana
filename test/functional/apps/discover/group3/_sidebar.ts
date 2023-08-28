@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(options).to.have.length(6);
         await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
 
-        await PageObjects.discover.selectTextBaseLang('ES|QL');
+        await PageObjects.discover.selectTextBaseLang();
 
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
@@ -375,7 +375,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           INITIAL_FIELD_LIST_SUMMARY
         );
 
-        await PageObjects.discover.selectTextBaseLang('ES|QL');
+        await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
