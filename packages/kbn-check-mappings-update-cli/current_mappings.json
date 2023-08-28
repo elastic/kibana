@@ -616,6 +616,10 @@
       }
     }
   },
+  "apm-indices": {
+    "dynamic": false,
+    "properties": {}
+  },
   "tag": {
     "properties": {
       "name": {
@@ -2987,6 +2991,14 @@
       }
     }
   },
+  "policy-settings-protection-updates-note": {
+    "properties": {
+      "note": {
+        "type": "text",
+        "index": false
+      }
+    }
+  },
   "infrastructure-ui-source": {
     "dynamic": false,
     "properties": {}
@@ -3030,10 +3042,6 @@
         "type": "keyword"
       }
     }
-  },
-  "apm-indices": {
-    "dynamic": false,
-    "properties": {}
   },
   "apm-telemetry": {
     "dynamic": false,
