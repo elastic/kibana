@@ -349,6 +349,7 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
           formatBytes,
           formatNumber,
           ilmPhase: 'unmanaged',
+          isILMAvailable: true,
           indexName: 'auditbeat-custom-index-1',
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           patternDocsCount: 57410,
@@ -376,6 +377,7 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
           formatNumber,
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: true,
           partitionedFieldMetadata: emptyIncompatible,
           patternDocsCount: 57410,
           sizeInBytes: 28413,
@@ -383,6 +385,32 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
       ).toEqual([
         '### auditbeat-custom-index-1\n',
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ✅ | auditbeat-custom-index-1 | 4 (0.0%) | 0 | `unmanaged` | 27.7KB |\n\n',
+        '### **Incompatible fields** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
+        '\n\n\n',
+      ]);
+    });
+
+    test('it returns the expected comment when `isILMAvailable` is false', () => {
+      const emptyIncompatible: PartitionedFieldMetadata = {
+        ...mockPartitionedFieldMetadata,
+        incompatible: [], // <-- empty
+      };
+
+      expect(
+        getAllIncompatibleMarkdownComments({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          ilmPhase: 'unmanaged',
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          partitionedFieldMetadata: emptyIncompatible,
+          patternDocsCount: 57410,
+          sizeInBytes: 28413,
+        })
+      ).toEqual([
+        '### auditbeat-custom-index-1\n',
+        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|\n| ✅ | auditbeat-custom-index-1 | 4 (0.0%) | 0 | 27.7KB |\n\n',
         '### **Incompatible fields** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
         '\n\n\n',
       ]);

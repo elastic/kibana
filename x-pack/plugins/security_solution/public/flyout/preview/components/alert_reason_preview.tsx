@@ -7,11 +7,20 @@
 
 import React, { useMemo } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import styled from '@emotion/styled';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { ALERT_REASON_TITLE } from './translations';
 import { ALERT_REASON_PREVIEW_BODY_TEST_ID } from './test_ids';
 import { usePreviewPanelContext } from '../context';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+
+const ReasonPreviewContainerWrapper = styled.div`
+  overflow-x: auto;
+  padding-block: ${euiThemeVars.euiSizeS};
+`;
+
+const ReasonPreviewContainer = styled.div``;
 
 /**
  * Alert reason renderer on a preview panel on top of the right section of expandable flyout
@@ -27,6 +36,19 @@ export const AlertReasonPreview: React.FC = () => {
     [dataAsNestedObject]
   );
 
+  const rowRenderer = useMemo(
+    () =>
+      renderer && dataAsNestedObject
+        ? renderer.renderRow({
+            contextId: 'event-details',
+            data: dataAsNestedObject,
+            isDraggable: false,
+            scopeId: 'global',
+          })
+        : null,
+    [renderer, dataAsNestedObject]
+  );
+
   if (!dataAsNestedObject || !renderer) {
     return null;
   }
@@ -37,12 +59,11 @@ export const AlertReasonPreview: React.FC = () => {
         <h6>{ALERT_REASON_TITLE}</h6>
       </EuiTitle>
       <EuiSpacer size="m" />
-      {renderer.renderRow({
-        contextId: 'event-details',
-        data: dataAsNestedObject,
-        isDraggable: false,
-        scopeId: 'global',
-      })}
+      <ReasonPreviewContainerWrapper>
+        <ReasonPreviewContainer className={'eui-displayInlineBlock'}>
+          {rowRenderer}
+        </ReasonPreviewContainer>
+      </ReasonPreviewContainerWrapper>
     </EuiPanel>
   );
 };

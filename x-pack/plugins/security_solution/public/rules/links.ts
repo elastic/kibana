@@ -13,13 +13,22 @@ import {
   RULES_LANDING_PATH,
   RULES_ADD_PATH,
   SERVER_APP_ID,
+  COVERAGE_OVERVIEW_PATH,
 } from '../../common/constants';
-import { ADD_RULES, CREATE_NEW_RULE, EXCEPTIONS, RULES, SIEM_RULES } from '../app/translations';
+import {
+  ADD_RULES,
+  COVERAGE_OVERVIEW,
+  CREATE_NEW_RULE,
+  EXCEPTIONS,
+  RULES,
+  SIEM_RULES,
+} from '../app/translations';
 import { SecurityPageName } from '../app/types';
 import { benchmarksLink } from '../cloud_security_posture/links';
 import type { LinkItem } from '../common/links';
 import { IconConsoleCloud } from '../common/icons/console_cloud';
 import { IconRollup } from '../common/icons/rollup';
+import { IconDashboards } from '../common/icons/dashboards';
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
@@ -78,6 +87,25 @@ export const links: LinkItem = {
       ],
     },
     benchmarksLink,
+    {
+      id: SecurityPageName.coverageOverview,
+      title: COVERAGE_OVERVIEW,
+      landingIcon: IconDashboards,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.coverageOverviewDashboardDescription',
+        {
+          defaultMessage: 'Review and maintain your protections MITRE ATT&CK® coverage',
+        }
+      ),
+      path: COVERAGE_OVERVIEW_PATH,
+      capabilities: [`${SERVER_APP_ID}.show`],
+      globalSearchKeywords: [
+        i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
+          defaultMessage: 'MITRE ATT&CK Coverage',
+        }),
+      ],
+      experimentalKey: 'detectionsCoverageOverview',
+    },
   ],
   categories: [
     {
@@ -89,6 +117,12 @@ export const links: LinkItem = {
         SecurityPageName.cloudSecurityPostureBenchmarks,
         SecurityPageName.exceptions,
       ],
+    },
+    {
+      label: i18n.translate('xpack.securitySolution.appLinks.category.discover', {
+        defaultMessage: 'Discover',
+      }),
+      linkIds: [SecurityPageName.coverageOverview],
     },
   ],
 };

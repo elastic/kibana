@@ -327,7 +327,12 @@ describe('registerTransactionDurationRuleType', () => {
       transactionType: undefined,
       serviceName: undefined,
       aggregationType: 'avg',
-      kqlFilter: 'service.name: opbeans-java and transaction.type: request',
+      searchConfiguration: {
+        query: {
+          query: 'service.name: opbeans-java and transaction.type: request',
+          language: 'kuery',
+        },
+      },
       groupBy: ['service.name', 'service.environment', 'transaction.type'],
     };
 

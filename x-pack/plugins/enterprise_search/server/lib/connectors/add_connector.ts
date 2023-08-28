@@ -8,7 +8,11 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CURRENT_CONNECTORS_INDEX } from '../..';
-import { ConnectorDocument } from '../../../common/types/connectors';
+import {
+  Connector,
+  ConnectorDocument,
+  IngestPipelineParams,
+} from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { createConnectorDocument } from '../../utils/create_connector_document';
 
@@ -25,58 +29,58 @@ const createConnector = async (
   client: IScopedClusterClient,
   language: string | null,
   deleteExisting: boolean
-): Promise<{ id: string; index_name: string }> => {
+): Promise<Connector> => {
   const index = document.index_name;
-  const indexExists = await client.asCurrentUser.indices.exists({ index });
-  if (indexExists) {
-    {
-      throw new Error(ErrorCode.INDEX_ALREADY_EXISTS);
+  if (index) {
+    const indexExists = await client.asCurrentUser.indices.exists({ index });
+    if (indexExists) {
+      {
+        throw new Error(ErrorCode.INDEX_ALREADY_EXISTS);
+      }
     }
-  }
 
-  const connector = await fetchConnectorByIndexName(client, index);
-  if (connector) {
-    if (deleteExisting) {
-      await deleteConnectorById(client, connector.id);
-    } else {
-      throw new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
+    const connector = await fetchConnectorByIndexName(client, index);
+    if (connector) {
+      if (deleteExisting) {
+        await deleteConnectorById(client, connector.id);
+      } else {
+        throw new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
+      }
     }
-  }
-  const crawler = await fetchCrawlerByIndexName(client, index);
+    const crawler = await fetchCrawlerByIndexName(client, index);
 
-  if (crawler) {
-    throw new Error(ErrorCode.CRAWLER_ALREADY_EXISTS);
+    if (crawler) {
+      throw new Error(ErrorCode.CRAWLER_ALREADY_EXISTS);
+    }
+    await createIndex(client, index, language, false);
   }
-
   const result = await client.asCurrentUser.index({
     document,
     index: CURRENT_CONNECTORS_INDEX,
     refresh: 'wait_for',
   });
-  await createIndex(client, document.index_name, language, false);
 
-  return { id: result._id, index_name: document.index_name };
+  return { ...document, id: result._id };
 };
 
 export const addConnector = async (
   client: IScopedClusterClient,
   input: {
-    delete_existing_connector?: boolean;
-    index_name: string;
-    is_native: boolean;
+    deleteExistingConnector?: boolean;
+    indexName: string | null;
+    isNative: boolean;
     language: string | null;
-    service_type?: string;
+    pipeline?: IngestPipelineParams | null;
+    serviceType?: string | null;
   }
-): Promise<{ id: string; index_name: string }> => {
-  const pipeline = await getDefaultPipeline(client);
+): Promise<Connector> => {
+  const pipeline = input.pipeline || (await getDefaultPipeline(client));
 
   const document = createConnectorDocument({
-    indexName: input.index_name,
-    isNative: input.is_native,
-    language: input.language,
+    ...input,
     pipeline,
-    serviceType: input.service_type ?? null,
+    serviceType: input.serviceType || null,
   });
 
-  return await createConnector(document, client, input.language, !!input.delete_existing_connector);
+  return await createConnector(document, client, input.language, !!input.deleteExistingConnector);
 };
