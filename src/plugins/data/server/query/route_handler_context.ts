@@ -14,8 +14,9 @@ import { extract, inject } from '../../common/query/filters/persistable_state';
 function injectReferences({
   id,
   attributes,
+  namespaces,
   references,
-}: Pick<SavedObject<SavedQueryAttributes>, 'id' | 'attributes' | 'references'>) {
+}: Pick<SavedObject<SavedQueryAttributes>, 'id' | 'attributes' | 'namespaces' | 'references'>) {
   const { query } = attributes;
   if (isOfQueryType(query) && typeof query.query === 'string') {
     try {
@@ -26,7 +27,7 @@ function injectReferences({
     }
   }
   const filters = inject(attributes.filters ?? [], references);
-  return { id, attributes: { ...attributes, filters } };
+  return { id, attributes: { ...attributes, filters }, namespaces };
 }
 
 function extractReferences({
@@ -156,7 +157,7 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
   };
 
   const deleteSavedQuery = async (id: string) => {
-    return await soClient.delete('query', id);
+    return await soClient.delete('query', id, { force: true });
   };
 
   return {
