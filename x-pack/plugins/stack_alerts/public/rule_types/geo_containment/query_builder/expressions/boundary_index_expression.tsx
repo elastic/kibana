@@ -29,7 +29,6 @@ interface Props {
   setBoundaryNameField: (boundaryNameField?: string) => void;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  operation: string;
 }
 
 interface KibanaDeps {
@@ -46,11 +45,10 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   setBoundaryNameField,
   data,
   unifiedSearch,
-  operation,
 }) => {
   const { http } = useKibana<KibanaDeps>().services;
   const IndexPatternSelect = (unifiedSearch.ui && unifiedSearch.ui.IndexPatternSelect) || null;
-  const { boundaryGeoField } = ruleParams;
+  const { boundaryGeoField, operation } = ruleParams;
 
   const nothingSelected: DataViewField = useMemo(
     () =>

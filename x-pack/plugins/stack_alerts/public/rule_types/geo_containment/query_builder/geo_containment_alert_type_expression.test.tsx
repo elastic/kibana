@@ -27,6 +27,7 @@ const alertParams = {
   boundaryIndexTitle: '',
   boundaryIndexId: '',
   boundaryGeoField: '',
+  operation: 'create',
 };
 
 test('should render EntityIndexExpression', async () => {

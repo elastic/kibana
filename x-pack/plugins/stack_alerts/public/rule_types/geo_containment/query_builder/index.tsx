@@ -64,16 +64,7 @@ function validateQuery(query: Query) {
 
 export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
-> = ({
-  ruleParams,
-  ruleInterval,
-  setRuleParams,
-  setRuleProperty,
-  errors,
-  data,
-  unifiedSearch,
-  operation,
-}) => {
+> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data, unifiedSearch }) => {
   const {
     index,
     indexId,
@@ -87,6 +78,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
     boundaryIndexQuery,
     boundaryGeoField,
     boundaryNameField,
+    operation,
   } = ruleParams;
 
   const { http, docLinks, uiSettings, notifications, storage, usageCollection, dataViews } =
@@ -253,7 +245,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
       </EuiTitle>
       <EuiSpacer size="s" />
       <BoundaryIndexExpression
-        operation={operation}
         ruleParams={ruleParams}
         errors={errors}
         boundaryIndexPattern={boundaryIndexPattern}

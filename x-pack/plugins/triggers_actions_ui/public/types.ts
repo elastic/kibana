@@ -393,7 +393,6 @@ export interface RuleTypeParamsExpressionProps<
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  operation: string;
 }
 
 export type RuleParamsForRules = Record<

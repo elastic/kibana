@@ -21,6 +21,7 @@ export interface GeoContainmentAlertParams extends RuleTypeParams {
   boundaryNameField?: string;
   indexQuery?: Query;
   boundaryIndexQuery?: Query;
+  operation: string;
 }
 
 // Will eventually include 'geo_shape'

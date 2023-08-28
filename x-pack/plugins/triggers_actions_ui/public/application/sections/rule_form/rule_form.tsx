@@ -589,7 +589,6 @@ export const RuleForm = ({
               dataViews={dataViews}
               unifiedSearch={unifiedSearch}
               onChangeMetaData={onChangeMetaData}
-              operation={operation}
             />
           </Suspense>
         </EuiErrorBoundary>
