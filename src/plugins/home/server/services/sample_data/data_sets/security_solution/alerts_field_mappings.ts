@@ -6,6 +6,20 @@
  * Side Public License, v 1.
  */
 export const alertsFieldMappings = {
+  kibana: {
+    properties: {
+      space_ids: {
+        type: 'keyword',
+      },
+      alert: {
+        properties: {
+          workflow_status: {
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  },
   alert: {
     properties: {
       actions: {

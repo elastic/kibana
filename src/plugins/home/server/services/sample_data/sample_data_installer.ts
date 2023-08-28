@@ -191,14 +191,12 @@ export class SampleDataInstaller {
         await this.esClient.asCurrentUser.indices.createDataStream({
           name: index,
         });
-        console.log('aliases', aliases, index);
         if (aliases) {
           const res = await this.esClient.asCurrentUser.indices.updateAliases({
             actions: Object.entries(aliases).map(([alias]) => ({
               add: { index, alias },
             })),
           });
-          console.log('res', res);
         }
       } else {
         await this.esClient.asCurrentUser.indices.create({
