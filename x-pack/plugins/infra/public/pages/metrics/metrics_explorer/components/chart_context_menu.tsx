@@ -26,7 +26,7 @@ import {
   MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
-import { useNodeDetailsRedirect } from '../../../link_to/redirect_to_node_detail';
+import { useNodeDetailsRedirect } from '../../../link_to';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
 
