@@ -17,7 +17,6 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
-import { generateDataProvider } from '../utils/data_provider';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
@@ -48,6 +47,12 @@ import {
   PREVALENCE_DETAILS_TABLE_TEST_ID,
 } from './test_ids';
 import { useLeftPanelContext } from '../context';
+import {
+  getDataProvider,
+  getDataProviderAnd,
+} from '../../../common/components/event_details/table/use_action_cell_data_provider';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { IS_OPERATOR } from '../../../../common/types';
 
 export const PREVALENCE_TAB_ID = 'prevalence-details';
 const DEFAULT_FROM = 'now-30d';
@@ -65,7 +70,6 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   },
   {
-    field: 'alertCount',
     name: (
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>{PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE}</EuiFlexItem>
@@ -73,25 +77,25 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
       </EuiFlexGroup>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
-    render: (alertCount: number) => {
+    render: (data: PrevalenceData) => {
       const dataProviders = [
-        generateDataProvider('host.name', 'Host-k4p7oce77q'),
-        generateDataProvider('event.kind', 'signal'),
+        getDataProvider(data.field, `timeline-indicator-${data.field}-${data.value}`, data.value),
       ];
-      return (
+      return data.alertCount > 0 ? (
         <InvestigateInTimelineButton
           asEmptyButton={true}
           dataProviders={dataProviders}
           filters={[]}
         >
-          <>{alertCount}</>
+          <>{data.alertCount}</>
         </InvestigateInTimelineButton>
+      ) : (
+        getEmptyTagValue()
       );
     },
     width: '10%',
   },
   {
-    field: 'docCount',
     name: (
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>{PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE}</EuiFlexItem>
@@ -99,19 +103,36 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
       </EuiFlexGroup>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
-    render: (docCount: number) => {
+    render: (data: PrevalenceData) => {
       const dataProviders = [
-        generateDataProvider('host.name', 'Host-k4p7oce77q'),
-        generateDataProvider('event.kind', 'signal'),
+        {
+          ...getDataProvider(
+            data.field,
+            `timeline-indicator-${data.field}-${data.value}`,
+            data.value
+          ),
+          and: [
+            getDataProviderAnd(
+              'event.kind',
+              `timeline-indicator-event.kind-not-signal`,
+              'signal',
+              IS_OPERATOR,
+              true
+            ),
+          ],
+        },
       ];
-      return (
+      return data.docCount > 0 ? (
         <InvestigateInTimelineButton
           asEmptyButton={true}
           dataProviders={dataProviders}
           filters={[]}
+          keepDataView // changing dataview from only detections to include non-alerts docs
         >
-          <>{docCount}</>
+          <>{data.docCount}</>
         </InvestigateInTimelineButton>
+      ) : (
+        getEmptyTagValue()
       );
     },
     width: '10%',
