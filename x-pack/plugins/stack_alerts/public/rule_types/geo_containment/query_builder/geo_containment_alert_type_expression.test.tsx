@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
@@ -116,6 +116,6 @@ test.only('should render BoundaryIndexExpression in edit mode', async () => {
       operation="create"
     />
   );
-  console.log('component', component)
+  console.log('component', component);
   // expect(component).toMatchSnapshot();
 });
