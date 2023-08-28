@@ -11,7 +11,7 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 
 import type { RuleResponse, ErrorSchema } from '../../model';
 import { getRulesSchemaMock } from '../../model/rule_schema/mocks';
-import { getErrorSchemaMock } from '../../model/error_schema.mocks';
+import { getErrorSchemaMock } from '../../model/error_schema.mock';
 
 import { BulkCrudRulesResponse } from './response_schema';
 

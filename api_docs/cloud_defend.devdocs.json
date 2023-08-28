@@ -390,7 +390,7 @@
                 "section": "def-common.ResponseAction",
                 "text": "ResponseAction"
               },
-              "[]"
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,

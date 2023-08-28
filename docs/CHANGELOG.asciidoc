@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.9.1>>
 * <<release-notes-8.9.0>>
 * <<release-notes-8.8.2>>
 * <<release-notes-8.8.1>>
@@ -45,6 +46,51 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.9.1]]
+== {kib} 8.9.1
+
+Review the following information about the {kib} 8.9.1 release. 
+
+[float]
+[[breaking-changes-8.9.1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.9.0, review the breaking changes, then mitigate the impact to your application.
+
+There are no breaking changes in the {kib} 8.9.1 release.
+
+To review the breaking changes in the previous release, check {kibana-ref-all}/8.9/release-notes-8.9.0.html#breaking-changes-8.9.0[8.9.0].
+
+[float]
+[[fixes-v8.9.1]]
+=== Bug Fixes
+APM::
+* Fixes flame graph rendering on the transaction detail page ({kibana-pull}162968[#162968]).
+* Check if documents are missing `span.name` ({kibana-pull}162899[#162899]).
+* Fixes transaction action menu for Trace Explorer and dependency operations ({kibana-pull}162213[#162213]).
+Canvas::
+* Fixes embeddables not rendering in Canvas ({kibana-pull}163013[#163013]).
+Discover::
+* Fixes grid styles to enable better content wrapping ({kibana-pull}162325[#162325]).
+* Fixes search sessions using temporary data views ({kibana-pull}161029[#161029]).
+* Make share links and search session information shorter for temporary data views ({kibana-pull}161180[#161180]).
+Elastic Security::
+For the Elastic Security 8.9.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes for query error on Agents list in the UI ({kibana-pull}162816[#162816]).
+* Remove duplicate path being pushed to package archive ({kibana-pull}162724[#162724]).
+Management::
+* Resolves potential errors present in v8.9.0 with data views that contain field filters that have been edited ({kibana-pull}162860[#162860]).
+Uptime::
+* Fixes Monitor not found 404 message display ({kibana-pull}163501[#163501]).
+
+[float]
+[[enhancement-v8.9.1]]
+=== Enhancements
+Discover::
+* Set legend width to extra large and enable text wrapping in legend labels ({kibana-pull}163009[#163009]).
+
 [[release-notes-8.9.0]]
 == {kib} 8.9.0
 
@@ -56,8 +102,6 @@ For information about the {kib} 8.9.0 release, review the following information.
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.9.0, review the breaking changes, then mitigate the impact to your application.
-
-// tag::notable-breaking-changes[]
 
 [discrete]
 [[breaking-159118]]
@@ -77,9 +121,6 @@ For synthetic monitoring, we now recommend to use the new Synthetics app. For mo
 *Details* +
 Data from browser monitors and monitors of all types created within the Synthetics App or via the Elastic Synthetics Fleet Integration will no longer appear in Uptime. For more information, refer to {kibana-pull}159012[#159012]
 ====
-      
-
-// end::notable-breaking-changes[]
 
 [float]
 [[deprecations-8.9.0]]

@@ -12,13 +12,17 @@ import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common'
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES, HOSTS_LINK_LOCAL_STORAGE_KEY, HOSTS_VIEW_PATH } from './constants';
+import {
+  DATES,
+  HOSTS_LINK_LOCAL_STORAGE_KEY,
+  HOSTS_VIEW_PATH,
+  DATE_PICKER_FORMAT,
+} from './constants';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
 const START_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataStartDate);
 const END_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataEndDate);
-const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 const tableEntries = [
   {
@@ -93,6 +97,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects([
+    'assetDetails',
     'common',
     'infraHome',
     'timePicker',
@@ -154,6 +159,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const currentUrl = await browser.getCurrentUrl();
       return !!currentUrl.match(path);
     });
+
+  const waitForPageToLoad = async () =>
+    await retry.waitFor(
+      'wait for table and KPI charts to load',
+      async () =>
+        (await pageObjects.infraHostsView.isHostTableLoading()) &&
+        (await pageObjects.infraHostsView.isKPIChartsLoaded())
+    );
 
   describe('Hosts View', function () {
     before(async () => {
@@ -246,189 +259,132 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('#Single host Flyout', () => {
+    describe('#Single Host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await pageObjects.timePicker.setAbsoluteRange(
-          START_HOST_PROCESSES_DATE.format(timepickerFormat),
-          END_HOST_PROCESSES_DATE.format(timepickerFormat)
-        );
-        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
       });
 
-      after(async () => {
-        await retry.try(async () => {
-          await pageObjects.infraHostsView.clickCloseFlyoutButton();
-        });
-      });
-
-      describe('Overview Tab', () => {
+      describe('Tabs', () => {
         before(async () => {
-          await pageObjects.infraHostsView.clickOverviewFlyoutTab();
+          await pageObjects.timePicker.setAbsoluteRange(
+            START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
+            END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+          );
+
+          await waitForPageToLoad();
+
+          await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
         });
 
-        [
-          { metric: 'cpuUsage', value: '13.9%' },
-          { metric: 'normalizedLoad1m', value: '18.8%' },
-          { metric: 'memoryUsage', value: '94.9%' },
-          { metric: 'diskSpaceUsage', value: 'N/A' },
-        ].forEach(({ metric, value }) => {
-          it(`${metric} tile should show ${value}`, async () => {
-            await retry.try(async () => {
-              const tileValue = await pageObjects.infraHostsView.getAssetDetailsKPITileValue(
-                metric
-              );
-              expect(tileValue).to.eql(value);
+        after(async () => {
+          await retry.try(async () => {
+            await pageObjects.infraHostsView.clickCloseFlyoutButton();
+          });
+        });
+
+        describe('Overview Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickOverviewTab();
+          });
+
+          [
+            { metric: 'cpuUsage', value: '13.9%' },
+            { metric: 'normalizedLoad1m', value: '18.8%' },
+            { metric: 'memoryUsage', value: '94.9%' },
+            { metric: 'diskSpaceUsage', value: 'N/A' },
+          ].forEach(({ metric, value }) => {
+            it(`${metric} tile should show ${value}`, async () => {
+              await retry.try(async () => {
+                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
+                  metric
+                );
+                expect(tileValue).to.eql(value);
+              });
             });
           });
-        });
 
-        it('should render 8 charts in the Metrics section', async () => {
-          const hosts = await pageObjects.infraHostsView.getAssetDetailsMetricsCharts();
-          expect(hosts.length).to.equal(8);
-        });
-
-        it('should navigate to metadata tab', async () => {
-          await pageObjects.infraHostsView.clickShowAllMetadataOverviewTab();
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          await pageObjects.infraHostsView.metadataTableExist();
-          await pageObjects.infraHostsView.clickOverviewFlyoutTab();
-        });
-
-        it('should show alerts', async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          await pageObjects.infraHostsView.overviewAlertsTitleExist();
-        });
-
-        it('should open alerts flyout', async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          await pageObjects.infraHostsView.clickOverviewOpenAlertsFlyout();
-          // There are 2 flyouts open (asset details and alerts)
-          // so we need a stricter selector
-          // to be sure that we are closing the alerts flyout
-          const closeAlertFlyout = await find.byCssSelector(
-            '[aria-labelledby="flyoutRuleAddTitle"] > [data-test-subj="euiFlyoutCloseButton"]'
-          );
-          await closeAlertFlyout.click();
-        });
-
-        it('should navigate to alerts', async () => {
-          await pageObjects.infraHostsView.clickOverviewLinkToAlerts();
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          const url = parse(await browser.getCurrentUrl());
-
-          const query = decodeURIComponent(url.query ?? '');
-
-          const alertsQuery =
-            "_a=(kuery:'host.name:\"Jennys-MBP.fritz.box\"',rangeFrom:'2023-03-28T18:20:00.000Z',rangeTo:'2023-03-28T18:21:00.000Z',status:all)";
-
-          expect(url.pathname).to.eql('/app/observability/alerts');
-          expect(query).to.contain(alertsQuery);
-
-          await returnTo(HOSTS_VIEW_PATH);
-        });
-      });
-
-      describe('Metadata Tab', () => {
-        before(async () => {
-          await pageObjects.infraHostsView.clickMetadataFlyoutTab();
-        });
-
-        it('should render metadata tab, add and remove filter', async () => {
-          await pageObjects.infraHostsView.metadataTableExist();
-
-          // Add Pin
-          await pageObjects.infraHostsView.clickAddMetadataPin();
-          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
-
-          // Persist pin after refresh
-          await browser.refresh();
-          await retry.try(async () => {
-            await pageObjects.infraHome.waitForLoading();
-            const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
-            expect(removePinExist).to.be(true);
+          it('should render 8 charts in the Metrics section', async () => {
+            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
+            expect(hosts.length).to.equal(8);
           });
 
-          // Remove Pin
-          await pageObjects.infraHostsView.clickRemoveMetadataPin();
-          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(false);
-
-          await pageObjects.infraHostsView.clickAddMetadataFilter();
-          await pageObjects.header.waitUntilLoadingHasFinished();
-
-          // Add Filter
-          const addedFilter = await pageObjects.infraHostsView.getAppliedFilter();
-          expect(addedFilter).to.contain('host.architecture: arm64');
-          const removeFilterExists = await pageObjects.infraHostsView.getRemoveFilterExist();
-          expect(removeFilterExists).to.be(true);
-
-          // Remove filter
-          await pageObjects.infraHostsView.clickRemoveMetadataFilter();
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          const removeFilterShouldNotExist =
-            await pageObjects.infraHostsView.getRemoveFilterExist();
-          expect(removeFilterShouldNotExist).to.be(false);
+          it('should show alerts', async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            await pageObjects.assetDetails.overviewAlertsTitleExists();
+          });
         });
 
-        it('should render metadata tab, pin and unpin table row', async () => {
-          // Add Pin
-          await pageObjects.infraHostsView.clickAddMetadataPin();
-          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
-
-          // Persist pin after refresh
-          await browser.refresh();
-          await retry.try(async () => {
-            await pageObjects.infraHome.waitForLoading();
-            const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
-            expect(removePinExist).to.be(true);
+        describe('Metadata Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetadataTab();
           });
 
-          // Remove Pin
-          await pageObjects.infraHostsView.clickRemoveMetadataPin();
-          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(false);
-        });
-      });
+          it('should show metadata table', async () => {
+            await pageObjects.assetDetails.metadataTableExists();
+          });
 
-      describe('Processes Tab', () => {
-        before(async () => {
-          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-        });
-        it('should render processes tab and with Total Value summary', async () => {
-          const processesTotalValue =
-            await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
-          const processValue = await processesTotalValue.getVisibleText();
-          expect(processValue).to.eql('313');
+          it('should render metadata tab, add and remove filter', async () => {
+            // Add Filter
+            await pageObjects.assetDetails.clickAddMetadataFilter();
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            const addedFilter = await pageObjects.assetDetails.getMetadataAppliedFilter();
+            expect(addedFilter).to.contain('host.architecture: arm64');
+            const removeFilterExists = await pageObjects.assetDetails.metadataRemoveFilterExists();
+            expect(removeFilterExists).to.be(true);
+
+            // Remove filter
+            await pageObjects.assetDetails.clickRemoveMetadataFilter();
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            const removeFilterShouldNotExist =
+              await pageObjects.assetDetails.metadataRemovePinExists();
+            expect(removeFilterShouldNotExist).to.be(false);
+          });
         });
 
-        it('should expand processes table row', async () => {
-          await pageObjects.infraHostsView.getProcessesTable();
-          await pageObjects.infraHostsView.getProcessesTableBody();
-          await pageObjects.infraHostsView.clickProcessesTableExpandButton();
+        describe('Processes Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickProcessesTab();
+          });
+
+          it('should show processes table', async () => {
+            await pageObjects.assetDetails.processesTableExists();
+          });
         });
-      });
 
-      describe('Logs Tab', () => {
-        before(async () => {
-          await pageObjects.infraHostsView.clickLogsFlyoutTab();
+        describe('Logs Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickLogsTab();
+          });
+
+          it('should render logs tab', async () => {
+            await pageObjects.assetDetails.logsExists();
+          });
         });
-        it('should render logs tab', async () => {
-          await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
-        });
-      });
 
-      describe('Flyout links', () => {
-        it('should navigate to APM services after click', async () => {
-          await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
-          const url = parse(await browser.getCurrentUrl());
-          const query = decodeURIComponent(url.query ?? '');
-          const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
+        describe('Flyout links', () => {
+          it('should navigate to APM services after click', async () => {
+            await pageObjects.assetDetails.clickApmServicesLink();
+            const url = parse(await browser.getCurrentUrl());
+            const query = decodeURIComponent(url.query ?? '');
+            const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
 
-          expect(url.pathname).to.eql('/app/apm/services');
-          expect(query).to.contain(kuery);
+            expect(url.pathname).to.eql('/app/apm/services');
+            expect(query).to.contain(kuery);
 
-          await returnTo(HOSTS_VIEW_PATH);
+            await returnTo(HOSTS_VIEW_PATH);
+          });
+
+          it('should navigate to Host Details page after click', async () => {
+            await pageObjects.assetDetails.clickOpenAsPageLink();
+            const dateRange = await pageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
+            expect(dateRange.start).to.equal(START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT));
+            expect(dateRange.end).to.equal(END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT));
+
+            await returnTo(HOSTS_VIEW_PATH);
+          });
         });
       });
     });
@@ -439,16 +395,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
         await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.timePicker.setAbsoluteRange(
-          START_DATE.format(timepickerFormat),
-          END_DATE.format(timepickerFormat)
+          START_DATE.format(DATE_PICKER_FORMAT),
+          END_DATE.format(DATE_PICKER_FORMAT)
         );
 
-        await retry.waitFor(
-          'wait for table and KPI charts to load',
-          async () =>
-            (await pageObjects.infraHostsView.isHostTableLoading()) &&
-            (await pageObjects.infraHostsView.isKPIChartsLoaded())
-        );
+        await waitForPageToLoad();
       });
 
       it('should render the correct page title', async () => {
@@ -508,37 +459,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('should render alerts count for a host inside a flyout', async () => {
-        await pageObjects.infraHostsView.clickHostCheckbox('demo-stack-mysql-01', '-');
-        await pageObjects.infraHostsView.clickSelectedHostsButton();
-        await pageObjects.infraHostsView.clickSelectedHostsAddFilterButton();
-        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
-
-        const activeAlertsCount = await pageObjects.infraHostsView.getActiveAlertsCountText();
-        const totalAlertsCount = await pageObjects.infraHostsView.getTotalAlertsCountText();
-
-        expect(activeAlertsCount).to.equal('2 ');
-        expect(totalAlertsCount).to.equal('3');
-
-        const deleteFilterButton = await find.byCssSelector(
-          `[title="Delete host.name: demo-stack-mysql-01"]`
-        );
-        await deleteFilterButton.click();
-
-        await pageObjects.infraHostsView.clickCloseFlyoutButton();
-      });
-
-      it('should render "N/A" when processes summary is not available in flyout', async () => {
-        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
-        await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-        const processesTotalValue =
-          await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
-        const processValue = await processesTotalValue.getVisibleText();
-        expect(processValue).to.eql('N/A');
-        await pageObjects.infraHostsView.clickCloseFlyoutButton();
-      });
-
-      describe('KPI tiles', () => {
+      describe('KPIs', () => {
         [
           { metric: 'hostsCount', value: '6' },
           { metric: 'cpuUsage', value: '0.8%' },
@@ -672,12 +593,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         before(async () => {
           await browser.scrollTop();
           await pageObjects.infraHostsView.submitQuery(query);
-          await retry.waitFor(
-            'wait for table and KPI charts to load',
-            async () =>
-              (await pageObjects.infraHostsView.isHostTableLoading()) &&
-              (await pageObjects.infraHostsView.isKPIChartsLoaded())
-          );
+          await await waitForPageToLoad();
         });
 
         after(async () => {

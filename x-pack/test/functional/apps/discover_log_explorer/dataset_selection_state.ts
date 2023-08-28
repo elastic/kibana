@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('when the "index" query param exist', () => {
+    describe('when the "index" query param exists', () => {
       it('should decode and restore the selection from a valid encoded index', async () => {
         const azureActivitylogsIndex =
           'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(datasetSelectionTitle).to.be('[Azure Logs] activitylogs');
       });
 
-      it('should fallback to "All log datasets" selection and notify the user for an invalid encoded index', async () => {
+      it('should fallback to the "All log datasets" selection and notify the user of an invalid encoded index', async () => {
         const invalidEncodedIndex = 'invalid-encoded-index';
         await PageObjects.common.navigateToApp('discover', {
           hash: `/p/log-explorer?_a=(index:${encodeURIComponent(invalidEncodedIndex)})`,
@@ -61,7 +61,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const azureActivitylogsIndex =
           'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
         await PageObjects.common.navigateToApp('discover', {
-          hash: `/p/log-explorer?_a=(index:${encodeURIComponent(azureActivitylogsIndex)})`,
+          hash: `/p/log-explorer?_a=(index:${encodeURIComponent(
+            azureActivitylogsIndex
+          )})&controlPanels=()`,
         });
         const azureDatasetSelectionTitle =
           await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();

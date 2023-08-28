@@ -110,7 +110,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async assertCaseTitle(expectedTitle: string) {
-      const actionTitle = await testSubjects.getVisibleText('header-page-title');
+      const actionTitle = await testSubjects.getVisibleText('editable-title-header-value');
       expect(actionTitle).to.eql(
         expectedTitle,
         `Expected case title to be '${expectedTitle}' (got '${actionTitle}')`
@@ -138,7 +138,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     async closeAssigneesPopover() {
       await retry.try(async () => {
         // Click somewhere outside the popover
-        await testSubjects.click('header-page-title');
+        await testSubjects.click('editable-title-header-value');
         await header.waitUntilLoadingHasFinished();
         await testSubjects.missingOrFail('euiSelectableList');
       });

@@ -9,8 +9,14 @@ xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
 xpack.uptime.enabled: false
-enterpriseSearch.enabled: false
+enterpriseSearch.enabled: true
+enterpriseSearch.canDeployEntSearch: false
+enterpriseSearch.hasConnectors: true
+enterpriseSearch.hasNativeConnectors: false
+enterpriseSearch.hasWebCrawler: false
+enterpriseSearch.ui.enabled: false
 monitoring.ui.enabled: false
+xpack.fleet.enabled: false
 
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
@@ -26,3 +32,6 @@ telemetry.labels.serverless: search
 
 # Alerts config
 xpack.actions.enabledActionTypes: ['.email', '.index', '.slack', '.jira', '.webhook', '.teams']
+
+# Customize empty page state for analytics apps
+no_data_page.analyticsNoDataPageFlavor: 'serverless_search'

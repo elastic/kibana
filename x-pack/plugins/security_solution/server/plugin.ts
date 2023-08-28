@@ -17,6 +17,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
@@ -94,9 +95,9 @@ import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
-import { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
 
 import { AppFeatures } from './lib/app_features';
+import { registerRiskScoringTask } from './lib/risk_engine/tasks/risk_scoring_task';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -120,7 +121,6 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
-  private riskEngineDataClient: RiskEngineDataClient | undefined;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -162,16 +162,13 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.setup(core, plugins);
 
-    this.riskEngineDataClient = new RiskEngineDataClient({
-      logger: this.logger,
-      kibanaVersion: this.pluginContext.env.packageInfo.version,
-      elasticsearchClientPromise: core
-        .getStartServices()
-        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
-    });
-
     if (experimentalFeatures.riskScoringPersistence) {
-      this.riskEngineDataClient.initializeResources({});
+      registerRiskScoringTask({
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+      });
     }
 
     const requestContextFactory = new RequestContextFactory({
@@ -183,7 +180,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleMonitoringService: this.ruleMonitoringService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
-      riskEngineDataClient: this.riskEngineDataClient,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
@@ -254,6 +250,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleExecutionLoggerFactory:
         this.ruleMonitoringService.createRuleExecutionLogClientForExecutors,
       version: pluginContext.env.packageInfo.version,
+      experimentalFeatures: config.experimentalFeatures,
     };
 
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
@@ -442,6 +439,15 @@ export class Plugin implements ISecuritySolutionPlugin {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       plugins.fleet!;
     let manifestManager: ManifestManager | undefined;
+    const endpointFleetServicesFactory = new EndpointFleetServicesFactory(
+      {
+        agentService,
+        packageService,
+        packagePolicyService,
+        agentPolicyService,
+      },
+      core.savedObjects
+    );
 
     this.licensing$ = plugins.licensing.license$;
 
@@ -461,19 +467,26 @@ export class Plugin implements ISecuritySolutionPlugin {
         experimentalFeatures: config.experimentalFeatures,
         packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
         esClient: core.elasticsearch.client.asInternalUser,
+        appFeatures: this.appFeatures,
       });
 
-      // Migrate artifacts to fleet and then start the minifest task after that is done
+      // Migrate artifacts to fleet and then start the manifest task after that is done
       plugins.fleet.fleetSetupCompleted().then(() => {
-        logger.info('Dependent plugin setup complete - Starting ManifestTask');
-
         if (this.manifestTask) {
+          logger.info('Dependent plugin setup complete - Starting ManifestTask');
           this.manifestTask.start({
             taskManager,
           });
         } else {
           logger.error(new Error('User artifacts task not available.'));
         }
+
+        turnOffPolicyProtectionsIfNotSupported(
+          core.elasticsearch.client.asInternalUser,
+          endpointFleetServicesFactory.asInternalUser(),
+          this.appFeatures,
+          logger
+        );
       });
 
       // License related start
@@ -497,15 +510,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         packagePolicyService,
         logger
       ),
-      endpointFleetServicesFactory: new EndpointFleetServicesFactory(
-        {
-          agentService,
-          packageService,
-          packagePolicyService,
-          agentPolicyService,
-        },
-        core.savedObjects
-      ),
+      endpointFleetServicesFactory,
       security: plugins.security,
       alerting: plugins.alerting,
       config: this.config,
@@ -526,6 +531,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ),
       createFleetActionsClient,
       esClient: core.elasticsearch.client.asInternalUser,
+      appFeatures: this.appFeatures,
     });
 
     this.telemetryReceiver.start(

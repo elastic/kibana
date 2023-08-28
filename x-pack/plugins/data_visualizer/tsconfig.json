@@ -13,6 +13,8 @@
   ],
   "kbn_references": [
     "@kbn/ace",
+    "@kbn/aiops-components",
+    "@kbn/aiops-utils",
     "@kbn/charts-plugin",
     "@kbn/cloud-chat-plugin",
     "@kbn/cloud-plugin",
@@ -50,6 +52,7 @@
     "@kbn/ml-data-grid",
     "@kbn/ml-error-utils",
     "@kbn/ml-kibana-theme",
+    "@kbn/ml-in-memory-table",
     "@kbn/react-field",
     "@kbn/rison",
     "@kbn/saved-search-plugin",
@@ -60,7 +63,11 @@
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
-    "@kbn/unified-field-list"
+    "@kbn/unified-field-list",
+    "@kbn/ml-string-hash",
+    "@kbn/ml-random-sampler-utils",
+    "@kbn/data-service",
+    "@kbn/core-notifications-browser"
   ],
   "exclude": [
     "target/**/*",

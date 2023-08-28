@@ -37,7 +37,7 @@ interface AlertTestInstance {
   state: any;
 }
 
-let persistAlertInstances = false; // eslint-disable-line prefer-const
+const persistAlertInstances = false;
 
 type TestRuleState = Record<string, unknown> & {
   aRuleStateKey: string;
@@ -1785,8 +1785,7 @@ describe.skip('The metric threshold alert type', () => {
             },
           ],
           sourceId: 'default',
-          filterQuery: '',
-          filterQueryText:
+          filterQuery:
             'host.name:(look.there.is.no.space.after.these.parentheses)and uh.oh: "wow that is bad"',
         },
       });

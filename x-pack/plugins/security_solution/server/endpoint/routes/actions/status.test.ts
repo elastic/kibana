@@ -14,7 +14,6 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
 import {
   ACTION_STATUS_ROUTE,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
@@ -36,6 +35,7 @@ import type {
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { ActionStatusRequestSchema } from '../../../../common/api/endpoint';
 
 describe('Endpoint Pending Action Summary API', () => {
   let endpointAppContextService: EndpointAppContextService;

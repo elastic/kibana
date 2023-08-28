@@ -18,9 +18,9 @@ import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
-import { observabilityCoPilotConfig } from './services/openai/config';
 
 export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
+export { getParsedFilterQuery } from './utils/get_parsed_filtered_query';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
 export * from './types';
@@ -54,7 +54,6 @@ const configSchema = schema.object({
     groupByPageSize: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
-  aiAssistant: schema.maybe(observabilityCoPilotConfig),
   compositeSlo: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),

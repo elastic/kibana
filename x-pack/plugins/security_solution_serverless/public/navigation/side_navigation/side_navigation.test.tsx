@@ -48,15 +48,14 @@ const sideNavItems = [
   },
 ];
 
-mockUseSideNavItems.mockReturnValue(sideNavItems);
-
 describe('SecuritySideNavigation', () => {
   beforeEach(() => {
+    mockUseSideNavItems.mockReturnValue(sideNavItems);
     jest.clearAllMocks();
   });
 
   it('should render loading when not items received', () => {
-    mockUseSideNavItems.mockReturnValueOnce([]);
+    mockUseSideNavItems.mockReturnValue([]);
     const component = render(<SecuritySideNavigation activeNodes={[]} />, {
       wrapper: I18nProvider,
     });
@@ -103,7 +102,7 @@ describe('SecuritySideNavigation', () => {
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
-        selectedId: ExternalPageName.devToolsRoot,
+        selectedId: ExternalPageName.devTools,
       })
     );
   });

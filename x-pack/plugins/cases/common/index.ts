@@ -58,3 +58,5 @@ export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from '.
 export { StatusAll } from './ui/types';
 export { createUICapabilities } from './utils/capabilities';
 export { getApiTags } from './utils/api_tags';
+export { CaseMetricsFeature } from './types/api';
+export type { SingleCaseMetricsResponse, CasesMetricsResponse } from './types/api';

@@ -112,7 +112,35 @@ const hostViewTotalHostCountRetrieved: InfraTelemetryEvent = {
   },
 };
 
+const assetDetailsFlyoutViewed: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ASSET_DETAILS_FLYOUT_VIEWED,
+  schema: {
+    componentName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Hostname for the clicked host.',
+        optional: false,
+      },
+    },
+    assetType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Cloud provider for the clicked host.',
+        optional: false,
+      },
+    },
+    tabId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Cloud provider for the clicked host.',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const infraTelemetryEvents = [
+  assetDetailsFlyoutViewed,
   hostsViewQuerySubmittedEvent,
   hostsEntryClickedEvent,
   hostFlyoutRemoveFilter,

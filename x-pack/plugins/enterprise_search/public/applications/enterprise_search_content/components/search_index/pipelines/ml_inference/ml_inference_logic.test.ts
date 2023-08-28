@@ -43,9 +43,9 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   existingPipeline: undefined,
   existingInferencePipelines: [],
   formErrors: {
+    fieldMappings: 'Field is required.',
     modelID: 'Field is required.',
     pipelineName: 'Field is required.',
-    sourceField: 'Field is required.',
   },
   index: null,
   isConfigureStepValid: false,
@@ -336,11 +336,9 @@ describe('MlInferenceLogic', () => {
     describe('mlInferencePipeline', () => {
       it('returns undefined when configuration is invalid', () => {
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
-          destinationField: '',
           modelID: '',
-          pipelineName: 'unit-test',
-          sourceField: '',
-          fieldMappings: [],
+          pipelineName: '', // Invalid
+          fieldMappings: [], // Invalid
           targetField: '',
         });
 
@@ -349,11 +347,14 @@ describe('MlInferenceLogic', () => {
       it('generates inference pipeline', () => {
         MLModelsApiLogic.actions.apiSuccess([nerModel]);
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
-          destinationField: '',
           modelID: nerModel.model_id,
           pipelineName: 'unit-test',
-          sourceField: 'body',
-          fieldMappings: [],
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
           targetField: '',
         });
 
@@ -362,10 +363,8 @@ describe('MlInferenceLogic', () => {
       it('returns undefined when existing pipeline not yet selected', () => {
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
           existingPipeline: true,
-          destinationField: '',
           modelID: '',
           pipelineName: '',
-          sourceField: '',
           fieldMappings: [],
           targetField: '',
         });
@@ -382,11 +381,14 @@ describe('MlInferenceLogic', () => {
         });
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
           existingPipeline: true,
-          destinationField: '',
           modelID: '',
           pipelineName: 'unit-test',
-          sourceField: '',
-          fieldMappings: [],
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
           targetField: '',
         });
         expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
@@ -494,8 +496,8 @@ describe('MlInferenceLogic', () => {
       it('has errors when configuration is empty', () => {
         expect(MLInferenceLogic.values.formErrors).toEqual({
           modelID: 'Field is required.',
+          fieldMappings: 'Field is required.',
           pipelineName: 'Field is required.',
-          sourceField: 'Field is required.',
         });
       });
       it('has error for invalid pipeline names', () => {
@@ -503,7 +505,12 @@ describe('MlInferenceLogic', () => {
           ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
           modelID: 'unit-test-model',
           existingPipeline: false,
-          sourceField: 'body',
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
           pipelineName: 'Invalid Pipeline Name',
         });
         const expectedErrors = {
@@ -528,7 +535,12 @@ describe('MlInferenceLogic', () => {
           pipelineName: 'unit-test-pipeline',
           modelID: 'unit-test-model',
           existingPipeline: false,
-          sourceField: 'body',
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
         });
         MLInferenceLogic.actions.fetchPipelineSuccess({
           'mock-pipeline': {},
@@ -546,10 +558,8 @@ describe('MlInferenceLogic', () => {
       const mockModelConfiguration = {
         ...DEFAULT_VALUES.addInferencePipelineModal,
         configuration: {
-          destinationField: 'mock_destination_field',
           modelID: 'mock-model-id',
           pipelineName: 'mock-pipeline-name',
-          sourceField: 'mock_text_field',
         },
         indexName: 'my-index-123',
       };
@@ -561,6 +571,7 @@ describe('MlInferenceLogic', () => {
             configuration: {
               ...mockModelConfiguration.configuration,
               modelID: textExpansionModel.model_id,
+              fieldMappings: [],
             },
           },
         });
@@ -585,37 +596,6 @@ describe('MlInferenceLogic', () => {
               targetField: 'ml.inference.my_source_field2_expanded',
             },
           ],
-          pipelineDefinition: expect.any(Object), // Generation logic is tested elsewhere
-          pipelineName: mockModelConfiguration.configuration.pipelineName,
-        });
-      });
-
-      it('calls makeCreatePipelineRequest with passed pipelineDefinition and default fieldMappings', () => {
-        mount({
-          ...DEFAULT_VALUES,
-          addInferencePipelineModal: {
-            ...mockModelConfiguration,
-            configuration: {
-              ...mockModelConfiguration.configuration,
-              modelID: nerModel.model_id,
-            },
-          },
-        });
-        jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
-
-        MLModelsApiLogic.actions.apiSuccess([nerModel]);
-        MLInferenceLogic.actions.createPipeline();
-
-        expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
-          indexName: mockModelConfiguration.indexName,
-          inferenceConfig: undefined,
-          fieldMappings: [
-            {
-              sourceField: mockModelConfiguration.configuration.sourceField,
-              targetField: `ml.inference.${mockModelConfiguration.configuration.destinationField}`,
-            },
-          ],
-          modelId: nerModel.model_id,
           pipelineDefinition: expect.any(Object), // Generation logic is tested elsewhere
           pipelineName: mockModelConfiguration.configuration.pipelineName,
         });

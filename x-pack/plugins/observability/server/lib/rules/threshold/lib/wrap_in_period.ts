@@ -7,18 +7,18 @@
 
 import moment from 'moment';
 import { MetricExpressionParams } from '../../../../../common/threshold_rule/types';
-import { TIMESTAMP_FIELD } from '../../../../../common/threshold_rule/constants';
 
 export const createLastPeriod = (
   lastPeriodEnd: number,
-  { timeUnit, timeSize }: MetricExpressionParams
+  { timeUnit, timeSize }: MetricExpressionParams,
+  timeFieldName: string
 ) => {
   const start = moment(lastPeriodEnd).subtract(timeSize, timeUnit).toISOString();
   return {
     lastPeriod: {
       filter: {
         range: {
-          [TIMESTAMP_FIELD]: {
+          [timeFieldName]: {
             gte: start,
             lte: moment(lastPeriodEnd).toISOString(),
           },
@@ -29,7 +29,7 @@ export const createLastPeriod = (
 };
 
 export const wrapInCurrentPeriod = <Aggs extends {}>(
-  timeframe: { start: number; end: number },
+  timeframe: { start: number; end: number; timeFieldName: string },
   aggs: Aggs
 ) => {
   return {
@@ -38,7 +38,7 @@ export const wrapInCurrentPeriod = <Aggs extends {}>(
         filters: {
           all: {
             range: {
-              [TIMESTAMP_FIELD]: {
+              [timeframe.timeFieldName]: {
                 gte: moment(timeframe.start).toISOString(),
                 lte: moment(timeframe.end).toISOString(),
               },

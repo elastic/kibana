@@ -67,6 +67,7 @@
     "@kbn/enterprise-search-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/discover-plugin",
-    "@kbn/core-http-common"
+    "@kbn/core-http-common",
+    "@kbn/event-annotation-plugin"
   ]
 }

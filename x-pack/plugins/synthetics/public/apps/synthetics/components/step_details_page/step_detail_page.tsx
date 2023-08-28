@@ -72,7 +72,7 @@ export const StepDetailPage = () => {
                 <BreakdownLegend />
               </EuiFlexItem>
               <EuiFlexItem grow={2} style={{ minWidth: 200 }}>
-                <NetworkTimingsBreakdown monitorId={data?.details?.journey.monitor.id!} />
+                <NetworkTimingsBreakdown monitorQueryId={data?.details?.journey.monitor.id!} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

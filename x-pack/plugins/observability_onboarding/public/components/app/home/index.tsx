@@ -56,7 +56,9 @@ export function Home() {
 
   const { navigateToKibanaUrl } = useKibanaNavigation();
 
-  const handleClickSystemLogs = () => {};
+  const handleClickSystemLogs = () => {
+    navigateToKibanaUrl('/app/observabilityOnboarding/systemLogs');
+  };
   const handleClickCustomLogs = () => {
     navigateToKibanaUrl('/app/observabilityOnboarding/customLogs');
   };

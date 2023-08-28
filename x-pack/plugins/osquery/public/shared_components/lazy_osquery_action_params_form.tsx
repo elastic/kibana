@@ -6,8 +6,6 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '../query_client';
 import type { OsqueryResponseActionsParamsFormProps } from './osquery_response_action_type';
 
 const OsqueryResponseActionParamsForm = lazy(() => import('./osquery_response_action_type'));
@@ -19,13 +17,11 @@ export const getLazyOsqueryResponseActionTypeForm =
 
     return (
       <Suspense fallback={null}>
-        <QueryClientProvider client={queryClient}>
-          <OsqueryResponseActionParamsForm
-            onChange={onChange}
-            defaultValues={defaultValues}
-            onError={onError}
-          />
-        </QueryClientProvider>
+        <OsqueryResponseActionParamsForm
+          onChange={onChange}
+          defaultValues={defaultValues}
+          onError={onError}
+        />
       </Suspense>
     );
   };

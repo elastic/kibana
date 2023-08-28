@@ -25,13 +25,14 @@ Object {
             ],
             "columns": Object {
               "0eb97c09-a351-4280-97da-944e4bd30dd7": Object {
+                "customLabel": true,
                 "dataType": "number",
                 "filter": Object {
                   "language": "kuery",
                   "query": "event.outcome : \\"failure\\" ",
                 },
                 "isBucketed": false,
-                "label": "",
+                "label": " ",
                 "operationType": "count",
                 "scale": "ratio",
                 "sourceField": "___records___",

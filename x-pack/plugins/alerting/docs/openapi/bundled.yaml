@@ -8,12 +8,15 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
-tags:
-  - name: alerting
-    description: Alerting APIs enable you to create and manage rules and alerts.
 servers:
   - url: http://localhost:5601
     description: local
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
+tags:
+  - name: alerting
+    description: Alerting APIs enable you to create and manage rules and alerts.
 paths:
   /s/{spaceId}/api/alerting/rule:
     post:
@@ -728,6 +731,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key:
+    post:
+      summary: Updates the API key for a rule.
+      operationId: updateRuleAPIKey
+      description: The new API key has the credentials of the user that submits the request.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/rule_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1656,13 +1683,15 @@ components:
     actions:
       type: array
       default: []
-      required:
-        - group
-        - id
-        - params
       nullable: true
       items:
         type: object
+        required:
+          - group
+          - id
+          - params
+        description: |
+          An action that runs under defined conditions.
         properties:
           alerts_filter:
             type: object
@@ -1721,7 +1750,7 @@ components:
           frequency:
             type: object
             description: |
-              The parameters that affect how often actions are generated. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
+              The properties that affect how often actions are generated. If the rule type supports setting `summary` to `true`, the action can be a summary of alerts at the specified notification interval. Otherwise, an action runs for each alert at the specified notification interval. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
             required:
               - notify_when
               - summary
@@ -1735,7 +1764,8 @@ components:
                 $ref: '#/components/schemas/throttle'
           group:
             type: string
-            description: The group name for the actions. If you don't need to group actions, set to `default`.
+            description: |
+              The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.
             example: default
           id:
             type: string
@@ -4500,6 +4530,24 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
+    400_response:
+      title: Bad request
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+          enum:
+            - Bad Request
+        message:
+          type: string
+        statusCode:
+          type: integer
+          enum:
+            - 400
     alert_response_properties:
       title: Legacy alert response properties
       type: object
@@ -5214,6 +5262,3 @@ components:
             id: recovered
             name: Recovered
           rule_task_timeout: 5m
-security:
-  - basicAuth: []
-  - apiKeyAuth: []

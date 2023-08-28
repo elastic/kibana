@@ -51,6 +51,9 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -107,6 +110,9 @@ export interface DiscoverServices {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
+  contentClient: ContentClient;
+  serverless?: ServerlessPluginStart;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 export const buildServices = memoize(function (
@@ -165,5 +171,8 @@ export const buildServices = memoize(function (
     unifiedSearch: plugins.unifiedSearch,
     lens: plugins.lens,
     uiActions: plugins.uiActions,
+    contentClient: plugins.contentManagement.client,
+    serverless: plugins.serverless,
+    noDataPage: plugins.noDataPage,
   };
 });

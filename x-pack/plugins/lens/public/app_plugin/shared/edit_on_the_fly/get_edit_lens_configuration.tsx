@@ -14,6 +14,7 @@ import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { isEqual } from 'lodash';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   makeConfigureStore,
@@ -136,6 +137,7 @@ export async function getEditLensConfiguration(
             hideCloseButton
             css={css`
               background: none;
+              clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
             `}
           >
             {children}
@@ -162,7 +164,9 @@ export async function getEditLensConfiguration(
     return getWrapper(
       <Provider store={lensStore}>
         <KibanaContextProvider services={lensServices}>
-          <LensEditConfigurationFlyout {...configPanelProps} />
+          <RootDragDropProvider>
+            <LensEditConfigurationFlyout {...configPanelProps} />
+          </RootDragDropProvider>
         </KibanaContextProvider>
       </Provider>
     );

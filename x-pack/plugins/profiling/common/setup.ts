@@ -16,21 +16,18 @@ export interface SetupState {
   data: {
     available: boolean;
   };
-  packages: {
-    installed: boolean;
-  };
   permissions: {
     configured: boolean;
   };
   policies: {
-    apm: {
-      installed: boolean;
-    };
     collector: {
       installed: boolean;
     };
     symbolizer: {
       installed: boolean;
+    };
+    apm: {
+      profilingEnabled: boolean;
     };
   };
   resource_management: {
@@ -55,21 +52,18 @@ export function createDefaultSetupState(): SetupState {
     data: {
       available: false,
     },
-    packages: {
-      installed: false,
-    },
     permissions: {
       configured: false,
     },
     policies: {
-      apm: {
-        installed: false,
-      },
       collector: {
         installed: false,
       },
       symbolizer: {
         installed: false,
+      },
+      apm: {
+        profilingEnabled: false,
       },
     },
     resource_management: {
@@ -84,15 +78,20 @@ export function createDefaultSetupState(): SetupState {
   };
 }
 
-export function areResourcesSetup(state: SetupState): boolean {
+export function areResourcesSetupForViewer(state: SetupState): boolean {
   return (
-    state.resource_management.enabled &&
-    state.resources.created &&
-    state.packages.installed &&
-    state.permissions.configured &&
-    state.policies.apm.installed &&
     state.policies.collector.installed &&
     state.policies.symbolizer.installed &&
+    !state.policies.apm.profilingEnabled
+  );
+}
+
+export function areResourcesSetupForAdmin(state: SetupState): boolean {
+  return (
+    areResourcesSetupForViewer(state) &&
+    state.resource_management.enabled &&
+    state.resources.created &&
+    state.permissions.configured &&
     state.settings.configured
   );
 }

@@ -69,6 +69,7 @@ import {
   isColumnInvalid,
   cloneLayer,
   getNotifiableFeatures,
+  getUnsupportedOperationsWarningMessage,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -141,7 +142,10 @@ export const removeColumn: Datasource<FormBasedPrivateState>['removeColumn'] = (
   columnId,
   indexPatterns,
 }) => {
-  const indexPattern = indexPatterns[prevState.layers[layerId]?.indexPatternId];
+  const indexPattern = indexPatterns?.[prevState.layers[layerId]?.indexPatternId];
+  if (!indexPattern) {
+    throw new Error('indexPatterns is not passed to the function');
+  }
   return mergeLayer({
     state: prevState,
     layerId,
@@ -798,6 +802,7 @@ export function getFormBasedDatasource({
           core.docLinks,
           setState
         ),
+        ...getUnsupportedOperationsWarningMessage(state, frameDatasourceAPI, core.docLinks),
       ];
 
       const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);

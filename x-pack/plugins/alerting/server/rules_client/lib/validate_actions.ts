@@ -126,7 +126,7 @@ export async function validateActions(
   const actionWithInvalidTimeframe = [];
   const actionsWithInvalidTimeRange = [];
   const actionsWithInvalidDays = [];
-  const actionsWithAlertsFilterWithoutSummaryGetter = [];
+  const actionsWithAlertsFilterWithoutAlertsMapping = [];
 
   for (const action of actions) {
     const { alertsFilter } = action;
@@ -141,8 +141,8 @@ export async function validateActions(
 
     if (alertsFilter) {
       // Action has alertsFilter but the ruleType does not support AAD
-      if (!ruleType.getSummarizedAlerts) {
-        actionsWithAlertsFilterWithoutSummaryGetter.push(action);
+      if (!ruleType.alerts) {
+        actionsWithAlertsFilterWithoutAlertsMapping.push(action);
       }
 
       // alertsFilter must have at least one of query and timeframe
@@ -241,14 +241,14 @@ export async function validateActions(
     );
   }
 
-  if (actionsWithAlertsFilterWithoutSummaryGetter.length > 0) {
+  if (actionsWithAlertsFilterWithoutAlertsMapping.length > 0) {
     errors.push(
       i18n.translate(
         'xpack.alerting.rulesClient.validateActions.actionsWithAlertsFilterWithoutSummaryGetter',
         {
           defaultMessage: `This ruleType ({ruleType}) can't have an action with Alerts Filter. Actions: [{uuids}]`,
           values: {
-            uuids: actionsWithAlertsFilterWithoutSummaryGetter.map((a) => a.uuid).join(', '),
+            uuids: actionsWithAlertsFilterWithoutAlertsMapping.map((a) => a.uuid).join(', '),
             ruleType: ruleType.name,
           },
         }

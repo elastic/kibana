@@ -37,6 +37,7 @@ import {
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
   InstallCloudFormationManagedAgentStep,
+  InstallGoogleCloudShellManagedAgentStep,
   IncomingDataConfirmationStep,
 } from '.';
 
@@ -200,7 +201,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
-  cloudFormationTemplateUrl,
 }) => {
   const kibanaVersion = useKibanaVersion();
   const core = useStartServices();
@@ -247,14 +247,22 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
       );
     }
 
-    if (cloudFormationTemplateUrl) {
+    if (cloudSecurityIntegration?.isCloudFormation) {
       steps.push(
         InstallCloudFormationManagedAgentStep({
           apiKeyData,
           selectedApiKeyId,
           enrollToken,
-          cloudFormationTemplateUrl,
-          agentPolicy,
+          cloudSecurityIntegration,
+        })
+      );
+    } else if (cloudSecurityIntegration?.cloudShellUrl) {
+      steps.push(
+        InstallGoogleCloudShellManagedAgentStep({
+          apiKeyData,
+          selectedApiKeyId,
+          cloudShellUrl: cloudSecurityIntegration.cloudShellUrl,
+          cloudShellCommand: installManagedCommands.googleCloudShell,
         })
       );
     } else {
@@ -314,7 +322,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     link,
     agentDataConfirmed,
     installedPackagePolicy,
-    cloudFormationTemplateUrl,
   ]);
 
   return <EuiSteps steps={instructionsSteps} />;

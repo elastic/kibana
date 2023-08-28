@@ -43,6 +43,7 @@ import type {
   CasesUI,
   AttachmentUI,
 } from '../../common/ui/types';
+import { CaseMetricsFeature } from '../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
@@ -290,14 +291,14 @@ export const basicResolvedCase: ResolvedCase = {
 };
 
 export const basicCaseNumericValueFeatures: SingleCaseMetricsFeature[] = [
-  'alerts.count',
-  'alerts.users',
-  'alerts.hosts',
-  'actions.isolateHost',
-  'connectors',
+  CaseMetricsFeature.ALERTS_COUNT,
+  CaseMetricsFeature.ALERTS_USERS,
+  CaseMetricsFeature.ALERTS_HOSTS,
+  CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
+  CaseMetricsFeature.CONNECTORS,
 ];
 
-export const basicCaseStatusFeatures: SingleCaseMetricsFeature[] = ['lifespan'];
+export const basicCaseStatusFeatures: SingleCaseMetricsFeature[] = [CaseMetricsFeature.LIFESPAN];
 
 export const basicCaseMetrics: SingleCaseMetrics = {
   alerts: {

@@ -25,7 +25,6 @@ import { AlertStates } from './types';
 
 import {
   buildFiredAlertReason,
-  buildInvalidQueryAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
 } from './messages';
@@ -49,17 +48,16 @@ export type MetricThresholdRuleTypeState = RuleTypeState & {
   lastRunTimestamp?: number;
   missingGroups?: Array<string | MissingGroupsRecord>;
   groupBy?: string | string[];
-  filterQuery?: string;
 };
 export type MetricThresholdAlertState = AlertState; // no specific instance state used
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type MetricThresholdAlertContext = {
+
+export interface MetricThresholdAlertContext extends Record<string, unknown> {
   alertDetailsUrl: string;
   groupings?: object;
   reason?: string;
   timestamp: string; // ISO string
   value?: Array<number | null> | null;
-};
+}
 
 export const FIRED_ACTIONS_ID = 'threshold.fired';
 export const NO_DATA_ACTIONS_ID = 'threshold.nodata';
@@ -155,44 +153,6 @@ export const createMetricThresholdExecutor = ({
       alertOnGroupDisappear: boolean | undefined;
     };
 
-    if (!params.filterQuery && params.filterQueryText) {
-      try {
-        const { fromKueryExpression } = await import('@kbn/es-query');
-        fromKueryExpression(params.filterQueryText);
-      } catch (e) {
-        thresholdLogger.error(e.message);
-        const timestamp = startedAt.toISOString();
-        const actionGroupId = FIRED_ACTIONS_ID; // Change this to an Error action group when able
-        const reason = buildInvalidQueryAlertReason(params.filterQueryText);
-        const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId);
-        const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
-        const indexedStartedAt =
-          getAlertStartedDate(UNGROUPED_FACTORY_KEY) ?? startedAt.toISOString();
-
-        alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: await getAlertUrl(
-            alertUuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          ),
-          reason,
-          timestamp,
-          value: null,
-        });
-
-        return {
-          state: {
-            lastRunTimestamp: startedAt.valueOf(),
-            missingGroups: [],
-            groupBy: params.groupBy,
-            filterQuery: params.filterQuery,
-          },
-        };
-      }
-    }
-
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
     const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
     const compositeSize = config.thresholdRule.groupByPageSize;
@@ -205,14 +165,18 @@ export const createMetricThresholdExecutor = ({
 
     const initialSearchSource = await searchSourceClient.create(params.searchConfiguration!);
     const dataView = initialSearchSource.getField('index')!.getIndexPattern();
+    const timeFieldName = initialSearchSource.getField('index')?.timeFieldName;
     if (!dataView) {
       throw new Error('No matched data view');
+    } else if (!timeFieldName) {
+      throw new Error('No timestamp field is specified');
     }
 
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
       dataView,
+      timeFieldName,
       compositeSize,
       alertOnGroupDisappear,
       logger,

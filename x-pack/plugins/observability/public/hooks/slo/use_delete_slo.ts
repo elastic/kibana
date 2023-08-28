@@ -76,9 +76,6 @@ export function useDeleteSlo() {
           })
         );
       },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
-      },
     }
   );
 }

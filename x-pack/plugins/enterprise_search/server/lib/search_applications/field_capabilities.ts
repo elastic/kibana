@@ -15,12 +15,15 @@ import {
 } from '../../../common/types/search_applications';
 
 import { availableIndices } from './available_indices';
+import { fetchAliasIndices } from './fetch_alias_indices';
 
 export const fetchSearchApplicationFieldCapabilities = async (
   client: IScopedClusterClient,
   searchApplication: EnterpriseSearchApplication
 ): Promise<EnterpriseSearchApplicationFieldCapabilities> => {
-  const { name, updated_at_millis, indices } = searchApplication;
+  const { name, updated_at_millis } = searchApplication;
+
+  const indices = await fetchAliasIndices(client, name);
 
   const availableIndicesList = await availableIndices(client, indices);
 

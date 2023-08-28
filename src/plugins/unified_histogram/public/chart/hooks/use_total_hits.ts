@@ -206,6 +206,7 @@ const fetchTotalHitsSearchSource = async ({
       executionContext: {
         description: 'fetch total hits',
       },
+      disableShardFailureWarning: true, // TODO: show warnings as a badge next to total hits number
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),

@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { customLogsRoutes } from '../components/app/custom_logs/wizard';
+import { systemLogsRoutes } from '../components/app/system_logs';
 import { Home } from '../components/app/home';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<
@@ -42,4 +43,5 @@ export const baseRoutes = {
 export const routes = {
   ...baseRoutes,
   ...customLogsRoutes,
+  ...systemLogsRoutes,
 };

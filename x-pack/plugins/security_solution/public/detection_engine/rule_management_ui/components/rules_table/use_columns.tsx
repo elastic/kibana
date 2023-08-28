@@ -37,7 +37,7 @@ import { RuleStatusBadge } from '../../../../detections/components/rules/rule_ex
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
 import { PopoverTooltip } from './popover_tooltip';
 import { useRulesTableContext } from './rules_table/rules_table_context';
@@ -58,6 +58,7 @@ interface ColumnsProps {
 
 interface ActionColumnsProps {
   showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+  confirmDeletion: () => Promise<boolean>;
 }
 
 const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): TableColumn => {
@@ -232,8 +233,12 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
 const useActionsColumn = ({
   showExceptionsDuplicateConfirmation,
+  confirmDeletion,
 }: ActionColumnsProps): EuiTableActionsColumnType<Rule> => {
-  const actions = useRulesTableActions({ showExceptionsDuplicateConfirmation });
+  const actions = useRulesTableActions({
+    showExceptionsDuplicateConfirmation,
+    confirmDeletion,
+  });
 
   return useMemo(() => ({ actions, width: '40px' }), [actions]);
 };
@@ -246,8 +251,12 @@ export const useRulesColumns = ({
   mlJobs,
   startMlJobs,
   showExceptionsDuplicateConfirmation,
+  confirmDeletion,
 }: UseColumnsProps): TableColumn[] => {
-  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
+  const actionsColumn = useActionsColumn({
+    showExceptionsDuplicateConfirmation,
+    confirmDeletion,
+  });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const enabledColumn = useEnabledColumn({
@@ -354,9 +363,13 @@ export const useMonitoringColumns = ({
   mlJobs,
   startMlJobs,
   showExceptionsDuplicateConfirmation,
+  confirmDeletion,
 }: UseColumnsProps): TableColumn[] => {
   const docLinks = useKibana().services.docLinks;
-  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
+  const actionsColumn = useActionsColumn({
+    showExceptionsDuplicateConfirmation,
+    confirmDeletion,
+  });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const enabledColumn = useEnabledColumn({

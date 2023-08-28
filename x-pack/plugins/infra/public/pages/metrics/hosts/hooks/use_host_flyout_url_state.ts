@@ -9,8 +9,6 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import isEmpty from 'lodash/isEmpty';
-import omitBy from 'lodash/omitBy';
 import { FlyoutTabIds } from '../../../../components/asset_details/types';
 import { useUrlState } from '../../../../utils/use_url_state';
 
@@ -36,7 +34,9 @@ export const useHostFlyoutUrlState = (): [HostFlyoutUrl, SetHostFlyoutState] => 
     if (!newProps) {
       setUrlState(DEFAULT_STATE);
     } else {
-      const payload = omitBy(newProps, isEmpty);
+      const payload = Object.fromEntries(
+        Object.entries(newProps).filter(([_, v]) => !!v || v === '')
+      );
       setUrlState({ ...(urlState ?? DEFAULT_STATE), ...payload });
     }
   };
@@ -59,6 +59,10 @@ const HostFlyoutStateRT = rt.intersection([
     tabId: FlyoutTabIdRT,
   }),
   rt.partial({
+    dateRange: rt.type({
+      from: rt.string,
+      to: rt.string,
+    }),
     processSearch: rt.string,
     metadataSearch: rt.string,
     logsSearch: rt.string,
