@@ -134,16 +134,17 @@ export default function ({ getService }: FtrProviderContext) {
           // expect success because we're using the internal header
           expect(body).toEqual({
             authentication_provider: { name: '__http__', type: 'http' },
-            authentication_realm: { name: 'reserved', type: 'reserved' },
+            authentication_realm: { name: 'file1', type: 'file' },
             authentication_type: 'realm',
             elastic_cloud_user: false,
             email: null,
             enabled: true,
             full_name: null,
-            lookup_realm: { name: 'reserved', type: 'reserved' },
-            metadata: { _reserved: true },
+            lookup_realm: { name: 'file1', type: 'file' },
+            metadata: {},
+            operator: true,
             roles: ['superuser'],
-            username: 'elastic',
+            username: 'elastic_serverless',
           });
           expect(status).toBe(200);
         });

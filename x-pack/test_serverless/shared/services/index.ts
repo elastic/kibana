@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export const services = {};
+import {SupertestProvider, SupertestWithoutAuthProvider} from './supertest';
+export const services = {
+  supertest: SupertestProvider,
+  supertestWithoutAuth: SupertestWithoutAuthProvider
+};
