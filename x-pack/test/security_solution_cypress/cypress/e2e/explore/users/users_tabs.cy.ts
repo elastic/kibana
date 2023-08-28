@@ -23,8 +23,6 @@ describe('Users stats and tables', () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'users');
-
-    cy.task('esArchiverLoad', 'risk_users');
   });
 
   beforeEach(() => {
@@ -34,7 +32,6 @@ describe('Users stats and tables', () => {
 
   after(() => {
     cy.task('esArchiverUnload', 'users');
-    cy.task('esArchiverUnload', 'risk_users');
   });
 
   describe('Users page tabs', () => {
