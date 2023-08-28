@@ -206,7 +206,7 @@ export const NavigationEmbeddableLinkEditor = ({
             />
           </EuiFormRow>
 
-          <EuiFormRow label={'Options'}>
+          <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkOptionsLabel()}>
             {selectedLinkType === DASHBOARD_LINK_TYPE ? (
               <DashboardDrilldownOptionsComponent
                 options={linkOptions as DashboardDrilldownOptions}
