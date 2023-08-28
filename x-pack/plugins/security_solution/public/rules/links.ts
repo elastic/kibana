@@ -103,7 +103,6 @@ export const links: LinkItem = {
           defaultMessage: 'MITRE ATT&CK Coverage',
         }),
       ],
-      experimentalKey: 'detectionsCoverageOverview',
     },
   ],
   categories: [
