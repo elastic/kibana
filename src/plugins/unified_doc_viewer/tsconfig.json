@@ -20,7 +20,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/ebt-tools",
     "@kbn/core",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": [
     "target/**/*",
