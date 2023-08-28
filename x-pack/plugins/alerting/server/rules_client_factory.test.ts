@@ -12,6 +12,7 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   loggingSystemMock,
+  savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
@@ -37,6 +38,7 @@ const securityPluginStart = securityMock.createStart();
 
 const alertingAuthorization = alertingAuthorizationMock.create();
 const alertingAuthorizationClientFactory = alertingAuthorizationClientFactoryMock.createFactory();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
@@ -46,6 +48,7 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   spaceIdToNamespace: jest.fn(),
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
   actions: actionsMock.createStart(),
   eventLog: eventLogMock.createStart(),
@@ -102,8 +105,10 @@ test('creates a rules client with proper constructor arguments when security is 
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
     createAPIKey: expect.any(Function),
+    internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
     encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
     kibanaVersion: '7.10.0',
+    maxScheduledPerMinute: 10000,
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
@@ -140,10 +145,12 @@ test('creates a rules client with proper constructor arguments', async () => {
     namespace: 'default',
     getUserName: expect.any(Function),
     createAPIKey: expect.any(Function),
+    internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
     encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
     kibanaVersion: '7.10.0',
+    maxScheduledPerMinute: 10000,
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),

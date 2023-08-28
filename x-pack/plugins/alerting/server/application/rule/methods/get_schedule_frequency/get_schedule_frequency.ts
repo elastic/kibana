@@ -43,12 +43,13 @@ const convertIntervalToFrequency = (context: RulesClientContext, schedule: strin
 export const getScheduleFrequency = async (
   context: RulesClientContext
 ): Promise<GetScheduleFrequencyResult> => {
-  const response = await context.unsecuredSavedObjectsClient.find<
+  const response = await context.internalSavedObjectsRepository.find<
     RuleDomain,
     SchedulesIntervalAggregationResult
   >({
     type: 'alert',
     filter: 'alert.attributes.enabled: true',
+    namespaces: ['*'],
     aggs: {
       schedule_intervals: {
         terms: {
@@ -69,7 +70,10 @@ export const getScheduleFrequency = async (
 
   return {
     totalScheduledPerMinute,
-    remainingSchedulesPerMinute: context.maxScheduledPerMinute - totalScheduledPerMinute,
+    remainingSchedulesPerMinute: Math.max(
+      context.maxScheduledPerMinute - totalScheduledPerMinute,
+      0
+    ),
   };
 };
 
@@ -80,7 +84,7 @@ interface ValidateScheduleLimitParams {
 }
 
 export const validateScheduleLimit = async (params: ValidateScheduleLimitParams) => {
-  const { context, prevInterval = [], updatedInterval } = params;
+  const { context, prevInterval = [], updatedInterval = [] } = params;
 
   const prevIntervalArray = Array.isArray(prevInterval) ? prevInterval : [prevInterval];
   const updatedIntervalArray = Array.isArray(updatedInterval) ? updatedInterval : [updatedInterval];
@@ -103,8 +107,7 @@ export const validateScheduleLimit = async (params: ValidateScheduleLimitParams)
 
   if (computedRemainingSchedulesPerMinute < updatedSchedulesPerMinute) {
     throw new Error(
-      `Failed to validate schedule limit: limit reached (${computedRemainingSchedulesPerMinute}/min < ${updatedSchedulesPerMinute}/min).
-    `
+      `Failed to validate schedule limit: limit reached, Remaining schedule allotment (${computedRemainingSchedulesPerMinute}/min) < New schedules (${updatedSchedulesPerMinute}/min).`
     );
   }
 };

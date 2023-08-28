@@ -61,10 +61,12 @@ export async function createRule<Params extends RuleParams = never>(
 
   try {
     createRuleDataSchema.validate(data);
-    await validateScheduleLimit({
-      context,
-      updatedInterval: data.schedule.interval,
-    });
+    if (data.enabled) {
+      await validateScheduleLimit({
+        context,
+        updatedInterval: data.schedule.interval,
+      });
+    }
   } catch (error) {
     throw Boom.badRequest(`Error validating create data - ${error.message}`);
   }

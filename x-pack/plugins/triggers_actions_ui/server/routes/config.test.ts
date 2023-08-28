@@ -51,6 +51,7 @@ describe('createConfigRoute', () => {
       baseRoute: `/internal/triggers_actions_ui`,
       alertingConfig: () => ({
         isUsingSecurity: true,
+        maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
       }),
       getRulesClientWithRequest: () => mockRulesClient,
@@ -80,6 +81,7 @@ describe('createConfigRoute', () => {
       baseRoute: `/internal/triggers_actions_ui`,
       alertingConfig: () => ({
         isUsingSecurity: true,
+        maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
       }),
       getRulesClientWithRequest: () => mockRulesClient,

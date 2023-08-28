@@ -10,6 +10,7 @@ import {
   Logger,
   SavedObjectsServiceStart,
   PluginInitializerContext,
+  ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
@@ -34,6 +35,7 @@ export interface RulesClientFactoryOpts {
   getSpaceId: (request: KibanaRequest) => string;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  internalSavedObjectsRepository: ISavedObjectsRepository;
   actions: ActionsPluginStartContract;
   eventLog: IEventLogClientService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -53,6 +55,7 @@ export class RulesClientFactory {
   private getSpaceId!: (request: KibanaRequest) => string;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
+  private internalSavedObjectsRepository!: ISavedObjectsRepository;
   private actions!: ActionsPluginStartContract;
   private eventLog!: IEventLogClientService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
@@ -74,6 +77,7 @@ export class RulesClientFactory {
     this.securityPluginStart = options.securityPluginStart;
     this.spaceIdToNamespace = options.spaceIdToNamespace;
     this.encryptedSavedObjectsClient = options.encryptedSavedObjectsClient;
+    this.internalSavedObjectsRepository = options.internalSavedObjectsRepository;
     this.actions = options.actions;
     this.eventLog = options.eventLog;
     this.kibanaVersion = options.kibanaVersion;
@@ -106,6 +110,7 @@ export class RulesClientFactory {
       authorization: this.authorization.create(request),
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
       namespace: this.spaceIdToNamespace(spaceId),
+      internalSavedObjectsRepository: this.internalSavedObjectsRepository,
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       async getUserName() {

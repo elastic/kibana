@@ -295,6 +295,7 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
 
   for await (const response of rulesFinder.find()) {
     const intervals = response.saved_objects
+      .filter((rule) => rule.attributes.enabled)
       .map((rule) => rule.attributes.schedule?.interval)
       .filter(isValidInterval);
 
@@ -320,13 +321,41 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
   }
   await rulesFinder.close();
 
+  const updatedInterval = rules
+    .filter((rule) => rule.attributes.enabled)
+    .map((rule) => rule.attributes.schedule?.interval)
+    .filter(isValidInterval);
+
+  try {
+    await validateScheduleLimit({
+      context,
+      prevInterval,
+      updatedInterval,
+    });
+  } catch (error) {
+    return {
+      apiKeysToInvalidate: Array.from(apiKeysMap.values())
+        .filter((value) => value.newApiKey)
+        .map((value) => value.newApiKey as string),
+      resultSavedObjects: [],
+      rules: [],
+      errors: rules.map((rule) => ({
+        message: `Failed to bulk edit rule - ${error.message}`,
+        rule: {
+          id: rule.id,
+          name: rule.attributes.name || 'n/a',
+        },
+      })),
+      skipped: [],
+    };
+  }
+
   const { result, apiKeysToInvalidate } =
     rules.length > 0
       ? await saveBulkUpdatedRules({
           context,
           rules,
           apiKeysMap,
-          prevInterval,
         })
       : {
           result: { saved_objects: [] },
@@ -842,26 +871,14 @@ async function saveBulkUpdatedRules({
   context,
   rules,
   apiKeysMap,
-  prevInterval,
 }: {
   context: RulesClientContext;
   rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>;
   apiKeysMap: ApiKeysMap;
-  prevInterval: string[];
 }) {
   const apiKeysToInvalidate: string[] = [];
   let result;
   try {
-    const updatedInterval = rules
-      .map((rule) => rule.attributes.schedule?.interval)
-      .filter(isValidInterval);
-
-    validateScheduleLimit({
-      context,
-      prevInterval,
-      updatedInterval,
-    });
-
     // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
     // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
     // bulk_disable, bulk_enable, etc. to fix this cast

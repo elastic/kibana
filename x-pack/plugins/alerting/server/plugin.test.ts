@@ -155,6 +155,7 @@ describe('Alerting Plugin', () => {
 
       expect(setupContract.getConfig()).toEqual({
         isUsingSecurity: false,
+        maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
       });
 

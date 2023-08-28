@@ -7,7 +7,11 @@
 
 import { validateScheduleLimit } from './get_schedule_frequency';
 import { RulesClient, ConstructorOptions } from '../../../../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
@@ -24,6 +28,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.0.0';
 
@@ -38,6 +43,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
@@ -73,7 +79,7 @@ const getMockAggregationResult = (
 
 describe('getScheduleFrequency()', () => {
   beforeEach(() => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue(
+    internalSavedObjectsRepository.find.mockResolvedValue(
       getMockAggregationResult([
         { interval: '1m', count: 1 },
         { interval: '1m', count: 2 },
@@ -101,7 +107,7 @@ describe('getScheduleFrequency()', () => {
   });
 
   test('should handle empty bucket correctly', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue({
+    internalSavedObjectsRepository.find.mockResolvedValue({
       page: 1,
       per_page: 20,
       total: 1,
@@ -116,7 +122,7 @@ describe('getScheduleFrequency()', () => {
   });
 
   test('should handle malformed schedule interval correctly', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue(
+    internalSavedObjectsRepository.find.mockResolvedValue(
       getMockAggregationResult([
         { interval: '1m', count: 1 },
         { interval: '1m', count: 2 },
@@ -134,6 +140,27 @@ describe('getScheduleFrequency()', () => {
     expect(result.totalScheduledPerMinute).toEqual(12);
     expect(result.remainingSchedulesPerMinute).toEqual(88);
   });
+
+  test('should not go below 0 for remaining schedules', async () => {
+    internalSavedObjectsRepository.find.mockResolvedValue(
+      getMockAggregationResult([
+        { interval: '1m', count: 1 },
+        { interval: '1m', count: 2 },
+        { interval: '1m', count: 3 },
+        { interval: '5m', count: 5 },
+        { interval: '5m', count: 10 },
+        { interval: '5m', count: 15 },
+      ])
+    );
+
+    const rulesClient = new RulesClient({
+      ...rulesClientParams,
+      maxScheduledPerMinute: 10,
+    });
+    const result = await rulesClient.getScheduleFrequency();
+    expect(result.totalScheduledPerMinute).toEqual(12);
+    expect(result.remainingSchedulesPerMinute).toEqual(0);
+  });
 });
 
 describe('validateScheduleLimit', () => {
@@ -145,7 +172,7 @@ describe('validateScheduleLimit', () => {
   };
 
   beforeEach(() => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue(
+    internalSavedObjectsRepository.find.mockResolvedValue(
       getMockAggregationResult([{ interval: '1m', count: 2 }])
     );
   });
@@ -169,11 +196,13 @@ describe('validateScheduleLimit', () => {
         context,
         updatedInterval: ['1m', '1m', '1m', '2m'],
       })
-    ).rejects.toThrowError('Failed to validate schedule limit: limit reached (3/min < 3.5/min)');
+    ).rejects.toThrowError(
+      'Failed to validate schedule limit: limit reached, Remaining schedule allotment (3/min) < New schedules (3.5/min)'
+    );
   });
 
   test('should not throw if previous interval was modified to be under the limit', () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue(
+    internalSavedObjectsRepository.find.mockResolvedValue(
       getMockAggregationResult([{ interval: '1m', count: 6 }])
     );
 
@@ -187,7 +216,7 @@ describe('validateScheduleLimit', () => {
   });
 
   test('should throw if the previous interval was modified to exceed the limit', () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue(
+    internalSavedObjectsRepository.find.mockResolvedValue(
       getMockAggregationResult([{ interval: '1m', count: 5 }])
     );
 
@@ -197,6 +226,8 @@ describe('validateScheduleLimit', () => {
         prevInterval: ['1m'],
         updatedInterval: ['30s'],
       })
-    ).rejects.toThrowError('Failed to validate schedule limit: limit reached (1/min < 2/min)');
+    ).rejects.toThrowError(
+      'Failed to validate schedule limit: limit reached, Remaining schedule allotment (1/min) < New schedules (2/min)'
+    );
   });
 });

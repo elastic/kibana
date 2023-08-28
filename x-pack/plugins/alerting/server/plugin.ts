@@ -465,6 +465,7 @@ export class AlertingPlugin {
       taskManager: plugins.taskManager,
       securityPluginSetup: security,
       securityPluginStart: plugins.security,
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {

@@ -90,11 +90,13 @@ async function updateWithOCC<Params extends RuleTypeParams>(
   }
 
   try {
-    await validateScheduleLimit({
-      context,
-      prevInterval: alertSavedObject.attributes.schedule.interval,
-      updatedInterval: data.schedule.interval,
-    });
+    if (alertSavedObject.attributes.enabled) {
+      await validateScheduleLimit({
+        context,
+        prevInterval: alertSavedObject.attributes.schedule?.interval,
+        updatedInterval: data.schedule.interval,
+      });
+    }
   } catch (error) {
     throw Boom.badRequest(`Error validating update data - ${error.message}`);
   }
