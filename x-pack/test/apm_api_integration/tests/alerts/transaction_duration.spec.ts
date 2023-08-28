@@ -97,7 +97,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ruleTypeId: ApmRuleType.TransactionDuration,
           name: 'Apm transaction duration without kql filter',
           params: {
-            kqlFilter: '',
             ...ruleParams,
           },
           actions: [indexAction],
@@ -209,8 +208,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ruleTypeId: ApmRuleType.TransactionDuration,
           name: 'Apm transaction duration with kql filter',
           params: {
-            kqlFilter:
-              'service.name: opbeans-node and transaction.type: request and service.environment: production',
+            searchConfiguration: {
+              query: {
+                query:
+                  'service.name: opbeans-node and transaction.type: request and service.environment: production',
+                language: 'kuery',
+              },
+            },
             ...ruleParams,
           },
           actions: [],
