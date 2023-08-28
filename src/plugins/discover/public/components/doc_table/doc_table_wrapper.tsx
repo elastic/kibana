@@ -209,7 +209,6 @@ export const DocTableWrapper = forwardRef(
         shouldShowFieldHandler,
         onAddColumn,
         onRemoveColumn,
-        DocViewer,
         isPlainRecord,
         rows,
       ]
