@@ -7,9 +7,8 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import rison from '@kbn/rison';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES, NODE_DETAILS_PATH } from './constants';
+import { DATES, NODE_DETAILS_PATH, DATE_PICKER_FORMAT } from './constants';
 
 const START_HOST_ALERTS_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_HOST_ALERTS_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -23,34 +22,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['assetDetails', 'common', 'infraHome', 'header']);
+  const pageObjects = getPageObjects([
+    'assetDetails',
+    'common',
+    'infraHome',
+    'header',
+    'timePicker',
+  ]);
 
-  const getNodeDetailsUrl = (assetName: string, dateRange: { from: string; to: string }) => {
+  const getNodeDetailsUrl = (assetName: string) => {
     const queryParams = new URLSearchParams();
-
-    queryParams.set(
-      '_a',
-      rison.encode({
-        autoReload: false,
-        refreshInterval: 5000,
-        time: { ...dateRange, interval: '>1m' },
-      })
-    );
 
     queryParams.set('assetName', assetName);
 
     return queryParams.toString();
   };
 
-  const navigateToNodeDetails = async (
-    assetId: string,
-    assetName: string,
-    dateRange: { from: string; to: string }
-  ) => {
+  const navigateToNodeDetails = async (assetId: string, assetName: string) => {
     await pageObjects.common.navigateToUrlWithBrowserHistory(
       'infraOps',
       `/${NODE_DETAILS_PATH}/${assetId}`,
-      getNodeDetailsUrl(assetName, dateRange),
+      getNodeDetailsUrl(assetName),
       {
         insertTimestamp: false,
         ensureCurrentUrl: false,
@@ -61,35 +53,77 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Node Details', () => {
     describe('#With Asset Details', () => {
-      describe('#Asset Type: host', () => {
+      before(async () => {
+        await Promise.all([
+          esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
+          esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+          esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
+          kibanaServer.savedObjects.cleanStandardList(),
+        ]);
+        await browser.setWindowSize(1600, 1200);
+
+        await navigateToNodeDetails('Jennys-MBP.fritz.box', 'Jennys-MBP.fritz.box');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      after(async () => {
+        await Promise.all([
+          esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
+          esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+          esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
+        ]);
+      });
+
+      describe('#Date picker', () => {
         before(async () => {
-          await Promise.all([
-            esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
-            esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-            esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
-            kibanaServer.savedObjects.cleanStandardList(),
-          ]);
-          await browser.setWindowSize(1600, 1200);
+          await pageObjects.assetDetails.clickOverviewTab();
 
-          await navigateToNodeDetails('Jennys-MBP.fritz.box', 'Jennys-MBP.fritz.box', {
-            from: START_HOST_PROCESSES_DATE.toISOString(),
-            to: END_HOST_PROCESSES_DATE.toISOString(),
-          });
-
-          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.timePicker.setAbsoluteRange(
+            START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
+            END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+          );
         });
 
         after(async () => {
-          await Promise.all([
-            esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
-            esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-            esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
-          ]);
+          await pageObjects.assetDetails.clickOverviewTab();
+        });
+
+        [{ tab: 'metadata' }, { tab: 'processes' }, { tab: 'logs' }, { tab: 'anomalies' }].forEach(
+          ({ tab }) => {
+            it(`should keep the same date range across tabs: ${tab}`, async () => {
+              const clickFuncs: Record<string, () => void> = {
+                metadata: pageObjects.assetDetails.clickMetadataTab,
+                processes: pageObjects.assetDetails.clickProcessesTab,
+                logs: pageObjects.assetDetails.clickLogsTab,
+                anomalies: pageObjects.assetDetails.clickAnomaliesTab,
+              };
+
+              await clickFuncs[tab]();
+
+              const datePickerValue = await pageObjects.timePicker.getTimeConfig();
+              expect(await pageObjects.timePicker.timePickerExists()).to.be(true);
+              expect(datePickerValue.start).to.equal(
+                START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+              );
+              expect(datePickerValue.end).to.equal(
+                END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+              );
+            });
+          }
+        );
+      });
+
+      describe('#Asset Type: host', () => {
+        before(async () => {
+          await pageObjects.timePicker.setAbsoluteRange(
+            START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
+            END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+          );
         });
 
         describe('Overview Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickOverviewFlyoutTab();
+            await pageObjects.assetDetails.clickOverviewTab();
           });
 
           [
@@ -121,7 +155,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metadata Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickMetadataFlyoutTab();
+            await pageObjects.assetDetails.clickMetadataTab();
           });
 
           it('should show metadata table', async () => {
@@ -137,7 +171,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await browser.refresh();
             await retry.try(async () => {
               // Temporary until URL state isn't implemented
-              await pageObjects.assetDetails.clickMetadataFlyoutTab();
+              await pageObjects.assetDetails.clickMetadataTab();
               await pageObjects.infraHome.waitForLoading();
               const removePinExist = await pageObjects.assetDetails.metadataRemovePinExists();
               expect(removePinExist).to.be(true);
@@ -151,7 +185,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Processes Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickProcessesFlyoutTab();
+            await pageObjects.assetDetails.clickProcessesTab();
           });
 
           it('should render processes tab and with Total Value summary', async () => {
@@ -170,23 +204,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Logs Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickLogsFlyoutTab();
+            await pageObjects.assetDetails.clickLogsTab();
           });
+
           it('should render logs tab', async () => {
             await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
           });
         });
 
+        describe('Osquery Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickOsqueryTab();
+          });
+
+          it('should show a date picker', async () => {
+            expect(await pageObjects.timePicker.timePickerExists()).to.be(false);
+          });
+        });
+
         describe('Host with alerts and no processes', () => {
           before(async () => {
-            await navigateToNodeDetails('demo-stack-mysql-01', 'demo-stack-mysql-01', {
-              from: START_HOST_ALERTS_DATE.toISOString(),
-              to: END_HOST_ALERTS_DATE.toISOString(),
-            });
+            await navigateToNodeDetails('demo-stack-mysql-01', 'demo-stack-mysql-01');
+            await pageObjects.timePicker.setAbsoluteRange(
+              START_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT),
+              END_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT)
+            );
           });
 
           it('should render alerts count for a host inside a flyout', async () => {
-            await pageObjects.assetDetails.clickOverviewFlyoutTab();
+            await pageObjects.assetDetails.clickOverviewTab();
 
             retry.tryForTime(30 * 1000, async () => {
               await observability.components.alertSummaryWidget.getFullSizeComponentSelectorOrFail();
@@ -202,7 +248,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render "N/A" when processes summary is not available in flyout', async () => {
-            await pageObjects.assetDetails.clickProcessesFlyoutTab();
+            await pageObjects.assetDetails.clickProcessesTab();
             const processesTotalValue =
               await pageObjects.assetDetails.getProcessesTabContentTotalValue();
             const processValue = await processesTotalValue.getVisibleText();

@@ -16,8 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/164753
-  describe.skip('conflicts', () => {
+  describe('conflicts', () => {
     before(() =>
       esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
     );
@@ -46,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 name: 'number_conflict',
                 type: 'number',
-                esTypes: ['integer', 'float'],
+                esTypes: ['float', 'integer'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -55,16 +54,16 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 name: 'string_conflict',
                 type: 'string',
-                esTypes: ['text', 'keyword'],
+                esTypes: ['keyword', 'text'],
                 aggregatable: true,
                 searchable: true,
-                readFromDocValues: false,
+                readFromDocValues: true,
                 metadata_field: false,
               },
               {
                 name: 'success',
                 type: 'conflict',
-                esTypes: ['boolean', 'keyword'],
+                esTypes: ['keyword', 'boolean'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,
