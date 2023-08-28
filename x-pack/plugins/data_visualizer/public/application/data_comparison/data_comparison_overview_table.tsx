@@ -250,13 +250,11 @@ export const DataComparisonOverviewTable = ({
   };
 
   const toggleDetails = (item: Feature) => {
-    // console.log(`--@@item`, item);
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
     if (itemIdToExpandedRowMapValues[item.featureName]) {
       delete itemIdToExpandedRowMapValues[item.featureName];
     } else {
-      const { featureName, comparisonDistribution } = item;
       itemIdToExpandedRowMapValues[item.featureName] = (
         <DataComparisonDistributionChart item={item} colors={colors} />
       );

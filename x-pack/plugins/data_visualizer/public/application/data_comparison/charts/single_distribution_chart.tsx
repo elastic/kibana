@@ -6,12 +6,13 @@
  */
 
 import { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import React, { useMemo } from 'react';
+import { defaultValueFormatter } from './default_value_formatter';
+import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
 import { NoChartsData } from './no_charts_data';
 import { DATA_COMPARISON_TYPE } from '../constants';
 import { DataComparisonField, Histogram } from '../types';
-const defaultFormatter = (d: unknown) => Number(d).toFixed(2);
 
 export const SingleDistributionChart = ({
   data,
@@ -25,7 +26,7 @@ export const SingleDistributionChart = ({
   fieldType?: DataComparisonField['type'];
 }) => {
   const valueFormatter = useMemo(
-    () => (fieldType === DATA_COMPARISON_TYPE.NUMERIC ? defaultFormatter : undefined),
+    () => (fieldType === DATA_COMPARISON_TYPE.NUMERIC ? defaultValueFormatter : undefined),
     [fieldType]
   );
 
@@ -33,7 +34,17 @@ export const SingleDistributionChart = ({
 
   return (
     <Chart>
+      <Tooltip body={DataComparisonChartTooltipBody} />
+
       <Settings />
+      <Axis
+        id="vertical"
+        position={Position.Left}
+        tickFormat={valueFormatter}
+        domain={{ min: 0, max: 1 }}
+        hide={true}
+      />
+
       <Axis
         id="bottom"
         position={Position.Bottom}

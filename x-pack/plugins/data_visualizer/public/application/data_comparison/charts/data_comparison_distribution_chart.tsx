@@ -7,15 +7,14 @@
 
 import { Axis, BarSeries, Chart, Tooltip, Position, ScaleType, Settings } from '@elastic/charts';
 import React, { useMemo } from 'react';
-import { TickFormatter } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { NoChartsData } from './no_charts_data';
 import type { Feature } from '../types';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE } from '../constants';
 import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
+import { defaultValueFormatter } from './default_value_formatter';
 
 const CHART_HEIGHT = 200;
 
-const defaultFormatter: TickFormatter = (d: unknown) => Number(d).toFixed(2);
 export const DataComparisonDistributionChart = ({
   item,
   colors,
@@ -24,7 +23,7 @@ export const DataComparisonDistributionChart = ({
   colors: { referenceColor: string; productionColor: string };
 }) => {
   const valueFormatter = useMemo(
-    () => (item?.fieldType === DATA_COMPARISON_TYPE.NUMERIC ? defaultFormatter : undefined),
+    () => (item?.fieldType === DATA_COMPARISON_TYPE.NUMERIC ? defaultValueFormatter : undefined),
     [item?.fieldType]
   );
 
@@ -42,7 +41,12 @@ export const DataComparisonDistributionChart = ({
           tickFormat={valueFormatter}
           labelFormat={valueFormatter}
         />
-        <Axis id="vertical" position={Position.Left} tickFormat={valueFormatter} />
+        <Axis
+          id="vertical"
+          position={Position.Left}
+          tickFormat={valueFormatter}
+          domain={{ min: 0, max: 1 }}
+        />
         <BarSeries
           id="data-drift-viz"
           name={featureName}
