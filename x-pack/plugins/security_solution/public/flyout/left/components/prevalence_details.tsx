@@ -17,6 +17,8 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
+import { generateDataProvider } from '../utils/data_provider';
+import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
@@ -71,6 +73,21 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
       </EuiFlexGroup>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
+    render: (alertCount: number) => {
+      const dataProviders = [
+        generateDataProvider('host.name', 'Host-k4p7oce77q'),
+        generateDataProvider('event.kind', 'signal'),
+      ];
+      return (
+        <InvestigateInTimelineButton
+          asEmptyButton={true}
+          dataProviders={dataProviders}
+          filters={[]}
+        >
+          <>{alertCount}</>
+        </InvestigateInTimelineButton>
+      );
+    },
     width: '10%',
   },
   {
@@ -82,6 +99,21 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
       </EuiFlexGroup>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
+    render: (docCount: number) => {
+      const dataProviders = [
+        generateDataProvider('host.name', 'Host-k4p7oce77q'),
+        generateDataProvider('event.kind', 'signal'),
+      ];
+      return (
+        <InvestigateInTimelineButton
+          asEmptyButton={true}
+          dataProviders={dataProviders}
+          filters={[]}
+        >
+          <>{docCount}</>
+        </InvestigateInTimelineButton>
+      );
+    },
     width: '10%',
   },
   {
