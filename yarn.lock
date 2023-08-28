@@ -4962,6 +4962,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/no-data-page-plugin@link:src/plugins/no_data_page":
+  version "0.0.0"
+  uid ""
+
 "@kbn/notifications-plugin@link:x-pack/plugins/notifications":
   version "0.0.0"
   uid ""
