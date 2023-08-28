@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export const transformAggregateResponse: RewriteRequestCase<AggregateOptions> = ({
+import { RewriteRequestCase } from '@kbn/actions-plugin/common';
+import { AggregateOptions } from '../../../../../../application/rule/methods/aggregate';
+
+export const transformAggregateQueryRequest: RewriteRequestCase<AggregateOptions> = ({
   default_search_operator: defaultSearchOperator,
   has_reference: hasReference,
   search_fields: searchFields,

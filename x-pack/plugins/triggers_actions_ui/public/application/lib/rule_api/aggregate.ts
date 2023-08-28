@@ -54,6 +54,7 @@ export async function loadRuleAggregations({
   const res = await http.post<AsApiContract<RuleAggregationFormattedResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
+      // TODO: validate body schema
       body: JSON.stringify({
         search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
         search: searchText,
@@ -62,5 +63,6 @@ export async function loadRuleAggregations({
       }),
     }
   );
+  // TODO: import from alerting/common
   return rewriteBodyRes(res);
 }

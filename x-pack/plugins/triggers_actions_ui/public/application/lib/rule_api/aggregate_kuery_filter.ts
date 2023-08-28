@@ -31,11 +31,14 @@ export async function loadRuleAggregationsWithKueryFilter({
   const res = await http.post<AsApiContract<RuleAggregationFormattedResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
+      // TODO: validate body schema
       body: JSON.stringify({
         ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
         default_search_operator: 'AND',
       }),
     }
   );
+
+  // TODO: import from alerting/common
   return rewriteBodyRes(res);
 }

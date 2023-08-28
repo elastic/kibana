@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const transformAggregateBody: RewriteResponseCase<RuleAggregationFormattedResult> = ({
+import { RewriteResponseCase } from '@kbn/actions-plugin/common';
+import { RuleAggregationFormattedResult } from '../../../../../../../common';
+
+export const transformAggregateBodyResponse: RewriteResponseCase<
+  RuleAggregationFormattedResult
+> = ({
   ruleExecutionStatus,
   ruleLastRunOutcome,
   ruleEnabledStatus,

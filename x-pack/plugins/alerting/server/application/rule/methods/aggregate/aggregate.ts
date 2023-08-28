@@ -6,13 +6,14 @@
  */
 
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import { RuleAttributes } from '../../../../data/rule/types';
+import { validateRuleAggregationFields } from '../../../../../common/routes/rule/validation/validate_rule_aggregation_fields/latest';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { buildKueryNodeFilter } from '../../../../rules_client/common';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import { RulesClientContext } from '../../../../rules_client/types';
-import { RawRule } from '../../../../types';
-import { validateRuleAggregationFields } from '../../../../rules_client/lib/validate_rule_aggregation_fields';
+
 import type { AggregateParams } from './types';
 
 export async function aggregate<T = Record<string, unknown>>(
@@ -42,7 +43,7 @@ export async function aggregate<T = Record<string, unknown>>(
   const { filter: authorizationFilter } = authorizationTuple;
   const filterKueryNode = buildKueryNodeFilter(filter);
 
-  const result = await context.unsecuredSavedObjectsClient.find<RawRule, T>({
+  const result = await context.unsecuredSavedObjectsClient.find<RuleAttributes, T>({
     ...restOptions,
     filter:
       authorizationFilter && filterKueryNode

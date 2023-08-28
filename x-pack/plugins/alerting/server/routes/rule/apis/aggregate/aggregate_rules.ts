@@ -7,6 +7,7 @@
 
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
@@ -17,7 +18,8 @@ import {
 } from '../../../../../common/routes/rule/apis/aggregate';
 import { getDefaultRuleAggregationV1 } from './factories';
 import { formatDefaultAggregationResultV1 } from './transforms';
-import { transformAggregateBodyV1, transformAggregateResponseV1 } from './transforms';
+import { transformAggregateQueryRequestV1, transformAggregateBodyResponseV1 } from './transforms';
+import { DefaultRuleAggregationResultV1 } from './types';
 
 export const aggregateRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -35,7 +37,7 @@ export const aggregateRulesRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const body: AggregateRulesRequestBodyV1 = req.body;
-        const options = transformAggregateBodyV1({
+        const options = transformAggregateQueryRequestV1({
           ...body,
           has_reference: body.has_reference || undefined,
         });
@@ -43,12 +45,13 @@ export const aggregateRulesRoute = (
           [body.search, body.search_fields].filter(Boolean) as string[],
           usageCounter
         );
-        const aggregateResult = await rulesClient.aggregate<DefaultRuleAggregationResult>({
+
+        const aggregateResult = await rulesClient.aggregate<DefaultRuleAggregationResultV1>({
           aggs: getDefaultRuleAggregationV1(),
           options,
         });
         return res.ok({
-          body: transformAggregateResponseV1(formatDefaultAggregationResultV1(aggregateResult)),
+          body: transformAggregateBodyResponseV1(formatDefaultAggregationResultV1(aggregateResult)),
         });
       })
     )

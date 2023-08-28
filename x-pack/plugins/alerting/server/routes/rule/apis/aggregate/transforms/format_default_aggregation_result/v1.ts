@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import {
+  RuleAggregationFormattedResult,
+  RuleExecutionStatusValues,
+  RuleLastRunOutcomeValues,
+} from '../../../../../../../common';
+import { DefaultRuleAggregationResult } from '../../types/v1';
+
 export const formatDefaultAggregationResult = (
   aggregations: DefaultRuleAggregationResult
 ): RuleAggregationFormattedResult => {

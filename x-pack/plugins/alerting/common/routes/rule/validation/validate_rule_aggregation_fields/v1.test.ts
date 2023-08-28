@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getRuleTagsAggregation, getDefaultRuleAggregation } from '../../../common';
 import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { validateRuleAggregationFields } from './validate_rule_aggregation_fields';
+import { getRuleTagsAggregation } from '../../../../rule_tags_aggregation';
+import { getDefaultRuleAggregation } from '../../../../../server/routes/rule/apis/aggregate/factories';
+import { validateRuleAggregationFields } from './v1';
 
 describe('validateAggregationTerms', () => {
   it('should allow for simple valid aggregations', () => {
