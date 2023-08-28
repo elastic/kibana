@@ -14,7 +14,11 @@ import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewField, DataView } from '@kbn/data-plugin/common';
-import { ES_GEO_SHAPE_TYPES, GeoContainmentAlertParams } from '../../types';
+import {
+  BOUNDARY_NAME_ENTITY_TYPES,
+  ES_GEO_SHAPE_TYPES,
+  GeoContainmentAlertParams,
+} from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
@@ -74,7 +78,6 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   const oldIndexPattern = usePrevious(boundaryIndexPattern);
 
   useEffect(() => {
-    const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
     if (oldIndexPattern !== boundaryIndexPattern) {
       const newGeoFields = [
         ...(boundaryIndexPattern.fields ?? []).filter((field: DataViewField) =>

@@ -26,3 +26,4 @@ export interface GeoContainmentAlertParams extends RuleTypeParams {
 // Will eventually include 'geo_shape'
 export const ES_GEO_FIELD_TYPES = ['geo_point'];
 export const ES_GEO_SHAPE_TYPES = ['geo_shape'];
+export const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];

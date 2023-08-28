@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
@@ -29,6 +29,52 @@ const alertParams = {
   boundaryIndexId: '',
   boundaryGeoField: '',
 };
+
+const boundaryIndexPattern = {
+  title: 'title',
+  fields: [
+    {
+      count: 0,
+      name: 'field1',
+      type: 'geo_point',
+      esTypes: ['geo_point'],
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    },
+    {
+      count: 0,
+      name: 'field2',
+      type: 'string',
+      esTypes: ['keyword'],
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    },
+    {
+      count: 0,
+      name: 'field3',
+      type: 'geo_point',
+      esTypes: ['geo_point'],
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    },
+    {
+      count: 0,
+      name: 'field4',
+      type: 'date',
+      esTypes: ['date'],
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    },
+  ],
+} as unknown as DataView;
 
 test('should render EntityIndexExpression', async () => {
   const component = shallow(
@@ -89,7 +135,8 @@ test('should render BoundaryIndexExpression', async () => {
   expect(component).toMatchSnapshot();
 });
 
-test.only('should render BoundaryIndexExpression in edit mode', async () => {
+test('should call setBoundaryNameField in edit mode', async () => {
+  const setBoundaryNameField = jest.fn();
   const alertParamsEdit = {
     index: '',
     indexId: '',
@@ -102,20 +149,50 @@ test.only('should render BoundaryIndexExpression in edit mode', async () => {
     boundaryGeoField: '',
   };
 
-  const component = render(
+  render(
     <BoundaryIndexExpression
       ruleParams={alertParamsEdit}
       errors={{} as IErrorObject}
-      boundaryIndexPattern={'' as unknown as DataView}
+      boundaryIndexPattern={boundaryIndexPattern}
       setBoundaryIndexPattern={() => {}}
       setBoundaryGeoField={() => {}}
-      setBoundaryNameField={() => {}}
-      boundaryNameField={'testNameField'}
+      setBoundaryNameField={setBoundaryNameField}
+      boundaryNameField={'field4'}
+      data={dataStartMock}
+      unifiedSearch={unifiedSearchStartMock}
+      operation="edit"
+    />
+  );
+  expect(setBoundaryNameField).not.toBeCalled();
+});
+
+test('should not call setBoundaryNameField in create mode', async () => {
+  const setBoundaryNameField = jest.fn();
+  const alertParamsEdit = {
+    index: '',
+    indexId: '',
+    geoField: '',
+    entity: '',
+    dateField: '',
+    boundaryType: '',
+    boundaryIndexTitle: '',
+    boundaryIndexId: '',
+    boundaryGeoField: '',
+  };
+
+  render(
+    <BoundaryIndexExpression
+      ruleParams={alertParamsEdit}
+      errors={{} as IErrorObject}
+      boundaryIndexPattern={boundaryIndexPattern}
+      setBoundaryIndexPattern={() => {}}
+      setBoundaryGeoField={() => {}}
+      setBoundaryNameField={setBoundaryNameField}
+      boundaryNameField={'field4'}
       data={dataStartMock}
       unifiedSearch={unifiedSearchStartMock}
       operation="create"
     />
   );
-  console.log('component', component)
-  // expect(component).toMatchSnapshot();
+  expect(setBoundaryNameField).toBeCalledWith('field2');
 });
