@@ -9,35 +9,31 @@ import React, { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { CustomFieldTypesUI } from './type';
-import { FieldTypeDropdown } from './field_type_dropdown';
+import { CustomFieldTypesUI } from '../type';
+import { FieldOptions } from './index';
 
-interface FieldTypeSelectorProps {
-  customFieldTypes: CustomFieldTypesUI[],
-  dataTestSubj: string;
+interface FieldOptionsSelectorProps {
+  dataTestSubj: string,
+  idAria: string,
   disabled: boolean;
   field: FieldHook<string>;
-  idAria: string;
   isLoading: boolean;
-  handleChange: (newValue: string) => void;
-  selectedType: string;
+  selectedType: CustomFieldTypesUI;
 }
 
-export const FieldTypeSelector = ({
-  customFieldTypes,
-  dataTestSubj,
+export const FieldOptionsSelector = ({
   disabled = false,
   field,
-  idAria,
   isLoading = false,
-  handleChange,
-  selectedType
-}: FieldTypeSelectorProps) => {
+  dataTestSubj,
+  idAria,
+  selectedType,
+}: FieldOptionsSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const onChange = useCallback(
-    (val: string) => {
-      field.setValue(val);
-      handleChange(val);
+
+  const handleOptionChange = useCallback(
+    (checkboxOption) => {
+      field.setValue(checkboxOption);
     },
     [field]
   );
@@ -53,14 +49,15 @@ export const FieldTypeSelector = ({
       label={field.label}
       labelAppend={field.labelAppend}
     >
-      <FieldTypeDropdown
-        customFieldTypes={customFieldTypes}
-        disabled={disabled}
-        isLoading={isLoading}
-        onChange={onChange}
-        selectedType={field.value}
+      <FieldOptions 
+        selectedType={selectedType} 
+        disabled={disabled || isLoading} 
+        handleOptionChange={handleOptionChange}
       />
     </EuiFormRow>
   );
 };
-FieldTypeSelector.displayName = 'FieldTypeSelector';
+
+FieldOptionsSelector.displayName = 'FieldOptionsSelector';
+
+

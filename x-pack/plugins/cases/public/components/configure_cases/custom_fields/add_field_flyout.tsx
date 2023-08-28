@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -16,21 +16,41 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiText
 } from '@elastic/eui';
+import {CustomFieldsForm, CustomFieldFormState} from './form';
 
 import * as i18n from '../translations';
 
 export interface AddFieldFlyoutProps {
   // disabled: boolean;
-  // isLoading: boolean;
+  isLoading: boolean;
   onCloseFlyout: () => void;
   onSaveAndAddAnotherField: () => void;
-  onSaveField: () => void;
+  onSaveField: (data: Record<string, unknown>) => void;
 }
 
-const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({ onCloseFlyout, onSaveAndAddAnotherField, onSaveField }) => {
+const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({ onCloseFlyout, onSaveAndAddAnotherField, onSaveField, isLoading }) => {
   const dataTestSubj = 'add-custom-field-flyout';
+
+  const [formState, setFormState] = useState<CustomFieldFormState>({
+    isSubmitted: false,
+    isSubmitting: false,
+    isValid: undefined,
+    submit: async () => ({ isValid: false, data: {} as CustomFieldFormState }),
+    preSubmitValidator: null,
+  });
+
+  const { submit, isValid: isFormValid, isSubmitting } = formState;
+
+  const handleSaveField = useCallback(
+    async () => {
+      const { isValid, data } = await submit();
+
+      console.log('handleSaveField', {isValid, data} );
+      onSaveField(data);
+    },
+    [onSaveField, submit],
+  )
 
   return (
     <EuiFlyout onClose={onCloseFlyout} data-test-subj={dataTestSubj}>
@@ -40,7 +60,7 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({ onCloseFlyout,
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        
+        <CustomFieldsForm onChange={setFormState} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj={`${dataTestSubj}-footer`}>
         <EuiFlexGroup justifyContent="flexStart">
@@ -57,7 +77,7 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({ onCloseFlyout,
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={onSaveField} data-test-subj={`${dataTestSubj}-save`}>
+                <EuiButton fill onClick={handleSaveField} data-test-subj={`${dataTestSubj}-save`}>
                   {i18n.SAVE_FIELD}
                 </EuiButton>
               </EuiFlexItem>

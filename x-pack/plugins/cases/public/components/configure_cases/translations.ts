@@ -195,3 +195,33 @@ export const FIELD_LABEL = i18n.translate(
     defaultMessage: 'Field label'
   }
 );
+
+export const FIELD_TYPE = i18n.translate(
+  'xpack.cases.configureCases.fieldType',
+  {
+    defaultMessage: 'Field type'
+  }
+);
+
+export const FIELD_OPTIONS = i18n.translate(
+  'xpack.cases.configureCases.fieldOptions',
+  {
+    defaultMessage: 'Options'
+  }
+);
+
+export const FIELD_OPTION_REQUIRED = i18n.translate(
+  'xpack.cases.configureCases.fieldOptionRequired',
+  {
+    defaultMessage: 'Make this field required'
+  }
+);
+
+export const REQUIRED_FIELD = (fieldName: string): string =>
+  i18n.translate(
+    'xpack.cases.configureCases.requiredField',
+    {
+      values: { fieldName },
+      defaultMessage: '{fieldName} is required.'
+    }
+  );
