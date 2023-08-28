@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type {
-  UpsellingService,
+  MessageUpsellings,
   PageUpsellings,
   SectionUpsellings,
   UpsellingSectionId,
-} from '@kbn/security-solution-plugin/public';
-import type {
-  MessageUpsellings,
   UpsellingMessageId,
-} from '@kbn/security-solution-upselling/service/types';
+  UpsellingService,
+} from '@kbn/security-solution-upselling/service';
 import React from 'react';
 import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
+import { AppFeatureKey } from '@kbn/security-solution-features';
 import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';

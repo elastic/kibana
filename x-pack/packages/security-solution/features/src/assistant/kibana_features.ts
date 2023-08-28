@@ -7,10 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { type BaseKibanaFeatureConfig } from '@kbn/security-solution-features';
-import { APP_ID, ASSISTANT_FEATURE_ID } from '../../../common/constants';
-import type { AssistantSubFeatureId } from './security_assistant_kibana_sub_features';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { type BaseKibanaFeatureConfig } from '../types';
+import { APP_ID, ASSISTANT_FEATURE_ID } from '../constants';
 
 export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   id: ASSISTANT_FEATURE_ID,
@@ -47,8 +46,3 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
     },
   },
 });
-
-export const getAssistantBaseKibanaSubFeatureIds = (): AssistantSubFeatureId[] => [
-  // This is a sample sub-feature that can be used for future implementations
-  // AssistantSubFeatureId.createConversation,
-];

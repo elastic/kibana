@@ -12,25 +12,19 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { AppFeatures } from '@kbn/security-solution-features';
-import type { AppFeatureKey, ExperimentalFeatures } from '../../../common';
+import type { AppFeatureKey } from '@kbn/security-solution-features';
+import {
+  getSecurityFeature,
+  getCasesFeature,
+  getAssistantFeature,
+} from '@kbn/security-solution-features';
+import type { ExperimentalFeatures } from '../../../common';
+import { AppFeatures } from './app_features';
 import type { AppFeaturesConfigurator } from './types';
-import {
-  getSecurityBaseKibanaFeature,
-  getSecurityBaseKibanaSubFeatureIds,
-} from './security_kibana_features';
-import {
-  getCasesBaseKibanaFeature,
-  getCasesBaseKibanaSubFeatureIds,
-} from './security_cases_kibana_features';
-import { casesSubFeaturesMap } from './security_cases_kibana_sub_features';
-import { securitySubFeaturesMap } from './security_kibana_sub_features';
-import {
-  getAssistantBaseKibanaFeature,
-  getAssistantBaseKibanaSubFeatureIds,
-} from './security_assistant_kibana_features';
-import { assistantSubFeaturesMap } from './security_assistant_kibana_sub_features';
+import { securityDefaultSavedObjects } from './security_saved_objects';
+import { casesUiCapabilities, casesApiTags } from './cases_privileges';
 
 export class AppFeaturesService {
   private securityAppFeatures: AppFeatures;
@@ -42,34 +36,35 @@ export class AppFeaturesService {
     private readonly logger: Logger,
     private readonly experimentalFeatures: ExperimentalFeatures
   ) {
-    const securityBaseKibanaFeature = getSecurityBaseKibanaFeature();
-    const securityBaseKibanaSubFeatureIds = getSecurityBaseKibanaSubFeatureIds(
-      this.experimentalFeatures
-    );
+    const securityFeature = getSecurityFeature({
+      savedObjects: securityDefaultSavedObjects,
+      experimentalFeatures: this.experimentalFeatures,
+    });
     this.securityAppFeatures = new AppFeatures(
       this.logger,
-      securitySubFeaturesMap,
-      securityBaseKibanaFeature,
-      securityBaseKibanaSubFeatureIds
+      securityFeature.subFeaturesMap,
+      securityFeature.baseKibanaFeature,
+      securityFeature.baseKibanaSubFeatureIds
     );
 
-    const securityCasesBaseKibanaFeature = getCasesBaseKibanaFeature();
-    const securityCasesBaseKibanaSubFeatureIds = getCasesBaseKibanaSubFeatureIds();
+    const casesFeature = getCasesFeature({
+      uiCapabilities: casesUiCapabilities,
+      apiTags: casesApiTags,
+      savedObjects: { files: filesSavedObjectTypes },
+    });
     this.casesAppFeatures = new AppFeatures(
       this.logger,
-      casesSubFeaturesMap,
-      securityCasesBaseKibanaFeature,
-      securityCasesBaseKibanaSubFeatureIds
+      casesFeature.subFeaturesMap,
+      casesFeature.baseKibanaFeature,
+      casesFeature.baseKibanaSubFeatureIds
     );
 
-    // register security assistant Kibana features
-    const securityAssistantBaseKibanaFeature = getAssistantBaseKibanaFeature();
-    const securityAssistantBaseKibanaSubFeatureIds = getAssistantBaseKibanaSubFeatureIds();
+    const assistantFeature = getAssistantFeature();
     this.securityAssistantAppFeatures = new AppFeatures(
       this.logger,
-      assistantSubFeaturesMap,
-      securityAssistantBaseKibanaFeature,
-      securityAssistantBaseKibanaSubFeatureIds
+      assistantFeature.subFeaturesMap,
+      assistantFeature.baseKibanaFeature,
+      assistantFeature.baseKibanaSubFeatureIds
     );
   }
 

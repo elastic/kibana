@@ -13,7 +13,7 @@ import type {
   AppFeaturesConfig,
   AppSubFeaturesMap,
   BaseKibanaFeatureConfig,
-} from './types';
+} from '@kbn/security-solution-features';
 
 const category = {
   id: 'security',

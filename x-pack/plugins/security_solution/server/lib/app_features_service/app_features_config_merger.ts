@@ -12,7 +12,7 @@ import type {
   AppFeatureKibanaConfig,
   BaseKibanaFeatureConfig,
   SubFeaturesPrivileges,
-} from './types';
+} from '@kbn/security-solution-features';
 
 export class AppFeaturesConfigMerger<T extends string = string> {
   constructor(

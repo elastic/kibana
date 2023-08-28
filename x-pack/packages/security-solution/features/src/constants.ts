@@ -5,5 +5,18 @@
  * 2.0.
  */
 
-export const APP_ID = 'securitySolution';
-export const SERVER_APP_ID = 'siem';
+// Same as the plugin id defined by Security Solution
+export const APP_ID = 'securitySolution' as const;
+export const SERVER_APP_ID = 'siem' as const;
+
+export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
+export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
+
+// Same as the plugin id defined by Cloud Security Posture
+export const CLOUD_POSTURE_APP_ID = 'csp' as const;
+
+/**
+ * Id for the notifications alerting type
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export const LEGACY_NOTIFICATIONS_ID = `siem.notifications` as const;

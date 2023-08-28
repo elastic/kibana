@@ -22,7 +22,7 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
-import { AppFeatureSecurityKey } from '../../common/types/app_features';
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features';
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,

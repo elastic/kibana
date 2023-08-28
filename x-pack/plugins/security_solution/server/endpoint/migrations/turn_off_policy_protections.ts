@@ -8,12 +8,12 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features';
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { PolicyData } from '../../../common/endpoint/types';
-import { AppFeatureSecurityKey } from '../../../common/types/app_features';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
 import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';

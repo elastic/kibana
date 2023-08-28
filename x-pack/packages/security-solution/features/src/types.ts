@@ -46,9 +46,15 @@ export type AppFeaturesCasesConfig = Map<
   AppFeatureKibanaConfig<CasesSubFeatureId>
 >;
 
-export type AppFeaturesSecurityAssistantConfig = Map<
+export type AppFeaturesAssistantConfig = Map<
   AppFeatureAssistantKey,
   AppFeatureKibanaConfig<AssistantSubFeatureId>
 >;
 
 export type AppSubFeaturesMap<T extends string = string> = Map<T, SubFeatureConfig>;
+
+export interface AppFeatureParams<T extends string = string> {
+  baseKibanaFeature: BaseKibanaFeatureConfig;
+  baseKibanaSubFeatureIds: T[];
+  subFeaturesMap: AppSubFeaturesMap<T>;
+}

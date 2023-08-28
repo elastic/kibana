@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME, ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
+export {
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  ES_FIXED_SIZE_INDEX_BLOB_STORE,
+  FILE_SO_TYPE,
+  FILE_SHARE_SO_TYPE,
+} from './constants';
 
 export type {
   File,

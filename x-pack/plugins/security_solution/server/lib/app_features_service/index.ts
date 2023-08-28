@@ -4,6 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export const mockGetAppUrl = jest.fn();
-export const mockNavigateTo = jest.fn();
+export { AppFeaturesService } from './app_features_service';

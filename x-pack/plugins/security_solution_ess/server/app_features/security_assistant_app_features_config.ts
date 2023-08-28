@@ -5,29 +5,19 @@
  * 2.0.
  */
 
+import type { AppFeatureAssistantKey } from '@kbn/security-solution-features';
 import {
-  AppFeatureAssistantKey,
-  type AppFeatureKey,
+  assistantDefaultAppFeaturesConfig,
+  createEnabledAppFeaturesConfigMap,
   type AppFeatureKeys,
   type AppFeatureKibanaConfig,
-  type AppFeaturesSecurityAssistantConfig,
+  type AppFeaturesAssistantConfig,
   type AssistantSubFeatureId,
 } from '@kbn/security-solution-features';
 
 export const getSecurityAssistantAppFeaturesConfigurator =
-  (enabledAppFeatureKeys: AppFeatureKeys) => (): AppFeaturesSecurityAssistantConfig => {
-    const securityAssistantAppFeatureValues: AppFeatureKey[] =
-      Object.values(AppFeatureAssistantKey);
-    const securityAssistantEnabledAppFeatureKeys = enabledAppFeatureKeys.filter((appFeatureKey) =>
-      securityAssistantAppFeatureValues.includes(appFeatureKey)
-    ) as AppFeatureAssistantKey[];
-
-    return new Map(
-      securityAssistantEnabledAppFeatureKeys.map((key) => [
-        key,
-        securityAssistantAppFeaturesConfig[key],
-      ])
-    );
+  (enabledAppFeatureKeys: AppFeatureKeys) => (): AppFeaturesAssistantConfig => {
+    return createEnabledAppFeaturesConfigMap(assistantAppFeaturesConfig, enabledAppFeatureKeys);
   };
 
 /**
@@ -39,15 +29,10 @@ export const getSecurityAssistantAppFeaturesConfigurator =
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Assistant subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Assistant subFeature with the privilege `id` specified.
  */
-const securityAssistantAppFeaturesConfig: Record<
+const assistantAppFeaturesConfig: Record<
   AppFeatureAssistantKey,
   AppFeatureKibanaConfig<AssistantSubFeatureId>
 > = {
-  [AppFeatureAssistantKey.assistant]: {
-    privileges: {
-      all: {
-        ui: ['ai-assistant'],
-      },
-    },
-  },
+  ...assistantDefaultAppFeaturesConfig,
+  // ess-specific app features configs here
 };

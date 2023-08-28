@@ -8,12 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
-import {
-  AppFeatureKey,
-  AppFeaturesPrivileges,
-  SecuritySubFeatureId,
-} from '@kbn/security-solution-features';
-import { APP_ID } from '../../../common';
+import { AppFeaturesPrivilegeId, AppFeaturesPrivileges } from '../app_features_privileges';
+import { SecuritySubFeatureId } from '../app_features_keys';
+import { APP_ID } from '../constants';
+import type { SecurityFeatureParams } from './types';
 
 const endpointListSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
@@ -558,7 +556,7 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ...AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].all,
+          ...AppFeaturesPrivileges[AppFeaturesPrivilegeId.endpointExceptions].all,
         },
         {
           id: 'endpoint_exceptions_read',
@@ -568,14 +566,25 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ...AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].read,
+          ...AppFeaturesPrivileges[AppFeaturesPrivilegeId.endpointExceptions].read,
         },
       ],
     },
   ],
 };
 
-// Defines all the ordered Security subFeatures available
+/**
+ * Sub-features that will always be available for Security
+ * regardless of the product type.
+ */
+export const getSecurityBaseKibanaSubFeatureIds = (
+  { experimentalFeatures }: SecurityFeatureParams // currently un-used, but left here as a convenience for possible future use
+): SecuritySubFeatureId[] => [SecuritySubFeatureId.hostIsolation];
+
+/**
+ * Defines all the Security Assistant subFeatures available.
+ * The order of the subFeatures is the order they will be displayed
+ */
 export const securitySubFeaturesMap = Object.freeze(
   new Map<SecuritySubFeatureId, SubFeatureConfig>([
     [SecuritySubFeatureId.endpointList, endpointListSubFeature],

@@ -50,7 +50,19 @@ export enum AssistantSubFeatureId {
   createConversation = 'createConversationSubFeature',
 }
 
-// Defines all the ordered Security Assistant subFeatures available
+/**
+ * Sub-features that will always be available for Security Assistant
+ * regardless of the product type.
+ */
+export const getAssistantBaseKibanaSubFeatureIds = (): AssistantSubFeatureId[] => [
+  // This is a sample sub-feature that can be used for future implementations
+  // AssistantSubFeatureId.createConversation,
+];
+
+/**
+ * Defines all the Security Assistant subFeatures available.
+ * The order of the subFeatures is the order they will be displayed
+ */
 export const assistantSubFeaturesMap = Object.freeze(
   new Map<AssistantSubFeatureId, SubFeatureConfig>([
     // This is a sample sub-feature that can be used for future implementations

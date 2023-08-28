@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { APP_ID } from '@kbn/security-solution-plugin/common';
+import type { AppFeatureCasesKey } from '@kbn/security-solution-features';
 import {
-  AppFeatureCasesKey,
+  getCasesDefaultAppFeaturesConfig,
+  createEnabledAppFeaturesConfigMap,
   type AppFeatureKibanaConfig,
   type AppFeaturesCasesConfig,
   type AppFeatureKeys,
   type CasesSubFeatureId,
-  type AppFeatureKey,
 } from '@kbn/security-solution-features';
 
 import {
@@ -22,12 +22,7 @@ import {
 
 export const getCasesAppFeaturesConfigurator =
   (enabledAppFeatureKeys: AppFeatureKeys) => (): AppFeaturesCasesConfig => {
-    const casesAppFeatureValues: AppFeatureKey[] = Object.values(AppFeatureCasesKey);
-    const casesEnabledAppFeatureKeys = enabledAppFeatureKeys.filter((appFeatureKey) =>
-      casesAppFeatureValues.includes(appFeatureKey)
-    ) as AppFeatureCasesKey[];
-
-    return new Map(casesEnabledAppFeatureKeys.map((key) => [key, casesAppFeaturesConfig[key]]));
+    return createEnabledAppFeaturesConfigMap(casesAppFeaturesConfig, enabledAppFeatureKeys);
   };
 
 /**
@@ -43,19 +38,9 @@ const casesAppFeaturesConfig: Record<
   AppFeatureCasesKey,
   AppFeatureKibanaConfig<CasesSubFeatureId>
 > = {
-  [AppFeatureCasesKey.casesConnectors]: {
-    privileges: {
-      all: {
-        api: [GET_CONNECTORS_CONFIGURE_API_TAG], // Add cases connector get connectors API privileges
-        ui: [CASES_CONNECTORS_CAPABILITY], // Add cases connector UI privileges
-        cases: {
-          push: [APP_ID], // Add cases connector push privileges
-        },
-      },
-      read: {
-        api: [GET_CONNECTORS_CONFIGURE_API_TAG], // Add cases connector get connectors API privileges
-        ui: [CASES_CONNECTORS_CAPABILITY], // Add cases connector UI privileges
-      },
-    },
-  },
+  ...getCasesDefaultAppFeaturesConfig({
+    apiTags: { connectors: GET_CONNECTORS_CONFIGURE_API_TAG },
+    uiCapabilities: { connectors: CASES_CONNECTORS_CAPABILITY },
+  }),
+  // ess-specific app features configs here
 };

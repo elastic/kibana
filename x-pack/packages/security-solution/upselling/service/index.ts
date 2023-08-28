@@ -5,9 +5,4 @@
  * 2.0.
  */
 export { UpsellingService } from './upselling_service';
-export type {
-  PageUpsellings,
-  SectionUpsellings,
-  UpsellingSectionId,
-  UpsellingMessageId,
-} from './types';
+export * from './types';

@@ -10,12 +10,8 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-p
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
-import {
-  ALL_APP_FEATURE_KEYS,
-  allowedExperimentalValues,
-  type AppFeatureKeys,
-  type ExperimentalFeatures,
-} from '../../../common';
+import { ALL_APP_FEATURE_KEYS, type AppFeatureKeys } from '@kbn/security-solution-features';
+import { allowedExperimentalValues, type ExperimentalFeatures } from '../../../common';
 import { AppFeaturesService } from './app_features_service';
 
 const SECURITY_BASE_CONFIG = {

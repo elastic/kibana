@@ -7,9 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
@@ -19,18 +17,9 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import {
-  type BaseKibanaFeatureConfig,
-  SecuritySubFeatureId,
-} from '@kbn/security-solution-features';
-import type { ExperimentalFeatures } from '../../../common';
-import { APP_ID, LEGACY_NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../common/constants';
-import { savedObjectTypes } from '../../saved_objects';
-
-// Same as the plugin id defined by Cloud Security Posture
-const CLOUD_POSTURE_APP_ID = 'csp';
-// Same as the saved-object type for rules defined by Cloud Security Posture
-const CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE = 'csp_rule';
+import type { BaseKibanaFeatureConfig } from '../types';
+import { APP_ID, SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID, CLOUD_POSTURE_APP_ID } from '../constants';
+import type { SecurityFeatureParams } from './types';
 
 const SECURITY_RULE_TYPES = [
   LEGACY_NOTIFICATIONS_ID,
@@ -43,7 +32,9 @@ const SECURITY_RULE_TYPES = [
   NEW_TERMS_RULE_TYPE_ID,
 ];
 
-export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
+export const getSecurityBaseKibanaFeature = ({
+  savedObjects,
+}: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
   id: SERVER_APP_ID,
   name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
     defaultMessage: 'Security',
@@ -70,14 +61,7 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
         'cloud-security-posture-read',
       ],
       savedObject: {
-        all: [
-          'alert',
-          'exception-list',
-          EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
-          DATA_VIEW_SAVED_OBJECT_TYPE,
-          ...savedObjectTypes,
-          CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
-        ],
+        all: ['alert', ...savedObjects],
         read: [],
       },
       alerting: {
@@ -99,13 +83,7 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
       api: [APP_ID, 'lists-read', 'rac', 'cloud-security-posture-read'],
       savedObject: {
         all: [],
-        read: [
-          'exception-list',
-          EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
-          DATA_VIEW_SAVED_OBJECT_TYPE,
-          ...savedObjectTypes,
-          CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
-        ],
+        read: [...savedObjects],
       },
       alerting: {
         rule: {
@@ -122,7 +100,3 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
     },
   },
 });
-
-export const getSecurityBaseKibanaSubFeatureIds = (
-  _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
-): SecuritySubFeatureId[] => [SecuritySubFeatureId.hostIsolation];

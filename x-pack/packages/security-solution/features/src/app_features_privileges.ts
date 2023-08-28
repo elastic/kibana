@@ -6,10 +6,18 @@
  */
 
 import { APP_ID } from './constants';
-import { AppFeatureKey } from './app_features_keys';
 
+export enum AppFeaturesPrivilegeId {
+  endpointExceptions = 'endpoint_exceptions',
+}
+
+/**
+ * This is the mapping of the privileges that are registered
+ * using a different Kibana feature configuration (sub-feature, main feature privilege, etc)
+ * in each offering type (ess, serverless)
+ */
 export const AppFeaturesPrivileges = {
-  [AppFeatureKey.endpointExceptions]: {
+  [AppFeaturesPrivilegeId.endpointExceptions]: {
     all: {
       ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
       api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],

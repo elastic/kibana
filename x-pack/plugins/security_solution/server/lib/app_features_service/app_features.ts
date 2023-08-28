@@ -12,7 +12,7 @@ import type {
   AppFeaturesConfig,
   AppSubFeaturesMap,
   BaseKibanaFeatureConfig,
-} from './types';
+} from '@kbn/security-solution-features';
 import { AppFeaturesConfigMerger } from './app_features_config_merger';
 
 export class AppFeatures<T extends string = string, S extends string = string> {
