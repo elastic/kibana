@@ -64,6 +64,7 @@ import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -166,6 +167,7 @@ export interface VisualizationsStartDeps {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 /**
@@ -330,6 +332,7 @@ export class VisualizationsPlugin
           listingViewRegistry,
           unifiedSearch: pluginsStart.unifiedSearch,
           serverless: pluginsStart.serverless,
+          noDataPage: pluginsStart.noDataPage,
         };
 
         params.element.classList.add('visAppWrapper');

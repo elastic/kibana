@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { TestProviders } from '../../../common/mock';
 import { EuiBasicTable } from '@elastic/eui';
 import { CorrelationsDetailsAlertsTable, columns } from './correlations_details_alerts_table';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
@@ -17,7 +18,11 @@ jest.mock('@elastic/eui', () => ({
   EuiBasicTable: jest.fn(() => <div data-testid="mock-euibasictable" />),
 }));
 
-describe('AlertsTable', () => {
+const TEST_ID = 'TEST';
+const scopeId = 'scopeId';
+const eventId = 'eventId';
+
+describe('CorrelationsDetailsAlertsTable', () => {
   const alertIds = ['id1', 'id2', 'id3'];
 
   beforeEach(() => {
@@ -59,7 +64,19 @@ describe('AlertsTable', () => {
   });
 
   it('renders EuiBasicTable with correct props', () => {
-    render(<CorrelationsDetailsAlertsTable title={'title'} loading={false} alertIds={alertIds} />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <CorrelationsDetailsAlertsTable
+          title={'title'}
+          loading={false}
+          alertIds={alertIds}
+          scopeId={scopeId}
+          eventId={eventId}
+          data-test-subj={TEST_ID}
+        />
+      </TestProviders>
+    );
+    expect(getByTestId(`${TEST_ID}InvestigateInTimeline`)).toBeInTheDocument();
 
     expect(jest.mocked(usePaginatedAlerts)).toHaveBeenCalled();
 

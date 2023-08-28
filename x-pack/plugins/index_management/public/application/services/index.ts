@@ -24,9 +24,8 @@ export {
   useLoadIndexTemplates,
   simulateIndexTemplate,
   useLoadNodesPlugins,
+  loadIndex,
 } from './api';
-
-export { useLoadIndex } from './indices_api';
 
 export { sortTable } from './sort_table';
 
