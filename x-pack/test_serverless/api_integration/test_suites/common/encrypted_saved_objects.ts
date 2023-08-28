@@ -11,7 +11,8 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  describe('encrypted saved objects', function () {
+  // Error: self-signed certificate in certificate chain
+  describe.skip('encrypted saved objects', function () {
     describe('route access', () => {
       describe('disabled', () => {
         it('rotate key', async () => {

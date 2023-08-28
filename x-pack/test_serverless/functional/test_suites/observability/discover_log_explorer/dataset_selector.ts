@@ -22,7 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'discoverLogExplorer']);
 
-  describe('Dataset Selector', () => {
+  // Error: self-signed certificate in certificate chain
+  describe.skip('Dataset Selector', () => {
     before(async () => {
       await PageObjects.discoverLogExplorer.removeInstalledPackages();
     });
