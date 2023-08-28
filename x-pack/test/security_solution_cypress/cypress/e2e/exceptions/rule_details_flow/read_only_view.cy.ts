@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
 
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
@@ -27,7 +26,7 @@ import {
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 
-describe('Exceptions viewer read only', { tags: tag.ESS }, () => {
+describe('Exceptions viewer read only', { tags: '@ess' }, () => {
   const exceptionList = getExceptionList();
 
   beforeEach(() => {

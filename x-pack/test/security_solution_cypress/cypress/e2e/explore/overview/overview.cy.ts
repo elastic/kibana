@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { HOST_STATS, NETWORK_STATS, OVERVIEW_EMPTY_PAGE } from '../../../screens/overview';
 
@@ -17,7 +16,7 @@ import { cleanKibana } from '../../../tasks/common';
 import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
 
-describe('Overview Page', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'overview');
@@ -65,7 +64,7 @@ describe('Overview Page', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 });
 
-describe('Overview page with no data', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+describe('Overview page with no data', { tags: '@brokenInServerless' }, () => {
   before(() => {
     cy.task('esArchiverUnload', 'auditbeat');
   });
