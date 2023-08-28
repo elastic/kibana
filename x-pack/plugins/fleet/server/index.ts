@@ -21,7 +21,6 @@ export type {
   Artifact,
   ListArtifactsProps,
   MessageSigningServiceInterface,
-  FleetActionsClient,
 } from './services';
 export { getRegistryUrl } from './services';
 

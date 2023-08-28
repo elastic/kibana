@@ -7,8 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
-import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
+import { filter, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
@@ -44,6 +43,7 @@ export const createActionHandler = async (
   const internalSavedObjectsClient = await getInternalSavedObjectsClient(
     osqueryContext.getStartServices
   );
+
   const { soClient, metadata, alertData, error } = options;
   const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
 
@@ -124,19 +124,14 @@ export const createActionHandler = async (
           type: 'INPUT_ACTION',
           input_type: 'osquery',
           agents: query.agents,
-          user_id: metadata?.currentUser,
+          user_id: metadata?.currentUser || 'osquery',
           data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
         })
       )
     : [];
 
   if (fleetActions.length) {
-    await esClientInternal.bulk({
-      refresh: 'wait_for',
-      body: flatten(
-        fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
-      ),
-    });
+    await osqueryContext.service.getFleetActionsClient()?.bulkCreate(fleetActions);
   }
 
   const actionsComponentTemplateExists = await esClientInternal.indices.exists({

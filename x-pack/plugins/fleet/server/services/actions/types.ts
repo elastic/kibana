@@ -104,7 +104,7 @@ export interface FleetActionRequest extends CommonFleetActionResultDocFields {
     signature: string;
   };
   start_time?: string;
-  timeout: number;
+  timeout?: number;
   type: string;
   user_id: string;
 
