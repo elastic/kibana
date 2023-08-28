@@ -7,41 +7,25 @@
  */
 
 import {
-  ACTION_ADD_PANEL,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
-  EmbeddablePackageState,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import {
-  NavigationEmbeddableByValueInput,
-  NavigationEmbeddableByReferenceInput,
-  NavigationEmbeddableInput,
-} from './types';
+import { NavigationEmbeddableByReferenceInput, NavigationEmbeddableInput } from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import type { NavigationEmbeddable } from './navigation_embeddable';
-import { NAV_VERTICAL_LAYOUT } from '../../common/content_management';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
-export interface NavigationEmbeddableCreationOptions {
-  getInitialInput?: () => Partial<NavigationEmbeddableInput>;
-  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
-}
-
 // TODO: Replace string 'OPEN_FLYOUT_ADD_DRILLDOWN' with constant as part of https://github.com/elastic/kibana/issues/154381
-const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableByValueInput, 'id'> => ({
-  attributes: {
-    title: '',
-    layout: NAV_VERTICAL_LAYOUT,
-  },
-  disabledActions: [ACTION_ADD_PANEL, 'OPEN_FLYOUT_ADD_DRILLDOWN'],
+const getDefaultNavigationEmbeddableInput = (): Partial<NavigationEmbeddableInput> => ({
+  disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
 export class NavigationEmbeddableFactoryDefinition
