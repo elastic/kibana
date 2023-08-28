@@ -70,7 +70,8 @@
     "@kbn/serverless",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
-    "@kbn/unified-data-table"
+    "@kbn/unified-data-table",
+    "@kbn/no-data-page-plugin"
   ],
   "exclude": [
     "target/**/*"
