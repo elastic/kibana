@@ -598,12 +598,16 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      // sleep to allow for secrets to be deleted
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      for (let i = 0; i < 3; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const searchRes = await getSecrets();
+        const searchRes = await getSecrets();
+        if (searchRes.hits.hits.length === 0) {
+          return;
+        }
+      }
 
-      expect(searchRes.hits.hits.length).to.eql(0);
+      throw new Error('Secrets not deleted');
     });
 
     it('should not store secrets if fleet server does not meet minimum version', async () => {

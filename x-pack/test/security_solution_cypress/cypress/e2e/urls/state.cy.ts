@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import {
   DATE_PICKER_APPLY_BUTTON_TIMELINE,
   GET_DATE_PICKER_END_DATE_POPOVER_BUTTON,
@@ -70,7 +68,7 @@ const ABSOLUTE_DATE = {
   firefoxStartTimeTyped: '2019-08-01T14:33:29',
 };
 
-describe('url state', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
