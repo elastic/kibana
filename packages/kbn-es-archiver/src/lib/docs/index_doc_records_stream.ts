@@ -18,21 +18,18 @@ enum BulkOperation {
   Index = 'index',
 }
 
-export function createIndexDocRecordsStream(
+export function createIndexDocRecordsStreamSvrLess(
   client: Client,
   stats: Stats,
-  progress: Progress,
   useCreate: boolean = false
-) {
+): Writable {
   return new Writable({
     highWaterMark: 300,
     objectMode: true,
 
     async write(record, enc, callback) {
       try {
-        console.log('\nλjs write');
         await indexDocs([record.value]);
-        progress.addToComplete(1);
         callback(null);
       } catch (err) {
         callback(err);
@@ -41,10 +38,7 @@ export function createIndexDocRecordsStream(
 
     async writev(chunks, callback) {
       try {
-        console.log('\nλjs write VEE');
-        console.log(`\nλjs chunks.length: \n\t${chunks.length}`);
         await indexDocs(chunks.map(({ chunk: record }) => record.value));
-        progress.addToComplete(chunks.length);
         callback(null);
       } catch (err) {
         callback(err);
@@ -94,4 +88,79 @@ export function createIndexDocRecordsStream(
       stats.indexedDoc(doc.data_stream || doc.index);
     }
   }
+}
+
+export function createIndexDocRecordsStream(
+  client: Client,
+  stats: Stats,
+  progress: Progress,
+  useCreate: boolean = false
+) {
+  async function indexDocs(docs: any[]) {
+    const operation = useCreate === true ? BulkOperation.Create : BulkOperation.Index;
+    const ops = new WeakMap<any, any>();
+    const errors: string[] = [];
+
+    await client.helpers.bulk(
+      {
+        retries: 5,
+        datasource: docs.map((doc) => {
+          const body = doc.source;
+          const op = doc.data_stream ? BulkOperation.Create : operation;
+          const index = doc.data_stream || doc.index;
+          ops.set(body, {
+            [op]: {
+              _index: index,
+              _id: doc.id,
+            },
+          });
+          return body;
+        }),
+        onDocument(doc) {
+          return ops.get(doc);
+        },
+        onDrop(dropped) {
+          const dj = JSON.stringify(dropped.document);
+          const ej = JSON.stringify(dropped.error);
+          errors.push(`Bulk doc failure [operation=${operation}]:\n  doc: ${dj}\n  error: ${ej}`);
+        },
+      },
+      {
+        headers: ES_CLIENT_HEADERS,
+      }
+    );
+
+    if (errors.length) {
+      throw new AggregateError(errors);
+    }
+
+    for (const doc of docs) {
+      stats.indexedDoc(doc.data_stream || doc.index);
+    }
+  }
+
+  return new Writable({
+    highWaterMark: 300,
+    objectMode: true,
+
+    async write(record, enc, callback) {
+      try {
+        await indexDocs([record.value]);
+        progress.addToComplete(1);
+        callback(null);
+      } catch (err) {
+        callback(err);
+      }
+    },
+
+    async writev(chunks, callback) {
+      try {
+        await indexDocs(chunks.map(({ chunk: record }) => record.value));
+        progress.addToComplete(chunks.length);
+        callback(null);
+      } catch (err) {
+        callback(err);
+      }
+    },
+  });
 }

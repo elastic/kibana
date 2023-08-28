@@ -8,14 +8,13 @@
 
 import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
-import { Readable } from 'stream';
+import { PassThrough, Readable } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { ES_CLIENT_HEADERS } from '../client_headers';
 
 import {
   isGzip,
@@ -24,9 +23,8 @@ import {
   readDirectory,
   createParseArchiveStreams,
   createCreateIndexStream,
-  createIndexDocRecordsStream,
+  createIndexDocRecordsStreamSvrLess,
   migrateSavedObjectIndices,
-  Progress,
   createDefaultSpace,
 } from '../lib';
 import { atLeastOne, freshenUp, hasDotKibanaPrefix } from './load_utils';
@@ -58,33 +56,13 @@ export async function loadAction({
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
-  const files = prioritizeMappings(await readDirectory(inputDir));
-
-  // a single stream that emits records from all archive files, in
-  // order, so that createIndexStream can track the state of indexes
-  // across archives and properly skip docs from existing indexes
-  const recordStream = concatStreamProviders(
-    files.map((filename) => () => {
-      log.info('[%s] Loading %j', name, filename);
-
-      return pipeline(
-        createReadStream(resolve(inputDir, filename)),
-        ...createParseArchiveStreams({ gzip: isGzip(filename) })
-      );
-    }),
-    { objectMode: true }
-  );
-
-  const progress = new Progress();
-  progress.activate(log);
 
   await createPromiseFromStreams([
-    recordStream,
+    bothFiles$(inputDir, prioritizeMappings(await readDirectory(inputDir))),
     createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
-    createIndexDocRecordsStream(client, stats, progress, useCreate),
+    createIndexDocRecordsStreamSvrLess(client, stats, useCreate),
   ]);
 
-  progress.deactivate();
   const result = stats.toJSON();
 
   const indicesWithDocs: string[] = [];
@@ -105,4 +83,22 @@ export async function loadAction({
       await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
   }
   return result;
+
+  // a single stream that emits records from all archive files, in
+  // order, so that createIndexStream can track the state of indexes
+  // across archives and properly skip docs from existing indexes
+  function bothFiles$(
+    archiveDirectory: string,
+    maybeMappingsAndDocsFileNamesFromArchive: string[]
+  ): PassThrough {
+    return concatStreamProviders(
+      maybeMappingsAndDocsFileNamesFromArchive.map((filename: string) => () => {
+        return pipeline(
+          createReadStream(resolve(archiveDirectory, filename)),
+          ...createParseArchiveStreams({ gzip: isGzip(filename) })
+        );
+      }),
+      { objectMode: true }
+    );
+  }
 }
