@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CORRELATIONS_ERROR_MESSAGE } from './translations';
 import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
@@ -14,11 +14,12 @@ import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_
 import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
-
+import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 import { useLeftPanelContext } from '../context';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
+import { SuppressedAlerts } from './suppressed_alerts';
 
 export const CORRELATIONS_TAB_ID = 'correlations-details';
 
@@ -43,34 +44,59 @@ export const CorrelationsDetails: React.FC = () => {
   });
   const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
   const showCases = useShowRelatedCases();
+  const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
+    getFieldsData,
+  });
 
   const canShowAtLeastOneInsight =
-    showAlertsByAncestry || showSameSourceAlerts || showAlertsBySession || showCases;
+    showAlertsByAncestry ||
+    showSameSourceAlerts ||
+    showAlertsBySession ||
+    showCases ||
+    showSuppressedAlerts;
 
   return (
     <>
       {canShowAtLeastOneInsight ? (
-        <>
-          {showAlertsByAncestry && documentId && indices && (
-            <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+        <EuiFlexGroup gutterSize="l" direction="column">
+          {showSuppressedAlerts && (
+            <EuiFlexItem>
+              <SuppressedAlerts
+                alertSuppressionCount={alertSuppressionCount}
+                dataAsNestedObject={dataAsNestedObject}
+              />
+            </EuiFlexItem>
           )}
-
-          <EuiSpacer />
-
+          {showCases && (
+            <EuiFlexItem>
+              <RelatedCases eventId={eventId} />
+            </EuiFlexItem>
+          )}
           {showSameSourceAlerts && originalEventId && (
-            <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
+            <EuiFlexItem>
+              <RelatedAlertsBySameSourceEvent
+                originalEventId={originalEventId}
+                scopeId={scopeId}
+                eventId={eventId}
+              />
+            </EuiFlexItem>
           )}
-
-          <EuiSpacer />
-
           {showAlertsBySession && entityId && (
-            <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
+            <EuiFlexItem>
+              <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
+            </EuiFlexItem>
           )}
-
-          <EuiSpacer />
-
-          {showCases && <RelatedCases eventId={eventId} />}
-        </>
+          {showAlertsByAncestry && documentId && indices && (
+            <EuiFlexItem>
+              <RelatedAlertsByAncestry
+                documentId={documentId}
+                indices={indices}
+                scopeId={scopeId}
+                eventId={eventId}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       ) : (
         <div data-test-subj={`${CORRELATIONS_DETAILS_TEST_ID}Error`}>
           {CORRELATIONS_ERROR_MESSAGE}
