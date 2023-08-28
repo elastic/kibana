@@ -500,7 +500,7 @@ export class DiscoverPageObject extends FtrService {
     return items;
   }
 
-  public async selectTextBaseLang(lang: 'SQL') {
+  public async selectTextBaseLang(lang: string) {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.find.clickByCssSelector(
       `[data-test-subj="text-based-languages-switcher"] [title="${lang}"]`

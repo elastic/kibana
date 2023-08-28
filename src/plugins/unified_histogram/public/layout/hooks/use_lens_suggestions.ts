@@ -19,6 +19,7 @@ import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { computeInterval } from './compute_interval';
+const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
 
 export const useLensSuggestions = ({
   dataView,
@@ -70,10 +71,22 @@ export const useLensSuggestions = ({
       getAggregateQueryMode(query) === 'esql' &&
       timeRange
     ) {
+      let queryHasTransformationalCommands = false;
+      if ('esql' in query) {
+        TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
+          if (query.esql.toLowerCase().includes(command)) {
+            queryHasTransformationalCommands = true;
+            return;
+          }
+        });
+      }
+
+      if (queryHasTransformationalCommands) return undefined;
+
       const interval = computeInterval(timeRange, data);
       const language = getAggregateQueryMode(query);
       const histogramQuery = `${query[language]} | eval uniqueName = 1
-        | EVAL timestamp=DATE_TRUNC(${dataView.timeFieldName}, ${interval}) | stats rows = count(uniqueName) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
+        | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats rows = count(uniqueName) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
