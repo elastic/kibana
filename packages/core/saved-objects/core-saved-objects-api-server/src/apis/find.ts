@@ -11,7 +11,7 @@ import type {
   AggregationsAggregationContainer,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObject } from '../..';
+import type { SavedObject, SavedObjectsGetOptions } from '../..';
 
 type KueryNode = any;
 
@@ -153,7 +153,8 @@ export interface SavedObjectsFindOptions {
    */
   pit?: SavedObjectsPitParams;
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
-  migrationVersionCompatibility?: 'compatible' | 'raw';
+  migrationVersionCompatibility?: SavedObjectsGetOptions['migrationVersionCompatibility'];
+  downwardConversion?: SavedObjectsGetOptions['downwardConversion'];
 }
 
 /**
