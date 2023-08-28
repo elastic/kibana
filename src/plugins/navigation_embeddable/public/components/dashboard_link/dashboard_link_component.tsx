@@ -72,31 +72,8 @@ export const DashboardLinkComponent = ({
   }, [link.destination, parentDashboardId, parentDashboardInput, destinationDashboard]);
 
   /**
-   * Dashboard-to-dashboard navigation
-   */
-  const { value: dashboardLocator } = useAsync(async () => {
-    return await getDashboardLocator({
-      link,
-      navEmbeddable,
-    });
-  }, [link]);
-
-  const dashboardHref = useMemo(() => {
-    if (dashboardLocator) {
-      return getDashboardHref(dashboardLocator);
-    }
-  }, [dashboardLocator]);
-
-  /**
    * Memoized link information
    */
-  const linkOptions = useMemo(() => {
-    return {
-      ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-      ...link.options,
-    } as DashboardDrilldownOptions;
-  }, [link.options]);
-
   const linkLabel = useMemo(() => {
     return link.label || (dashboardTitle ?? DashboardLinkStrings.getDashboardErrorLabel());
   }, [link, dashboardTitle]);
@@ -114,6 +91,52 @@ export const DashboardLinkComponent = ({
     };
   }, [error, dashboardTitle, dashboardDescription]);
 
+  /**
+   * Dashboard-to-dashboard navigation
+   */
+  const { loading: loadingOnClickProps, value: onClickProps } = useAsync(async () => {
+    /** If the link points to the current dashboard, then there should be no `onClick` or `href` prop */
+    if (link.destination === parentDashboardId) return;
+
+    const linkOptions = {
+      ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+      ...link.options,
+    } as DashboardDrilldownOptions;
+
+    const locator = await getDashboardLocator({
+      link: { ...link, options: linkOptions },
+      navEmbeddable,
+    });
+    if (!locator) return;
+
+    const href = getDashboardHref(locator);
+    return {
+      href,
+      onClick: async (event: React.MouseEvent) => {
+        /**
+         * If the link is being opened via a modified click, then we should use the default `href` navigation behaviour
+         * by passing all the dashboard state via the URL - this will keep behaviour consistent across all browsers.
+         */
+        const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
+        if (modifiedClick) {
+          return;
+        }
+
+        /** Otherwise, prevent the default behaviour and handle click depending on `openInNewTab` option */
+        event.preventDefault();
+        if (linkOptions.openInNewTab) {
+          window.open(href, '_blank');
+        } else {
+          const { app, path, state } = locator;
+          await coreServices.application.navigateToApp(app, {
+            path,
+            state,
+          });
+        }
+      },
+    };
+  }, [link]);
+
   return loadingDestinationDashboard ? (
     <li id={`dashboardLink--${link.id}--loading`}>
       <EuiButtonEmpty size="s" isLoading={true}>
@@ -124,50 +147,24 @@ export const DashboardLinkComponent = ({
     <EuiListGroupItem
       size="s"
       color="text"
-      isDisabled={Boolean(error) || !dashboardLocator}
+      {...onClickProps}
       id={`dashboardLink--${link.id}`}
       iconType={error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
+      isDisabled={Boolean(error) || loadingOnClickProps}
       className={classNames('navigationLink', {
         navigationLinkCurrent: link.destination === parentDashboardId,
         dashboardLinkError: Boolean(error),
         'dashboardLinkError--noLabel': !link.label,
       })}
-      href={dashboardHref}
-      onClick={
-        link.destination === parentDashboardId
-          ? undefined // no `onClick` event should exist if the link points to the current dashboard
-          : async (event) => {
-              /**
-               * If the link is being opened via a new tab (either by modifying the click or due to `openInNewTab`
-               * being `true`), then we should use the default `href` navigation behaviour by passing all the dashboard
-               * state via the URL - this will keep behaviour consistent across all browsers.
-               */
-              const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
-              if (modifiedClick || linkOptions.openInNewTab) {
-                return;
-              }
-
-              /** Otherwise, if we're remaining in the current tab, then rely on Core to navigate */
-              if (dashboardLocator) {
-                // this check should always be true, since the button is disabled otherwise - this is just for type safety
-                event.preventDefault();
-                const { app, path, state } = dashboardLocator;
-                await coreServices.application.navigateToApp(app, {
-                  path,
-                  state,
-                });
-              }
-            }
-      }
       label={
         <EuiToolTip
           delay="long"
           display="block"
           repositionOnScroll
-          position={layout === NAV_VERTICAL_LAYOUT ? 'right' : 'bottom'}
           title={tooltipTitle}
           content={tooltipMessage}
+          position={layout === NAV_VERTICAL_LAYOUT ? 'right' : 'bottom'}
         >
           {/* Setting `title=""` so that the native browser tooltip is disabled */}
           <div className="eui-textTruncate" title="">

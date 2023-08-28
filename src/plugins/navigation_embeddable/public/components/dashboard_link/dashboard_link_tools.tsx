@@ -13,13 +13,10 @@ import {
   getEmbeddableParams,
   DashboardAppLocatorParams,
 } from '@kbn/dashboard-plugin/public';
-import {
-  DashboardDrilldownOptions,
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-} from '@kbn/presentation-util-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 import { KibanaLocation } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
 
 import { DashboardItem } from '../../embeddable/types';
 import { NavigationEmbeddable } from '../../embeddable';
@@ -107,19 +104,19 @@ export const fetchDashboards = async ({
  */
 
 interface GetDashboardLocatorProps {
-  link: NavigationEmbeddableLink;
+  link: NavigationEmbeddableLink & { options: DashboardDrilldownOptions };
   navEmbeddable: NavigationEmbeddable;
 }
 
-/** TODO: maybe store this in component state??? */
+/**
+ * Fetch the locator to use for dashboard navigation
+ * @param props `GetDashboardLocatorProps`
+ * @returns The locator to use for dashboard navigation
+ */
 export const getDashboardLocator = async ({ link, navEmbeddable }: GetDashboardLocatorProps) => {
-  const options: DashboardDrilldownOptions = {
-    ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-    ...link.options,
-  };
   const params: DashboardAppLocatorParams = {
     dashboardId: link.destination,
-    ...getEmbeddableParams(navEmbeddable, options),
+    ...getEmbeddableParams(navEmbeddable, link.options),
   };
 
   const locator = dashboardServices.locator; // TODO: Make this generic as part of https://github.com/elastic/kibana/issues/164748
