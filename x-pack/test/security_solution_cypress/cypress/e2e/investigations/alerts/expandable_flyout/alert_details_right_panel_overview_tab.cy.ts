@@ -171,7 +171,7 @@ describe(
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON)
           .should('be.visible')
-          .and('have.text', 'Investigation guide');
+          .and('have.text', 'Show investigation guide');
 
         cy.log('should navigate to left Investigation tab');
 
@@ -295,7 +295,9 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_CONTENT)
           .should('be.visible')
           .within(() => {
-            // TODO the order in which these appear is not deterministic currently, hence this can cause flakiness
+            // cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_SUPPRESSED_ALERTS)
+            //   .should('be.visible')
+            //   .and('have.text', '1 suppressed alert'); // TODO populate rule with alert suppression
             cy.get(
               DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_ANCESTRY
             )

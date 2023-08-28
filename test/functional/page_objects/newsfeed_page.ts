@@ -21,7 +21,7 @@ export class NewsfeedPageObject extends FtrService {
   }
 
   async resetPage() {
-    await this.common.navigateToUrl('home', undefined); // navigateToApp sets `disableWelcomePrompt` to true under the hood. `navigateToUrl` explicitly disables the welcome screen.
+    await this.common.navigateToApp('home');
   }
 
   async closeNewsfeedPanel() {
