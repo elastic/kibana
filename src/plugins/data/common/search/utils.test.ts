@@ -6,31 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { isErrorResponse, isRunningResponse } from './utils';
+import { isMalformedResponse, isRunningResponse } from './utils';
 
 describe('utils', () => {
-  describe('isErrorResponse', () => {
+  describe('isMalformedResponse', () => {
     it('returns `true` if the response is undefined', () => {
-      const isError = isErrorResponse();
+      const isError = isMalformedResponse();
       expect(isError).toBe(true);
     });
 
-    it('returns `false` if the response is running and partial', () => {
-      const isError = isErrorResponse({
-        isPartial: true,
-        isRunning: true,
-        rawResponse: {},
-      });
-      expect(isError).toBe(false);
-    });
-
-    it('returns `false` if the response is complete', () => {
-      const isError = isErrorResponse({
-        isPartial: false,
-        isRunning: false,
-        rawResponse: {},
-      });
-      expect(isError).toBe(false);
+    it('returns `true` if rawResponse is undefined', () => {
+      const isError = isMalformedResponse({});
+      expect(isError).toBe(true);
     });
   });
 

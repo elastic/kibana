@@ -11,9 +11,9 @@ import { AggTypesDependencies } from '..';
 import type { IKibanaSearchResponse } from './types';
 
 /**
- * @returns true if response had an error while executing in ES
+ * @returns true if response is malformed
  */
-export const isErrorResponse = (response?: IKibanaSearchResponse) => {
+export const isMalformedResponse = (response?: IKibanaSearchResponse) => {
   return !response || !response.rawResponse;
 };
 

@@ -196,7 +196,7 @@ export type {
 } from './search';
 
 export type { ISearchOptions } from '../common';
-export { isErrorResponse, isRunningResponse } from '../common';
+export { isRunningResponse } from '../common';
 
 // Search namespace
 export const search = {
