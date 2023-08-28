@@ -20,6 +20,7 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
 import { Index } from '../../../../../../common';
 import { loadIndex } from '../../../../services';
+import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { Section } from '../../home';
 import { DetailsPageError } from './details_page_error';
@@ -34,7 +35,7 @@ export enum IndexDetailsSection {
   Pipelines = 'pipelines',
   Stats = 'stats',
 }
-const tabs = [
+const defaultTabs = [
   {
     id: IndexDetailsSection.Overview,
     name: (
@@ -65,11 +66,13 @@ const tabs = [
       <FormattedMessage id="xpack.idxMgmt.indexDetails.pipelinesTitle" defaultMessage="Pipelines" />
     ),
   },
-  {
-    id: IndexDetailsSection.Stats,
-    name: <FormattedMessage id="xpack.idxMgmt.indexDetails.statsTitle" defaultMessage="Stats" />,
-  },
 ];
+
+const statsTab = {
+  id: IndexDetailsSection.Stats,
+  name: <FormattedMessage id="xpack.idxMgmt.indexDetails.statsTitle" defaultMessage="Stats" />,
+};
+
 export const DetailsPage: React.FunctionComponent<
   RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
 > = ({
@@ -78,6 +81,7 @@ export const DetailsPage: React.FunctionComponent<
   },
   history,
 }) => {
+  const { config } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const [index, setIndex] = useState<Index | null>();
@@ -111,14 +115,16 @@ export const DetailsPage: React.FunctionComponent<
   }, [history]);
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
-    return tabs.map((tab) => ({
+    const visibleTabs = config.enableIndexStats ? [...defaultTabs, statsTab] : defaultTabs;
+
+    return visibleTabs.map((tab) => ({
       onClick: () => onSectionChange(tab.id),
       isSelected: tab.id === indexDetailsSection,
       key: tab.id,
       'data-test-subj': `indexDetailsTab-${tab.id}`,
       label: tab.name,
     }));
-  }, [indexDetailsSection, onSectionChange]);
+  }, [indexDetailsSection, onSectionChange, config]);
 
   if (isLoading && !index) {
     return (
@@ -192,20 +198,17 @@ export const DetailsPage: React.FunctionComponent<
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Pipelines}`}
             render={() => <div>Pipelines</div>}
           />
-          <Route
-            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Stats}`}
-            render={() => <StatsTab indexName={indexName} />}
-          />
+          {config.enableIndexStats && (
+            <Route
+              path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Stats}`}
+              render={() => <StatsTab indexName={indexName} />}
+            />
+          )}
           <Redirect
             from={`/${Section.Indices}/${indexName}`}
             to={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
           />
         </Routes>
-      </div>
-
-      <EuiSpacer size="l" />
-      <div>
-        <pre>{JSON.stringify(index, null, 2)}</pre>
       </div>
     </>
   );
