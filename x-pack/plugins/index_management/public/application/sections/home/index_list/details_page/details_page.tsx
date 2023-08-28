@@ -24,6 +24,7 @@ import { DiscoverLink } from '../../../../lib/discover_link';
 import { Section } from '../../home';
 import { DetailsPageError } from './details_page_error';
 import { ManageIndexButton } from './manage_index_button';
+import { DetailsPageMappings } from './details_page_mappings';
 
 export enum IndexDetailsSection {
   Overview = 'overview',
@@ -175,8 +176,8 @@ export const DetailsPage: React.FunctionComponent<
             render={() => <div>Documents</div>}
           />
           <Route
-            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Mappings}`}
-            render={() => <div>Mappings</div>}
+            path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Mappings}`}
+            component={DetailsPageMappings}
           />
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Settings}`}
@@ -193,10 +194,6 @@ export const DetailsPage: React.FunctionComponent<
         </Routes>
       </div>
 
-      <EuiSpacer size="l" />
-      <div>
-        <pre>{JSON.stringify(index, null, 2)}</pre>
-      </div>
     </>
   );
 };
