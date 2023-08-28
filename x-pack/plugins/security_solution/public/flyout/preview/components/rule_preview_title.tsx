@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { EuiTitle, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import { DELETED_RULE_BADGE } from './translations';
+import { DELETED_RULE } from '../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
 import { CreatedBy, UpdatedBy } from '../../../detections/components/rules/rule_info';
 import {
@@ -40,7 +41,7 @@ export const RulePreviewTitle: React.FC<RulePreviewTitleProps> = ({ rule, isSupp
         <>
           <EuiSpacer size="s" />
           <EuiBadge data-test-subj={RULE_PREVIEW_RULE_TITLE_SUPPRESSED_TEST_ID} title="">
-            {DELETED_RULE_BADGE}
+            {DELETED_RULE}
           </EuiBadge>
         </>
       )}

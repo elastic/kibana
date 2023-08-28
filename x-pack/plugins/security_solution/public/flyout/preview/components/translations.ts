@@ -36,10 +36,3 @@ export const ALERT_REASON_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.alertReasonTitle',
   { defaultMessage: 'Alert reason' }
 );
-
-export const DELETED_RULE_BADGE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.rulePreviewDeletedRuleBadge',
-  {
-    defaultMessage: 'Deleted rule',
-  }
-);
