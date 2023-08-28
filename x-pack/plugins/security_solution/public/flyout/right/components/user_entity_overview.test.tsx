@@ -15,6 +15,7 @@ import {
   ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
+  TECHNICAL_PREVIEW_ICON_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 import { mockContextValue } from '../mocks/mock_right_panel_context';
@@ -82,6 +83,7 @@ describe('<UserEntityOverview />', () => {
 
       expect(getByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).toHaveTextContent(domain);
       expect(getByTestId(ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('Medium');
+      expect(getByTestId(TECHNICAL_PREVIEW_ICON_TEST_ID)).toBeInTheDocument();
     });
 
     it('should render correctly if returned data is null', () => {
@@ -96,7 +98,8 @@ describe('<UserEntityOverview />', () => {
         </TestProviders>
       );
       expect(getByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).toHaveTextContent('—');
-      expect(getByTestId(ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('Unknown');
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('—');
+      expect(getByTestId(TECHNICAL_PREVIEW_ICON_TEST_ID)).toBeInTheDocument();
     });
   });
 
@@ -117,6 +120,7 @@ describe('<UserEntityOverview />', () => {
       expect(getByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).toHaveTextContent(domain);
       expect(getByTestId(ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent(lastSeenText);
       expect(queryByTestId(ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(TECHNICAL_PREVIEW_ICON_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('should render correctly if returned data is null', () => {
