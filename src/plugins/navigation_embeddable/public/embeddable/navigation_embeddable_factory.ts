@@ -9,38 +9,23 @@
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
-  EmbeddablePackageState,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import {
-  NavigationEmbeddableByValueInput,
-  NavigationEmbeddableByReferenceInput,
-  NavigationEmbeddableInput,
-} from './types';
+import { NavigationEmbeddableByReferenceInput, NavigationEmbeddableInput } from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import type { NavigationEmbeddable } from './navigation_embeddable';
-import { NAV_VERTICAL_LAYOUT } from '../../common/content_management';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
-export interface NavigationEmbeddableCreationOptions {
-  getInitialInput?: () => Partial<NavigationEmbeddableInput>;
-  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
-}
-
 // TODO: Replace string 'OPEN_FLYOUT_ADD_DRILLDOWN' with constant once the dashboardEnhanced plugin is removed
 // and it is no longer locked behind `x-pack`
-const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableByValueInput, 'id'> => ({
-  attributes: {
-    title: '',
-    layout: NAV_VERTICAL_LAYOUT,
-  },
+const getDefaultNavigationEmbeddableInput = (): Partial<NavigationEmbeddableInput> => ({
   disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
