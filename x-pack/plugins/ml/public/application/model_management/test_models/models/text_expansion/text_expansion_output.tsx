@@ -64,6 +64,44 @@ export const TextExpansionOutput: FC<{
 export const DocumentResult: FC<{
   response: FormattedTextExpansionResponse;
 }> = ({ response }) => {
+  const statInfo = useResultStatFormatting(response);
+
+  return (
+    <>
+      {response.text !== undefined ? (
+        <>
+          <EuiStat
+            title={roundToDecimalPlace(response.score, 3)}
+            textAlign="left"
+            titleColor={statInfo.color}
+            description={
+              <EuiTextColor color={statInfo.color}>
+                <span>
+                  {statInfo.icon !== null ? (
+                    <EuiIcon type={statInfo.icon} color={statInfo.color} />
+                  ) : null}
+                  {statInfo.text}
+                </span>
+              </EuiTextColor>
+            }
+          />
+
+          <EuiSpacer size="s" />
+          <span css={{ color: statInfo.textColor }}>{response.text}</span>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+    </>
+  );
+};
+
+/*
+ * Currently not used. Tokens could contain sensitive words, so need to be hidden from the user.
+ * This may change in the future, in which case this function will be used.
+ */
+export const DocumentResultWithTokens: FC<{
+  response: FormattedTextExpansionResponse;
+}> = ({ response }) => {
   const tokens = response.adjustedTokenWeights
     .filter(({ value }) => value > 0)
     .sort((a, b) => b.value - a.value)

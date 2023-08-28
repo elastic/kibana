@@ -23,7 +23,7 @@ fmt.Println(searchResp, err)`,
   "log"
   "strings"
 ​
-  "github.com/elastic/elasticsearch-serverless-go"
+  elasticsearch "github.com/elastic/go-elasticsearch/v8"
 )
 
 func main() {
@@ -37,6 +37,12 @@ func main() {
   }
 }`,
   docLink: docLinks.clientsGoIndex,
+  github: {
+    label: i18n.translate('xpack.enterpriseSearch.languages.go.githubLink', {
+      defaultMessage: 'go-elasticsearch',
+    }),
+    link: 'https://github.com/elastic/go-elasticsearch',
+  },
   iconType: 'go.svg',
   id: Languages.GO,
   ingestData: `ingestResult, err := es.Bulk().

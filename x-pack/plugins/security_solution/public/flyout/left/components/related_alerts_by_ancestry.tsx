@@ -24,6 +24,10 @@ export interface RelatedAlertsByAncestryProps {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * Id of the document
+   */
+  eventId: string;
 }
 
 /**
@@ -33,6 +37,7 @@ export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = 
   documentId,
   indices,
   scopeId,
+  eventId,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsByAncestry({
     documentId,
@@ -50,6 +55,8 @@ export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = 
       title={title}
       loading={loading}
       alertIds={data}
+      scopeId={scopeId}
+      eventId={eventId}
       data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}
     />
   );

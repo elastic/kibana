@@ -37,6 +37,8 @@ xpack.license_management.enabled: false
 xpack.index_management.enableIndexActions: false
 # Disable legacy index templates from Index Management UI
 xpack.index_management.enableLegacyTemplates: false
+# Disable index stats information from Index Management UI
+xpack.index_management.enableIndexStats: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible

@@ -23,6 +23,7 @@ export const deleteRule = async (
   const response = await supertest
     .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .expect(200);
 
   return response.body;

@@ -122,6 +122,7 @@ export const loadLiveQuery = (
   payload = {
     agent_all: true,
     query: 'select * from uptime;',
+    kuery: '',
   }
 ) =>
   request<{
@@ -222,6 +223,9 @@ export const loadRule = (includeResponseActions = false) =>
         : {}),
     } as RuleCreateProps,
     url: `/api/detection_engine/rules`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
   }).then((response) => response.body);
 
 export const cleanupRule = (id: string) => {
