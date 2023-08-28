@@ -6,7 +6,7 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { isRunningResponse, type ISearchStart, isErrorResponse } from '@kbn/data-plugin/public';
+import { isRunningResponse, type ISearchStart } from '@kbn/data-plugin/public';
 
 export interface AlertsQueryParams {
   alertIds: string[];
@@ -47,11 +47,14 @@ export const createFindAlerts =
           },
           { abortSignal: signal }
         )
-        .subscribe((response) => {
-          if (!isRunningResponse(response)) {
-            $subscription.unsubscribe();
-            resolve(response.rawResponse);
-          } else if (isErrorResponse(response)) {
+        .subscribe({
+          next: (response) => {
+            if (!isRunningResponse(response)) {
+              $subscription.unsubscribe();
+              resolve(response.rawResponse);
+            }
+          },
+          error: (err) => {
             $subscription.unsubscribe();
             reject(new Error(`Error while loading alerts`));
           }
