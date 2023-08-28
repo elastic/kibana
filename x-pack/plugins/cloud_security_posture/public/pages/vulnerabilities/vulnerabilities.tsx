@@ -103,70 +103,6 @@ export const Vulnerabilities = () => {
   );
 };
 
-const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
-  const cloudPostureTable = useCloudPostureTable({
-    dataView,
-    defaultQuery: getDefaultQuery,
-    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
-  });
-
-  const multiFieldsSort = useMemo(() => {
-    return cloudPostureTable.sort.map(({ id, direction }: { id: string; direction: string }) => {
-      if (id === vulnerabilitiesColumns.severity) {
-        return severitySortScript(direction);
-      }
-      if (id === vulnerabilitiesColumns.package) {
-        return getCaseInsensitiveSortScript(id, direction);
-      }
-
-      return {
-        [id]: direction,
-      };
-    });
-  }, [cloudPostureTable.sort]);
-
-  const { data, isLoading, isFetching } = useLatestVulnerabilities({
-    query: cloudPostureTable.query,
-    sort: multiFieldsSort,
-    enabled: !cloudPostureTable.queryError,
-    pageIndex: cloudPostureTable.pageIndex,
-    pageSize: cloudPostureTable.pageSize,
-  });
-
-  const error = cloudPostureTable.queryError || null;
-
-  if (isLoading && !error) {
-    return defaultLoadingRenderer();
-  }
-
-  if (!data?.page && !error) {
-    return defaultNoDataRenderer();
-  }
-
-  return (
-    <>
-      <FindingsSearchBar
-        dataView={dataView}
-        setQuery={(newQuery) => {
-          cloudPostureTable.setUrlQuery({ ...newQuery, pageIndex: 0 });
-        }}
-        loading={isFetching}
-        placeholder={SEARCH_BAR_PLACEHOLDER}
-      />
-      <EuiSpacer size="m" />
-      {error && <ErrorCallout error={error as Error} />}
-      {!error && (
-        <VulnerabilitiesDataGrid
-          dataView={dataView}
-          data={data}
-          isFetching={isFetching}
-          {...cloudPostureTable}
-        />
-      )}
-    </>
-  );
-};
-
 const VulnerabilitiesDataGrid = ({
   dataView,
   data,
@@ -184,7 +120,18 @@ const VulnerabilitiesDataGrid = ({
   dataView: DataView;
   data: VulnerabilitiesQueryData | undefined;
   isFetching: boolean;
-} & CloudPostureTableResult) => {
+} & Pick<
+  CloudPostureTableResult,
+  | 'pageIndex'
+  | 'sort'
+  | 'pageSize'
+  | 'onChangeItemsPerPage'
+  | 'onChangePage'
+  | 'onSort'
+  | 'urlQuery'
+  | 'setUrlQuery'
+  | 'onResetFilters'
+>) => {
   const { euiTheme } = useEuiTheme();
   const styles = useStyles();
   const [showHighlight, setHighlight] = useState(false);
@@ -452,6 +399,90 @@ const VulnerabilitiesDataGrid = ({
           onPaginate={onPaginateFlyout}
           closeFlyout={onCloseFlyout}
           isLoading={isFetching}
+        />
+      )}
+    </>
+  );
+};
+
+const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
+  const {
+    sort,
+    query,
+    queryError,
+    pageSize,
+    pageIndex,
+    onChangeItemsPerPage,
+    onChangePage,
+    onSort,
+    urlQuery,
+    setUrlQuery,
+    onResetFilters,
+  } = useCloudPostureTable({
+    dataView,
+    defaultQuery: getDefaultQuery,
+    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
+  });
+
+  const multiFieldsSort = useMemo(() => {
+    return sort.map(({ id, direction }: { id: string; direction: string }) => {
+      if (id === vulnerabilitiesColumns.severity) {
+        return severitySortScript(direction);
+      }
+      if (id === vulnerabilitiesColumns.package) {
+        return getCaseInsensitiveSortScript(id, direction);
+      }
+
+      return {
+        [id]: direction,
+      };
+    });
+  }, [sort]);
+
+  const { data, isLoading, isFetching } = useLatestVulnerabilities({
+    query,
+    sort: multiFieldsSort,
+    enabled: !queryError,
+    pageIndex,
+    pageSize,
+  });
+
+  const error = queryError || null;
+
+  if (isLoading && !error) {
+    return defaultLoadingRenderer();
+  }
+
+  if (!data?.page && !error) {
+    return defaultNoDataRenderer();
+  }
+
+  return (
+    <>
+      <FindingsSearchBar
+        dataView={dataView}
+        setQuery={(newQuery) => {
+          setUrlQuery({ ...newQuery, pageIndex: 0 });
+        }}
+        loading={isFetching}
+        placeholder={SEARCH_BAR_PLACEHOLDER}
+      />
+      <EuiSpacer size="m" />
+      {error && <ErrorCallout error={error as Error} />}
+      {!error && (
+        <VulnerabilitiesDataGrid
+          dataView={dataView}
+          data={data}
+          isFetching={isFetching}
+          pageIndex={pageIndex}
+          sort={sort}
+          pageSize={pageSize}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onChangePage={onChangePage}
+          onSort={onSort}
+          urlQuery={urlQuery}
+          onResetFilters={onResetFilters}
+          setUrlQuery={setUrlQuery}
         />
       )}
     </>
