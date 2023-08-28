@@ -6,41 +6,20 @@
  */
 
 import React from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-} from '@elastic/eui';
-import { useTimelineEventsDetails } from '../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-
-import { useCorrelations } from '../../shared/hooks/use_correlations';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { CORRELATIONS_ERROR_MESSAGE } from './translations';
+import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
+import { RelatedAlertsBySession } from './related_alerts_by_session';
+import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
+import { RelatedCases } from './related_cases';
+import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
+import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 import { useLeftPanelContext } from '../context';
-import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
-import { SecurityPageName } from '../../../../common';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { AlertsTable } from './correlations_details_alerts_table';
-import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
-import {
-  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
-  CORRELATIONS_DETAILS_BY_ANCESTRY_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SESSION_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SOURCE_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
-  CORRELATIONS_DETAILS_ERROR_TEST_ID,
-} from './test_ids';
-import { CorrelationsCasesTable } from './correlations_cases_table';
-import {
-  ANCESTRY_ALERTS_HEADING,
-  RELATED_CASES_HEADING,
-  SESSION_ALERTS_HEADING,
-  SOURCE_ALERTS_HEADING,
-} from './translations';
-import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
+import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
+import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
+import { SuppressedAlerts } from './suppressed_alerts';
 
 export const CORRELATIONS_TAB_ID = 'correlations-details';
 
@@ -48,121 +27,81 @@ export const CORRELATIONS_TAB_ID = 'correlations-details';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const { indexName, eventId, scopeId } = useLeftPanelContext();
-
-  const [{ pageName }] = useRouteSpy();
-  const sourcererScope =
-    pageName === SecurityPageName.detections
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
-
-  const sourcererDataView = useSourcererDataView(sourcererScope);
-
-  const [isEventDataLoading, eventData, _searchHit, dataAsNestedObject] = useTimelineEventsDetails({
-    indexName,
-    eventId,
-    runtimeMappings: sourcererDataView.runtimeMappings,
-    skip: !eventId,
-  });
+  const { dataAsNestedObject, dataFormattedForFieldBrowser, eventId, getFieldsData, scopeId } =
+    useLeftPanelContext();
 
   const {
-    loading: isCorrelationsLoading,
-    error: correlationsError,
-    ancestryAlertsIds,
-    alertsBySessionIds,
-    sameSourceAlertsIds,
-    cases,
-  } = useCorrelations({
-    eventId,
+    show: showAlertsByAncestry,
+    documentId,
+    indices,
+  } = useShowRelatedAlertsByAncestry({
+    getFieldsData,
     dataAsNestedObject,
-    dataFormattedForFieldBrowser: eventData,
-    scopeId,
+    dataFormattedForFieldBrowser,
+  });
+  const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
+    getFieldsData,
+  });
+  const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
+  const showCases = useShowRelatedCases();
+  const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
+    getFieldsData,
   });
 
-  const topLevelLoading = isEventDataLoading || isCorrelationsLoading;
-
-  if (topLevelLoading) {
-    return (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  if (correlationsError) {
-    return (
-      <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
-        title={<h2>{ERROR_TITLE('Correlation Details')}</h2>}
-        body={<p>{ERROR_MESSAGE('Correlation Details view')}</p>}
-        data-test-subj={CORRELATIONS_DETAILS_ERROR_TEST_ID}
-      />
-    );
-  }
+  const canShowAtLeastOneInsight =
+    showAlertsByAncestry ||
+    showSameSourceAlerts ||
+    showAlertsBySession ||
+    showCases ||
+    showSuppressedAlerts;
 
   return (
     <>
-      <ExpandablePanel
-        header={{
-          title: ANCESTRY_ALERTS_HEADING(ancestryAlertsIds.length),
-          iconType: 'warning',
-        }}
-        expand={{ expandable: true }}
-        data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}
-      >
-        <AlertsTable
-          alertIds={ancestryAlertsIds}
-          data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_TABLE_TEST_ID}
-        />
-      </ExpandablePanel>
-
-      <EuiSpacer />
-
-      <ExpandablePanel
-        header={{
-          title: SOURCE_ALERTS_HEADING(sameSourceAlertsIds.length),
-          iconType: 'warning',
-        }}
-        expand={{ expandable: true }}
-        data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}
-      >
-        <AlertsTable
-          alertIds={sameSourceAlertsIds}
-          data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_TABLE_TEST_ID}
-        />
-      </ExpandablePanel>
-
-      <EuiSpacer />
-
-      <ExpandablePanel
-        header={{
-          title: SESSION_ALERTS_HEADING(alertsBySessionIds.length),
-          iconType: 'warning',
-        }}
-        expand={{ expandable: true }}
-        data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}
-      >
-        <AlertsTable
-          alertIds={alertsBySessionIds}
-          data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_TABLE_TEST_ID}
-        />
-      </ExpandablePanel>
-
-      <EuiSpacer />
-
-      <ExpandablePanel
-        header={{
-          title: RELATED_CASES_HEADING(cases.length),
-          iconType: 'warning',
-        }}
-        expand={{ expandable: true }}
-        data-test-subj={CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID}
-      >
-        <CorrelationsCasesTable cases={cases} />
-      </ExpandablePanel>
+      {canShowAtLeastOneInsight ? (
+        <EuiFlexGroup gutterSize="l" direction="column">
+          {showSuppressedAlerts && (
+            <EuiFlexItem>
+              <SuppressedAlerts
+                alertSuppressionCount={alertSuppressionCount}
+                dataAsNestedObject={dataAsNestedObject}
+              />
+            </EuiFlexItem>
+          )}
+          {showCases && (
+            <EuiFlexItem>
+              <RelatedCases eventId={eventId} />
+            </EuiFlexItem>
+          )}
+          {showSameSourceAlerts && originalEventId && (
+            <EuiFlexItem>
+              <RelatedAlertsBySameSourceEvent
+                originalEventId={originalEventId}
+                scopeId={scopeId}
+                eventId={eventId}
+              />
+            </EuiFlexItem>
+          )}
+          {showAlertsBySession && entityId && (
+            <EuiFlexItem>
+              <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
+            </EuiFlexItem>
+          )}
+          {showAlertsByAncestry && documentId && indices && (
+            <EuiFlexItem>
+              <RelatedAlertsByAncestry
+                documentId={documentId}
+                indices={indices}
+                scopeId={scopeId}
+                eventId={eventId}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      ) : (
+        <div data-test-subj={`${CORRELATIONS_DETAILS_TEST_ID}Error`}>
+          {CORRELATIONS_ERROR_MESSAGE}
+        </div>
+      )}
     </>
   );
 };

@@ -62,7 +62,7 @@ describe('GET /spaces/space', () => {
     });
 
     initGetAllSpacesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,

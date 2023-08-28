@@ -11,8 +11,7 @@ import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { IContainer } from '@kbn/embeddable-plugin/public';
 import { EmbeddableAnomalyChartsContainer } from './embeddable_anomaly_charts_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
@@ -23,6 +22,8 @@ import {
   AnomalyChartsServices,
 } from '..';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
+import { AnomalyDetectionEmbeddable } from '../common/anomaly_detection_embeddable';
+
 export const getDefaultExplorerChartsPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.anomalyChartsEmbeddable.title', {
     defaultMessage: 'ML anomaly charts for {jobIds}',
@@ -31,7 +32,7 @@ export const getDefaultExplorerChartsPanelTitle = (jobIds: JobId[]) =>
 
 export type IAnomalyChartsEmbeddable = typeof AnomalyChartsEmbeddable;
 
-export class AnomalyChartsEmbeddable extends Embeddable<
+export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
   AnomalyChartsEmbeddableInput,
   AnomalyChartsEmbeddableOutput
 > {
@@ -44,52 +45,7 @@ export class AnomalyChartsEmbeddable extends Embeddable<
     public services: [CoreStart, MlDependencies, AnomalyChartsServices],
     parent?: IContainer
   ) {
-    super(
-      initialInput,
-      {
-        defaultTitle: initialInput.title,
-        defaultDescription: initialInput.description,
-      },
-      parent
-    );
-    this.initializeOutput(initialInput);
-  }
-
-  private async initializeOutput(initialInput: AnomalyChartsEmbeddableInput) {
-    const { anomalyExplorerService } = this.services[2];
-    const { jobIds } = initialInput;
-
-    try {
-      const jobs = await anomalyExplorerService.getCombinedJobs(jobIds);
-      const dataViewsService = this.services[1].data.dataViews;
-
-      // First get list of unique indices from the selected jobs
-      const indices = new Set(jobs.map((j) => j.datafeed_config.indices).flat());
-      // Then find the data view assuming the data view title matches the index name
-      const indexPatterns: Record<string, DataView> = {};
-      for (const indexName of indices) {
-        const response = await dataViewsService.find(`"${indexName}"`);
-
-        const indexPattern = response.find(
-          (obj) => obj.title.toLowerCase() === indexName.toLowerCase()
-        );
-        if (indexPattern !== undefined) {
-          indexPatterns[indexPattern.id!] = indexPattern;
-        }
-      }
-
-      this.updateOutput({
-        ...this.getOutput(),
-        indexPatterns: Object.values(indexPatterns),
-      });
-    } catch (e) {
-      // Unable to find and load data view but we can ignore the error
-      // as we only load it to support the filter & query bar
-      // the visualizations should still work correctly
-
-      // eslint-disable-next-line no-console
-      console.error(`Unable to load data views for ${jobIds}`, e);
-    }
+    super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
   }
 
   public onLoading() {

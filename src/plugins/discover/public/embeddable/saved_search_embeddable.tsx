@@ -280,7 +280,7 @@ export class SavedSearchEmbeddable
       useNewFieldsApi,
       {
         sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
-        defaultSort: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+        sortDir: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
       }
     );
 
@@ -769,5 +769,9 @@ export class SavedSearchEmbeddable
 
     this.subscription?.unsubscribe();
     this.abortController?.abort();
+  }
+
+  public hasTimeRange() {
+    return this.getTimeRange() !== undefined;
   }
 }
