@@ -48,8 +48,8 @@ export const createAndNavigateToCase = async (
   const cases = getService('cases');
 
   const header = getPageObject('header');
- 
-  await navigateToCasesApp(getPageObject, getService, owner)
+
+  await navigateToCasesApp(getPageObject, getService, owner);
 
   const theCase = await cases.api.createCase({ owner });
   await cases.casesTable.waitForCasesToBeListed();
