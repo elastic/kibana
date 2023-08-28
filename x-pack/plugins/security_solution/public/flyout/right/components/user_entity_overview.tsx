@@ -13,7 +13,7 @@ import {
   EuiLink,
   useEuiTheme,
   useEuiFontSize,
-  EuiBetaBadge,
+  EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
@@ -148,15 +148,15 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         title: (
           <>
             {i18n.USER_RISK_CLASSIFICATION}
-            <EuiBetaBadge
-              css={css`
-                margin-left: ${euiTheme.size.xs};
-              `}
-              label={TECHNICAL_PREVIEW_TITLE}
-              size="s"
-              iconType="beaker"
-              tooltipContent={TECHNICAL_PREVIEW_MESSAGE}
-              tooltipPosition="bottom"
+            <EuiIconTip
+              title={TECHNICAL_PREVIEW_TITLE}
+              size="m"
+              type="iInCircle"
+              content={TECHNICAL_PREVIEW_MESSAGE}
+              position="bottom"
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
               data-test-subj={TECHNICAL_PREVIEW_ICON_TEST_ID}
             />
           </>
@@ -172,7 +172,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         ),
       },
     ];
-  }, [userRisk, euiTheme.size.xs]);
+  }, [userRisk]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}>

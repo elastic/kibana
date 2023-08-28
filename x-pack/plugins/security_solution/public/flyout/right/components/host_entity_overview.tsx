@@ -13,7 +13,7 @@ import {
   EuiIcon,
   useEuiTheme,
   useEuiFontSize,
-  EuiBetaBadge,
+  EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
@@ -149,16 +149,15 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         title: (
           <>
             {i18n.HOST_RISK_CLASSIFICATION}
-            <EuiBetaBadge
-              css={css`
-                margin-left: ${euiTheme.size.xs};
-              `}
-              label={TECHNICAL_PREVIEW_TITLE}
-              size="s"
-              alignment="baseline"
-              iconType="beaker"
-              tooltipContent={TECHNICAL_PREVIEW_MESSAGE}
-              tooltipPosition="bottom"
+            <EuiIconTip
+              title={TECHNICAL_PREVIEW_TITLE}
+              size="m"
+              type="iInCircle"
+              content={TECHNICAL_PREVIEW_MESSAGE}
+              position="bottom"
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
               data-test-subj={TECHNICAL_PREVIEW_ICON_TEST_ID}
             />
           </>
@@ -174,7 +173,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         ),
       },
     ];
-  }, [hostRisk, euiTheme.size.xs]);
+  }, [hostRisk]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}>
