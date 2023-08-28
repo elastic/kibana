@@ -91,6 +91,7 @@ const timestamp = '2022-07-25T08:20:18.966Z';
 const defaultProps = {
   hostName: 'test host',
   timestamp,
+  scopeId: 'scopeId',
 };
 
 const mockHostDetailsResponse = [

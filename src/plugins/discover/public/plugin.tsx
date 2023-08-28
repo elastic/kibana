@@ -44,6 +44,7 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { PLUGIN_ID } from '../common';
 import {
   setHeaderActionMenuMounter,
@@ -192,6 +193,7 @@ export interface DiscoverStartPlugins {
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 /**

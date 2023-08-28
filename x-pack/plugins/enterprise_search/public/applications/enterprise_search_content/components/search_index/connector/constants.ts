@@ -98,6 +98,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.network_drive,
+    platinumOnly: true,
   },
   onedrive: {
     docsUrl: docLinks.connectorsOneDrive,
