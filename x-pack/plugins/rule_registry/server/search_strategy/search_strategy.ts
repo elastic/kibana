@@ -8,7 +8,6 @@ import { map, mergeMap, catchError } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { from, of } from 'rxjs';
-import { isEmpty } from 'lodash';
 import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
@@ -32,7 +31,7 @@ export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
 };
 
-const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
+const EMPTY_FIELDS: estypes.QueryDslFieldAndFormat[] = [{ field: '*', include_unmapped: true }];
 
 export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrategy';
 
@@ -125,7 +124,7 @@ export const ruleRegistrySearchStrategyProvider = (
                   },
                 }),
           };
-          let fields = request?.fields ?? [];
+          let fields = request?.fields ?? EMPTY_FIELDS;
           fields.push({ field: 'kibana.alert.*', include_unmapped: false });
 
           if (siemRequest) {
