@@ -8,12 +8,14 @@
 import { EuiFormRow, EuiLink, EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ActionConnector,
+  ActionTypeRegistryContract,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { noop } from 'lodash/fp';
-import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { Conversation, Prompt } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
@@ -25,10 +27,17 @@ import { UseAssistantContext } from '../../../assistant_context';
 import { ConversationSelectorSettings } from '../conversation_selector_settings';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
+import { getGenAiConfig } from '../../../connectorland/helpers';
 
-interface Config {
-  defaultModel?: string;
+export interface OnConnectorSelectionChangeProps {
+  connector: ActionConnector | undefined;
+  isNew: boolean;
 }
+
+export type OnConnectorSelectionChange = ({
+  connector,
+  isNew,
+}: OnConnectorSelectionChangeProps) => void;
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -153,17 +162,19 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     );
 
     const handleOnConnectorSelectionChange = useCallback(
-      (connectorId: string, provider?: OpenAiProviderType, model?: string) => {
+      ({ connector, isNew }: OnConnectorSelectionChangeProps) => {
         if (selectedConversation != null) {
+          const config = getGenAiConfig(connector);
+
           setUpdatedConversationSettings((prev) => ({
             ...prev,
             [selectedConversation.id]: {
               ...selectedConversation,
               apiConfig: {
                 ...selectedConversation.apiConfig,
-                connectorId,
-                provider,
-                model: model ?? selectedConversation.apiConfig.model,
+                connectorId: connector?.id,
+                provider: config?.apiProvider,
+                model: config?.defaultModel,
               },
             },
           }));
@@ -173,9 +184,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     );
 
     const selectedModel = useMemo(() => {
-      const connectorModel: string | undefined = (
-        selectedConnector as ActionConnectorProps<Config, unknown>
-      )?.config?.defaultModel;
+      const connectorModel = getGenAiConfig(selectedConnector)?.defaultModel;
+      // Prefer conversation configuration over connector default
       return selectedConversation?.apiConfig.model ?? connectorModel;
     }, [selectedConnector, selectedConversation?.apiConfig.model]);
 

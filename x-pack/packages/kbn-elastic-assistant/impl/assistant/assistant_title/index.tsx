@@ -118,7 +118,6 @@ export const AssistantTitle: React.FC<{
             <ConnectorSelectorInline
               isDisabled={isDisabled || selectedConversation === undefined}
               onConnectorModalVisibilityChange={() => {}}
-              onConnectorSelectionChange={() => {}}
               selectedConnectorId={selectedConnectorId}
               selectedConversation={selectedConversation}
             />

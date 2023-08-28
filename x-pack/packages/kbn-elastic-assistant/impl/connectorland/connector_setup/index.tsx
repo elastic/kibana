@@ -14,11 +14,7 @@ import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  GEN_AI_CONNECTOR_ID,
-  OpenAiProviderType,
-} from '@kbn/stack-connectors-plugin/public/common';
-import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { GEN_AI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/public/common';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
 import { Conversation, Message } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
@@ -29,6 +25,7 @@ import { clearPresentationData, conversationHasNoPresentationData } from './help
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../use_load_connectors';
+import { getGenAiConfig } from '../helpers';
 
 const ConnectorButtonWrapper = styled.div`
   margin-bottom: 10px;
@@ -37,11 +34,6 @@ const ConnectorButtonWrapper = styled.div`
 const SkipEuiText = styled(EuiText)`
   margin-top: 20px;
 `;
-
-interface Config {
-  apiProvider: string;
-  defaultModel?: string;
-}
 
 export interface ConnectorSetupProps {
   conversation?: Conversation;
@@ -230,18 +222,17 @@ export const useConnectorSetup = ({
           <ConnectorAddModal
             actionType={actionType}
             onClose={() => setIsConnectorModalVisible(false)}
-            postSaveEventHandler={(savedAction: ActionConnector) => {
+            postSaveEventHandler={(connector: ActionConnector) => {
+              const config = getGenAiConfig(connector);
               // Add connector to all conversations
               Object.values(conversations).forEach((c) => {
                 setApiConfig({
                   conversationId: c.id,
                   apiConfig: {
                     ...c.apiConfig,
-                    connectorId: savedAction.id,
-                    provider: (savedAction as ActionConnectorProps<Config, unknown>)?.config
-                      .apiProvider as OpenAiProviderType,
-                    model: (savedAction as ActionConnectorProps<Config, unknown>)?.config
-                      .defaultModel,
+                    connectorId: connector.id,
+                    provider: config?.apiProvider,
+                    model: config?.defaultModel,
                   },
                 });
               });
