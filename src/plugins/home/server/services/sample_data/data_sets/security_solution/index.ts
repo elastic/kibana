@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { auditbeatFieldMappings } from './auditbeat_field_mappings';
 import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
+import { alertsFieldMappings } from './alerts_field_mappings';
 
 const securitysolutionName = i18n.translate('home.sampleData.securitySolutionSpecTitle', {
   defaultMessage: 'Sample Security Solution data',
@@ -44,6 +45,19 @@ export const securitySolutionSpecProvider = function (): SampleDatasetSchema {
         aliases: {
           'auditbeat-sample-data': {},
         },
+      },
+      {
+        id: 'alerts',
+        dataPath: path.join(__dirname, './alerts.json.gz'),
+        fields: alertsFieldMappings,
+        timeFields: ['@timestamp', 'alert.actions.createdAt'],
+        currentTimeMarker: '2018-01-09T00:00:00',
+        preserveDayOfWeekTimeOfDay: true,
+        aliases: {
+          [`.alerts-security.alerts-{{spaceId}}`]: {},
+        },
+        isDataStream: false,
+        deleteAliasWhenRemoved: false,
       },
     ],
     status: 'not_installed',

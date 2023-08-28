@@ -26,6 +26,7 @@ export interface SampleDataInstallerOptions {
   soClient: SavedObjectsClientContract;
   soImporter: ISavedObjectsImporter;
   sampleDatasets: SampleDatasetSchema[];
+  spaceId: string;
   logger: Logger;
 }
 
@@ -43,6 +44,7 @@ export class SampleDataInstaller {
   private readonly soImporter: ISavedObjectsImporter;
   private readonly sampleDatasets: SampleDatasetSchema[];
   private readonly logger: Logger;
+  private readonly spaceId: string;
 
   constructor({
     esClient,
@@ -50,12 +52,14 @@ export class SampleDataInstaller {
     soClient,
     sampleDatasets,
     logger,
+    spaceId,
   }: SampleDataInstallerOptions) {
     this.esClient = esClient;
     this.soClient = soClient;
     this.soImporter = soImporter;
     this.sampleDatasets = sampleDatasets;
     this.logger = logger;
+    this.spaceId = spaceId ?? 'default';
   }
 
   async install(
@@ -113,19 +117,21 @@ export class SampleDataInstaller {
   }
 
   private async uninstallDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
-    let index = createIndexName(dataset.id, dataIndex.id, dataset.index);
+    let index = createIndexName(dataset.id, dataIndex.id);
 
-    try {
-      // if the sample data was reindexed using UA, the index name is actually an alias pointing to the reindexed
-      // index. In that case, we need to get rid of the alias and to delete the underlying index
-      const response = await this.esClient.asCurrentUser.indices.getAlias({
-        name: index,
-      });
-      const aliasName = index;
-      index = Object.keys(response)[0];
-      await this.esClient.asCurrentUser.indices.deleteAlias({ name: aliasName, index });
-    } catch (err) {
-      // ignore errors from missing alias
+    if (dataIndex.deleteAliasWhenRemoved === true) {
+      try {
+        // if the sample data was reindexed using UA, the index name is actually an alias pointing to the reindexed
+        // index. In that case, we need to get rid of the alias and to delete the underlying index
+        const response = await this.esClient.asCurrentUser.indices.getAlias({
+          name: index,
+        });
+        const aliasName = index;
+        index = Object.keys(response)[0];
+        await this.esClient.asCurrentUser.indices.deleteAlias({ name: aliasName, index });
+      } catch (err) {
+        // ignore errors from missing alias
+      }
     }
 
     try {
@@ -153,8 +159,20 @@ export class SampleDataInstaller {
     }
   }
 
+  private getAliasWithSpaceId(aliases: Record<string, {}> | undefined, spaceId: string) {
+    if (!aliases) {
+      return undefined;
+    }
+    return Object.keys(aliases).reduce<Record<string, {}>>((acc, alias) => {
+      const aliasWithSpaceId = alias.replace('{{spaceId}}', spaceId);
+      acc[aliasWithSpaceId] = {};
+      return acc;
+    }, {});
+  }
+
   private async installDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
     const index = createIndexName(dataset.id, dataIndex.id);
+    const aliases = this.getAliasWithSpaceId(dataIndex.aliases, this.spaceId);
     try {
       if (dataIndex.isDataStream) {
         const request = {
@@ -166,7 +184,6 @@ export class SampleDataInstaller {
             },
             index_patterns: [index],
             data_stream: {},
-            aliases: dataIndex.aliases,
           },
         };
         await this.esClient.asCurrentUser.indices.putIndexTemplate(request);
@@ -174,6 +191,15 @@ export class SampleDataInstaller {
         await this.esClient.asCurrentUser.indices.createDataStream({
           name: index,
         });
+        console.log('aliases', aliases, index);
+        if (aliases) {
+          const res = await this.esClient.asCurrentUser.indices.updateAliases({
+            actions: Object.entries(aliases).map(([alias]) => ({
+              add: { index, alias },
+            })),
+          });
+          console.log('res', res);
+        }
       } else {
         await this.esClient.asCurrentUser.indices.create({
           index,
@@ -186,7 +212,7 @@ export class SampleDataInstaller {
               },
             },
             mappings: { properties: dataIndex.fields },
-            aliases: dataIndex.aliases,
+            aliases,
           },
         });
       }

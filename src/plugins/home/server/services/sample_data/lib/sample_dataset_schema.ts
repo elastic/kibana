@@ -23,6 +23,8 @@ const dataIndexSchema = schema.object({
   // path to newline delimented JSON file containing data relative to KIBANA_HOME
   dataPath: schema.string(),
 
+  deleteAliasWhenRemoved: schema.maybe(schema.boolean({ defaultValue: true })),
+
   // Object defining Elasticsearch field mappings (contents of index.mappings.type.properties)
   fields: schema.recordOf(schema.string(), schema.any()),
 

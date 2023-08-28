@@ -9,6 +9,8 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,
@@ -39,7 +41,10 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     this.isDevMode = this.initContext.env.mode.dev;
   }
 
-  public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
+  public setup(
+    core: CoreSetup<{ spaces?: SpacesPluginSetup }>,
+    plugins: HomeServerPluginSetupDependencies
+  ): HomeServerPluginSetup {
     this.customIntegrations = plugins.customIntegrations;
 
     core.capabilities.registerProvider(capabilitiesProvider);

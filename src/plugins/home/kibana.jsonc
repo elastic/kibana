@@ -16,7 +16,7 @@
       "customIntegrations",
       "cloud",
       "guidedOnboarding",
-      "cloudChatProvider"
+      "cloudChatProvider",
     ],
     "requiredBundles": [
       "kibanaReact"

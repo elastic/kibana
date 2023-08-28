@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { IRouter, Logger } from '@kbn/core/server';
+import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
@@ -20,7 +20,8 @@ export function createInstallRoute(
   sampleDatasets: SampleDatasetSchema[],
   logger: Logger,
   usageTracker: SampleDataUsageTracker,
-  analytics: AnalyticsServiceSetup
+  analytics: AnalyticsServiceSetup,
+  getSpaceId: (req: KibanaRequest) => Promise<string>
 ): void {
   router.post(
     {
@@ -33,6 +34,8 @@ export function createInstallRoute(
     },
     async (context, req, res) => {
       const routeStartTime = performance.now();
+      const spaceId = await getSpaceId(req);
+
       const { params, query } = req;
       const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
       if (!sampleDataset) {

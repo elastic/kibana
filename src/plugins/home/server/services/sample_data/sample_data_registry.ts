@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, KibanaRequest, PluginInitializerContext } from '@kbn/core/server';
 import type { SavedObject } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+
 import {
   SampleDatasetProvider,
   SampleDatasetSchema,
@@ -30,11 +32,13 @@ import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
 import { registerSampleDatasetWithIntegration } from './lib/register_with_integrations';
 
+const DEFAULT_SPACE_ID = 'default';
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   private readonly sampleDatasets: SampleDatasetSchema[] = [];
   private readonly appLinksMap = new Map<string, AppLinkData[]>();
+  private getSpaceId?: (req: KibanaRequest) => Promise<string>;
 
   private registerSampleDataSet(specProvider: SampleDatasetProvider) {
     let value: SampleDatasetSchema;
@@ -68,7 +72,7 @@ export class SampleDataRegistry {
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<{ spaces?: SpacesPluginSetup }>,
     usageCollections: UsageCollectionSetup | undefined,
     customIntegrations?: CustomIntegrationsPluginSetup,
     isDevMode?: boolean
@@ -82,10 +86,22 @@ export class SampleDataRegistry {
       core.getStartServices().then(([coreStart]) => coreStart.savedObjects),
       this.initContext.logger.get('sample_data', 'usage')
     );
+
+    this.getSpaceId = async (req: KibanaRequest) =>
+      await core.getStartServices().then(([_, depsStart]) => {
+        return depsStart?.spaces?.spacesService?.getSpaceId(req) ?? DEFAULT_SPACE_ID;
+      });
     const router = core.http.createRouter();
     const logger = this.initContext.logger.get('sampleData');
     createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
-    createInstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
+    createInstallRoute(
+      router,
+      this.sampleDatasets,
+      logger,
+      usageTracker,
+      core.analytics,
+      this.getSpaceId
+    );
     createUninstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
 
     this.registerSampleDataSet(flightsSpecProvider);
