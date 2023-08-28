@@ -237,7 +237,6 @@ export class DiscoverPlugin
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
     const isDev = this.initializerContext.env.mode.dev;
-    console.log(this.config.headlessLocation);
 
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
@@ -334,7 +333,7 @@ export class DiscoverPlugin
     );
     const navLinkStatus =
       this.config.headlessLocation !== undefined ? AppNavLinkStatus.hidden : undefined;
-    console.log(navLinkStatus);
+
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
