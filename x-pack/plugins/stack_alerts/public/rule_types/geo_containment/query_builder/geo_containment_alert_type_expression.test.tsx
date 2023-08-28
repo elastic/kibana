@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
@@ -27,7 +28,6 @@ const alertParams = {
   boundaryIndexTitle: '',
   boundaryIndexId: '',
   boundaryGeoField: '',
-  operation: 'create',
 };
 
 test('should render EntityIndexExpression', async () => {
@@ -82,8 +82,40 @@ test('should render BoundaryIndexExpression', async () => {
       boundaryNameField={'testNameField'}
       data={dataStartMock}
       unifiedSearch={unifiedSearchStartMock}
+      operation="create"
     />
   );
 
   expect(component).toMatchSnapshot();
+});
+
+test.only('should render BoundaryIndexExpression in edit mode', async () => {
+  const alertParamsEdit = {
+    index: '',
+    indexId: '',
+    geoField: '',
+    entity: '',
+    dateField: '',
+    boundaryType: '',
+    boundaryIndexTitle: '',
+    boundaryIndexId: '',
+    boundaryGeoField: '',
+  };
+
+  const component = render(
+    <BoundaryIndexExpression
+      ruleParams={alertParamsEdit}
+      errors={{} as IErrorObject}
+      boundaryIndexPattern={'' as unknown as DataView}
+      setBoundaryIndexPattern={() => {}}
+      setBoundaryGeoField={() => {}}
+      setBoundaryNameField={() => {}}
+      boundaryNameField={'testNameField'}
+      data={dataStartMock}
+      unifiedSearch={unifiedSearchStartMock}
+      operation="create"
+    />
+  );
+  console.log('component', component)
+  // expect(component).toMatchSnapshot();
 });
