@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { generateRandomStringName } from '@kbn/osquery-plugin/cypress/tasks/integrations';
 import { disableExpandableFlyoutAdvancedSettings } from '../../../tasks/common';
+import { generateRandomStringName } from '../../../tasks/utils';
 import { APP_ALERTS_PATH } from '../../../../../../common/constants';
 import { closeAllToasts } from '../../../tasks/toasts';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';

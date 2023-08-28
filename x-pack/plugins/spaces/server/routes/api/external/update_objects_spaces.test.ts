@@ -62,7 +62,7 @@ describe('update_objects_spaces', () => {
       spacesClientService: clientServiceStart,
     });
     initUpdateObjectsSpacesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,
