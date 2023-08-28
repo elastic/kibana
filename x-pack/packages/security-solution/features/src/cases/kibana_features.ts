@@ -19,9 +19,12 @@ export const getCasesBaseKibanaFeature = ({
 }: CasesFeatureParams): BaseKibanaFeatureConfig => {
   return {
     id: CASES_FEATURE_ID,
-    name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionCaseTitle', {
-      defaultMessage: 'Cases',
-    }),
+    name: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitle',
+      {
+        defaultMessage: 'Cases',
+      }
+    ),
     order: 1100,
     category: DEFAULT_APP_CATEGORIES.security,
     app: [CASES_FEATURE_ID, 'kibana'],

@@ -10,7 +10,7 @@ import {
   AppFeatureSecurityKey,
   SecuritySubFeatureId,
   securityDefaultAppFeaturesConfig,
-  type AppFeatureKey,
+  createEnabledAppFeaturesConfigMap,
   type AppFeatureKeys,
   type AppFeatureKibanaConfig,
   type AppFeaturesSecurityConfig,
@@ -21,14 +21,7 @@ export const getSecurityAppFeaturesConfigurator =
   (
     _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
   ): AppFeaturesSecurityConfig => {
-    const securityAppFeatureValues: AppFeatureKey[] = Object.values(AppFeatureSecurityKey);
-    const securityEnabledAppFeatureKeys = enabledAppFeatureKeys.filter((appFeatureKey) =>
-      securityAppFeatureValues.includes(appFeatureKey)
-    ) as AppFeatureSecurityKey[];
-
-    return new Map(
-      securityEnabledAppFeatureKeys.map((key) => [key, securityAppFeaturesConfig[key]])
-    );
+    return createEnabledAppFeaturesConfigMap(securityAppFeaturesConfig, enabledAppFeatureKeys);
   };
 
 /**

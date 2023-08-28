@@ -2,16 +2,10 @@
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "react",
-      "@emotion/react/types/css-prop",
-      "@testing-library/jest-dom",
-      "@testing-library/react"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/features-plugin",
     "@kbn/utility-types",
@@ -20,7 +14,6 @@
     "@kbn/cases-plugin",
     "@kbn/securitysolution-rules",
     "@kbn/securitysolution-list-constants",
-    "@kbn/security-solution-plugin",
-  ],
-  "exclude": ["target/**/*"]
+    "@kbn/security-solution-plugin"
+  ]
 }

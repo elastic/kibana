@@ -12,13 +12,13 @@ import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 // @ts-expect-error unused variable
 const createConversationSubFeature: SubFeatureConfig = {
   name: i18n.translate(
-    'xpack.securitySolution.featureRegistry.assistant.createConversationSubFeatureName',
+    'securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureName',
     {
       defaultMessage: 'Create Conversations',
     }
   ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.assistant.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.assistant.description',
     { defaultMessage: 'Create custom conversations.' }
   ),
   privilegeGroups: [
@@ -29,7 +29,7 @@ const createConversationSubFeature: SubFeatureConfig = {
           api: [],
           id: 'create_conversation',
           name: i18n.translate(
-            'xpack.securitySolution.featureRegistry.assistant.createConversationSubFeatureDetails',
+            'securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureDetails',
             {
               defaultMessage: 'Create conversations',
             }

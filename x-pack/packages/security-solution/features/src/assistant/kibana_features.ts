@@ -14,7 +14,7 @@ import { APP_ID, ASSISTANT_FEATURE_ID } from '../constants';
 export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   id: ASSISTANT_FEATURE_ID,
   name: i18n.translate(
-    'xpack.securitySolution.featureRegistry.linkSecuritySolutionAssistantTitle',
+    'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionAssistantTitle',
     {
       defaultMessage: 'Elastic AI Assistant',
     }

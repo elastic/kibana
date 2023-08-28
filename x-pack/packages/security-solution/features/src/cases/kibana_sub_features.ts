@@ -29,7 +29,7 @@ export const getCasesSubFeaturesMap = ({
   savedObjects,
 }: CasesFeatureParams) => {
   const deleteCasesSubFeature: SubFeatureConfig = {
-    name: i18n.translate('xpack.securitySolution.featureRegistry.deleteSubFeatureName', {
+    name: i18n.translate('securitySolutionPackages.features.featureRegistry.deleteSubFeatureName', {
       defaultMessage: 'Delete',
     }),
     privilegeGroups: [
@@ -39,9 +39,12 @@ export const getCasesSubFeaturesMap = ({
           {
             api: apiTags.delete,
             id: 'cases_delete',
-            name: i18n.translate('xpack.securitySolution.featureRegistry.deleteSubFeatureDetails', {
-              defaultMessage: 'Delete cases and comments',
-            }),
+            name: i18n.translate(
+              'securitySolutionPackages.features.featureRegistry.deleteSubFeatureDetails',
+              {
+                defaultMessage: 'Delete cases and comments',
+              }
+            ),
             includeIn: 'all',
             savedObject: {
               all: [...savedObjects.files],

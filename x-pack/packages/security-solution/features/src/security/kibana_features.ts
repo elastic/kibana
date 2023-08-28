@@ -36,9 +36,12 @@ export const getSecurityBaseKibanaFeature = ({
   savedObjects,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
   id: SERVER_APP_ID,
-  name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
-    defaultMessage: 'Security',
-  }),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitle',
+    {
+      defaultMessage: 'Security',
+    }
+  ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
   app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],

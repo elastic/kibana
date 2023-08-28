@@ -16,16 +16,19 @@ import type { SecurityFeatureParams } from './types';
 const endpointListSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.endpointList.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for Endpoint List access.',
     }
   ),
-  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.endpointList', {
-    defaultMessage: 'Endpoint List',
-  }),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.endpointList',
+    {
+      defaultMessage: 'Endpoint List',
+    }
+  ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.endpointList.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.endpointList.description',
     {
       defaultMessage:
         'Displays all hosts running Elastic Defend and their relevant integration details.',
@@ -64,16 +67,19 @@ const endpointListSubFeature: SubFeatureConfig = {
 const trustedApplicationsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.trustedApplications.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedApplications.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for Trusted Applications access.',
     }
   ),
-  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.trustedApplications', {
-    defaultMessage: 'Trusted Applications',
-  }),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedApplications',
+    {
+      defaultMessage: 'Trusted Applications',
+    }
+  ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.trustedApplications.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedApplications.description',
     {
       defaultMessage:
         'Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.',
@@ -118,19 +124,19 @@ const trustedApplicationsSubFeature: SubFeatureConfig = {
 const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for Host Isolation Exceptions access.',
     }
   ),
   name: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolationExceptions',
     {
       defaultMessage: 'Host Isolation Exceptions',
     }
   ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolationExceptions.description',
     {
       defaultMessage:
         'Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.',
@@ -175,16 +181,16 @@ const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
 const blocklistSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.blockList.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.blockList.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for Blocklist access.',
     }
   ),
-  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.blockList', {
+  name: i18n.translate('securitySolutionPackages.features.featureRegistry.subFeatures.blockList', {
     defaultMessage: 'Blocklist',
   }),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.blockList.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.blockList.description',
     {
       defaultMessage:
         'Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.',
@@ -229,16 +235,19 @@ const blocklistSubFeature: SubFeatureConfig = {
 const eventFiltersSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.eventFilters.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.eventFilters.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for Event Filters access.',
     }
   ),
-  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.eventFilters', {
-    defaultMessage: 'Event Filters',
-  }),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.eventFilters',
+    {
+      defaultMessage: 'Event Filters',
+    }
+  ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.eventFilters.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.eventFilters.description',
     {
       defaultMessage:
         'Filter out endpoint events that you do not need or want stored in Elasticsearch.',
@@ -283,16 +292,19 @@ const eventFiltersSubFeature: SubFeatureConfig = {
 const policyManagementSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.policyManagement.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.policyManagement.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for Policy Management access.',
     }
   ),
-  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.policyManagement', {
-    defaultMessage: 'Elastic Defend Policy Management',
-  }),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.policyManagement',
+    {
+      defaultMessage: 'Elastic Defend Policy Management',
+    }
+  ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.policyManagement.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.policyManagement.description',
     {
       defaultMessage:
         'Access the Elastic Defend integration policy to configure protections, event collection, and advanced policy features.',
@@ -332,19 +344,19 @@ const policyManagementSubFeature: SubFeatureConfig = {
 const responseActionsHistorySubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.responseActionsHistory.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for Response Actions History access.',
     }
   ),
   name: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.responseActionsHistory',
     {
       defaultMessage: 'Response Actions History',
     }
   ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.responseActionsHistory.description',
     {
       defaultMessage: 'Access the history of response actions performed on endpoints.',
     }
@@ -382,16 +394,19 @@ const responseActionsHistorySubFeature: SubFeatureConfig = {
 const hostIsolationSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.hostIsolation.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolation.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for Host Isolation access.',
     }
   ),
-  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.hostIsolation', {
-    defaultMessage: 'Host Isolation',
-  }),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolation',
+    {
+      defaultMessage: 'Host Isolation',
+    }
+  ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.hostIsolation.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolation.description',
     { defaultMessage: 'Perform the "isolate" and "release" response actions.' }
   ),
   privilegeGroups: [
@@ -417,16 +432,19 @@ const hostIsolationSubFeature: SubFeatureConfig = {
 const processOperationsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.processOperations.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.processOperations.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for Process Operations access.',
     }
   ),
-  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.processOperations', {
-    defaultMessage: 'Process Operations',
-  }),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.processOperations',
+    {
+      defaultMessage: 'Process Operations',
+    }
+  ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.processOperations.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.processOperations.description',
     {
       defaultMessage: 'Perform process-related response actions in the response console.',
     }
@@ -453,16 +471,19 @@ const processOperationsSubFeature: SubFeatureConfig = {
 const fileOperationsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.fileOperations.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.fileOperations.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for File Operations access.',
     }
   ),
-  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.fileOperations', {
-    defaultMessage: 'File Operations',
-  }),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.fileOperations',
+    {
+      defaultMessage: 'File Operations',
+    }
+  ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.fileOperations.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.fileOperations.description',
     {
       defaultMessage: 'Perform file-related response actions in the response console.',
     }
@@ -492,16 +513,19 @@ const fileOperationsSubFeature: SubFeatureConfig = {
 const executeActionSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for Execute Operations access.',
     }
   ),
-  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.executeOperations', {
-    defaultMessage: 'Execute Operations',
-  }),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.executeOperations',
+    {
+      defaultMessage: 'Execute Operations',
+    }
+  ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.executeOperations.description',
     {
       // TODO: Update this description before 8.8 FF
       defaultMessage: 'Perform script execution on the endpoint.',
@@ -530,16 +554,19 @@ const executeActionSubFeature: SubFeatureConfig = {
 const endpointExceptionsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.endpointExceptions.privilegesTooltip',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions.privilegesTooltip',
     {
       defaultMessage: 'All Spaces is required for Endpoint Exceptions access.',
     }
   ),
-  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.endpointExceptions', {
-    defaultMessage: 'Endpoint Exceptions',
-  }),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions',
+    {
+      defaultMessage: 'Endpoint Exceptions',
+    }
+  ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.endpointExceptions.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions.description',
     {
       defaultMessage: 'Use Endpoint Exceptions (this is a test sub-feature).',
     }
