@@ -14,5 +14,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./navigation'));
     loadDiscoverLogExplorerSuite(loadTestFile);
     loadTestFile(require.resolve('./cases/attachment_framework'));
+    loadTestFile(require.resolve('./cases/configure'));
+    loadTestFile(require.resolve('./cases/list_view'));
+    loadTestFile(require.resolve('./cases/create_case_form'));
   });
 }
