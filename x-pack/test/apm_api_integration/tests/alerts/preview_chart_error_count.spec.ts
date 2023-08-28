@@ -41,7 +41,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),
         interval: '5m',
-        kqlFilter: 'service.name: synth-go',
+        searchConfiguration: JSON.stringify({
+          query: {
+            query: 'service.name: synth-go',
+            language: 'kuery',
+          },
+        }),
         serviceName: undefined,
         errorGroupingKey: undefined,
         environment: 'ENVIRONMENT_ALL',
@@ -328,9 +333,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              kqlFilter: `service.name: synth-go and error.grouping_key: ${getErrorGroupingKey(
-                'Error 1'
-              )}`,
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query: `service.name: synth-go and error.grouping_key: ${getErrorGroupingKey(
+                    'Error 1'
+                  )}`,
+                  language: 'kuery',
+                },
+              }),
             },
           },
         };
@@ -430,9 +440,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              kqlFilter: `service.name: synth-go and error.grouping_key: ${getErrorGroupingKey(
-                'Error 0'
-              )}`,
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query: `service.name: synth-go and error.grouping_key: ${getErrorGroupingKey(
+                    'Error 0'
+                  )}`,
+                  language: 'kuery',
+                },
+              }),
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, ERROR_GROUP_ID],
             },
           },
@@ -463,7 +478,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              kqlFilter: '',
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query: '',
+                  language: 'kuery',
+                },
+              }),
             },
           },
         };
@@ -490,7 +510,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              kqlFilter: '',
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query: '',
+                  language: 'kuery',
+                },
+              }),
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, ERROR_GROUP_ID],
             },
           },
