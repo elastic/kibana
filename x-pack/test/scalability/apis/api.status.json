@@ -2,9 +2,9 @@
   "journeyName": "POST /api/core/capabilities",
   "scalabilitySetup": {
     "responseTimeThreshold": {
-      "threshold1": 5000,
-      "threshold2": 10000,
-      "threshold3": 20000
+      "threshold1": 1000,
+      "threshold2": 3000,
+      "threshold3": 5000
     },
     "warmup": [
       {
