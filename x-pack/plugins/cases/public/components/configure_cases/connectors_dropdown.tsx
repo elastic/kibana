@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiSuperSelect } from '
 import styled from 'styled-components';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { hasSaveActionsCapability } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
@@ -75,7 +76,11 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   selectedConnector,
   appendAddConnectorButton = false,
 }) => {
-  const { triggersActionsUi } = useKibana().services;
+  const {
+    triggersActionsUi,
+    application: { capabilities },
+  } = useKibana().services;
+  const canSave = hasSaveActionsCapability(capabilities);
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
       (acc, connector) => {
@@ -118,7 +123,13 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
     );
 
     if (appendAddConnectorButton) {
-      return [...connectorsFormatted, addNewConnector];
+      return [
+        ...connectorsFormatted,
+        {
+          ...addNewConnector,
+          disabled: !canSave,
+        },
+      ];
     }
 
     return connectorsFormatted;
