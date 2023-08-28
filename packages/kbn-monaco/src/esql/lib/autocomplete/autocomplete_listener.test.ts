@@ -137,6 +137,44 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | stats a=min(b), b=max(', ['FieldIdentifier']);
   });
 
+  describe('enrich', () => {
+    for (const prevCommand of [
+      '',
+      '| enrich other-policy ',
+      '| enrich other-policy on b ',
+      '| enrich other-policy with c ',
+    ]) {
+      testSuggestions(`from a ${prevCommand}| enrich`, ['PolicyIdentifier']);
+      testSuggestions(`from a ${prevCommand}| enrich policy `, ['|', 'on', 'with']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on `, [
+        'PolicyMatchingFieldIdentifier',
+      ]);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['|', 'with']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with `, [
+        'var0',
+        'PolicyFieldIdentifier',
+      ]);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 `, ['=', '|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = `, [
+        'PolicyFieldIdentifier',
+      ]);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = c `, ['|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = c, `, [
+        'var1',
+        'PolicyFieldIdentifier',
+      ]);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = c, var1 `, ['=', '|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = c, var1 = `, [
+        'PolicyFieldIdentifier',
+      ]);
+      testSuggestions(`from a ${prevCommand}| enrich policy with `, [
+        'var0',
+        'PolicyFieldIdentifier',
+      ]);
+      testSuggestions(`from a ${prevCommand}| enrich policy with c`, ['=', '|']);
+    }
+  });
+
   describe('eval', () => {
     testSuggestions('from a | eval ', ['var0']);
     testSuggestions('from a | eval a ', ['=']);

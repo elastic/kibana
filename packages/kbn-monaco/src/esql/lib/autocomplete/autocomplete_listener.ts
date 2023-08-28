@@ -10,7 +10,12 @@ import type { AutocompleteCommandDefinition, UserDefinedVariables } from './type
 import { DynamicAutocompleteItem } from './dymanic_item';
 
 import { esql_parserListener as ESQLParserListener } from '../../antlr/esql_parser_listener';
-import { esql_parser, esql_parser as ESQLParser } from '../../antlr/esql_parser';
+import {
+  esql_parser,
+  esql_parser as ESQLParser,
+  EnrichCommandContext,
+  EnrichWithClauseContext,
+} from '../../antlr/esql_parser';
 
 import {
   processingCommandsDefinitions,
@@ -58,20 +63,38 @@ import {
   GrokCommandContext,
   MvExpandCommandContext,
 } from '../../antlr/esql_parser';
+import {
+  onOperatorDefinition,
+  withOperatorDefinition,
+} from './autocomplete_definitions/operators_commands';
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
 
 export class AutocompleteListener implements ESQLParserListener {
   private suggestions: Array<AutocompleteCommandDefinition | DynamicAutocompleteItem> = [];
   private readonly userDefinedVariables: UserDefinedVariables = {
     sourceIdentifiers: [],
+    policyIdentifiers: [],
   };
   private readonly tables: string[][] = [];
   private parentContext: number | undefined;
 
-  private get fields() {
-    const fieldsSuggestions: Array<DynamicAutocompleteItem | AutocompleteCommandDefinition> = [
-      DynamicAutocompleteItem.FieldIdentifier,
-    ];
-    return fieldsSuggestions;
+  private get fields(): [DynamicAutocompleteItem] {
+    return [DynamicAutocompleteItem.FieldIdentifier];
+  }
+
+  private get policies(): [DynamicAutocompleteItem] {
+    return [DynamicAutocompleteItem.PolicyIdentifier];
+  }
+
+  private get policyFields(): [DynamicAutocompleteItem] {
+    return [DynamicAutocompleteItem.PolicyFieldIdentifier];
+  }
+
+  private get policyMatchingField(): [DynamicAutocompleteItem] {
+    return [DynamicAutocompleteItem.PolicyMatchingFieldIdentifier];
   }
 
   private get hasSuggestions() {
@@ -82,16 +105,23 @@ export class AutocompleteListener implements ESQLParserListener {
     return node && node.payload?.startIndex >= 0;
   }
 
-  private getEndCommandSuggestions(skipDefinitions: AutocompleteCommandDefinition[] = []) {
-    const suggestions = [pipeDefinition];
-
-    if (
-      !skipDefinitions.find((i) => i === byOperatorDefinition) &&
-      this.parentContext === ESQLParser.STATS
-    ) {
-      suggestions.push(byOperatorDefinition);
+  private applyConditionalSuggestion(
+    skipDefinitions: AutocompleteCommandDefinition[],
+    targetDefinition: AutocompleteCommandDefinition,
+    context: number
+  ) {
+    if (!skipDefinitions.find((i) => i === targetDefinition) && this.parentContext === context) {
+      return targetDefinition;
     }
-    return suggestions;
+  }
+
+  private getEndCommandSuggestions(skipDefinitions: AutocompleteCommandDefinition[] = []) {
+    return [
+      pipeDefinition,
+      this.applyConditionalSuggestion(skipDefinitions, byOperatorDefinition, ESQLParser.STATS),
+      this.applyConditionalSuggestion(skipDefinitions, onOperatorDefinition, ESQLParser.ENRICH),
+      this.applyConditionalSuggestion(skipDefinitions, withOperatorDefinition, ESQLParser.ENRICH),
+    ].filter(nonNullable);
   }
 
   private getNewVarName() {
@@ -356,6 +386,72 @@ export class AutocompleteListener implements ESQLParserListener {
   enterWhereCommand(ctx: WhereCommandContext) {
     this.suggestions = [];
     this.parentContext = ESQLParser.WHERE;
+  }
+
+  enterEnrichCommand(ctx: EnrichCommandContext) {
+    this.suggestions = [];
+    this.parentContext = ESQLParser.ENRICH;
+  }
+
+  exitEnrichCommand(ctx: EnrichCommandContext) {
+    const policyName = ctx.enrichIdentifier().text;
+    if (policyName && !this.userDefinedVariables.policyIdentifiers.includes(policyName)) {
+      this.userDefinedVariables.policyIdentifiers.push(policyName);
+    }
+
+    if (this.parentContext === ESQLParser.WITH) {
+      return;
+    }
+    if (!policyName) {
+      this.suggestions = this.policies;
+    }
+
+    if (policyName)
+      if (this.parentContext === ESQLParser.ENRICH) {
+        const hasOn = this.isTerminalNodeExists(ctx.ON());
+        if (hasOn && !ctx._matchField.text) {
+          this.suggestions = this.policyMatchingField;
+        } else {
+          this.suggestions = this.getEndCommandSuggestions(
+            hasOn ? [onOperatorDefinition] : undefined
+          );
+        }
+      }
+  }
+
+  enterEnrichWithClause(ctx: EnrichWithClauseContext) {
+    this.suggestions = [];
+    this.parentContext = ESQLParser.WITH;
+  }
+
+  exitEnrichWithClause(ctx: EnrichWithClauseContext) {
+    const hasAssign = this.isTerminalNodeExists(ctx.ASSIGN());
+    // Note: this gets filled only after the assign operation :(
+    if (ctx._newName?.text) {
+      this.tables.at(-1)?.push(ctx._newName.text);
+    }
+
+    if (!ctx.exception && ctx.enrichFieldIdentifier().length === 1) {
+      // if it's after the assign operator, then suggest the fields from the policy
+      // TODO: need to check if the enrichFieldIdentifier given is a policyField or not and decide whether append the assignOperator
+      this.suggestions = !hasAssign
+        ? [assignOperatorDefinition, ...this.getEndCommandSuggestions()]
+        : this.policyFields;
+    } else {
+      this.suggestions = [];
+      if (!hasAssign) {
+        this.suggestions.push(buildNewVarDefinition(this.getNewVarName()));
+      }
+      if (!ctx._enrichField?.text) {
+        this.suggestions.push(...this.policyFields);
+      }
+      if (this.suggestions.length === 0) {
+        this.suggestions = this.getEndCommandSuggestions([
+          onOperatorDefinition,
+          withOperatorDefinition,
+        ]);
+      }
+    }
   }
 
   exitWhereCommand(ctx: WhereCommandContext) {
