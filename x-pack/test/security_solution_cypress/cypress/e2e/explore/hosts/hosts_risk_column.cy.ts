@@ -12,9 +12,10 @@ import { cleanKibana } from '../../../tasks/common';
 import { TABLE_CELL } from '../../../screens/alerts_details';
 import { kqlSearch } from '../../../tasks/security_header';
 
-describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
+describe('All hosts table', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
+    // illegal_argument_exception: unknown setting [index.lifecycle.name]
     cy.task('esArchiverLoad', 'risk_hosts');
   });
 

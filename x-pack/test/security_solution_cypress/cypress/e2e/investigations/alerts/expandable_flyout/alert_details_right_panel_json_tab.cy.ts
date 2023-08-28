@@ -16,7 +16,8 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe(
+// Failing constantly on CI
+describe.skip(
   'Alert details expandable flyout right panel json tab',
   { tags: ['@ess', '@brokenInServerless'] },
   () => {

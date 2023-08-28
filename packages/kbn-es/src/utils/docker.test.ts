@@ -341,7 +341,7 @@ describe('resolveEsArgs()', () => {
       ssl: true,
     });
 
-    expect(esArgs).toHaveLength(20);
+    expect(esArgs).toHaveLength(32);
     expect(esArgs).not.toEqual(expect.arrayContaining(['xpack.security.enabled=false']));
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
@@ -365,6 +365,18 @@ describe('resolveEsArgs()', () => {
         "xpack.security.transport.ssl.verification_mode=certificate",
         "--env",
         "xpack.security.operator_privileges.enabled=true",
+        "--env",
+        "xpack.security.authc.realms.jwt.jwt1.client_authentication.type=shared_secret",
+        "--env",
+        "xpack.security.authc.realms.jwt.jwt1.order=-98",
+        "--env",
+        "xpack.security.authc.realms.jwt.jwt1.allowed_issuer=https://kibana.elastic.co/jwt/",
+        "--env",
+        "xpack.security.authc.realms.jwt.jwt1.allowed_audiences=elasticsearch",
+        "--env",
+        "xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=/usr/share/elasticsearch/config/secrets/jwks.json",
+        "--env",
+        "xpack.security.authc.realms.jwt.jwt1.claims.principal=sub",
       ]
     `);
   });
@@ -418,7 +430,7 @@ describe('setupServerlessVolumes()', () => {
       (path) => !volumeCmd.some((cmd) => cmd.includes(path))
     );
 
-    expect(volumeCmd).toHaveLength(18);
+    expect(volumeCmd).toHaveLength(20);
     expect(pathsNotIncludedInCmd).toEqual([]);
   });
 });
