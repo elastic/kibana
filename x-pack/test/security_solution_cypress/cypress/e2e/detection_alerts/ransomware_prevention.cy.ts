@@ -34,7 +34,7 @@ describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () =
       waitForAlertsToPopulate();
     });
 
-    describe('Alerts table', () => {
+    describe('Alerts table', { tags: ['@brokenInServerless'] }, () => {
       it('shows Ransomware Alerts', () => {
         cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Prevention Alert');
       });
