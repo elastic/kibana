@@ -30998,7 +30998,6 @@
     "xpack.securitySolution.detectionEngine.createRule.savedQueryFiltersLabel": "已保存查询筛选",
     "xpack.securitySolution.detectionEngine.createRule.savedQueryLabel": "已保存查询",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.authorFieldEmptyError": "作者不得为空",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector": "数据视图",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.descriptionFieldRequiredError": "描述必填。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel": "索引模式",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel": "将现有的终端例外添加到规则",
