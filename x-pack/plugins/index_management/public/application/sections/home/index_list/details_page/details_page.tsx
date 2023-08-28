@@ -193,7 +193,6 @@ export const DetailsPage: React.FunctionComponent<
           />
         </Routes>
       </div>
-
     </>
   );
 };
