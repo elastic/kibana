@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { BehaviorSubject } from 'rxjs';
-import { Filter, Query } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { RANDOM_SAMPLER_OPTION, RandomSampler } from '@kbn/ml-random-sampler-utils';
-import { RandomSamplerOption } from '../index_data_visualizer/constants/random_sampler';
+import { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 
 export const defaultSearchQuery = {
   match_all: {},
 };
 
-interface StateManagerConstructorArgs {
+interface StateManagerInitialParams {
   id: string;
   indexPattern: string;
   searchString: string;
@@ -28,79 +26,10 @@ interface StateManagerConstructorArgs {
   timeField?: string;
 }
 
-export class StateManager {
-  private _timeField?: string;
-  private _id: string = 'dataDriftStateManager';
-
-  private indexPattern$ = new BehaviorSubject<string>('');
-  private searchString$ = new BehaviorSubject<Query['query']>('');
-  private query$ = new BehaviorSubject<estypes.QueryDslQueryContainer>(defaultSearchQuery);
-  private searchQueryLanguage$ = new BehaviorSubject<SearchQueryLanguage>(
-    SEARCH_QUERY_LANGUAGE.KUERY
-  );
-  filters$ = new BehaviorSubject<Filter[]>([]);
-  private randomSamplerMode$ = new BehaviorSubject<RandomSamplerOption>(
-    RANDOM_SAMPLER_OPTION.ON_AUTOMATIC
-  );
-  private _randomSampler = new RandomSampler();
-
-  constructor({
-    id,
-    indexPattern,
-    searchString,
-    searchQuery,
-    searchQueryLanguage,
-    filters,
-    timeField,
-  }: StateManagerConstructorArgs) {
-    this._id = id;
-    this.indexPattern$.next(indexPattern);
-    this.searchString$.next(searchString);
-    this.query$.next(searchQuery);
-    this.searchQueryLanguage$.next(searchQueryLanguage);
-    this.filters$.next(filters);
-    this._timeField = timeField;
-  }
-
-  public setRandomSamplerMode(mode: RandomSamplerOption) {
-    this.randomSamplerMode$.next(mode);
-  }
-
-  public getRandomSamplerMode() {
-    return this.randomSamplerMode$.getValue();
-  }
-
-  public getQuery() {
-    return this.query$.getValue();
-  }
-
-  public setQuery(q: estypes.QueryDslQueryContainer) {
-    this.query$.next(q);
-  }
-
-  public get randomSampler() {
-    return this._randomSampler;
-  }
-
-  public get searchString() {
-    return this.searchString$.getValue();
-  }
-  public get searchQueryLanguage() {
-    return this.searchQueryLanguage$.getValue();
-  }
-  public get id() {
-    return this._id;
-  }
-
-  public get timeField() {
-    return this._timeField;
-  }
-}
-
 export const DataComparisonStateManagerContext = createContext<{
   dataView: DataView | never;
-  reference: StateManager;
-  production: StateManager;
+  reference: DataDriftStateManager;
+  production: DataDriftStateManager;
 }>({
   get dataView(): never {
     throw new Error('DataComparisonStateManagerContext is not implemented');
@@ -112,6 +41,43 @@ export const DataComparisonStateManagerContext = createContext<{
     throw new Error('production is not implemented');
   },
 });
+
+export type DataDriftStateManager = ReturnType<typeof useDataDriftStateManager>;
+
+export const useDataDriftStateManager = ({
+  id,
+  indexPattern: initialIndexPattern,
+  searchString: initialSearchString,
+  searchQuery: initialSearchQuery,
+  searchQueryLanguage: initialSearchQueryLanguage,
+  filters: initialFilters,
+  timeField: initialTimeField,
+}: StateManagerInitialParams) => {
+  const [query, setQuery] = useState(initialSearchQuery);
+  const [indexPattern, setIndexPattern] = useState(initialIndexPattern);
+  const [searchString, setSearchString] = useState(initialSearchString);
+  const [searchQueryLanguage, setSearchQueryLanguage] = useState(initialSearchQueryLanguage);
+  const [filters, setFilters] = useState(initialFilters);
+  const [timeField, setTimeField] = useState(initialTimeField);
+  const [randomSampler] = useState(new RandomSampler());
+
+  return {
+    id,
+    query,
+    setQuery,
+    indexPattern,
+    setIndexPattern,
+    searchString,
+    setSearchString,
+    searchQueryLanguage,
+    setSearchQueryLanguage,
+    filters,
+    setFilters,
+    timeField,
+    setTimeField,
+    randomSampler,
+  };
+};
 
 export function useDataComparisonStateManagerContext() {
   return useContext(DataComparisonStateManagerContext);

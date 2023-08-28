@@ -655,7 +655,7 @@ export const useFetchDataComparisonResult = (
             kqlQuery,
             mapAndFlattenFilters([
               ...queryManager.filterManager.getFilters(),
-              ...(referenceStateManager.filters$.getValue() ?? []),
+              ...(referenceStateManager.filters ?? []),
             ]),
             currentDataView,
             uiSettings
@@ -722,7 +722,7 @@ export const useFetchDataComparisonResult = (
               kqlQuery,
               mapAndFlattenFilters([
                 ...queryManager.filterManager.getFilters(),
-                ...(productionStateManager.filters$.getValue() ?? []),
+                ...(productionStateManager.filters ?? []),
               ]),
               currentDataView,
               uiSettings

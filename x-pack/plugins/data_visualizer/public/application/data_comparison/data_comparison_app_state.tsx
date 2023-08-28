@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
 import { pick } from 'lodash';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -24,7 +24,7 @@ import { InitialSettings } from './use_data_drift_result';
 import {
   DataComparisonStateManagerContext,
   defaultSearchQuery,
-  StateManager,
+  useDataDriftStateManager,
 } from './use_state_manager';
 import { DV_STORAGE_KEYS } from '../index_data_visualizer/types/storage';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
@@ -99,32 +99,24 @@ export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppState
     timeField: getStr(params.timeField),
   };
 
-  const referenceStateManager = useMemo(
-    () =>
-      new StateManager({
-        id: 'referenceDataDriftData',
-        indexPattern: getStr(params.reference) ?? dataView.getIndexPattern(),
-        searchString: '',
-        searchQuery: defaultSearchQuery,
-        searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
-        filters: [],
-        timeField: dataView.timeFieldName,
-      }),
-    [params.reference, dataView]
-  );
-  const productionStateManager = useMemo(
-    () =>
-      new StateManager({
-        id: 'productionDataDriftData',
-        indexPattern: getStr(params.production) ?? dataView.getIndexPattern(),
-        searchString: '',
-        searchQuery: defaultSearchQuery,
-        searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
-        filters: [],
-        timeField: dataView.timeFieldName,
-      }),
-    [params.production, dataView]
-  );
+  const referenceStateManager = useDataDriftStateManager({
+    id: 'referenceDataDriftData',
+    indexPattern: getStr(params.reference) ?? dataView.getIndexPattern(),
+    searchString: '',
+    searchQuery: defaultSearchQuery,
+    searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+    filters: [],
+    timeField: dataView.timeFieldName,
+  });
+  const productionStateManager = useDataDriftStateManager({
+    id: 'productionDataDriftData',
+    indexPattern: getStr(params.production) ?? dataView.getIndexPattern(),
+    searchString: '',
+    searchQuery: defaultSearchQuery,
+    searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+    filters: [],
+    timeField: dataView.timeFieldName,
+  });
 
   return (
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>

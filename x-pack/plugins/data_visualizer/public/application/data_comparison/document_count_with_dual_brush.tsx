@@ -12,8 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { BrushSelectionUpdateHandler, DocumentCountChartProps } from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { Filter } from '@kbn/es-query';
-import useObservable from 'react-use/lib/useObservable';
-import { StateManager, useDataComparisonStateManagerContext } from './use_state_manager';
+import { DataDriftStateManager, useDataComparisonStateManagerContext } from './use_state_manager';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DocumentCountStats } from '../../../common/types/field_stats';
 import { TotalCountHeader } from '../common/components/document_count_content/total_count_header';
@@ -46,7 +45,7 @@ export interface DocumentCountContentProps
   randomSampler: RandomSampler;
   reload: () => void;
   approximate: boolean;
-  stateManager: StateManager;
+  stateManager: DataDriftStateManager;
   label?: string;
 }
 
@@ -83,7 +82,6 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   } = useDataVisualizerKibana();
 
   const { dataView } = useDataComparisonStateManagerContext();
-  const stateFilters = useObservable(stateManager.filters$);
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
   const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
@@ -107,8 +105,8 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
               showFilterBar={true}
               showDatePicker={false}
               showQueryInput={false}
-              filters={stateFilters}
-              onFiltersUpdated={(filters: Filter[]) => stateManager.filters$.next(filters)}
+              filters={stateManager.filters}
+              onFiltersUpdated={(filters: Filter[]) => stateManager.setFilters(filters)}
               indexPatterns={[dataView]}
               displayStyle={'inPage'}
               isClearable={true}
@@ -161,8 +159,8 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
             showFilterBar={true}
             showDatePicker={false}
             showQueryInput={false}
-            filters={stateFilters}
-            onFiltersUpdated={(filters: Filter[]) => stateManager.filters$.next(filters)}
+            filters={stateManager.filters}
+            onFiltersUpdated={(filters: Filter[]) => stateManager.setFilters(filters)}
             indexPatterns={[dataView]}
             displayStyle={'inPage'}
             isClearable={true}
