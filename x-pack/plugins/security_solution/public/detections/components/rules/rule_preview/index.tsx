@@ -231,7 +231,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           <EuiSpacer />
         </>
       )}
-      <EuiText size="xs">
+      <EuiText size="xs" data-test-subj="rule-preview">
         <h4>{i18n.QUERY_PREVIEW_LABEL}</h4>
       </EuiText>
       <EuiSpacer size="xs" />
