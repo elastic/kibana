@@ -8,7 +8,6 @@
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
 import apm from 'elastic-apm-node';
-import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
@@ -66,15 +65,15 @@ function routeSchemasFromRouteConfig<P, Q, B>(
     );
   }
 
-  if (route.validate !== false) {
-    Object.entries(route.validate).forEach(([key, schema]) => {
-      if (!(isConfigSchema(schema) || typeof schema === 'function')) {
-        throw new Error(
-          `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
-        );
-      }
-    });
-  }
+  // if (route.validate !== false) {
+  //   Object.entries(route.validate).forEach(([key, schema]) => {
+  //     if (!(isConfigSchema(schema) || typeof schema === 'function')) {
+  //       throw new Error(
+  //         `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
+  //       );
+  //     }
+  //   });
+  // }
 
   if (route.validate) {
     return RouteValidator.from(route.validate);
@@ -157,6 +156,10 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       ) => {
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
+        if (route.path === '/api/core/capabilities') {
+          console.error('routeSchemas', JSON.stringify(route, null, 2));
+          console.error('routeSchemas', JSON.stringify(routeSchemas, null, 2));
+        }
         this.routes.push({
           handler: async (req, responseToolkit) =>
             await this.handle({
@@ -167,7 +170,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
             }),
           method,
           path: getRouteFullPath(this.routerPath, route.path),
-          options: validOptions(method, route),
+          options: {
+            ...validOptions(method, route),
+            validate: route.validate,
+          },
+          validate: route.validate,
         });
       };
 

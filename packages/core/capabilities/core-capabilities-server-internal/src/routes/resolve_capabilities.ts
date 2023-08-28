@@ -18,6 +18,7 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
       path: '/api/core/capabilities',
       options: {
         authRequired: 'optional',
+        tags: ['api'],
       },
       validate: {
         query: schema.object({
