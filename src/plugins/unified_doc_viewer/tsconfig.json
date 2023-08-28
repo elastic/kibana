@@ -14,7 +14,6 @@
     "@kbn/i18n",
     "@kbn/unified-doc-viewer",
     "@kbn/unified-field-list",
-    "@kbn/kibana-utils-plugin",
     "@kbn/data-plugin",
     "@kbn/core-analytics-browser",
     "@kbn/field-formats-plugin",

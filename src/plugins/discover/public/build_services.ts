@@ -53,6 +53,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -111,6 +112,7 @@ export interface DiscoverServices {
   uiActions: UiActionsStart;
   contentClient: ContentClient;
   serverless?: ServerlessPluginStart;
+  unifiedDocViewer: UnifiedDocViewerStart;
 }
 
 export const buildServices = memoize(function (
@@ -171,5 +173,6 @@ export const buildServices = memoize(function (
     uiActions: plugins.uiActions,
     contentClient: plugins.contentManagement.client,
     serverless: plugins.serverless,
+    unifiedDocViewer: plugins.unifiedDocViewer,
   };
 });

@@ -8,15 +8,14 @@
 
 import React from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { DocViewer } from '@kbn/unified-doc-viewer';
-import type { UnifiedDocViewerServices } from '../../types';
+import { DocViewer, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
-interface UnifiedDocViewerProps extends DocViewRenderProps {
-  services: UnifiedDocViewerServices;
+export interface UnifiedDocViewerProps extends DocViewRenderProps {
+  registry: DocViewsRegistry;
 }
 
-export function UnifiedDocViewer({ services, ...renderProps }: UnifiedDocViewerProps) {
+export function UnifiedDocViewer({ registry, ...renderProps }: UnifiedDocViewerProps) {
   const { hit } = renderProps;
-  const { unifiedDocViewer } = services;
-  return <DocViewer docViews={unifiedDocViewer.getDocViews(hit)} {...renderProps} />;
+
+  return <DocViewer docViews={registry.getDocViewsSorted(hit)} {...renderProps} />;
 }

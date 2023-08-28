@@ -10,9 +10,9 @@ import React from 'react';
 import type { Plugin } from '@kbn/core/public';
 import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { withSuspense } from '@kbn/shared-ux-utility';
-import { DeferredSpinner, DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { DeferredSpinner, DocViewer, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { EuiSkeletonText } from '@elastic/eui';
+import { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import { useUnifiedDocViewerServices } from './hooks';
 
 const DocViewerLegacyTable = React.lazy(() => import('./components/doc_viewer_table/legacy'));
@@ -25,6 +25,7 @@ export interface UnifiedDocViewerSetup {
 
 export interface UnifiedDocViewerStart {
   getDocViews: DocViewsRegistry['getDocViewsSorted'];
+  DocViewerComponent: (props: DocViewRenderProps) => JSX.Element;
 }
 
 export class UnifiedDocViewerPublicPlugin
@@ -43,12 +44,17 @@ export class UnifiedDocViewerPublicPlugin
         const { uiSettings } = useUnifiedDocViewerServices();
         const DocView = uiSettings.get(DOC_TABLE_LEGACY) ? DocViewerLegacyTable : DocViewerTable;
 
-        return withSuspense(
-          DocView,
-          <DeferredSpinner>
-            <EuiSkeletonText />
-          </DeferredSpinner>
-        )(props);
+        return (
+          <React.Suspense
+            fallback={
+              <DeferredSpinner>
+                <EuiSkeletonText />
+              </DeferredSpinner>
+            }
+          >
+            <DocView {...props} />
+          </React.Suspense>
+        );
       },
     });
 
@@ -87,6 +93,14 @@ export class UnifiedDocViewerPublicPlugin
   public start() {
     return {
       getDocViews: this.docViewsRegistry.getDocViewsSorted.bind(this.docViewsRegistry),
+      DocViewerComponent: (renderProps: DocViewRenderProps) => {
+        return (
+          <DocViewer
+            docViews={this.docViewsRegistry.getDocViewsSorted(renderProps.hit)}
+            {...renderProps}
+          />
+        );
+      },
     };
   }
 }

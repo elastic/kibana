@@ -77,6 +77,7 @@ import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
 } from './components/discover_container';
+import { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 
 /**
  * @public
@@ -192,6 +193,7 @@ export interface DiscoverStartPlugins {
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
+  unifiedDocViewer: UnifiedDocViewerStart;
 }
 
 /**
