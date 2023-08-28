@@ -9,8 +9,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['navigationalSearch', 'svlObltNavigation']);
-  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['navigationalSearch']);
+  const serverlessNavigation = getService('svlObltNavigation');
 
   describe('Application', () => {
     before('initialize tests', async () => {
@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('is shown in the global search', async () => {
-      await PageObjects.svlObltNavigation.navigateToLandingPage();
+      await serverlessNavigation.navigateToLandingPage();
       await PageObjects.navigationalSearch.searchFor('log explorer');
 
       const results = await PageObjects.navigationalSearch.getDisplayedResults();
