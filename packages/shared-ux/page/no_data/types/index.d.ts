@@ -31,7 +31,7 @@ export interface NoDataPageProps extends CommonProps, ActionCardProps {
    */
   solution: string;
   /**
-   * Required to set the docs link for the whole solution
+   * Required in "kibana" flavor to set the docs link for the whole solution, otherwise optional
    */
   docsLink?: string;
   /**
