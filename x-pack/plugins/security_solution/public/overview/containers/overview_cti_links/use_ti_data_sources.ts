@@ -51,11 +51,7 @@ export const getTiDataSourcesComplete = (
 ): Observable<CtiDataSourceStrategyResponse> => {
   return getTiDataSources(props).pipe(
     filter((response) => {
-<<<<<<< HEAD
-      return isErrorResponse(response) || !isRunningResponse(response);
-=======
-      return isCompleteResponse(response);
->>>>>>> 35b7b08595d02964c1931beb2f9d52634268b82c
+      return !isRunningResponse(response);
     })
   );
 };
