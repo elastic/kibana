@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, ReactNode, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import { css } from '@emotion/react';
 
 import {
