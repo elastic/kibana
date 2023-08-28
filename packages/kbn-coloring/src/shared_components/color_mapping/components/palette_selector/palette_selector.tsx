@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   EuiButtonGroup,
   EuiColorPalettePicker,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -91,8 +92,57 @@ export function PaletteSelector({
     [getPaletteFn, model, dispatch, paletteId]
   );
 
+  const [preserveModalPaletteId, setPreserveModalPaletteId] = useState<string | null>(null);
+
+  const preserveChangesModal =
+    preserveModalPaletteId !== null ? (
+      <EuiConfirmModal
+        title="Color changes detected"
+        onCancel={() => {
+          if (preserveModalPaletteId) switchPaletteFn(preserveModalPaletteId, true);
+          setPreserveModalPaletteId(null);
+        }}
+        onConfirm={() => {
+          if (preserveModalPaletteId) switchPaletteFn(preserveModalPaletteId, false);
+          setPreserveModalPaletteId(null);
+        }}
+        confirmButtonText="Discard changes"
+        cancelButtonText="Preserve changes"
+        buttonColor="danger"
+        defaultFocusedButton="confirm"
+      >
+        <p>Switching palette will discard all your custom color changes</p>
+      </EuiConfirmModal>
+    ) : null;
+
+  const [colorScaleModalId, setColorScaleModalId] = useState<'gradient' | 'categorical' | null>(
+    null
+  );
+
+  const colorScaleModal =
+    colorScaleModalId !== null ? (
+      <EuiConfirmModal
+        title="Color changes detected"
+        onCancel={() => {
+          setColorScaleModalId(null);
+        }}
+        onConfirm={() => {
+          if (colorScaleModalId) updateColorMode(colorScaleModalId, false);
+          setColorScaleModalId(null);
+        }}
+        cancelButtonText="Go back"
+        confirmButtonText="Discard changes"
+        defaultFocusedButton="confirm"
+        buttonColor="danger"
+      >
+        <p>Switching to {colorScaleModalId} mode will discard all your custom color changes</p>
+      </EuiConfirmModal>
+    ) : null;
+
   return (
     <>
+      {preserveChangesModal}
+      {colorScaleModal}
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFormRow label="Palette">
@@ -113,10 +163,7 @@ export function PaletteSelector({
                   model.colorMode.type === 'gradient' &&
                   model.colorMode.steps.some((a) => a.touched);
                 if (hasChanges || hasGradientChanges) {
-                  const preserve = window.confirm(
-                    'Do you want to preserve the color changes? (cancel for NO)'
-                  );
-                  switchPaletteFn(selectedPaletteId, preserve);
+                  setPreserveModalPaletteId(selectedPaletteId);
                 } else {
                   switchPaletteFn(selectedPaletteId, false);
                 }
@@ -150,12 +197,7 @@ export function PaletteSelector({
                   model.colorMode.steps.some((a) => a.touched);
 
                 if (hasChanges || hasGradientChanges) {
-                  const okToSwitch = window.confirm(
-                    `Switch to ${id} will clear all your custom color changes, are you Ok? (cancel for NO)`
-                  );
-                  if (okToSwitch) {
-                    updateColorMode(id as 'gradient' | 'categorical', false);
-                  }
+                  setColorScaleModalId(id as 'gradient' | 'categorical');
                 } else {
                   updateColorMode(id as 'gradient' | 'categorical', false);
                 }
