@@ -46,10 +46,4 @@ export const getEventEnrichment = ({
 export const getEventEnrichmentComplete = (
   props: GetEventEnrichmentProps
 ): Observable<CtiEventEnrichmentStrategyResponse> =>
-<<<<<<< HEAD
-  getEventEnrichment(props).pipe(
-    filter((response) => isErrorResponse(response) || !isRunningResponse(response))
-  );
-=======
-  getEventEnrichment(props).pipe(filter((response) => isCompleteResponse(response)));
->>>>>>> 35b7b08595d02964c1931beb2f9d52634268b82c
+  getEventEnrichment(props).pipe(filter((response) => !isRunningResponse(response)));
