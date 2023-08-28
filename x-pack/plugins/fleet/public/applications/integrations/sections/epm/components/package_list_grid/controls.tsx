@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, ReactNode, useEffect } from 'react';
+import React, { useCallback, useRef, useEffect, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 
 import {
@@ -21,6 +21,7 @@ import {
 
 import { VariableSizeList as List } from 'react-window';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WindowScroller } from 'react-virtualized';
 
 import { Loading } from '../../../../components';
 
@@ -65,18 +66,19 @@ interface GridColumnProps {
 }
 
 const VirtualizedRow: React.FC<any> = ({ children, style, onHeightChange }) => {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    onHeightChange(ref.current.clientHeight);
+    if (ref.current) {
+      onHeightChange(ref.current.clientHeight);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div style={style}>
       <div ref={ref}>
-        <EuiFlexGrid gutterSize="l" columns={3}>
-          {children}
-        </EuiFlexGrid>
+        {children}
         <EuiSpacer size="m" />
       </div>
     </div>
@@ -90,7 +92,7 @@ export const GridColumn = ({
   isLoading,
 }: GridColumnProps) => {
   const itemsSizeRefs = useRef(new Map<number, number>());
-  const listRef = useRef(React.createRef());
+  const listRef = useRef<List>(null);
 
   if (isLoading) return <Loading />;
 
@@ -117,95 +119,71 @@ export const GridColumn = ({
       </EuiFlexGrid>
     );
   }
-
   return (
-    <EuiAutoSizer style={{ minHeight: '300px' }}>
-      {({ height, width }: { height: number; width: number }) => (
-        <List
-          ref={listRef}
-          layout="vertical"
-          itemCount={Math.ceil(list.length / 3)}
-          itemSize={(index) => {
-            const test = itemsSizeRefs.current.get(index) ?? 600;
+    <>
+      <WindowScroller
+        onScroll={({ scrollTop }) => {
+          if (listRef.current) {
+            listRef.current.scrollTo(scrollTop);
+          }
+        }}
+      >
+        {() => (
+          <EuiAutoSizer disableHeight>
+            {({ width }: { width: number }) => (
+              <List
+                style={{ height: '100%' }}
+                ref={listRef}
+                layout="vertical"
+                itemCount={Math.ceil(list.length / 3)}
+                itemSize={(index) => {
+                  const test = itemsSizeRefs.current.get(index) ?? 200;
 
-            return test;
-          }}
-          height={height}
-          estimatedItemSize={600}
-          width={width}
-        >
-          {({ index, style }) => {
-            return (
-              <VirtualizedRow
-                style={style}
-                onHeightChange={(size: number) => {
-                  itemsSizeRefs.current.set(index, size);
-                  listRef.current.resetAfterIndex(index);
+                  return test;
                 }}
+                height={window.innerHeight} // plus Don't see an integration message
+                estimatedItemSize={200}
+                width={width}
               >
-                {list.slice(index * 3, index * 3 + 3).map((item) => {
+                {({ index, style }) => {
                   return (
-                    <EuiFlexItem
-                      key={item.id}
-                      // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
-                      css={css`
-                        & > .euiPopover,
-                        & > .euiPopover > .euiPopover__anchor,
-                        & > .euiPopover > .euiPopover__anchor > .euiCard {
-                          height: 100%;
+                    <VirtualizedRow
+                      style={style}
+                      onHeightChange={(size: number) => {
+                        itemsSizeRefs.current.set(index, size);
+                        if (listRef.current) {
+                          listRef.current.resetAfterIndex(index);
                         }
-                      `}
+                      }}
                     >
-                      <PackageCard {...item} showLabels={showCardLabels} />
-                    </EuiFlexItem>
+                      <EuiFlexGrid gutterSize="l" columns={3}>
+                        {list.slice(index * 3, index * 3 + 3).map((item) => {
+                          return (
+                            <EuiFlexItem
+                              key={item.id}
+                              // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
+                              css={css`
+                                & > .euiPopover,
+                                & > .euiPopover > .euiPopover__anchor,
+                                & > .euiPopover > .euiPopover__anchor > .euiCard {
+                                  height: 100%;
+                                }
+                              `}
+                            >
+                              <PackageCard {...item} showLabels={showCardLabels} />
+                            </EuiFlexItem>
+                          );
+                        })}
+                      </EuiFlexGrid>
+                    </VirtualizedRow>
                   );
-                })}
-              </VirtualizedRow>
-            );
-          }}
-        </List>
-      )}
-      {/* <EuiFlexGrid gutterSize="l" columns={3}></EuiFlexGrid> */}
-      {/* <EuiFlexGrid gutterSize="l" columns={3}>
-        {list.length ? (
-          list.map((item) => {
-            return (
-              <EuiFlexItem
-                key={item.id}
-                // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
-                css={css`
-                  & > .euiPopover,
-                  & > .euiPopover > .euiPopover__anchor,
-                  & > .euiPopover > .euiPopover__anchor > .euiCard {
-                    height: 100%;
-                  }
-                `}
-              >
-                <PackageCard {...item} showLabels={showCardLabels} />
-              </EuiFlexItem>
-            );
-          })
-        ) : (
-          <EuiFlexItem grow={3}>
-            <EuiText>
-              <p>
-                {showMissingIntegrationMessage ? (
-                  <FormattedMessage
-                    id="xpack.fleet.epmList.missingIntegrationPlaceholder"
-                    defaultMessage="We didn't find any integrations matching your search term. Please try another keyword or browse using the categories on the left."
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
-                    defaultMessage="No integrations found"
-                  />
-                )}
-              </p>
-            </EuiText>
-          </EuiFlexItem>
+                }}
+              </List>
+            )}
+          </EuiAutoSizer>
         )}
-      </EuiFlexGrid> */}
-    </EuiAutoSizer>
+      </WindowScroller>
+    </>
   );
 };
 
