@@ -40,7 +40,7 @@ export const JsonCodeEditorCommon = ({
   if (jsonValue === '') {
     return null;
   }
-  console.log(height);
+
   const codeEditor = (
     <CodeEditor
       languageId={XJsonLang.ID}
