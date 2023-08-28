@@ -20,6 +20,23 @@ describe('ES-index-backed file client', () => {
   const blobStorageIndex = '.kibana-test-blob';
   const metadataIndex = '.kibana-test-metadata';
 
+  const deleteFile = async ({
+    id,
+    hasContent,
+    refreshIndex = true,
+  }: {
+    id: string;
+    hasContent?: boolean;
+    refreshIndex?: boolean;
+  }) => {
+    if (refreshIndex) {
+      // Make sure to refresh the index before deleting the file to avoid an conflict error thrown by
+      // ES when deleting by query documents that don't exist yet.
+      await esClient.indices.refresh({ index: blobStorageIndex });
+    }
+    await fileClient.delete({ id, hasContent });
+  };
+
   beforeAll(async () => {
     testHarness = await setupIntegrationEnvironment();
     ({ esClient } = testHarness);
@@ -55,7 +72,7 @@ describe('ES-index-backed file client', () => {
         name: 'cool name',
       })
     );
-    await fileClient.delete({ id: file.id, hasContent: false });
+    await deleteFile({ id: file.id, hasContent: false });
   });
 
   test('uploads and downloads file content', async () => {
@@ -73,7 +90,7 @@ describe('ES-index-backed file client', () => {
     }
     expect(Buffer.concat(chunks).toString('utf-8')).toBe('test');
 
-    await fileClient.delete({ id: file.id, hasContent: true });
+    await deleteFile({ id: file.id, hasContent: true });
   });
 
   test('searches across files', async () => {
@@ -148,10 +165,12 @@ describe('ES-index-backed file client', () => {
       );
     }
 
+    await esClient.indices.refresh({ index: blobStorageIndex });
+
     await Promise.all([
-      fileClient.delete({ id: id1 }),
-      fileClient.delete({ id: id2 }),
-      fileClient.delete({ id: file3.id }),
+      deleteFile({ id: id1, refreshIndex: false }),
+      deleteFile({ id: id2, refreshIndex: false }),
+      deleteFile({ id: file3.id, refreshIndex: false }),
     ]);
   });
 
@@ -195,9 +214,11 @@ describe('ES-index-backed file client', () => {
       })
     );
 
+    await esClient.indices.refresh({ index: blobStorageIndex });
+
     await Promise.all([
-      fileClient.delete({ id: id1, hasContent: false }),
-      fileClient.delete({ id: id2, hasContent: false }),
+      deleteFile({ id: id1, hasContent: false, refreshIndex: false }),
+      deleteFile({ id: id2, hasContent: false, refreshIndex: false }),
     ]);
   });
 });
