@@ -19,6 +19,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { buildAlertFieldsRequest } from '@kbn/alerts-as-data-utils';
 import {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
@@ -124,6 +125,14 @@ export const ruleRegistrySearchStrategyProvider = (
                   },
                 }),
           };
+          let fields = request?.fields ?? [];
+          fields.push({ field: 'kibana.alert.*', include_unmapped: false });
+
+          if (siemRequest) {
+            fields.push({ field: 'signal.*', include_unmapped: false });
+            fields = fields.concat(buildAlertFieldsRequest([], false));
+          }
+
           const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
           params = {
             allow_no_indices: true,
@@ -131,8 +140,7 @@ export const ruleRegistrySearchStrategyProvider = (
             ignore_unavailable: true,
             body: {
               _source: false,
-              // TODO the fields need to come from the request
-              fields: !isEmpty(request?.fields) ? request?.fields : EMPTY_FIELDS,
+              fields,
               sort,
               size,
               from: request.pagination ? request.pagination.pageIndex * size : 0,
