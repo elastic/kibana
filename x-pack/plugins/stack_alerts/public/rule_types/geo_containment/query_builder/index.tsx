@@ -78,7 +78,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
     boundaryIndexQuery,
     boundaryGeoField,
     boundaryNameField,
-    operation,
   } = ruleParams;
 
   const { http, docLinks, uiSettings, notifications, storage, usageCollection, dataViews } =

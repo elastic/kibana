@@ -20,6 +20,7 @@ describe('expression params validation', () => {
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
       boundaryGeoField: 'testField',
+      operation: 'create',
     };
     expect(validateExpression(initialParams).errors.index.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.index[0]).toBe('Data view is required.');
@@ -36,6 +37,7 @@ describe('expression params validation', () => {
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
       boundaryGeoField: 'testField',
+      operation: 'create',
     };
     expect(validateExpression(initialParams).errors.geoField.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.geoField[0]).toBe('Geo field is required.');
@@ -52,6 +54,7 @@ describe('expression params validation', () => {
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
       boundaryGeoField: 'testField',
+      operation: 'create',
     };
     expect(validateExpression(initialParams).errors.entity.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.entity[0]).toBe('Entity is required.');
@@ -68,6 +71,7 @@ describe('expression params validation', () => {
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
       boundaryGeoField: 'testField',
+      operation: 'create',
     };
     expect(validateExpression(initialParams).errors.dateField.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.dateField[0]).toBe('Date field is required.');
@@ -84,6 +88,7 @@ describe('expression params validation', () => {
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
       boundaryGeoField: 'testField',
+      operation: 'create',
     };
     expect(validateExpression(initialParams).errors.boundaryType.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.boundaryType[0]).toBe(
@@ -102,6 +107,7 @@ describe('expression params validation', () => {
       boundaryIndexTitle: '',
       boundaryIndexId: 'testIndexId',
       boundaryGeoField: 'testField',
+      operation: 'create',
     };
     expect(validateExpression(initialParams).errors.boundaryIndexTitle.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.boundaryIndexTitle[0]).toBe(
@@ -120,6 +126,7 @@ describe('expression params validation', () => {
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
       boundaryGeoField: '',
+      operation: 'create',
     };
     expect(validateExpression(initialParams).errors.boundaryGeoField.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.boundaryGeoField[0]).toBe(
@@ -139,6 +146,7 @@ describe('expression params validation', () => {
       boundaryIndexId: 'testIndexId',
       boundaryGeoField: 'testField',
       boundaryNameField: '',
+      operation: 'create',
     };
     expect(validateExpression(initialParams).errors.boundaryGeoField.length).toBe(0);
   });
