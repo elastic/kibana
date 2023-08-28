@@ -88,7 +88,7 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
       defaultMessage: 'Renames an old column to a new one',
     }),
     documentation: {
-      value: buildDocumentation('rename new = old', ['… | rename a = b']),
+      value: buildDocumentation('rename new as old', ['… | rename a as b']),
     },
     sortText: 'B',
   },
