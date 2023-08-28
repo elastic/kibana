@@ -35,9 +35,8 @@ as the encryption key. Refer to <<xpack-security-encryptionKey,`xpack.security.e
 xpack.security.encryptionKey: "something_at_least_32_characters"
 ----
 
-Encryption for {kib}'s reporting and saved objects features also requires
-encryption key settings. Refer to
-<<xpack-reporting-encryptionKey,`xpack.reporting.encryptionKey`>> and
+{kib}'s reporting and saved objects features also have encryption key settings.
+Refer to <<xpack-reporting-encryptionKey,`xpack.reporting.encryptionKey`>> and
 <<xpack-encryptedSavedObjects-encryptionKey,`xpack.encryptedSavedObjects.encryptionKey`>>
 respectively.
 --
