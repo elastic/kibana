@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { esQueryRuleName } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const actions = getService('actions');
   const browser = getService('browser');
   const commonScreenshots = getService('commonScreenshots');
   const find = getService('find');
@@ -18,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
   const ruleName = 'test query rule';
-  const emailConnectorName = 'Email connector 1';
 
   const validQueryJson = JSON.stringify({
     query: {
@@ -48,28 +46,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   });
 
   describe('elasticsearch query rule', function () {
-    let emailConnectorId: string;
-    before(async () => {
-      ({ id: emailConnectorId } = await actions.api.createConnector({
-        name: emailConnectorName,
-        config: {
-          service: 'other',
-          from: 'bob@example.com',
-          host: 'some.non.existent.com',
-          port: 25,
-        },
-        secrets: {
-          user: 'bob',
-          password: 'supersecret',
-        },
-        connectorTypeId: '.email',
-      }));
-    });
-
-    after(async () => {
-      await actions.api.deleteConnector(emailConnectorId);
-    });
-
     it('create rule screenshot', async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -131,6 +107,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1500
       );
+      // Create an email connector action
+      await testSubjects.click('.email-alerting-ActionTypeSelectOption');
+      await testSubjects.scrollIntoView('addAlertActionButton');
+      await commonScreenshots.takeScreenshot(
+        'es-query-rule-action-query-matched',
+        screenshotDirectories,
+        1400,
+        1024
+      );
       await testSubjects.click('cancelSaveRuleButton');
     });
 
@@ -170,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       /* Reposition so that the details are visible for the second action */
       await testSubjects.scrollIntoView('alertActionAccordion-1');
       await commonScreenshots.takeScreenshot(
-        'es-query-rule-action-for-each-alert',
+        'es-query-rule-recovery-action',
         screenshotDirectories,
         1400,
         1024
