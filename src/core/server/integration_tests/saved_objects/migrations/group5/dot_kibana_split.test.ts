@@ -245,6 +245,7 @@ describe('split .kibana index into multiple system indices', () => {
             "osquery-pack",
             "osquery-pack-asset",
             "osquery-saved-query",
+            "policy-settings-protection-updates-note",
             "query",
             "risk-engine-configuration",
             "rules-settings",
