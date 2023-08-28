@@ -45,7 +45,6 @@ describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
     clearSearchBar();
   });
 
-
   it('filters the table', () => {
     openHostRiskTableFilterAndSelectTheCriticalOption();
 
