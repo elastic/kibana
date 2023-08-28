@@ -31,8 +31,9 @@ import {
   UIM_TEMPLATE_UPDATE,
   UIM_TEMPLATE_CLONE,
   UIM_TEMPLATE_SIMULATE,
+  INTERNAL_API_BASE_PATH,
 } from '../../../common/constants';
-import { TemplateDeserialized, TemplateListItem, DataStream } from '../../../common';
+import { TemplateDeserialized, TemplateListItem, DataStream, Index } from '../../../common';
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
@@ -308,6 +309,13 @@ export function simulateIndexTemplate(template: { [key: string]: any }) {
 export function useLoadNodesPlugins() {
   return useRequest<string[]>({
     path: `${API_BASE_PATH}/nodes/plugins`,
+    method: 'get',
+  });
+}
+
+export function loadIndex(indexName: string) {
+  return sendRequest<Index>({
+    path: `${INTERNAL_API_BASE_PATH}/indices/${indexName}`,
     method: 'get',
   });
 }

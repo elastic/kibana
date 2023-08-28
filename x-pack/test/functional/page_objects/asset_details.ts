@@ -11,8 +11,16 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
+    async clickApmServicesLink() {
+      return testSubjects.click('infraAssetDetailsViewAPMServicesButton');
+    },
+
+    async clickOpenAsPageLink() {
+      return testSubjects.click('infraAssetDetailsOpenAsPageButton');
+    },
+
     // Overview
-    async clickOverviewFlyoutTab() {
+    async clickOverviewTab() {
       return testSubjects.click('infraAssetDetailsOverviewTab');
     },
 
@@ -44,12 +52,8 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsMetadataShowAllButton');
     },
 
-    async clickApmServicesLink() {
-      return testSubjects.click('infraAssetDetailsViewAPMServicesButton');
-    },
-
     // Metadata
-    async clickMetadataFlyoutTab() {
+    async clickMetadataTab() {
       return testSubjects.click('infraAssetDetailsMetadataTab');
     },
 
@@ -89,7 +93,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     // Processes
-    async clickProcessesFlyoutTab() {
+    async clickProcessesTab() {
       return testSubjects.click('infraAssetDetailsProcessesTab');
     },
 
@@ -121,12 +125,22 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     // Logs
-    async clickLogsFlyoutTab() {
+    async clickLogsTab() {
       return testSubjects.click('infraAssetDetailsLogsTab');
     },
 
     async logsExists() {
       await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+    },
+
+    // Anomalies
+    async clickAnomaliesTab() {
+      return testSubjects.click('infraAssetDetailsAnomaliesTab');
+    },
+
+    // Osquery
+    async clickOsqueryTab() {
+      return testSubjects.click('infraAssetDetailsOsqueryTab');
     },
   };
 }
