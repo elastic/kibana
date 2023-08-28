@@ -30,6 +30,7 @@ export function createIndexDocRecordsStream(
 
     async write(record, enc, callback) {
       try {
+        console.log('\nλjs write');
         await indexDocs([record.value]);
         progress.addToComplete(1);
         callback(null);
@@ -40,6 +41,8 @@ export function createIndexDocRecordsStream(
 
     async writev(chunks, callback) {
       try {
+        console.log('\nλjs write VEE');
+        console.log(`\nλjs chunks.length: \n\t${chunks.length}`);
         await indexDocs(chunks.map(({ chunk: record }) => record.value));
         progress.addToComplete(chunks.length);
         callback(null);

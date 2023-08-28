@@ -29,6 +29,7 @@ import {
   Progress,
   createDefaultSpace,
 } from '../lib';
+import { atLeastOne, freshenUp, hasDotKibanaPrefix } from './load_utils';
 
 // pipe a series of streams into each other so that data and errors
 // flow from the first stream to the last. Errors from the last stream
@@ -58,7 +59,6 @@ export async function loadAction({
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
-  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
@@ -95,27 +95,14 @@ export async function loadAction({
     }
   }
 
-  await client.indices.refresh(
-    {
-      index: indicesWithDocs.join(','),
-      allow_no_indices: true,
-    },
-    {
-      headers: ES_CLIENT_HEADERS,
-    }
-  );
+  await freshenUp(client, indicesWithDocs);
 
   // If we affected saved objects indices, we need to ensure they are migrated...
-  if (Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
+  if (atLeastOne(hasDotKibanaPrefix(MAIN_SAVED_OBJECT_INDEX))(result)) {
     await migrateSavedObjectIndices(kbnClient);
-    log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
-
-    if (kibanaPluginIds.includes('spaces')) {
-      // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
+    // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
+    if ((await kbnClient.plugins.getEnabledIds()).includes('spaces'))
       await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
-      log.debug(`[%s] Ensured that default space exists in ${MAIN_SAVED_OBJECT_INDEX}`, name);
-    }
   }
-
   return result;
 }
