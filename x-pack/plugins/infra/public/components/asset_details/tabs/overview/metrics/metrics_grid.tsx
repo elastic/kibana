@@ -10,6 +10,7 @@ import { EuiFlexGrid, EuiFlexItem, EuiTitle, EuiSpacer, EuiFlexGroup } from '@el
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import {
   assetDetailsDashboards,
   XY_MISSING_VALUE_DOTTED_LINE_CONFIG,
@@ -18,18 +19,22 @@ import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { LensChart, HostMetricsExplanationContent } from '../../../../lens';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
 import { Popover } from '../../common/popover';
+import type { DataViewOrigin } from '../../../types';
+import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
 
-type DataViewOrigin = 'logs' | 'metrics';
+type BrushEndArgs = Parameters<NonNullable<LensEmbeddableInput['onBrushEnd']>>[0];
 
 interface Props {
   nodeName: string;
   timeRange: TimeRange;
   metricsDataView?: DataView;
   logsDataView?: DataView;
+  isCompactView: boolean;
 }
 
 export const MetricsGrid = React.memo(
-  ({ nodeName, metricsDataView, logsDataView, timeRange }: Props) => {
+  ({ nodeName, metricsDataView, logsDataView, timeRange, isCompactView }: Props) => {
+    const { setDateRange } = useDateRangeProviderContext();
     const getDataView = useCallback(
       (dataViewOrigin: DataViewOrigin) => {
         return dataViewOrigin === 'metrics' ? metricsDataView : logsDataView;
@@ -50,6 +55,18 @@ export const MetricsGrid = React.memo(
       [getDataView, nodeName]
     );
 
+    const handleBrushEnd = useCallback(
+      ({ range, preventDefault }: BrushEndArgs) => {
+        setDateRange({
+          from: new Date(range[0]).toISOString(),
+          to: new Date(range[1]).toISOString(),
+        });
+
+        preventDefault();
+      },
+      [setDateRange]
+    );
+
     return (
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem grow={false}>
@@ -62,26 +79,27 @@ export const MetricsGrid = React.memo(
             gutterSize="s"
             data-test-subj="infraAssetDetailsMetricsChartGrid"
           >
-            {assetDetailsDashboards.host.hostMetricCharts.map(
-              ({ dataViewOrigin, id, layers, title, overrides }, index) => (
-                <EuiFlexItem key={index} grow={false}>
-                  <LensChart
-                    id={`infraAssetDetailsMetricsChart${id}`}
-                    borderRadius="m"
-                    dataView={getDataView(dataViewOrigin)}
-                    dateRange={timeRange}
-                    height={METRIC_CHART_HEIGHT}
-                    visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG}
-                    layers={layers}
-                    filters={getFilters(dataViewOrigin)}
-                    title={title}
-                    overrides={overrides}
-                    visualizationType="lnsXY"
-                    disableTriggers
-                  />
-                </EuiFlexItem>
-              )
-            )}
+            {(isCompactView
+              ? assetDetailsDashboards.host.hostMetricCharts
+              : assetDetailsDashboards.host.hostMetricChartsFullPage
+            ).map(({ dataViewOrigin, id, layers, title, overrides }, index) => (
+              <EuiFlexItem key={index} grow={false}>
+                <LensChart
+                  id={`infraAssetDetailsMetricsChart${id}`}
+                  borderRadius="m"
+                  dataView={getDataView(dataViewOrigin)}
+                  dateRange={timeRange}
+                  height={METRIC_CHART_HEIGHT}
+                  visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG}
+                  layers={layers}
+                  filters={getFilters(dataViewOrigin)}
+                  title={title}
+                  overrides={overrides}
+                  visualizationType="lnsXY"
+                  onBrushEnd={handleBrushEnd}
+                />
+              </EuiFlexItem>
+            ))}
           </EuiFlexGrid>
         </EuiFlexItem>
       </EuiFlexGroup>

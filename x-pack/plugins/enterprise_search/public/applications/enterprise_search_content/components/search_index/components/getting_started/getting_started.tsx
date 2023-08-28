@@ -32,10 +32,12 @@ import {
   OverviewPanel,
   CodeBox,
   getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
 } from '@kbn/search-api-panels';
 
 import { LanguageDefinition } from '@kbn/search-api-panels';
 
+import { PLUGIN_ID } from '../../../../../../../common/constants';
 import { KibanaDeps } from '../../../../../../../common/types';
 
 import { icons } from '../../../../../../assets/client_libraries';
@@ -50,7 +52,6 @@ import { GenerateApiKeyModal } from '../generate_api_key_modal/modal';
 
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { showTryInConsole } from './languages/utils';
 
 const DEFAULT_URL = 'https://localhost:9200';
 
@@ -68,6 +69,7 @@ export const APIGettingStarted = () => {
     apiKey,
     url: cloudContext.elasticsearchUrl || DEFAULT_URL,
   };
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/client_libraries/`);
 
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
@@ -98,7 +100,6 @@ export const APIGettingStarted = () => {
               language={language}
               setSelectedLanguage={setSelectedLanguage}
               isSelectedLanguage={selectedLanguage === language}
-              http={http}
               src={icons[language.id]}
             />
           </EuiFlexItem>
@@ -106,12 +107,11 @@ export const APIGettingStarted = () => {
       </SelectClientPanel>
       <InstallClientPanel
         codeSnippet={getLanguageDefinitionCodeSnippet(selectedLanguage, 'installClient', codeArgs)}
-        showTryInConsole={showTryInConsole('installClient')}
+        consoleRequest={getConsoleRequest('installClient')}
         languages={languageDefinitions}
         language={selectedLanguage}
         setSelectedLanguage={setSelectedLanguage}
-        http={http}
-        pluginId={''}
+        assetBasePath={assetBasePath}
         application={services.application}
         sharePlugin={services.share}
         isPanelLeft={false}
@@ -301,11 +301,10 @@ export const APIGettingStarted = () => {
               'configureClient',
               codeArgs
             )}
-            showTryInConsole={showTryInConsole('configureClient')}
+            consoleRequest={getConsoleRequest('configureClient')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />
@@ -336,11 +335,10 @@ export const APIGettingStarted = () => {
               'testConnection',
               codeArgs
             )}
-            showTryInConsole={showTryInConsole('testConnection')}
+            consoleRequest={getConsoleRequest('testConnection')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />
@@ -365,11 +363,10 @@ export const APIGettingStarted = () => {
           <CodeBox
             languages={languageDefinitions}
             codeSnippet={getLanguageDefinitionCodeSnippet(selectedLanguage, 'ingestData', codeArgs)}
-            showTryInConsole={showTryInConsole('ingestData')}
+            consoleRequest={getConsoleRequest('ingestData')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />
@@ -397,11 +394,10 @@ export const APIGettingStarted = () => {
               'buildSearchQuery',
               codeArgs
             )}
-            showTryInConsole={showTryInConsole('buildSearchQuery')}
+            consoleRequest={getConsoleRequest('buildSearchQuery')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />

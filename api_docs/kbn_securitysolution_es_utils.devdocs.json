@@ -3821,6 +3821,39 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-common.stringifyZodError",
+        "type": "Function",
+        "tags": [],
+        "label": "stringifyZodError",
+        "description": [],
+        "signature": [
+          "(err: Zod.ZodError<any>) => string"
+        ],
+        "path": "packages/kbn-securitysolution-es-utils/src/transform_error/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.stringifyZodError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "Zod.ZodError<any>"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/transform_error/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
         "id": "def-common.transformError",
         "type": "Function",
         "tags": [],
