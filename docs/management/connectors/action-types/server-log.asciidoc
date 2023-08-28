@@ -3,11 +3,12 @@
 ++++
 <titleabbrev>Server log</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can write in {kib} server logs.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
 A server log connector writes an entry to the {kib} server log.
-
-You can create a server log connectors in {kib} or by using the
-<<create-connector-api,create connector API>>.
 
 [float]
 [[define-serverlog-ui]]
@@ -30,8 +31,8 @@ Server log connectors do not have any configuration properties other than a name
 [[server-log-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}.
+For example:
 
 [role="screenshot"]
 image::management/connectors/images/serverlog-params-test.png[Server log connector test]
