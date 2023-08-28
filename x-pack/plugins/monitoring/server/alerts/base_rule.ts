@@ -193,7 +193,15 @@ export class BaseRule {
         const alertInstance: RawAlertInstance = states.alertInstances[instanceId];
         const filteredAlertInstance = this.filterAlertInstance(alertInstance, filters);
         if (filteredAlertInstance) {
-          accum[instanceId] = filteredAlertInstance as RawAlertInstance;
+          const state = filteredAlertInstance.state
+            ? {
+                alertStates: (filteredAlertInstance.state as AlertInstanceState).alertStates,
+              }
+            : filteredAlertInstance.state;
+          accum[instanceId] = {
+            ...filteredAlertInstance,
+            state,
+          } as RawAlertInstance;
         }
         return accum;
       },
