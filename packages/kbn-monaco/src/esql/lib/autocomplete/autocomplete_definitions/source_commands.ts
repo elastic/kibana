@@ -9,23 +9,25 @@
 import { i18n } from '@kbn/i18n';
 import { buildDocumentation } from './utils';
 
-import type { AutocompleteCommandDefinition } from '../types';
+import type { AutocompleteCommandDefinition, RawSignatureDefinition } from '../types';
 
-export const sourceCommandsDefinitions: AutocompleteCommandDefinition[] = [
+export const sourceCommandsRawDefinitions: RawSignatureDefinition[] = [
   {
     label: 'from',
     insertText: 'from',
-    kind: 0,
     detail: i18n.translate('monaco.esql.autocomplete.fromDoc', {
       defaultMessage:
         'Retrieves data from one or more datasets. A dataset is a collection of data that you want to search. The only supported dataset is an index. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',
     }),
-    documentation: {
-      value: buildDocumentation(
-        'from` indexPatterns = wildcardIdentifier (`,` wildcardIdentifier)*',
-        ['from logs', 'from logs-*', 'from logs_*, events-*', 'from from remote*:logs*']
-      ),
-    },
-    sortText: 'A',
+    signature: 'from` indexPatterns = wildcardIdentifier (`,` wildcardIdentifier)*',
+    examples: ['from logs', 'from logs-*', 'from logs_*, events-*', 'from from remote*:logs*'],
   },
 ];
+
+export const sourceCommandsDefinitions: AutocompleteCommandDefinition[] =
+  sourceCommandsRawDefinitions.map(({ signature, examples, ...rest }) => ({
+    ...rest,
+    kind: 0,
+    sortText: 'A',
+    documentation: { value: buildDocumentation(signature, examples) },
+  }));

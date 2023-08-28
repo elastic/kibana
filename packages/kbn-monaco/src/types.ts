@@ -14,6 +14,7 @@ export interface LangModuleType {
   lexerRules?: monaco.languages.IMonarchLanguage;
   languageConfiguration?: monaco.languages.LanguageConfiguration;
   getSuggestionProvider?: Function;
+  getSignatureProvider?: Function;
 }
 
 export interface CompleteLangModuleType extends LangModuleType {

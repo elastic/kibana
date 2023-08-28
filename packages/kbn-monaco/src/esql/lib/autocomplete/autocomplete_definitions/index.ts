@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { RawSignatureDefinition } from '../types';
+import { sourceCommandsRawDefinitions } from './source_commands';
+import { processingRawCommandsDefinition } from './processing_commands';
+
+export const signatures: RawSignatureDefinition[] = sourceCommandsRawDefinitions.concat(
+  processingRawCommandsDefinition
+);
+
 export {
   aggregationFunctionsDefinitions,
   mathCommandDefinition,

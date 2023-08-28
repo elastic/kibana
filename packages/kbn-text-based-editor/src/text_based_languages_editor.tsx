@@ -625,6 +625,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                             })
                           : undefined
                       }
+                      signatureProvider={
+                        language === 'esql' && !isCompactFocused
+                          ? ESQLLang.getSignatureProvider?.()
+                          : undefined
+                      }
                       onChange={onQueryUpdate}
                       editorDidMount={(editor) => {
                         editor1.current = editor;

@@ -16,6 +16,10 @@ const examplesLabel = i18n.translate('monaco.esql.autocomplete.examplesLabel', {
   defaultMessage: 'Examples:',
 });
 
+export const exampleLabel = i18n.translate('monaco.esql.autocomplete.exampleLabel', {
+  defaultMessage: 'Example:',
+});
+
 /** @internal **/
 export const buildDocumentation = (declaration: string, examples?: string[]) => `
 ---

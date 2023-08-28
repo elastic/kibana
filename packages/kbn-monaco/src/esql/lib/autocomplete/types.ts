@@ -30,3 +30,11 @@ export type AutocompleteCommandDefinition = Pick<
   monaco.languages.CompletionItem,
   'label' | 'insertText' | 'kind' | 'detail' | 'documentation' | 'sortText'
 >;
+
+export interface RawSignatureDefinition {
+  label: string;
+  insertText: string;
+  detail: string;
+  signature: string;
+  examples: string[];
+}

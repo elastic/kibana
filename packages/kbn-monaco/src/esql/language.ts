@@ -17,6 +17,7 @@ import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
 import { ESQLCompletionAdapter } from './lib/monaco/esql_completion_provider';
 import type { ESQLCustomAutocompleteCallbacks } from './lib/autocomplete/types';
+import { createSignatureProvider } from './lib/monaco/esql_signature_provider';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();
 
@@ -34,5 +35,9 @@ export const ESQLLang: CustomLangModuleType = {
 
   getSuggestionProvider(callbacks?: ESQLCustomAutocompleteCallbacks) {
     return new ESQLCompletionAdapter((...uris) => workerProxyService.getWorker(uris), callbacks);
+  },
+
+  getSignatureProvider() {
+    return createSignatureProvider();
   },
 };
