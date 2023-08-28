@@ -137,21 +137,10 @@ test('should render BoundaryIndexExpression', async () => {
 
 test('should call setBoundaryNameField in edit mode', async () => {
   const setBoundaryNameField = jest.fn();
-  const alertParamsEdit = {
-    index: '',
-    indexId: '',
-    geoField: '',
-    entity: '',
-    dateField: '',
-    boundaryType: '',
-    boundaryIndexTitle: '',
-    boundaryIndexId: '',
-    boundaryGeoField: '',
-  };
 
   render(
     <BoundaryIndexExpression
-      ruleParams={alertParamsEdit}
+      ruleParams={alertParams}
       errors={{} as IErrorObject}
       boundaryIndexPattern={boundaryIndexPattern}
       setBoundaryIndexPattern={() => {}}
@@ -168,21 +157,10 @@ test('should call setBoundaryNameField in edit mode', async () => {
 
 test('should not call setBoundaryNameField in create mode', async () => {
   const setBoundaryNameField = jest.fn();
-  const alertParamsEdit = {
-    index: '',
-    indexId: '',
-    geoField: '',
-    entity: '',
-    dateField: '',
-    boundaryType: '',
-    boundaryIndexTitle: '',
-    boundaryIndexId: '',
-    boundaryGeoField: '',
-  };
 
   render(
     <BoundaryIndexExpression
-      ruleParams={alertParamsEdit}
+      ruleParams={alertParams}
       errors={{} as IErrorObject}
       boundaryIndexPattern={boundaryIndexPattern}
       setBoundaryIndexPattern={() => {}}
