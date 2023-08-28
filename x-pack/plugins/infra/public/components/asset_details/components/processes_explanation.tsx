@@ -25,7 +25,7 @@ const ProcessesExplanationTooltipContent = React.memo(() => {
     <EuiText size="s" onClick={onClick} style={{ width: 300 }}>
       <p>
         <FormattedMessage
-          id="xpack.infra.assetDetails.processes.tooltip.documentationLabel"
+          id="xpack.infra.assetDetails.processes.tooltip.explanationLabel"
           defaultMessage="The processes listed are based on an aggregation of the top CPU and the top memory consuming processes for the 1 minute preceding the end date of the selected time period. The number of top processes is configurable in the {systemIntegration}."
           values={{
             systemIntegration: (
