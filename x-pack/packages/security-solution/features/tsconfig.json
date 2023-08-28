@@ -13,10 +13,14 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "kbn_references": [
-    "@kbn/core",
     "@kbn/features-plugin",
-    "@kbn/core-logging-server-mocks",
     "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/core-application-common",
+    "@kbn/cases-plugin",
+    "@kbn/securitysolution-rules",
+    "@kbn/securitysolution-list-constants",
+    "@kbn/security-solution-plugin",
   ],
   "exclude": ["target/**/*"]
 }
