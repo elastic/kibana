@@ -45,7 +45,12 @@ type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof Archive
 };
 export type ArchiveAsset = Pick<
   SavedObject,
-  'id' | 'attributes' | 'migrationVersion' | 'references'
+  | 'id'
+  | 'attributes'
+  | 'migrationVersion' // deprecated
+  | 'references'
+  | 'coreMigrationVersion'
+  | 'typeMigrationVersion'
 > & {
   type: KibanaSavedObjectType;
 };
@@ -81,13 +86,24 @@ export async function getKibanaAsset(key: string): Promise<ArchiveAsset> {
 
 export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectToBe {
   // convert that to an object
-  return {
+  const so: Partial<SavedObjectToBe> = {
     type: asset.type,
     id: asset.id,
     attributes: asset.attributes,
     references: asset.references || [],
-    migrationVersion: asset.migrationVersion || {},
   };
+
+  // migrating deprecated migrationVersion to typeMigrationVersion
+  if (asset.migrationVersion && asset.migrationVersion[asset.type]) {
+    so.typeMigrationVersion = asset.migrationVersion[asset.type];
+  }
+  if (asset.coreMigrationVersion) {
+    so.coreMigrationVersion = asset.coreMigrationVersion;
+  }
+  if (asset.typeMigrationVersion) {
+    so.typeMigrationVersion = asset.typeMigrationVersion;
+  }
+  return so as SavedObjectToBe;
 }
 
 export async function installKibanaAssets(options: {
