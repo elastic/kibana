@@ -106,3 +106,6 @@ xpack.alerting.rules.run.ruleTypeOverrides:
     timeout: 1m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.actions.run.maxAttempts: 10
+
+## TaskManager requeue invalid tasks, supports ZDT
+xpack.task_manager.requeue_invalid_tasks.enabled: true

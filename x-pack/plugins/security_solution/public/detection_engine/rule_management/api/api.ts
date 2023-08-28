@@ -16,7 +16,7 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
-import { convertRulesFilterToKQL } from '../../../../common/utils/kql';
+import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   UpgradeSpecificRulesRequest,
   PerformRuleUpgradeResponseBody,

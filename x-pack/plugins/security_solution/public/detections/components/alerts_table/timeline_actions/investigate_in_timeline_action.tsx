@@ -18,7 +18,7 @@ import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 interface InvestigateInTimelineActionProps {
   ecsRowData?: Ecs | null;
   ariaLabel?: string;
-  buttonType?: 'text' | 'icon';
+  buttonType?: 'text' | 'icon' | 'emptyButton';
   onInvestigateInTimelineAlertClick?: () => void;
 }
 
