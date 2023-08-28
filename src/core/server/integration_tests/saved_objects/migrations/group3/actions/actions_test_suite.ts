@@ -521,27 +521,29 @@ export const runActionTestSuite = ({
     });
   });
 
-  describe('cloneIndex', () => {
-    afterAll(async () => {
-      try {
-        // Restore the default setting of 1000 shards per node
-        await client.cluster.putSettings({
-          persistent: { cluster: { max_shards_per_node: null } },
-        });
-        await client.indices.delete({ index: 'clone_*' });
-      } catch (e) {
-        /** ignore */
-      }
-    });
-    it('resolves right if cloning into a new target index', async () => {
-      const task = cloneIndex({
-        client,
-        source: 'existing_index_with_write_block',
-        target: 'clone_target_1',
-        esCapabilities,
+  // _clone is blocked on serverless
+  runOnTraditionalOnly(() => {
+    describe('cloneIndex', () => {
+      afterAll(async () => {
+        try {
+          // Restore the default setting of 1000 shards per node
+          await client.cluster.putSettings({
+            persistent: { cluster: { max_shards_per_node: null } },
+          });
+          await client.indices.delete({ index: 'clone_*' });
+        } catch (e) {
+          /** ignore */
+        }
       });
-      expect.assertions(3);
-      await expect(task()).resolves.toMatchInlineSnapshot(`
+      it('resolves right if cloning into a new target index', async () => {
+        const task = cloneIndex({
+          client,
+          source: 'existing_index_with_write_block',
+          target: 'clone_target_1',
+          esCapabilities,
+        });
+        expect.assertions(3);
+        await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
           "right": Object {
@@ -550,57 +552,57 @@ export const runActionTestSuite = ({
           },
         }
       `);
-      const { clone_target_1: cloneTarget1 } = await client.indices.getSettings({
-        index: 'clone_target_1',
-      });
-      // @ts-expect-error https://github.com/elastic/elasticsearch/issues/89381
-      expect(cloneTarget1.settings?.index.mapping?.total_fields.limit).toBe('1500');
-      expect(cloneTarget1.settings?.blocks?.write).toBeUndefined();
-    });
-    it('resolves right if clone target already existed after waiting for index status to be green ', async () => {
-      expect.assertions(2);
-
-      // Create a red index that we later turn into green
-      await client.indices
-        .create({
-          index: 'clone_red_then_green_index',
-          timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index can go to green
-              number_of_replicas: '0',
-              // Disable all shard allocation so that the index status is red
-              index: { routing: { allocation: { enable: 'none' } } },
-            },
-          },
-        })
-        .catch((e) => {});
-
-      // Call clone even though the index already exists
-      const cloneIndexPromise = cloneIndex({
-        client,
-        source: 'existing_index_with_write_block',
-        target: 'clone_red_then_green_index',
-        esCapabilities,
-      })();
-
-      let indexGreen = false;
-      setTimeout(() => {
-        client.indices.putSettings({
-          index: 'clone_red_then_green_index',
-          body: {
-            // Enable all shard allocation so that the index status goes green
-            routing: { allocation: { enable: 'all' } },
-          },
+        const { clone_target_1: cloneTarget1 } = await client.indices.getSettings({
+          index: 'clone_target_1',
         });
-        indexGreen = true;
-      }, 10);
+        // @ts-expect-error https://github.com/elastic/elasticsearch/issues/89381
+        expect(cloneTarget1.settings?.index.mapping?.total_fields.limit).toBe('1500');
+        expect(cloneTarget1.settings?.blocks?.write).toBeUndefined();
+      });
+      it('resolves right if clone target already existed after waiting for index status to be green ', async () => {
+        expect.assertions(2);
 
-      await cloneIndexPromise.then((res) => {
-        // Assert that the promise didn't resolve before the index became green
-        expect(indexGreen).toBe(true);
-        expect(res).toMatchInlineSnapshot(`
+        // Create a red index that we later turn into green
+        await client.indices
+          .create({
+            index: 'clone_red_then_green_index',
+            timeout: '5s',
+            body: {
+              mappings: { properties: {} },
+              settings: {
+                // Allocate 1 replica so that this index can go to green
+                number_of_replicas: '0',
+                // Disable all shard allocation so that the index status is red
+                index: { routing: { allocation: { enable: 'none' } } },
+              },
+            },
+          })
+          .catch((e) => {});
+
+        // Call clone even though the index already exists
+        const cloneIndexPromise = cloneIndex({
+          client,
+          source: 'existing_index_with_write_block',
+          target: 'clone_red_then_green_index',
+          esCapabilities,
+        })();
+
+        let indexGreen = false;
+        setTimeout(() => {
+          client.indices.putSettings({
+            index: 'clone_red_then_green_index',
+            body: {
+              // Enable all shard allocation so that the index status goes green
+              routing: { allocation: { enable: 'all' } },
+            },
+          });
+          indexGreen = true;
+        }, 10);
+
+        await cloneIndexPromise.then((res) => {
+          // Assert that the promise didn't resolve before the index became green
+          expect(indexGreen).toBe(true);
+          expect(res).toMatchInlineSnapshot(`
           Object {
             "_tag": "Right",
             "right": Object {
@@ -609,36 +611,36 @@ export const runActionTestSuite = ({
             },
           }
         `);
+        });
       });
-    });
-    it('resolves left with a index_not_green_timeout if clone target already exists but takes longer than the specified timeout before turning green', async () => {
-      // Create a red index
-      await client.indices
-        .create({
-          index: 'clone_red_index',
-          timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
-              // Disable all shard allocation so that the index status is red
-              index: { routing: { allocation: { enable: 'none' } } },
+      it('resolves left with a index_not_green_timeout if clone target already exists but takes longer than the specified timeout before turning green', async () => {
+        // Create a red index
+        await client.indices
+          .create({
+            index: 'clone_red_index',
+            timeout: '5s',
+            body: {
+              mappings: { properties: {} },
+              settings: {
+                // Allocate 1 replica so that this index stays yellow
+                number_of_replicas: '1',
+                // Disable all shard allocation so that the index status is red
+                index: { routing: { allocation: { enable: 'none' } } },
+              },
             },
-          },
-        })
-        .catch((e) => {});
+          })
+          .catch((e) => {});
 
-      // Call clone even though the index already exists
-      let cloneIndexPromise = cloneIndex({
-        client,
-        source: 'existing_index_with_write_block',
-        target: 'clone_red_index',
-        timeout: '1s',
-        esCapabilities,
-      })();
+        // Call clone even though the index already exists
+        let cloneIndexPromise = cloneIndex({
+          client,
+          source: 'existing_index_with_write_block',
+          target: 'clone_red_index',
+          timeout: '1s',
+          esCapabilities,
+        })();
 
-      await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
+        await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
           "left": Object {
@@ -648,26 +650,26 @@ export const runActionTestSuite = ({
         }
       `);
 
-      // Now make the index yellow and repeat
+        // Now make the index yellow and repeat
 
-      await client.indices.putSettings({
-        index: 'clone_red_index',
-        body: {
-          // Enable all shard allocation so that the index status goes yellow
-          routing: { allocation: { enable: 'all' } },
-        },
-      });
+        await client.indices.putSettings({
+          index: 'clone_red_index',
+          body: {
+            // Enable all shard allocation so that the index status goes yellow
+            routing: { allocation: { enable: 'all' } },
+          },
+        });
 
-      // Call clone even though the index already exists
-      cloneIndexPromise = cloneIndex({
-        client,
-        source: 'existing_index_with_write_block',
-        target: 'clone_red_index',
-        timeout: '1s',
-        esCapabilities,
-      })();
+        // Call clone even though the index already exists
+        cloneIndexPromise = cloneIndex({
+          client,
+          source: 'existing_index_with_write_block',
+          target: 'clone_red_index',
+          timeout: '1s',
+          esCapabilities,
+        })();
 
-      await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
+        await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
           "left": Object {
@@ -677,26 +679,26 @@ export const runActionTestSuite = ({
         }
       `);
 
-      // Now make the index green and it should succeed
+        // Now make the index green and it should succeed
 
-      await client.indices.putSettings({
-        index: 'clone_red_index',
-        body: {
-          // Set zero replicas so status goes green
-          number_of_replicas: 0,
-        },
-      });
+        await client.indices.putSettings({
+          index: 'clone_red_index',
+          body: {
+            // Set zero replicas so status goes green
+            number_of_replicas: 0,
+          },
+        });
 
-      // Call clone even though the index already exists
-      cloneIndexPromise = cloneIndex({
-        client,
-        source: 'existing_index_with_write_block',
-        target: 'clone_red_index',
-        timeout: '30s',
-        esCapabilities,
-      })();
+        // Call clone even though the index already exists
+        cloneIndexPromise = cloneIndex({
+          client,
+          source: 'existing_index_with_write_block',
+          target: 'clone_red_index',
+          timeout: '30s',
+          esCapabilities,
+        })();
 
-      await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
+        await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
           "right": Object {
@@ -705,16 +707,16 @@ export const runActionTestSuite = ({
           },
         }
       `);
-    });
-    it('resolves left index_not_found_exception if the source index does not exist', async () => {
-      expect.assertions(1);
-      const task = cloneIndex({
-        client,
-        source: 'no_such_index',
-        target: 'clone_target_3',
-        esCapabilities,
       });
-      await expect(task()).resolves.toMatchInlineSnapshot(`
+      it('resolves left index_not_found_exception if the source index does not exist', async () => {
+        expect.assertions(1);
+        const task = cloneIndex({
+          client,
+          source: 'no_such_index',
+          target: 'clone_target_3',
+          esCapabilities,
+        });
+        await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
           "left": Object {
@@ -723,17 +725,17 @@ export const runActionTestSuite = ({
           },
         }
       `);
-    });
-    it('resolves left cluster_shard_limit_exceeded when the action would exceed the maximum normal open shards', async () => {
-      // Set the max shards per node really low so that any new index that's created would exceed the maximum open shards for this cluster
-      await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: 1 } } });
-      const cloneIndexPromise = cloneIndex({
-        client,
-        source: 'existing_index_with_write_block',
-        target: 'clone_target_4',
-        esCapabilities,
-      })();
-      await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
+      });
+      it('resolves left cluster_shard_limit_exceeded when the action would exceed the maximum normal open shards', async () => {
+        // Set the max shards per node really low so that any new index that's created would exceed the maximum open shards for this cluster
+        await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: 1 } } });
+        const cloneIndexPromise = cloneIndex({
+          client,
+          source: 'existing_index_with_write_block',
+          target: 'clone_target_4',
+          esCapabilities,
+        })();
+        await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
           "left": Object {
@@ -741,6 +743,7 @@ export const runActionTestSuite = ({
           },
         }
       `);
+      });
     });
   });
 

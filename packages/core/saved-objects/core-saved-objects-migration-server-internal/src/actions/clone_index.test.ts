@@ -73,7 +73,7 @@ describe('cloneIndex', () => {
     `);
   });
 
-  it('calls client.indices.clone with the correct parameter for serverless ES', async () => {
+  it('resolve left with action_not_supported for serverless ES', async () => {
     const statelessCapabilities = elasticsearchServiceMock.createCapabilities({ serverless: true });
     const task = cloneIndex({
       client,
@@ -81,27 +81,13 @@ describe('cloneIndex', () => {
       target: 'my_target_index',
       esCapabilities: statelessCapabilities,
     });
-    try {
-      await task();
-    } catch (e) {
-      /** ignore */
-    }
-    expect(client.indices.clone.mock.calls[0][0]).toMatchInlineSnapshot(`
+    const result = await task();
+    expect(result).toMatchInlineSnapshot(`
       Object {
-        "index": "my_source_index",
-        "settings": Object {
-          "index": Object {
-            "blocks.write": false,
-            "mapping": Object {
-              "total_fields": Object {
-                "limit": 1500,
-              },
-            },
-          },
+        "_tag": "Left",
+        "left": Object {
+          "type": "action_not_supported",
         },
-        "target": "my_target_index",
-        "timeout": "60s",
-        "wait_for_active_shards": "all",
       }
     `);
   });

@@ -18,7 +18,7 @@ import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound, AcknowledgeResponse } from '.';
+import type { IndexNotFound, AcknowledgeResponse, ActionNotSupported } from '.';
 import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
 import {
   DEFAULT_TIMEOUT,
@@ -58,25 +58,40 @@ export const cloneIndex = ({
   target,
   timeout = DEFAULT_TIMEOUT,
 }: CloneIndexParams): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotFound | IndexNotGreenTimeout | ClusterShardLimitExceeded,
+  | RetryableEsClientError
+  | IndexNotFound
+  | IndexNotGreenTimeout
+  | ClusterShardLimitExceeded
+  | ActionNotSupported,
   CloneIndexResponse
 > => {
   const cloneTask: TaskEither.TaskEither<
-    RetryableEsClientError | IndexNotFound | ClusterShardLimitExceeded,
+    RetryableEsClientError | IndexNotFound | ClusterShardLimitExceeded | ActionNotSupported,
     AcknowledgeResponse
   > = () => {
-    const indexSettings = {
-      // The source we're cloning from will have a write block set, so
-      // we need to remove it to allow writes to our newly cloned index
-      'blocks.write': false,
-      // Increase the fields limit beyond the default of 1000
-      mapping: {
-        total_fields: { limit: 1500 },
-      },
-      // settings not being supported on serverless ES
-      ...(esCapabilities.serverless
-        ? {}
-        : {
+    // clone is not supported on serverless
+    if (esCapabilities.serverless) {
+      return Promise.resolve(
+        Either.left({
+          type: 'action_not_supported' as const,
+        })
+      );
+    }
+
+    return client.indices
+      .clone({
+        index: source,
+        target,
+        wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
+        settings: {
+          index: {
+            // The source we're cloning from will have a write block set, so
+            // we need to remove it to allow writes to our newly cloned index
+            'blocks.write': false,
+            // Increase the fields limit beyond the default of 1000
+            mapping: {
+              total_fields: { limit: 1500 },
+            },
             // The rest of the index settings should have already been applied
             // to the source index and will be copied to the clone target. But
             // we repeat it here for explicitness.
@@ -88,16 +103,7 @@ export const cloneIndex = ({
             refresh_interval: '1s',
             // Bump priority so that recovery happens before newer indices
             priority: 10,
-          }),
-    };
-
-    return client.indices
-      .clone({
-        index: source,
-        target,
-        wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-        settings: {
-          index: indexSettings,
+          },
         },
         timeout,
       })
