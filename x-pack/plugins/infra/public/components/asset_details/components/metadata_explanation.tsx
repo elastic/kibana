@@ -63,7 +63,7 @@ export const MetadataExplanationMessage = () => {
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
           <FormattedMessage
-            id="xpack.infra.assetDetails.overview.metadataSectionTitle"
+            id="xpack.infra.assetDetails.metadata.tooltip.metadataSectionTitle"
             defaultMessage="Showing metadata collected on {date} @ {time}"
             values={{
               date: dateString,
