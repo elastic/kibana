@@ -8,7 +8,6 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const indexThresholdRuleName = 'kibana sites - low bytes';
-export const metricThresholdRuleName = 'network metric packets';
 export const esQueryRuleName = 'sample logs query rule';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
@@ -32,7 +31,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
   describe('stack alerting', function () {
     let itRuleId: string;
-    let mtRuleId: string;
     let esRuleId: string;
     let serverLogConnectorId: string;
     let emailConnectorId: string;
@@ -91,40 +89,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
           },
         ],
       }));
-      // Create metric threshold rule
-      ({ id: mtRuleId } = await rules.api.createRule({
-        consumer: 'infrastructure',
-        name: metricThresholdRuleName,
-        notifyWhen: 'onActionGroupChange',
-        params: {
-          criteria: [
-            {
-              aggType: 'max',
-              comparator: '>',
-              threshold: [0],
-              timeSize: 3,
-              timeUnit: 's',
-              metric: 'network.packets',
-            },
-          ],
-          sourceId: 'default',
-          alertOnNoData: false,
-          alertOnGroupDisappear: false,
-          groupBy: ['network.name'],
-        },
-        ruleTypeId: 'metrics.alert.threshold',
-        schedule: { interval: '1m' },
-        actions: [
-          {
-            group: 'metrics.threshold.fired',
-            id: serverLogConnectorId,
-            params: {
-              level: 'info',
-              message: 'Test Metric Threshold rule',
-            },
-          },
-        ],
-      }));
       // Create Elasticsearch query rule
       ({ id: esRuleId } = await rules.api.createRule({
         consumer: 'alerts',
@@ -175,7 +139,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     after(async () => {
       await rules.api.deleteRule(itRuleId);
-      await rules.api.deleteRule(mtRuleId);
       await rules.api.deleteRule(esRuleId);
       await rules.api.deleteAllRules();
       await actions.api.deleteConnector(serverLogConnectorId);
@@ -185,7 +148,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./es_query_rule'));
     loadTestFile(require.resolve('./index_threshold_rule'));
     loadTestFile(require.resolve('./list_view'));
-    loadTestFile(require.resolve('./metrics_threshold_rule'));
     loadTestFile(require.resolve('./tracking_containment_rule'));
   });
 }
