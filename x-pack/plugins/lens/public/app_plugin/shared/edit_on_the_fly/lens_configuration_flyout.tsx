@@ -227,6 +227,7 @@ export function LensEditConfigurationFlyout({
               datasourceMap={datasourceMap}
               visualizationMap={visualizationMap}
               frame={frameApi}
+              core={coreStart}
               nowProvider={startDependencies.data.nowProvider}
               showOnlyIcons
               customSwitchSuggestionAction={(suggestion) => {
