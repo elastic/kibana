@@ -230,90 +230,90 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           if (testData.type === 'latest') {
             const destIndexMappings: MappingTypeMapping = {
               properties: {
-                "customer_id": {
-                  "type": "long"
+                customer_id: {
+                  type: 'long',
                 },
-                "day_of_week_i": {
-                  "type": "long"
+                day_of_week_i: {
+                  type: 'long',
                 },
-                "order_date": {
-                  "type": "date"
+                order_date: {
+                  type: 'date',
                 },
-                "order_id": {
-                  "type": "long"
+                order_id: {
+                  type: 'long',
                 },
-                "products": {
-                  "properties": {
-                    "_id": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
+                products: {
+                  properties: {
+                    _id: {
+                      type: 'text',
+                      fields: {
+                        keyword: {
+                          type: 'keyword',
+                          ignore_above: 256,
+                        },
+                      },
                     },
-                    "base_price": {
-                      "type": "float"
+                    base_price: {
+                      type: 'float',
                     },
-                    "base_unit_price": {
-                      "type": "float"
+                    base_unit_price: {
+                      type: 'float',
                     },
-                    "created_on": {
-                      "type": "date"
+                    created_on: {
+                      type: 'date',
                     },
-                    "discount_amount": {
-                      "type": "float"
+                    discount_amount: {
+                      type: 'float',
                     },
-                    "discount_percentage": {
-                      "type": "float"
+                    discount_percentage: {
+                      type: 'float',
                     },
-                    "min_price": {
-                      "type": "float"
+                    min_price: {
+                      type: 'float',
                     },
-                    "price": {
-                      "type": "float"
+                    price: {
+                      type: 'float',
                     },
-                    "product_id": {
-                      "type": "long"
+                    product_id: {
+                      type: 'long',
                     },
-                    "product_name": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
+                    product_name: {
+                      type: 'text',
+                      fields: {
+                        keyword: {
+                          type: 'keyword',
+                          ignore_above: 256,
+                        },
+                      },
                     },
-                    "quantity": {
-                      "type": "long"
+                    quantity: {
+                      type: 'long',
                     },
-                    "tax_amount": {
-                      "type": "float"
+                    tax_amount: {
+                      type: 'float',
                     },
-                    "taxful_price": {
-                      "type": "float"
+                    taxful_price: {
+                      type: 'float',
                     },
-                    "taxless_price": {
-                      "type": "float"
+                    taxless_price: {
+                      type: 'float',
                     },
-                    "unit_discount_amount": {
-                      "type": "float"
-                    }
-                  }
+                    unit_discount_amount: {
+                      type: 'float',
+                    },
+                  },
                 },
-                "taxful_total_price": {
-                  "type": "float"
+                taxful_total_price: {
+                  type: 'float',
                 },
-                "taxless_total_price": {
-                  "type": "float"
+                taxless_total_price: {
+                  type: 'float',
                 },
-                "total_quantity": {
-                  "type": "long"
+                total_quantity: {
+                  type: 'long',
                 },
-                "total_unique_products": {
-                  "type": "long"
+                total_unique_products: {
+                  type: 'long',
                 },
               },
             };
