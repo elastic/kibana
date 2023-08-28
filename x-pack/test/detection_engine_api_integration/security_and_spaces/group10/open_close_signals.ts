@@ -50,29 +50,9 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           // remove any server generated items that are nondeterministic
-          body.items.forEach((_: any, index: number) => {
-            delete body.items[index].update.error.index_uuid;
-          });
           delete body.took;
 
-          expect(body).to.eql({
-            errors: true,
-            items: [
-              {
-                update: {
-                  _id: '123',
-                  _index: '.internal.alerts-security.alerts-default-000001',
-                  error: {
-                    index: '.internal.alerts-security.alerts-default-000001',
-                    reason: '[123]: document missing',
-                    shard: '0',
-                    type: 'document_missing_exception',
-                  },
-                  status: 404,
-                },
-              },
-            ],
-          });
+          expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
         });
 
         it('should not give errors when querying and the signals index does exist and is empty', async () => {
@@ -84,29 +64,9 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           // remove any server generated items that are nondeterministic
-          body.items.forEach((_: any, index: number) => {
-            delete body.items[index].update.error.index_uuid;
-          });
           delete body.took;
 
-          expect(body).to.eql({
-            errors: true,
-            items: [
-              {
-                update: {
-                  _id: '123',
-                  _index: '.internal.alerts-security.alerts-default-000001',
-                  error: {
-                    index: '.internal.alerts-security.alerts-default-000001',
-                    reason: '[123]: document missing',
-                    shard: '0',
-                    type: 'document_missing_exception',
-                  },
-                  status: 404,
-                },
-              },
-            ],
-          });
+          expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
 
           await deleteAllAlerts(supertest, log, es);
         });

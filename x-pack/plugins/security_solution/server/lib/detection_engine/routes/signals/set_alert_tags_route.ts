@@ -54,12 +54,12 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
 
       const painlessScript = {
         params: { tagsToAdd, tagsToRemove },
-        source: `List newTagsArray = []; 
+        source: `List newTagsArray = [];
         if (ctx._source["kibana.alert.workflow_tags"] != null) {
           for (tag in ctx._source["kibana.alert.workflow_tags"]) {
             if (!params.tagsToRemove.contains(tag)) {
               newTagsArray.add(tag);
-            } 
+            }
           }
           for (tag in params.tagsToAdd) {
             if (!newTagsArray.contains(tag)) {
@@ -90,9 +90,20 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
       }
 
       try {
-        const body = await esClient.bulk({
-          refresh: 'wait_for',
-          body: bulkUpdateRequest,
+        const body = await esClient.updateByQuery({
+          index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+          // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2
+          // Note: Before we tried to use "refresh: wait_for" but I do not think that was available and instead it defaulted to "refresh: true"
+          // but the tests do not pass with "refresh: false". If at some point a "refresh: wait_for" is implemented, we should use that instead.
+          refresh: true,
+          body: {
+            script: painlessScript,
+            query: {
+              bool: {
+                filter: { terms: { _id: ids } },
+              },
+            },
+          },
         });
         return response.ok({ body });
       } catch (err) {
