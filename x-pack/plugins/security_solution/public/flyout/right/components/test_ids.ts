@@ -63,8 +63,11 @@ export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
 export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsAgentStatusCell';
 
-export const INVESTIGATION_GUIDE_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInvestigationGuideButton';
+export const INVESTIGATION_GUIDE_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInvestigationGuide';
+export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button`;
+export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading`;
+export const INVESTIGATION_GUIDE_NO_DATA_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}NoData`;
 
 /* Insights section */
 
@@ -80,8 +83,6 @@ export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSu
 /* Insights Entities */
 
 export const INSIGHTS_ENTITIES_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsEntities';
-export const TECHNICAL_PREVIEW_ICON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutTechnicalPreviewIcon';
 export const ENTITIES_USER_OVERVIEW_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesUserOverview';
 export const ENTITIES_USER_OVERVIEW_LINK_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Link`;
@@ -105,6 +106,10 @@ export const INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID = `${INSIGHTS_THREAT
 
 export const INSIGHTS_CORRELATIONS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsCorrelations';
+export const INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsSupressedAlerts';
+export const SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutSupressedAlertsTechnicalPreview';
 export const INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsRelatedCases';
 export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID =
@@ -118,21 +123,13 @@ export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
 
 export const INSIGHTS_PREVALENCE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsPrevalence';
-export const INSIGHTS_PREVALENCE_ROW_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsPrevalenceRow';
 
 /* Visualizations section */
 
 export const VISUALIZATIONS_SECTION_TEST_ID = 'securitySolutionDocumentDetailsVisualizationsTitle';
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
   'securitySolutionDocumentDetailsVisualizationsTitleHeader';
-
-/* Visualizations analyzer preview */
-
-export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerPreview';
-
-/* Visualizations session preview */
-
+export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalyzerPreview';
 export const SESSION_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsSessionPreview';
 
 /* Response section */
