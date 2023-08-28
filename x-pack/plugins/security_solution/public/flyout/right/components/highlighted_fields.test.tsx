@@ -11,11 +11,11 @@ import { RightPanelContext } from '../context';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { HighlightedFields } from './highlighted_fields';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
-import { useHighlightedFields } from '../hooks/use_highlighted_fields';
+import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 import { TestProviders } from '../../../common/mock';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
-jest.mock('../hooks/use_highlighted_fields');
+jest.mock('../../shared/hooks/use_highlighted_fields');
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
 describe('<HighlightedFields />', () => {
@@ -27,15 +27,11 @@ describe('<HighlightedFields />', () => {
     const panelContextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
     } as unknown as RightPanelContext;
-    (useHighlightedFields as jest.Mock).mockReturnValue([
-      {
-        field: 'field',
-        description: {
-          field: 'field',
-          values: ['value'],
-        },
+    (useHighlightedFields as jest.Mock).mockReturnValue({
+      field: {
+        values: ['value'],
       },
-    ]);
+    });
 
     const { getByTestId } = render(
       <TestProviders>
@@ -53,7 +49,7 @@ describe('<HighlightedFields />', () => {
     const panelContextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
     } as unknown as RightPanelContext;
-    (useHighlightedFields as jest.Mock).mockReturnValue([]);
+    (useHighlightedFields as jest.Mock).mockReturnValue({});
 
     const { container } = render(
       <RightPanelContext.Provider value={panelContextValue}>
@@ -68,15 +64,11 @@ describe('<HighlightedFields />', () => {
     const panelContextValue = {
       dataFormattedForFieldBrowser: null,
     } as unknown as RightPanelContext;
-    (useHighlightedFields as jest.Mock).mockReturnValue([
-      {
-        field: 'field',
-        description: {
-          field: 'field',
-          values: ['value'],
-        },
+    (useHighlightedFields as jest.Mock).mockReturnValue({
+      field: {
+        values: ['value'],
       },
-    ]);
+    });
 
     const { container } = render(
       <RightPanelContext.Provider value={panelContextValue}>
