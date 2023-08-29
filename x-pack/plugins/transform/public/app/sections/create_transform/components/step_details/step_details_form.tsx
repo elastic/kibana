@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiText,
+  EuiTextArea,
 } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -430,7 +431,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               defaultMessage: 'Transform description',
             })}
           >
-            <EuiFieldText
+            <EuiTextArea
               placeholder={i18n.translate(
                 'xpack.transform.stepDetailsForm.transformDescriptionPlaceholderText',
                 { defaultMessage: 'Description (optional)' }

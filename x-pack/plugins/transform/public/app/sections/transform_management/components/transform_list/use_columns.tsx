@@ -213,7 +213,7 @@ export const useColumns = (
       'data-test-subj': 'transformListColumnDescription',
       name: i18n.translate('xpack.transform.description', { defaultMessage: 'Description' }),
       sortable: true,
-      truncateText: true,
+      truncateText: false,
     },
     {
       name: i18n.translate('xpack.transform.type', { defaultMessage: 'Type' }),
