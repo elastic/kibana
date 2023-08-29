@@ -271,8 +271,8 @@ export class AlertsClient<
     const { alertsToReturn, recoveredAlertsToReturn } =
       this.legacyAlertsClient.getAlertsToSerialize(false);
 
-    const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('activeCurrent');
-    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent');
+    const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
+    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
@@ -281,41 +281,47 @@ export class AlertsClient<
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(alertsToReturn)) {
       // See if there's an existing active alert document
-      if (
-        this.fetchedAlerts.data.hasOwnProperty(id) &&
-        this.fetchedAlerts.data[id].kibana.alert.status === 'active'
-      ) {
-        activeAlertsToIndex.push(
-          buildOngoingAlert<
-            AlertData,
-            LegacyState,
-            LegacyContext,
-            ActionGroupIds,
-            RecoveryActionGroupId
-          >({
-            alert: this.fetchedAlerts.data[id],
-            legacyAlert: activeAlerts[id],
-            rule: this.rule,
-            timestamp: currentTime,
-            payload: this.reportedAlerts[id],
-            kibanaVersion: this.options.kibanaVersion,
-          })
-        );
+      if (!!activeAlerts[id]) {
+        if (
+          this.fetchedAlerts.data.hasOwnProperty(id) &&
+          this.fetchedAlerts.data[id].kibana.alert.status === 'active'
+        ) {
+          activeAlertsToIndex.push(
+            buildOngoingAlert<
+              AlertData,
+              LegacyState,
+              LegacyContext,
+              ActionGroupIds,
+              RecoveryActionGroupId
+            >({
+              alert: this.fetchedAlerts.data[id],
+              legacyAlert: activeAlerts[id],
+              rule: this.rule,
+              timestamp: currentTime,
+              payload: this.reportedAlerts[id],
+              kibanaVersion: this.options.kibanaVersion,
+            })
+          );
+        } else {
+          activeAlertsToIndex.push(
+            buildNewAlert<
+              AlertData,
+              LegacyState,
+              LegacyContext,
+              ActionGroupIds,
+              RecoveryActionGroupId
+            >({
+              legacyAlert: activeAlerts[id],
+              rule: this.rule,
+              timestamp: currentTime,
+              payload: this.reportedAlerts[id],
+              kibanaVersion: this.options.kibanaVersion,
+            })
+          );
+        }
       } else {
-        activeAlertsToIndex.push(
-          buildNewAlert<
-            AlertData,
-            LegacyState,
-            LegacyContext,
-            ActionGroupIds,
-            RecoveryActionGroupId
-          >({
-            legacyAlert: activeAlerts[id],
-            rule: this.rule,
-            timestamp: currentTime,
-            payload: this.reportedAlerts[id],
-            kibanaVersion: this.options.kibanaVersion,
-          })
+        this.options.logger.error(
+          `Error writing alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in active alerts`
         );
       }
     }
