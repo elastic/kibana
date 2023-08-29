@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['discover']);
 
   // Failing: See https://github.com/elastic/kibana/issues/165146
+  // Failing: See https://github.com/elastic/kibana/issues/165144
   describe.skip('creation_continuous_transform', function () {
     before(async () => {
       // installing the sample data with test user with super user role and then switching roles with limited privileges
