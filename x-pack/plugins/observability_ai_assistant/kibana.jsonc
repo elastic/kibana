@@ -16,6 +16,7 @@
       "observabilityShared",
       "ruleRegistry",
       "security",
+      "share",
       "taskManager",
       "triggersActionsUi"
     ],

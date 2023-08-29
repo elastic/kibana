@@ -42,9 +42,7 @@ export function Application({
         <KibanaContextProvider
           services={{
             ...coreStart,
-            plugins: {
-              start: pluginsStart,
-            },
+            ...pluginsStart,
           }}
         >
           <RedirectAppLinks coreStart={coreStart}>

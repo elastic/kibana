@@ -47,6 +47,7 @@ export function ConversationList({
   loading,
   error,
   conversations,
+  onClickConversation,
   onClickNewChat,
   onClickDeleteConversation,
 }: {
@@ -54,6 +55,7 @@ export function ConversationList({
   loading: boolean;
   error?: any;
   conversations?: Array<{ id: string; label: string; href?: string }>;
+  onClickConversation: (conversationId: string) => void;
   onClickNewChat: () => void;
   onClickDeleteConversation: (id: string) => void;
 }) {
@@ -116,7 +118,7 @@ export function ConversationList({
                       label={conversation.label}
                       size="s"
                       isActive={conversation.id === selected}
-                      isDisabled={!hasCorrectLicense || loading}
+                      isDisabled={loading}
                       href={conversation.href}
                       wrapText
                       extraAction={
@@ -154,7 +156,7 @@ export function ConversationList({
           <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow className={newChatButtonWrapperClassName}>
-                <NewChatButton onClick={onClickNewChat} disabled={!hasCorrectLicense} />
+                <NewChatButton onClick={onClickNewChat} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

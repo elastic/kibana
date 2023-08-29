@@ -19,11 +19,7 @@ const pageSectionContentClassName = css`
 
 export function ObservabilityAIAssistantPageTemplate({ children }: { children: React.ReactNode }) {
   const {
-    services: {
-      plugins: {
-        start: { observabilityShared },
-      },
-    },
+    services: { observabilityShared },
   } = useKibana();
 
   const PageTemplate = observabilityShared.navigation.PageTemplate;

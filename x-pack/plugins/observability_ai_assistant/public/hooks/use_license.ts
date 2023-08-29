@@ -17,11 +17,7 @@ interface UseLicenseReturnValue {
 }
 
 export const useLicense = (): UseLicenseReturnValue => {
-  const {
-    plugins: {
-      start: { licensing },
-    },
-  } = useKibana().services;
+  const { licensing } = useKibana().services;
 
   const license = useObservable<ILicense | null>(licensing?.license$ ?? new Observable(), null);
 

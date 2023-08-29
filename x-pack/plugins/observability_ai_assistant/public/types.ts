@@ -38,6 +38,7 @@ import type {
   RegisterFunctionDefinition,
 } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -105,6 +106,7 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   security: SecurityPluginStart;
+  share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
