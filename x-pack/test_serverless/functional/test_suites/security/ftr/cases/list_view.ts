@@ -15,8 +15,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const svlSecNavigation = getService('svlSecNavigation');
-
-  // Failing
+  
   describe('cases list', () => {
     before(async () => {
       await svlSecNavigation.navigateToLandingPage();
