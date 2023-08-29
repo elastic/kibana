@@ -5,14 +5,23 @@
  * 2.0.
  */
 import React from 'react';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../utils/kibana_react';
 
 export function GlobalLogsTab() {
   const {
-    triggersActionsUi: { getGlobalRuleEventLogList: GlobalRuleEvenLogList },
+    triggersActionsUi: { getGlobalRuleEventLogList: GlobalRuleEventLogList },
   } = useKibana().services;
 
-  return <GlobalRuleEvenLogList />;
+  const filteredRuleTypes = useGetFilteredRuleTypes();
+
+  return (
+    <GlobalRuleEventLogList
+      filteredRuleTypes={filteredRuleTypes}
+      setHeaderActions={() => {}} // TODO: what's this?
+      localStorageKey="observability:global-rule-event-log-list"
+    />
+  );
 }
 
 // eslint-disable-next-line import/no-default-export
