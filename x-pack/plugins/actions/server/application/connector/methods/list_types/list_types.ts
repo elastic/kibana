@@ -11,8 +11,12 @@ import { ListTypesParams } from './types';
 
 export async function listTypes(
   context: ActionsClientContext,
-  { featureId, includeSystemActionTypes }: ListTypesParams
+  options: ListTypesParams
 ): Promise<ConnectorType[]> {
+  // assert the input
+  const featureId = (options as ListTypesParams).featureId;
+  const includeSystemActionTypes = (options as ListTypesParams).includeSystemActionTypes;
+
   const connectorTypes = context.actionTypeRegistry.list(featureId);
 
   const filteredConnectorTypes = includeSystemActionTypes
