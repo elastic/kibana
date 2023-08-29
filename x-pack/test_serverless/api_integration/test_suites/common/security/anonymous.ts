@@ -11,8 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  // Error: self-signed certificate in certificate chain
-  describe.skip('security/anonymous', function () {
+  describe('security/anonymous', function () {
     describe('route access', () => {
       describe('disabled', () => {
         it('get access capabilities', async () => {
