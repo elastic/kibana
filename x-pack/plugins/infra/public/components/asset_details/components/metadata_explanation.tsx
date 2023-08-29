@@ -57,7 +57,7 @@ export const MetadataExplanationMessage = () => {
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const { metadata } = useMetadataStateProviderContext();
 
-  const dateFromRange = new Date(metadata?.info?.['@timestamp'] ?? getDateRangeInTimestamp().to);
+  const dateFromRange = new Date(metadata?.info?.timestamp ?? getDateRangeInTimestamp().to);
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="baseline">
