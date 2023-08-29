@@ -13,11 +13,18 @@ import { EntityForm } from './entity_form';
 export const GeoContainmentRuleTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
 > = (props) => {
-  console.log('props', props);
+
+  function getValidationError(key: string) {
+    return props.errors[key]?.length > 0 && key in props.ruleParams
+      ? props.errors[key][0]
+      : null;
+  }
+
   return (
     <>
       <EntityForm
         data={props.data}
+        getValidationError={getValidationError}
         ruleParams={props.ruleParams}
         setDataViewId={(id: string) => props.setRuleParams('indexId', id)}
         setDataViewTitle={(title: string) => props.setRuleParams('index', title)}

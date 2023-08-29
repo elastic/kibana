@@ -33,13 +33,14 @@ function fieldsToOptions(fields?: DataViewField[]): Array<EuiComboBoxOptionOptio
 }
 
 interface Props {
+  isInvalid: boolean;
   placeholder: string;
   value: string | null; // data view field name
   onChange: (fieldName?: string) => void;
   fields: DataViewField[];
 }
 
-export function SingleFieldSelect({ placeholder, value, onChange, fields }: Props) {
+export function SingleFieldSelect({ isInvalid, placeholder, value, onChange, fields }: Props) {
   function renderOption(
     option: EuiComboBoxOptionOption<DataViewField>,
     searchValue: string,
@@ -71,6 +72,7 @@ export function SingleFieldSelect({ placeholder, value, onChange, fields }: Prop
 
   return (
     <EuiComboBox
+      isInvalid={isInvalid}
       singleSelection={true}
       options={fieldsToOptions(fields)}
       selectedOptions={selectedOptions}

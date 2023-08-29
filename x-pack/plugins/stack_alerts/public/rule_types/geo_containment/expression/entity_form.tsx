@@ -39,6 +39,7 @@ function getGeoFields(fields: DataViewField[]) {
 
 interface Props {
   data: DataPublicPluginStart;
+  getValidationError: (key: string) => string | null;
   ruleParams: GeoContainmentAlertParams;
   setDataViewId: (id: string) => void;
   setDataViewTitle: (title: string) => void;
@@ -86,6 +87,44 @@ export const EntityForm = (props: Props) => {
     };
   }, [props.ruleParams.indexId]);
 
+  function getDataViewError() {
+    const validationError = props.getValidationError('index');
+    if (validationError) {
+      return validationError;
+    }
+
+    if (dataView && dateFields.length === 0) {
+      return i18n.translate('xpack.stackAlerts.geoContainment.noDateFieldInIndexPattern.message', {
+        defaultMessage:
+          'Data view does not contain date fields.',
+      });
+    }
+
+    if (dataView && geoFields.length === 0) {
+      return i18n.translate('xpack.stackAlerts.geoContainment.noGeoFieldInIndexPattern.message', {
+        defaultMessage:
+          'Data view does not contain geospatial fields. Must have one of type: {geoFieldTypes}.',
+        values: {
+          geoFieldTypes: ENTITY_GEO_FIELD_TYPES.join(', '),
+        },
+      });
+    }
+
+    if (dataViewNotFound) {
+      return i18n.translate('xpack.stackAlerts.geoContainment.dataViewNotFound', {
+        defaultMessage: `Unable to find data view '{id}'`,
+        values: { id: props.ruleParams.indexId },
+      });
+    }
+
+    return null;
+  }
+
+  const dataViewError = getDataViewError();
+  const dateFieldError = props.getValidationError('dateField');
+  const geoFieldError = props.getValidationError('geoField');
+  const entityFieldError = props.getValidationError('entity');
+
   return (
     <EuiPanel>
       <EuiTitle size="xs">
@@ -101,6 +140,8 @@ export const EntityForm = (props: Props) => {
 
       <EuiSkeletonText lines={3} size="s" isLoading={isLoading}>
         <EuiFormRow
+          error={dataViewError}
+          isInvalid={Boolean(dataViewError)}
           label={i18n.translate('xpack.stackAlerts.geoContainment.dataViewLabel', {
             defaultMessage: 'Data view',
           })}
@@ -108,17 +149,30 @@ export const EntityForm = (props: Props) => {
           <DataViewSelect
             dataViewId={props.ruleParams.indexId}
             data={props.data}
-            isInvalid={false}
+            isInvalid={Boolean(dataViewError)}
             onChange={(dataView: DataView) => {
               props.setDataViewId(dataView.id);
               props.setDataViewTitle(dataView.title);
+              
               const dateFields = getDateFields(dataView.fields);
-              props.setDateField(dateFields.length ? dateFields[0].name : '');
+              if (dateFields.length) {
+                props.setDateField(dateFields[0].name);
+              } else if ('dateField' in props.ruleParams) {
+                props.setDateField('');
+              }
+
               // do not attempt to auto select entity field
               // there can be many matches so auto selecting the correct field is improbable
-              props.setEntityField('');
+              if ('entity' in props.ruleParams) {
+                props.setEntityField('');
+              }
+
               const geoFields = getGeoFields(dataView.fields);
-              props.setGeoField(geoFields.length ? geoFields[0].name : '');
+              if (geoFields.length) {
+                props.setGeoField(geoFields[0].name);
+              } else if ('geoField' in props.ruleParams) {
+                props.setGeoField('');
+              }
             }}
             unifiedSearch={props.unifiedSearch}
           />
@@ -127,6 +181,8 @@ export const EntityForm = (props: Props) => {
         {props.ruleParams.indexId && 
           <>
             <EuiFormRow
+              error={dateFieldError}
+              isInvalid={Boolean(dateFieldError)}
               label={
                 i18n.translate('xpack.stackAlerts.geoContainment.timeFieldLabel', {
                   defaultMessage: 'Time',
@@ -134,6 +190,7 @@ export const EntityForm = (props: Props) => {
               }
             >
               <SingleFieldSelect
+                isInvalid={Boolean(dateFieldError)}
                 placeholder={i18n.translate('xpack.stackAlerts.geoContainment.selectTimeLabel', {
                   defaultMessage: 'Select time field',
                 })}
@@ -148,11 +205,14 @@ export const EntityForm = (props: Props) => {
             </EuiFormRow>
 
             <EuiFormRow
+              error={geoFieldError}
+              isInvalid={Boolean(geoFieldError)}
               label={i18n.translate('xpack.stackAlerts.geoContainment.geofieldLabel', {
                 defaultMessage: 'Location',
               })}
             >
               <SingleFieldSelect
+                isInvalid={Boolean(geoFieldError)}
                 placeholder={i18n.translate('xpack.stackAlerts.geoContainment.selectGeoLabel', {
                   defaultMessage: 'Select location field',
                 })}
@@ -167,11 +227,14 @@ export const EntityForm = (props: Props) => {
             </EuiFormRow>
 
             <EuiFormRow
+              error={entityFieldError}
+              isInvalid={Boolean(entityFieldError)}
               label={i18n.translate('xpack.stackAlerts.geoContainment.entityfieldLabel', {
                 defaultMessage: 'Entity',
               })}
             >
               <SingleFieldSelect
+                isInvalid={Boolean(entityFieldError)}
                 placeholder={i18n.translate(
                   'xpack.stackAlerts.geoContainment.topHitsSplitFieldSelectPlaceholder',
                   {
