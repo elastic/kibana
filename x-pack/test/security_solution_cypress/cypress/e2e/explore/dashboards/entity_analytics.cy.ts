@@ -100,7 +100,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
     });
   });
 
-
   describe('With host risk data', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_entities' });

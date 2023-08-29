@@ -76,9 +76,9 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
 
       closeAlertFlyout();
 
-      cy.task('esArchiverUnload', 'risk_entities');    
+      cy.task('esArchiverUnload', 'risk_entities');
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts_updated' });
-      
+
       expandFirstAlert();
       cy.get(ENRICHED_DATA_ROW).contains('Critical');
       cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification');
