@@ -44,7 +44,8 @@
     "@kbn/data-views-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/es-query",
-    "@kbn/rule-registry-plugin"
+    "@kbn/rule-registry-plugin",
+    "@kbn/licensing-plugin"
   ],
   "exclude": ["target/**/*"]
 }
