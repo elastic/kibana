@@ -68,7 +68,7 @@ async function mountDoc(update = false) {
     locator: { getUrl: jest.fn(() => Promise.resolve('mock-url')) },
     chrome: { setBreadcrumbs: jest.fn() },
   };
-  setUnifiedDocViewerServices(Promise.resolve(mockUnifiedDocViewerServices));
+  setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
   await act(async () => {
     comp = mountWithIntl(
       <KibanaContextProvider services={services}>

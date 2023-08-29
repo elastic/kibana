@@ -58,7 +58,7 @@ describe('Discover flyout', function () {
       contextLocator: { getRedirectUrl: jest.fn(() => 'mock-context-redirect-url') },
       singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url') },
     } as unknown as DiscoverServices;
-    setUnifiedDocViewerServices(Promise.resolve(mockUnifiedDocViewerServices));
+    setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
     const hit = buildDataTableRecord(
       hitIndex ? esHitsMock[hitIndex] : (esHitsMock[0] as EsHitRecord),

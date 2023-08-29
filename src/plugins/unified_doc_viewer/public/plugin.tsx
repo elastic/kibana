@@ -15,11 +15,11 @@ import { EuiSkeletonText } from '@elastic/eui';
 import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { type UnifiedDocViewerServices, useUnifiedDocViewerServices } from './hooks';
 
-export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] = createGetterSetter<
-  Promise<UnifiedDocViewerServices>
->('UnifiedDocViewerServices');
+export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
+  createGetterSetter<UnifiedDocViewerServices>('UnifiedDocViewerServices');
 
 const DocViewerLegacyTable = React.lazy(() => import('./components/doc_viewer_table/legacy'));
 const DocViewerTable = React.lazy(() => import('./components/doc_viewer_table'));
@@ -39,7 +39,7 @@ export interface UnifiedDocViewerStartDeps {
 }
 
 export class UnifiedDocViewerPublicPlugin
-  implements Plugin<UnifiedDocViewerSetup, UnifiedDocViewerStart, UnifiedDocViewerStartDeps>
+  implements Plugin<UnifiedDocViewerSetup, UnifiedDocViewerStart, {}, UnifiedDocViewerStartDeps>
 {
   private docViewsRegistry = new DocViewsRegistry();
 
@@ -95,30 +95,20 @@ export class UnifiedDocViewerPublicPlugin
       },
     });
 
-    const { analytics, uiSettings } = core;
-    setUnifiedDocViewerServices(
-      core.getStartServices().then(([, depsStart, unifiedDocViewer]) => {
-        const { data, fieldFormats } = depsStart;
-        const storage = new Storage(localStorage);
-        return {
-          analytics,
-          data,
-          fieldFormats,
-          storage,
-          uiSettings,
-          unifiedDocViewer,
-        };
-      })
-    );
-
     return {
       addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
     };
   }
 
-  public start() {
-    return {
+  public start(core: CoreStart, deps: UnifiedDocViewerStartDeps) {
+    const { analytics, uiSettings } = core;
+    const { data, fieldFormats } = deps;
+    const storage = new Storage(localStorage);
+    const unifiedDocViewer = {
       getDocViews: this.docViewsRegistry.getDocViewsSorted.bind(this.docViewsRegistry),
     };
+    const services = { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer };
+    setUnifiedDocViewerServices(services);
+    return unifiedDocViewer;
   }
 }
