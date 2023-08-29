@@ -300,6 +300,11 @@ export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.resp
   defaultMessage: 'There are no response actions defined for this event.',
 });
 
+export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
+  { defaultMessage: 'Technical preview' }
+);
+
 export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage',
   {
