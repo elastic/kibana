@@ -128,6 +128,9 @@ export const ruleRegistrySearchStrategyProvider = (
           if (siemRequest) {
             fields.push({ field: 'signal.*', include_unmapped: false });
             fields = fields.concat(buildAlertFieldsRequest([], false));
+          } else {
+            // only for o11y solutions
+            fields.push({ field: '*', include_unmapped: true });
           }
 
           const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
