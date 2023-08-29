@@ -37,7 +37,7 @@ describe('Spaces plugin', () => {
       );
     });
 
-    it('should not register the spaces API and the space selector app when buildFlavor is serverless', () => {
+    it('should not register the spaces routes and the space selector app when buildFlavor is serverless', () => {
       const coreSetup = coreMock.createSetup();
 
       const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
