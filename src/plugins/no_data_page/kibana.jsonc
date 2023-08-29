@@ -1,0 +1,10 @@
+{
+  "type": "plugin",
+  "id": "@kbn/no-data-page-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "noDataPage",
+    "server": true,
+    "browser": true
+  }
+}
