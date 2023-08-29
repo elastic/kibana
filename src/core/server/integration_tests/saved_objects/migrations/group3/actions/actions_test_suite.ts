@@ -409,49 +409,56 @@ export const runActionTestSuite = ({
       await client.indices.delete({ index: 'red_then_yellow_index' }).catch(() => ({}));
       await client.indices.delete({ index: 'red_index' }).catch(() => ({}));
     });
-    it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
-      // Create a red index
-      await client.indices.create(
-        {
-          index: 'red_then_yellow_index',
-          timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
-              // Disable all shard allocation so that the index status is red
-              routing: { allocation: { enable: 'none' } },
+
+    // routing allocation and number_of_replicas settings not supported on serverless
+    runOnTraditionalOnly(() => {
+      it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
+        // Create a red index
+        await client.indices.create(
+          {
+            index: 'red_then_yellow_index',
+            timeout: '5s',
+            body: {
+              mappings: { properties: {} },
+              settings: {
+                // Allocate 1 replica so that this index stays yellow
+                number_of_replicas: '1',
+                // Disable all shard allocation so that the index status is red
+                routing: { allocation: { enable: 'none' } },
+              },
             },
           },
-        },
-        { maxRetries: 0 /** handle retry ourselves for now */ }
-      );
+          { maxRetries: 0 /** handle retry ourselves for now */ }
+        );
 
-      // Start tracking the index status
-      const indexStatusPromise = waitForIndexStatus({
-        client,
-        index: 'red_then_yellow_index',
-        status: 'yellow',
-      })();
+        // Start tracking the index status
+        const indexStatusPromise = waitForIndexStatus({
+          client,
+          index: 'red_then_yellow_index',
+          status: 'yellow',
+        })();
 
-      const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
-      expect(redStatusResponse.status).toBe('red');
+        const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
+        expect(redStatusResponse.status).toBe('red');
 
-      client.indices.putSettings({
-        index: 'red_then_yellow_index',
-        body: {
-          // Enable all shard allocation so that the index status turns yellow
-          routing: { allocation: { enable: 'all' } },
-        },
+        client.indices.putSettings({
+          index: 'red_then_yellow_index',
+          body: {
+            // Enable all shard allocation so that the index status turns yellow
+            routing: { allocation: { enable: 'all' } },
+          },
+        });
+
+        await indexStatusPromise;
+        // Assert that the promise didn't resolve before the index became yellow
+
+        const yellowStatusResponse = await client.cluster.health({
+          index: 'red_then_yellow_index',
+        });
+        expect(yellowStatusResponse.status).toBe('yellow');
       });
-
-      await indexStatusPromise;
-      // Assert that the promise didn't resolve before the index became yellow
-
-      const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
-      expect(yellowStatusResponse.status).toBe('yellow');
     });
+
     it('resolves left with "index_not_yellow_timeout" after waiting for an index status to be yellow timeout', async () => {
       // Create a red index
       await client.indices
@@ -1827,54 +1834,57 @@ export const runActionTestSuite = ({
       // @ts-expect-error https://github.com/elastic/elasticsearch/issues/89381
       expect(createNewIndex.settings?.index?.mapping.total_fields.limit).toBe('1500');
     });
-    it('resolves left if an existing index status does not become green', async () => {
-      expect.assertions(2);
-      // Create a red index
-      await client.indices
-        .create(
-          {
-            index: 'red_then_yellow_index',
-            timeout: '5s',
-            body: {
-              mappings: { properties: {} },
-              settings: {
-                // Allocate 1 replica so that this index stays yellow
-                number_of_replicas: '1',
-                // Disable all shard allocation so that the index status starts as red
-                index: { routing: { allocation: { enable: 'none' } } },
+
+    // number_of_replicas and routing allocation not available on serverless
+    runOnTraditionalOnly(() => {
+      it('resolves left if an existing index status does not become green', async () => {
+        expect.assertions(2);
+        // Create a red index
+        await client.indices
+          .create(
+            {
+              index: 'red_then_yellow_index',
+              timeout: '5s',
+              body: {
+                mappings: { properties: {} },
+                settings: {
+                  // Allocate 1 replica so that this index stays yellow
+                  number_of_replicas: '1',
+                  // Disable all shard allocation so that the index status starts as red
+                  index: { routing: { allocation: { enable: 'none' } } },
+                },
               },
             },
-          },
-          { maxRetries: 0 /** handle retry ourselves for now */ }
-        )
-        .catch((e) => {
-          /** ignore */
-        });
+            { maxRetries: 0 /** handle retry ourselves for now */ }
+          )
+          .catch((e) => {
+            /** ignore */
+          });
 
-      // Call createIndex even though the index already exists
-      const createIndexPromise = createIndex({
-        client,
-        indexName: 'red_then_yellow_index',
-        mappings: undefined as any,
-        esCapabilities,
-      })();
-      let indexYellow = false;
+        // Call createIndex even though the index already exists
+        const createIndexPromise = createIndex({
+          client,
+          indexName: 'red_then_yellow_index',
+          mappings: undefined as any,
+          esCapabilities,
+        })();
+        let indexYellow = false;
 
-      setTimeout(() => {
-        client.indices.putSettings({
-          index: 'red_then_yellow_index',
-          body: {
-            // Renable allocation so that the status becomes yellow
-            routing: { allocation: { enable: 'all' } },
-          },
-        });
-        indexYellow = true;
-      }, 10);
+        setTimeout(() => {
+          client.indices.putSettings({
+            index: 'red_then_yellow_index',
+            body: {
+              // Renable allocation so that the status becomes yellow
+              routing: { allocation: { enable: 'all' } },
+            },
+          });
+          indexYellow = true;
+        }, 10);
 
-      await createIndexPromise.then((err) => {
-        // Assert that the promise didn't resolve before the index became yellow
-        expect(indexYellow).toBe(true);
-        expect(err).toMatchInlineSnapshot(`
+        await createIndexPromise.then((err) => {
+          // Assert that the promise didn't resolve before the index became yellow
+          expect(indexYellow).toBe(true);
+          expect(err).toMatchInlineSnapshot(`
           Object {
             "_tag": "Left",
             "left": Object {
@@ -1883,58 +1893,60 @@ export const runActionTestSuite = ({
             },
           }
         `);
+        });
       });
-    });
-    it('resolves right after waiting for an existing index status to become green', async () => {
-      expect.assertions(2);
-      // Create a yellow index
-      await client.indices
-        .create({
-          index: 'yellow_then_green_index',
-          timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
+      it('resolves right after waiting for an existing index status to become green', async () => {
+        expect.assertions(2);
+        // Create a yellow index
+        await client.indices
+          .create({
+            index: 'yellow_then_green_index',
+            timeout: '5s',
+            body: {
+              mappings: { properties: {} },
+              settings: {
+                // Allocate 1 replica so that this index stays yellow
+                number_of_replicas: '1',
+              },
             },
-          },
-        })
-        .catch((e) => {
-          /** ignore */
-        });
+          })
+          .catch((e) => {
+            /** ignore */
+          });
 
-      // Call createIndex even though the index already exists
-      const createIndexPromise = createIndex({
-        client,
-        indexName: 'yellow_then_green_index',
-        mappings: undefined as any,
-        esCapabilities,
-      })();
-      let indexGreen = false;
+        // Call createIndex even though the index already exists
+        const createIndexPromise = createIndex({
+          client,
+          indexName: 'yellow_then_green_index',
+          mappings: undefined as any,
+          esCapabilities,
+        })();
+        let indexGreen = false;
 
-      setTimeout(() => {
-        client.indices.putSettings({
-          index: 'yellow_then_green_index',
-          body: {
-            // Set 0 replican so that this index becomes green
-            number_of_replicas: '0',
-          },
-        });
-        indexGreen = true;
-      }, 10);
+        setTimeout(() => {
+          client.indices.putSettings({
+            index: 'yellow_then_green_index',
+            body: {
+              // Set 0 replican so that this index becomes green
+              number_of_replicas: '0',
+            },
+          });
+          indexGreen = true;
+        }, 10);
 
-      await createIndexPromise.then((res) => {
-        // Assert that the promise didn't resolve before the index became green
-        expect(indexGreen).toBe(true);
-        expect(res).toMatchInlineSnapshot(`
+        await createIndexPromise.then((res) => {
+          // Assert that the promise didn't resolve before the index became green
+          expect(indexGreen).toBe(true);
+          expect(res).toMatchInlineSnapshot(`
           Object {
             "_tag": "Right",
             "right": "index_already_exists",
           }
         `);
+        });
       });
     });
+
     it('resolves left cluster_shard_limit_exceeded when the action would exceed the maximum normal open shards', async () => {
       // Set the max shards per node really low so that any new index that's created would exceed the maximum open shards for this cluster
       await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: 1 } } });
