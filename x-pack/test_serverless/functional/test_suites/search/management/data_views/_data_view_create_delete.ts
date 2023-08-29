@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -18,16 +17,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
-  const es = getService('es');
 
   describe('creating and deleting default data view', function describeIndexTests() {
     before(async function () {
       // TODO: emptyKibanaIndex fails in Serverless with
-      // "index_not_found_exception: no such index [.kibana_ingest]"
-      if (!(await es.indices.exists({ index: INGEST_SAVED_OBJECT_INDEX }))) {
-        await es.indices.create({ index: INGEST_SAVED_OBJECT_INDEX });
-      }
-      await esArchiver.emptyKibanaIndex();
+      // "index_not_found_exception: no such index [.kibana_ingest]",
+      // so it was switched to `savedObjects.cleanStandardList()`
+      await kibanaServer.savedObjects.cleanStandardList();
       // TODO: Loading this from `es_archives` in `test_serverless`
       // instead since minor modifications were required
       await esArchiver.loadIfNeeded(

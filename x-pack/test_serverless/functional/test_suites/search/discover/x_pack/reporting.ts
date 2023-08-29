@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { Key } from 'selenium-webdriver';
 import moment from 'moment';
-import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -55,11 +54,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Check Available', () => {
       before(async () => {
         // TODO: emptyKibanaIndex fails in Serverless with
-        // "index_not_found_exception: no such index [.kibana_ingest]"
-        if (!(await es.indices.exists({ index: INGEST_SAVED_OBJECT_INDEX }))) {
-          await es.indices.create({ index: INGEST_SAVED_OBJECT_INDEX });
-        }
-        await esArchiver.emptyKibanaIndex();
+        // "index_not_found_exception: no such index [.kibana_ingest]",
+        // so it was switched to `savedObjects.cleanStandardList()`
+        await kibanaServer.savedObjects.cleanStandardList();
         await reportingAPI.initEcommerce();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
@@ -68,11 +65,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await reportingAPI.teardownEcommerce();
         // TODO: emptyKibanaIndex fails in Serverless with
-        // "index_not_found_exception: no such index [.kibana_ingest]"
-        if (!(await es.indices.exists({ index: INGEST_SAVED_OBJECT_INDEX }))) {
-          await es.indices.create({ index: INGEST_SAVED_OBJECT_INDEX });
-        }
-        await esArchiver.emptyKibanaIndex();
+        // "index_not_found_exception: no such index [.kibana_ingest]",
+        // so it was switched to `savedObjects.cleanStandardList()`
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('is available if new', async () => {
@@ -95,11 +90,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await reportingAPI.teardownEcommerce();
         // TODO: emptyKibanaIndex fails in Serverless with
-        // "index_not_found_exception: no such index [.kibana_ingest]"
-        if (!(await es.indices.exists({ index: INGEST_SAVED_OBJECT_INDEX }))) {
-          await es.indices.create({ index: INGEST_SAVED_OBJECT_INDEX });
-        }
-        await esArchiver.emptyKibanaIndex();
+        // "index_not_found_exception: no such index [.kibana_ingest]",
+        // so it was switched to `savedObjects.cleanStandardList()`
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       beforeEach(async () => {
