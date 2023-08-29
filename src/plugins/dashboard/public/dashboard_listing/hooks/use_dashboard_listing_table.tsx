@@ -70,6 +70,7 @@ export const useDashboardListingTable = ({
   initialFilter,
   urlStateEnabled,
   useSessionStorageIntegration,
+  showCreateDashboardButton = true,
 }: {
   dashboardListingId?: string;
   disableCreateDashboardButton?: boolean;
@@ -79,6 +80,7 @@ export const useDashboardListingTable = ({
   initialFilter?: string;
   urlStateEnabled?: boolean;
   useSessionStorageIntegration?: boolean;
+  showCreateDashboardButton?: boolean;
 }): UseDashboardListingTableReturnType => {
   const {
     dashboardSessionStorage,
@@ -274,7 +276,7 @@ export const useDashboardListingTable = ({
         onSave: updateItemMeta,
         customValidators: contentEditorValidators,
       },
-      createItem: !showWriteControls ? undefined : createItem,
+      createItem: !showWriteControls || !showCreateDashboardButton ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
       editItem: !showWriteControls ? undefined : editItem,
       emptyPrompt,
@@ -308,6 +310,7 @@ export const useDashboardListingTable = ({
       initialPageSize,
       listingLimit,
       onFetchSuccess,
+      showCreateDashboardButton,
       showWriteControls,
       title,
       updateItemMeta,

@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
+import { getSourcererScopeId } from '../../../helpers';
 import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
@@ -41,6 +42,10 @@ export interface HighlightedFieldsTableRow {
      * Highlighted field value
      */
     values: string[] | null | undefined;
+    /**
+     * Maintain backwards compatibility // TODO remove when possible
+     */
+    scopeId: string;
   };
 }
 
@@ -54,15 +59,21 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
     field: 'description',
     name: HIGHLIGHTED_FIELDS_VALUE_COLUMN,
     'data-test-subj': 'valueCell',
-    render: (description: { field: string; values: string[] | null | undefined }) => (
+    render: (description: {
+      field: string;
+      values: string[] | null | undefined;
+      scopeId: string;
+    }) => (
       <SecurityCellActions
         data={{
           field: description.field,
           value: description.values,
         }}
         mode={CellActionsMode.HOVER_RIGHT}
-        triggerId={SecurityCellActionsTrigger.DEFAULT}
-        visibleCellActions={6}
+        triggerId={SecurityCellActionsTrigger.DEFAULT} // TODO use SecurityCellActionsTrigger.DETAILS_FLYOUT when https://github.com/elastic/kibana/issues/155243 is fixed
+        visibleCellActions={5} // TODO use 6 when https://github.com/elastic/kibana/issues/155243 is fixed
+        sourcererScopeId={getSourcererScopeId(description.scopeId)}
+        metadata={{ scopeId: description.scopeId }}
       >
         <HighlightedFieldsCell values={description.values} field={description.field} />
       </SecurityCellActions>
@@ -74,7 +85,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
  * Component that displays the highlighted fields in the right panel under the Investigation section.
  */
 export const HighlightedFields: FC = () => {
-  const { dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, scopeId } = useRightPanelContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
@@ -83,8 +94,8 @@ export const HighlightedFields: FC = () => {
     investigationFields: maybeRule?.investigation_fields ?? [],
   });
   const items = useMemo(
-    () => convertHighlightedFieldsToTableRow(highlightedFields),
-    [highlightedFields]
+    () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId),
+    [highlightedFields, scopeId]
   );
 
   if (!dataFormattedForFieldBrowser || items.length === 0) {

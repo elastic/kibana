@@ -21,7 +21,12 @@ interface IngestDataProps {
   codeSnippet: string;
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
-  docLinks: any;
+  docLinks: {
+    beats: string;
+    connectors: string;
+    integrations: string;
+    logStash: string;
+  };
   assetBasePath: string;
   application?: ApplicationStart;
   sharePlugin: SharePluginStart;
