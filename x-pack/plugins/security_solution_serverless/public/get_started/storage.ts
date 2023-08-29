@@ -7,11 +7,18 @@
 
 import type { ProductLine } from '../../common/product';
 import type { CardId, StepId } from './types';
+import { GetSetUpCardId } from './types';
 import { storage } from '../common/lib/storage';
 
 export const ACTIVE_PRODUCTS_STORAGE_KEY = 'ACTIVE_PRODUCTS';
 export const FINISHED_STEPS_STORAGE_KEY = 'FINISHED_STEPS';
 export const EXPANDED_CARDS_STORAGE_KEY = 'EXPANDED_CARDS';
+
+const defaultExpandedCards = {
+  [GetSetUpCardId.configure]: { isExpanded: true, expandedSteps: [] },
+  [GetSetUpCardId.introduction]: { isExpanded: true, expandedSteps: [] },
+  [GetSetUpCardId.explore]: { isExpanded: true, expandedSteps: [] },
+};
 
 export const getStartedStorage = {
   getActiveProductsFromStorage: () => {
@@ -56,10 +63,17 @@ export const getStartedStorage = {
     }
     storage.set(FINISHED_STEPS_STORAGE_KEY, { ...finishedSteps, [cardId]: steps });
   },
-  getAllExpandedCardStepsFromStorage: () => storage.get(EXPANDED_CARDS_STORAGE_KEY) ?? {},
+  getAllExpandedCardStepsFromStorage: () => {
+    const storageData = storage.get(EXPANDED_CARDS_STORAGE_KEY);
+    debugger;
+    const temp =
+      !storageData || Object.keys(storageData).length === 0 ? defaultExpandedCards : storageData;
+    debugger;
+    return temp;
+  },
   addExpandedCardStepToStorage: (cardId: CardId, stepId?: StepId) => {
     const activeCards: Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }> =
-      storage.get(EXPANDED_CARDS_STORAGE_KEY) ?? {};
+      getStartedStorage.getAllExpandedCardStepsFromStorage();
     const card = activeCards[cardId]
       ? { ...activeCards[cardId], isExpanded: true }
       : {

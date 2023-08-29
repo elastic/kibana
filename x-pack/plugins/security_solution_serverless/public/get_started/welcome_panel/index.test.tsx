@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
-import { WelcomePanel } from './welcome_panel';
+import { WelcomePanel } from '.';
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
