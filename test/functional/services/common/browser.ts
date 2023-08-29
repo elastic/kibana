@@ -8,7 +8,7 @@
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { cloneDeepWith, isString } from 'lodash';
-import { Key, Origin, WebDriver } from 'selenium-webdriver';
+import { Key, Origin, WebDriver, logging } from 'selenium-webdriver';
 import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
 import { modifyUrl } from '@kbn/std';
 
@@ -725,6 +725,10 @@ class BrowserService extends FtrService {
       this.log.error(message);
       throw new Error(message);
     }
+  }
+
+  public async getBrowserLogs() {
+    return this.driver.manage().logs().get(logging.Type.BROWSER);
   }
 }
 
