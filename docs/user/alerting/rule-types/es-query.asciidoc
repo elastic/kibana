@@ -1,7 +1,7 @@
 [[rule-type-es-query]]
 == {es} query
 
-:frontmatter-description: An {es} query rule generates alerts when your query meets a threshold.
+:frontmatter-description: Create an {es} query rule, which generates alerts when your query meets a threshold.
 :frontmatter-tags-products: [kibana,alerting]
 :frontmatter-tags-content-type: [overview]
 :frontmatter-tags-user-goals: [analyze]
@@ -13,8 +13,8 @@ threshold condition is met.
 [float]
 === Create the rule
 
-Fill in the name and optional tags, then select 
-*{es} query*. {es} query rule can be defined using KQL/Lucene or Query DSL.
+In *{stack-manage-app}* > *{rules-ui}*, click *Create rule*, fill in the name and optional tags, then select *{es} query*.
+An {es} query rule can be defined using KQL/Lucene or Query DSL.
 
 [float]
 === Define the conditions
