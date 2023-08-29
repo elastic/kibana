@@ -175,10 +175,39 @@ describe('Add Integration - Real API', () => {
     cy.getBySel(getIntegrationCategories('aws')).click({ scrollBehavior: false });
 
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).contains('AWS').should('exist');
-    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length.greaterThan', 29);
+
+    // Infinite scroll
+    function getAllIntegrations() {
+      const cardItems = new Set<string>();
+      return cy
+        .window()
+        .then(() => {
+          for (let i = 0; i < 10; i++) {
+            cy.scrollTo(0, i * 300);
+            cy.wait(50);
+            cy.getBySel(INTEGRATION_LIST)
+              .find('.euiCard')
+              .each((element) => {
+                const attrValue = element.attr('data-test-subj');
+                if (attrValue) {
+                  cardItems.add(attrValue);
+                }
+              });
+          }
+        })
+        .then(() => {
+          return [...cardItems.values()];
+        });
+    }
+
+    getAllIntegrations().then((items) => {
+      expect(items).to.have.length.greaterThan(29);
+    });
 
     cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Cloud');
-    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length.greaterThan', 3);
+    getAllIntegrations().then((items) => {
+      expect(items).to.have.length.greaterThan(3);
+    });
     cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
   });
