@@ -96,7 +96,6 @@ export function ShardFailureDescription(props: ShardFailure) {
       <EuiFlexItem grow={false}>
         <EuiDescriptionList
           type="responsiveColumn"
-          rowGutterSize="s"
           listItems={items}
           compressed
           className="shardFailureModal__desc"

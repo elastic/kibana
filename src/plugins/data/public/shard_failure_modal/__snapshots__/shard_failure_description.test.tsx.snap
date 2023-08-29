@@ -17,7 +17,6 @@ exports[`ShardFailureDescription renders matching snapshot given valid propertie
           "className": "shardFailureModal__descValue",
         }
       }
-      gutterSize="s"
       listItems={
         Array [
           Object {
@@ -84,7 +83,6 @@ exports[`ShardFailureDescription should show more details when button is pressed
           "className": "shardFailureModal__descValue",
         }
       }
-      gutterSize="s"
       listItems={
         Array [
           Object {

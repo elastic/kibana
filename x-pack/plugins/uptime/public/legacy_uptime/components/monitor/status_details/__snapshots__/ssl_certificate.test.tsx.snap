@@ -8,7 +8,7 @@ Array [
 }
 
 <dt
-    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-m-normal"
+    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal-s"
   >
     TLS Certificate
   </dt>,
@@ -63,7 +63,7 @@ Array [
 }
 
 <dt
-    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-m-normal"
+    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal-s"
   >
     TLS Certificate
   </dt>,
