@@ -83,6 +83,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         search: {
           from: nodeDetailFrom,
           to: currentTime,
+          assetName: node.name,
         },
       }),
     });
