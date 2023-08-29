@@ -23,11 +23,13 @@ import {
   readDirectory,
   createParseArchiveStreams,
   createCreateIndexStream,
-  createIndexDocRecordsStreamSvrLess,
+  createIndexDocRecordsStream,
+  // createIndexDocRecordsStreamSvrLess
   migrateSavedObjectIndices,
+  Progress,
   createDefaultSpace,
 } from '../lib';
-import { atLeastOne, freshenUp, hasDotKibanaPrefix } from './load_utils';
+import { atLeastOne, freshenUp, hasDotKibanaPrefix, indexingOccurred } from './load_utils';
 
 // pipe a series of streams into each other so that data and errors
 // flow from the first stream to the last. Errors from the last stream
@@ -56,22 +58,23 @@ export async function loadAction({
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
+  const progress = new Progress();
+  progress.activate(log);
 
   await createPromiseFromStreams([
+    // This used to be  const recordStream = concatStreamProviders()...
     bothFiles$(inputDir, prioritizeMappings(await readDirectory(inputDir))),
     createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
-    createIndexDocRecordsStreamSvrLess(client, stats, useCreate),
+    createIndexDocRecordsStream(client, stats, progress, useCreate),
+    // createIndexDocRecordsStreamSvrLess(client, stats, useCreate),
   ]);
 
+  progress.deactivate();
   const result = stats.toJSON();
 
   const indicesWithDocs: string[] = [];
-  for (const [index, { docs }] of Object.entries(result)) {
-    if (docs && docs.indexed > 0) {
-      log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
-      indicesWithDocs.push(index);
-    }
-  }
+  for (const [index, { docs }] of Object.entries(result))
+    if (indexingOccurred(docs)) indicesWithDocs.push(index);
 
   await freshenUp(client, indicesWithDocs);
 
