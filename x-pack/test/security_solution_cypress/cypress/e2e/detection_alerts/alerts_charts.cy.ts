@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import { getNewRule } from '../../objects/rule';
 import { ALERTS_COUNT } from '../../screens/alerts';
 import {
@@ -26,7 +24,7 @@ import {
 } from '../../screens/search_bar';
 import { TOASTER } from '../../screens/alerts_detection_rules';
 
-describe('Histogram legend hover actions', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Histogram legend hover actions', { tags: ['@ess', '@serverless'] }, () => {
   const ruleConfigs = getNewRule();
 
   before(() => {

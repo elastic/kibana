@@ -144,6 +144,7 @@ export const DashboardsLandingPage = () => {
             goToDashboard={goToDashboard}
             initialFilter={initialFilter}
             urlStateEnabled={false}
+            showCreateDashboardButton={false}
           />
         </>
       )}

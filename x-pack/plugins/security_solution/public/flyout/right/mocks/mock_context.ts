@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ALERT_REASON, ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import {
+  ALERT_REASON,
+  ALERT_RISK_SCORE,
+  ALERT_SEVERITY,
+  ALERT_SUPPRESSION_DOCS_COUNT,
+} from '@kbn/rule-data-utils';
 
 /**
  * Returns mocked data for field (mock this method: x-pack/plugins/security_solution/public/common/hooks/use_get_fields_data.ts)
@@ -24,6 +29,8 @@ export const mockGetFieldsData = (field: string): string[] => {
       return ['user1'];
     case ALERT_REASON:
       return ['reason'];
+    case ALERT_SUPPRESSION_DOCS_COUNT:
+      return ['1'];
     default:
       return [];
   }
