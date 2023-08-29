@@ -7,7 +7,6 @@
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
-import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/common/constants';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';
@@ -16,16 +15,14 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const svlCommonApi = getService('svlCommonApi');
-  const es = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   describe('search', () => {
     before(async () => {
       // TODO: emptyKibanaIndex fails in Serverless with
-      // "index_not_found_exception: no such index [.kibana_ingest]"
-      if (!(await es.indices.exists({ index: INGEST_SAVED_OBJECT_INDEX }))) {
-        await es.indices.create({ index: INGEST_SAVED_OBJECT_INDEX });
-      }
-      await esArchiver.emptyKibanaIndex();
+      // "index_not_found_exception: no such index [.kibana_ingest]",
+      // so it was switched to `savedObjects.cleanStandardList()`
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
 

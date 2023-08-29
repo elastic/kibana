@@ -20,6 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('telemetry API', () => {
     before(async () => {
+      // TODO: Clean `kql-telemetry` before running the tests
+      await kibanaServer.savedObjects.clean({ types: ['kql-telemetry'] });
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );

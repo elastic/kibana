@@ -12,7 +12,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   // differentiate it from the x-pack `search` folder (now `search_xpack`)
   describe('search', () => {
     loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./sql_search'));
+    // TODO: Removed `sql_search` since
+    // SQL is not supported in Serverless
     loadTestFile(require.resolve('./bsearch'));
   });
 }

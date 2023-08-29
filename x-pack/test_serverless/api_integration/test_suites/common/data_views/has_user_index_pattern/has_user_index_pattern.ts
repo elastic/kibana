@@ -11,7 +11,6 @@ import {
   INITIAL_REST_VERSION_INTERNAL,
 } from '@kbn/data-views-plugin/server/constants';
 import expect from '@kbn/expect';
-import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { configArray } from '../constants';
 
@@ -20,17 +19,16 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const svlCommonApi = getService('svlCommonApi');
+  const kibanaServer = getService('kibanaServer');
 
   describe('has user index pattern API', () => {
     configArray.forEach((config) => {
       describe(config.name, () => {
         beforeEach(async () => {
           // TODO: emptyKibanaIndex fails in Serverless with
-          // "index_not_found_exception: no such index [.kibana_ingest]"
-          if (!(await es.indices.exists({ index: INGEST_SAVED_OBJECT_INDEX }))) {
-            await es.indices.create({ index: INGEST_SAVED_OBJECT_INDEX });
-          }
-          await esArchiver.emptyKibanaIndex();
+          // "index_not_found_exception: no such index [.kibana_ingest]",
+          // so it was switched to `savedObjects.cleanStandardList()`
+          await kibanaServer.savedObjects.cleanStandardList();
           if (await es.indices.exists({ index: 'metrics-test' })) {
             await es.indices.delete({ index: 'metrics-test' });
           }
@@ -45,11 +43,9 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return false if no index patterns', async () => {
           // Make sure all saved objects including data views are cleared
           // TODO: emptyKibanaIndex fails in Serverless with
-          // "index_not_found_exception: no such index [.kibana_ingest]"
-          if (!(await es.indices.exists({ index: INGEST_SAVED_OBJECT_INDEX }))) {
-            await es.indices.create({ index: INGEST_SAVED_OBJECT_INDEX });
-          }
-          await esArchiver.emptyKibanaIndex();
+          // "index_not_found_exception: no such index [.kibana_ingest]",
+          // so it was switched to `savedObjects.cleanStandardList()`
+          await kibanaServer.savedObjects.cleanStandardList();
           const response = await supertest
             .get(servicePath)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)

@@ -307,7 +307,9 @@ export default function ({ getService }: FtrProviderContext) {
         verifyErrorResponse(resp.body, 400, 'parsing_exception', true);
       });
 
-      it('should return 403 for lack of privledges', async () => {
+      // TODO: Security works differently in Serverless so this test fails,
+      // we'll need to figure out how to test this properly in Serverless
+      it.skip('should return 403 for lack of privledges', async () => {
         const username = 'no_access';
         const password = 't0pS3cr3t';
 
