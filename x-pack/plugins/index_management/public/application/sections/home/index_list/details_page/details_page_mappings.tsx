@@ -139,7 +139,7 @@ export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexN
         `}
       >
         <EuiPanel>
-          <EuiCodeBlock language="json" isCopyable>
+          <EuiCodeBlock language="json" isCopyable data-test-subj="indexDetailsMappingsCodeBlock">
             {JSON.stringify(data, null, 2)}
           </EuiCodeBlock>
         </EuiPanel>
