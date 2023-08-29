@@ -78,9 +78,10 @@ export const usePackageIconType = ({
     setIconType('package');
   }, [paramIcons, cacheKey, toPackageImage, iconList, packageName, iconType, tryApi, version]);
 
-  // Avoid blinking
-  if (CACHED_ICONS.has(cacheKey)) {
-    return CACHED_ICONS.get(cacheKey);
+  if (iconType) {
+    return iconType;
   }
-  return iconType;
+
+  // Avoid blinking
+  return CACHED_ICONS.get(cacheKey);
 };
