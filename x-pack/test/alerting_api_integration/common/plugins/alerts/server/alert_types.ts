@@ -521,8 +521,8 @@ function getPatternFiringAlertType() {
 
 function getPatternFiringAlertsAsDataRuleType() {
   const paramsSchema = schema.object({
-    index: schema.string(),
-    reference: schema.string(),
+    index: schema.maybe(schema.string()),
+    reference: schema.maybe(schema.string()),
     pattern: schema.recordOf(
       schema.string(),
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))

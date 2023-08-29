@@ -58,7 +58,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           false
         ),
       };
-      const ruleParameters = { pattern, index: 'test-index', reference: 'test-ref' };
+      const ruleParameters = { pattern };
       const createdRule = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -187,7 +187,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           new Array(11).fill(false)
         ),
       };
-      const ruleParameters = { pattern, index: 'test-index', reference: 'test-ref' };
+      const ruleParameters = { pattern };
       const createdRule = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -316,7 +316,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           false
         ),
       };
-      const ruleParameters = { pattern, index: 'test-index', reference: 'test-ref' };
+      const ruleParameters = { pattern };
       const createdRule = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
