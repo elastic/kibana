@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/log-explorer-plugin",
   "owner": "@elastic/infra-monitoring-ui",
-  "description": "This plugin exposes and registers Logs+ features.",
+  "description": "This plugin provides a LogExplorer component using the Discover customization framework, offering several affordances specifically designed for log consumption.",
   "plugin": {
     "id": "logExplorer",
     "server": true,
