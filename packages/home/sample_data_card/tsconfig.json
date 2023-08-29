@@ -17,6 +17,7 @@
     "@kbn/i18n",
     "@kbn/home-sample-data-types",
     "@kbn/test-jest-helpers",
+    "@kbn/core-http-common",
   ],
   "exclude": [
     "target/**/*",
