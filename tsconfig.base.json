@@ -674,6 +674,8 @@
       "@kbn/ecs-data-quality-dashboard-plugin/*": ["x-pack/plugins/ecs_data_quality_dashboard/*"],
       "@kbn/elastic-assistant": ["x-pack/packages/kbn-elastic-assistant"],
       "@kbn/elastic-assistant/*": ["x-pack/packages/kbn-elastic-assistant/*"],
+      "@kbn/elastic-assistant-plugin": ["x-pack/plugins/elastic_assistant"],
+      "@kbn/elastic-assistant-plugin/*": ["x-pack/plugins/elastic_assistant/*"],
       "@kbn/elasticsearch-client-plugin": ["test/plugin_functional/plugins/elasticsearch_client_plugin"],
       "@kbn/elasticsearch-client-plugin/*": ["test/plugin_functional/plugins/elasticsearch_client_plugin/*"],
       "@kbn/elasticsearch-client-xpack-plugin": ["x-pack/test/plugin_api_integration/plugins/elasticsearch_client"],
@@ -1646,3 +1648,4 @@
     ]
   }
 }
+
