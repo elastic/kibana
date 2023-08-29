@@ -37,6 +37,10 @@ import {
   getConsoleRequest,
 } from '@kbn/search-api-panels';
 
+
+import { LanguageDefinition } from '@kbn/search-api-panels';
+
+import { PLUGIN_ID } from '../../../../../../../common/constants';
 import { KibanaDeps } from '../../../../../../../common/types';
 
 import { icons } from '../../../../../../assets/client_libraries';
@@ -69,6 +73,7 @@ export const APIGettingStarted = () => {
     indexName,
     url: cloudContext.elasticsearchUrl || DEFAULT_URL,
   };
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/client_libraries/`);
 
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
@@ -99,7 +104,6 @@ export const APIGettingStarted = () => {
               language={language}
               setSelectedLanguage={setSelectedLanguage}
               isSelectedLanguage={selectedLanguage === language}
-              http={http}
               src={icons[language.id]}
             />
           </EuiFlexItem>
@@ -111,8 +115,7 @@ export const APIGettingStarted = () => {
         languages={languageDefinitions}
         language={selectedLanguage}
         setSelectedLanguage={setSelectedLanguage}
-        http={http}
-        pluginId={''}
+        assetBasePath={assetBasePath}
         application={services.application}
         sharePlugin={services.share}
         isPanelLeft={false}
@@ -285,8 +288,7 @@ export const APIGettingStarted = () => {
             consoleRequest={getConsoleRequest('configureClient')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />
@@ -320,8 +322,7 @@ export const APIGettingStarted = () => {
             consoleRequest={getConsoleRequest('testConnection')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />
@@ -349,8 +350,7 @@ export const APIGettingStarted = () => {
             consoleRequest={getConsoleRequest('ingestData')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />
@@ -381,8 +381,7 @@ export const APIGettingStarted = () => {
             consoleRequest={getConsoleRequest('buildSearchQuery')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />
