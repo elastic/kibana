@@ -68,7 +68,7 @@ import {
 import { duplicateSelectedRulesWithExceptions } from '../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../tasks/api_calls/timelines';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { cleanKibana } from '../../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -127,7 +127,7 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
     const expectedNumberOfAlerts = '1 alert';
 
     beforeEach(() => {
-      cy.task('esArchiverResetKibana');
+      cleanKibana();
       cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
       cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
       login();
@@ -427,11 +427,6 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
     });
 
     describe('Generating signals', () => {
-      beforeEach(() => {
-        login();
-        deleteAlertsAndRules();
-      });
-
       it('Creates and enables a new Indicator Match rule', () => {
         const rule = getNewThreatIndicatorRule();
         visitWithoutDateRange(RULE_CREATION);
@@ -541,8 +536,6 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
     describe('Duplicates the indicator rule', () => {
       describe('on rule editing page', () => {
         beforeEach(() => {
-          login();
-          deleteAlertsAndRules();
           createRule(
             getNewThreatIndicatorRule({
               name: 'Indicator rule duplicate test',
