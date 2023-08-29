@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// Error: socket hang up
 describe('Serverless', () => {
   beforeEach(() => {
     cy.loginAsElasticUser();

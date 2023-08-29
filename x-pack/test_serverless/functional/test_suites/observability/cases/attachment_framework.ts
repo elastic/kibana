@@ -19,8 +19,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const find = getService('find');
 
-  // Error: self-signed certificate in certificate chain
-  describe.skip('persistable attachment', () => {
+  describe('persistable attachment', () => {
     describe('lens visualization', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
