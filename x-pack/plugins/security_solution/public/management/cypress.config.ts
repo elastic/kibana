@@ -41,6 +41,10 @@ export default defineCypressConfig({
     KIBANA_PASSWORD: 'changeme',
     ELASTICSEARCH_USERNAME: 'system_indices_superuser',
     ELASTICSEARCH_PASSWORD: 'changeme',
+
+    grepFilterSpecs: true,
+    grepOmitFiltered: true,
+    grepTags: '@ess',
   },
 
   e2e: {
@@ -50,6 +54,9 @@ export default defineCypressConfig({
     specPattern: 'public/management/cypress/e2e/mocked_data/',
     experimentalRunAllSpecs: true,
     setupNodeEvents: (on, config) => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('@cypress/grep/src/plugin')(config);
+
       return dataLoaders(on, config);
     },
   },

@@ -39,6 +39,10 @@ export default defineCypressConfig({
     'cypress-react-selector': {
       root: '#security-solution-app',
     },
+
+    grepFilterSpecs: true,
+    grepOmitFiltered: true,
+    grepTags: '@ess',
   },
 
   e2e: {
@@ -53,6 +57,11 @@ export default defineCypressConfig({
       // Data loaders specific to "real" Endpoint testing
       dataLoadersForRealEndpoints(on, config);
       responseActionTasks(on, config);
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-extraneous-dependencies
+      require('@cypress/grep/src/plugin')(config);
+
+      return config;
     },
   },
 });
