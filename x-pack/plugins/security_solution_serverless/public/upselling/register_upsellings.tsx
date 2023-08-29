@@ -7,34 +7,35 @@
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type {
   MessageUpsellings,
-  UpsellingMessageId,
   PageUpsellings,
   SectionUpsellings,
+  UpsellingMessageId,
   UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import React from 'react';
 import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
-import { AppFeatureKey } from '@kbn/security-solution-features/src/app_features_keys';
+import { AppFeatureKey } from '@kbn/security-solution-features/keys';
+import type { AppFeatureKeyType } from '@kbn/security-solution-features';
 import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 import {
+  EntityAnalyticsUpsellingLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
   ThreatIntelligencePaywallLazy,
-  EntityAnalyticsUpsellingLazy,
 } from './lazy_upselling';
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 
 interface UpsellingsConfig {
-  pli: AppFeatureKey;
+  pli: AppFeatureKeyType;
   component: React.ComponentType;
 }
 
 interface UpsellingsMessageConfig {
-  pli: AppFeatureKey;
+  pli: AppFeatureKeyType;
   message: string;
   id: UpsellingMessageId;
 }

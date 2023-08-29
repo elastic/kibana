@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
-  AppFeatureKey,
+  AppFeatureKeyType,
   AppFeaturesConfig,
   AppSubFeaturesMap,
   BaseKibanaFeatureConfig,
@@ -17,7 +17,7 @@ import { AppFeaturesConfigMerger } from './app_features_config_merger';
 
 export class AppFeatures<T extends string = string, S extends string = string> {
   private featureConfigMerger: AppFeaturesConfigMerger;
-  private appFeatures?: Set<AppFeatureKey>;
+  private appFeatures?: Set<AppFeatureKeyType>;
   private featuresSetup?: FeaturesPluginSetup;
 
   constructor(

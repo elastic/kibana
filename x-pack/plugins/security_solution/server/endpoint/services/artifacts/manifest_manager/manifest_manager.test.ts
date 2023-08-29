@@ -7,11 +7,11 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
+  ENDPOINT_BLOCKLISTS_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_BLOCKLISTS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
@@ -27,10 +27,10 @@ import {
   toArtifactRecords,
 } from '../../../lib/artifacts/mocks';
 import {
-  ManifestConstants,
   getArtifactId,
-  translateToEndpointExceptions,
   Manifest,
+  ManifestConstants,
+  translateToEndpointExceptions,
 } from '../../../lib/artifacts';
 
 import {
@@ -43,7 +43,7 @@ import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { InvalidInternalManifestError } from '../errors';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 import type { Artifact } from '@kbn/fleet-plugin/server';
-import { AppFeatureSecurityKey } from '../../../../../common/types/app_features';
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());

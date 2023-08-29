@@ -14,23 +14,23 @@
 import type { Logger } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { AppFeatureKey } from '@kbn/security-solution-features';
+import type { AppFeatureKeyType } from '@kbn/security-solution-features';
 import {
-  getSecurityFeature,
-  getCasesFeature,
   getAssistantFeature,
+  getCasesFeature,
+  getSecurityFeature,
 } from '@kbn/security-solution-features/app_features';
 import type { ExperimentalFeatures } from '../../../common';
 import { AppFeatures } from './app_features';
 import type { AppFeaturesConfigurator } from './types';
 import { securityDefaultSavedObjects } from './security_saved_objects';
-import { casesUiCapabilities, casesApiTags } from './cases_privileges';
+import { casesApiTags, casesUiCapabilities } from './cases_privileges';
 
 export class AppFeaturesService {
   private securityAppFeatures: AppFeatures;
   private casesAppFeatures: AppFeatures;
   private securityAssistantAppFeatures: AppFeatures;
-  private appFeatures?: Set<AppFeatureKey>;
+  private appFeatures?: Set<AppFeatureKeyType>;
 
   constructor(
     private readonly logger: Logger,
@@ -84,16 +84,16 @@ export class AppFeaturesService {
     const securityAssistantAppFeaturesConfig = configurator.securityAssistant();
     this.securityAssistantAppFeatures.setConfig(securityAssistantAppFeaturesConfig);
 
-    this.appFeatures = new Set<AppFeatureKey>(
+    this.appFeatures = new Set<AppFeatureKeyType>(
       Object.freeze([
         ...securityAppFeaturesConfig.keys(),
         ...casesAppFeaturesConfig.keys(),
         ...securityAssistantAppFeaturesConfig.keys(),
-      ]) as readonly AppFeatureKey[]
+      ]) as readonly AppFeatureKeyType[]
     );
   }
 
-  public isEnabled(appFeatureKey: AppFeatureKey): boolean {
+  public isEnabled(appFeatureKey: AppFeatureKeyType): boolean {
     if (!this.appFeatures) {
       throw new Error('AppFeatures has not yet been configured');
     }

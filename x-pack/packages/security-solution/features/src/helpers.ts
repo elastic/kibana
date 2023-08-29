@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { AppFeatureKey, AppFeatureKeys, AppFeatureKibanaConfig } from './types';
+import type { AppFeatureKeys, AppFeatureKeyType, AppFeatureKibanaConfig } from './types';
 
 /**
  * Creates the AppFeaturesConfig Map from the given appFeatures object and a set of enabled appFeatures keys.
  */
 export const createEnabledAppFeaturesConfigMap = <
-  K extends AppFeatureKey,
+  K extends AppFeatureKeyType,
   T extends string = string
 >(
   appFeatures: Record<K, AppFeatureKibanaConfig<T>>,

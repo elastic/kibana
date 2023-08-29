@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features';
+import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 
 // Just copying all feature keys for now.
 // We may need a different set of keys in the future if we create serverless-specific appFeatures

@@ -9,7 +9,7 @@ import type { PluginSetupContract } from '@kbn/features-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { AppFeatures } from './app_features';
 import type {
-  AppFeatureKey,
+  AppFeatureKeyType,
   AppFeaturesConfig,
   AppSubFeaturesMap,
   BaseKibanaFeatureConfig,
@@ -77,7 +77,7 @@ const privileges = {
 };
 
 const SECURITY_APP_FEATURE_CONFIG: AppFeaturesConfig<string> = new Map();
-SECURITY_APP_FEATURE_CONFIG.set('test-base-feature' as AppFeatureKey, {
+SECURITY_APP_FEATURE_CONFIG.set('test-base-feature' as AppFeatureKeyType, {
   privileges: {
     all: {
       ui: ['test-capability'],
@@ -116,7 +116,7 @@ const CASES_BASE_CONFIG = {
 };
 
 const CASES_APP_FEATURE_CONFIG: AppFeaturesConfig<string> = new Map();
-CASES_APP_FEATURE_CONFIG.set('test-cases-feature' as AppFeatureKey, {
+CASES_APP_FEATURE_CONFIG.set('test-cases-feature' as AppFeatureKeyType, {
   privileges: {
     all: {
       ui: ['test-cases-capability'],
@@ -155,7 +155,7 @@ describe('AppFeatures', () => {
 
     expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
       ...baseKibanaFeature,
-      ...SECURITY_APP_FEATURE_CONFIG.get('test-base-feature' as AppFeatureKey),
+      ...SECURITY_APP_FEATURE_CONFIG.get('test-base-feature' as AppFeatureKeyType),
       ...privileges,
       subFeatures: [{ baz: 'baz' }],
     });
@@ -177,7 +177,7 @@ describe('AppFeatures', () => {
 
     expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
       ...baseKibanaFeature,
-      ...CASES_APP_FEATURE_CONFIG.get('test-cases-feature' as AppFeatureKey),
+      ...CASES_APP_FEATURE_CONFIG.get('test-cases-feature' as AppFeatureKeyType),
       subFeatures: [{ baz: 'baz' }],
       ...CASES_BASE_CONFIG,
     });

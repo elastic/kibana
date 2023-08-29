@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { UpsellingService } from '@kbn/security-solution-plugin/public';
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-plugin/common';
 import {
   registerUpsellings,
   upsellingMessages,
@@ -15,6 +13,8 @@ import {
 } from './register_upsellings';
 import { ProductLine, ProductTier } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
+import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 
 const mockGetProductAppFeatures = jest.fn();
 jest.mock('../../common/pli/pli_features', () => ({

@@ -12,17 +12,17 @@ import type {
 } from '@kbn/features-plugin/common';
 import type { RecursivePartial } from '@kbn/utility-types';
 import type {
-  AppFeatureKey,
-  AppFeatureSecurityKey,
-  AppFeatureCasesKey,
-  SecuritySubFeatureId,
-  CasesSubFeatureId,
-  AssistantSubFeatureId,
   AppFeatureAssistantKey,
+  AppFeatureCasesKey,
+  AppFeatureKeyType,
+  AppFeatureSecurityKey,
+  AssistantSubFeatureId,
+  CasesSubFeatureId,
+  SecuritySubFeatureId,
 } from './app_features_keys';
 
-export { AppFeatureKey };
-export type AppFeatureKeys = AppFeatureKey[];
+export type { AppFeatureKeyType };
+export type AppFeatureKeys = AppFeatureKeyType[];
 
 // Features types
 export type BaseKibanaFeatureConfig = Omit<KibanaFeatureConfig, 'subFeatures'>;
@@ -33,7 +33,7 @@ export type AppFeatureKibanaConfig<T extends string = string> =
     subFeaturesPrivileges?: SubFeaturesPrivileges[];
   };
 export type AppFeaturesConfig<T extends string = string> = Map<
-  AppFeatureKey,
+  AppFeatureKeyType,
   AppFeatureKibanaConfig<T>
 >;
 

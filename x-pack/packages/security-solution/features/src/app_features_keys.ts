@@ -71,7 +71,7 @@ export const AppFeatureKey = {
   ...AppFeatureAssistantKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
-export type AppFeatureKey = AppFeatureSecurityKey | AppFeatureCasesKey | AppFeatureAssistantKey;
+export type AppFeatureKeyType = AppFeatureSecurityKey | AppFeatureCasesKey | AppFeatureAssistantKey;
 
 export const ALL_APP_FEATURE_KEYS = Object.freeze(Object.values(AppFeatureKey));
 
