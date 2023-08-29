@@ -20,7 +20,7 @@ import {
 import type { CustomFieldFormState } from './form';
 import { CustomFieldsForm } from './form';
 
-import * as i18n from '../configure_cases/translations';
+import * as i18n from './translations';
 
 export interface AddFieldFlyoutProps {
   // disabled: boolean;
