@@ -167,6 +167,9 @@ export class SearchSource {
     const { parent, ...currentFields } = fields;
     this.fields = currentFields;
     this.dependencies = dependencies;
+    if (!this.fields.trackTotalHits) {
+      this.fields.trackTotalHits = false;
+    }
 
     if (parent) {
       this.setParent(new SearchSource(parent, dependencies));
@@ -694,7 +697,18 @@ export class SearchSource {
    * @resolved {Object|null} - the flat data of the SearchSource
    */
   private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }): SearchRequest {
-    Object.entries(this.fields).forEach(([key, value]) => {
+    const hasCountAgg = (aggs: unknown) => {
+      if (aggs instanceof AggConfigs) return aggs.hasCountAgg();
+      else {
+        return true;
+      }
+    };
+
+    const fields = { ...this.fields };
+    if (!fields.trackTotalHits && hasCountAgg(fields.aggs)) {
+      fields.trackTotalHits = true;
+    }
+    Object.entries(fields).forEach(([key, value]) => {
       this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });
     if (this.parent) {

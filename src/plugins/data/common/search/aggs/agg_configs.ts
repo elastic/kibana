@@ -114,6 +114,10 @@ export class AggConfigs {
     return { probability: this.opts.probability ?? 1, seed: this.opts.samplerSeed };
   }
 
+  public hasCountAgg() {
+    return !!this.aggs.find((agg) => agg.type.dslName === 'count');
+  }
+
   isSamplingEnabled() {
     return (
       isSamplingEnabled(this.opts.probability) &&
