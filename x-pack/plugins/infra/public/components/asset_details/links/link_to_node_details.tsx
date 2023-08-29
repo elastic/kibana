@@ -10,7 +10,6 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useNodeDetailsRedirect } from '../../../pages/link_to';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
-import type { Asset } from '../types';
 
 export interface LinkToNodeDetailsProps {
   dateRangeTimestamp: { from: number; to: number };

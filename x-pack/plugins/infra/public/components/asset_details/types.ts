@@ -29,20 +29,13 @@ export type TabIds = `${FlyoutTabIds}`;
 
 export interface OverridableTabState {
   metadata?: {
-    query?: string;
     showActionsColumn?: boolean;
-  };
-  processes?: {
-    query?: string;
   };
   anomalies?: {
     onClose?: () => void;
   };
   alertRule?: {
     onCreateRuleClick?: () => void;
-  };
-  logs?: {
-    query?: string;
   };
 }
 
@@ -73,10 +66,8 @@ export interface AssetDetailsProps {
   assetType: InventoryItemType;
   dateRange: TimeRange;
   tabs: Tab[];
-  activeTabId?: TabIds;
   overrides?: OverridableTabState;
   renderMode: RenderMode;
-  onTabsStateChange?: TabsStateChangeFn;
   links?: LinkOptions[];
   // This is temporary. Once we start using the asset details in other plugins,
   // It will have to retrieve the metricAlias internally rather than receive it via props
