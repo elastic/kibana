@@ -514,6 +514,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // FLAKY: https://github.com/elastic/kibana/issues/158612
+        // FLAKY: https://github.com/elastic/kibana/issues/158613
         it.skip('runs the transform and displays it correctly in the job list', async () => {
           await transform.testExecution.logTestStep('creates the transform');
           await transform.wizard.createTransform();
