@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, useState } from 'react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,6 +15,7 @@ import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
+import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
@@ -23,7 +24,10 @@ import { RulesTab } from './rules_tab';
 
 const GlobalLogsTab = lazy(() => import('./global_logs_tab'));
 
-export function RulesPage() {
+interface RulesPageProps {
+  logs?: boolean;
+}
+export function RulesPage({ logs }: RulesPageProps) {
   const {
     http,
     docLinks,
@@ -31,13 +35,12 @@ export function RulesPage() {
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
-  const { path } = useRouteMatch();
+  // const { path } = useRouteMatch();
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
   const [stateRefresh, setRefresh] = useState(new Date());
 
-  const onTabChange = (tabName: 'rules' | 'logs') => {
-    const routePath = tabName === 'rules' ? path : `${path}/logs`;
-    history.push(routePath);
+  const onTabChange = (path: typeof RULES_LOGS_PATH | typeof RULES_PATH) => {
+    history.push(path);
   };
 
   useBreadcrumbs([
@@ -102,13 +105,13 @@ export function RulesPage() {
             id: 'Rules',
             name: 'rules',
             label: 'Rules',
-            onClick: () => onTabChange('rules'),
+            onClick: () => onTabChange(RULES_PATH),
           },
           {
             id: 'Logs',
             name: 'logs',
             label: 'Logs',
-            onClick: () => onTabChange('logs'),
+            onClick: () => onTabChange(RULES_LOGS_PATH),
           },
         ],
       }}
@@ -119,10 +122,10 @@ export function RulesPage() {
         <EuiFlexItem>
           <div>Pam</div>
           <Routes>
-            <Route exact path={`${path}/logs`} component={GlobalLogsTab} />
+            <Route exact path={RULES_LOGS_PATH} component={GlobalLogsTab} />
             <Route
               exact
-              path={path}
+              path={RULES_PATH}
               render={() => <RulesTab setRefresh={setRefresh} stateRefresh={stateRefresh} />}
             />
           </Routes>

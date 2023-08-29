@@ -13,6 +13,7 @@ export const ALERTS_PATH = '/alerts' as const;
 export const ALERT_DETAIL_PATH = '/alerts/:alertId' as const;
 export const EXPLORATORY_VIEW_PATH = '/exploratory-view' as const; // has been moved to its own app. Keeping around for redirecting purposes.
 export const RULES_PATH = '/alerts/rules' as const;
+export const RULES_LOGS_PATH = '/alerts/ruleslogs' as const;
 export const RULE_DETAIL_PATH = '/alerts/rules/:ruleId' as const;
 export const SLOS_PATH = '/slos' as const;
 export const SLOS_WELCOME_PATH = '/slos/welcome' as const;

@@ -28,6 +28,7 @@ import {
   LANDING_PATH,
   OVERVIEW_PATH,
   ROOT_PATH,
+  RULES_LOGS_PATH,
   RULES_PATH,
   RULE_DETAIL_PATH,
   SLOS_PATH,
@@ -106,7 +107,14 @@ export const routes = {
       return <RulesPage />;
     },
     params: {},
-    exact: false,
+    exact: true,
+  },
+  [RULES_LOGS_PATH]: {
+    handler: () => {
+      return <RulesPage logs />;
+    },
+    params: {},
+    exact: true,
   },
   [RULE_DETAIL_PATH]: {
     handler: () => {
