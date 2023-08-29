@@ -8,13 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFormRow,
-  EuiPanel,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataViewSelect } from './data_view_select';
@@ -23,16 +17,15 @@ import { SingleFieldSelect } from './single_field_select';
 export const BOUNDARY_GEO_FIELD_TYPES = ['geo_shape'];
 
 function getGeoFields(fields: DataViewField[]) {
-  return fields.filter((field: DataViewField) =>
-    BOUNDARY_GEO_FIELD_TYPES.includes(field.type)
-  );
+  return fields.filter((field: DataViewField) => BOUNDARY_GEO_FIELD_TYPES.includes(field.type));
 }
 
 function getNameFields(fields: DataViewField[]) {
-  return fields.filter((field: DataViewField) =>
-    ['string', 'number', 'ip'].includes(field.type) &&
-    !field.name.startsWith('_') &&
-    !field.name.endsWith('keyword')
+  return fields.filter(
+    (field: DataViewField) =>
+      ['string', 'number', 'ip'].includes(field.type) &&
+      !field.name.startsWith('_') &&
+      !field.name.endsWith('keyword')
   );
 }
 
@@ -61,12 +54,13 @@ export const BoundaryForm = (props: Props) => {
     let ignore = false;
     setIsLoading(true);
     setDataViewNotFound(false);
-    props.data.indexPatterns.get(props.ruleParams.boundaryIndexId)
+    props.data.indexPatterns
+      .get(props.ruleParams.boundaryIndexId)
       .then((dataView) => {
         if (!ignore) {
           setDataView(dataView);
           setGeoFields(getGeoFields(dataView.fields));
-          setNameFields(getNameFields(dataView.fields))
+          setNameFields(getNameFields(dataView.fields));
           setIsLoading(false);
         }
       })
@@ -118,14 +112,12 @@ export const BoundaryForm = (props: Props) => {
           />
         </EuiFormRow>
 
-        {props.ruleParams.boundaryIndexId && 
+        {props.ruleParams.boundaryIndexId && (
           <>
             <EuiFormRow
-              label={
-                i18n.translate('xpack.stackAlerts.geoContainment.geofieldLabel', {
-                  defaultMessage: 'Location',
-                })
-              }
+              label={i18n.translate('xpack.stackAlerts.geoContainment.geofieldLabel', {
+                defaultMessage: 'Location',
+              })}
             >
               <SingleFieldSelect
                 placeholder={i18n.translate('xpack.stackAlerts.geoContainment.selectGeoLabel', {
@@ -160,8 +152,8 @@ export const BoundaryForm = (props: Props) => {
               />
             </EuiFormRow>
           </>
-        }
+        )}
       </EuiSkeletonText>
     </EuiPanel>
   );
-}
+};

@@ -13,11 +13,8 @@ import { EntityForm } from './entity_form';
 export const GeoContainmentRuleTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
 > = (props) => {
-
   function getValidationError(key: string) {
-    return props.errors[key]?.length > 0 && key in props.ruleParams
-      ? props.errors[key][0]
-      : null;
+    return props.errors[key]?.length > 0 && key in props.ruleParams ? props.errors[key][0] : null;
   }
 
   return (
@@ -42,7 +39,7 @@ export const GeoContainmentRuleTypeExpression: React.FunctionComponent<
         setDataViewId={(id: string) => {
           props.setRuleParams('boundaryIndexId', id);
           // TODO remove unused param 'boundaryType'
-          props.setRuleParams('boundaryType', 'entireIndex')
+          props.setRuleParams('boundaryType', 'entireIndex');
         }}
         setDataViewTitle={(title: string) => props.setRuleParams('boundaryIndexTitle', title)}
         setGeoField={(fieldName: string) => props.setRuleParams('boundaryGeoField', fieldName)}
@@ -53,4 +50,4 @@ export const GeoContainmentRuleTypeExpression: React.FunctionComponent<
       <EuiSpacer size="l" />
     </>
   );
-}
+};

@@ -8,13 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFormRow,
-  EuiPanel,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataViewSelect } from './data_view_select';
@@ -27,14 +21,16 @@ function getDateFields(fields: DataViewField[]) {
 }
 
 function getEntityFields(fields: DataViewField[]) {
-  return fields.filter((field: DataViewField) => 
-    field.aggregatable && ['string', 'number', 'ip'].includes(field.type) && !field.name.startsWith('_'));
+  return fields.filter(
+    (field: DataViewField) =>
+      field.aggregatable &&
+      ['string', 'number', 'ip'].includes(field.type) &&
+      !field.name.startsWith('_')
+  );
 }
 
 function getGeoFields(fields: DataViewField[]) {
-  return fields.filter((field: DataViewField) =>
-    ENTITY_GEO_FIELD_TYPES.includes(field.type)
-  );
+  return fields.filter((field: DataViewField) => ENTITY_GEO_FIELD_TYPES.includes(field.type));
 }
 
 interface Props {
@@ -65,7 +61,8 @@ export const EntityForm = (props: Props) => {
     let ignore = false;
     setIsLoading(true);
     setDataViewNotFound(false);
-    props.data.indexPatterns.get(props.ruleParams.indexId)
+    props.data.indexPatterns
+      .get(props.ruleParams.indexId)
       .then((dataView) => {
         if (!ignore) {
           setDataView(dataView);
@@ -95,8 +92,7 @@ export const EntityForm = (props: Props) => {
 
     if (dataView && dateFields.length === 0) {
       return i18n.translate('xpack.stackAlerts.geoContainment.noDateFieldInIndexPattern.message', {
-        defaultMessage:
-          'Data view does not contain date fields.',
+        defaultMessage: 'Data view does not contain date fields.',
       });
     }
 
@@ -153,7 +149,7 @@ export const EntityForm = (props: Props) => {
             onChange={(dataView: DataView) => {
               props.setDataViewId(dataView.id);
               props.setDataViewTitle(dataView.title);
-              
+
               const dateFields = getDateFields(dataView.fields);
               if (dateFields.length) {
                 props.setDateField(dateFields[0].name);
@@ -178,16 +174,14 @@ export const EntityForm = (props: Props) => {
           />
         </EuiFormRow>
 
-        {props.ruleParams.indexId && 
+        {props.ruleParams.indexId && (
           <>
             <EuiFormRow
               error={dateFieldError}
               isInvalid={Boolean(dateFieldError)}
-              label={
-                i18n.translate('xpack.stackAlerts.geoContainment.timeFieldLabel', {
-                  defaultMessage: 'Time',
-                })
-              }
+              label={i18n.translate('xpack.stackAlerts.geoContainment.timeFieldLabel', {
+                defaultMessage: 'Time',
+              })}
             >
               <SingleFieldSelect
                 isInvalid={Boolean(dateFieldError)}
@@ -251,8 +245,8 @@ export const EntityForm = (props: Props) => {
               />
             </EuiFormRow>
           </>
-        }
+        )}
       </EuiSkeletonText>
     </EuiPanel>
   );
-}
+};

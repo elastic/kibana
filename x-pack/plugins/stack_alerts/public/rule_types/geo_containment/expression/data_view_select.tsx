@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -22,7 +22,7 @@ interface Props {
 export const DataViewSelect = (props: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const isMounted = useMountedState();
-  
+
   return (
     <props.unifiedSearch.ui.IndexPatternSelect
       isClearable={false}
@@ -49,12 +49,9 @@ export const DataViewSelect = (props: Props) => {
           }
         }
       }}
-      placeholder={i18n.translate(
-        'xpack.stackAlerts.geoContainment.dataViewSelectPlaceholder',
-        {
-          defaultMessage: 'Select data view',
-        }
-      )}
+      placeholder={i18n.translate('xpack.stackAlerts.geoContainment.dataViewSelectPlaceholder', {
+        defaultMessage: 'Select data view',
+      })}
     />
   );
-}
+};
