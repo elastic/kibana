@@ -107,6 +107,7 @@ export class ObservabilityAIAssistantPlugin
         service,
         signal,
         pluginsStart,
+        coreStart,
         registerContext,
         registerFunction,
       });
