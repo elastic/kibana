@@ -7,7 +7,6 @@ steps:
       message: Triggered by pipeline.tests.qa.yaml
       branch: $BUILDKITE_BRANCH
       commit: $BUILDKITE_COMMIT
-      name: Serverless tests
 
   - label: ":pipeline::weight_lifter::seedling: Trigger RAC Alert Load tests for ${ENVIRONMENT}"
     trigger: appex-qa-rac-alert-load
@@ -17,7 +16,6 @@ steps:
       message: Triggered by pipeline.tests.qa.yaml
       branch: $BUILDKITE_BRANCH
       commit: $BUILDKITE_COMMIT
-      name: RAC Alert load tests
 
   - wait: ~
 
