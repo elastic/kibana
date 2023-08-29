@@ -6,9 +6,12 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { dataLoaders } from './cypress/support/data_loaders';
 
+import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
+
+import { responseActionTasks } from './support/response_actions';
+
+// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   reporter: '../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
@@ -33,14 +36,9 @@ export default defineCypressConfig({
   experimentalStudio: true,
 
   env: {
-    KIBANA_URL: 'http://localhost:5601',
-    ELASTICSEARCH_URL: 'http://localhost:9200',
-    FLEET_SERVER_URL: 'https://localhost:8220',
-    // Username/password used for both elastic and kibana
-    KIBANA_USERNAME: 'elastic',
-    KIBANA_PASSWORD: 'changeme',
-    ELASTICSEARCH_USERNAME: 'system_indices_superuser',
-    ELASTICSEARCH_PASSWORD: 'changeme',
+    'cypress-react-selector': {
+      root: '#security-solution-app',
+    },
 
     grepFilterSpecs: true,
     grepOmitFiltered: true,
@@ -48,16 +46,22 @@ export default defineCypressConfig({
   },
 
   e2e: {
-    // baseUrl: To override, set Env. variable `CYPRESS_BASE_URL`
-    baseUrl: 'http://localhost:5601',
+    experimentalMemoryManagement: true,
+    experimentalInteractiveRunEvents: true,
+    baseUrl: 'http://localhost:5620',
     supportFile: 'public/management/cypress/support/e2e.ts',
-    specPattern: 'public/management/cypress/e2e/mocked_data/',
+    specPattern: 'public/management/cypress/e2e/endpoint/*.cy.{js,jsx,ts,tsx}',
     experimentalRunAllSpecs: true,
-    setupNodeEvents: (on, config) => {
+    setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+      dataLoaders(on, config);
+      // Data loaders specific to "real" Endpoint testing
+      dataLoadersForRealEndpoints(on, config);
+      responseActionTasks(on, config);
+
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
 
-      return dataLoaders(on, config);
+      return config;
     },
   },
 });
