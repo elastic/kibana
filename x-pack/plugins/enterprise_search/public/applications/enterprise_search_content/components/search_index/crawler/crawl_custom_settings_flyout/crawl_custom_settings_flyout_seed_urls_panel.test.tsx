@@ -71,14 +71,14 @@ describe('CrawlCustomSettingsFlyoutSeedUrlsPanel', () => {
           selectedDomainUrls: MOCK_VALUES.selectedDomainUrls,
           selectedEntryPointUrls: MOCK_VALUES.selectedEntryPointUrls,
           selectedSitemapUrls: MOCK_VALUES.selectedSitemapUrls,
+          entryPointUrls: MOCK_VALUES.entryPointUrls,
+          sitemapUrls: MOCK_VALUES.sitemapUrls,
         }}
         onSelectCustomEntryPointUrls={MOCK_ACTIONS.onSelectCustomEntryPointUrls}
         onSelectCustomSitemapUrls={MOCK_ACTIONS.onSelectCustomSitemapUrls}
         onSelectEntryPointUrls={MOCK_ACTIONS.onSelectEntryPointUrls}
         onSelectSitemapUrls={MOCK_ACTIONS.onSelectSitemapUrls}
         toggleIncludeSitemapsInRobotsTxt={MOCK_ACTIONS.toggleIncludeSitemapsInRobotsTxt}
-        entryPointUrls={MOCK_VALUES.entryPointUrls}
-        sitemapUrls={MOCK_VALUES.sitemapUrls}
       />
     );
   });

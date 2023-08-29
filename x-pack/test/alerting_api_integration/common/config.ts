@@ -334,6 +334,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             : []),
           '--notifications.connectors.default.email=notification-email',
           '--xpack.task_manager.allow_reading_invalid_state=false',
+          '--xpack.task_manager.requeue_invalid_tasks.enabled=true',
         ],
       },
     };

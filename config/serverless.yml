@@ -13,6 +13,10 @@ xpack.cloud.base_url: "https://cloud.elastic.co"
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
 
+# Limit batch size to reduce possibility of failures.
+# A longer migration time is acceptable due to the ZDT algorithm.
+migrations.batchSize: 250
+
 # temporarily allow to run the migration on UI nodes
 # until the controller is able to spawn the migrator job/pod
 migrations.zdt:
@@ -37,6 +41,8 @@ xpack.license_management.enabled: false
 xpack.index_management.enableIndexActions: false
 # Disable legacy index templates from Index Management UI
 xpack.index_management.enableLegacyTemplates: false
+# Disable index stats information from Index Management UI
+xpack.index_management.enableIndexStats: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
@@ -47,6 +53,9 @@ xpack.canvas.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
+
+# Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
+xpack.security.showInsecureClusterWarning: false
 
 # Disable UI of security management plugins
 xpack.security.ui.userManagementEnabled: false
@@ -81,6 +90,9 @@ console.autocompleteDefinitions.endpointsAvailability: serverless
 # Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
 elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]
 
+# Limit maxSockets to 800 as we do in ESS, which improves reliability under high loads.
+elasticsearch.maxSockets: 800
+
 # Visualizations editors readonly settings
 vis_type_gauge.readOnly: true
 vis_type_heatmap.readOnly: true
@@ -109,3 +121,6 @@ xpack.actions.run.maxAttempts: 10
 
 # Task Manager
 xpack.task_manager.allow_reading_invalid_state: false
+
+## TaskManager requeue invalid tasks, supports ZDT
+xpack.task_manager.requeue_invalid_tasks.enabled: true

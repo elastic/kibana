@@ -13,15 +13,26 @@ import type { LeftPanelPaths } from '.';
 import { tabs } from './tabs';
 
 export interface PanelHeaderProps {
+  /**
+   * Id of the tab selected in the parent component to display its content
+   */
   selectedTabId: LeftPanelPaths;
+  /**
+   * Callback to set the selected tab id in the parent component
+   * @param selected
+   */
   setSelectedTabId: (selected: LeftPanelPaths) => void;
-  handleOnEventClosed?: () => void;
 }
 
-export const PanelHeader: VFC<PanelHeaderProps> = memo(
-  ({ selectedTabId, setSelectedTabId, handleOnEventClosed }) => {
-    const onSelectedTabChanged = (id: LeftPanelPaths) => setSelectedTabId(id);
-    const renderTabs = tabs.map((tab, index) => (
+/**
+ * Header at the top of the left section.
+ * Displays the investigation and insights tabs (visualize is hidden for 8.9).
+ */
+export const PanelHeader: VFC<PanelHeaderProps> = memo(({ selectedTabId, setSelectedTabId }) => {
+  const onSelectedTabChanged = (id: LeftPanelPaths) => setSelectedTabId(id);
+  const renderTabs = tabs
+    .filter((tab) => tab.visible)
+    .map((tab, index) => (
       <EuiTab
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
@@ -32,20 +43,19 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(
       </EuiTab>
     ));
 
-    return (
-      <EuiFlyoutHeader hasBorder>
-        <EuiTabs
-          size="l"
-          expand
-          css={css`
-            margin-bottom: -25px;
-          `}
-        >
-          {renderTabs}
-        </EuiTabs>
-      </EuiFlyoutHeader>
-    );
-  }
-);
+  return (
+    <EuiFlyoutHeader hasBorder>
+      <EuiTabs
+        size="l"
+        expand
+        css={css`
+          margin-bottom: -25px;
+        `}
+      >
+        {renderTabs}
+      </EuiTabs>
+    </EuiFlyoutHeader>
+  );
+});
 
 PanelHeader.displayName = 'PanelHeader';
