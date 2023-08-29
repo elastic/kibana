@@ -68,7 +68,7 @@ import {
 import { duplicateSelectedRulesWithExceptions } from '../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -126,19 +126,11 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
     const expectedNumberOfRules = 1;
     const expectedNumberOfAlerts = '1 alert';
 
-    before(() => {
-      cleanKibana();
+    beforeEach(() => {
+      cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
       cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
-    });
-
-    beforeEach(() => {
       login();
-    });
-
-    after(() => {
-      cy.task('esArchiverUnload', 'threat_indicator');
-      cy.task('esArchiverUnload', 'suspicious_source_event');
     });
 
     describe('Creating new indicator match rules', () => {
