@@ -382,7 +382,7 @@ export interface RegistryDataStreamRoutingRules {
   source_dataset: string;
   rules: Array<{
     target_dataset: string;
-    if?: string;
+    if: string;
     namespace?: string;
   }>;
 }
