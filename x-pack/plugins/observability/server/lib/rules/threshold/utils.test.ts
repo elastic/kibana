@@ -87,30 +87,30 @@ describe('getFormattedGroupBy', () => {
         ])
       )
     ).toEqual({
-      'host-0,00-00-5E-00-53-23,event-0,container-name': [
-        { field: 'host.name', value: 'host-0' },
-        { field: 'host.mac', value: '00-00-5E-00-53-23' },
-        { field: 'tags', value: 'event-0' },
-        { field: 'container.name', value: 'container-name' },
-      ],
-      'host-0,00-00-5E-00-53-23,group-0,container-name': [
-        { field: 'host.name', value: 'host-0' },
-        { field: 'host.mac', value: '00-00-5E-00-53-23' },
-        { field: 'tags', value: 'group-0' },
-        { field: 'container.name', value: 'container-name' },
-      ],
-      'host-0,00-00-5E-00-53-24,event-0,container-name': [
-        { field: 'host.name', value: 'host-0' },
-        { field: 'host.mac', value: '00-00-5E-00-53-24' },
-        { field: 'tags', value: 'event-0' },
-        { field: 'container.name', value: 'container-name' },
-      ],
-      'host-0,00-00-5E-00-53-24,group-0,container-name': [
-        { field: 'host.name', value: 'host-0' },
-        { field: 'host.mac', value: '00-00-5E-00-53-24' },
-        { field: 'tags', value: 'group-0' },
-        { field: 'container.name', value: 'container-name' },
-      ],
+      'host-0,00-00-5E-00-53-23,event-0,container-name': {
+        'host.name': 'host-0',
+        'host.mac': '00-00-5E-00-53-23',
+        tags: 'event-0',
+        'container.name': 'container-name',
+      },
+      'host-0,00-00-5E-00-53-23,group-0,container-name': {
+        'host.name': 'host-0',
+        'host.mac': '00-00-5E-00-53-23',
+        tags: 'group-0',
+        'container.name': 'container-name',
+      },
+      'host-0,00-00-5E-00-53-24,event-0,container-name': {
+        'host.name': 'host-0',
+        'host.mac': '00-00-5E-00-53-24',
+        tags: 'event-0',
+        'container.name': 'container-name',
+      },
+      'host-0,00-00-5E-00-53-24,group-0,container-name': {
+        'host.name': 'host-0',
+        'host.mac': '00-00-5E-00-53-24',
+        tags: 'group-0',
+        'container.name': 'container-name',
+      },
     });
   });
 });

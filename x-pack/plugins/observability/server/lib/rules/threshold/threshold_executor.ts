@@ -82,10 +82,9 @@ type MetricThresholdAlert = Alert<
   MetricThresholdAllowedActionGroups
 >;
 
-export type Groups = Array<{
-  field: string;
-  value: string;
-}>;
+export interface Groups {
+  [key: string]: string;
+}
 
 type MetricThresholdAlertFactory = (
   id: string,

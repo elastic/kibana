@@ -12,8 +12,6 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
   ALERT_GROUPS,
-  ALERT_GROUPS_FIELD,
-  ALERT_GROUPS_VALUE,
 } from '@kbn/rule-data-utils';
 
 export const legacyExperimentalFieldMap = {
@@ -33,17 +31,18 @@ export const legacyExperimentalFieldMap = {
   [ALERT_GROUPS]: {
     type: 'object',
     array: true,
+    dynamic: true,
     required: false,
-  },
-  [ALERT_GROUPS_FIELD]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [ALERT_GROUPS_VALUE]: {
-    type: 'keyword',
-    array: false,
-    required: false,
+    // dynamic_templates: [
+    //   {
+    //     strings_as_keywords: {
+    //       match_mapping_type: 'string',
+    //       mapping: {
+    //         type: 'keyword',
+    //       },
+    //     },
+    //   },
+    // ],
   },
 } as const;
 
