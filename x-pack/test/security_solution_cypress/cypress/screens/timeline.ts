@@ -6,6 +6,7 @@
  */
 
 import type { TimelineFilter } from '../objects/timeline';
+import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const ADD_NOTE_BUTTON = '[data-test-subj="add-note"]';
 
@@ -339,3 +340,9 @@ export const HOVER_ACTIONS = {
 export const GET_TIMELINE_HEADER = (fieldName: string) => {
   return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;
 };
+
+export const DISCOVER_TAB = getDataTestSubjectSelector('timelineTabs-discover');
+
+export const TIMELINE_DATE_PICKER_CONTAINER = getDataTestSubjectSelector(
+  'timeline-date-picker-container'
+);

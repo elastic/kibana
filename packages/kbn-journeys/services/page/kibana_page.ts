@@ -72,4 +72,18 @@ export class KibanaPage {
       checkAttribute: 'data-ech-render-complete',
     });
   }
+
+  async clearInput(locator: string) {
+    const textArea = this.page.locator(locator);
+    await textArea.clear();
+  }
+
+  async clickAndWaitFor(
+    locator: string,
+    state?: 'attached' | 'detached' | 'visible' | 'hidden' | undefined
+  ) {
+    const element = this.page.locator(locator);
+    await element.click();
+    await element.waitFor({ state });
+  }
 }
