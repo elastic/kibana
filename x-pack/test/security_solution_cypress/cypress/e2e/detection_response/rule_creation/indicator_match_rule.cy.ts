@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import {
   getIndexPatterns,
@@ -110,7 +108,7 @@ import { DETECTIONS_RULE_MANAGEMENT_URL, RULE_CREATION } from '../../../urls/nav
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
-describe('indicator match', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
   describe('Detection rules, Indicator Match', () => {
     const expectedUrls = getNewThreatIndicatorRule().references?.join('');
     const expectedFalsePositives = getNewThreatIndicatorRule().false_positives?.join('');
@@ -122,8 +120,8 @@ describe('indicator match', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () =>
 
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'threat_indicator');
-      cy.task('esArchiverLoad', 'suspicious_source_event');
+      cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
+      cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
     });
 
     beforeEach(() => {

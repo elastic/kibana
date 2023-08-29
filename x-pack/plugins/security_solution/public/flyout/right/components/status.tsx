@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { CellActionsMode } from '@kbn/cell-actions';
+import { getSourcererScopeId } from '../../../helpers';
 import { SecurityCellActions } from '../../../common/components/cell_actions';
 import type {
   EnrichedFieldInfo,
@@ -61,8 +62,10 @@ export const DocumentStatus: FC = () => {
         value: statusData.values[0],
       }}
       mode={CellActionsMode.HOVER_RIGHT}
-      triggerId={SecurityCellActionsTrigger.DEFAULT}
-      visibleCellActions={6}
+      triggerId={SecurityCellActionsTrigger.DEFAULT} // TODO use SecurityCellActionsTrigger.DETAILS_FLYOUT when https://github.com/elastic/kibana/issues/155243 is fixed
+      visibleCellActions={5} // TODO use 6 when https://github.com/elastic/kibana/issues/155243 is fixed
+      sourcererScopeId={getSourcererScopeId(scopeId)}
+      metadata={{ scopeId }}
     >
       <StatusPopoverButton
         eventId={eventId}
