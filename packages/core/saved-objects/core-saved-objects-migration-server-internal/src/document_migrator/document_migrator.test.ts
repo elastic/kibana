@@ -1462,7 +1462,7 @@ describe('DocumentMigrator', () => {
       expect(() =>
         migrator.migrate(document, { allowDowngrade: false })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[NewerModelVersionError]: Document \\"smelly\\" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0]."`
+        `"Document \\"smelly\\" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0]."`
       );
     });
   });

@@ -19,7 +19,7 @@ import { getTimeline } from '../../../objects/timeline';
 describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'overview');
+    cy.task('esArchiverLoad', { archiveName: 'overview' });
   });
 
   beforeEach(() => {
@@ -69,7 +69,7 @@ describe('Overview page with no data', { tags: '@brokenInServerless' }, () => {
     cy.task('esArchiverUnload', 'auditbeat');
   });
   after(() => {
-    cy.task('esArchiverLoad', 'auditbeat');
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
   });
 
   it('Splash screen should be here', () => {

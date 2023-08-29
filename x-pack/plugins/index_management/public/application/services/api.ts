@@ -315,7 +315,14 @@ export function useLoadNodesPlugins() {
 
 export function loadIndex(indexName: string) {
   return sendRequest<Index>({
-    path: `${INTERNAL_API_BASE_PATH}/indices/${indexName}`,
+    path: `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}`,
+    method: 'get',
+  });
+}
+
+export function useLoadIndexMappings(indexName: string) {
+  return useRequest({
+    path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
     method: 'get',
   });
 }
