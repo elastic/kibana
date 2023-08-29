@@ -7,6 +7,4 @@
 
 import { FtrService } from '../ftr_provider_context';
 
-export class ExampleReportingPageObject extends FtrService {
-
-}
+export class ExampleReportingPageObject extends FtrService {}
