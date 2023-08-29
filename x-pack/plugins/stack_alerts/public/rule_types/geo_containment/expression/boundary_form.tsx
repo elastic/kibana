@@ -134,11 +134,19 @@ export const BoundaryForm = (props: Props) => {
             onChange={(dataView: DataView) => {
               props.setDataViewId(dataView.id);
               props.setDataViewTitle(dataView.title);
+
               const geoFields = getGeoFields(dataView.fields);
-              props.setGeoField(geoFields.length ? geoFields[0].name : '');
+              if (geoFields.length) {
+                props.setGeoField(geoFields[0].name);
+              } else if ('boundaryGeoField' in props.ruleParams) {
+                props.setGeoField('');
+              }
+              
               // do not attempt to auto select name field
               // its optional plus there can be many matches so auto selecting the correct field is improbable
-              props.setNameField(undefined);
+              if ('boundaryNameField' in props.ruleParams) {
+                props.setNameField(undefined);
+              }
             }}
             unifiedSearch={props.unifiedSearch}
           />
