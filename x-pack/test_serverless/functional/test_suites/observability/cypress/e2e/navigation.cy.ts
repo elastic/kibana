@@ -6,7 +6,7 @@
  */
 
 // Error: socket hang up
-describe.skip('Serverless', () => {
+describe('Serverless', () => {
   beforeEach(() => {
     cy.loginAsElasticUser();
   });
