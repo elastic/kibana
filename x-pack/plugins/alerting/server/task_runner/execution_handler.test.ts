@@ -28,7 +28,7 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../../common';
+import { AlertInstanceState, AlertInstanceContext, RuleNotifyWhen } from '../../common';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
 import { mockAAD } from './fixtures';
@@ -149,6 +149,7 @@ const generateAlert = ({
   throttledActions = {},
   lastScheduledActionsGroup = 'default',
   maintenanceWindowIds,
+  pendingRecoveredCount,
 }: {
   id: number;
   group?: ActiveActionGroup | 'recovered';
@@ -158,6 +159,7 @@ const generateAlert = ({
   throttledActions?: ThrottledActions;
   lastScheduledActionsGroup?: string;
   maintenanceWindowIds?: string[];
+  pendingRecoveredCount?: number;
 }) => {
   const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>(
     String(id),
@@ -170,6 +172,7 @@ const generateAlert = ({
           group: lastScheduledActionsGroup,
           actions: throttledActions,
         },
+        pendingRecoveredCount,
       },
     }
   );
@@ -1591,6 +1594,64 @@ describe('Execution Handler', () => {
       3,
       'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-3.'
     );
+  });
+
+  test('does not schedule actions with notifyWhen not set to "on status change" for alerts that are flapping', async () => {
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        ...defaultExecutionParams,
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions: [
+            {
+              ...defaultExecutionParams.rule.actions[0],
+              frequency: {
+                summary: false,
+                notifyWhen: RuleNotifyWhen.ACTIVE,
+                throttle: null,
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 2, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 3, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+  });
+
+  test('does schedule actions with notifyWhen is set to "on status change" for alerts that are flapping', async () => {
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        ...defaultExecutionParams,
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions: [
+            {
+              ...defaultExecutionParams.rule.actions[0],
+              frequency: {
+                summary: false,
+                notifyWhen: RuleNotifyWhen.CHANGE,
+                throttle: null,
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 2, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 3, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
   });
 
   describe('rule url', () => {

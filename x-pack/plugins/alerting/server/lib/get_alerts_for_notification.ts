@@ -8,12 +8,7 @@
 import { keys } from 'lodash';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { Alert } from '../alert';
-import {
-  AlertInstanceState,
-  AlertInstanceContext,
-  RuleNotifyWhenType,
-  RuleNotifyWhen,
-} from '../types';
+import { AlertInstanceState, AlertInstanceContext } from '../types';
 
 export function getAlertsForNotification<
   State extends AlertInstanceState,
@@ -22,7 +17,7 @@ export function getAlertsForNotification<
   RecoveryActionGroupId extends string
 >(
   flappingSettings: RulesSettingsFlappingProperties,
-  notifyWhen: RuleNotifyWhenType | null,
+  notifyOnActionGroupChange: boolean,
   actionGroupId: string,
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
@@ -62,8 +57,8 @@ export function getAlertsForNotification<
           );
           activeAlerts[id] = newAlert;
 
-          // rules with "on status change" should return notifications
-          if (notifyWhen === RuleNotifyWhen.CHANGE) {
+          // rules with at least one action with "on status change" should return notifications
+          if (notifyOnActionGroupChange) {
             currentActiveAlerts[id] = newAlert;
           }
 

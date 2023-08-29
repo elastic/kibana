@@ -32,6 +32,7 @@ import {
   RuleTypeState,
   SanitizedRule,
   RuleAlertData,
+  RuleNotifyWhen,
 } from '../../common';
 import {
   generateActionHash,
@@ -575,6 +576,16 @@ export class ExecutionHandler<
           );
           continue;
         }
+
+        // Actions with notifyWhen set to "on status change" should return
+        // notifications for flapping and pending recovered alerts
+        if (
+          alert.getPendingRecoveredCount() > 0 &&
+          action.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
+        ) {
+          continue;
+        }
+
         if (action.group === actionGroup && !this.isAlertMuted(alertId)) {
           if (
             this.isRecoveredAlert(action.group) ||
