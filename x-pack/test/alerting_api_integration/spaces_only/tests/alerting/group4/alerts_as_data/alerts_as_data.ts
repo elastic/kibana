@@ -49,7 +49,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         alertB: [true, false, false], // active then recovers
         alertC: [true, false, true], // active twice
       };
-      const ruleParameters = { pattern };
+      const ruleParameters = { pattern, index: 'test-index', reference: 'test-ref' };
       const createdRule = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
