@@ -5,6 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import rison from '@kbn/rison';
+import querystring from 'querystring';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const defaultLogColumns = ['@timestamp', 'message'];
@@ -40,7 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should restore the table columns from the URL state if exists', async () => {
         await PageObjects.observabilityLogExplorer.navigateTo({
-          hash: '?_a=(columns:!(message,data_stream.namespace))',
+          search: querystring.stringify({
+            _a: rison.encode({
+              columns: ['message', 'data_stream.namespace'],
+            }),
+          }),
         });
 
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
