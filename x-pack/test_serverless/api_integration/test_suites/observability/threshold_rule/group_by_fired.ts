@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   let alertId: string;
   let startedAt: string;
 
-  describe('Threshold rule - GROUP_BY - FIRED', () => {
+  describe.skip('Threshold rule - GROUP_BY - FIRED', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id';

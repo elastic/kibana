@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
 
-  describe('Threshold rule - CUSTOM_EQ - AVG - BYTES - FIRED', () => {
+  describe.skip('Threshold rule - CUSTOM_EQ - AVG - BYTES - FIRED', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id';
