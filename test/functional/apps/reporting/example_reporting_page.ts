@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { FtrService } from '../ftr_provider_context';
+import { FtrService } from '../../../../x-pack/test/functional/ftr_provider_context';
 
 export class ExampleReportingPageObject extends FtrService {}

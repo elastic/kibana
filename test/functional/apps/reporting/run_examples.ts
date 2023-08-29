@@ -7,18 +7,20 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
+export default({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
+  // run-examples
   // go to localhost:5601/app/developerExamples
   // in input type="search" euiFieldSearch class
   // value="report"
   // click button need to add a data-test-subj
-  before(() => {});
   describe('Example app of reporting functionality', async () => {
-    await PageObjects.common.navigateToApp('Developer examples');
+    
+    it('', async () => {
+    await PageObjects.common.navigateToApp('developerExamples');
     console.log(PageObjects);
     await testSubjects.click('euiFieldSearch');
-    describe('');
+    })
   });
 };
