@@ -31,5 +31,6 @@
     "@kbn/management-cards-navigation",
     "@kbn/core-elasticsearch-server",
     "@kbn/search-api-panels",
+    "@kbn/serverless-search-settings",
   ]
 }
