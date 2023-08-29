@@ -63,6 +63,7 @@ import {
   expectNumberOfRules,
   selectAllRules,
   goToRuleDetailsOf,
+  disableAutoRefresh,
 } from '../../../tasks/alerts_detection_rules';
 import { duplicateSelectedRulesWithExceptions } from '../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -546,38 +547,52 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
     });
 
     describe('Duplicates the indicator rule', () => {
-      beforeEach(() => {
-        login();
-        deleteAlertsAndRules();
-        createRule(
-          getNewThreatIndicatorRule({
-            name: 'Indicator rule duplicate test',
-            rule_id: 'rule_testing',
-            enabled: true,
-          })
-        );
-        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      describe('on rule editing page', () => {
+        beforeEach(() => {
+          login();
+          deleteAlertsAndRules();
+          createRule(
+            getNewThreatIndicatorRule({
+              name: 'Indicator rule duplicate test',
+              rule_id: 'rule_testing',
+              enabled: true,
+            })
+          );
+          visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+          disableAutoRefresh();
+        });
+
+        it('Allows the rule to be duplicated from the table', () => {
+          duplicateFirstRule();
+          goBackToRuleDetails();
+          goBackToRulesTable();
+          checkDuplicatedRule('Indicator rule duplicate test [Duplicate]');
+        });
+
+        it("Allows the rule to be duplicated from the table's bulk actions", () => {
+          selectAllRules();
+          duplicateSelectedRulesWithExceptions();
+          checkDuplicatedRule('Indicator rule duplicate test [Duplicate]');
+        });
       });
 
-      it('Allows the rule to be duplicated from the table', () => {
-        duplicateFirstRule();
-        goBackToRuleDetails();
-        goBackToRulesTable();
-        checkDuplicatedRule();
-      });
+      describe('on rule details page', () => {
+        beforeEach(() => {
+          createRule(
+            getNewThreatIndicatorRule({
+              name: 'Indicator rule duplicate test',
+              rule_id: 'rule_testing',
+              enabled: true,
+            })
+          ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id)));
+        });
 
-      it("Allows the rule to be duplicated from the table's bulk actions", () => {
-        selectAllRules();
-        duplicateSelectedRulesWithExceptions();
-        checkDuplicatedRule();
-      });
-
-      it('Allows the rule to be duplicated from the edit screen', () => {
-        goToRuleDetailsOf('Indicator rule duplicate test');
-        duplicateRuleFromMenu();
-        goBackToRuleDetails();
-        goBackToRulesTable();
-        checkDuplicatedRule();
+        it('Allows the rule to be duplicated', () => {
+          duplicateRuleFromMenu();
+          goBackToRuleDetails();
+          goBackToRulesTable();
+          checkDuplicatedRule('Indicator rule duplicate test [Duplicate]');
+        });
       });
     });
   });

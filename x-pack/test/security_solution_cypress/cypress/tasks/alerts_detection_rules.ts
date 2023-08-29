@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { duplicatedRuleName } from '../objects/rule';
 import {
   COLLAPSED_ACTION_BTN,
   CUSTOM_RULES_BTN,
@@ -107,8 +106,8 @@ export const duplicateRuleFromMenu = () => {
  * Check that the duplicated rule is on the table
  * and it is disabled (default)
  */
-export const checkDuplicatedRule = () => {
-  cy.contains(RULE_NAME, duplicatedRuleName)
+export const checkDuplicatedRule = (ruleName: string): void => {
+  cy.contains(RULE_NAME, ruleName)
     .parents(RULES_ROW)
     .find(RULE_SWITCH)
     .should('have.attr', 'aria-checked', 'false');
