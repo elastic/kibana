@@ -21,7 +21,9 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/ebt-tools",
     "@kbn/core",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-ui-settings-browser-mocks"
   ],
   "exclude": [
     "target/**/*",
