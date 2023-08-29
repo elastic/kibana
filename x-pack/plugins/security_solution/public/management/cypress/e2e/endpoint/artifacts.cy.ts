@@ -36,7 +36,7 @@ const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
 
 const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
-describe('Artifact pages', () => {
+describe('Artifact pages', { tags: '@ess' }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;

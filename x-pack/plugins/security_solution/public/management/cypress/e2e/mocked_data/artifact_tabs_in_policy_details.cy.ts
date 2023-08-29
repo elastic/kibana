@@ -63,7 +63,7 @@ const visitArtifactTab = (tabId: string) => {
   cy.get(`#${tabId}`).click();
 };
 
-describe('Artifact tabs in Policy Details page', () => {
+describe('Artifact tabs in Policy Details page', { tags: '@ess' }, () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();

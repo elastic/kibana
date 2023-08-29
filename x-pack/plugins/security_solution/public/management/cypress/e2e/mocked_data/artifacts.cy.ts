@@ -35,7 +35,7 @@ const loginWithoutAccess = (url: string) => {
   loadPage(url);
 };
 
-describe('Artifacts pages', () => {
+describe('Artifacts pages', { tags: '@ess' }, () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();

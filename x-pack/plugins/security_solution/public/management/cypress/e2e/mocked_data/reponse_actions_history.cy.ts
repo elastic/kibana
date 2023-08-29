@@ -10,7 +10,7 @@ import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
-describe('Response actions history page', () => {
+describe('Response actions history page', { tags: '@ess' }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
   // let actionData: ReturnTypeFromChainable<typeof indexActionResponses>;
 

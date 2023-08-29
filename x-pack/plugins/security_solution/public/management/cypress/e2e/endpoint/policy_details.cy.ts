@@ -16,7 +16,7 @@ import {
 import { login, ROLE } from '../../tasks/login';
 import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
 
-describe('Policy Details', () => {
+describe('Policy Details', { tags: '@ess' }, () => {
   describe('Protection updates', () => {
     const loadProtectionUpdatesUrl = (policyId: string) =>
       loadPage(`/app/security/administration/policy/${policyId}/protectionUpdates`);

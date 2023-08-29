@@ -21,7 +21,7 @@ import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
-describe('When accessing Endpoint Response Console', () => {
+describe('When accessing Endpoint Response Console', { tags: '@ess' }, () => {
   const performResponderSanityChecks = () => {
     openResponderActionLogFlyout();
     // Ensure the popover in the action log date quick select picker is accessible

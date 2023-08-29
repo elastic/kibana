@@ -19,7 +19,7 @@ import { login } from '../../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../../tasks/response_actions';
 
-describe('Endpoint generated alerts', () => {
+describe('Endpoint generated alerts', { tags: '@ess' }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
