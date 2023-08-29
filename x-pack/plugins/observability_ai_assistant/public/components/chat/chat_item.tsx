@@ -23,6 +23,7 @@ import { ChatTimelineItem } from './chat_timeline';
 import { getRoleTranslation } from '../../utils/get_role_translation';
 import type { Feedback } from '../feedback_buttons';
 import { Message } from '../../../common';
+import { FailedToLoadResponse } from '../message_panel/failed_to_load_response';
 
 export interface ChatItemProps extends ChatTimelineItem {
   onEditSubmit: (message: Message) => Promise<void>;
@@ -126,7 +127,7 @@ export function ChatItem({
   };
 
   let contentElement: React.ReactNode =
-    content || error ? (
+    content || loading || error ? (
       <ChatItemContentInlinePromptEditor
         content={content}
         editing={editing}
@@ -179,8 +180,8 @@ export function ChatItem({
     >
       <EuiPanel hasShadow={false} paddingSize="s">
         {element ? <EuiErrorBoundary>{element}</EuiErrorBoundary> : null}
-
         {contentElement}
+        {error ? <FailedToLoadResponse /> : null}
       </EuiPanel>
 
       <ChatItemControls

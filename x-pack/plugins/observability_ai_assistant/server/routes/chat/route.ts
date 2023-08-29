@@ -5,10 +5,11 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import type { IncomingMessage } from 'http';
+import { IncomingMessage } from 'http';
 import { notImplemented } from '@hapi/boom';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { messageRt } from '../runtime_types';
+import { MessageRole } from '../../../common';
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat',
@@ -41,10 +42,16 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       body: { messages, connectorId, functions },
     } = params;
 
+    const isStartOfConversation =
+      messages.some((message) => message.message.role === MessageRole.Assistant) === false;
+
+    const isRecallFunctionAvailable = functions.some((fn) => fn.name === 'recall') === true;
+
     return client.chat({
       messages,
       connectorId,
       functions,
+      functionCall: isStartOfConversation && isRecallFunctionAvailable ? 'recall' : undefined,
     });
   },
 });

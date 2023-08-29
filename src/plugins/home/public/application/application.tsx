@@ -32,7 +32,7 @@ export const renderApp = async (
 ) => {
   const { featureCatalogue, chrome, dataViewsService: dataViews, trackUiMetric } = getServices();
 
-  // all the directories could be get in "start" phase of plugin after all of the legacy plugins will be moved to a NP
+  // FIXME: use featureCatalogue.getFeatures$()
   const directories = featureCatalogue.get();
 
   // Filters solutions by available nav links

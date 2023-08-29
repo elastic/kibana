@@ -28,6 +28,7 @@ export const policyFactory = (
       cloud,
       serverless,
     },
+    global_manifest_version: 'latest',
     windows: {
       events: {
         credential_access: true,
@@ -53,7 +54,7 @@ export const policyFactory = (
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
-        reputation_service: false,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       popup: {
@@ -98,7 +99,7 @@ export const policyFactory = (
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
-        reputation_service: false,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       memory_protection: {
@@ -140,7 +141,7 @@ export const policyFactory = (
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
-        reputation_service: false,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       memory_protection: {

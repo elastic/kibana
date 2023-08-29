@@ -97,6 +97,7 @@ import {
 } from '../common/endpoint/constants';
 
 import { AppFeatures } from './lib/app_features';
+import { registerRiskScoringTask } from './lib/risk_engine/tasks/risk_scoring_task';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -160,6 +161,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     appFeatures.init(plugins.features);
 
     this.ruleMonitoringService.setup(core, plugins);
+
+    if (experimentalFeatures.riskScoringPersistence) {
+      registerRiskScoringTask({
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+      });
+    }
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -457,6 +467,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         experimentalFeatures: config.experimentalFeatures,
         packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
         esClient: core.elasticsearch.client.asInternalUser,
+        appFeatures: this.appFeatures,
       });
 
       // Migrate artifacts to fleet and then start the manifest task after that is done
