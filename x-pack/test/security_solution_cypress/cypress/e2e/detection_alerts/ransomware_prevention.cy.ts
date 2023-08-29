@@ -13,10 +13,14 @@ import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../screens
 import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../screens/timeline';
 import { selectAlertsHistogram } from '../../tasks/alerts';
 import { createTimeline } from '../../tasks/timelines';
+import { cleanKibana } from '../../tasks/common';
 
 describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', 'ransomware_prevention');
+    cleanKibana();
+    cy.task('esArchiverLoad', {
+      archiveName: 'ransomware_prevention',
+    });
   });
 
   after(() => {

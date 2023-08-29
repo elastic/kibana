@@ -29,3 +29,7 @@ export const MlJobCompatibilityLink = () => (
     linkText={i18n.ML_JOB_COMPATIBILITY_LINK_TEXT}
   />
 );
+
+export const CoverageOverviewLink = () => (
+  <DocLink docPath={i18n.COVERAGE_OVERVIEW_LINK_PATH} linkText={i18n.COVERAGE_OVERVIEW_LINK_TEXT} />
+);
