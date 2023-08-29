@@ -28,5 +28,11 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./index_management'));
     loadTestFile(require.resolve('./alerting'));
     loadTestFile(require.resolve('./ingest_pipelines'));
+    loadTestFile(require.resolve('./data_view_field_editor'));
+    loadTestFile(require.resolve('./data_views'));
+    loadTestFile(require.resolve('./kql_telemetry'));
+    loadTestFile(require.resolve('./scripts_tests'));
+    loadTestFile(require.resolve('./search_oss'));
+    loadTestFile(require.resolve('./search_xpack'));
   });
 }

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import {
   PAGE_TITLE,
   HOST_RISK_PREVIEW_TABLE,
@@ -47,12 +45,12 @@ describe(
     env: {
       ftrConfig: { enableExperimental: ['riskScoringRoutesEnabled', 'riskScoringPersistence'] },
     },
-    tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS],
+    tags: ['@ess', '@brokenInServerless'],
   },
   () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'all_users');
+      cy.task('esArchiverLoad', { archiveName: 'all_users' });
     });
 
     beforeEach(() => {

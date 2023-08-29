@@ -10,6 +10,8 @@ import { CONTENT_TEST_ID, HEADER_TEST_ID } from '../../right/components/expandab
 /* Rule preview */
 
 export const RULE_PREVIEW_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutRulePreviewTitle';
+export const RULE_PREVIEW_RULE_TITLE_SUPPRESSED_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutRulePreviewTitleSuppressed';
 export const RULE_PREVIEW_RULE_CREATED_BY_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutRulePreviewCreatedByText';
 export const RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID =
