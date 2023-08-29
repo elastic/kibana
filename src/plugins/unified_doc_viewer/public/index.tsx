@@ -13,7 +13,6 @@ import type { JsonCodeEditorProps } from './components';
 import { UnifiedDocViewerPublicPlugin } from './plugin';
 
 export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';
-export { UnifiedDocViewer } from './components';
 
 const LazyJsonCodeEditor = React.lazy(
   () => import('./components/json_code_editor/json_code_editor')
@@ -21,6 +20,16 @@ const LazyJsonCodeEditor = React.lazy(
 
 export const JsonCodeEditor = withSuspense<JsonCodeEditorProps>(
   LazyJsonCodeEditor,
+  <EuiDelayRender delay={300}>
+    <EuiPanel color="transparent" paddingSize="s">
+      <EuiLoadingSpinner size="m" />
+    </EuiPanel>
+  </EuiDelayRender>
+);
+
+const LazyUnifiedDocViewer = React.lazy(() => import('./components/doc_viewer'));
+export const UnifiedDocViewer = withSuspense(
+  LazyUnifiedDocViewer,
   <EuiDelayRender delay={300}>
     <EuiPanel color="transparent" paddingSize="s">
       <EuiLoadingSpinner size="m" />

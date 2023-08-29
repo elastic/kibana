@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './doc_viewer';
+import { UnifiedDocViewer } from './doc_viewer';
+
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default UnifiedDocViewer;
