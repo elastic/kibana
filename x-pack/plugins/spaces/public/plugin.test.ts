@@ -19,10 +19,10 @@ describe('Spaces plugin', () => {
   describe('#setup', () => {
     it('should register the spaces API and the space selector app when buildFlavor is traditional', () => {
       const coreSetup = coreMock.createSetup();
-      const mockInitializerContext = coreMock.createPluginInitializerContext();
-
-      // @ts-expect-error buildFlavor marked as readonly
-      mockInitializerContext.env.packageInfo.buildFlavor = 'traditional';
+      const mockInitializerContext = coreMock.createPluginInitializerContext(
+        {},
+        { buildFlavor: 'traditional' }
+      );
 
       const plugin = new SpacesPlugin(mockInitializerContext);
       plugin.setup(coreSetup, {});
@@ -63,10 +63,10 @@ describe('Spaces plugin', () => {
 
       management.sections.section.kibana = mockSection;
 
-      const mockInitializerContext = coreMock.createPluginInitializerContext();
-
-      // @ts-expect-error buildFlavor marked as readonly
-      mockInitializerContext.env.packageInfo.buildFlavor = 'traditional';
+      const mockInitializerContext = coreMock.createPluginInitializerContext(
+        {},
+        { buildFlavor: 'traditional' }
+      );
 
       const plugin = new SpacesPlugin(mockInitializerContext);
       plugin.setup(coreSetup, {
@@ -124,10 +124,10 @@ describe('Spaces plugin', () => {
       const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
 
-      const mockInitializerContext = coreMock.createPluginInitializerContext();
-
-      // @ts-expect-error buildFlavor marked as readonly
-      mockInitializerContext.env.packageInfo.buildFlavor = 'traditional';
+      const mockInitializerContext = coreMock.createPluginInitializerContext(
+        {},
+        { buildFlavor: 'traditional' }
+      );
 
       const plugin = new SpacesPlugin(mockInitializerContext);
       plugin.setup(coreSetup, {});

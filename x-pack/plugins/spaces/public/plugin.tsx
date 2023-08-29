@@ -63,21 +63,21 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
     };
 
-    if (plugins.home && !this.isServerless) {
-      plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
-    }
-
-    if (plugins.management && !this.isServerless) {
-      this.managementService = new ManagementService();
-      this.managementService.setup({
-        management: plugins.management,
-        getStartServices: core.getStartServices,
-        spacesManager: this.spacesManager,
-        config: this.config,
-      });
-    }
-
     if (!this.isServerless) {
+      if (plugins.home) {
+        plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
+      }
+
+      if (plugins.management) {
+        this.managementService = new ManagementService();
+        this.managementService.setup({
+          management: plugins.management,
+          getStartServices: core.getStartServices,
+          spacesManager: this.spacesManager,
+          config: this.config,
+        });
+      }
+
       spaceSelectorApp.create({
         getStartServices: core.getStartServices,
         application: core.application,
