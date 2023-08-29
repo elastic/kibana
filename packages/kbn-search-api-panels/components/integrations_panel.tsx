@@ -24,7 +24,7 @@ import { LEARN_MORE_LABEL } from '../constants';
 import { GithubLink } from './github_link';
 
 export interface IntegrationsPanelProps {
-  docLinks: any;
+  docLinks: { beats: string; connectors: string; logStash: string };
   assetBasePath: string;
 }
 
