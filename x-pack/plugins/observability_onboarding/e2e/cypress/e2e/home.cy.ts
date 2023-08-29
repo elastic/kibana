@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-//  CypressError: `cy.visit()` failed trying to load:
-describe.skip('[Observability onboarding] Landing page', () => {
+describe('[Observability onboarding] Landing page', () => {
   beforeEach(() => {
     cy.loginAsElastic();
   });
