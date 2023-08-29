@@ -91,7 +91,7 @@ export const HighlightedFields: FC = () => {
 
   const highlightedFields = useHighlightedFields({
     dataFormattedForFieldBrowser,
-    investigationFields: maybeRule?.investigation_fields ?? [],
+    investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
   });
   const items = useMemo(
     () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId),
