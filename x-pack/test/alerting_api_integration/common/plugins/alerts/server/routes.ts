@@ -398,6 +398,7 @@ export function defineRoutes(
                 )
               : null,
             params: req.body.params,
+            actionTypeId: req.params.id,
           },
         ]);
         return res.noContent();
