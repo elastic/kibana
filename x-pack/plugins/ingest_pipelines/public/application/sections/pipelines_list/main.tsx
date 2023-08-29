@@ -174,13 +174,13 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   const [filters, setFilters] = useState<Filters<FilterName>>({
     managed: {
-      name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewManagedTemplateLabel', {
+      name: i18n.translate('xpack.ingestPipelines.viewManagedTemplateLabel', {
         defaultMessage: 'Managed pipelines',
       }),
       checked: 'on',
     },
     notManaged: {
-      name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewNotManagedTemplateLabel', {
+      name: i18n.translate('xpack.ingestPipelines.viewNotManagedTemplateLabel', {
         defaultMessage: 'Custom pipelines',
       }),
       checked: 'on',
