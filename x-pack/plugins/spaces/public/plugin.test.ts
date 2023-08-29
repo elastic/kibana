@@ -17,7 +17,7 @@ import { SpacesPlugin } from './plugin';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
-    it('should register the spaces routes and the space selector app when buildFlavor is traditional', () => {
+    it('should register the space selector app when buildFlavor is traditional', () => {
       const coreSetup = coreMock.createSetup();
       const mockInitializerContext = coreMock.createPluginInitializerContext(
         {},
@@ -37,7 +37,7 @@ describe('Spaces plugin', () => {
       );
     });
 
-    it('should not register the spaces routes and the space selector app when buildFlavor is serverless', () => {
+    it('should not register the space selector app when buildFlavor is serverless', () => {
       const coreSetup = coreMock.createSetup();
 
       const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
