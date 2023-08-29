@@ -383,7 +383,7 @@ export const generateRunnerResult = ({
       ...(state && { alertInstances }),
       ...(state && { alertRecoveredInstances }),
       ...(state && { alertTypeState: {} }),
-      ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z') }),
+      ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z').toISOString() }),
       ...(state && { summaryActions }),
     },
     hasError,
@@ -440,7 +440,7 @@ export const generateAlertInstance = (
     meta: {
       uuid: expect.any(String),
       lastScheduledActions: {
-        date: new Date(DATE_1970),
+        date: new Date(DATE_1970).toISOString(),
         group: 'default',
         ...(actions && { actions }),
       },
