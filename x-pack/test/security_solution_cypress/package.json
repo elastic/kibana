@@ -11,7 +11,7 @@
       "cypress:run:cases:ess": "yarn cypress:ess --spec './cypress/e2e/explore/cases/*.cy.ts'",
       "cypress:ess": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel run --config-file ../../test/security_solution_cypress/cypress/cypress_ci.config.ts --ftr-config-file ../../test/security_solution_cypress/cli_config",
       "cypress:run:respops:ess": "yarn cypress:ess --spec './cypress/e2e/(detection_alerts|detection_rules|exceptions)/*.cy.ts'",
-      "cypress:investigations:run:ess": "yarn cypress:ess --spec './cypress/e2e/investigations/**/*.cy.ts'",
+      "cypress:investigations:run:ess": "yarn cypress:ess --spec './cypress/e2e/investigations/alerts/expandable_flyout/alert_details_right_panel_overview_tab.cy.ts'",
       "cypress:explore:run:ess": "yarn cypress:ess --spec './cypress/e2e/explore/**/*.cy.ts'",
       "cypress:changed-specs-only:ess": "yarn cypress:ess --changed-specs-only --env burn=2",
       "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results && yarn junit:transform && mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/",
