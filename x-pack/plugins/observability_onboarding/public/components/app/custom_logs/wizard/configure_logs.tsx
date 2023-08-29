@@ -181,6 +181,7 @@ export function ConfigureLogs() {
               isDisabled={
                 logFilePathNotConfigured || !datasetName || !namespace
               }
+              data-test-subj={`obltOnboardingCustomLogsContinue`}
             >
               {isCreatingIntegration
                 ? i18n.translate(
@@ -229,7 +230,10 @@ export function ConfigureLogs() {
           >
             <>
               {logFilePaths.map((filepath, index) => (
-                <div key={index}>
+                <div
+                  key={index}
+                  data-test-subj={`obltOnboardingLogFilePath-${index}`}
+                >
                   {index > 0 && <EuiSpacer size="s" />}
                   <EuiFlexGroup alignItems="center" gutterSize="xs">
                     <EuiFlexItem>
@@ -265,7 +269,11 @@ export function ConfigureLogs() {
             gutterSize="xs"
           >
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="plusInCircle" onClick={addLogFilePath}>
+              <EuiButtonEmpty
+                iconType="plusInCircle"
+                onClick={addLogFilePath}
+                data-test-subj="obltOnboardingCustomLogsAddFilePath"
+              >
                 {i18n.translate(
                   'xpack.observability_onboarding.configureLogs.logFile.addRow',
                   {
@@ -321,6 +329,7 @@ export function ConfigureLogs() {
               )}
               value={serviceName}
               onChange={(event) => setServiceName(event.target.value)}
+              data-test-subj="obltOnboardingCustomLogsServiceName"
             />
           </OptionalFormRow>
           <EuiHorizontalRule margin="m" />
@@ -526,6 +535,7 @@ export function ConfigureLogs() {
               }
               isInvalid={isIntegrationNameInvalid}
               onInput={() => setIntegrationNameTouched(true)}
+              data-test-subj="obltOnboardingCustomLogsIntegrationsName"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -580,6 +590,7 @@ export function ConfigureLogs() {
               }
               isInvalid={isDatasetNameInvalid}
               onInput={() => setDatasetNameTouched(true)}
+              data-test-subj="obltOnboardingCustomLogsDatasetName"
             />
           </EuiFormRow>
         </EuiForm>
