@@ -51,7 +51,7 @@ describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () =
     });
   });
 
-  describe('Ransomware in Timelines',  { tags: ['@brokenInServerless'] }, () => {
+  describe('Ransomware in Timelines', { tags: ['@brokenInServerless'] }, () => {
     beforeEach(() => {
       login();
       visit(TIMELINES_URL);
