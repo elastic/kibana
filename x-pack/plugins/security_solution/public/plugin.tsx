@@ -16,8 +16,9 @@ import type {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '@kbn/core/public';
+
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
@@ -169,16 +170,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         http: core.http,
       });
 
-      const filterManager = new FilterManager(core.uiSettings);
-
       // used for creating a custom stateful KQL Query Bar
       const customDataService: DataPublicPluginStart = {
         ...startPlugins.data,
-        query: {
-          ...query,
-          filterManager,
-        },
+        query,
+        // @ts-expect-error
+        _name: 'custom',
       };
+
+      // @ts-expect-error
+      customDataService.query.filterManager._name = 'customFilterManager';
 
       const services: StartServices = {
         ...coreStart,
@@ -195,7 +196,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         telemetry: this.telemetry.start(),
-        discoverFilterManager: filterManager,
         customDataService,
         topValuesPopover: new TopValuesPopoverService(),
       };
