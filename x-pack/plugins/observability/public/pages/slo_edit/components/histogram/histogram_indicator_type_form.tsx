@@ -6,35 +6,30 @@
  */
 
 import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHorizontalRule,
   EuiIconTip,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
+import { useFormContext } from 'react-hook-form';
 import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-import { createOptionsFromFields } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
+import { GroupByFieldSelector } from '../common/group_by_field_selector';
 import { QueryBuilder } from '../common/query_builder';
+import { TimestampFieldSelector } from '../common/timestamp_field_selector';
 import { IndexSelection } from '../custom_common/index_selection';
 import { HistogramIndicator } from './histogram_indicator';
-import { GroupByFieldSelector } from '../common/group_by_field_selector';
 
 export function HistogramIndicatorTypeForm() {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
-
+  const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
   const { isLoading, data: indexFields } = useFetchIndexPatternFields(index);
-  const timestampFields = (indexFields ?? []).filter((field) => field.type === 'date');
 
   return (
     <>
@@ -53,55 +48,7 @@ export function HistogramIndicatorTypeForm() {
             <IndexSelection />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.histogram.timestampField.label',
-                { defaultMessage: 'Timestamp field' }
-              )}
-              isInvalid={getFieldState('indicator.params.timestampField').invalid}
-            >
-              <Controller
-                name="indicator.params.timestampField"
-                defaultValue=""
-                rules={{ required: true }}
-                control={control}
-                render={({ field: { ref, ...field }, fieldState }) => (
-                  <EuiComboBox
-                    {...field}
-                    async
-                    placeholder={i18n.translate(
-                      'xpack.observability.slo.sloEdit.sliType.histogram.timestampField.placeholder',
-                      { defaultMessage: 'Select a timestamp field' }
-                    )}
-                    aria-label={i18n.translate(
-                      'xpack.observability.slo.sloEdit.sliType.histogram.timestampField.placeholder',
-                      { defaultMessage: 'Select a timestamp field' }
-                    )}
-                    data-test-subj="histogramIndicatorFormTimestampFieldSelect"
-                    isClearable
-                    isDisabled={!index}
-                    isInvalid={fieldState.invalid}
-                    isLoading={!!index && isLoading}
-                    onChange={(selected: EuiComboBoxOptionOption[]) => {
-                      if (selected.length) {
-                        return field.onChange(selected[0].value);
-                      }
-
-                      field.onChange('');
-                    }}
-                    options={createOptionsFromFields(timestampFields)}
-                    selectedOptions={
-                      !!index &&
-                      !!field.value &&
-                      timestampFields.some((timestampField) => timestampField.name === field.value)
-                        ? [{ value: field.value, label: field.value }]
-                        : []
-                    }
-                    singleSelection={{ asPlainText: true }}
-                  />
-                )}
-              />
-            </EuiFormRow>
+            <TimestampFieldSelector index={index} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
