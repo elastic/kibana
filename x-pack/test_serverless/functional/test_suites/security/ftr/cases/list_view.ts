@@ -17,7 +17,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlSecNavigation = getService('svlSecNavigation');
 
   // Failing
-  describe.skip('cases list', () => {
+  describe('cases list', () => {
     before(async () => {
       await svlSecNavigation.navigateToLandingPage();
 
@@ -35,7 +35,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // Error: self-signed certificate in certificate chain
     describe('listing', () => {
       createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
