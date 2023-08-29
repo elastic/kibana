@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { StatsTab } from './stats';
+export { DetailsPageStats } from './stats';

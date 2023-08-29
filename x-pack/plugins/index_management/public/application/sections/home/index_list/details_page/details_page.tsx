@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,7 +26,7 @@ import { DiscoverLink } from '../../../../lib/discover_link';
 import { Section } from '../../home';
 import { DetailsPageError } from './details_page_error';
 import { ManageIndexButton } from './manage_index_button';
-import { StatsTab } from './tabs';
+import { DetailsPageStats } from './tabs';
 
 export enum IndexDetailsSection {
   Overview = 'overview',
@@ -139,7 +140,6 @@ export const DetailsPage: React.FunctionComponent<
   if (error || !index) {
     return <DetailsPageError indexName={indexName} resendRequest={fetchIndexDetails} />;
   }
-
   return (
     <>
       <EuiPageSection paddingSize="none">
@@ -176,7 +176,12 @@ export const DetailsPage: React.FunctionComponent<
 
       <EuiSpacer size="l" />
 
-      <div data-test-subj={`indexDetailsContent`}>
+      <div
+        data-test-subj={`indexDetailsContent`}
+        css={css`
+          height: 100%;
+        `}
+      >
         <Routes>
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
@@ -200,8 +205,8 @@ export const DetailsPage: React.FunctionComponent<
           />
           {config.enableIndexStats && (
             <Route
-              path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Stats}`}
-              render={() => <StatsTab indexName={indexName} />}
+              path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Stats}`}
+              component={DetailsPageStats}
             />
           )}
           <Redirect
