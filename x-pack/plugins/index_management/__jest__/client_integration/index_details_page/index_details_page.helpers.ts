@@ -38,6 +38,12 @@ export interface IndexDetailsPageTestBed extends TestBed {
     getHeader: () => string;
     clickIndexDetailsTab: (tab: IndexDetailsSection) => Promise<void>;
     getActiveTabContent: () => string;
+    mappings: {
+      getCodeBlockContent: () => string;
+      getDocsLinkHref: () => string;
+      isErrorDisplayed: () => boolean;
+      clickErrorReloadButton: () => Promise<void>;
+    };
     clickBackToIndicesButton: () => Promise<void>;
     discoverLinkExists: () => boolean;
     contextMenu: {
@@ -91,6 +97,24 @@ export const setup = async (
     return find('indexDetailsContent').text();
   };
 
+  const mappings = {
+    getCodeBlockContent: () => {
+      return find('indexDetailsMappingsCodeBlock').text();
+    },
+    getDocsLinkHref: () => {
+      return find('indexDetailsMappingsDocsLink').prop('href');
+    },
+    isErrorDisplayed: () => {
+      return exists('indexDetailsMappingsError');
+    },
+    clickErrorReloadButton: async () => {
+      await act(async () => {
+        find('indexDetailsMappingsReloadButton').simulate('click');
+      });
+      component.update();
+    },
+  };
+
   const clickBackToIndicesButton = async () => {
     await act(async () => {
       find('indexDetailsBackToIndicesButton').simulate('click');
@@ -142,6 +166,7 @@ export const setup = async (
       getHeader,
       clickIndexDetailsTab,
       getActiveTabContent,
+      mappings,
       clickBackToIndicesButton,
       discoverLinkExists,
       contextMenu,

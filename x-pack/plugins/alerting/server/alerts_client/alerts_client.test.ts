@@ -686,7 +686,8 @@ describe('Alerts Client', () => {
         },
       };
 
-      const activeAlertObj = new Alert<{}, {}, 'default'>('1', activeAlert);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const activeAlertObj = new Alert<{}, {}, 'default'>('1', activeAlert as any);
       activeAlertObj.scheduleActions('default', {});
       const spy = jest
         .spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts')
@@ -765,7 +766,8 @@ describe('Alerts Client', () => {
         ruleLabel: `test: rule-name`,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         activeAlertsFromState: {
-          '1': activeAlert,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          '1': activeAlert as any,
         },
         recoveredAlertsFromState: {},
       });
