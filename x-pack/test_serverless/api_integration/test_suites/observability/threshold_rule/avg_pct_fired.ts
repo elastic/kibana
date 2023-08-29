@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const dataViewApi = getService('dataViewApi');
   const logger = getService('log');
 
-  // Error: self-signed certificate in certificate chain
+  // Blocked API: index_not_found_exception: no such index [.alerts-observability.threshold.alerts-default]
   describe.skip('Threshold rule - AVG - PCT - FIRED', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
