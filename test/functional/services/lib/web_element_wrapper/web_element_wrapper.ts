@@ -755,6 +755,20 @@ export class WebElementWrapper {
   }
 
   /**
+   * Scroll the element into view
+   *
+   * @param {ScrollIntoViewOptions} scrollIntoViewOptions
+   * @return {Promise<void>}
+   */
+  public scrollIntoView(scrollIntoViewOptions?: ScrollIntoViewOptions) {
+    return this.driver.executeScript<void>(
+      (target: HTMLElement, options: ScrollIntoViewOptions) => target.scrollIntoView(options),
+      this._webElement,
+      scrollIntoViewOptions
+    );
+  }
+
+  /**
    * Gets element innerHTML and wrap it up with cheerio
    *
    * @nonstandard
