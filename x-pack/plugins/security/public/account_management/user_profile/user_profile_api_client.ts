@@ -10,9 +10,9 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
+import type { UserProfileData } from '@kbn/user-profile-components';
 
 import type { GetUserProfileResponse, UserProfile } from '../../../common';
-import type { UserProfileData } from './user_profile';
 
 /**
  * Parameters for the get user profile for the current user API.

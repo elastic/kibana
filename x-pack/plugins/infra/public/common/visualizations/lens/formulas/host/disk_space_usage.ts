@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const diskSpaceUsage: FormulaConfig = {
+export const diskSpaceUsage: FormulaValueConfig = {
   label: 'Disk Space Usage',
   value: 'average(system.filesystem.used.pct)',
   format: {

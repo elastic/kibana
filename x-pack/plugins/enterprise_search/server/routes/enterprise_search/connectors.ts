@@ -56,7 +56,13 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const body = await addConnector(client, request.body);
+        const body = await addConnector(client, {
+          deleteExistingConnector: request.body.delete_existing_connector,
+          indexName: request.body.index_name,
+          isNative: request.body.is_native,
+          language: request.body.language,
+          serviceType: request.body.service_type,
+        });
         return response.ok({ body });
       } catch (error) {
         if (

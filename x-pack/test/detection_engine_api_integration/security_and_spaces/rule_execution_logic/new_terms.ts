@@ -198,6 +198,7 @@ export default ({ getService }: FtrProviderContext) => {
           history_window_start: '2019-01-19T20:42:00.000Z',
           index: ['auditbeat-*'],
           language: 'kuery',
+          investigation_fields: [],
         },
         'kibana.alert.rule.actions': [],
         'kibana.alert.rule.author': [],
@@ -731,11 +732,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {

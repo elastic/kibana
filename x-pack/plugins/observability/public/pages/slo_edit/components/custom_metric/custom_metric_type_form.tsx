@@ -27,15 +27,15 @@ import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
 import { MetricIndicator } from './metric_indicator';
+import { GroupByFieldSelector } from '../common/group_by_field_selector';
 
 export { NEW_CUSTOM_METRIC } from './metric_indicator';
 
 export function CustomMetricIndicatorTypeForm() {
   const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
 
-  const { isLoading, data: indexFields } = useFetchIndexPatternFields(
-    watch('indicator.params.index')
-  );
+  const index = watch('indicator.params.index');
+  const { isLoading, data: indexFields } = useFetchIndexPatternFields(index);
   const timestampFields = (indexFields ?? []).filter((field) => field.type === 'date');
 
   return (
@@ -180,6 +180,8 @@ export function CustomMetricIndicatorTypeForm() {
         <EuiFlexItem>
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
+
+        <GroupByFieldSelector index={index} />
 
         <DataPreviewChart />
       </EuiFlexGroup>

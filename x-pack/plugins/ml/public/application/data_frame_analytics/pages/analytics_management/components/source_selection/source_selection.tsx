@@ -31,11 +31,10 @@ const fixedPageSize: number = 20;
 export const SourceSelection: FC = () => {
   const {
     services: {
-      http,
-      uiSettings,
-      savedObjectsManagement,
       savedSearch: savedSearchService,
       data: { dataViews: dataViewsService },
+      contentManagement,
+      uiSettings,
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
@@ -159,14 +158,12 @@ export const SourceSelection: FC = () => {
                     defaultMessage: 'Data view',
                   }
                 ),
-                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={fixedPageSize}
             services={{
+              contentClient: contentManagement.client,
               uiSettings,
-              http,
-              savedObjectsManagement,
             }}
           />
         </EuiPageContent>

@@ -64,7 +64,14 @@
     "@kbn/shared-ux-utility",
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
-    "@kbn/discover-utils"
+    "@kbn/discover-utils",
+    "@kbn/field-types",
+    "@kbn/search-response-warnings",
+    "@kbn/content-management-plugin",
+    "@kbn/serverless",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-render",
+    "@kbn/no-data-page-plugin"
   ],
   "exclude": [
     "target/**/*"

@@ -23,7 +23,7 @@ import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
 import { useFetchApmSuggestions } from '../../hooks/slo/use_fetch_apm_suggestions';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { buildSlo } from '../../data/slo/slo';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 import { SloEditPage } from './slo_edit';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 
@@ -66,6 +66,7 @@ const mockBasePathPrepend = jest.fn();
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
+      theme: {},
       application: {
         navigateToUrl: mockNavigate,
       },

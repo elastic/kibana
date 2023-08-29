@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiCheckbox,
   EuiEmptyPrompt,
-  EuiFieldSearch,
   EuiFormRow,
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { ISearchSource } from '@kbn/data-plugin/common';
@@ -40,7 +40,7 @@ import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionChart } from './components/expression_chart';
 import { ExpressionRow } from './components/expression_row';
-import { MetricsExplorerKueryBar } from './components/kuery_bar';
+import { RuleFlyoutKueryBar } from '../rule_kql_filter/kuery_bar';
 import { MetricsExplorerGroupBy } from './components/group_by';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
 
@@ -282,11 +282,6 @@ export default function Expressions(props: Props) {
     }
   }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleFieldSearchChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
-    [onFilterChange]
-  );
-
   const hasGroupBy = useMemo(
     () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
     [ruleParams.groupBy]
@@ -336,13 +331,29 @@ export default function Expressions(props: Props) {
     return (
       <>
         <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />
-        <EuiSpacer size={'m'} />
+        <EuiSpacer size="m" />
       </>
     );
   }
 
+  const placeHolder = i18n.translate(
+    'xpack.observability.threshold.rule.homePage.toolbar.kqlSearchFieldPlaceholder',
+    {
+      defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+    }
+  );
+
   return (
     <>
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.observability.threshold.rule.alertFlyout.selectDataViewPrompt"
+            defaultMessage="Select a data view"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <DataViewSelectPopover
         dependencies={{ dataViews, dataViewEditor }}
         dataView={dataView}
@@ -352,59 +363,90 @@ export default function Expressions(props: Props) {
           onChangeMetaData({ ...metadata, adHocDataViewList });
         }}
       />
-      <EuiSpacer size={'s'} />
-      <EuiText size="xs">
-        <h4>
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h5>
           <FormattedMessage
-            id="xpack.observability.threshold.rule.alertFlyout.conditions"
-            defaultMessage="Conditions"
+            id="xpack.observability.threshold.rule.alertFlyout.defineTextQueryPrompt"
+            defaultMessage="Define query filter (optional)"
           />
-        </h4>
-      </EuiText>
-      <EuiSpacer size={'xs'} />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <RuleFlyoutKueryBar
+        placeholder={placeHolder}
+        derivedIndexPattern={derivedIndexPattern}
+        onChange={debouncedOnFilterChange}
+        onSubmit={onFilterChange}
+        value={ruleParams.filterQuery}
+      />
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.observability.threshold.rule.alertFlyout.setConditions"
+            defaultMessage="Set rule conditions"
+          />
+        </h5>
+      </EuiTitle>
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
-            <ExpressionRow
-              canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
-              fields={derivedIndexPattern.fields as any}
-              remove={removeExpression}
-              addExpression={addExpression}
-              key={idx} // idx's don't usually make good key's but here the index has semantic meaning
-              expressionId={idx}
-              setRuleParams={updateParams}
-              errors={(errors[idx] as IErrorObject) || emptyError}
-              expression={e || {}}
-              dataView={derivedIndexPattern}
-            >
-              {/* Preview */}
-              <ExpressionChart
-                expression={e}
-                derivedIndexPattern={derivedIndexPattern}
-                filterQuery={ruleParams.filterQuery}
-                groupBy={ruleParams.groupBy}
-                timeFieldName={dataView?.timeFieldName}
-              />
-            </ExpressionRow>
+            <div key={idx}>
+              {/* index has semantic meaning, we show the condition title starting from the 2nd one  */}
+              {idx >= 1 && (
+                <EuiTitle size="xs">
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.observability.threshold.rule.alertFlyout.condition"
+                      defaultMessage="Condition {conditionNumber}"
+                      values={{ conditionNumber: idx + 1 }}
+                    />
+                  </h5>
+                </EuiTitle>
+              )}
+              <ExpressionRow
+                canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
+                fields={derivedIndexPattern.fields as any}
+                remove={removeExpression}
+                addExpression={addExpression}
+                key={idx} // idx's don't usually make good key's but here the index has semantic meaning
+                expressionId={idx}
+                setRuleParams={updateParams}
+                errors={(errors[idx] as IErrorObject) || emptyError}
+                expression={e || {}}
+                dataView={derivedIndexPattern}
+              >
+                {/* Preview */}
+                <ExpressionChart
+                  expression={e}
+                  derivedIndexPattern={derivedIndexPattern}
+                  filterQuery={ruleParams.filterQuery}
+                  groupBy={ruleParams.groupBy}
+                  timeFieldName={dataView?.timeFieldName}
+                />
+              </ExpressionRow>
+            </div>
           );
         })}
-      <div style={{ marginLeft: 28 }}>
-        <ForLastExpression
-          timeWindowSize={timeSize}
-          timeWindowUnit={timeUnit}
-          errors={emptyError}
-          onChangeWindowSize={updateTimeSize}
-          onChangeWindowUnit={updateTimeUnit}
-        />
-      </div>
-      <EuiSpacer size={'m'} />
+
+      <ForLastExpression
+        timeWindowSize={timeSize}
+        timeWindowUnit={timeUnit}
+        errors={emptyError}
+        onChangeWindowSize={updateTimeSize}
+        onChangeWindowUnit={updateTimeUnit}
+        display="fullWidth"
+      />
+
+      <EuiSpacer size="m" />
       <div>
         <EuiButtonEmpty
           data-test-subj="thresholdRuleExpressionsAddConditionButton"
-          color={'primary'}
-          iconSide={'left'}
-          flush={'left'}
-          iconType={'plusInCircleFilled'}
+          color="primary"
+          iconSide="left"
+          flush="left"
+          iconType="plusInCircleFilled"
           onClick={addExpression}
         >
           <FormattedMessage
@@ -413,36 +455,7 @@ export default function Expressions(props: Props) {
           />
         </EuiButtonEmpty>
       </div>
-      <EuiSpacer size={'m'} />
-      <EuiFormRow
-        label={i18n.translate('xpack.observability.threshold.rule.alertFlyout.filterLabel', {
-          defaultMessage: 'Filter (optional)',
-        })}
-        helpText={i18n.translate('xpack.observability.threshold.rule.alertFlyout.filterHelpText', {
-          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
-        })}
-        fullWidth
-        display="rowCompressed"
-        isInvalid={!!errors.filterQuery}
-      >
-        {(metadata && derivedIndexPattern && (
-          <MetricsExplorerKueryBar
-            derivedIndexPattern={derivedIndexPattern}
-            onChange={debouncedOnFilterChange}
-            onSubmit={onFilterChange}
-            value={ruleParams.filterQuery}
-          />
-        )) || (
-          <EuiFieldSearch
-            data-test-subj="thresholdRuleExpressionsFieldSearch"
-            onChange={handleFieldSearchChange}
-            value={ruleParams.filterQuery}
-            fullWidth
-            isInvalid={!!errors.filterQuery}
-          />
-        )}
-      </EuiFormRow>
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.observability.threshold.rule.alertFlyout.createAlertPerText', {
           defaultMessage: 'Group alerts by (optional)',
@@ -493,7 +506,7 @@ export default function Expressions(props: Props) {
           </EuiText>
         </>
       )}
-      <EuiSpacer size={'s'} />
+      <EuiSpacer size="s" />
       <EuiCheckbox
         id="metrics-alert-group-disappear-toggle"
         label={
@@ -524,7 +537,7 @@ export default function Expressions(props: Props) {
         checked={Boolean(hasGroupBy && ruleParams.alertOnGroupDisappear)}
         onChange={(e) => setRuleParams('alertOnGroupDisappear', e.target.checked)}
       />
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
     </>
   );
 }

@@ -77,7 +77,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
 
   protected getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
     if (!error.response?.status) {
-      return 'Unknown API Error';
+      return `Unexpected API Error: ${error.code} - ${error.message}`;
     }
     if (error.response.status === 401) {
       return 'Unauthorized API Error';
@@ -88,7 +88,12 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
   }
 
   public async runApi({ body }: GenAiRunActionParams): Promise<GenAiRunActionResponse> {
-    const sanitizedBody = sanitizeRequest(this.provider, this.url, body);
+    const sanitizedBody = sanitizeRequest(
+      this.provider,
+      this.url,
+      body,
+      ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
+    );
     const axiosOptions = getAxiosOptions(this.provider, this.key, false);
     const response = await this.request({
       url: this.url,
@@ -104,7 +109,14 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     body,
     stream,
   }: GenAiStreamActionParams): Promise<GenAiRunActionResponse> {
-    const executeBody = getRequestWithStreamOption(this.provider, this.url, body, stream);
+    const executeBody = getRequestWithStreamOption(
+      this.provider,
+      this.url,
+      body,
+      stream,
+      ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
+    );
+
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
     const response = await this.request({
       url: this.url,

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { Request } from '@hapi/hapi';
 import { RulesClientFactory, RulesClientFactoryOpts } from './rules_client_factory';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { CoreKibanaRequest } from '@kbn/core/server';
 import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
@@ -26,6 +24,7 @@ import { alertingAuthorizationClientFactoryMock } from './alerting_authorization
 import { AlertingAuthorization } from './authorization';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 
 jest.mock('./rules_client');
@@ -56,23 +55,6 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
 };
 
-const fakeRequest = {
-  app: {},
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-  getSavedObjectsClient: () => savedObjectsClient,
-} as unknown as Request;
-
 const actionsAuthorization = actionsAuthorizationMock.create();
 
 beforeEach(() => {
@@ -88,7 +70,7 @@ beforeEach(() => {
 test('creates a rules client with proper constructor arguments when security is enabled', async () => {
   const factory = new RulesClientFactory();
   factory.initialize({ securityPluginSetup, securityPluginStart, ...rulesClientFactoryParams });
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
   alertingAuthorizationClientFactory.create.mockReturnValue(
@@ -133,7 +115,7 @@ test('creates a rules client with proper constructor arguments when security is 
 test('creates a rules client with proper constructor arguments', async () => {
   const factory = new RulesClientFactory();
   factory.initialize(rulesClientFactoryParams);
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
   alertingAuthorizationClientFactory.create.mockReturnValue(
@@ -174,7 +156,7 @@ test('creates a rules client with proper constructor arguments', async () => {
 test('getUserName() returns null when security is disabled', async () => {
   const factory = new RulesClientFactory();
   factory.initialize(rulesClientFactoryParams);
-  factory.create(CoreKibanaRequest.from(fakeRequest), savedObjectsService);
+  factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
   const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
   const userNameResult = await constructorCall.getUserName();
@@ -188,7 +170,7 @@ test('getUserName() returns a name when security is enabled', async () => {
     securityPluginSetup,
     securityPluginStart,
   });
-  factory.create(CoreKibanaRequest.from(fakeRequest), savedObjectsService);
+  factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
   const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
   securityPluginStart.authc.getCurrentUser.mockReturnValueOnce({
@@ -201,7 +183,7 @@ test('getUserName() returns a name when security is enabled', async () => {
 test('getActionsClient() returns ActionsClient', async () => {
   const factory = new RulesClientFactory();
   factory.initialize(rulesClientFactoryParams);
-  factory.create(CoreKibanaRequest.from(fakeRequest), savedObjectsService);
+  factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
   const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
   const actionsClient = await constructorCall.getActionsClient();
@@ -211,7 +193,7 @@ test('getActionsClient() returns ActionsClient', async () => {
 test('createAPIKey() returns { apiKeysEnabled: false } when security is disabled', async () => {
   const factory = new RulesClientFactory();
   factory.initialize(rulesClientFactoryParams);
-  factory.create(CoreKibanaRequest.from(fakeRequest), savedObjectsService);
+  factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
   const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
   const createAPIKeyResult = await constructorCall.createAPIKey();
@@ -221,7 +203,7 @@ test('createAPIKey() returns { apiKeysEnabled: false } when security is disabled
 test('createAPIKey() returns { apiKeysEnabled: false } when security is enabled but ES security is disabled', async () => {
   const factory = new RulesClientFactory();
   factory.initialize(rulesClientFactoryParams);
-  factory.create(CoreKibanaRequest.from(fakeRequest), savedObjectsService);
+  factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
   const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
   securityPluginStart.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
@@ -236,7 +218,7 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
     securityPluginSetup,
     securityPluginStart,
   });
-  factory.create(CoreKibanaRequest.from(fakeRequest), savedObjectsService);
+  factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
   const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
   securityPluginStart.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
@@ -258,7 +240,7 @@ test('createAPIKey() throws when security plugin createAPIKey throws an error', 
     securityPluginSetup,
     securityPluginStart,
   });
-  factory.create(CoreKibanaRequest.from(fakeRequest), savedObjectsService);
+  factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
   const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
   securityPluginStart.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(

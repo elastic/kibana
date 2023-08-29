@@ -48,7 +48,7 @@ export async function createFleetServerHost(
 ): Promise<FleetServerHost> {
   if (data.is_default) {
     const defaultItem = await getDefaultFleetServerHost(soClient);
-    if (defaultItem) {
+    if (defaultItem && defaultItem.id !== options?.id) {
       await updateFleetServerHost(
         soClient,
         defaultItem.id,

@@ -31,7 +31,7 @@ import { useUnifiedSearchContext } from './use_unified_search';
 import { useMetricsDataViewContext } from './use_data_view';
 import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL } from '../translations';
-import { TOOLTIP } from '../../../../common/visualizations/lens/dashboards/host/translations';
+import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 
 /**
@@ -128,7 +128,7 @@ const sortTableData =
 export const useHostsTable = () => {
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
-  const { searchCriteria } = useUnifiedSearchContext();
+  const { parsedDateRange } = useUnifiedSearchContext();
   const [{ pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
     services: {
@@ -244,7 +244,7 @@ export const useHostsTable = () => {
         render: (title: HostNodeRow['title']) => (
           <EntryTitle
             title={title}
-            time={searchCriteria.dateRange}
+            time={parsedDateRange}
             onClick={() => reportHostEntryClick(title)}
           />
         ),
@@ -254,9 +254,8 @@ export const useHostsTable = () => {
         name: (
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
-            toolTip={TOOLTIP.cpuUsage}
+            toolTip={METRICS_TOOLTIP.cpuUsage}
             formula={hostLensFormulas.cpuUsage.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'cpu',
@@ -269,9 +268,8 @@ export const useHostsTable = () => {
         name: (
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
-            toolTip={TOOLTIP.normalizedLoad1m}
+            toolTip={METRICS_TOOLTIP.normalizedLoad1m}
             formula={hostLensFormulas.normalizedLoad1m.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'normalizedLoad1m',
@@ -284,9 +282,8 @@ export const useHostsTable = () => {
         name: (
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
-            toolTip={TOOLTIP.memoryUsage}
+            toolTip={METRICS_TOOLTIP.memoryUsage}
             formula={hostLensFormulas.memoryUsage.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'memory',
@@ -299,9 +296,8 @@ export const useHostsTable = () => {
         name: (
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
-            toolTip={TOOLTIP.memoryFree}
+            toolTip={METRICS_TOOLTIP.memoryFree}
             formula={hostLensFormulas.memoryFree.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'memoryFree',
@@ -314,9 +310,8 @@ export const useHostsTable = () => {
         name: (
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
-            toolTip={TOOLTIP.diskSpaceUsage}
+            toolTip={METRICS_TOOLTIP.diskSpaceUsage}
             formula={hostLensFormulas.diskSpaceUsage.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'diskSpaceUsage',
@@ -329,9 +324,8 @@ export const useHostsTable = () => {
         name: (
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.rx}
-            toolTip={TOOLTIP.rx}
+            toolTip={METRICS_TOOLTIP.rx}
             formula={hostLensFormulas.rx.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'rx',
@@ -345,9 +339,8 @@ export const useHostsTable = () => {
         name: (
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.tx}
-            toolTip={TOOLTIP.tx}
+            toolTip={METRICS_TOOLTIP.tx}
             formula={hostLensFormulas.tx.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'tx',
@@ -358,13 +351,7 @@ export const useHostsTable = () => {
         width: '120px',
       },
     ],
-    [
-      hostFlyoutState?.itemId,
-      reportHostEntryClick,
-      searchCriteria.dateRange,
-      setHostFlyoutState,
-      popoverContainerRef,
-    ]
+    [hostFlyoutState?.itemId, parsedDateRange, reportHostEntryClick, setHostFlyoutState]
   );
 
   const selection: EuiTableSelectionType<HostNodeRow> = {

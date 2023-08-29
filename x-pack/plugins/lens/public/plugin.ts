@@ -63,6 +63,7 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -168,6 +169,7 @@ export interface LensPluginStartDependencies {
   share?: SharePluginStart;
   eventAnnotationService: EventAnnotationServiceType;
   contentManagement: ContentManagementPublicStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface LensPublicSetup {

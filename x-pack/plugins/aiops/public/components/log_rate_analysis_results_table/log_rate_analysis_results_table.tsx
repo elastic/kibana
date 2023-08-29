@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
-import { orderBy } from 'lodash';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { orderBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
@@ -336,6 +336,46 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     };
   }, [pageIndex, pageSize, sortField, sortDirection, significantTerms]);
 
+  useEffect(() => {
+    // If no row is hovered or pinned or the user switched to a new page,
+    // fall back to set the first row into a hovered state to make the
+    // main document count chart show a comparison view by default.
+    if (
+      (selectedSignificantTerm === null ||
+        !pageOfItems.some((item) => isEqual(item, selectedSignificantTerm))) &&
+      pinnedSignificantTerm === null &&
+      pageOfItems.length > 0
+    ) {
+      setSelectedSignificantTerm(pageOfItems[0]);
+    }
+
+    // If a user switched pages and a pinned row is no longer visible
+    // on the current page, set the status of pinned rows back to `null`.
+    if (
+      pinnedSignificantTerm !== null &&
+      !pageOfItems.some((item) => isEqual(item, pinnedSignificantTerm))
+    ) {
+      setPinnedSignificantTerm(null);
+    }
+  }, [
+    selectedSignificantTerm,
+    setSelectedSignificantTerm,
+    setPinnedSignificantTerm,
+    pageOfItems,
+    pinnedSignificantTerm,
+  ]);
+
+  // When the analysis results table unmounts,
+  // make sure to reset any hovered or pinned rows.
+  useEffect(
+    () => () => {
+      setSelectedSignificantTerm(null);
+      setPinnedSignificantTerm(null);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   const getRowStyle = (significantTerm: SignificantTerm) => {
     if (
       pinnedSignificantTerm &&
@@ -393,7 +433,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
             }
           },
           onMouseEnter: () => {
-            setSelectedSignificantTerm(significantTerm);
+            if (pinnedSignificantTerm === null) {
+              setSelectedSignificantTerm(significantTerm);
+            }
           },
           onMouseLeave: () => {
             setSelectedSignificantTerm(null);

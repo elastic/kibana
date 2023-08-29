@@ -297,6 +297,7 @@ describe('Alerting Plugin', () => {
             dataViewsServiceFactory: jest
               .fn()
               .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+            getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
           } as DataViewsServerPluginStart,
         });
 
@@ -345,6 +346,7 @@ describe('Alerting Plugin', () => {
             dataViewsServiceFactory: jest
               .fn()
               .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+            getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
           } as DataViewsServerPluginStart,
         });
 
@@ -404,6 +406,7 @@ describe('Alerting Plugin', () => {
           dataViewsServiceFactory: jest
             .fn()
             .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+          getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
         } as DataViewsServerPluginStart,
       });
 

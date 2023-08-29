@@ -56,6 +56,7 @@
     "@kbn/core-capabilities-common",
     "@kbn/unified-search-plugin",
     "@kbn/core-http-server-mocks",
+    "@kbn/core-http-router-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
   ],
   "exclude": ["target/**/*"]

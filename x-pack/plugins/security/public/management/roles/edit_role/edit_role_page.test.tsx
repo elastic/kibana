@@ -19,15 +19,15 @@ import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mock
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
+import { EditRolePage } from './edit_role_page';
+import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
+import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
+import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import type { Role } from '../../../../common/model';
 import { userAPIClientMock } from '../../users/index.mock';
 import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
-import { EditRolePage } from './edit_role_page';
-import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
-import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
-import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 
 const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();

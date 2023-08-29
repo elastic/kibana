@@ -1,7 +1,11 @@
 {
   "security.clear_cached_realms": {
     "url_params": {
-      "usernames": []
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "usernames": ""
     },
     "methods": [
       "POST"
@@ -9,6 +13,10 @@
     "patterns": [
       "_security/realm/{realms}/_clear_cache"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-clear-cache.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-clear-cache.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

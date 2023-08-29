@@ -29,6 +29,9 @@ import type {
   FieldStatsServices,
 } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { CasesUiStart } from '@kbn/cases-plugin/public';
 
 /**
  * AIOps App Dependencies to be provided via React context.
@@ -90,6 +93,10 @@ export interface AiopsAppDependencies {
    */
   lens: LensPublicStart;
   /**
+   * Internationalisation service
+   */
+  i18n: CoreStart['i18n'];
+  /**
    * Deps for unified fields stats.
    */
   fieldStats?: {
@@ -104,6 +111,9 @@ export interface AiopsAppDependencies {
       dslQuery?: FieldStatsProps['dslQuery'];
     }>;
   };
+  presentationUtil?: PresentationUtilPluginStart;
+  embeddable?: EmbeddableStart;
+  cases?: CasesUiStart;
 }
 
 /**

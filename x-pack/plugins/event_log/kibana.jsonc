@@ -11,7 +11,8 @@
       "eventLog"
     ],
     "optionalPlugins": [
-      "spaces"
+      "spaces",
+      "serverless"
     ]
   }
 }
