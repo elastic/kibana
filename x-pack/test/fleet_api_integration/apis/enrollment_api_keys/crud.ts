@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import { OLDEST_INTERNAL_VERSION } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents, getEsClientForAPIKey } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -324,6 +325,7 @@ export default function (providerContext: FtrProviderContext) {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
           .send({
             policy_id: 'policy1',
           })
@@ -332,11 +334,20 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should get and delete with deprecated API', async () => {
-        await supertest.get(`/api/fleet/enrollment-api-keys`).expect(200);
-        await supertest.get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`).expect(200);
+        await supertest
+          .get(`/api/fleet/enrollment-api-keys`)
+          .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        await supertest
+          .get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
+          .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
 
         await supertest
           .delete(`/api/fleet/enrollment-api-keys/${keyId}`)
+          .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
       });

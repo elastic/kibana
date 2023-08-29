@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { PackageInfo } from '@kbn/fleet-plugin/common/types/models/epm';
+import { OLDEST_INTERNAL_VERSION } from '@kbn/fleet-plugin/common/constants';
 import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -197,10 +198,14 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
     });
 
-    it('returns package info in item field when calling without version', async function () {
+    it('returns package info in item field when calling without version (deprecated endpoint)', async function () {
       // this will install through the registry by default
       await installPackage(testPkgName, testPkgVersion);
-      const res = await supertest.get(`/api/fleet/epm/packages/${testPkgName}`).expect(200);
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/${testPkgName}`)
+        .set('kbn-xsrf', 'xxxx')
+        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+        .expect(200);
       const packageInfo = res.body.item;
       // the uploaded version will have this description
       expect(packageInfo.name).to.equal('apache');

@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { OLDEST_INTERNAL_VERSION } from '@kbn/fleet-plugin/common/constants';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -18,6 +19,16 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+
+  const epmInstallDeprecated = async (pkgName: string) => {
+    // This endpoint is currently deprecated and marked as internal
+    const getPkgRes = await supertest
+      .get(`/api/fleet/epm/packages/${pkgName}`)
+      .set('kbn-xsrf', 'xxxx')
+      .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+      .expect(200);
+    return getPkgRes;
+  };
 
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -301,15 +312,13 @@ export default function (providerContext: FtrProviderContext) {
         // load a bunch of fake system integration policy
         const policyIds = new Array(10).fill(null).map((_, i) => `package-policy-test-${i}`);
         packagePoliciesToDeleteIds = packagePoliciesToDeleteIds.concat(policyIds);
-        const getPkRes = await supertest
-          .get(`/api/fleet/epm/packages/system`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
+        const getPkRes = await epmInstallDeprecated('system');
         systemPkgVersion = getPkRes.body.item.version;
         // we must first force install the system package to override package verification error on policy create
         const installPromise = supertest
           .post(`/api/fleet/epm/packages/system-${systemPkgVersion}`)
           .set('kbn-xsrf', 'xxxx')
+          .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
           .send({ force: true })
           .expect(200);
 
@@ -500,15 +509,13 @@ export default function (providerContext: FtrProviderContext) {
 
         const policyId = 'package-policy-test-';
         packagePoliciesToDeleteIds.push(policyId);
-        const getPkRes = await supertest
-          .get(`/api/fleet/epm/packages/system`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
+        const getPkRes = await epmInstallDeprecated('system');
         systemPkgVersion = getPkRes.body.item.version;
         // we must first force install the system package to override package verification error on policy create
         const installPromise = supertest
           .post(`/api/fleet/epm/packages/system-${systemPkgVersion}`)
           .set('kbn-xsrf', 'xxxx')
+          .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
           .send({ force: true })
           .expect(200);
 
@@ -591,15 +598,13 @@ export default function (providerContext: FtrProviderContext) {
       it('should work with package policy with space in name', async () => {
         const policyId = 'package-policy-test-1';
         packagePoliciesToDeleteIds.push(policyId);
-        const getPkRes = await supertest
-          .get(`/api/fleet/epm/packages/system`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
+        const getPkRes = await epmInstallDeprecated('system');
         systemPkgVersion = getPkRes.body.item.version;
         // we must first force install the system package to override package verification error on policy create
         const installPromise = supertest
           .post(`/api/fleet/epm/packages/system-${systemPkgVersion}`)
           .set('kbn-xsrf', 'xxxx')
+          .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
           .send({ force: true })
           .expect(200);
 
@@ -1101,15 +1106,13 @@ export default function (providerContext: FtrProviderContext) {
       });
       setupFleetAndAgents(providerContext);
       before(async () => {
-        const getPkRes = await supertest
-          .get(`/api/fleet/epm/packages/system`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
+        const getPkRes = await epmInstallDeprecated('system');
 
         // we must first force install the system package to override package verification error on policy create
         await supertest
           .post(`/api/fleet/epm/packages/system-${getPkRes.body.item.version}`)
           .set('kbn-xsrf', 'xxxx')
+          .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
           .send({ force: true })
           .expect(200);
 
