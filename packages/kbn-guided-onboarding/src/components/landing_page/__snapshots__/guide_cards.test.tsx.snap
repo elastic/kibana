@@ -297,6 +297,33 @@ exports[`guide cards snapshots should render all cards 1`] = `
           size="m"
         />
       </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        key="5"
+      >
+        <GuideCard
+          activateGuide={[MockFunction]}
+          activeFilter="all"
+          card={
+            Object {
+              "icon": "visBarHorizontal",
+              "navigateTo": Object {
+                "appId": "profiling",
+                "path": "/add-data-instructions",
+              },
+              "order": 15,
+              "solution": "observability",
+              "telemetryId": "onboarding--observability--profiling",
+              "title": "Optimize my workloads with Universal Profiling",
+            }
+          }
+          guidesState={Array []}
+          navigateToApp={[MockFunction]}
+        />
+        <EuiSpacer
+          size="m"
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlexItem>
   <EuiFlexItem

@@ -36,6 +36,7 @@ import loggingIcon from '../../../icons/logging.svg';
 import nginxIcon from '../../../icons/nginx.svg';
 import opentelemetryIcon from '../../../icons/opentelemetry.svg';
 import systemIcon from '../../../icons/system.svg';
+import universalProfilingIcon from '../../../icons/universal_profiling.svg';
 
 const StyledItem = styled(EuiFlexItem)`
   flex-direction: row;
@@ -76,6 +77,9 @@ export function Home() {
   };
   const handleClickUploadFile = () => {
     navigateToKibanaUrl('/app/home#/tutorial_directory/fileDataViz');
+  };
+  const handleClickUniversalProfilingSetupGuide = () => {
+    navigateToKibanaUrl('/app/profiling/add-data-instructions');
   };
 
   return (
@@ -253,6 +257,45 @@ export function Home() {
               paddingSize="m"
               display="plain"
               hasBorder
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ width: '100%' }}>
+        <EuiFlexGroup alignItems="stretch">
+          <EuiFlexItem>
+            <EuiCard
+              icon={
+                <EuiFlexGroup gutterSize="m" justifyContent="center">
+                  <EuiIcon type={universalProfilingIcon} size="l" />
+                </EuiFlexGroup>
+              }
+              title={i18n.translate(
+                'xpack.observability_onboarding.card.universalProfiling.title',
+                {
+                  defaultMessage: 'Universal Profiling',
+                }
+              )}
+              description={i18n.translate(
+                'xpack.observability_onboarding.card.universalProfiling.description',
+                {
+                  defaultMessage:
+                    ' eBPF-based fleet-wide full-system continuous profiling. Identify performance regression, wasteful computation and debug complex issues faster.',
+                }
+              )}
+              footer={
+                <EuiButton
+                  onClick={handleClickUniversalProfilingSetupGuide}
+                  color="primary"
+                >
+                  {getStartedLabel}
+                </EuiButton>
+              }
+              paddingSize="m"
+              titleSize="xs"
+              display="plain"
+              hasBorder
+              onClick={handleClickUniversalProfilingSetupGuide}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

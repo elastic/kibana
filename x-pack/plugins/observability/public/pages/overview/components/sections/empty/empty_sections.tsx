@@ -147,5 +147,23 @@ const getEmptySections = ({ http }: { http: HttpSetup }): Section[] => {
       }),
       href: http.basePath.prepend(paths.observability.rules),
     },
+    {
+      id: 'universal_profiling',
+      title: i18n.translate('xpack.observability.emptySection.apps.universalProfiling.title', {
+        defaultMessage: 'Universal Profiling',
+      }),
+      icon: 'logoObservability',
+      description: i18n.translate(
+        'xpack.observability.emptySection.apps.universalProfiling.description',
+        {
+          defaultMessage:
+            'Understand what lines of code are consuming compute resources across your entire infrastructure, with minimal overhead and zero instrumentation',
+        }
+      ),
+      linkTitle: i18n.translate('xpack.observability.emptySection.apps.universalProfiling.link', {
+        defaultMessage: 'Install Profiling Host Agent',
+      }),
+      href: http.basePath.prepend('/app/profiling/add-data-instructions'),
+    },
   ];
 };
