@@ -6,7 +6,6 @@
  */
 
 import { fillAddFilterForm } from '../../../../tasks/search_bar';
-import { tag } from '../../../../tags';
 import {
   addDiscoverKqlQuery,
   addFieldToTable,
@@ -39,7 +38,7 @@ describe(
   'Discover State',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
-    tags: [tag.ESS, tag.SERVERLESS],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     beforeEach(() => {

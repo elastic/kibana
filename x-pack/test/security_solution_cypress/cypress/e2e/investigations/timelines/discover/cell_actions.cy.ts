@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
 import { grantClipboardReadPerm } from '../../../../tasks/common/clipboard';
 import {
   DISCOVER_CELL_ACTIONS,
@@ -27,7 +26,7 @@ describe(
   `Discover Datagrid Cell Actions`,
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
-    tags: [tag.ESS, tag.SERVERLESS],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     beforeEach(() => {
