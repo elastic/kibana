@@ -153,7 +153,9 @@ const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 
   ['xpack.security.operator_privileges.enabled', 'true'],
+];
 
+const SERVERLESS_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.authc.realms.jwt.jwt1.client_authentication.type', 'shared_secret'],
 
   ['xpack.security.authc.realms.jwt.jwt1.order', '-98'],
@@ -535,7 +537,13 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         ...node,
         image,
         params: node.params.concat(
-          resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
+          resolveEsArgs(
+            DEFAULT_SERVERLESS_ESARGS.concat(
+              node.esArgs ?? [],
+              options.ssl ? SERVERLESS_SSL_ESARGS : []
+            ),
+            options
+          ),
           i === 0 ? resolvePort(options) : [],
           volumeCmd
         ),
