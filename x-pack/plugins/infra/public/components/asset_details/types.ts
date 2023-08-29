@@ -94,3 +94,5 @@ export interface RouteState {
   originPathname?: string;
   originData?: Search;
 }
+
+export type DataViewOrigin = 'logs' | 'metrics';
