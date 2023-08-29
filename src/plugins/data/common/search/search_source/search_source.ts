@@ -106,7 +106,6 @@ import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 import {
   getEsQueryConfig,
   IKibanaSearchResponse,
-  isErrorResponse,
   isPartialResponse,
   isCompleteResponse,
   UI_SETTINGS,
@@ -547,9 +546,7 @@ export class SearchSource {
         // For testing timeout messages in UI, uncomment the next line
         // response.rawResponse.timed_out = true;
         return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
-          if (isErrorResponse(response)) {
-            obs.error(response);
-          } else if (isPartialResponse(response)) {
+          if (isPartialResponse(response)) {
             obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {

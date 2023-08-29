@@ -34,7 +34,11 @@ import * as i18n from './translations';
 export const RulePreview: React.FC = memo(() => {
   const { ruleId, indexPattern } = usePreviewPanelContext();
   const [rule, setRule] = useState<Rule | null>(null);
-  const { rule: maybeRule, loading: ruleLoading } = useRuleWithFallback(ruleId ?? '');
+  const {
+    rule: maybeRule,
+    loading: ruleLoading,
+    isExistingRule,
+  } = useRuleWithFallback(ruleId ?? '');
   const { data } = useKibana().services;
 
   // persist rule until refresh is complete
@@ -77,7 +81,7 @@ export const RulePreview: React.FC = memo(() => {
 
   return rule ? (
     <EuiPanel hasShadow={false} data-test-subj={RULE_PREVIEW_BODY_TEST_ID} className="eui-yScroll">
-      <RulePreviewTitle rule={rule} />
+      <RulePreviewTitle rule={rule} isSuppressed={!isExistingRule} />
       <EuiHorizontalRule margin="s" />
       <ExpandableSection
         title={i18n.RULE_PREVIEW_ABOUT_TEXT}
