@@ -19,7 +19,6 @@ import {
 import type { SecurityProductTypes } from '../../common/config';
 import { ProductSwitch } from './product_switch';
 import { useTogglePanel } from './use_toggle_panel';
-import { useKibana } from '../common/services';
 
 const CONTENT_WIDTH = 1150;
 
@@ -44,7 +43,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
       expandedCardSteps,
     },
   } = useTogglePanel({ productTypes });
-  const services = useKibana().services;
+
   return (
     <KibanaPageTemplate
       restrictWidth={false}

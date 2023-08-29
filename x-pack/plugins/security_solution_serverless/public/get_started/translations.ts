@@ -28,47 +28,6 @@ export const GET_STARTED_PAGE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const WELCOME_PANEL_PROJECT_CREATED_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.welcomePanel.projectCreated.title',
-  {
-    defaultMessage: `Project created`,
-  }
-);
-
-export const WELCOME_PANEL_PROJECT_CREATED_DESCRIPTION = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.welcomePanel.projectCreated.description',
-  {
-    defaultMessage: `View all projects here.`,
-  }
-);
-
-export const WELCOME_PANEL_INVITE_YOUR_TEAM_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.welcomePanel.inviteYourTeam.title',
-  {
-    defaultMessage: 'Invite your team',
-  }
-);
-
-export const WELCOME_PANEL_INVITE_YOUR_TEAM_DESCRIPTION = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.welcomePanel.inviteYourTeam.description',
-  {
-    defaultMessage: `Boost security through collaboration`,
-  }
-);
-
-export const WELCOME_PANEL_PROGRESS_TRACKER_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.welcomePanel.progressTracker.title',
-  {
-    defaultMessage: 'Progress tracker',
-  }
-);
-
-export const WELCOME_PANEL_PROGRESS_TRACKER_DESCRIPTION = (tasks: number) =>
-  i18n.translate('xpack.securitySolutionServerless.getStarted.welcomePanel.progressTracker.note', {
-    defaultMessage: `{tasks, plural, =1 {task} other {tasks}} completed`,
-    values: { tasks },
-  });
-
 export const STEP_TIME_MIN = (min: number) =>
   i18n.translate(
     'xpack.securitySolutionServerless.getStarted.togglePanel.progressTracker.stepTimeMin',

@@ -10,15 +10,6 @@ import type React from 'react';
 
 import type { ProductLine } from '../../common/product';
 
-export interface HeaderSection {
-  description?: (params: {
-    totalActiveSteps: number | null;
-    totalStepsLeft: number | null;
-  }) => React.ReactNode | null;
-  icon: EuiIconProps;
-  id: string;
-  title: string;
-}
 export interface Section {
   cards?: Card[];
   icon?: EuiIconProps;
