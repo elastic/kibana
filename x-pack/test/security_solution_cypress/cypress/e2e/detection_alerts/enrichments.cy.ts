@@ -33,7 +33,7 @@ import { ALERTS_URL } from '../../urls/navigation';
 describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_entities');
+    cy.task('esArchiverLoad', { archiveName: 'risk_entities' });
   });
 
   after(() => {
@@ -43,7 +43,8 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   describe('Custom query rule', () => {
     beforeEach(() => {
       disableExpandableFlyout();
-      cy.task('esArchiverLoad', 'risk_entities');
+      cy.task('esArchiverLoad', { archiveName: 'risk_entities' });
+
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: 'rule1' }));
       login();
@@ -74,8 +75,10 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification').should('not.exist');
 
       closeAlertFlyout();
-      cy.task('esArchiverUnload', 'risk_entities');
-      cy.task('esArchiverLoad', 'risk_hosts_updated');
+
+      cy.task('esArchiverUnload', 'risk_entities');    
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts_updated' });
+      
       expandFirstAlert();
       cy.get(ENRICHED_DATA_ROW).contains('Critical');
       cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification');

@@ -22,7 +22,7 @@ import { USERS_URL } from '../../../urls/navigation';
 describe('Users stats and tables', () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'users');
+    cy.task('esArchiverLoad', { archiveName: 'users' });
   });
 
   beforeEach(() => {

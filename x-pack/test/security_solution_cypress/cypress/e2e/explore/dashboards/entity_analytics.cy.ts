@@ -79,7 +79,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
   describe('Risk Score enabled but still no data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_entities_no_data');
+      cy.task('esArchiverLoad', { archiveName: 'risk_entities_no_data' });
     });
 
     beforeEach(() => {
@@ -100,9 +100,10 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
     });
   });
 
+
   describe('With host risk data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_entities');
+      cy.task('esArchiverLoad', { archiveName: 'risk_entities' });
     });
 
     beforeEach(() => {
@@ -190,7 +191,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
   describe('With user risk data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_entities');
+      cy.task('esArchiverLoad', { archiveName: 'risk_entities' });
     });
 
     beforeEach(() => {
@@ -279,7 +280,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
   describe('With anomalies data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'network');
+      cy.task('esArchiverLoad', { archiveName: 'network' });
       login();
       visit(ENTITY_ANALYTICS_URL);
       cy.get(ANOMALIES_TABLE).should('be.visible');

@@ -24,7 +24,7 @@ const DATA_VIEW = 'auditbeat-*';
 
 describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', 'risk_entities');
+    cy.task('esArchiverLoad', { archiveName: 'risk_entities' });
 
     login();
     // Create and select data view

@@ -13,8 +13,8 @@ import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_entities');
-    cy.task('esArchiverLoad', 'query_alert');
+    cy.task('esArchiverLoad', { archiveName: 'risk_entities' });
+    cy.task('esArchiverLoad', { archiveName: 'query_alert' });
   });
 
   beforeEach(() => {

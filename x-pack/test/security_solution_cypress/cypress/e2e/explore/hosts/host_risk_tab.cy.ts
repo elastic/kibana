@@ -24,7 +24,7 @@ import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_entities');
+    cy.task('esArchiverLoad', { archiveName: 'risk_entities' });
   });
 
   beforeEach(() => {
