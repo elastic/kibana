@@ -9,16 +9,13 @@ import createContainer from 'constate';
 import type { AssetDetailsProps } from '../types';
 import { useMetadataStateProviderContext } from './use_metadata_state';
 
-export interface UseAssetDetailsStateProps {
-  state: Pick<
-    AssetDetailsProps,
-    'asset' | 'assetType' | 'overrides' | 'onTabsStateChange' | 'renderMode'
-  >;
+export interface UseAssetDetailsRenderProps {
+  props: Pick<AssetDetailsProps, 'asset' | 'assetType' | 'overrides' | 'renderMode'>;
 }
 
-export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
+export function useAssetDetailsRenderProps({ props }: UseAssetDetailsRenderProps) {
   const { metadata } = useMetadataStateProviderContext();
-  const { asset, assetType, onTabsStateChange, overrides, renderMode } = state;
+  const { asset, assetType, overrides, renderMode } = props;
 
   // When the asset asset.name is known we can load the page faster
   // Otherwise we need to use metadata response.
@@ -30,12 +27,12 @@ export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
       name: asset.name || metadata?.name || 'asset-name',
     },
     assetType,
-    onTabsStateChange,
     overrides,
     renderMode,
     loading,
   };
 }
 
-export const AssetDetailsState = createContainer(useAssetDetailsState);
-export const [AssetDetailsStateProvider, useAssetDetailsStateContext] = AssetDetailsState;
+export const AssetDetailsRenderProps = createContainer(useAssetDetailsRenderProps);
+export const [AssetDetailsRenderPropsProvider, useAssetDetailsRenderPropsContext] =
+  AssetDetailsRenderProps;
