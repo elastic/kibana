@@ -70,7 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('can access a new Dashboard from the unsaved changes section of the listing page', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.gotoDashboardLandingPage({ isServerless: true });
+      await PageObjects.dashboard.gotoDashboardServerlessLandingPage();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.expectUnsavedChangesListingExists('New Dashboard');
       await PageObjects.dashboard.clickUnsavedChangesContinueEditing('New Dashboard');
@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('loads the saved Dashboard', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage({ isServerless: true });
+      await PageObjects.dashboard.gotoDashboardServerlessLandingPage();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.expectUnsavedChangesListingDoesNotExist('New Dashboard');
 

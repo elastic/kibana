@@ -174,15 +174,6 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.existOrFail('dashboardLandingPage');
   }
 
-  public async clickDashboardBreadcrumbLink(isServerless: boolean = false) {
-    this.log.debug('clickDashboardBreadcrumbLink');
-    if (!isServerless) {
-      await this.testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
-    } else {
-      await this.testSubjects.click('breadcrumb breadcrumb-deepLinkId-dashboards');
-    }
-  }
-
   public async expectOnDashboard(expectedTitle: string) {
     await this.retry.waitFor(
       `last breadcrumb to have dashboard title: ${expectedTitle}`,
@@ -194,29 +185,30 @@ export class DashboardPageObject extends FtrService {
     );
   }
 
-  public async gotoDashboardLandingPage(
-    {
-      ignorePageLeaveWarning = true,
-      isServerless = false,
-    }: {
-      ignorePageLeaveWarning?: boolean;
-      isServerless?: boolean;
-    } = { ignorePageLeaveWarning: true, isServerless: false }
-  ) {
-    this.log.debug('gotoDashboardLandingPage');
-    const onPage = await this.onDashboardLandingPage();
-    if (!onPage) {
-      await this.clickDashboardBreadcrumbLink(isServerless);
-      await this.retry.try(async () => {
-        const warning = await this.testSubjects.exists('confirmModalTitleText');
-        if (warning) {
-          await this.testSubjects.click(
-            ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-          );
-        }
-      });
-      await this.expectExistsDashboardLandingPage();
+  private async ensureOnDashboardListingPage() {
+    // retry clearing the warning if it exists.
+    if (await this.testSubjects.exists('confirmModalTitleText')) {
+      await this.testSubjects.click('confirmModalConfirmButton');
     }
+    await this.expectExistsDashboardLandingPage();
+  }
+
+  public async gotoDashboardLandingPage() {
+    this.log.debug('go to Dashboard landing page');
+    if (await this.onDashboardLandingPage()) return;
+    await this.retry.try(async () => {
+      await this.testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
+      this.ensureOnDashboardListingPage();
+    });
+  }
+
+  public async gotoDashboardServerlessLandingPage() {
+    this.log.debug('go to serverless Dashboard landing page');
+    if (await this.onDashboardLandingPage()) return;
+    await this.retry.try(async () => {
+      await this.testSubjects.click('breadcrumb breadcrumb-deepLinkId-dashboards');
+      this.ensureOnDashboardListingPage();
+    });
   }
 
   public async clickClone() {
