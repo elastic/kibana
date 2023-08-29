@@ -150,9 +150,8 @@ spec:
         build_branches: false
         build_pull_request_forks: false
         build_tags: true
-        # https://regex101.com/r/ScgA8Y/1
-        filter_condition: 'build.tag =~ "/^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$$/
-"'
+        # https://regex101.com/r/tY52jo/1
+        filter_condition: 'build.tag =~ "/^deploy@\d+$$/"'
         filter_enabled: true
         trigger_mode: none
       teams:
