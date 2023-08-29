@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './src/field_maps';
-export * from './src/schemas';
-export * from './src/search';
+export { buildAlertFieldsRequest, ALERT_EVENTS_FIELDS } from './security';
