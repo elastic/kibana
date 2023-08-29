@@ -24,7 +24,7 @@ import type {
   INDEX_PATTERN_TYPE,
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
-import {
+import type {
   DataViewEditorService,
   DataViewEditorServiceConstructorArgs,
 } from './data_view_editor_service';
