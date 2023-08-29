@@ -159,11 +159,12 @@ describe('Related integrations', { tags: ['@ess', '@brokenInServerless'] }, () =
       });
 
       it('should display a badge with the installed integrations', () => {
+        const enabledIntegrations = RULE_RELATED_INTEGRATIONS.filter((x) => x.enabled).length;
+        const totalIntegrations = RULE_RELATED_INTEGRATIONS.length;
+
         cy.get(INTEGRATIONS_POPOVER).should(
           'have.text',
-          `${RULE_RELATED_INTEGRATIONS.filter((x) => x.enabled).length}/${
-            RULE_RELATED_INTEGRATIONS.length
-          } integrations`
+          `${enabledIntegrations}/${totalIntegrations} integrations`
         );
       });
 
