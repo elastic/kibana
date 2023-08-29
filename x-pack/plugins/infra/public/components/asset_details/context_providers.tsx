@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AssetDetailsStateProvider } from './hooks/use_asset_details_state';
+import { AssetDetailsRenderPropsProvider } from './hooks/use_asset_details_render_props';
 import { DateRangeProvider } from './hooks/use_date_range';
 import { MetadataStateProvider } from './hooks/use_metadata_state';
 import { AssetDetailsProps } from './types';
@@ -21,8 +21,8 @@ export const ContextProviders = ({
   return (
     <DateRangeProvider initialDateRange={dateRange}>
       <MetadataStateProvider asset={asset} assetType={assetType}>
-        <AssetDetailsStateProvider
-          state={{
+        <AssetDetailsRenderPropsProvider
+          props={{
             asset,
             assetType,
             overrides,
@@ -30,7 +30,7 @@ export const ContextProviders = ({
           }}
         >
           {children}
-        </AssetDetailsStateProvider>
+        </AssetDetailsRenderPropsProvider>
       </MetadataStateProvider>
     </DateRangeProvider>
   );

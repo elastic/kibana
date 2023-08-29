@@ -29,7 +29,7 @@ import {
   ProcessListContextProvider,
 } from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
 import { getFieldByType } from '../../../../../common/inventory_models';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
@@ -41,7 +41,7 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
 export const Processes = () => {
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { asset, assetType } = useAssetDetailsStateContext();
+  const { asset, assetType } = useAssetDetailsRenderPropsContext();
 
   const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');
   const [searchBarState, setSearchBarState] = useState<Query>(() =>

@@ -24,7 +24,7 @@ export interface UseDateRangeProviderProps {
 
 export function useDateRangeProvider({ initialDateRange }: UseDateRangeProviderProps) {
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const dateRange: TimeRange = urlState?.dateRange || initialDateRange;
+  const dateRange: TimeRange = urlState?.dateRange ?? initialDateRange;
 
   const setDateRange = useCallback(
     (newDateRange: TimeRange) => {

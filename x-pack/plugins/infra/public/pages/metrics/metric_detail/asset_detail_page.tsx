@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { NoRemoteCluster } from '../../../components/empty_states';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';

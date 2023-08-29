@@ -13,7 +13,6 @@ import { FlyoutTabIds } from '../types';
 import { useUrlState } from '../../../utils/use_url_state';
 
 export const DEFAULT_STATE: AssetDetailsState = {
-  itemId: '',
   tabId: FlyoutTabIds.OVERVIEW,
   processSearch: undefined,
   metadataSearch: undefined,
@@ -55,7 +54,6 @@ const TabIdRT = rt.union([
 
 const AssetDetailsStateRT = rt.intersection([
   rt.type({
-    itemId: rt.string,
     tabId: TabIdRT,
   }),
   rt.partial({

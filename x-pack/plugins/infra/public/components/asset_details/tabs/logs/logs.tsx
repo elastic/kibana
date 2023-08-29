@@ -16,7 +16,7 @@ import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/comm
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
@@ -26,7 +26,7 @@ const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 export const Logs = () => {
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { asset, assetType } = useAssetDetailsStateContext();
+  const { asset, assetType } = useAssetDetailsRenderPropsContext();
   const { logs } = useDataViewsProviderContext();
 
   const { loading: logViewLoading, reference: logViewReference } = logs ?? {};

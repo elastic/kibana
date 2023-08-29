@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Table } from './table';
 import { getAllFields } from './utils';
 import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
 export interface MetadataSearchUrlState {
@@ -22,7 +22,7 @@ export interface MetadataSearchUrlState {
 
 export const Metadata = () => {
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { overrides } = useAssetDetailsStateContext();
+  const { overrides } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,

@@ -168,16 +168,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  const refreshPageWithDelay = async () => {
-    /**
-     * Delay gives React a chance to finish
-     * running effects (like updating the URL) before
-     * refreshing the page.
-     */
-    await pageObjects.common.sleep(1000);
-    await browser.refresh();
-  };
-
   describe('Hosts View', function () {
     before(async () => {
       await Promise.all([
@@ -294,16 +284,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
-        it('preserves selected tab between page reloads', async () => {
-          await testSubjects.missingOrFail('infraAssetDetailsMetadataTable');
-          await pageObjects.assetDetails.clickMetadataTab();
-          await pageObjects.assetDetails.metadataTableExists();
-
-          await refreshPageWithDelay();
-
-          await pageObjects.assetDetails.metadataTableExists();
-        });
-
         describe('Overview Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickOverviewTab();
@@ -362,17 +342,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               await pageObjects.assetDetails.metadataRemovePinExists();
             expect(removeFilterShouldNotExist).to.be(false);
           });
-
-          it('preserves search term between page reloads', async () => {
-            const searchInput = await pageObjects.assetDetails.getMetadataSearchField();
-
-            expect(await searchInput.getAttribute('value')).to.be('');
-
-            await searchInput.type('test');
-            await refreshPageWithDelay();
-
-            expect(await searchInput.getAttribute('value')).to.be('test');
-          });
         });
 
         describe('Processes Tab', () => {
@@ -383,17 +352,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should show processes table', async () => {
             await pageObjects.assetDetails.processesTableExists();
           });
-
-          it('preserves search term between page reloads', async () => {
-            const searchInput = await pageObjects.assetDetails.getProcessesSearchField();
-
-            expect(await searchInput.getAttribute('value')).to.be('');
-
-            await searchInput.type('test');
-            await refreshPageWithDelay();
-
-            expect(await searchInput.getAttribute('value')).to.be('test');
-          });
         });
 
         describe('Logs Tab', () => {
@@ -403,17 +361,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should render logs tab', async () => {
             await pageObjects.assetDetails.logsExists();
-          });
-
-          it('preserves search term between page reloads', async () => {
-            const searchInput = await pageObjects.assetDetails.getLogsSearchField();
-
-            expect(await searchInput.getAttribute('value')).to.be('');
-
-            await searchInput.type('test');
-            await refreshPageWithDelay();
-
-            expect(await searchInput.getAttribute('value')).to.be('test');
           });
         });
 

@@ -123,8 +123,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
 
         it('preserves selected date range between page reloads', async () => {
-          const start = moment.utc('2023-08-28T10:20:00.000Z').format(DATE_PICKER_FORMAT);
-          const end = moment.utc('2023-08-28T21:00:00.000Z').format(DATE_PICKER_FORMAT);
+          const start = moment.utc(START_HOST_ALERTS_DATE).format(DATE_PICKER_FORMAT);
+          const end = moment.utc(END_HOST_ALERTS_DATE).format(DATE_PICKER_FORMAT);
 
           await pageObjects.timePicker.setAbsoluteRange(start, end);
           await refreshPageWithDelay();
@@ -214,6 +214,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickRemoveMetadataPin();
             expect(await pageObjects.assetDetails.metadataRemovePinExists()).to.be(false);
           });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getMetadataSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            await retry.try(async () => {
+              expect(await searchInput.getAttribute('value')).to.be('test');
+            });
+            await searchInput.clearValue();
+          });
         });
 
         describe('Processes Tab', () => {
@@ -233,6 +247,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.getProcessesTableBody();
             await pageObjects.assetDetails.clickProcessesTableExpandButton();
           });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getProcessesSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            await retry.try(async () => {
+              expect(await searchInput.getAttribute('value')).to.be('test');
+            });
+            await searchInput.clearValue();
+          });
         });
 
         describe('Logs Tab', () => {
@@ -242,6 +270,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should render logs tab', async () => {
             await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+          });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getLogsSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            await retry.try(async () => {
+              expect(await searchInput.getAttribute('value')).to.be('test');
+            });
+            await searchInput.clearValue();
           });
         });
 
