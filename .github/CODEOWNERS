@@ -826,16 +826,16 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/stack_functional_integration/apps/ccs/ccs_discover.js @elastic/kibana-data-discovery
 /x-pack/test/stack_functional_integration/apps/management/_index_pattern_create.js @elastic/kibana-data-discovery
 /x-pack/test/upgrade/apps/discover @elastic/kibana-data-discovery
-x-pack/test_serverless/functional/test_suites/search/context @elastic/kibana-data-discovery
-x-pack/test_serverless/functional/test_suites/search/discover @elastic/kibana-data-discovery
-x-pack/test_serverless/functional/test_suites/search/discover_ml_uptime/discover @elastic/kibana-data-discovery
-x-pack/test_serverless/functional/test_suites/search/management/data_views @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/data_views @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/data_view_field_editor @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/kql_telemetry @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/scripts_tests @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_oss @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_xpack @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/search/context @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/search/discover @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/search/discover_ml_uptime/discover @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/search/management/data_views @elastic/kibana-data-discovery
 
 # Visualizations
 /src/plugins/visualize/ @elastic/kibana-visualizations
