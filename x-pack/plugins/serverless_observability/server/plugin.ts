@@ -27,6 +27,9 @@ export class ServerlessObservabilityPlugin
 
   public setup(_coreSetup: CoreSetup, pluginsSetup: SetupDependencies) {
     pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: false, nlp: false });
+
+    // There are no specific UI settings for the Observability project
+    pluginsSetup.serverless.setupProjectSettings([]);
     return {};
   }
 

@@ -13,6 +13,7 @@ import type {
   CoreSetup,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
 import { registerApiKeyRoutes } from './routes/api_key_routes';
 import { registerIndicesRoutes } from './routes/indices_routes';
 
@@ -23,9 +24,6 @@ import type {
   SetupDependencies,
   StartDependencies,
 } from './types';
-
-// This will be moved into a package
-const SEARCH_PROJECT_SETTINGS = ['courier:ignoreFilterIfFieldNotInIndex'];
 
 export interface RouteDependencies {
   logger: Logger;

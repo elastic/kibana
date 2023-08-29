@@ -13,6 +13,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -29,20 +30,6 @@ import {
   endpointMeteringService,
   setEndpointPackagePolicyServerlessFlag,
 } from './endpoint/services';
-
-// This list will be moved into a package
-const SECURITY_PROJECT_SETTINGS = [
-  'securitySolution:refreshIntervalDefaults',
-  'securitySolution:timeDefaults',
-  'securitySolution:defaultIndex',
-  'securitySolution:defaultThreatIndex',
-  'securitySolution:defaultAnomalyScore',
-  'securitySolution:enableGroupedNav',
-  'securitySolution:rulesTableRefresh',
-  'securitySolution:ipReputationLinks',
-  'securitySolution:enableCcsWarning',
-  'securitySolution:showRelatedIntegrations',
-];
 
 export class SecuritySolutionServerlessPlugin
   implements

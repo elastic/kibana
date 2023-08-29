@@ -5404,6 +5404,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-common-settings@link:packages/serverless/settings/common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
   version "0.0.0"
   uid ""
@@ -5412,11 +5416,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-search-settings@link:packages/serverless/settings/search_project":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless-search@link:x-pack/plugins/serverless_search":
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-settings@link:packages/serverless/settings":
+"@kbn/serverless-security-settings@link:packages/serverless/settings/security_project":
   version "0.0.0"
   uid ""
 
