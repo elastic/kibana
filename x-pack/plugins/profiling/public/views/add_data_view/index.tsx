@@ -526,7 +526,7 @@ EOF`}
                       target="_blank"
                       href={`${core.docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${core.docLinks.DOC_LINK_VERSION}/profiling-advanced-configuration.html`}
                     >
-                      {i18n.translate('xpack.profiling.tabs.debWarning.fedoraLink', {
+                      {i18n.translate('xpack.profiling.tabs.debWarning.advancedLink', {
                         defaultMessage: 'Advanced configuration',
                       })}
                     </EuiLink>
