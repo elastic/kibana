@@ -64,10 +64,12 @@ export function DiscoverMainRoute({
     dataViewEditor,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
+
   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
     getDiscoverStateContainer({
       history,
       services,
+      mode,
     })
   );
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =

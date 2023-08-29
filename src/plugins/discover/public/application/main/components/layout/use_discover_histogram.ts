@@ -26,6 +26,7 @@ import {
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
@@ -299,6 +300,8 @@ export const useDiscoverHistogram = ({
 
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
+  const histogramCustomization = useDiscoverCustomization('unified_histogram');
+
   return {
     ref,
     getCreationOptions,
@@ -309,6 +312,10 @@ export const useDiscoverHistogram = ({
     timeRange,
     relativeTimeRange,
     columns,
+    onFilter: histogramCustomization?.onFilter,
+    onBrushEnd: histogramCustomization?.onBrushEnd,
+    withDefaultActions: histogramCustomization?.withDefaultActions,
+    disabledActions: histogramCustomization?.disabledActions,
   };
 };
 

@@ -283,7 +283,13 @@ function DiscoverDocumentsComponent({
         </>
       )}
       {isDataLoading && (
-        <EuiProgress size="xs" color="accent" position="absolute" css={progressStyle} />
+        <EuiProgress
+          data-test-subj="discoverDataGridUpdating"
+          size="xs"
+          color="accent"
+          position="absolute"
+          css={progressStyle}
+        />
       )}
     </EuiFlexItem>
   );

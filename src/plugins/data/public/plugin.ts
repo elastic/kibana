@@ -34,6 +34,7 @@ import {
 import {
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
+  createFiltersFromMultiValueClickAction,
   createMultiValueClickActionDefinition,
   createValueClickActionDefinition,
   createSelectRangeActionDefinition,
@@ -167,6 +168,7 @@ export class DataPublicPlugin
       actions: {
         createFiltersFromValueClickAction,
         createFiltersFromRangeSelectAction,
+        createFiltersFromMultiValueClickAction,
       },
       datatableUtilities,
       fieldFormats,
