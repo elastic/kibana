@@ -8,5 +8,16 @@
 export { bulkDeleteRulesRequestParamsSchema } from './schemas/latest';
 export { bulkDeleteRulesRequestParamsSchema as bulkDeleteRulesRequestParamsSchemaV1 } from './schemas/v1';
 
-export type {  BulkDeleteRulesResponse } from './types/latest';
-export type { BulkDeleteRulesResponse as BulkDeleteRulesResponseV1 } from './types/v1';
+export type {
+  BulkDeleteRulesResponse,
+  BulkOperationError,
+  BulkDeleteRulesRequestParams,
+} from './types/latest';
+export type {
+  BulkDeleteRulesResponse as BulkDeleteRulesResponseV1,
+  BulkOperationError as BulkOperationErrorV1,
+  BulkDeleteRulesRequestParams as BulkDeleteRulesRequestParamsV1,
+} from './types/v1';
+
+export { getAndValidateCommonBulkOptions } from './validation/latest';
+export { getAndValidateCommonBulkOptions as getAndValidateCommonBulkOptionsV1 } from './validation/v1';

@@ -10,6 +10,7 @@ import { IRouter } from '@kbn/core/server';
 import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { bulkDeleteRulesRequestParamsSchemaV1} from '../../../../../common/routes/rule/apis/bulk_delete';
 
 export const bulkDeleteRulesRoute = ({
   router,
@@ -22,10 +23,7 @@ export const bulkDeleteRulesRoute = ({
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_delete`,
       validate: {
-        body: schema.object({
-          filter: schema.maybe(schema.string()),
-          ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 })),
-        }),
+        body: bulkDeleteRulesRequestParamsSchemaV1,
       },
     },
     handleDisabledApiKeysError(

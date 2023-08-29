@@ -23,16 +23,20 @@ import {
 import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
-  getAndValidateCommonBulkOptions,
 } from '../../../../rules_client/common';
-import {
-  BulkOptions,
-  BulkOperationError,
-  RulesClientContext,
-} from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import type {
+  BulkOperationErrorV1,
+  BulkDeleteRulesResponseV1,
+  BulkDeleteRulesRequestParamsV1,
+} from '../../../../../common/routes/rule/apis/bulk_delete';
+import { getAndValidateCommonBulkOptionsV1 } from '../../../../../common/routes/rule/apis/bulk_delete';
 
-export const bulkDeleteRules = async (context: RulesClientContext, options: BulkOptions) => {
-  const { ids, filter } = getAndValidateCommonBulkOptions(options);
+export const bulkDeleteRules = async (
+  context: RulesClientContext,
+  options: BulkDeleteRulesRequestParamsV1
+): Promise<BulkDeleteRulesResponseV1> => {
+  const { ids, filter } = getAndValidateCommonBulkOptionsV1(options);
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
@@ -152,7 +156,7 @@ const bulkDeleteWithOCC = async (
   const deletedRuleIds: string[] = [];
   const apiKeysToInvalidate: string[] = [];
   const taskIdsToDelete: string[] = [];
-  const errors: BulkOperationError[] = [];
+  const errors: BulkOperationErrorV1[] = [];
 
   result.statuses.forEach((status) => {
     if (status.error === undefined) {

@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RuleParamsV1, RuleResponseV1 } from '../../../response';
+import type { TypeOf } from '@kbn/config-schema';
+import { bulkDeleteRulesRequestParamsSchemaV1 } from '..';
+import { Rule } from '../../../../../rule';
 
 export interface BulkOperationError {
   message: string;
@@ -15,12 +17,11 @@ export interface BulkOperationError {
   };
 }
 
-interface BulkBulkDeleteResponse<Params> {
-  rules: Array<RuleResponseV1<Params>>;
+export type BulkDeleteRulesRequestParams = TypeOf<typeof bulkDeleteRulesRequestParamsSchemaV1>;
+
+export interface BulkDeleteRulesResponse {
+  rules: Rule[];
   errors: BulkOperationError[];
   total: number;
-}
-
-export interface BulkDeleteRulesResponse<Params extends RuleParamsV1 = never> {
-  body: BulkBulkDeleteResponse<Params>;
+  taskIdsFailedToBeDeleted: string[];
 }
