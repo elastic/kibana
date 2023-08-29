@@ -131,7 +131,7 @@ export const Processes = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <ProcessesExplanationMessage />
+        {!error && (response?.processList ?? []).length > 0 && <ProcessesExplanationMessage />}
         <EuiFlexItem grow={false}>
           <EuiSearchBar
             query={searchBarState}

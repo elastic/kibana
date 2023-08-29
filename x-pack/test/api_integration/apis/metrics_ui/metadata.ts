@@ -100,7 +100,8 @@ export default function ({ getService }: FtrProviderContext) {
             expect(metadata.features.length).to.be(58);
             expect(metadata.name).to.equal('gke-observability-8--observability-8--bc1afd95-f0zc');
             expect(metadata.info).to.eql({
-              timestamp: '2019-07-25T19:37:57.653Z',
+              '@timestamp': '2019-07-25T19:38:08.625Z',
+              timestamp: '2019-07-25T19:38:08.625Z',
               cloud: {
                 availability_zone: 'europe-west1-c',
                 instance: {
