@@ -109,16 +109,25 @@ Example: `2022-02-03T20:29:27.732Z`.
 `context.hits`:: The most recent documents that matched the query. Using the 
 https://mustache.github.io/[Mustache] template array syntax, you can iterate 
 over these hits to get values from the {es} documents into your actions.
-+
-[role="screenshot"]
-image::images/rule-types-es-query-example-action-variable.png[Iterate over hits using Mustache template syntax]
-+
-The documents returned by `context.hits` include the {ref}/mapping-source-field.html[`_source`] field.
-If the {es} query search API's {ref}/search-fields.html#search-fields-param[`fields`] parameter is used, documents will also return the `fields` field, 
-which can be used to access any runtime fields defined by the {ref}/runtime-search-request.html[`runtime_mappings`] parameter as the following example shows:
+For example, the message in an email connector action might contain:
 +
 --
-[source]
+[source,sh]
+--------------------------------------------------
+Elasticsearch query rule '{{rule.name}}' is active:
+
+{{#context.hits}}
+Document with {{_id}} and hostname {{_source.host.name}} has
+{{_source.system.memory.actual.free}} bytes of memory free
+{{/context.hits}}
+--------------------------------------------------
+
+The documents returned by `context.hits` include the {ref}/mapping-source-field.html[`_source`] field.
+If the {es} query search API's {ref}/search-fields.html#search-fields-param[`fields`] parameter is used, documents will also return the `fields` field, 
+which can be used to access any runtime fields defined by the {ref}/runtime-search-request.html[`runtime_mappings`] parameter. 
+For example:
+
+[source,sh]
 --------------------------------------------------
 {{#context.hits}}
 timestamp: {{_source.@timestamp}}
@@ -127,13 +136,12 @@ day of the week: {{fields.day_of_week}} <1>
 --------------------------------------------------
 // NOTCONSOLE
 <1> The `fields` parameter here is used to access the `day_of_week` runtime field.
---
-+
+
 As the {ref}/search-fields.html#search-fields-response[`fields`] response always returns an array of values for each field, 
-the https://mustache.github.io/[Mustache] template array syntax is used to iterate over these values in your actions as the following example shows:
-+
---
-[source]
+the https://mustache.github.io/[Mustache] template array syntax is used to iterate over these values in your actions.
+For example:
+
+[source,sh]
 --------------------------------------------------
 {{#context.hits}}
 Labels:
