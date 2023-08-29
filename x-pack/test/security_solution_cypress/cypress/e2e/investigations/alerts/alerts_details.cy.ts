@@ -60,7 +60,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('With unmapped fields', () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'unmapped_fields');
+      cy.task('esArchiverLoad', { archiveName: 'unmapped_fields' });
       createRule(getUnmappedRule());
     });
 
@@ -126,7 +126,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Url state management', () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'query_alert');
+      cy.task('esArchiverLoad', { archiveName: 'query_alert' });
     });
 
     beforeEach(() => {
@@ -172,7 +172,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Localstorage management', () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'query_alert');
+      cy.task('esArchiverLoad', { archiveName: 'query_alert' });
     });
 
     beforeEach(() => {
