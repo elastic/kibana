@@ -373,7 +373,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
             ...SNOOZE_SCHEDULE,
             // updating the dtstart to the current time because otherwise the snooze might be over already
             dtstart: new Date().toISOString(),
-            duration: 1000,
+            duration: 3000,
           },
         ]);
       });
