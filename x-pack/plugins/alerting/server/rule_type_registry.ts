@@ -38,6 +38,10 @@ import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_n
 import { InMemoryMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
 import { AlertsService } from './alerts_service/alerts_service';
+import {
+  getRuleTypeIdLegacyConsumers,
+  isRuleTypeIdHasLegacyConsumers,
+} from './rule_type_registry_deprecated_consumers';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -70,6 +74,7 @@ export interface RegistryRuleType
   enabledInLicense: boolean;
   hasFieldsForAAD: boolean;
   hasAlertsMappings: boolean;
+  legacyConsumers: string[];
 }
 
 /**
@@ -102,6 +107,7 @@ export type NormalizedRuleType<
   RecoveryActionGroupId extends string,
   AlertData extends RuleAlertData
 > = {
+  legacyConsumers: string[];
   actionGroups: Array<ActionGroup<ActionGroupIds | RecoveryActionGroupId>>;
 } & Omit<
   RuleType<
@@ -386,6 +392,7 @@ export class RuleTypeRegistry {
           doesSetRecoveryContext,
           alerts,
           fieldsForAAD,
+          legacyConsumers,
         },
       ]) => {
         // KEEP the type here to be safe if not the map is  ignoring it for some reason
@@ -409,6 +416,7 @@ export class RuleTypeRegistry {
           ).isValid,
           hasFieldsForAAD: Boolean(fieldsForAAD),
           hasAlertsMappings: !!alerts,
+          legacyConsumers,
           ...(alerts ? { alerts } : {}),
         };
         return ruleType;
@@ -499,5 +507,6 @@ function augmentActionGroupsWithReserved<
     ...ruleType,
     actionGroups: [...actionGroups, ...reservedActionGroups],
     recoveryActionGroup: recoveryActionGroup ?? RecoveredActionGroup,
+    legacyConsumers: isRuleTypeIdHasLegacyConsumers(id) ? getRuleTypeIdLegacyConsumers(id) : [],
   };
 }

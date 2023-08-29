@@ -34,6 +34,7 @@ export interface FindParams {
   options?: FindOptions;
   excludeFromPublicApi?: boolean;
   includeSnoozeData?: boolean;
+  featuresIds?: string[];
 }
 
 export interface FindOptions extends IndexType {
@@ -50,6 +51,7 @@ export interface FindOptions extends IndexType {
   };
   fields?: string[];
   filter?: string | KueryNode;
+  filterConsumers?: string[];
 }
 
 export interface FindResult<Params extends RuleTypeParams> {
@@ -62,7 +64,7 @@ export interface FindResult<Params extends RuleTypeParams> {
 export async function find<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   {
-    options: { fields, ...options } = {},
+    options: { fields, filterConsumers, ...options } = {},
     excludeFromPublicApi = false,
     includeSnoozeData = false,
   }: FindParams = {}
@@ -71,7 +73,8 @@ export async function find<Params extends RuleTypeParams = never>(
   try {
     authorizationTuple = await context.authorization.getFindAuthorizationFilter(
       AlertingAuthorizationEntity.Rule,
-      alertingAuthorizationFilterOpts
+      alertingAuthorizationFilterOpts,
+      Array.isArray(filterConsumers) ? new Set(filterConsumers) : undefined
     );
   } catch (error) {
     context.auditLogger?.log(
@@ -84,7 +87,6 @@ export async function find<Params extends RuleTypeParams = never>(
   }
 
   const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
-
   const filterKueryNode = buildKueryNodeFilter(options.filter);
   let sortField = mapSortField(options.sortField);
   if (excludeFromPublicApi) {
