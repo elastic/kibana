@@ -8,7 +8,7 @@
 import { ScopedHistory } from '@kbn/core-application-browser';
 import { DataPublicPluginStart, ISearchStart, ISessionService } from '@kbn/data-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   createLogExplorerProfileCustomizations,
   CreateLogExplorerProfileCustomizationsDeps,
@@ -28,19 +28,16 @@ export const createLogExplorer = ({
   data,
   discover: { DiscoverContainer },
 }: CreateLogExplorerArgs) => {
-  const customizeLogExplorer = createLogExplorerProfileCustomizations({ core, data });
+  const logExplorerCustomizations = [createLogExplorerProfileCustomizations({ core, data })];
+
+  const overrideServices = {
+    data: createDataServiceProxy(data),
+  };
 
   return ({ scopedHistory }: LogExplorerProps) => {
-    const overrideServices = useMemo(
-      () => ({
-        data: createDataServiceProxy(data),
-      }),
-      []
-    );
-
     return (
       <DiscoverContainer
-        customize={customizeLogExplorer}
+        customizationCallbacks={logExplorerCustomizations}
         overrideServices={overrideServices}
         scopedHistory={scopedHistory}
       />
