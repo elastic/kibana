@@ -203,7 +203,7 @@ export const ElasticsearchOverview = () => {
             'ingestData',
             codeSnippetArguments
           )}
-          showTryInConsole={getConsoleRequest('ingestData')}
+          consoleRequest={getConsoleRequest('ingestData')}
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
