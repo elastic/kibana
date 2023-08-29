@@ -116,6 +116,7 @@ export const useLensSuggestions = ({
       }
       return undefined;
     }
+    return undefined;
   }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
 
   useEffect(() => {
@@ -139,7 +140,8 @@ export const useLensSuggestions = ({
   return {
     allSuggestions,
     currentSuggestion: histogramSuggestion ?? currentSuggestion,
-    suggestionUnsupported: !currentSuggestion && !histogramSuggestion && isPlainRecord,
+    suggestionUnsupported:
+      !currentSuggestion && !histogramSuggestion && isPlainRecord && !dataView.isTimeBased(),
     isOnHistogramMode: Boolean(histogramSuggestion),
   };
 };

@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    const getSearchCount = async (type: 'ese' | 'sql') => {
+    const getSearchCount = async (type: 'ese' | 'esql') => {
       const requests = await browser.execute(() =>
         performance
           .getEntries()
@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.canvasExists();
     };
 
-    const expectSearches = async (type: 'ese' | 'sql', expected: number, cb: Function) => {
+    const expectSearches = async (type: 'ese' | 'esql', expected: number, cb: Function) => {
       await browser.execute(async () => {
         performance.clearResourceTimings();
       });
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       query2,
       setQuery,
     }: {
-      type: 'ese' | 'sql';
+      type: 'ese' | 'esql';
       savedSearch: string;
       query1: string;
       query2: string;
@@ -218,21 +218,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('SQL mode', () => {
-      const type = 'sql';
+    describe('ES|QL mode', () => {
+      const type = 'esql';
 
       beforeEach(async () => {
         await PageObjects.discover.selectTextBaseLang();
-        monacoEditor.setCodeEditorValue('SELECT count(*) FROM "logstash-*" WHERE bytes > 1000');
+        monacoEditor.setCodeEditorValue(
+          'from logstash-* | where bytes > 1000 | stats countB = count(bytes)'
+        );
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
       });
 
       getSharedTests({
         type,
-        savedSearch: 'sql test',
-        query1: 'SELECT type, count(*) FROM "logstash-*" WHERE bytes > 1000 GROUP BY type',
-        query2: 'SELECT type, count(*) FROM "logstash-*" WHERE bytes < 2000 GROUP BY type',
+        savedSearch: 'esql test',
+        query1: 'from logstash-* | where bytes > 1000 | stats countB = count(bytes) ',
+        query2: 'from logstash-* | where bytes < 2000 | stats countB = count(bytes) ',
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
       });
     });
