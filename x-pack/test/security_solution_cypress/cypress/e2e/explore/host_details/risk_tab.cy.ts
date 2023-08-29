@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { login, visitHostDetailsPage } from '../../../tasks/login';
 
 import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
 import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 
-describe('risk tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_hosts');
+    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
   });
 
   beforeEach(() => {

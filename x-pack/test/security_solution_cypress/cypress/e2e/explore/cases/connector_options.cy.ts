@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
@@ -29,7 +28,7 @@ import { CASES_URL } from '../../../urls/navigation';
 import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../../../screens/case_details';
 import { cleanKibana } from '../../../tasks/common';
 
-describe('Cases connector incident fields', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
