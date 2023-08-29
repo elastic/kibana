@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import { CoreSetup, DEFAULT_APP_CATEGORIES, Plugin } from '@kbn/core/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
   // PluginStartContract as FeaturesPluginStart,
@@ -19,6 +19,41 @@ export interface FeatureControlExampleDeps {
 export class MyFeaturePlugin implements Plugin<void, void, any, FeatureControlExampleDeps> {
   public setup(core: CoreSetup, { features }: FeatureControlExampleDeps) {
     const router = core.http.createRouter();
+    // features.registerKibanaFeature({
+    //   id: 'MyFeaturePLuginIsNeeded',
+    //   name: 'FeaturePLuginExample',
+    //   category: DEFAULT_APP_CATEGORIES.management,
+    //   app: [],
+    //   privileges: {
+    //     all: {
+    //       app: [],
+    //       api: [],
+    //       catalogue: [],
+    //       management: {
+    //         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
+    //       },
+    //       savedObject: {
+    //         all: [],
+    //         read: [],
+    //       },
+    //       ui: ['show', 'execute', 'save', 'delete'],
+    //     },
+    //     read: {
+    //       app: [],
+    //       api: [],
+    //       catalogue: [],
+    //       management: {
+    //         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
+    //       },
+    //       savedObject: {
+    //         // action execution requires 'read' over `actions`, but 'all' over `action_task_params`
+    //         all: [],
+    //         read: [],
+    //       },
+    //       ui: ['show', 'execute'],
+    //     },
+    //   },
+    // });
     router.get(
       {
         path: '/internal/my_plugin/example',
