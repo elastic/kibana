@@ -7,6 +7,7 @@
  */
 
 import React, { FC, MouseEventHandler, useContext } from 'react';
+import { ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM } from '@kbn/core-http-common';
 import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 
 import { SAMPLE_DATA_API } from './constants';
@@ -116,7 +117,7 @@ export const SampleDataCardKibanaProvider: FC<KibanaDependencies> = ({
       application.navigateToUrl(http.basePath.prepend(targetUrl));
     },
     installSampleDataSet: async (id, defaultIndex) => {
-      await http.post(`${SAMPLE_DATA_API}/${id}`);
+      await http.post(`${SAMPLE_DATA_API}/${id}?${ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM}=true`);
 
       if (uiSettings.isDefault('defaultIndex')) {
         uiSettings.set('defaultIndex', defaultIndex);
