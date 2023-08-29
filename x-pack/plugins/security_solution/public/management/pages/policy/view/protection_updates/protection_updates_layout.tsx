@@ -22,7 +22,7 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +30,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
+import { useCreateProtectionUpdatesNote } from './hooks/use_post_protection_updates_note';
+import { useGetProtectionUpdatesNote } from './hooks/use_get_protection_updates_note';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
@@ -68,6 +70,20 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
     const today = moment();
     const [selectedDate, setSelectedDate] = useState<Moment>(today);
+
+    const { data: fetchedNote, isLoading: getNoteInProgress } = useGetProtectionUpdatesNote({
+      policyId: _policy.id,
+    });
+    const { isLoading: createNoteInProgress, mutate: createNote } = useCreateProtectionUpdatesNote({
+      policyId: _policy.id,
+    });
+    const [note, setNote] = useState('');
+
+    useEffect(() => {
+      if (fetchedNote && !getNoteInProgress) {
+        setNote(fetchedNote.note);
+      }
+    }, [fetchedNote, getNoteInProgress]);
 
     const automaticUpdatesEnabled = manifestVersion === 'latest';
     const internalDateFormat = 'YYYY-MM-DD';
@@ -121,8 +137,27 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               text: err.message,
             });
           });
+        if ((!fetchedNote && note !== '') || (fetchedNote && note !== fetchedNote.note)) {
+          createNote(
+            { note },
+            {
+              onError: (error) => {
+                toasts.addDanger({
+                  'data-test-subj': 'protectionUpdatesNoteUpdateFailureMessage',
+                  title: i18n.translate(
+                    'xpack.securitySolution.endpoint.protectionUpdates.noteUpdateErrorTitle',
+                    {
+                      defaultMessage: 'Note update failed!',
+                    }
+                  ),
+                  text: error.body.message,
+                });
+              },
+            }
+          );
+        }
       },
-      [dispatch, policy, sendPolicyUpdate, toasts]
+      [policy, sendPolicyUpdate, fetchedNote, note, toasts, dispatch, createNote]
     );
 
     const toggleAutomaticUpdates = useCallback(
@@ -262,11 +297,12 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               )}
             </h5>
           </EuiTitle>
-          <EuiSpacer size="m" />
 
+          <EuiSpacer size="m" />
           <EuiText size="m" data-test-subj="protection-updates-deployed-version">
             {deployedVersion === 'latest' ? 'latest' : formattedDate}
           </EuiText>
+
           <EuiSpacer size="l" />
           {renderVersionToDeployPicker()}
 
@@ -292,22 +328,26 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
             />
           </EuiFlexGroup>
           <EuiSpacer size="m" />
+          {canWritePolicyManagement ? (
+            <EuiTextArea
+              value={note}
+              disabled={getNoteInProgress || createNoteInProgress}
+              onChange={(e) => setNote(e.target.value)}
+              fullWidth={true}
+              rows={3}
+              placeholder={i18n.translate(
+                'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
+                {
+                  defaultMessage: 'Add relevant information about update here',
+                }
+              )}
+              data-test-subj={'protection-updates-manifest-note'}
+            />
+          ) : (
+            <EuiText data-test-subj={'protection-updates-manifest-note-view-mode'}>{note}</EuiText>
+          )}
 
-          <EuiTextArea
-            value={''}
-            onChange={() => undefined}
-            fullWidth={true}
-            rows={3}
-            placeholder={i18n.translate(
-              'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
-              {
-                defaultMessage: 'Add relevant information about update here',
-              }
-            )}
-            data-test-subj={'protection-updates-manifest-note'}
-          />
           <EuiSpacer size="m" />
-
           <EuiButton
             fill={true}
             disabled={!canWritePolicyManagement}
@@ -353,7 +393,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
           <EuiShowFor sizes={['l', 'xl', 'm']}>
             {canWritePolicyManagement ? (
               <EuiSwitch
-                disabled={isUpdating}
+                disabled={isUpdating || createNoteInProgress || getNoteInProgress}
                 label={'Update manifest automatically'}
                 labelProps={{ 'data-test-subj': 'protection-updates-manifest-switch-label' }}
                 checked={automaticUpdatesEnabled}

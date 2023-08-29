@@ -30,7 +30,7 @@ export function registerProtectionUpdatesNoteRoutes(
     .post({
       access: 'public',
       path: PROTECTION_UPDATES_NOTE_ROUTE,
-      options: { authRequired: true },
+      options: { authRequired: true, tags: ['access:securitySolution'] },
     })
     .addVersion(
       {
@@ -50,7 +50,7 @@ export function registerProtectionUpdatesNoteRoutes(
     .get({
       access: 'public',
       path: PROTECTION_UPDATES_NOTE_ROUTE,
-      options: { authRequired: true },
+      options: { authRequired: true, tags: ['access:securitySolution'] },
     })
     .addVersion(
       {
@@ -60,7 +60,7 @@ export function registerProtectionUpdatesNoteRoutes(
         },
       },
       withEndpointAuthz(
-        { all: ['canWritePolicyManagement'] },
+        { all: ['canReadSecuritySolution'] },
         logger,
         getProtectionUpdatesNoteHandler()
       )
@@ -70,7 +70,7 @@ export function registerProtectionUpdatesNoteRoutes(
     .put({
       access: 'public',
       path: PROTECTION_UPDATES_NOTE_ROUTE,
-      options: { authRequired: true },
+      options: { authRequired: true, tags: ['access:securitySolution'] },
     })
     .addVersion(
       {
@@ -90,7 +90,7 @@ export function registerProtectionUpdatesNoteRoutes(
     .delete({
       access: 'public',
       path: PROTECTION_UPDATES_NOTE_ROUTE,
-      options: { authRequired: true },
+      options: { authRequired: true, tags: ['access:securitySolution'] },
     })
     .addVersion(
       {

@@ -9,7 +9,10 @@ import moment from 'moment/moment';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
-import { setCustomProtectionUpdatesManifestVersion } from '../../tasks/endpoint_policy';
+import {
+  setCustomProtectionUpdatesManifestVersion,
+  setCustomProtectionUpdatesNote,
+} from '../../tasks/endpoint_policy';
 import { login, ROLE } from '../../tasks/login';
 import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
 
@@ -17,6 +20,8 @@ describe('Policy Details', () => {
   describe('Protection updates', () => {
     const loadProtectionUpdatesUrl = (policyId: string) =>
       loadPage(`/app/security/administration/policy/${policyId}/protectionUpdates`);
+    const testNote = 'test note';
+    const updatedTestNote = 'updated test note';
 
     describe('Renders and saves protection updates', () => {
       let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -59,13 +64,18 @@ describe('Policy Details', () => {
         cy.getByTestSubj('protection-updates-version-to-deploy-picker').within(() => {
           cy.get('input').should('have.value', formattedToday);
         });
+        cy.getByTestSubj('protection-updates-manifest-name-note-title');
+        cy.getByTestSubj('protection-updates-manifest-note');
         cy.getByTestSubj('policyDetailsSaveButton');
       });
 
       it('should successfully update the manifest version to custom date', () => {
         loadProtectionUpdatesUrl(policy.id);
         cy.getByTestSubj('protection-updates-manifest-switch').click();
+        cy.getByTestSubj('protection-updates-manifest-note').type(testNote);
+
         cy.intercept('PUT', `/api/fleet/package_policies/${policy.id}`).as('policy');
+        cy.intercept('POST', `/api/endpoint/protection_updates_note/*`).as('note');
         cy.getByTestSubj('policyDetailsSaveButton').click();
         cy.wait('@policy').then(({ request, response }) => {
           expect(request.body.inputs[0].config.policy.value.global_manifest_version).to.equal(
@@ -73,8 +83,15 @@ describe('Policy Details', () => {
           );
           expect(response?.statusCode).to.equal(200);
         });
+
+        cy.wait('@note').then(({ request, response }) => {
+          expect(request.body.note).to.equal(testNote);
+          expect(response?.statusCode).to.equal(200);
+        });
+
         cy.getByTestSubj('protectionUpdatesSuccessfulMessage');
         cy.getByTestSubj('protection-updates-deployed-version').contains(formattedToday);
+        cy.getByTestSubj('protection-updates-manifest-note').contains(testNote);
       });
     });
 
@@ -122,6 +139,50 @@ describe('Policy Details', () => {
       });
     });
 
+    describe('Renders and saves protection updates with custom note', () => {
+      let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+      let policy: PolicyData;
+
+      const twoMonthsAgo = moment().subtract(2, 'months').format('YYYY-MM-DD');
+
+      beforeEach(() => {
+        login();
+        disableExpandableFlyoutAdvancedSettings();
+      });
+
+      before(() => {
+        getEndpointIntegrationVersion().then((version) => {
+          createAgentPolicyTask(version).then((data) => {
+            indexedPolicy = data;
+            policy = indexedPolicy.integrationPolicies[0];
+            setCustomProtectionUpdatesManifestVersion(policy.id, twoMonthsAgo);
+            setCustomProtectionUpdatesNote(policy.id, testNote);
+          });
+        });
+      });
+
+      after(() => {
+        if (indexedPolicy) {
+          cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+        }
+      });
+
+      it('should update note on save', () => {
+        loadProtectionUpdatesUrl(policy.id);
+        cy.getByTestSubj('protection-updates-manifest-note').contains(testNote);
+        cy.getByTestSubj('protection-updates-manifest-note').clear().type(updatedTestNote);
+
+        cy.intercept('POST', `/api/endpoint/protection_updates_note/*`).as('note_updated');
+        cy.getByTestSubj('policyDetailsSaveButton').click();
+        cy.wait('@note_updated').then(({ request, response }) => {
+          expect(request.body.note).to.equal(updatedTestNote);
+          expect(response?.statusCode).to.equal(200);
+        });
+        cy.getByTestSubj('protectionUpdatesSuccessfulMessage');
+        cy.getByTestSubj('protection-updates-manifest-note').contains(updatedTestNote);
+      });
+    });
+
     describe('Renders read only protection updates for user without write permissions', () => {
       let indexedPolicy: IndexedFleetEndpointPolicyResponse;
       let policy: PolicyData;
@@ -138,6 +199,7 @@ describe('Policy Details', () => {
             indexedPolicy = data;
             policy = indexedPolicy.integrationPolicies[0];
             setCustomProtectionUpdatesManifestVersion(policy.id, twoMonthsAgo.format('YYYY-MM-DD'));
+            setCustomProtectionUpdatesNote(policy.id, testNote);
           });
         });
       });
@@ -162,6 +224,10 @@ describe('Policy Details', () => {
         cy.getByTestSubj('protection-updates-manifest-name-version-to-deploy-title');
         cy.getByTestSubj('protection-updates-version-to-deploy-view-mode');
         cy.getByTestSubj('protection-updates-version-to-deploy-picker').should('not.exist');
+
+        cy.getByTestSubj('protection-updates-manifest-name-note-title');
+        cy.getByTestSubj('protection-updates-manifest-note').should('not.exist');
+        cy.getByTestSubj('protection-updates-manifest-note-view-mode').contains(testNote);
         cy.getByTestSubj('policyDetailsSaveButton').should('be.disabled');
       });
     });
