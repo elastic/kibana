@@ -67,6 +67,7 @@ async function uploadSourcemap(apmApiClient: any) {
 export default function ({ getService }: APMFtrContextProvider) {
   const apmApiClient = getService('apmApiClient');
 
+  // Issue: https://github.com/elastic/kibana/issues/165138
   describe.skip('apm feature flags', () => {
     describe('fleet migrations', () => {
       it('rejects requests to save apm server schema', async () => {

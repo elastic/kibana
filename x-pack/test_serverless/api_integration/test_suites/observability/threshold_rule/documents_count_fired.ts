@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
 
+  // Issue: https://github.com/elastic/kibana/issues/165138
   describe.skip('Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';

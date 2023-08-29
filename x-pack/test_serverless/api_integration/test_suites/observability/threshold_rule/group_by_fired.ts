@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   let alertId: string;
   let startedAt: string;
 
+  // Issue: https://github.com/elastic/kibana/issues/165138
   describe.skip('Threshold rule - GROUP_BY - FIRED', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
