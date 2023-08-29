@@ -513,7 +513,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
-        it('runs the transform and displays it correctly in the job list', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/158612
+        it.skip('runs the transform and displays it correctly in the job list', async () => {
           await transform.testExecution.logTestStep('creates the transform');
           await transform.wizard.createTransform();
 
