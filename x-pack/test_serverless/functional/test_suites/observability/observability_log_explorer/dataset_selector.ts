@@ -259,7 +259,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.observabilityLogExplorer.assertNoIntegrationsPromptExists();
         });
 
-        it('should load more integrations by scrolling to the end of the list', async () => {
+        // skipped until https://github.com/elastic/kibana/pull/165080 is available
+        it.skip('should load more integrations by scrolling to the end of the list', async () => {
           // Install more integrations and reload the page
           const cleanupAdditionalSetup =
             await PageObjects.observabilityLogExplorer.setupAdditionalIntegrations();
