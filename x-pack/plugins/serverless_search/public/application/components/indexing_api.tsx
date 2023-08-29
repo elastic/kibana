@@ -23,20 +23,26 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
-import { OverviewPanel, LanguageClientPanel, CodeBox } from '@kbn/search-api-panels';
+import {
+  OverviewPanel,
+  LanguageClientPanel,
+  CodeBox,
+  getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
+} from '@kbn/search-api-panels';
 import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 
 import { PLUGIN_ID } from '../../../common';
+import { docLinks } from '../../../common/doc_links';
 import { IndexData, FetchIndicesResult } from '../../../common/types';
 import { FETCH_INDICES_PATH } from '../routes';
 import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { getCodeSnippet, showTryInConsole } from './languages/utils';
 
 const NoIndicesContent = () => (
   <>
@@ -47,7 +53,7 @@ const NoIndicesContent = () => (
         defaultMessage="Don't have an index yet? {getStartedLink}"
         values={{
           getStartedLink: (
-            <EuiLink href="#" external>
+            <EuiLink href={docLinks.gettingStartedIngest} external>
               {i18n.translate(
                 'xpack.serverlessSearch.content.indexingApi.clientPanel.noIndices.getStartedLink',
                 { defaultMessage: 'Get started' }
@@ -102,7 +108,6 @@ const IndicesContent = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
-            // TODO: format count based on locale
             title={selectedIndex ? selectedIndex.count.toLocaleString() : '--'}
             titleColor="primary"
             description={i18n.translate(
@@ -135,6 +140,7 @@ export const ElasticsearchIndexingApi = () => {
       return result;
     },
   });
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
@@ -202,8 +208,7 @@ export const ElasticsearchIndexingApi = () => {
                       language={language}
                       setSelectedLanguage={setSelectedLanguage}
                       isSelectedLanguage={selectedLanguage === language}
-                      http={http}
-                      pluginId={PLUGIN_ID}
+                      assetBasePath={assetBasePath}
                     />
                   </EuiFlexItem>
                 ))}
@@ -211,17 +216,16 @@ export const ElasticsearchIndexingApi = () => {
               <EuiSpacer />
               <CodeBox
                 languages={languageDefinitions}
-                codeSnippet={getCodeSnippet(
+                codeSnippet={getLanguageDefinitionCodeSnippet(
                   selectedLanguage,
                   'ingestDataIndex',
                   codeSnippetArguments
                 )}
                 selectedLanguage={selectedLanguage}
                 setSelectedLanguage={setSelectedLanguage}
-                http={http}
-                pluginId={PLUGIN_ID}
+                assetBasePath={assetBasePath}
                 sharePlugin={share}
-                showTryInConsole={showTryInConsole('ingestDataIndex')}
+                consoleRequest={getConsoleRequest('ingestDataIndex')}
               />
             </>
           }
@@ -234,7 +238,7 @@ export const ElasticsearchIndexingApi = () => {
                       'xpack.serverlessSearch.content.indexingApi.ingestDocsLink',
                       { defaultMessage: 'Ingestion documentation' }
                     ),
-                    href: '#', // TODO: get doc links ?
+                    href: docLinks.gettingStartedIngest,
                   },
                 ]
           }
