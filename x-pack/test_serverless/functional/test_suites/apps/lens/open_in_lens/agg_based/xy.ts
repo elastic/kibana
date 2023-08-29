@@ -9,14 +9,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { common, visualize, visEditor, lens, timePicker, header, visChart, dashboard } = getPageObjects([
-    'common',
-    'visualize',
+  const { lens, timePicker, dashboard } = getPageObjects([
     'lens',
-    'visEditor',
     'timePicker',
-    'header',
-    'visChart',
     'dashboard',
   ]);
 
@@ -37,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     })
 
     beforeEach(async () => {
-      await common.navigateToApp('dashboards'); // required for svl until dashboard PO navigation is fixed
+      await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
       await dashboard.gotoDashboardEditMode('Convert to Lens - XY')
       await timePicker.setDefaultAbsoluteRange()
     });
@@ -224,7 +219,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('xyVisChart');
 
       const expectedData = ['win 8','win xp','win 7','ios','osx'];
-      await lens.enableDebugState();
+      await lens.enableEchDebugState();
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       await retry.try(async () => {
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
@@ -244,7 +239,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('xyVisChart');
 
       const expectedData = ['Count'];
-      await lens.enableDebugState();
+      await lens.enableEchDebugState();
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       await retry.try(async () => {
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);

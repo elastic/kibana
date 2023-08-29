@@ -9,11 +9,8 @@ import { createTestConfig } from "../../../../../config.base";
 
 export default createTestConfig({
   serverlessProject: 'es',
-  testFiles: [
-    // require.resolve('../../../../common'),
-    require.resolve('.'),
-  ],
+  testFiles: [require.resolve('.')],
   junit: {
-    reportName: 'Serverless Lens agg-based Functional Tests',
+    reportName: 'Serverless Lens C2L agg-based Functional Tests',
   },
 });

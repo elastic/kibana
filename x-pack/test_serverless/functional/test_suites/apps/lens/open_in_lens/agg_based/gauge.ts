@@ -9,13 +9,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { common, visualize, lens, timePicker, visEditor, visChart, dashboard } = getPageObjects([
-    'common',
-    'visualize',
+  const { lens, timePicker, dashboard } = getPageObjects([
     'lens',
     'timePicker',
-    'visEditor',
-    'visChart',
     'dashboard'
   ]);
 
@@ -36,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     })
 
     beforeEach(async () => {
-      await common.navigateToApp('dashboards'); // required for svl until dashboard PO navigation is fixed
+      await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
       await dashboard.gotoDashboardEditMode('Convert to Lens - Gauge')
       await timePicker.setDefaultAbsoluteRange()
     });

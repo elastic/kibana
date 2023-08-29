@@ -9,8 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { common, lens, timePicker, dashboard } = getPageObjects([
-    'common',
+  const { lens, timePicker, dashboard } = getPageObjects([
     'lens',
     'timePicker',
     'dashboard'
@@ -31,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     })
 
     beforeEach(async () => {
-      await common.navigateToApp('dashboards'); // required for svl until dashboard PO navigation is fixed
+      await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
       await dashboard.gotoDashboardEditMode('Convert to Lens - Heatmap')
       await timePicker.setDefaultAbsoluteRange()
     });
@@ -50,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const visPanel = await panelActions.getPanelHeading('Heatmap - With X-Axis only');
       await panelActions.convertToLens(visPanel)
       await lens.waitForVisualization('heatmapChart');
-      await lens.enableDebugState();
+      await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // Must have Debug state
@@ -84,7 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const visPanel = await panelActions.getPanelHeading('Heatmap - With Y-Axis only');
       await panelActions.convertToLens(visPanel)
       await lens.waitForVisualization('heatmapChart');
-      await lens.enableDebugState();
+      await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // Must have Debug state
@@ -99,7 +98,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const visPanel = await panelActions.getPanelHeading('Heatmap - Color number');
       await panelActions.convertToLens(visPanel)
       await lens.waitForVisualization('heatmapChart');
-      await lens.enableDebugState();
+      await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // Must have Debug state
@@ -143,7 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const visPanel = await panelActions.getPanelHeading('Heatmap - Custom Color ranges');
       await panelActions.convertToLens(visPanel)
       await lens.waitForVisualization('heatmapChart');
-      await lens.enableDebugState();
+      await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // Must have Debug state

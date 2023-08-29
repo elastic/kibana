@@ -56,7 +56,12 @@ export class DashboardPageObject extends FtrService {
     await this.kibanaServer.savedObjects.cleanStandardList();
     await this.kibanaServer.importExport.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
-    await this.common.navigateToApp('dashboard');
+    await this.goToApp();
+  }
+
+  public async goToApp() {
+    const appName = this.config.get('serverless') ? 'dashboards' : 'dashboard';
+    await this.common.navigateToApp(appName);
   }
 
   public async expectAppStateRemovedFromURL() {
