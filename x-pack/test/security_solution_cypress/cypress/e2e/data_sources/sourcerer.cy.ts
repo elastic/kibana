@@ -35,12 +35,12 @@ const rolesToCreate = [secReadCasesAll];
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
-describe('Sourcerer', { tags: ['@ess', '@serverless', '@brokenInSserverless'] }, () => {
+describe('Sourcerer', () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
-  describe('permissions', () => {
+  describe('permissions', { tags: '@ess' }, () => {
     before(() => {
       createUsersAndRoles(usersToCreate, rolesToCreate);
     });
@@ -51,7 +51,7 @@ describe('Sourcerer', { tags: ['@ess', '@serverless', '@brokenInSserverless'] },
     });
   });
 
-  describe('Default scope', () => {
+  describe('Default scope', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       cy.clearLocalStorage();
       login();
