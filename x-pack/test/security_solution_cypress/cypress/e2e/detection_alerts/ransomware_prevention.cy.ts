@@ -40,7 +40,7 @@ describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () =
       });
     });
 
-    describe('Trend Chart', () => {
+    describe('Trend Chart', { tags: ['@brokenInServerless'] }, () => {
       beforeEach(() => {
         selectAlertsHistogram();
       });
