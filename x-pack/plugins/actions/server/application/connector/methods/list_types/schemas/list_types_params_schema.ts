@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export interface ListTypesParams {
-  featureId?: string;
-  includeSystemActionTypes?: boolean;
-}
+import { schema } from '@kbn/config-schema';
+
+export const listTypesParamsSchema = schema.object({
+  featureId: schema.maybe(schema.string()),
+  includeSystemActionTypes: schema.maybe(schema.boolean()),
+});

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { ListTypesParams } from './list_types_params';
+export { listTypesParamsSchema } from './list_types_params_schema';
