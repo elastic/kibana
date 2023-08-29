@@ -7,10 +7,10 @@
   "scripts": {
     "cypress:burn": "yarn cypress:run --env burn=2 --headed",
     "cypress:changed-specs-only": "yarn cypress:run --changed-specs-only --env burn=2",
-    "cypress": "node ../security_solution/scripts/start_cypress_parallel --config-file ../osquery/cypress.config.ts --ftr-config-file ../../../x-pack/test/osquery_cypress/cli_config",
+    "cypress": "NODE_OPTIONS=--openssl-legacy-provider && node ../security_solution/scripts/start_cypress_parallel --config-file ../osquery/cypress.config.ts --ftr-config-file ../../../x-pack/test/osquery_cypress/cli_config",
     "cypress:open": "yarn cypress open",
     "cypress:run": "yarn cypress run",
-    "cypress:serverless": "node ../security_solution/scripts/start_cypress_parallel --config-file ../osquery/serverless_cypress.config.ts --ftr-config-file ../../../x-pack/test/osquery_cypress/serverless_cli_config",
+    "cypress:serverless": "NODE_OPTIONS=--openssl-legacy-provider && node ../security_solution/scripts/start_cypress_parallel --config-file ../osquery/serverless_cypress.config.ts --ftr-config-file ../../../x-pack/test/osquery_cypress/serverless_cli_config",
     "cypress:serverless:open": "yarn cypress:serverless open",
     "cypress:serverless:run": "yarn cypress:serverless run",
     "nyc": "../../../node_modules/.bin/nyc report --reporter=text-summary",
