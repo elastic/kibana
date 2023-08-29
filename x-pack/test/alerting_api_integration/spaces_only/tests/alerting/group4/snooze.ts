@@ -353,9 +353,12 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
+      const dateStart = new Date().toISOString();
       const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
         snooze_schedule: {
           ...SNOOZE_SCHEDULE,
+          // updating the dtstart to the current time because otherwise the snooze might be over already
+          dtstart: dateStart,
           duration: 3000,
         },
       });
@@ -371,8 +374,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         expect(updatedAlert.snooze_schedule).to.eql([
           {
             ...SNOOZE_SCHEDULE,
-            // updating the dtstart to the current time because otherwise the snooze might be over already
-            dtstart: new Date().toISOString(),
+            dtstart: dateStart,
             duration: 3000,
           },
         ]);
