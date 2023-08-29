@@ -166,10 +166,26 @@ curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
 
 
 `xpack.actions.proxyBypassHosts` {ess-icon}::
-Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
+Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings. Example:
++
+[source,yaml]
+----
+# If applicable, include the subdomain in the hostname
+xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
+----
++
+By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
 
 `xpack.actions.proxyOnlyHosts` {ess-icon}::
-Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, no hosts will use the proxy, but if an action's hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
+Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings. Example:
++
+[source,yaml]
+----
+# If applicable, include the subdomain in the hostname
+xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
+----
++
+By default, no hosts will use the proxy, but if an action's hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
 
 `xpack.actions.proxyHeaders` {ess-icon}::
 Specifies HTTP headers for the proxy, if using a proxy for actions. Default: {}.
