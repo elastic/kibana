@@ -17,7 +17,6 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
-import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
@@ -535,6 +534,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       createFleetActionsClient,
       esClient: core.elasticsearch.client.asInternalUser,
       appFeatures: this.appFeatures,
+      savedObjectsClient,
     });
 
     this.telemetryReceiver.start(
@@ -561,13 +561,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         });
       }
     });
-
-    if (registerIngestCallback) {
-      registerIngestCallback(
-        'packagePolicyPostDelete',
-        getPackagePolicyDeleteCallback(savedObjectsClient)
-      );
-    }
 
     return {};
   }

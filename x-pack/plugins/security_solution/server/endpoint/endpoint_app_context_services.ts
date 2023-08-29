@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  Logger,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
 import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -71,6 +76,7 @@ export interface EndpointAppContextServiceStartContract {
   cloud: CloudSetup;
   esClient: ElasticsearchClient;
   appFeatures: AppFeatures;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 /**
@@ -109,6 +115,7 @@ export class EndpointAppContextService {
         endpointMetadataService,
         esClient,
         appFeatures,
+        savedObjectsClient,
       } = dependencies;
 
       registerIngestCallback(
@@ -145,7 +152,7 @@ export class EndpointAppContextService {
 
       registerIngestCallback(
         'packagePolicyPostDelete',
-        getPackagePolicyDeleteCallback(exceptionListsClient)
+        getPackagePolicyDeleteCallback(exceptionListsClient, savedObjectsClient)
       );
     }
 

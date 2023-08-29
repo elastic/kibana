@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
 import type {
@@ -44,6 +44,7 @@ import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage'
 import type { AnyPolicyCreateConfig } from './types';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
 import { createEventFilters } from './handlers/create_event_filters';
+import { removeProtectionUpdatesNote } from './handlers/remove_protection_updates_note';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -280,7 +281,8 @@ export const getPackagePolicyPostCreateCallback = (
 };
 
 export const getPackagePolicyDeleteCallback = (
-  exceptionsClient: ExceptionListClient | undefined
+  exceptionsClient: ExceptionListClient | undefined,
+  savedObjectsClient: SavedObjectsClientContract | undefined
 ): PostPackagePolicyPostDeleteCallback => {
   return async (deletePackagePolicy): Promise<void> => {
     if (!exceptionsClient) {
@@ -290,8 +292,12 @@ export const getPackagePolicyDeleteCallback = (
     for (const policy of deletePackagePolicy) {
       if (isEndpointPackagePolicy(policy)) {
         policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy));
+        if (savedObjectsClient) {
+          policiesToRemove.push(removeProtectionUpdatesNote(savedObjectsClient, policy));
+        }
       }
     }
+
     await Promise.all(policiesToRemove);
   };
 };

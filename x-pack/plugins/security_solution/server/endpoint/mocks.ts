@@ -216,6 +216,7 @@ export const createMockEndpointAppContextServiceStartContract =
       createFleetActionsClient: jest.fn((_) => fleetActionsClientMock),
       esClient: elasticsearchClientMock.createElasticsearchClient(),
       appFeatures,
+      savedObjectsClient: savedObjectsClientMock.create(),
     };
   };
 
