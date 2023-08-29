@@ -50,6 +50,28 @@ function setupIntegrations() {
   cy.wait('@packages');
 }
 
+// Infinite scroll
+function getAllIntegrations() {
+  const cardItems = new Set<string>();
+
+  for (let i = 0; i < 10; i++) {
+    cy.scrollTo(0, i * 600);
+    cy.wait(50);
+    cy.getBySel(INTEGRATION_LIST)
+      .find('.euiCard')
+      .each((element) => {
+        const attrValue = element.attr('data-test-subj');
+        if (attrValue) {
+          cardItems.add(attrValue);
+        }
+      });
+  }
+
+  return cy.then(() => {
+    return [...cardItems.values()];
+  });
+}
+
 it('should install integration without policy', () => {
   cy.visit('/app/integrations/detail/tomcat/settings');
 
@@ -175,30 +197,6 @@ describe('Add Integration - Real API', () => {
     cy.getBySel(getIntegrationCategories('aws')).click({ scrollBehavior: false });
 
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).contains('AWS').should('exist');
-
-    // Infinite scroll
-    function getAllIntegrations() {
-      const cardItems = new Set<string>();
-      return cy
-        .window()
-        .then(() => {
-          for (let i = 0; i < 10; i++) {
-            cy.scrollTo(0, i * 300);
-            cy.wait(50);
-            cy.getBySel(INTEGRATION_LIST)
-              .find('.euiCard')
-              .each((element) => {
-                const attrValue = element.attr('data-test-subj');
-                if (attrValue) {
-                  cardItems.add(attrValue);
-                }
-              });
-          }
-        })
-        .then(() => {
-          return [...cardItems.values()];
-        });
-    }
 
     getAllIntegrations().then((items) => {
       expect(items).to.have.length.greaterThan(29);
