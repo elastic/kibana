@@ -568,45 +568,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         expect(await commentArea.getVisibleText()).to.be('Test comment from automation');
       });
-
-      /**
-       * There is this bug https://github.com/elastic/kibana/issues/157280
-       * where this test randomly reproduces thus making the test flaky.
-       * Skipping for now until we fix it.
-       */
-      it.skip('should persist the draft of new comment while description is updated', async () => {
-        let commentArea = await find.byCssSelector(
-          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-        );
-
-        await commentArea.focus();
-        await commentArea.type('Test comment from automation');
-
-        await testSubjects.click('description-edit-icon');
-
-        await header.waitUntilLoadingHasFinished();
-
-        const description = await find.byCssSelector(
-          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
-        );
-
-        await header.waitUntilLoadingHasFinished();
-
-        await description.focus();
-        await description.type('Edited description');
-
-        await testSubjects.click('editable-save-markdown');
-        await header.waitUntilLoadingHasFinished();
-
-        await browser.refresh();
-        await header.waitUntilLoadingHasFinished();
-
-        commentArea = await find.byCssSelector(
-          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-        );
-
-        expect(await commentArea.getVisibleText()).to.be('Test comment from automation');
-      });
     });
 
     describe('actions', () => {
