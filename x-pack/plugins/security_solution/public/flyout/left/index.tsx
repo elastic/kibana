@@ -39,9 +39,10 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
   const { eventId, indexName, scopeId } = useLeftPanelContext();
 
   const selectedTabId = useMemo(() => {
-    const defaultTab = tabs[0].id;
+    const visibleTabs = tabs.filter((tab) => tab.visible);
+    const defaultTab = visibleTabs[0].id;
     if (!path) return defaultTab;
-    return tabs.map((tab) => tab.id).find((tabId) => tabId === path.tab) ?? defaultTab;
+    return visibleTabs.map((tab) => tab.id).find((tabId) => tabId === path.tab) ?? defaultTab;
   }, [path]);
 
   const setSelectedTabId = (tabId: LeftPanelTabsType[number]['id']) => {
