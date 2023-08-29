@@ -51,8 +51,11 @@ export interface IndexDetailsPageTestBed extends TestBed {
       isDisplayed: () => boolean;
       clickReloadButton: () => Promise<void>;
     };
-    statsTab: {
-      indexStatsContentExists: () => boolean;
+    stats: {
+      getCodeBlockContent: () => string;
+      getDocsLinkHref: () => string;
+      isErrorDisplayed: () => boolean;
+      clickErrorReloadButton: () => Promise<void>;
       indexStatsTabExists: () => boolean;
     };
   };
@@ -140,12 +143,24 @@ export const setup = async (
     },
   };
 
-  const statsTab = {
-    indexStatsContentExists: () => {
-      return exists('statsTabContent');
-    },
+  const stats = {
     indexStatsTabExists: () => {
       return exists('indexDetailsTab-stats');
+    },
+    getCodeBlockContent: () => {
+      return find('indexDetailsStatsCodeBlock').text();
+    },
+    getDocsLinkHref: () => {
+      return find('indexDetailsStatsDocsLink').prop('href');
+    },
+    isErrorDisplayed: () => {
+      return exists('indexDetailsStatsError');
+    },
+    clickErrorReloadButton: async () => {
+      await act(async () => {
+        find('reloadIndexStatsButton').simulate('click');
+      });
+      component.update();
     },
   };
   return {
@@ -159,7 +174,7 @@ export const setup = async (
       discoverLinkExists,
       contextMenu,
       errorSection,
-      statsTab,
+      stats,
     },
   };
 };

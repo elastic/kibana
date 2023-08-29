@@ -9,7 +9,7 @@ import { setupEnvironment } from '../helpers';
 import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
 import { IndexDetailsSection } from '../../../public/application/sections/home/index_list/details_page';
-import { testIndexMock, testIndexName } from './mocks';
+import { testIndexMock, testIndexName, testIndexStats } from './mocks';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 
 describe('<IndexDetailsPage />', () => {
@@ -22,6 +22,7 @@ describe('<IndexDetailsPage />', () => {
     ({ httpSetup, httpRequestsMockHelpers } = mockEnvironment);
     // testIndexName is configured in initialEntries of the memory router
     httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testIndexMock);
+    httpRequestsMockHelpers.setLoadIndexStatsResponse(testIndexName, testIndexStats);
 
     await act(async () => {
       testBed = await setup(httpSetup, {
@@ -62,10 +63,6 @@ describe('<IndexDetailsPage />', () => {
 
   describe('Stats tab', () => {
     it('loads index stats from the API', async () => {
-      const numberOfRequests = 1;
-      // Expect initial request to fetch index details
-      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
-
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
       expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/stats/${testIndexName}`, {
         asSystemRequest: undefined,
@@ -73,12 +70,21 @@ describe('<IndexDetailsPage />', () => {
         query: undefined,
         version: undefined,
       });
-      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
     });
 
     it('renders index stats', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
-      expect(testBed.actions.statsTab.indexStatsContentExists()).toBe(true);
+      const tabContent = testBed.actions.stats.getCodeBlockContent();
+      expect(tabContent).toEqual(JSON.stringify(testIndexStats, null, 2));
+    });
+
+    it('sets the docs link href from the documenation service', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      const docsLinkHref = testBed.actions.stats.getDocsLinkHref();
+      // the url from the mocked docs mock
+      expect(docsLinkHref).toEqual(
+        'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/indices-stats.html'
+      );
     });
 
     it('hides index stats tab if enableIndexStats===false', async () => {
@@ -89,7 +95,34 @@ describe('<IndexDetailsPage />', () => {
       });
       testBed.component.update();
 
-      expect(testBed.actions.statsTab.indexStatsTabExists()).toBe(false);
+      expect(testBed.actions.stats.indexStatsTabExists()).toBe(false);
+    });
+
+    describe('Error handling', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadIndexStatsResponse(testIndexName, undefined, {
+          statusCode: 500,
+          message: 'Error',
+        });
+        await act(async () => {
+          testBed = await setup(httpSetup);
+        });
+
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      });
+
+      it('there is an error prompt', async () => {
+        expect(testBed.actions.stats.isErrorDisplayed()).toBe(true);
+      });
+
+      it('resends a request when reload button is clicked', async () => {
+        // already sent 3 requests while setting up the component
+        const numberOfRequests = 3;
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+        await testBed.actions.stats.clickErrorReloadButton();
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+      });
     });
   });
 

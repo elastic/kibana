@@ -48,7 +48,7 @@ export const DetailsPageStats: FunctionComponent<RouteComponentProps<{ indexName
   if (error) {
     return (
       <EuiPageTemplate.EmptyPrompt
-        data-test-subj="indexStatsErrorLoadingDetails"
+        data-test-subj="indexDetailsStatsError"
         color="danger"
         iconType="warning"
         title={
@@ -162,6 +162,7 @@ export const DetailsPageStats: FunctionComponent<RouteComponentProps<{ indexName
         >
           <EuiPanel>
             <EuiCodeBlock
+              data-test-subj="indexDetailsStatsCodeBlock"
               isCopyable
               language="json"
               paddingSize="m"

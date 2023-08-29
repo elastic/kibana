@@ -29,3 +29,29 @@ export const testIndexMock: Index = {
   },
   isFollowerIndex: false,
 };
+
+// Mocking partial index stats response
+export const testIndexStats = {
+  _shards: {
+    total: 1,
+    successful: 1,
+    failed: 0,
+  },
+  stats: {
+    uuid: 'tQ-n6sriQzC84xn58VYONQ',
+    health: 'green',
+    status: 'open',
+    primaries: {
+      docs: {
+        count: 1000,
+        deleted: 0,
+      },
+    },
+    total: {
+      docs: {
+        count: 1000,
+        deleted: 0,
+      },
+    },
+  },
+};
