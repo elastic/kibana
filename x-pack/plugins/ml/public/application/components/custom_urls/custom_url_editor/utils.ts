@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment, { type Moment } from 'moment';
+import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import url from 'url';
@@ -482,6 +483,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
       delete datafeedConfig.authorization;
     }
     if (datafeedConfig && jobConfig.datafeed_config !== undefined) {
+      jobConfig = cloneDeep(jobConfig);
       delete jobConfig.datafeed_config;
     }
 
