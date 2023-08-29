@@ -88,7 +88,13 @@ export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexN
 
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
-    <EuiFlexGroup wrap direction="rowReverse">
+    <EuiFlexGroup
+      wrap
+      direction="rowReverse"
+      css={css`
+        height: 100%;
+      `}
+    >
       <EuiFlexItem
         grow={1}
         css={css`
@@ -144,7 +150,14 @@ export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexN
         `}
       >
         <EuiPanel>
-          <EuiCodeBlock language="json" isCopyable data-test-subj="indexDetailsMappingsCodeBlock">
+          <EuiCodeBlock
+            language="json"
+            isCopyable
+            data-test-subj="indexDetailsMappingsCodeBlock"
+            css={css`
+              height: 100%;
+            `}
+          >
             {JSON.stringify(data, null, 2)}
           </EuiCodeBlock>
         </EuiPanel>

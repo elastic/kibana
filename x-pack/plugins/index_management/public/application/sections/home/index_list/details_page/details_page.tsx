@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
+import { css } from '@emotion/react';
 import { Index } from '../../../../../../common';
 import { loadIndex } from '../../../../services';
 import { DiscoverLink } from '../../../../lib/discover_link';
@@ -165,7 +166,12 @@ export const DetailsPage: React.FunctionComponent<
 
       <EuiSpacer size="l" />
 
-      <div data-test-subj={`indexDetailsContent`}>
+      <div
+        data-test-subj={`indexDetailsContent`}
+        css={css`
+          height: 100%;
+        `}
+      >
         <Routes>
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
