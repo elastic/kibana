@@ -9,7 +9,8 @@ import { setupEnvironment } from '../helpers';
 import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
 import { IndexDetailsSection } from '../../../public/application/sections/home/index_list/details_page';
-import { testIndexMock } from './mocks';
+import { testIndexMock, testIndexName } from './mocks';
+import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 
 describe('<IndexDetailsPage />', () => {
   let testBed: IndexDetailsPageTestBed;
@@ -19,8 +20,8 @@ describe('<IndexDetailsPage />', () => {
   beforeEach(async () => {
     const mockEnvironment = setupEnvironment();
     ({ httpSetup, httpRequestsMockHelpers } = mockEnvironment);
-    // test_index is configured in initialEntries of the memory router
-    httpRequestsMockHelpers.setLoadIndexDetailsResponse('test_index', testIndexMock);
+    // testIndexName is configured in initialEntries of the memory router
+    httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testIndexMock);
 
     await act(async () => {
       testBed = await setup(httpSetup, {
@@ -36,9 +37,9 @@ describe('<IndexDetailsPage />', () => {
 
   describe('error section', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndexDetailsResponse('test_index', undefined, {
+      httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, undefined, {
         statusCode: 400,
-        message: 'Data for index .apm-agent-configuration was not found',
+        message: `Data for index ${testIndexName} was not found`,
       });
       await act(async () => {
         testBed = await setup(httpSetup);
@@ -59,10 +60,17 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
+  it('loads index details from the API', async () => {
+    expect(httpSetup.get).toHaveBeenLastCalledWith(
+      `${INTERNAL_API_BASE_PATH}/indices/${testIndexName}`,
+      { asSystemRequest: undefined, body: undefined, query: undefined, version: undefined }
+    );
+  });
+
   it('displays index name in the header', () => {
     const header = testBed.actions.getHeader();
-    // test_index is configured in initialEntries of the memory router
-    expect(header).toEqual('test_index');
+    // testIndexName is configured in initialEntries of the memory router
+    expect(header).toEqual(testIndexName);
   });
 
   it('defaults to overview tab', () => {
@@ -106,12 +114,140 @@ describe('<IndexDetailsPage />', () => {
     expect(testBed.actions.discoverLinkExists()).toBe(true);
   });
 
-  it('opens an index context menu when "manage index" button is clicked', async () => {
-    const {
-      actions: { contextMenu },
-    } = testBed;
-    expect(contextMenu.isOpened()).toBe(false);
-    await testBed.actions.contextMenu.clickManageIndexButton();
-    expect(contextMenu.isOpened()).toBe(true);
+  describe('context menu', () => {
+    it('opens an index context menu when "manage index" button is clicked', async () => {
+      expect(testBed.actions.contextMenu.isOpened()).toBe(false);
+      await testBed.actions.contextMenu.clickManageIndexButton();
+      expect(testBed.actions.contextMenu.isOpened()).toBe(true);
+    });
+
+    it('closes an index', async () => {
+      // already sent 1 request while setting up the component
+      const numberOfRequests = 1;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+
+      await testBed.actions.contextMenu.clickManageIndexButton();
+      await testBed.actions.contextMenu.clickIndexAction('closeIndexMenuButton');
+      expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/close`, {
+        body: JSON.stringify({ indices: [testIndexName] }),
+      });
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+
+    it('opens an index', async () => {
+      httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, {
+        ...testIndexMock,
+        status: 'close',
+      });
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+
+      // already sent 2 requests while setting up the component
+      const numberOfRequests = 2;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+
+      await testBed.actions.contextMenu.clickManageIndexButton();
+      await testBed.actions.contextMenu.clickIndexAction('openIndexMenuButton');
+      expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/open`, {
+        body: JSON.stringify({ indices: [testIndexName] }),
+      });
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+
+    it('forcemerges an index', async () => {
+      // already sent 1 request while setting up the component
+      const numberOfRequests = 1;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+
+      await testBed.actions.contextMenu.clickManageIndexButton();
+      await testBed.actions.contextMenu.clickIndexAction('forcemergeIndexMenuButton');
+      await testBed.actions.contextMenu.confirmForcemerge('2');
+      expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/forcemerge`, {
+        body: JSON.stringify({ indices: [testIndexName], maxNumSegments: '2' }),
+      });
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+
+    it('refreshes an index', async () => {
+      // already sent 1 request while setting up the component
+      const numberOfRequests = 1;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+
+      await testBed.actions.contextMenu.clickManageIndexButton();
+      await testBed.actions.contextMenu.clickIndexAction('refreshIndexMenuButton');
+      expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/refresh`, {
+        body: JSON.stringify({ indices: [testIndexName] }),
+      });
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+
+    it(`clears an index's cache`, async () => {
+      // already sent 1 request while setting up the component
+      const numberOfRequests = 1;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+
+      await testBed.actions.contextMenu.clickManageIndexButton();
+      await testBed.actions.contextMenu.clickIndexAction('clearCacheIndexMenuButton');
+      expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/clear_cache`, {
+        body: JSON.stringify({ indices: [testIndexName] }),
+      });
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+
+    it(`flushes an index`, async () => {
+      // already sent 1 request while setting up the component
+      const numberOfRequests = 1;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+
+      await testBed.actions.contextMenu.clickManageIndexButton();
+      await testBed.actions.contextMenu.clickIndexAction('flushIndexMenuButton');
+      expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/flush`, {
+        body: JSON.stringify({ indices: [testIndexName] }),
+      });
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
+
+    it(`deletes an index`, async () => {
+      jest.spyOn(testBed.routerMock.history, 'push');
+      // already sent 1 request while setting up the component
+      const numberOfRequests = 1;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+
+      await testBed.actions.contextMenu.clickManageIndexButton();
+      await testBed.actions.contextMenu.clickIndexAction('deleteIndexMenuButton');
+      await testBed.actions.contextMenu.confirmDelete();
+      expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/delete`, {
+        body: JSON.stringify({ indices: [testIndexName] }),
+      });
+
+      expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
+      expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
+    });
+
+    it(`unfreezes a frozen index`, async () => {
+      httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, {
+        ...testIndexMock,
+        isFrozen: true,
+      });
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+
+      // already sent 1 request while setting up the component
+      const numberOfRequests = 2;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+
+      await testBed.actions.contextMenu.clickManageIndexButton();
+      await testBed.actions.contextMenu.clickIndexAction('unfreezeIndexMenuButton');
+      expect(httpSetup.post).toHaveBeenCalledWith(`${API_BASE_PATH}/indices/unfreeze`, {
+        body: JSON.stringify({ indices: [testIndexName] }),
+      });
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
   });
 });

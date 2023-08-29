@@ -12,9 +12,11 @@ import type { HighlightedFieldsTableRow } from '../../right/components/highlight
 /**
  * Converts the highlighted fields to a format that can be consumed by the HighlightedFields component
  * @param highlightedFields
+ * @param scopeId
  */
 export const convertHighlightedFieldsToTableRow = (
-  highlightedFields: UseHighlightedFieldsResult
+  highlightedFields: UseHighlightedFieldsResult,
+  scopeId: string
 ): HighlightedFieldsTableRow[] => {
   const fieldNames = Object.keys(highlightedFields);
   return fieldNames.map((fieldName) => {
@@ -27,6 +29,7 @@ export const convertHighlightedFieldsToTableRow = (
       description: {
         field,
         values,
+        scopeId,
       },
     };
   });
