@@ -146,7 +146,6 @@ export default ({ getService }: FtrProviderContext) => {
             to: 'now',
             type: 'machine_learning',
             version: 1,
-            investigation_fields: [],
           },
           [ALERT_DEPTH]: 1,
           [ALERT_REASON]: `event with process store, by root on mothra created critical alert Test ML rule.`,
