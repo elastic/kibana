@@ -13,22 +13,16 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
-import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
-import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { concatStreamProviders } from '@kbn/utils';
 
 import {
   isGzip,
   createStats,
-  prioritizeMappings,
-  readDirectory,
   createParseArchiveStreams,
-  createCreateIndexStream,
-  createIndexDocRecordsStreamWithoutProgess,
+
   // createIndexDocRecordsStream,
-  migrateSavedObjectIndices,
-  createDefaultSpace,
 } from '../lib';
-import { atLeastOne, freshenUp, hasDotKibanaPrefix, indexingOccurred } from './load_utils';
+import { begin } from './load_serverless';
 
 // pipe a series of streams into each other so that data and errors
 // flow from the first stream to the last. Errors from the last stream
@@ -57,36 +51,37 @@ export async function loadAction({
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
-
-  await createPromiseFromStreams([
-    // This used to be  const recordStream = concatStreamProviders()...
-    bothFiles$(inputDir, prioritizeMappings(await readDirectory(inputDir))),
-    createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
-    createIndexDocRecordsStreamWithoutProgess(client, stats, useCreate),
-    // createIndexDocRecordsStream(client, stats, progress, useCreate),
-    // createIndexDocRecordsStreamSvrLess(client, stats, useCreate),
-  ]);
-
-  const result = stats.toJSON();
-
-  const indicesWithDocs: string[] = [];
-  for (const [index, { docs }] of Object.entries(result))
-    if (indexingOccurred(docs)) indicesWithDocs.push(index);
-
-  await freshenUp(client, indicesWithDocs);
-
-  // If we affected saved objects indices, we need to ensure they are migrated...
-  if (atLeastOne(hasDotKibanaPrefix(MAIN_SAVED_OBJECT_INDEX))(result)) {
-    await migrateSavedObjectIndices(kbnClient);
-    // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
-    if ((await kbnClient.plugins.getEnabledIds()).includes('spaces'))
-      await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
-  }
-  return result;
-
-  // a single stream that emits records from all archive files, in
-  // order, so that createIndexStream can track the state of indexes
-  // across archives and properly skip docs from existing indexes
+  await begin(name);
+  process.exit(666); // Trez Exit Expression
+  // await createPromiseFromStreams([
+  //   // This used to be  const recordStream = concatStreamProviders()...
+  //   bothFiles$(inputDir, prioritizeMappings(await readDirectory(inputDir))),
+  //   createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
+  //   createIndexDocRecordsStreamWithoutProgess(client, stats, useCreate),
+  //   // createIndexDocRecordsStream(client, stats, progress, useCreate),
+  //   // createIndexDocRecordsStreamSvrLess(client, stats, useCreate),
+  // ]);
+  //
+  // const result = stats.toJSON();
+  //
+  // const indicesWithDocs: string[] = [];
+  // for (const [index, { docs }] of Object.entries(result))
+  //   if (indexingOccurred(docs)) indicesWithDocs.push(index);
+  //
+  // await freshenUp(client, indicesWithDocs);
+  //
+  // // If we affected saved objects indices, we need to ensure they are migrated...
+  // if (atLeastOne(hasDotKibanaPrefix(MAIN_SAVED_OBJECT_INDEX))(result)) {
+  //   await migrateSavedObjectIndices(kbnClient);
+  //   // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
+  //   if ((await kbnClient.plugins.getEnabledIds()).includes('spaces'))
+  //     await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
+  // }
+  // return result;
+  //
+  // // a single stream that emits records from all archive files, in
+  // // order, so that createIndexStream can track the state of indexes
+  // // across archives and properly skip docs from existing indexes
   function bothFiles$(
     archiveDirectory: string,
     maybeMappingsAndDocsFileNamesFromArchive: string[]
