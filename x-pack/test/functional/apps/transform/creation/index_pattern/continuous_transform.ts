@@ -24,7 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const pageObjects = getPageObjects(['discover']);
 
-  describe('creation_continuous_transform', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/165146
+  describe.skip('creation_continuous_transform', function () {
     before(async () => {
       // installing the sample data with test user with super user role and then switching roles with limited privileges
       await security.testUser.setRoles(['superuser'], { skipBrowserRefresh: true });
