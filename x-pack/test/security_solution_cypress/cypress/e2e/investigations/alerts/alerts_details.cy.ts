@@ -38,7 +38,7 @@ import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 
 describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Basic functions', () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       login();
       disableExpandableFlyout();
@@ -49,6 +49,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('should update the table when status of the alert is updated', () => {
+      cy.get(OVERVIEW_RULE).should('be.visible');
       cy.get(ALERTS_TABLE_COUNT).should('have.text', '2 alerts');
       cy.get(ALERT_SUMMARY_SEVERITY_DONUT_CHART).should('contain.text', '2alerts');
       expandFirstAlert();
@@ -62,7 +63,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
     before(() => {
       cleanKibana();
       cy.task('esArchiverLoad', { archiveName: 'unmapped_fields' });
-      createRule(getUnmappedRule());
+      createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
     });
 
     beforeEach(() => {
