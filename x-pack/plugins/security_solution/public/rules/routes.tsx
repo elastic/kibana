@@ -31,7 +31,6 @@ import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/
 import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
-import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
 
 const RulesSubRoutes = [
@@ -109,21 +108,13 @@ const RulesContainerComponent: React.FC = () => {
 
 const Rules = React.memo(RulesContainerComponent);
 
-const CoverageOverviewRoutes = () => {
-  const isDetectionsCoverageOverviewEnabled = useIsExperimentalFeatureEnabled(
-    'detectionsCoverageOverview'
-  );
-
-  return isDetectionsCoverageOverviewEnabled ? (
-    <PluginTemplateWrapper>
-      <TrackApplicationView viewId={SecurityPageName.coverageOverview}>
-        <CoverageOverviewPage />
-      </TrackApplicationView>
-    </PluginTemplateWrapper>
-  ) : (
-    <Redirect to={SecurityPageName.landing} />
-  );
-};
+const CoverageOverviewRoutes = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.coverageOverview}>
+      <CoverageOverviewPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
+);
 
 export const routes: SecuritySubPluginRoutes = [
   {
