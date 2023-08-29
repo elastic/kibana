@@ -15,57 +15,61 @@ import { selectAlertsHistogram } from '../../tasks/alerts';
 import { createTimeline } from '../../tasks/timelines';
 import { cleanKibana } from '../../tasks/common';
 
-describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-    cy.task('esArchiverLoad', {
-      archiveName: 'ransomware_prevention',
-    });
-  });
-
-  after(() => {
-    cy.task('esArchiverUnload', 'ransomware_prevention');
-  });
-
-  describe('Ransomware display in Alerts Section', () => {
-    beforeEach(() => {
-      login();
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-    });
-
-    describe('Alerts table', { tags: ['@brokenInServerless'] }, () => {
-      it('shows Ransomware Alerts', () => {
-        cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Prevention Alert');
+describe(
+  'Ransomware Prevention Alerts',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
+    before(() => {
+      cleanKibana();
+      cy.task('esArchiverLoad', {
+        archiveName: 'ransomware_prevention',
       });
     });
 
-    describe('Trend Chart', { tags: ['@brokenInServerless'] }, () => {
+    after(() => {
+      cy.task('esArchiverUnload', 'ransomware_prevention');
+    });
+
+    describe('Ransomware display in Alerts Section', () => {
       beforeEach(() => {
-        selectAlertsHistogram();
+        login();
+        visit(ALERTS_URL);
+        waitForAlertsToPopulate();
       });
 
-      it('shows Ransomware Prevention Alert in the trend chart', () => {
-        cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Prevention Alert');
+      describe('Alerts table', () => {
+        it('shows Ransomware Alerts', () => {
+          cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Prevention Alert');
+        });
+      });
+
+      describe('Trend Chart', () => {
+        beforeEach(() => {
+          selectAlertsHistogram();
+        });
+
+        it('shows Ransomware Prevention Alert in the trend chart', () => {
+          cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Prevention Alert');
+        });
       });
     });
-  });
 
-  describe('Ransomware in Timelines', { tags: ['@brokenInServerless'] }, () => {
-    beforeEach(() => {
-      login();
-      visit(TIMELINES_URL);
+    describe('Ransomware in Timelines', () => {
+      beforeEach(() => {
+        login();
+        visit(TIMELINES_URL);
 
-      createTimeline();
+        createTimeline();
+      });
+
+      it('Renders ransomware entries in timelines table', () => {
+        cy.get(TIMELINE_QUERY).type('event.code: "ransomware"{enter}');
+
+        // Wait for grid to load, it should have an analyzer icon
+        cy.get(TIMELINE_VIEW_IN_ANALYZER).should('exist');
+
+        cy.get(MESSAGE).should('have.text', 'Ransomware Prevention Alert');
+      });
     });
-
-    it('Renders ransomware entries in timelines table', () => {
-      cy.get(TIMELINE_QUERY).type('event.code: "ransomware"{enter}');
-
-      // Wait for grid to load, it should have an analyzer icon
-      cy.get(TIMELINE_VIEW_IN_ANALYZER).should('exist');
-
-      cy.get(MESSAGE).should('have.text', 'Ransomware Prevention Alert');
-    });
-  });
-});
+  }
+);
