@@ -83,7 +83,7 @@ export interface ContentTemplateProps {
 export interface RouteState {
   originAppId: string;
   originPathname?: string;
-  originData?: Search;
+  originSearch?: Search;
 }
 
 export type DataViewOrigin = 'logs' | 'metrics';

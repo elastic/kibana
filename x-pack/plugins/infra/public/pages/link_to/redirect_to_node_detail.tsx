@@ -15,6 +15,7 @@ import {
   getStateFromLocation,
 } from './query_params';
 import { InventoryItemType } from '../../../common/inventory_models/types';
+import { RouteState } from '../../components/asset_details/types';
 
 export const RedirectToNodeDetail = () => {
   const {
@@ -37,13 +38,20 @@ export const RedirectToNodeDetail = () => {
     }
   }
 
-  const state = getStateFromLocation(location);
+  let state: RouteState | undefined;
+  try {
+    const stateFromLocation = getStateFromLocation(location);
+    state = stateFromLocation ? JSON.parse(stateFromLocation) : undefined;
+  } catch (err) {
+    state = undefined;
+  }
+
   return (
     <Redirect
       to={{
         pathname: `/detail/${nodeType}/${nodeId}`,
         search: queryParams.toString(),
-        state: state ? JSON.parse(state) : undefined,
+        state,
       }}
     />
   );

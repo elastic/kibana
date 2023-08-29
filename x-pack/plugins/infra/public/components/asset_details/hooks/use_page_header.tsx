@@ -49,7 +49,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
     if (location.state) {
       navigateToApp(location.state.originAppId, {
         replace: true,
-        path: `${location.state.originPathname}${location.state.originData}`,
+        path: `${location.state.originPathname}${location.state.originSearch}`,
       });
     } else {
       history.goBack();

@@ -56,7 +56,7 @@ export const useNodeDetailsRedirect = () => {
             ? {
                 state: JSON.stringify({
                   originAppId: appId,
-                  originData: location.search,
+                  originSearch: location.search,
                   originPathname: location.pathname,
                 } as RouteState),
               }
