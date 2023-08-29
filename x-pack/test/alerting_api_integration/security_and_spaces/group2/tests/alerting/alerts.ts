@@ -1817,16 +1817,13 @@ instanceStateValue: true
               // #####################################
               // first run (new alerts)
               // #####################################
-              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 1); // action execution
-
-              const searchResult = await esTestIndexTool.search(
+              const searchResult = await esTestIndexTool.waitForDocs(
                 'action:test.index-record',
-                reference
-              );
-              // @ts-expect-error doesnt handle total: number
-              expect(searchResult.body.hits.total.value).to.eql(1);
-              // @ts-expect-error _source: unknown
-              expect(searchResult.body.hits.hits[0]._source.params.message).to.be(
+                reference,
+                1
+              ); // action execution
+
+              expect(searchResult[0]._source.params.message).to.be(
                 'Alerts, all:1, new:1 IDs:[alertA,], ongoing:0 IDs:[], recovered:0 IDs:[]'
               );
 
@@ -1835,15 +1832,13 @@ instanceStateValue: true
               // #####################################
               await alertUtils.runSoon(ruleId);
 
-              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2); // action execution
-              const secondSearchResult = await esTestIndexTool.search(
+              const secondSearchResult = await esTestIndexTool.waitForDocs(
                 'action:test.index-record',
-                reference
+                reference,
+                2
               );
-              // @ts-expect-error doesnt handle total: number
-              expect(secondSearchResult.body.hits.total.value).to.eql(2);
-              // @ts-expect-error _source: unknown
-              expect(secondSearchResult.body.hits.hits[1]._source.params.message).to.be(
+
+              expect(secondSearchResult[1]._source.params.message).to.be(
                 'Alerts, all:1, new:0 IDs:[], ongoing:1 IDs:[alertA,], recovered:0 IDs:[]'
               );
 
@@ -1852,15 +1847,13 @@ instanceStateValue: true
               // #####################################
               await alertUtils.runSoon(ruleId);
 
-              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 3); // action execution
-              const thirdSearchResult = await esTestIndexTool.search(
+              const thirdSearchResult = await esTestIndexTool.waitForDocs(
                 'action:test.index-record',
-                reference
+                reference,
+                3
               );
-              // @ts-expect-error doesnt handle total: number
-              expect(thirdSearchResult.body.hits.total.value).to.eql(3);
-              // @ts-expect-error _source: unknown
-              expect(thirdSearchResult.body.hits.hits[2]._source.params.message).to.be(
+
+              expect(thirdSearchResult[2]._source.params.message).to.be(
                 'Alerts, all:1, new:0 IDs:[], ongoing:0 IDs:[], recovered:1 IDs:[alertA,]'
               );
 

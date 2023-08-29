@@ -630,9 +630,7 @@ function getPatternFiringRuleWithSummaryAction(
     rule_type_id: 'test.patternFiringAad',
     consumer: 'alertsFixture',
     params: {
-      index: ES_TEST_INDEX_NAME,
       pattern,
-      reference,
     },
     actions: [
       {
