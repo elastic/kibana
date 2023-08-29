@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import { bulkDeleteRulesRequestParamsSchemaV1} from '../../../../../common/routes/rule/apis/bulk_delete';
+import { bulkDeleteRulesRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/bulk_delete';
 
 export const bulkDeleteRulesRoute = ({
   router,

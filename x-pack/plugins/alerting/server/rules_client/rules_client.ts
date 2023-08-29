@@ -8,7 +8,7 @@
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions, MuteOptions } from './types';
-
+import type { BulkDeleteRulesRequestParamsV1 } from '../../common/routes/rule/apis/bulk_delete';
 import { clone, CloneArguments } from './methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
 import { get, GetParams } from './methods/get';
@@ -137,7 +137,8 @@ export class RulesClient {
   public getActionErrorLogWithAuth = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLogWithAuth(this.context, params);
 
-  public bulkDeleteRules = (options: BulkOptions) => bulkDeleteRules(this.context, options);
+  public bulkDeleteRules = (options: BulkDeleteRulesRequestParamsV1) =>
+    bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
   public bulkEnableRules = (options: BulkOptions) => bulkEnableRules(this.context, options);
