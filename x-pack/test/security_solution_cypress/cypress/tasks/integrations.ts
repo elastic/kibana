@@ -35,7 +35,7 @@ export type PackagePolicyWithoutAgentPolicyId = Omit<PackagePolicy, 'policy_id'>
  *
  * - open `app/integrations/detail/aws-1.17.0/overview?integration=cloudfront`
  * - click the button `Add Amazon CloudFront`
- * - fill in `Query URL`
+ * - fill in `Queue URL`
  * - press `Preview API request` at the bottom
  * - copy shown policies
  */
