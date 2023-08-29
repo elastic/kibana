@@ -168,8 +168,9 @@ curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
 `xpack.actions.proxyBypassHosts` {ess-icon}::
 Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings. Example:
 +
-[source,yml]
+[source,yaml]
 ----
+# If applicable, include the subdomain in the hostname
 xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
 ----
 +
@@ -178,8 +179,9 @@ By default, all hosts will use the proxy, but if an action's hostname is in this
 `xpack.actions.proxyOnlyHosts` {ess-icon}::
 Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings. Example:
 +
-[source,yml]
+[source,yaml]
 ----
+# If applicable, include the subdomain in the hostname
 xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
 ----
 +
