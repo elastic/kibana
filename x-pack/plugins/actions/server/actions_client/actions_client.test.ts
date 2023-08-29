@@ -97,7 +97,6 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
-const executionEnqueuer = jest.fn();
 const ephemeralExecutionEnqueuer = jest.fn();
 const bulkExecutionEnqueuer = jest.fn();
 const request = httpServerMock.createKibanaRequest();
@@ -144,7 +143,6 @@ beforeEach(() => {
     kibanaIndices,
     inMemoryConnectors: [],
     actionExecutor,
-    executionEnqueuer,
     ephemeralExecutionEnqueuer,
     bulkExecutionEnqueuer,
     request,
@@ -612,7 +610,6 @@ describe('create()', () => {
       kibanaIndices,
       inMemoryConnectors: [],
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -739,7 +736,6 @@ describe('create()', () => {
       ],
 
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -802,7 +798,6 @@ describe('create()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -864,7 +859,6 @@ describe('get()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -902,7 +896,6 @@ describe('get()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -960,7 +953,6 @@ describe('get()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -1004,7 +996,6 @@ describe('get()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -1127,7 +1118,6 @@ describe('get()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1172,7 +1162,6 @@ describe('get()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1207,7 +1196,6 @@ describe('get()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1279,7 +1267,6 @@ describe('getBulk()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -1418,7 +1405,6 @@ describe('getBulk()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1514,7 +1500,6 @@ describe('getBulk()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1589,7 +1574,6 @@ describe('getBulk()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1675,7 +1659,6 @@ describe('getOAuthAccessToken()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -2058,7 +2041,6 @@ describe('delete()', () => {
         },
       ],
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -2095,7 +2077,6 @@ describe('delete()', () => {
         },
       ],
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -2611,7 +2592,6 @@ describe('update()', () => {
         },
       ],
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -2655,7 +2635,6 @@ describe('update()', () => {
         },
       ],
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -2764,7 +2743,6 @@ describe('execute()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -2829,7 +2807,6 @@ describe('execute()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -2893,7 +2870,6 @@ describe('execute()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -3026,85 +3002,6 @@ describe('execute()', () => {
       ],
       actionExecutionId,
     });
-  });
-});
-
-describe('enqueueExecution()', () => {
-  describe('authorization', () => {
-    test('ensures user is authorised to excecute actions', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-      await actionsClient.enqueueExecution({
-        id: uuidv4(),
-        params: {},
-        spaceId: 'default',
-        executionId: '123abc',
-        apiKey: null,
-        source: asHttpRequestExecutionSource(request),
-      });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        operation: 'execute',
-      });
-    });
-
-    test('throws when user is not authorised to create the type of action', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to execute all actions`)
-      );
-
-      await expect(
-        actionsClient.enqueueExecution({
-          id: uuidv4(),
-          params: {},
-          spaceId: 'default',
-          executionId: '123abc',
-          apiKey: null,
-          source: asHttpRequestExecutionSource(request),
-        })
-      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        operation: 'execute',
-      });
-    });
-
-    test('tracks legacy RBAC', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.Legacy;
-      });
-
-      await actionsClient.enqueueExecution({
-        id: uuidv4(),
-        params: {},
-        spaceId: 'default',
-        executionId: '123abc',
-        apiKey: null,
-        source: asHttpRequestExecutionSource(request),
-      });
-
-      expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith(
-        'enqueueExecution',
-        mockUsageCounter
-      );
-    });
-  });
-
-  test('calls the executionEnqueuer with the appropriate parameters', async () => {
-    const opts = {
-      id: uuidv4(),
-      params: { baz: false },
-      spaceId: 'default',
-      executionId: '123abc',
-      apiKey: Buffer.from('123:abc').toString('base64'),
-      source: asHttpRequestExecutionSource(request),
-    };
-    await expect(actionsClient.enqueueExecution(opts)).resolves.toMatchInlineSnapshot(`undefined`);
-
-    expect(executionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
   });
 });
 
@@ -3442,7 +3339,6 @@ describe('isPreconfigured()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -3493,7 +3389,6 @@ describe('isPreconfigured()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -3546,7 +3441,6 @@ describe('isSystemAction()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -3597,7 +3491,6 @@ describe('isSystemAction()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,

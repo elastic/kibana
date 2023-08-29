@@ -45,7 +45,6 @@ import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
-  createExecutionEnqueuerFunction,
   createEphemeralExecutionEnqueuerFunction,
   createBulkExecutionEnqueuerFunction,
 } from './create_execute_function';
@@ -443,12 +442,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
         }),
-        executionEnqueuer: createExecutionEnqueuerFunction({
-          taskManager: plugins.taskManager,
-          actionTypeRegistry: actionTypeRegistry!,
-          isESOCanEncrypt: isESOCanEncrypt!,
-          inMemoryConnectors: this.inMemoryConnectors,
-        }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
@@ -672,12 +665,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             authorization: instantiateAuthorization(request),
             actionExecutor: actionExecutor!,
             ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
-              taskManager,
-              actionTypeRegistry: actionTypeRegistry!,
-              isESOCanEncrypt: isESOCanEncrypt!,
-              inMemoryConnectors,
-            }),
-            executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
