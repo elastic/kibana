@@ -528,6 +528,10 @@ Plugin server-side only. Plugin has three main functions:
 |This plugin implements (server) APIs used to render the content of the Data Quality dashboard.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/elastic_assistant/README.md[elasticAssistant]
+|This plugin implements (only) server APIs for the Elastic AI Assistant.
+
+
 |<<enhanced-embeddables-plugin>>
 |Enhances Embeddables by registering a custom factory provider. The enhanced factory provider
 adds dynamic actions to every embeddables state, in order to support drilldowns.

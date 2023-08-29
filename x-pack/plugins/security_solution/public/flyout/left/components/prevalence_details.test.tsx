@@ -15,8 +15,18 @@ import {
   PREVALENCE_DETAILS_TABLE_TEST_ID,
 } from './test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
+import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../shared/hooks/use_prevalence');
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 const panelContextValue = {
   eventId: 'event id',
@@ -53,9 +63,11 @@ describe('PrevalenceDetails', () => {
     });
 
     const { getByTestId } = render(
-      <LeftPanelContext.Provider value={panelContextValue}>
-        <PrevalenceDetails />
-      </LeftPanelContext.Provider>
+      <TestProviders>
+        <LeftPanelContext.Provider value={panelContextValue}>
+          <PrevalenceDetails />
+        </LeftPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();

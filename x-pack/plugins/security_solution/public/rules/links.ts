@@ -36,7 +36,7 @@ export const links: LinkItem = {
   path: RULES_LANDING_PATH,
   hideTimeline: true,
   skipUrlState: true,
-  globalNavPosition: 8,
+  globalNavPosition: 2,
   capabilities: [`${SERVER_APP_ID}.show`],
   links: [
     {
@@ -104,7 +104,6 @@ export const links: LinkItem = {
           defaultMessage: 'MITRE ATT&CK Coverage',
         }),
       ],
-      experimentalKey: 'detectionsCoverageOverview',
     },
   ],
   categories: [
