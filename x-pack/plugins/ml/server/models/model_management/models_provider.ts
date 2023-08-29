@@ -10,6 +10,11 @@ import { JOB_MAP_NODE_TYPES, MapElements } from '@kbn/ml-data-frame-analytics-ut
 import { flatten } from 'lodash';
 import type { TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
 import { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IngestPipeline,
+  IngestSimulateDocument,
+  IngestSimulateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { PipelineDefinition } from '../../../common/types/trained_models';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
@@ -75,6 +80,66 @@ export class ModelsProvider {
   ): string {
     return `${elementOriginalId}-${nodeType}`;
   }
+
+  /**
+   * Simulates the effect of the pipeline on given document.
+   *
+   */
+  async simulatePipeline(docs: IngestSimulateDocument[], pipelineConfig: IngestPipeline) {
+    const simulateRequest: IngestSimulateRequest = {
+      docs,
+      pipeline: pipelineConfig,
+    };
+    let result = {};
+    try {
+      result = await this._client.asCurrentUser.ingest.simulate(simulateRequest);
+    } catch (error) {
+      if (error.statusCode === 404) {
+        // ES returns 404 when there are no pipelines
+        // Instead, we should return an empty response and a 200
+        return result;
+      }
+      throw error;
+    }
+
+    return result;
+  }
+
+  /**
+   * Creates the pipeline
+   *
+   */
+  async createInferencePipeline(pipelineConfig: IngestPipeline, pipelineName: string) {
+    let result = {};
+
+    result = await this._client.asCurrentUser.ingest.putPipeline({
+      id: pipelineName,
+      ...pipelineConfig,
+    });
+
+    return result;
+  }
+
+  /**
+   * Retrieves existing pipelines.
+   *
+   */
+  async getPipelines() {
+    let result = {};
+    try {
+      result = await this._client.asCurrentUser.ingest.getPipeline();
+    } catch (error) {
+      if (error.statusCode === 404) {
+        // ES returns 404 when there are no pipelines
+        // Instead, we should return an empty response and a 200
+        return result;
+      }
+      throw error;
+    }
+
+    return result;
+  }
+
   /**
    * Retrieves the map of model ids and aliases with associated pipelines.
    * @param modelIds - Array of models ids and model aliases.

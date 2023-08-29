@@ -51,6 +51,13 @@ export const OverlapDistributionComparison = ({
         domain={{ min: 0, max: 1 }}
         hide={true}
       />
+      <Axis
+        id="bottom"
+        position={Position.Bottom}
+        tickFormat={valueFormatter}
+        labelFormat={valueFormatter}
+        hide={true}
+      />
 
       <Settings showLegend={false} />
       <AreaSeries

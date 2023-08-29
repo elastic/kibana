@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import {
   EuiButton,
-  EuiFlexGrid,
+  EuiCallOut,
   EuiFlexItem,
+  EuiFieldText,
   EuiFormRow,
   EuiFlexGroup,
   EuiComboBoxOptionOption,
   EuiComboBox,
+  EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -62,6 +64,9 @@ export function DataDriftIndexPatternsEditor({
   const { dataViewEditorServiceFactory } = dataViewEditor;
   const canEditDataView = dataViewEditor?.userPermissions.editDataView();
   const [timeField, setTimeField] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [dataViewName, setDataViewName] = useState<string>('');
+  const [dataViewMsg, setDataViewMsg] = useState<string | undefined>();
+  const [foundDataViewId, setFoundDataViewId] = useState<string | undefined>();
 
   const referenceDataViewEditorService = useMemo(
     () =>
@@ -119,37 +124,67 @@ export function DataDriftIndexPatternsEditor({
 
   const navigateToPath = useNavigateToPath();
 
-  const createDataViewAndRedirectToDataComparisonPage = async () => {
+  useEffect(() => {
+    let unmounted = false;
+    const getMatchingDataView = async () => {
+      setDataViewMsg(undefined);
+      setFoundDataViewId(undefined);
+      if (!unmounted && referenceIndexPattern && productionIndexPattern) {
+        const indicesName = `${referenceIndexPattern},${productionIndexPattern}`;
+
+        const matchingDataViews = await dataViews.find(indicesName);
+
+        const timeFieldName =
+          Array.isArray(timeField) && timeField.length > 0 ? timeField[0].value : undefined;
+
+        if (Array.isArray(matchingDataViews) && matchingDataViews.length > 0) {
+          const foundDataView = matchingDataViews.find((d) => {
+            return d.timeFieldName === timeFieldName;
+          });
+
+          if (foundDataView) {
+            setFoundDataViewId(foundDataView.id);
+          } else {
+            setDataViewMsg(
+              i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.referenceData', {
+                defaultMessage: `Found a data view matching pattern '${indicesName}' but with a different time field. Creating a new data view to analyze data drift.`,
+              })
+            );
+          }
+        }
+      }
+    };
+
+    getMatchingDataView();
+
+    return () => {
+      unmounted = true;
+    };
+  }, [referenceIndexPattern, productionIndexPattern, timeField, dataViews]);
+  const createDataViewAndRedirectToDataComparisonPage = async (createAdHocDV = false) => {
     // Create adhoc data view
     const indicesName = `${referenceIndexPattern},${productionIndexPattern}`;
 
-    const matchingDataViews = await dataViews.find(indicesName);
     const timeFieldName =
       Array.isArray(timeField) && timeField.length > 0 ? timeField[0].value : undefined;
 
     let dataView;
-    if (
-      Array.isArray(matchingDataViews) &&
-      matchingDataViews.length === 1 &&
-      matchingDataViews[0].timeFieldName === timeFieldName
-    ) {
-      dataView = matchingDataViews[0];
-    } else {
-      if (canEditDataView) {
+    if (!foundDataViewId) {
+      if (canEditDataView && createAdHocDV === false) {
         dataView = await dataViews.createAndSave({
           title: indicesName,
-          name: indicesName,
+          name: dataViewName,
           timeFieldName,
         });
       } else {
         dataView = await dataViews.create({
           title: indicesName,
-          name: indicesName,
+          name: dataViewName,
           timeFieldName,
         });
       }
     }
-    const dataViewId = dataView.id;
+    const dataViewId = foundDataViewId ?? dataView?.id;
     const url = await locator.getUrl({
       page: ML_PAGES.DATA_COMPARISON,
       pageState: {
@@ -163,9 +198,10 @@ export function DataDriftIndexPatternsEditor({
     await navigateToPath(url);
   };
 
-  return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexGrid className="fieldEditor__flyoutPanels" gutterSize="xl" columns={2}>
+  const firstSetOfSteps = [
+    {
+      title: 'Pick index pattern for reference data indices',
+      children: (
         <EuiFlexItem grow={false}>
           <DataViewEditor
             key={'reference'}
@@ -180,13 +216,18 @@ export function DataDriftIndexPatternsEditor({
             setIndexPattern={setReferenceIndexPattern}
           />
         </EuiFlexItem>
+      ),
+    },
+    {
+      title: 'Pick index pattern for comparison data indices',
+      children: (
         <EuiFlexItem grow={false}>
           <DataViewEditor
-            key={'production'}
+            key={'comparison'}
             label={
               <FormattedMessage
-                id="xpack.ml.dataDrift.indexPatternsEditor.productionData"
-                defaultMessage="Index pattern for production data indices"
+                id="xpack.ml.dataDrift.indexPatternsEditor.comparisonData"
+                defaultMessage="Index pattern for comparison data indices"
               />
             }
             dataViewEditorService={productionDataViewEditorService}
@@ -194,62 +235,129 @@ export function DataDriftIndexPatternsEditor({
             setIndexPattern={setProductionIndexPattern}
           />
         </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiFormRow
-        label={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.timeField', {
-          defaultMessage: 'Time field',
-        })}
-        fullWidth
-      >
-        <>
-          <EuiComboBox<string>
-            placeholder={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.timestampField', {
-              defaultMessage: 'Select a timestamp field',
-            })}
-            singleSelection={{ asPlainText: true }}
-            options={combinedTimeFieldOptions}
-            selectedOptions={timeField}
-            onChange={(newValue) => {
-              if (newValue.length === 0) {
-                // Don't allow clearing the type. One must always be selected
-                return;
-              }
-              setTimeField(newValue);
-            }}
-            isClearable={false}
-            isDisabled={productionIndexPattern === '' && referenceIndexPattern === ''}
-            data-test-subj="timestampField"
-            aria-label={i18n.translate(
-              'xpack.ml.dataDrift.indexPatternsEditor.timestampSelectAriaLabel',
-              {
-                defaultMessage: 'Timestamp field',
-              }
-            )}
-            fullWidth
-          />
-        </>
-      </EuiFormRow>
+      ),
+    },
+    {
+      title: 'Additional settings',
+      children: (
+        <EuiFlexGroup direction="column">
+          {combinedTimeFieldOptions.length > 0 ? (
+            <EuiFormRow
+              label={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.timeField', {
+                defaultMessage: 'Time field',
+              })}
+              fullWidth
+              color={'disabled'}
+            >
+              <>
+                <EuiComboBox<string>
+                  placeholder={i18n.translate(
+                    'xpack.ml.dataDrift.indexPatternsEditor.timestampField',
+                    {
+                      defaultMessage: 'Select an optional timestamp field',
+                    }
+                  )}
+                  singleSelection={{ asPlainText: true }}
+                  options={combinedTimeFieldOptions}
+                  selectedOptions={timeField}
+                  onChange={(newValue) => {
+                    if (newValue.length === 0) {
+                      // Don't allow clearing the type. One must always be selected
+                      return;
+                    }
+                    setTimeField(newValue);
+                  }}
+                  isClearable={false}
+                  isDisabled={productionIndexPattern === '' && referenceIndexPattern === ''}
+                  data-test-subj="timestampField"
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataDrift.indexPatternsEditor.timestampSelectAriaLabel',
+                    {
+                      defaultMessage: 'Timestamp field',
+                    }
+                  )}
+                  fullWidth
+                />
+              </>
+            </EuiFormRow>
+          ) : null}
+          {!foundDataViewId ? (
+            <EuiFormRow
+              label={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.dataViewName', {
+                defaultMessage: 'Data view name',
+              })}
+              helpText={`Optional data view name. ${
+                referenceIndexPattern && productionIndexPattern
+                  ? `Default to '${referenceIndexPattern},${productionIndexPattern}' if not set.`
+                  : ''
+              }`}
+              fullWidth
+            >
+              <EuiFieldText
+                value={dataViewName}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setDataViewName(e.target.value);
+                }}
+                fullWidth
+                data-test-subj="dataDriftDataViewNameInput"
+                placeholder={`Example Name`}
+              />
+            </EuiFormRow>
+          ) : null}
 
-      <EuiFormRow id="analyzeDriftData">
-        <EuiButton
-          disabled={!productionIndexPattern || !referenceIndexPattern}
-          fill
-          onClick={createDataViewAndRedirectToDataComparisonPage}
-          iconType="visTagCloud"
-          data-test-subj="analyzeDataDriftButton"
-          aria-label={i18n.translate(
-            'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel',
-            {
-              defaultMessage: 'Analyze data drift',
-            }
-          )}
-        >
-          <FormattedMessage
-            id="xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel"
-            defaultMessage="Analyze data drift"
-          />
-        </EuiButton>
-      </EuiFormRow>
-    </EuiFlexGroup>
-  );
+          {dataViewMsg ? <EuiCallOut color="primary">{dataViewMsg}</EuiCallOut> : null}
+
+          <EuiFormRow id="analyzeDriftData">
+            <EuiFlexGroup>
+              {canEditDataView && foundDataViewId === undefined ? (
+                <EuiFlexItem>
+                  <EuiButton
+                    color="primary"
+                    disabled={!productionIndexPattern || !referenceIndexPattern}
+                    onClick={createDataViewAndRedirectToDataComparisonPage.bind(null, true)}
+                    iconType="visTagCloud"
+                    data-test-subj="analyzeDataDriftButton"
+                    aria-label={i18n.translate(
+                      'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftWithoutSavingLabel',
+                      {
+                        defaultMessage: 'Analyze data drift without saving',
+                      }
+                    )}
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftWithoutSavingLabel"
+                      defaultMessage="Analyze data drift without saving"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
+
+              <EuiFlexItem>
+                <EuiButton
+                  disabled={!productionIndexPattern || !referenceIndexPattern}
+                  fill
+                  onClick={createDataViewAndRedirectToDataComparisonPage.bind(null, false)}
+                  iconType="visTagCloud"
+                  data-test-subj="analyzeDataDriftButton"
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel',
+                    {
+                      defaultMessage: 'Analyze data drift',
+                    }
+                  )}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel"
+                    defaultMessage="Analyze data drift"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiFlexGroup>
+      ),
+    },
+  ];
+
+  return <EuiSteps steps={firstSetOfSteps} />;
 }

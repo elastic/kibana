@@ -216,7 +216,7 @@ function getDataComparisonDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<
     title: i18n.translate('xpack.ml.deepLink.dataComparison', {
       defaultMessage: 'Data Comparison',
     }),
-    path: `/${ML_PAGES.DATA_COMPARISON_INDEX_SELECT}`,
+    path: `/${ML_PAGES.DATA_DRIFT}`,
     navLinkStatus: getNavStatus(mlCapabilities, false),
   };
 }

@@ -9,9 +9,15 @@ import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
 import React, { ChangeEvent, ReactNode, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFlexGrid,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { TimestampOption } from '@kbn/data-view-editor-plugin/public/types';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { canAppendWildcard, matchedIndicesDefault } from './data_drift_index_patterns_editor';
@@ -39,14 +45,6 @@ export function DataViewEditor({
   const matchedIndices = useObservable(
     dataViewEditorService.matchedIndices$,
     matchedIndicesDefault
-  );
-  const options = useObservable<TimestampOption[]>(
-    dataViewEditorService.timestampFieldOptions$,
-    []
-  );
-  const isLoadingOptions = useObservable<boolean>(
-    dataViewEditorService.loadingTimestampFields$,
-    false
   );
 
   const matchedReferenceIndices =
@@ -91,10 +89,17 @@ export function DataViewEditor({
       });
     return undefined;
   }, [indexPattern]);
+  const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
+    <EuiFlexGrid columns={2} gutterSize="none">
+      <EuiFlexItem
+        css={{
+          paddingLeft: euiTheme.size.base,
+          paddingRight: euiTheme.size.base,
+          borderRight: euiTheme.border.thin,
+        }}
+      >
         <EuiFormRow
           label={label}
           error={errorMessage}
@@ -122,7 +127,8 @@ export function DataViewEditor({
             placeholder="example-pattern*"
           />
         </EuiFormRow>
-
+      </EuiFlexItem>
+      <EuiFlexItem css={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
         <EuiBasicTable<MatchedItem>
           items={pageOfItems}
           columns={columns}
@@ -130,6 +136,6 @@ export function DataViewEditor({
           onChange={onTableChange}
         />
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </EuiFlexGrid>
   );
 }
