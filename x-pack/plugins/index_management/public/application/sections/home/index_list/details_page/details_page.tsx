@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,11 +17,14 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+
+import { Index } from '../../../../../../common';
+import { loadIndex } from '../../../../services';
 import { DiscoverLink } from '../../../../lib/discover_link';
-import { useLoadIndex } from '../../../../services';
 import { Section } from '../../home';
 import { DetailsPageError } from './details_page_error';
-import { IndexActionsContextMenuWithoutRedux } from '../index_actions_context_menu/index_actions_context_menu.without_redux';
+import { ManageIndexButton } from './manage_index_button';
+
 export enum IndexDetailsSection {
   Overview = 'overview',
   Documents = 'documents',
@@ -69,12 +72,37 @@ export const DetailsPage: React.FunctionComponent<
   },
   history,
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
+  const [index, setIndex] = useState<Index | null>();
+
+  const fetchIndexDetails = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const { data, error: loadingError } = await loadIndex(indexName);
+      setIsLoading(false);
+      setError(loadingError);
+      setIndex(data);
+    } catch (e) {
+      setIsLoading(false);
+      setError(e);
+    }
+  }, [indexName]);
+
+  useEffect(() => {
+    fetchIndexDetails();
+  }, [fetchIndexDetails]);
+
   const onSectionChange = useCallback(
     (newSection: IndexDetailsSection) => {
       return history.push(encodeURI(`/indices/${indexName}/${newSection}`));
     },
     [history, indexName]
   );
+
+  const navigateToAllIndices = useCallback(() => {
+    history.push(`/${Section.Indices}`);
+  }, [history]);
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
     return tabs.map((tab) => ({
@@ -86,8 +114,7 @@ export const DetailsPage: React.FunctionComponent<
     }));
   }, [indexDetailsSection, onSectionChange]);
 
-  const { isLoading, error, resendRequest, data } = useLoadIndex(indexName);
-  if (isLoading) {
+  if (isLoading && !index) {
     return (
       <SectionLoading>
         <FormattedMessage
@@ -97,8 +124,8 @@ export const DetailsPage: React.FunctionComponent<
       </SectionLoading>
     );
   }
-  if (error || !data) {
-    return <DetailsPageError indexName={indexName} resendRequest={resendRequest} />;
+  if (error || !index) {
+    return <DetailsPageError indexName={indexName} resendRequest={fetchIndexDetails} />;
   }
 
   return (
@@ -108,9 +135,7 @@ export const DetailsPage: React.FunctionComponent<
           data-test-subj="indexDetailsBackToIndicesButton"
           color="text"
           iconType="arrowLeft"
-          onClick={() => {
-            return history.push(`/${Section.Indices}`);
-          }}
+          onClick={navigateToAllIndices}
         >
           <FormattedMessage
             id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
@@ -127,10 +152,11 @@ export const DetailsPage: React.FunctionComponent<
         bottomBorder
         rightSideItems={[
           <DiscoverLink indexName={indexName} asButton={true} />,
-          <IndexActionsContextMenuWithoutRedux
-            indexNames={[indexName]}
-            indices={[data]}
-            fill={false}
+          <ManageIndexButton
+            indexName={indexName}
+            indexDetails={index}
+            reloadIndexDetails={fetchIndexDetails}
+            navigateToAllIndices={navigateToAllIndices}
           />,
         ]}
         tabs={headerTabs}
@@ -165,6 +191,11 @@ export const DetailsPage: React.FunctionComponent<
             to={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
           />
         </Routes>
+      </div>
+
+      <EuiSpacer size="l" />
+      <div>
+        <pre>{JSON.stringify(index, null, 2)}</pre>
       </div>
     </>
   );
