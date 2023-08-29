@@ -106,7 +106,7 @@ export const routes = {
       return <RulesPage />;
     },
     params: {},
-    exact: true,
+    exact: false,
   },
   [RULE_DETAIL_PATH]: {
     handler: () => {

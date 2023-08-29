@@ -5,33 +5,36 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { lazy, useState } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleStatus, useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { RulesTab } from './rules_tab';
+
+const GlobalLogsTab = lazy(() => import('./global_logs_tab'));
 
 export function RulesPage() {
   const {
     http,
     docLinks,
-    triggersActionsUi: {
-      getAddRuleFlyout: AddRuleFlyout,
-      getRulesList: RuleList,
-      getRulesSettingsLink: RulesSettingsLink,
-    },
+    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout, getRulesSettingsLink: RulesSettingsLink },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
-  const history = useHistory();
+
+  const { path } = useRouteMatch();
+
+  const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
+  const [stateRefresh, setRefresh] = useState(new Date());
 
   useBreadcrumbs([
     {
@@ -56,56 +59,6 @@ export function RulesPage() {
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
-
-  const urlStateStorage = createKbnUrlStateStorage({
-    history,
-    useHash: false,
-    useHashQuery: false,
-  });
-
-  const { lastResponse, params, search, status, type } = urlStateStorage.get<{
-    lastResponse: string[];
-    params: Record<string, string | number | object>;
-    search: string;
-    status: RuleStatus[];
-    type: string[];
-  }>('_a') || { lastResponse: [], params: {}, search: '', status: [], type: [] };
-
-  const [stateLastResponse, setLastResponse] = useState<string[]>(lastResponse);
-  const [stateParams, setParams] = useState<Record<string, string | number | object>>(params);
-  const [stateSearch, setSearch] = useState<string>(search);
-  const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
-  const [stateType, setType] = useState<string[]>(type);
-
-  const [stateRefresh, setRefresh] = useState(new Date());
-
-  const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
-
-  const handleStatusFilterChange = (newStatus: RuleStatus[]) => {
-    setStatus(newStatus);
-    urlStateStorage.set('_a', { lastResponse, params, search, status: newStatus, type });
-  };
-
-  const handleLastRunOutcomeFilterChange = (newLastResponse: string[]) => {
-    setRefresh(new Date());
-    setLastResponse(newLastResponse);
-    urlStateStorage.set('_a', { lastResponse: newLastResponse, params, search, status, type });
-  };
-
-  const handleTypeFilterChange = (newType: string[]) => {
-    setType(newType);
-    urlStateStorage.set('_a', { lastResponse, params, search, status, type: newType });
-  };
-
-  const handleSearchFilterChange = (newSearch: string) => {
-    setSearch(newSearch);
-    urlStateStorage.set('_a', { lastResponse, params, search: newSearch, status, type });
-  };
-
-  const handleRuleParamFilterChange = (newParams: Record<string, string | number | object>) => {
-    setParams(newParams);
-    urlStateStorage.set('_a', { lastResponse, params: newParams, search, status, type });
-  };
 
   return (
     <ObservabilityPageTemplate
@@ -140,36 +93,35 @@ export function RulesPage() {
             />
           </EuiButtonEmpty>,
         ],
+        tabs: [
+          {
+            id: 'Logs',
+            name: 'logs',
+            label: 'Logs',
+            onClick: () => console.log('clicked on logs'),
+          },
+          {
+            id: 'Rules',
+            name: 'rules',
+            label: 'Rules',
+            onClick: () => console.log('clicked on rules'),
+          },
+        ],
       }}
       data-test-subj="rulesPage"
     >
       <HeaderMenu />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <RuleList
-            filteredRuleTypes={filteredRuleTypes}
-            lastRunOutcomeFilter={stateLastResponse}
-            refresh={stateRefresh}
-            ruleDetailsRoute="alerts/rules/:ruleId"
-            rulesListKey="observability_rulesListColumns"
-            ruleParamFilter={stateParams}
-            showActionFilter={false}
-            statusFilter={stateStatus}
-            searchFilter={stateSearch}
-            typeFilter={stateType}
-            visibleColumns={[
-              'ruleName',
-              'ruleExecutionStatusLastDate',
-              'ruleSnoozeNotify',
-              'ruleExecutionStatus',
-              'ruleExecutionState',
-            ]}
-            onLastRunOutcomeFilterChange={handleLastRunOutcomeFilterChange}
-            onRuleParamFilterChange={handleRuleParamFilterChange}
-            onSearchFilterChange={handleSearchFilterChange}
-            onStatusFilterChange={handleStatusFilterChange}
-            onTypeFilterChange={handleTypeFilterChange}
-          />
+          <div>Pam</div>
+          <Routes>
+            <Route exact path={`${path}/logs`} component={GlobalLogsTab} />
+            <Route
+              exact
+              path={path}
+              render={() => <RulesTab setRefresh={setRefresh} stateRefresh={stateRefresh} />}
+            />
+          </Routes>
         </EuiFlexItem>
       </EuiFlexGroup>
 
