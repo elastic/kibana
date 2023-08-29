@@ -218,7 +218,7 @@ xpack.actions.run:
 --
 
 `xpack.actions.queued.max` {ess-icon}::
-Specifies the maximum number of actions that can be queued.
+Specifies the maximum number of actions that can be queued. Default: 1000000
 
 [float]
 [[alert-settings]]
