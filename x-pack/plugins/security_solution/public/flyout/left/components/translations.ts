@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ENTITIES_NO_DATA_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.entitiesNoDataMessage',
+  {
+    defaultMessage: 'No user or host data available',
+  }
+);
+
 export const ANALYZER_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.flyout.analyzerErrorMessage',
   {

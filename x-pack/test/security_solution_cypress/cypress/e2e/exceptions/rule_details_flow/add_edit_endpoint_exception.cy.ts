@@ -49,7 +49,7 @@ describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverle
 
   before(() => {
     cy.task('esArchiverResetKibana');
-    cy.task('esArchiverLoad', 'auditbeat');
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
     login();
     deleteAlertsAndRules();
     // create rule with exception
