@@ -188,7 +188,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       timeFieldName: dataView.timeFieldName ?? '',
       index: dataView.getIndexPattern(),
       grouping: true,
-      flushFix: true,
+      flushFix: false,
       // If analysis type is `spike`, pass on window parameters as is,
       // if it's `dip`, swap baseline and deviation.
       ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
