@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import {
-  Form,
-  FormHook,
-  useForm,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback, useEffect } from 'react';
-import { schema, FormProps } from './schema';
-import { CustomFieldFormSchema } from './type';
+import type { FormProps } from './schema';
+import { schema } from './schema';
+import type { CustomFieldFormSchema } from './type';
 import { FormFields } from './form_fields';
 
 export interface CustomFieldFormState {
@@ -26,18 +24,15 @@ interface Props {
   onChange: (state: CustomFieldFormState) => void;
 }
 
-const FormComponent: React.FC<Props> = ({ onChange
-}) => {
+const FormComponent: React.FC<Props> = ({ onChange }) => {
   const submitForm = useCallback(async (data, isValid) => {
-
-    console.log('submit form', {data, isValid});
-
+    console.log('submit form', { data, isValid });
   }, []);
 
   const { form } = useForm<FormProps>({
     options: { stripEmptyFields: false },
-    schema: schema,
-    onSubmit: submitForm
+    schema,
+    onSubmit: submitForm,
   });
 
   const { submit, isValid: isFormValid, isSubmitted, isSubmitting } = form;

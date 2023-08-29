@@ -9,31 +9,30 @@ import React, { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { CustomFieldTypesUI } from '../type';
-import { FieldOptions } from '.';
+import { TextAreaHeight } from '.';
 
-interface FieldOptionsSelectorProps {
+interface TextAreaHeightSelectorProps {
   dataTestSubj: string;
-  idAria: string;
   disabled: boolean;
   field: FieldHook<string>;
+  idAria: string;
   isLoading: boolean;
-  selectedType: CustomFieldTypesUI;
+  // handleTextAreaHeightChange: (newValue: string) => void;
 }
 
-export const FieldOptionsSelector = ({
+export const TextAreaHeightSelector = ({
+  dataTestSubj,
   disabled = false,
   field,
-  isLoading = false,
-  dataTestSubj,
   idAria,
-  selectedType,
-}: FieldOptionsSelectorProps) => {
+  isLoading = false,
+}: // handleTextAreaHeightChange,
+TextAreaHeightSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-  const handleOptionChange = useCallback(
-    (checkboxOption) => {
-      field.setValue(checkboxOption);
+  const onChange = useCallback(
+    (val: string) => {
+      field.setValue(val);
+      // handleChange(val);
     },
     [field]
   );
@@ -49,13 +48,9 @@ export const FieldOptionsSelector = ({
       label={field.label}
       labelAppend={field.labelAppend}
     >
-      <FieldOptions
-        selectedType={selectedType}
-        disabled={disabled || isLoading}
-        handleOptionChange={handleOptionChange}
-      />
+      <TextAreaHeight disabled={disabled} isLoading={isLoading} onChange={onChange} />
     </EuiFormRow>
   );
 };
 
-FieldOptionsSelector.displayName = 'FieldOptionsSelector';
+TextAreaHeightSelector.displayName = 'TextAreaHeightSelector';

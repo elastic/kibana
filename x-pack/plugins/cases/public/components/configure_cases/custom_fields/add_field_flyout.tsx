@@ -17,7 +17,8 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import {CustomFieldsForm, CustomFieldFormState} from './form';
+import type { CustomFieldFormState } from './form';
+import { CustomFieldsForm } from './form';
 
 import * as i18n from '../translations';
 
@@ -29,7 +30,12 @@ export interface AddFieldFlyoutProps {
   onSaveField: (data: Record<string, unknown>) => void;
 }
 
-const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({ onCloseFlyout, onSaveAndAddAnotherField, onSaveField, isLoading }) => {
+const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
+  onCloseFlyout,
+  onSaveAndAddAnotherField,
+  onSaveField,
+  isLoading,
+}) => {
   const dataTestSubj = 'add-custom-field-flyout';
 
   const [formState, setFormState] = useState<CustomFieldFormState>({
@@ -42,15 +48,12 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({ onCloseFlyout,
 
   const { submit, isValid: isFormValid, isSubmitting } = formState;
 
-  const handleSaveField = useCallback(
-    async () => {
-      const { isValid, data } = await submit();
+  const handleSaveField = useCallback(async () => {
+    const { isValid, data } = await submit();
 
-      console.log('handleSaveField', {isValid, data} );
-      onSaveField(data);
-    },
-    [onSaveField, submit],
-  )
+    console.log('handleSaveField', { isValid, data });
+    onSaveField(data);
+  }, [onSaveField, submit]);
 
   return (
     <EuiFlyout onClose={onCloseFlyout} data-test-subj={dataTestSubj}>
@@ -69,24 +72,26 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({ onCloseFlyout,
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={onSaveAndAddAnotherField} data-test-subj={`${dataTestSubj}-save-add-another`}>
-                  {i18n.SAVE_AND_ADD_ANOTHER}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={handleSaveField} data-test-subj={`${dataTestSubj}-save`}>
-                  {i18n.SAVE_FIELD}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          
+
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={onSaveAndAddAnotherField}
+                data-test-subj={`${dataTestSubj}-save-add-another`}
+              >
+                {i18n.SAVE_AND_ADD_ANOTHER}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={handleSaveField} data-test-subj={`${dataTestSubj}-save`}>
+                {i18n.SAVE_FIELD}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
-  )
+  );
 };
 
 AddFieldFlyoutComponent.displayName = 'AddFieldFlyout';

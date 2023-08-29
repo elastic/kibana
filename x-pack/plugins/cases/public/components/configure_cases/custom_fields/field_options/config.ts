@@ -6,19 +6,24 @@
  */
 
 import * as i18n from './translations';
-import { CustomFieldTypesUI } from '../type';
+import type { CustomFieldTypesUI } from '../type';
 
-export type Options = {
+export interface Options {
   id: string;
   label: string;
 }
 
 export interface BasicOptions {
-  required: Options
+  required: Options;
 }
 
 export interface TextOptions extends BasicOptions {
-  characterLimit: Options
+  characterLimit: Options;
+}
+
+export interface ListOptions extends BasicOptions {
+  multipleSelections: Options;
+  customValues: Options;
 }
 
 export const getConfig = (selectedType: CustomFieldTypesUI) => {
@@ -26,22 +31,37 @@ export const getConfig = (selectedType: CustomFieldTypesUI) => {
     required: {
       id: 'required_option',
       label: i18n.REQUIRED,
-  },
-  }
+    },
+  };
 
-  switch(selectedType) {
+  switch (selectedType) {
     case 'Text':
-    case 'Textarea': 
+    case 'Textarea':
       config = {
         ...config,
-          characterLimit: {
+        characterLimit: {
           id: 'character_limit',
           label: i18n.CHARACTER_LIMIT,
-        }
-      } as TextOptions
+        },
+      } as TextOptions;
 
-      return  config;
-    default :
+      return config;
+
+    case 'List':
+      config = {
+        ...config,
+        multipleSelections: {
+          id: 'multiple_selections',
+          label: i18n.MULTIPLE_SELECTIONS,
+        },
+        customValues: {
+          id: 'custom_values',
+          label: i18n.CUSTOM_VALUES,
+        },
+      } as ListOptions;
+
+      return config;
+    default:
       return config;
   }
-}
+};

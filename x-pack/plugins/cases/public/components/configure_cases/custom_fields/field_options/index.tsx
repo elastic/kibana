@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiCheckboxGroup, EuiCheckboxGroupOption } from '@elastic/eui';
-import { CustomFieldTypesUI } from '../type';
+import type { EuiCheckboxGroupOption } from '@elastic/eui';
+import { EuiCheckboxGroup } from '@elastic/eui';
+import type { CustomFieldTypesUI } from '../type';
 import { getConfig } from './config';
 
 interface FieldOptionsProps {
@@ -24,7 +25,7 @@ export const FieldOptionsComponent = ({
   const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
     {}
   );
-  
+
   const onChange = useCallback(
     (id: string) => {
       let checkboxOption = {};
@@ -37,7 +38,7 @@ export const FieldOptionsComponent = ({
       });
       handleOptionChange(checkboxOption);
     },
-    []
+    [handleOptionChange, setCheckboxIdToSelectedMap]
   );
 
   const config = getConfig(selectedType);
@@ -45,16 +46,15 @@ export const FieldOptionsComponent = ({
   const checkboxOptions: EuiCheckboxGroupOption[] = [...Object.values(config)];
 
   return (
-      <EuiCheckboxGroup
-        options={checkboxOptions}
-        idToSelectedMap={checkboxIdToSelectedMap}
-        onChange={onChange}
-        disabled={disabled}
-      />
+    <EuiCheckboxGroup
+      options={checkboxOptions}
+      idToSelectedMap={checkboxIdToSelectedMap}
+      onChange={onChange}
+      disabled={disabled}
+    />
   );
 };
 
 FieldOptionsComponent.displayName = 'FieldOptions';
 
 export const FieldOptions = React.memo(FieldOptionsComponent);
-

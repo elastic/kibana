@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiSuperSelect, EuiSuperSelectOption, EuiFlexItem, EuiText } from '@elastic/eui';
-import { CustomFieldTypesUI } from './type';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiSuperSelect, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { CustomFieldTypesUI } from '../type';
 
 interface Props {
-  customFieldTypes: CustomFieldTypesUI[],
+  customFieldTypes: CustomFieldTypesUI[];
   disabled: boolean;
   isLoading: boolean;
   onChange?: (newValue: string) => void;
@@ -22,7 +23,7 @@ export const FieldTypeDropdownComponent = ({
   disabled,
   isLoading,
   onChange,
-  selectedType
+  selectedType,
 }: Props) => {
   const options: Array<EuiSuperSelectOption<CustomFieldTypesUI>> = customFieldTypes.map(
     (fieldType) => {
@@ -57,4 +58,4 @@ export const FieldTypeDropdownComponent = ({
 };
 FieldTypeDropdownComponent.displayName = 'FieldTypeDropdown';
 
-export const FieldTypeDropdown = React.memo(FieldTypeDropdownComponent)
+export const FieldTypeDropdown = React.memo(FieldTypeDropdownComponent);

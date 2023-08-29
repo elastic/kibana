@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export type CustomFieldFormSchema<
-  Config = Record<string, unknown>,
-> = {
-  config: Config
+export interface CustomFieldFormSchema<Config = Record<string, unknown>> {
+  config: Config;
 }
 
 export enum customFieldTypesEnum {

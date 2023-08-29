@@ -22,7 +22,7 @@ import * as i18n from './translations';
 
 import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import { CustomFields } from './custom_fields/index';
+import { CustomFields } from './custom_fields';
 import { AddFieldFlyout } from './custom_fields/add_field_flyout';
 import type { ActionTypeConnector } from '../../../common/types/domain';
 import { ConnectorTypes } from '../../../common/types/domain';
@@ -74,20 +74,25 @@ const ConnectorsComponent: React.FC<Props> = ({
 
   const connectorsName = connector?.name ?? 'none';
 
-  const onAddCustomFields = useCallback(
-    () => {
-      setAddFieldFlyoutVisibility(true);
-    },
-    []
-  );
+  const onAddCustomFields = useCallback(() => {
+    setAddFieldFlyoutVisibility(true);
+  }, [setAddFieldFlyoutVisibility]);
 
   const onCloseAddFieldFlyout = useCallback(() => {
     setAddFieldFlyoutVisibility(false);
-  }, []);
+  }, [setAddFieldFlyoutVisibility]);
 
   const CustomFieldAddFlyout = useMemo(
-    () => addFieldFlyoutVisible ? <AddFieldFlyout onCloseFlyout={onCloseAddFieldFlyout} onSaveAndAddAnotherField={onCloseAddFieldFlyout} onSaveField={onCloseAddFieldFlyout} /> : null,
-    [addFieldFlyoutVisible]
+    () =>
+      addFieldFlyoutVisible ? (
+        <AddFieldFlyout
+          isLoading={isLoading}
+          onCloseFlyout={onCloseAddFieldFlyout}
+          onSaveAndAddAnotherField={onCloseAddFieldFlyout}
+          onSaveField={onCloseAddFieldFlyout}
+        />
+      ) : null,
+    [addFieldFlyoutVisible, isLoading, onCloseAddFieldFlyout]
   );
 
   const actionTypeName = useMemo(
@@ -161,7 +166,11 @@ const ConnectorsComponent: React.FC<Props> = ({
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
-              <CustomFields isLoading={isLoading} disabled={disabled} handleAddCustomField={onAddCustomFields} />
+              <CustomFields
+                isLoading={isLoading}
+                disabled={disabled}
+                handleAddCustomField={onAddCustomFields}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRowExtended>

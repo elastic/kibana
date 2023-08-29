@@ -161,67 +161,47 @@ export const CASES_WEBHOOK_MAPPINGS = i18n.translate(
   }
 );
 
-export const NO_CUSTOM_FIELDS = i18n.translate(
-  'xpack.cases.configureCases.noCustomFields',
-  {
-    defaultMessage: 'You do not have any fields yet'
-  }
-);
+export const NO_CUSTOM_FIELDS = i18n.translate('xpack.cases.configureCases.noCustomFields', {
+  defaultMessage: 'You do not have any fields yet',
+});
 
-export const ADD_CUSTOM_FIELD = i18n.translate(
-  'xpack.cases.configureCases.addCustomField',
-  {
-    defaultMessage: 'Add field'
-  }
-);
+export const ADD_CUSTOM_FIELD = i18n.translate('xpack.cases.configureCases.addCustomField', {
+  defaultMessage: 'Add field',
+});
 
-export const SAVE_AND_ADD_ANOTHER = i18n.translate(
-  'xpack.cases.configureCases.saveAndAddAnother',
-  {
-    defaultMessage: 'Save and add another'
-  }
-);
+export const SAVE_AND_ADD_ANOTHER = i18n.translate('xpack.cases.configureCases.saveAndAddAnother', {
+  defaultMessage: 'Save and add another',
+});
 
-export const SAVE_FIELD = i18n.translate(
-  'xpack.cases.configureCases.saveField',
-  {
-    defaultMessage: 'Save field'
-  }
-);
+export const SAVE_FIELD = i18n.translate('xpack.cases.configureCases.saveField', {
+  defaultMessage: 'Save field',
+});
 
-export const FIELD_LABEL = i18n.translate(
-  'xpack.cases.configureCases.fieldLabel',
-  {
-    defaultMessage: 'Field label'
-  }
-);
+export const FIELD_LABEL = i18n.translate('xpack.cases.configureCases.fieldLabel', {
+  defaultMessage: 'Field label',
+});
 
-export const FIELD_TYPE = i18n.translate(
-  'xpack.cases.configureCases.fieldType',
-  {
-    defaultMessage: 'Field type'
-  }
-);
+export const FIELD_TYPE = i18n.translate('xpack.cases.configureCases.fieldType', {
+  defaultMessage: 'Field type',
+});
 
-export const FIELD_OPTIONS = i18n.translate(
-  'xpack.cases.configureCases.fieldOptions',
-  {
-    defaultMessage: 'Options'
-  }
-);
+export const TextAreaHeight = i18n.translate('xpack.cases.configureCases.textAreaHeight', {
+  defaultMessage: 'Height of TextArea',
+});
+
+export const FIELD_OPTIONS = i18n.translate('xpack.cases.configureCases.fieldOptions', {
+  defaultMessage: 'Options',
+});
 
 export const FIELD_OPTION_REQUIRED = i18n.translate(
   'xpack.cases.configureCases.fieldOptionRequired',
   {
-    defaultMessage: 'Make this field required'
+    defaultMessage: 'Make this field required',
   }
 );
 
 export const REQUIRED_FIELD = (fieldName: string): string =>
-  i18n.translate(
-    'xpack.cases.configureCases.requiredField',
-    {
-      values: { fieldName },
-      defaultMessage: '{fieldName} is required.'
-    }
-  );
+  i18n.translate('xpack.cases.configureCases.requiredField', {
+    values: { fieldName },
+    defaultMessage: '{fieldName} is required.',
+  });

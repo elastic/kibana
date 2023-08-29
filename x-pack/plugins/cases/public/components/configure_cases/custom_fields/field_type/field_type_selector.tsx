@@ -9,11 +9,11 @@ import React, { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { CustomFieldTypesUI } from './type';
+import type { CustomFieldTypesUI } from '../type';
 import { FieldTypeDropdown } from './field_type_dropdown';
 
 interface FieldTypeSelectorProps {
-  customFieldTypes: CustomFieldTypesUI[],
+  customFieldTypes: CustomFieldTypesUI[];
   dataTestSubj: string;
   disabled: boolean;
   field: FieldHook<string>;
@@ -31,7 +31,7 @@ export const FieldTypeSelector = ({
   idAria,
   isLoading = false,
   handleChange,
-  selectedType
+  selectedType,
 }: FieldTypeSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const onChange = useCallback(
@@ -39,7 +39,7 @@ export const FieldTypeSelector = ({
       field.setValue(val);
       handleChange(val);
     },
-    [field]
+    [field, handleChange]
   );
 
   return (
