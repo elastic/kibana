@@ -108,6 +108,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'dev_tools.deeplinks.navLinkStatus (string)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
+        'enterpriseSearch.ui.enabled (boolean)',
         'home.disableWelcomeScreen (boolean)',
         'management.deeplinks.navLinkStatus (string)',
         'map.emsFileApiUrl (string)',
@@ -144,6 +145,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',
         'newsfeed.service.urlRoot (string)',
+        'no_data_page.analyticsNoDataPageFlavor (any)', // It's a string (any because schema.conditional)
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
         'telemetry.banner (boolean)',

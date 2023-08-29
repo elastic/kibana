@@ -40,8 +40,8 @@ export default defineCypressConfig({
     specPattern: './e2e/**/*.cy.ts',
   },
   env: {
-    KIBANA_URL: kibanaUrlWithoutAuth,
-    KIBANA_USERNAME: kbnTestConfig.getUrlParts().username,
-    KIBANA_PASSWORD: kbnTestConfig.getUrlParts().password,
+    username: kbnTestConfig.getUrlParts().username,
+    password: kbnTestConfig.getUrlParts().password,
+    kibanaUrlWithoutAuth,
   },
 });

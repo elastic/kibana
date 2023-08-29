@@ -72,6 +72,10 @@
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
               },
@@ -130,10 +134,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/entity_analytics/components/risk_score_preview_section.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -305,6 +305,10 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {
@@ -313,15 +317,15 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -386,98 +390,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -561,7 +473,95 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",
@@ -649,11 +649,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
               },
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "transform",
@@ -8036,6 +8036,10 @@
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
               },
@@ -8094,10 +8098,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/entity_analytics/components/risk_score_preview_section.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -8269,6 +8269,10 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {
@@ -8277,15 +8281,15 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -8350,98 +8354,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -8525,7 +8437,95 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",
@@ -8613,11 +8613,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
               },
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "transform",
@@ -15110,6 +15110,10 @@
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
               },
@@ -15168,10 +15172,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/entity_analytics/components/risk_score_preview_section.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -15343,6 +15343,10 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {
@@ -15351,15 +15355,15 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/public/search/errors/painless_error.tsx"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -15424,98 +15428,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
-              },
-              {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -15599,7 +15511,95 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",
@@ -15687,11 +15687,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/components/rule_preview.tsx"
               },
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "transform",
@@ -24378,22 +24378,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/core-saved-objects-api-browser",
-                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -24406,6 +24390,18 @@
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
+                "plugin": "@kbn/core-saved-objects-api-browser",
+                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
                 "plugin": "home",
                 "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
               },
@@ -24454,20 +24450,8 @@
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "osquery",
@@ -24558,6 +24542,26 @@
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
               },
               {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
@@ -24596,6 +24600,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/packages/get.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.test.ts"
               }
             ]
           },
