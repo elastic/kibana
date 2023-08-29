@@ -217,6 +217,9 @@ xpack.actions.run:
           maxAttempts: 5
 --
 
+`xpack.actions.queued.max` {ess-icon}::
+Specifies the maximum number of actions that can be queued.
+
 [float]
 [[alert-settings]]
 === Alerting settings
