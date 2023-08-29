@@ -168,7 +168,7 @@ export class AlertUtils {
 
   public getUpdateApiKeyRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_update_api_key`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/_update_api_key`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
