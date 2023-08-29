@@ -140,8 +140,7 @@ export const useLensSuggestions = ({
   return {
     allSuggestions,
     currentSuggestion: histogramSuggestion ?? currentSuggestion,
-    suggestionUnsupported:
-      !currentSuggestion && !histogramSuggestion && isPlainRecord && !dataView.isTimeBased(),
+    suggestionUnsupported: !currentSuggestion && !histogramSuggestion && isPlainRecord,
     isOnHistogramMode: Boolean(histogramSuggestion),
   };
 };
