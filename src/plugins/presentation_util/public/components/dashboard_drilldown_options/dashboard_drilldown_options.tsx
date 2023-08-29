@@ -17,7 +17,7 @@ export interface DashboardDrilldownOptionsProps {
   onOptionChange: (newOptions: Partial<DashboardDrilldownOptions>) => void;
 }
 
-const DashboardDrilldownOptionsComponent = ({
+export const DashboardDrilldownOptionsComponent = ({
   options,
   onOptionChange,
 }: DashboardDrilldownOptionsProps) => {
@@ -27,7 +27,7 @@ const DashboardDrilldownOptionsComponent = ({
         <EuiSwitch
           name="useCurrentFilters"
           label={dashboardDrilldownConfigStrings.component.getUseCurrentFiltersLabel()}
-          checked={!!options.useCurrentFilters}
+          checked={options.useCurrentFilters}
           onChange={() => onOptionChange({ useCurrentFilters: !options.useCurrentFilters })}
         />
       </EuiFormRow>
@@ -35,7 +35,7 @@ const DashboardDrilldownOptionsComponent = ({
         <EuiSwitch
           name="useCurrentDateRange"
           label={dashboardDrilldownConfigStrings.component.getUseCurrentDateRange()}
-          checked={!!options.useCurrentDateRange}
+          checked={options.useCurrentDateRange}
           onChange={() => onOptionChange({ useCurrentDateRange: !options.useCurrentDateRange })}
         />
       </EuiFormRow>
@@ -43,14 +43,10 @@ const DashboardDrilldownOptionsComponent = ({
         <EuiSwitch
           name="openInNewTab"
           label={dashboardDrilldownConfigStrings.component.getOpenInNewTab()}
-          checked={!!options.openInNewTab}
+          checked={options.openInNewTab}
           onChange={() => onOptionChange({ openInNewTab: !options.openInNewTab })}
         />
       </EuiFormRow>
     </>
   );
 };
-
-// required for dynamic import using React.lazy()
-// eslint-disable-next-line import/no-default-export
-export default DashboardDrilldownOptionsComponent;

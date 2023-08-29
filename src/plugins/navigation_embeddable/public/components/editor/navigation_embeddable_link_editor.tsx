@@ -26,17 +26,6 @@ import {
   EuiFlyoutHeader,
   EuiRadioGroupOption,
 } from '@elastic/eui';
-import {
-  withSuspense,
-  DashboardDrilldownOptions,
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-  LazyDashboardDrilldownOptionsComponent,
-} from '@kbn/presentation-util-plugin/public';
-import {
-  UrlDrilldownOptions,
-  UrlDrilldownOptionsComponent,
-  DEFAULT_URL_DRILLDOWN_OPTIONS,
-} from '@kbn/ui-actions-enhanced-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
@@ -51,11 +40,7 @@ import { DashboardItem, NavigationLinkInfo } from '../../embeddable/types';
 import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
 import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
-
-const DashboardDrilldownOptionsComponent = withSuspense(
-  LazyDashboardDrilldownOptionsComponent,
-  null
-);
+import { NavigationEmbeddableLinkOptions } from './navigation_embeddable_link_options';
 
 export const NavigationEmbeddableLinkEditor = ({
   link,
@@ -74,13 +59,8 @@ export const NavigationEmbeddableLinkEditor = ({
   const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
   const [destinationError, setDestinationError] = useState<string | undefined>();
+  const [linkOptions, setLinkOptions] = useState<NavigationLinkOptions | undefined>();
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
-  const [linkOptions, setLinkOptions] = useState<NavigationLinkOptions | undefined>({
-    ...(link?.type === EXTERNAL_LINK_TYPE
-      ? DEFAULT_URL_DRILLDOWN_OPTIONS
-      : DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS),
-    ...link?.options,
-  });
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as NavigationLinkType[]).map((type) => {
@@ -159,17 +139,11 @@ export const NavigationEmbeddableLinkEditor = ({
               idSelected={selectedLinkType}
               onChange={(id) => {
                 if (link?.type === id) {
-                  setLinkOptions(link.options);
                   setLinkDestination(link.destination);
                   setCurrentLinkLabel(link.label ?? '');
                 } else {
                   setLinkDestination(undefined);
                   setCurrentLinkLabel('');
-                  if (id === DASHBOARD_LINK_TYPE) {
-                    setLinkOptions(DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS);
-                  } else {
-                    setLinkOptions(DEFAULT_URL_DRILLDOWN_OPTIONS);
-                  }
                 }
                 setDefaultLinkLabel(undefined);
                 setSelectedLinkType(id as NavigationLinkType);
@@ -209,21 +183,11 @@ export const NavigationEmbeddableLinkEditor = ({
           </EuiFormRow>
 
           <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkOptionsLabel()}>
-            {selectedLinkType === DASHBOARD_LINK_TYPE ? (
-              <DashboardDrilldownOptionsComponent
-                options={linkOptions as DashboardDrilldownOptions}
-                onOptionChange={(change) =>
-                  setLinkOptions({ ...(linkOptions as DashboardDrilldownOptions), ...change })
-                }
-              />
-            ) : (
-              <UrlDrilldownOptionsComponent
-                options={linkOptions as UrlDrilldownOptions}
-                onOptionChange={(change) =>
-                  setLinkOptions({ ...(linkOptions as UrlDrilldownOptions), ...change })
-                }
-              />
-            )}
+            <NavigationEmbeddableLinkOptions
+              link={link}
+              setLinkOptions={setLinkOptions}
+              selectedLinkType={selectedLinkType}
+            />
           </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>
