@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
 
-  // Error: self-signed certificate in certificate chain
-  describe.skip('Data View Management', function () {
+  describe('Data View Management', function () {
     let dataViewId = '';
 
     before(async () => {
