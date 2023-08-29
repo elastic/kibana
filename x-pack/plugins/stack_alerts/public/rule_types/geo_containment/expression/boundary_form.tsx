@@ -141,7 +141,7 @@ export const BoundaryForm = (props: Props) => {
               } else if ('boundaryGeoField' in props.ruleParams) {
                 props.setGeoField('');
               }
-              
+
               // do not attempt to auto select name field
               // its optional plus there can be many matches so auto selecting the correct field is improbable
               if ('boundaryNameField' in props.ruleParams) {
