@@ -13,10 +13,10 @@ import type { CustomFieldTypesUI } from './type';
 import { FieldTypeSelector } from './field_type/field_type_selector';
 import { FieldOptionsSelector } from './field_options/field_options_selector';
 import { TextAreaHeightSelector } from './text_area_height/text_area_height_selector';
-import * as schema from './schema';
+import { customFieldTypes } from './schema';
 
 const FormFieldsComponent: React.FC = () => {
-  const [selectedType, setSelectedType] = useState<string>(schema.customFieldTypes[0]);
+  const [selectedType, setSelectedType] = useState<string>(customFieldTypes[0]);
   const handleTypeChange = useCallback(
     (val: CustomFieldTypesUI) => {
       setSelectedType(val);
@@ -28,7 +28,6 @@ const FormFieldsComponent: React.FC = () => {
     <>
       <UseField
         path="fieldLabel"
-        config={schema.fieldLabelConfig}
         component={Field}
         componentProps={{
           euiFieldProps: { 'data-test-subj': 'fieldLabelInput', fullWidth: true },
@@ -36,10 +35,9 @@ const FormFieldsComponent: React.FC = () => {
       />
       <UseField
         path="fieldType"
-        config={schema.fieldTypeConfig}
         component={FieldTypeSelector}
         componentProps={{
-          customFieldTypes: schema.customFieldTypes,
+          customFieldTypes: customFieldTypes,
           dataTestSubj: 'fieldTypeDropdown',
           selectedType,
           handleChange: handleTypeChange,
@@ -48,7 +46,6 @@ const FormFieldsComponent: React.FC = () => {
       {selectedType && selectedType === 'Textarea' ? (
         <UseField
           path="textAreaHeight"
-          config={schema.textAreaHeightConfig}
           component={TextAreaHeightSelector}
           componentProps={{
             dataTestSubj: 'textAreaHeight',
@@ -60,7 +57,6 @@ const FormFieldsComponent: React.FC = () => {
       {selectedType && (
         <UseField
           path="fieldOptions"
-          config={schema.fieldOptionsConfig}
           component={FieldOptionsSelector}
           componentProps={{
             dataTestSubj: 'fieldOptions',

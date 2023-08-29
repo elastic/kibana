@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, EuiPageBody } from '@elastic/eui';
+import { EuiCallOut, EuiFlexItem, EuiLink, EuiPageBody } from '@elastic/eui';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -29,6 +29,8 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
+import { CustomFields } from '../custom_fields';
+import { AddFieldFlyout } from '../custom_fields/add_field_flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 
 const FormWrapper = styled.div`
@@ -60,6 +62,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
     null
   );
+  const [addFieldFlyoutVisible, setAddFieldFlyoutVisibility] = useState<boolean>(false);
 
   const {
     connector,
@@ -202,6 +205,27 @@ export const ConfigureCases: React.FC = React.memo(() => {
     [connector.id, editedConnectorItem, editFlyoutVisible]
   );
 
+  const onAddCustomFields = useCallback(() => {
+    setAddFieldFlyoutVisibility(true);
+  }, [setAddFieldFlyoutVisibility]);
+
+  const onCloseAddFieldFlyout = useCallback(() => {
+    setAddFieldFlyoutVisibility(false);
+  }, [setAddFieldFlyoutVisibility]);
+
+  const CustomFieldAddFlyout = useMemo(
+    () =>
+      addFieldFlyoutVisible ? (
+        <AddFieldFlyout
+          isLoading={false}
+          onCloseFlyout={onCloseAddFieldFlyout}
+          onSaveAndAddAnotherField={onCloseAddFieldFlyout}
+          onSaveField={onCloseAddFieldFlyout}
+        />
+      ) : null,
+    [addFieldFlyoutVisible, onCloseAddFieldFlyout]
+  );
+
   return (
     <>
       <HeaderPage
@@ -254,8 +278,18 @@ export const ConfigureCases: React.FC = React.memo(() => {
               updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
             />
           </SectionWrapper>
+          <SectionWrapper>
+          <EuiFlexItem grow={false}>
+              <CustomFields
+                isLoading={false}
+                disabled={false}
+                handleAddCustomField={onAddCustomFields}
+              />
+            </EuiFlexItem>
+          </SectionWrapper>
           {ConnectorAddFlyout}
           {ConnectorEditFlyout}
+          {CustomFieldAddFlyout}
         </FormWrapper>
       </EuiPageBody>
     </>

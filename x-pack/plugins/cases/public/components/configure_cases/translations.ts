@@ -161,6 +161,14 @@ export const CASES_WEBHOOK_MAPPINGS = i18n.translate(
   }
 );
 
+export const CUSTOM_FIELDS_TITLE = i18n.translate('xpack.cases.configureCases.customFieldsTitle', {
+  defaultMessage: 'Custom Fields',
+});
+
+export const CUSTOM_FIELDS_DESCRIPTION = i18n.translate('xpack.cases.configureCases.customFieldsDescription', {
+  defaultMessage: 'Custom Fields description',
+});
+
 export const NO_CUSTOM_FIELDS = i18n.translate('xpack.cases.configureCases.noCustomFields', {
   defaultMessage: 'You do not have any fields yet',
 });

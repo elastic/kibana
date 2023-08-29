@@ -10,14 +10,13 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import React, { useCallback, useEffect } from 'react';
 import type { FormProps } from './schema';
 import { schema } from './schema';
-import type { CustomFieldFormSchema } from './type';
 import { FormFields } from './form_fields';
 
 export interface CustomFieldFormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
   isSubmitting: boolean;
-  submit: FormHook<CustomFieldFormSchema>['submit'];
+  submit: FormHook['submit'];
 }
 
 interface Props {
@@ -30,6 +29,7 @@ const FormComponent: React.FC<Props> = ({ onChange }) => {
   }, []);
 
   const { form } = useForm<FormProps>({
+    defaultValue: {fieldType: "Text"},
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitForm,

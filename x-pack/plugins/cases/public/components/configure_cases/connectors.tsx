@@ -22,8 +22,6 @@ import * as i18n from './translations';
 
 import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import { CustomFields } from './custom_fields';
-import { AddFieldFlyout } from './custom_fields/add_field_flyout';
 import type { ActionTypeConnector } from '../../../common/types/domain';
 import { ConnectorTypes } from '../../../common/types/domain';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
@@ -69,31 +67,9 @@ const ConnectorsComponent: React.FC<Props> = ({
     [connectors, selectedConnector.id]
   );
   const { permissions } = useCasesContext();
-  const [addFieldFlyoutVisible, setAddFieldFlyoutVisibility] = useState<boolean>(false);
   const canUseConnectors = permissions.connectors && actions.read;
 
   const connectorsName = connector?.name ?? 'none';
-
-  const onAddCustomFields = useCallback(() => {
-    setAddFieldFlyoutVisibility(true);
-  }, [setAddFieldFlyoutVisibility]);
-
-  const onCloseAddFieldFlyout = useCallback(() => {
-    setAddFieldFlyoutVisibility(false);
-  }, [setAddFieldFlyoutVisibility]);
-
-  const CustomFieldAddFlyout = useMemo(
-    () =>
-      addFieldFlyoutVisible ? (
-        <AddFieldFlyout
-          isLoading={isLoading}
-          onCloseFlyout={onCloseAddFieldFlyout}
-          onSaveAndAddAnotherField={onCloseAddFieldFlyout}
-          onSaveField={onCloseAddFieldFlyout}
-        />
-      ) : null,
-    [addFieldFlyoutVisible, isLoading, onCloseAddFieldFlyout]
-  );
 
   const actionTypeName = useMemo(
     () => actionTypes.find((c) => c.id === selectedConnector.type)?.name ?? i18n.UNKNOWN,
@@ -165,17 +141,9 @@ const ConnectorsComponent: React.FC<Props> = ({
                 />
               </EuiFlexItem>
             ) : null}
-            <EuiFlexItem grow={false}>
-              <CustomFields
-                isLoading={isLoading}
-                disabled={disabled}
-                handleAddCustomField={onAddCustomFields}
-              />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRowExtended>
       </EuiDescribedFormGroup>
-      {CustomFieldAddFlyout}
     </>
   );
 };

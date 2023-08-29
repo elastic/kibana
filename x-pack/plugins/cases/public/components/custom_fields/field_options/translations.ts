@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export * from '../../../../common/translations';
+export * from '../../../common/translations';
 
 export const REQUIRED = i18n.translate('xpack.cases.configureCases.fieldOptions.required', {
   defaultMessage: 'Make this field required',

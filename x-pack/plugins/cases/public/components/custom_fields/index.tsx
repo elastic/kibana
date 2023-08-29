@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiButtonEmpty } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButtonEmpty, EuiDescribedFormGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import * as i18n from '../translations';
+import * as i18n from './translations';
 
-import { useApplicationCapabilities } from '../../../common/lib/kibana';
-import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface Props {
   disabled: boolean;
@@ -25,6 +25,16 @@ const CustomFieldsComponent: React.FC<Props> = ({ disabled, isLoading, handleAdd
   const canAddCustomFields = permissions.connectors && actions.read;
 
   return canAddCustomFields ? (
+    <EuiDescribedFormGroup
+    fullWidth
+    title={<h3>{i18n.TITLE}</h3>}
+    description={
+      <>
+        <p>{i18n.DESCRIPTION}</p>
+      </>
+    }
+    data-test-subj="case-closure-options-form-group"
+  >
     <EuiEmptyPrompt
       color="subdued"
       className="eui-fullWidth"
@@ -44,6 +54,7 @@ const CustomFieldsComponent: React.FC<Props> = ({ disabled, isLoading, handleAdd
         </EuiButtonEmpty>
       }
     />
+    </EuiDescribedFormGroup>
   ) : null;
 };
 CustomFieldsComponent.displayName = 'CustomFields';

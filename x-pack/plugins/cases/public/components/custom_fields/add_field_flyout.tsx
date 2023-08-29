@@ -20,7 +20,7 @@ import {
 import type { CustomFieldFormState } from './form';
 import { CustomFieldsForm } from './form';
 
-import * as i18n from '../translations';
+import * as i18n from '../configure_cases/translations';
 
 export interface AddFieldFlyoutProps {
   // disabled: boolean;
@@ -43,7 +43,6 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
     isSubmitting: false,
     isValid: undefined,
     submit: async () => ({ isValid: false, data: {} as CustomFieldFormState }),
-    preSubmitValidator: null,
   });
 
   const { submit, isValid: isFormValid, isSubmitting } = formState;
