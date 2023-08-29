@@ -48,7 +48,7 @@ describe(
       });
     });
 
-    describe('Ransomware in Timelines', { tags: ['@brokenInServerless'] }, () => {
+    describe('Ransomware in Timelines', () => {
       before(() => {
         login();
         visit(TIMELINES_URL);
