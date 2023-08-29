@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
@@ -44,14 +43,14 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 describe(
   'Add exception using data views from rule details',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
     const ITEM_NAME = 'Sample Exception List Item';
 
     before(() => {
       cy.task('esArchiverResetKibana');
-      cy.task('esArchiverLoad', 'exceptions');
+      cy.task('esArchiverLoad', { archiveName: 'exceptions' });
       login();
       postDataView('exceptions-*');
     });
@@ -118,7 +117,7 @@ describe(
       cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
       // load more docs
-      cy.task('esArchiverLoad', 'exceptions_2');
+      cy.task('esArchiverLoad', { archiveName: 'exceptions_2' });
 
       // now that there are no more exceptions, the docs should match and populate alerts
       goToAlertsTab();

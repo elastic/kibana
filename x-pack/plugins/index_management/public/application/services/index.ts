@@ -24,7 +24,9 @@ export {
   useLoadIndexTemplates,
   simulateIndexTemplate,
   useLoadNodesPlugins,
+  loadIndex,
 } from './api';
+
 export { sortTable } from './sort_table';
 
 export { UiMetricService } from './ui_metric';
