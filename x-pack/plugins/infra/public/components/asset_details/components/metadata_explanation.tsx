@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { useDateRangeProviderContext } from '../hooks/use_date_range';
 import { Popover } from '../tabs/common/popover';
 import { useMetadataStateProviderContext } from '../hooks/use_metadata_state';
@@ -55,11 +55,13 @@ const MetadataExplanationTooltipContent = React.memo(() => {
 
 export const MetadataExplanationMessage = () => {
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
-  const { metadata } = useMetadataStateProviderContext();
+  const { metadata, loading } = useMetadataStateProviderContext();
 
   const dateFromRange = new Date(metadata?.info?.timestamp ?? getDateRangeInTimestamp().to);
 
-  return (
+  return loading ? (
+    <EuiLoadingSpinner />
+  ) : (
     <EuiFlexGroup gutterSize="xs" alignItems="baseline">
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
