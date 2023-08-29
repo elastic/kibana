@@ -98,13 +98,6 @@ const navigationTree: NavigationTreeDefinition = {
               }),
               link: 'management:ingest_pipelines',
             },
-            {
-              id: 'content_indexing_api',
-              link: 'serverlessIndexingApi',
-              title: i18n.translate('xpack.serverlessSearch.nav.content.indexingApi', {
-                defaultMessage: 'Indexing API',
-              }),
-            },
           ],
         },
         {

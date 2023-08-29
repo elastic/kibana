@@ -21,57 +21,64 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { getIdError, transform } from '../../../utils/utils';
 
 export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
-  router.delete(
-    {
+  router.versioned
+    .delete({
+      access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      validate: {
-        query: buildRouteValidation(DeleteRuleRequestQuery),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response): Promise<IKibanaResponse<DeleteRuleResponse>> => {
-      const siemResponse = buildSiemResponse(response);
-      const validationErrors = validateQueryRuleByIds(request.query);
-      if (validationErrors.length) {
-        return siemResponse.error({ statusCode: 400, body: validationErrors });
-      }
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            query: buildRouteValidation(DeleteRuleRequestQuery),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<DeleteRuleResponse>> => {
+        const siemResponse = buildSiemResponse(response);
+        const validationErrors = validateQueryRuleByIds(request.query);
+        if (validationErrors.length) {
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
+        }
 
-      try {
-        const { id, rule_id: ruleId } = request.query;
+        try {
+          const { id, rule_id: ruleId } = request.query;
 
-        const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
-        const rulesClient = ctx.alerting.getRulesClient();
+          const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
+          const rulesClient = ctx.alerting.getRulesClient();
 
-        const rule = await readRules({ rulesClient, id, ruleId });
+          const rule = await readRules({ rulesClient, id, ruleId });
 
-        if (!rule) {
-          const error = getIdError({ id, ruleId });
+          if (!rule) {
+            const error = getIdError({ id, ruleId });
+            return siemResponse.error({
+              body: error.message,
+              statusCode: error.statusCode,
+            });
+          }
+
+          await deleteRules({
+            ruleId: rule.id,
+            rulesClient,
+          });
+
+          const transformed = transform(rule);
+          if (transformed == null) {
+            return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
+          } else {
+            return response.ok({ body: transformed ?? {} });
+          }
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
         }
-
-        await deleteRules({
-          ruleId: rule.id,
-          rulesClient,
-        });
-
-        const transformed = transform(rule);
-        if (transformed == null) {
-          return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
-        } else {
-          return response.ok({ body: transformed ?? {} });
-        }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };
