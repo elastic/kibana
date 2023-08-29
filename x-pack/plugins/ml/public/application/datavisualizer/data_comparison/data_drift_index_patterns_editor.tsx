@@ -146,10 +146,13 @@ export function DataDriftIndexPatternsEditor({
             setFoundDataViewId(foundDataView.id);
           } else {
             setDataViewMsg(
-              i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.referenceData', {
-                defaultMessage: `Found a data view matching pattern '{indexPattern}' but with a different time field. Creating a new data view to analyze data drift.`,
-                values: { indexPattern: indicesName },
-              })
+              i18n.translate(
+                'xpack.ml.dataDrift.indexPatternsEditor.hasDataViewWithDifferentTimeField',
+                {
+                  defaultMessage: `Found a data view matching pattern '{indexPattern}' but with a different time field. Creating a new data view to analyze data drift.`,
+                  values: { indexPattern: indicesName },
+                }
+              )
             );
           }
         }
@@ -170,17 +173,20 @@ export function DataDriftIndexPatternsEditor({
       Array.isArray(timeField) && timeField.length > 0 ? timeField[0].value : undefined;
 
     let dataView;
+
     if (!foundDataViewId) {
+      const modifiedDataViewName =
+        dataViewName === '' ? `${indicesName}-${timeFieldName}` : dataViewName;
       if (canEditDataView && createAdHocDV === false) {
         dataView = await dataViews.createAndSave({
           title: indicesName,
-          name: dataViewName,
+          name: modifiedDataViewName,
           timeFieldName,
         });
       } else {
         dataView = await dataViews.create({
           title: indicesName,
-          name: dataViewName,
+          name: modifiedDataViewName,
           timeFieldName,
         });
       }
