@@ -8,12 +8,11 @@
 import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '@kbn/alerting-plugin/common';
 import type { MaintenanceWindowCreateBody } from '@kbn/alerting-plugin/common';
 import type { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
-import { tag } from '../../../../tags';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 
-describe('Maintenance window callout on Rule Management page', { tags: [tag.ESS] }, () => {
+describe('Maintenance window callout on Rule Management page', { tags: ['@ess'] }, () => {
   let maintenanceWindowId = '';
 
   before(() => {

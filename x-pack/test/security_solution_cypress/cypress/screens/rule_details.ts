@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const ALL_ACTIONS = '[data-test-subj="rules-details-popover-button-icon"]';
+export const POPOVER_ACTIONS_TRIGGER_BUTTON =
+  '[data-test-subj="rules-details-popover-button-icon"]';
 
 export const ABOUT_INVESTIGATION_NOTES = '[data-test-subj="stepAboutDetailsNoteContent"]';
 
@@ -28,7 +29,7 @@ export const SAVED_QUERY_DETAILS = /^Saved query$/;
 
 export const SAVED_QUERY_FILTERS_DETAILS = 'Saved query filters';
 
-export const DATA_VIEW_DETAILS = 'Data View';
+export const DATA_VIEW_DETAILS = 'Data view';
 
 export const DEFINITION_DETAILS =
   '[data-test-subj=definitionRule] [data-test-subj="listItemColumnStepRuleDescription"]';

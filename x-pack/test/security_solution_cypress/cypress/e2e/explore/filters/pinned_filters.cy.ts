@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 
@@ -23,7 +22,7 @@ import {
 import { ALERTS_PAGE } from '../../../screens/kibana_navigation';
 import { postDataView } from '../../../tasks/common';
 
-describe('pinned filters', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('pinned filters', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     postDataView('audit*');
   });
@@ -32,7 +31,7 @@ describe('pinned filters', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     login();
   });
 
-  it('show pinned filters on security', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+  it('show pinned filters on security', () => {
     visitWithoutDateRange(DISCOVER_WITH_PINNED_FILTER_URL);
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).find(GLOBAL_SEARCH_BAR_PINNED_FILTER).should('exist');
@@ -42,7 +41,7 @@ describe('pinned filters', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('have.text', 'host.name: test-host');
   });
 
-  it('does not show discover filters on security', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+  it('does not show discover filters on security', () => {
     visitWithoutDateRange(DISCOVER_WITH_FILTER_URL);
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('exist');
 

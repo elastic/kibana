@@ -224,8 +224,105 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      // FLAKY: https://github.com/elastic/kibana/issues/158612
-      describe.skip(`${testData.suiteTitle}`, function () {
+      describe(`${testData.suiteTitle}`, function () {
+        before(async () => {
+          // Add explicit mapping for destination index https://github.com/elastic/elasticsearch/issues/67148
+          if (testData.type === 'latest') {
+            const destIndexMappings: MappingTypeMapping = {
+              properties: {
+                customer_id: {
+                  type: 'long',
+                },
+                day_of_week_i: {
+                  type: 'long',
+                },
+                order_date: {
+                  type: 'date',
+                },
+                order_id: {
+                  type: 'long',
+                },
+                products: {
+                  properties: {
+                    _id: {
+                      type: 'text',
+                      fields: {
+                        keyword: {
+                          type: 'keyword',
+                          ignore_above: 256,
+                        },
+                      },
+                    },
+                    base_price: {
+                      type: 'float',
+                    },
+                    base_unit_price: {
+                      type: 'float',
+                    },
+                    created_on: {
+                      type: 'date',
+                    },
+                    discount_amount: {
+                      type: 'float',
+                    },
+                    discount_percentage: {
+                      type: 'float',
+                    },
+                    min_price: {
+                      type: 'float',
+                    },
+                    price: {
+                      type: 'float',
+                    },
+                    product_id: {
+                      type: 'long',
+                    },
+                    product_name: {
+                      type: 'text',
+                      fields: {
+                        keyword: {
+                          type: 'keyword',
+                          ignore_above: 256,
+                        },
+                      },
+                    },
+                    quantity: {
+                      type: 'long',
+                    },
+                    tax_amount: {
+                      type: 'float',
+                    },
+                    taxful_price: {
+                      type: 'float',
+                    },
+                    taxless_price: {
+                      type: 'float',
+                    },
+                    unit_discount_amount: {
+                      type: 'float',
+                    },
+                  },
+                },
+                taxful_total_price: {
+                  type: 'float',
+                },
+                taxless_total_price: {
+                  type: 'float',
+                },
+                total_quantity: {
+                  type: 'long',
+                },
+                total_unique_products: {
+                  type: 'long',
+                },
+              },
+            };
+
+            await transform.api.createIndices(testData.destinationIndex, {
+              mappings: destIndexMappings,
+            });
+          }
+        });
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
           await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);

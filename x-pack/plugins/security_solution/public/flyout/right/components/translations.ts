@@ -19,9 +19,9 @@ export const COLLAPSE_DETAILS_BUTTON = i18n.translate(
   { defaultMessage: 'Collapse details' }
 );
 
-export const DOCUMENT_DETAILS = i18n.translate(
+export const EVENT_DETAILS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.headerTitle',
-  { defaultMessage: 'Document details' }
+  { defaultMessage: 'Event details' }
 );
 
 export const SEVERITY_TITLE = i18n.translate(
@@ -130,6 +130,13 @@ export const ENTITIES_TITLE = i18n.translate(
   { defaultMessage: 'Entities' }
 );
 
+export const ENTITIES_NO_DATA_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.entitiesNoDataMessage',
+  {
+    defaultMessage: 'No user or host data available',
+  }
+);
+
 export const THREAT_INTELLIGENCE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle',
   { defaultMessage: 'Threat Intelligence' }
@@ -145,9 +152,21 @@ export const CORRELATIONS_TITLE = i18n.translate(
   { defaultMessage: 'Correlations' }
 );
 
+export const CORRELATIONS_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.correlations.error',
+  {
+    defaultMessage: 'No correlations data available',
+  }
+);
+
 export const PREVALENCE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.prevalenceTitle',
   { defaultMessage: 'Prevalence' }
+);
+
+export const PREVALENCE_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.prevalenceNoData',
+  { defaultMessage: 'No field/value pairs are uncommon' }
 );
 
 export const THREAT_MATCH_DETECTED = i18n.translate(
@@ -195,14 +214,35 @@ export const ANALYZER_PREVIEW_TITLE = i18n.translate(
   { defaultMessage: 'Analyzer preview' }
 );
 
+export const ANALYZER_PREVIEW_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.analyzerPreview.error',
+  {
+    defaultMessage: 'No analyzer graph data available',
+  }
+);
+
 export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetails.share', {
   defaultMessage: 'Share Alert',
 });
 
 export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.investigationGuideText',
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideTitle',
   {
     defaultMessage: 'Investigation guide',
+  }
+);
+
+export const INVESTIGATION_GUIDE_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideButton',
+  {
+    defaultMessage: 'Show investigation guide',
+  }
+);
+
+export const INVESTIGATION_GUIDE_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideNoData',
+  {
+    defaultMessage: 'An investigation guide has not been created for this rule.',
   }
 );
 
@@ -210,6 +250,21 @@ export const SESSION_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.sessionPreview.title',
   {
     defaultMessage: 'Session viewer preview',
+  }
+);
+
+export const SESSION_PREVIEW_UPSELL = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.upsell',
+  {
+    defaultMessage:
+      'Session preview is disabled because your license does not support it. Please upgrade your license.',
+  }
+);
+
+export const SESSION_PREVIEW_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.error',
+  {
+    defaultMessage: 'No session view data available',
   }
 );
 
@@ -251,3 +306,16 @@ export const RESPONSE_TITLE = i18n.translate(
 export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
   defaultMessage: 'There are no response actions defined for this event.',
 });
+
+export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
+  { defaultMessage: 'Technical preview' }
+);
+
+export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
