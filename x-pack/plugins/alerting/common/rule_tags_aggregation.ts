@@ -10,7 +10,7 @@ import type {
   AggregationsCompositeAggregation,
   AggregationsAggregateOrder,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AggregateOptions } from './rule';
+import type { AggregateOptions } from '../server/application/rule/methods/aggregate';
 
 export type RuleTagsAggregationOptions = Pick<AggregateOptions, 'filter' | 'search'> & {
   after?: AggregationsCompositeAggregation['after'];

@@ -6,8 +6,9 @@
  */
 
 import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getDefaultRuleAggregation } from '../../../../../server/application/rule/methods/aggregate/factories';
 import { getRuleTagsAggregation } from '../../../../rule_tags_aggregation';
-import { getDefaultRuleAggregation } from '../../../../../server/routes/rule/apis/aggregate/factories';
+
 import { validateRuleAggregationFields } from './v1';
 
 describe('validateAggregationTerms', () => {
