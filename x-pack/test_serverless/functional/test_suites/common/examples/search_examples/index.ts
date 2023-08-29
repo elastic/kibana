@@ -14,15 +14,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('search examples', function () {
     before(async () => {
-      // TODO: This fails in Serverless with
+      // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]",
-      // but the tests still run
-      try {
-        await esArchiver.emptyKibanaIndex();
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
-      }
+      // so it was switched to `savedObjects.cleanStandardList()`
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
