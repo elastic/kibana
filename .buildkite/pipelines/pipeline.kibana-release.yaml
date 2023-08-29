@@ -1,7 +1,7 @@
 steps:
   - label: ":releasethekraken: Release kibana"
     # https://regex101.com/r/tY52jo/1
-    if: 'BUILDKITE_TAG =~ "/^deploy@\d+$$/"'
+    if: 'build.env("BUILDKITE_TAG") =~ "/^deploy@\d+$$/"'
     trigger: gpctl-promote
     build:
       env:
