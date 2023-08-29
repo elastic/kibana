@@ -14,11 +14,11 @@ import React, {
   useReducer,
 } from 'react';
 import { invariant } from '../../../../../common/utils/invariant';
-import type {
+import {
+  BulkActionType,
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
-import { BulkActionType } from '../../../../../common/api/detection_engine';
 import type { CoverageOverviewDashboardState } from './coverage_overview_dashboard_reducer';
 import {
   SET_SHOW_EXPANDED_CELLS,
@@ -53,7 +53,10 @@ interface CoverageOverviewDashboardContextProviderProps {
 
 export const initialState: CoverageOverviewDashboardState = {
   showExpandedCells: false,
-  filter: {},
+  filter: {
+    activity: [CoverageOverviewRuleActivity.Enabled],
+    source: [CoverageOverviewRuleSource.Prebuilt, CoverageOverviewRuleSource.Custom],
+  },
   data: undefined,
   isLoading: false,
 };
