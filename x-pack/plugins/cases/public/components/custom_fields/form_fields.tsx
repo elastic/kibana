@@ -37,7 +37,7 @@ const FormFieldsComponent: React.FC = () => {
         path="fieldType"
         component={FieldTypeSelector}
         componentProps={{
-          customFieldTypes: customFieldTypes,
+          customFieldTypes,
           dataTestSubj: 'fieldTypeDropdown',
           selectedType,
           handleChange: handleTypeChange,

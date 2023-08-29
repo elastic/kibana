@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,

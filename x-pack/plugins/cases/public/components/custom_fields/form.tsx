@@ -29,7 +29,7 @@ const FormComponent: React.FC<Props> = ({ onChange }) => {
   }, []);
 
   const { form } = useForm<FormProps>({
-    defaultValue: {fieldType: "Text"},
+    defaultValue: { fieldType: 'Text' },
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitForm,

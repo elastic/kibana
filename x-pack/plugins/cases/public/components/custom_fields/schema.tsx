@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from '../configure_cases/translations';
@@ -22,11 +21,11 @@ export const customFieldTypes: CustomFieldTypesUI[] = [
   'Boolean',
 ];
 
-export type FormProps = {
-  fieldLabel: string,
-  fieldType: CustomFieldTypesUI,
+export interface FormProps {
+  fieldLabel: string;
+  fieldType: CustomFieldTypesUI;
   fieldOptions: BasicOptions | TextOptions | ListOptions;
-  textAreaHeight?: string,
+  textAreaHeight?: string;
 }
 
 export const schema = {
@@ -54,4 +53,4 @@ export const schema = {
   textAreaHeight: {
     label: i18n.TextAreaHeight,
   },
-}
+};

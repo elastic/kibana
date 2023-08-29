@@ -279,7 +279,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
             />
           </SectionWrapper>
           <SectionWrapper>
-          <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false}>
               <CustomFields
                 isLoading={false}
                 disabled={false}

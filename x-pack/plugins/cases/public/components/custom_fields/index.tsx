@@ -26,34 +26,34 @@ const CustomFieldsComponent: React.FC<Props> = ({ disabled, isLoading, handleAdd
 
   return canAddCustomFields ? (
     <EuiDescribedFormGroup
-    fullWidth
-    title={<h3>{i18n.TITLE}</h3>}
-    description={
-      <>
-        <p>{i18n.DESCRIPTION}</p>
-      </>
-    }
-    data-test-subj="case-closure-options-form-group"
-  >
-    <EuiEmptyPrompt
-      color="subdued"
-      className="eui-fullWidth"
-      css={css`
-        max-width: 580px;
-      `}
-      body={i18n.NO_CUSTOM_FIELDS}
-      actions={
-        <EuiButtonEmpty
-          isDisabled={disabled}
-          size="s"
-          onClick={handleAddCustomField}
-          iconType="plusInCircle"
-          data-test-subj="cases-add-custom-field"
-        >
-          {i18n.ADD_CUSTOM_FIELD}
-        </EuiButtonEmpty>
+      fullWidth
+      title={<h3>{i18n.TITLE}</h3>}
+      description={
+        <>
+          <p>{i18n.DESCRIPTION}</p>
+        </>
       }
-    />
+      data-test-subj="case-closure-options-form-group"
+    >
+      <EuiEmptyPrompt
+        color="subdued"
+        className="eui-fullWidth"
+        css={css`
+          max-width: 580px;
+        `}
+        body={i18n.NO_CUSTOM_FIELDS}
+        actions={
+          <EuiButtonEmpty
+            isDisabled={disabled}
+            size="s"
+            onClick={handleAddCustomField}
+            iconType="plusInCircle"
+            data-test-subj="cases-add-custom-field"
+          >
+            {i18n.ADD_CUSTOM_FIELD}
+          </EuiButtonEmpty>
+        }
+      />
     </EuiDescribedFormGroup>
   ) : null;
 };
