@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  DeferredSpinner,
-  DocViewer,
-  DocViewsRegistry,
-  ElasticRequestState,
-  FieldName,
-} from './src';
+export { DocViewer, DocViewsRegistry, ElasticRequestState, FieldName } from './src';

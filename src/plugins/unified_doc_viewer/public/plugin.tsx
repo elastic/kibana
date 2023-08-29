@@ -10,8 +10,8 @@ import React from 'react';
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { DeferredSpinner, DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import { EuiSkeletonText } from '@elastic/eui';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -57,9 +57,9 @@ export class UnifiedDocViewerPublicPlugin
         return (
           <React.Suspense
             fallback={
-              <DeferredSpinner>
+              <EuiDelayRender delay={300}>
                 <EuiSkeletonText />
-              </DeferredSpinner>
+              </EuiDelayRender>
             }
           >
             <DocView {...props} />
@@ -77,9 +77,9 @@ export class UnifiedDocViewerPublicPlugin
         return (
           <React.Suspense
             fallback={
-              <DeferredSpinner>
+              <EuiDelayRender delay={300}>
                 <EuiSkeletonText />
-              </DeferredSpinner>
+              </EuiDelayRender>
             }
           >
             <SourceViewer

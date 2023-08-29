@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './deferred_spinner';
 export * from './doc_viewer';
 export * from './field_name';
