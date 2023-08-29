@@ -31,7 +31,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('solutionSideNavItemLink-dashboards');
 
-        await dashboard.clickNewDashboard();
+        await testSubjects.click('createDashboardButton');
 
         await lens.createAndAddLensFromDashboard({});
 
