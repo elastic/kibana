@@ -48,5 +48,8 @@
     "@kbn/data-views-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/security-api-integration-helpers",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/data-plugin",
+    "@kbn/bfetch-plugin",
   ]
 }
