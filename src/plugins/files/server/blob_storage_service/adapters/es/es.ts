@@ -183,11 +183,19 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
   }
 
   public async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
+    // The refresh interval is set to 10s. To avoid throwing an error if the user tries to download a file
+    // right after uploading it, we refresh the index before downloading the file.
+    this.esClient.indices.refresh({ index: this.index });
+
     return this.getReadableContentStream(id, size);
   }
 
   public async delete(id: string): Promise<void> {
     try {
+      // The refresh interval is set to 10s. To avoid throwing an error if the user tries to delete a file
+      // right after uploading it, we refresh the index before deleting the file.
+      this.esClient.indices.refresh({ index: this.index });
+
       const dest = getWritableContentStream({
         id,
         client: this.esClient,
