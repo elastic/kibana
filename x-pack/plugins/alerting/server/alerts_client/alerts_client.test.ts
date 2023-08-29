@@ -686,6 +686,7 @@ describe('Alerts Client', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const activeAlertObj = new Alert<{}, {}, 'default'>('1', activeAlert as any);
       activeAlertObj.scheduleActions('default', {});
       const spy = jest
@@ -765,6 +766,7 @@ describe('Alerts Client', () => {
         ruleLabel: `test: rule-name`,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         activeAlertsFromState: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           '1': activeAlert as any,
         },
         recoveredAlertsFromState: {},
