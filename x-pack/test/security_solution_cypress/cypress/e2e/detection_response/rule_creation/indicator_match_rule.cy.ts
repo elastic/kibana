@@ -120,8 +120,8 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'threat_indicator');
-      cy.task('esArchiverLoad', 'suspicious_source_event');
+      cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
+      cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
     });
 
     beforeEach(() => {
