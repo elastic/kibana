@@ -14,6 +14,12 @@ To resolve errors, you can:
 
 * Change references to different saved objects
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 [[saved-objects-api-resolve-import-errors-request]]
 ==== Request
 

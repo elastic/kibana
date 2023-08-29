@@ -18,11 +18,12 @@ import {
   IndexDetailsSection,
 } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
+import { testIndexName } from './mocks';
 
 let routerMock: typeof reactRouterMock;
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
-    initialEntries: [`/indices/test_index`],
+    initialEntries: [`/indices/${testIndexName}`],
     componentRoutePath: `/indices/:indexName/:indexDetailsSection?`,
     onRouter: (router) => {
       routerMock = router;
@@ -42,6 +43,9 @@ export interface IndexDetailsPageTestBed extends TestBed {
     contextMenu: {
       clickManageIndexButton: () => Promise<void>;
       isOpened: () => boolean;
+      clickIndexAction: (indexAction: string) => Promise<void>;
+      confirmForcemerge: (numSegments: string) => Promise<void>;
+      confirmDelete: () => Promise<void>;
     };
     errorSection: {
       isDisplayed: () => boolean;
@@ -107,6 +111,28 @@ export const setup = async (
     },
     isOpened: () => {
       return exists('indexContextMenu');
+    },
+    clickIndexAction: async (indexAction: string) => {
+      await act(async () => {
+        find(`indexContextMenu.${indexAction}`).simulate('click');
+      });
+      component.update();
+    },
+    confirmForcemerge: async (numSegments: string) => {
+      await act(async () => {
+        testBed.form.setInputValue('indexActionsForcemergeNumSegments', numSegments);
+      });
+      component.update();
+      await act(async () => {
+        find('confirmModalConfirmButton').simulate('click');
+      });
+      component.update();
+    },
+    confirmDelete: async () => {
+      await act(async () => {
+        find('confirmModalConfirmButton').simulate('click');
+      });
+      component.update();
     },
   };
   return {
