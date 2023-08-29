@@ -205,7 +205,7 @@ export class SampleDataInstaller {
       managed: true,
       refresh: false,
     });
-    console.log(errors)
+    console.log(errors);
     if (errors.length > 0) {
       const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
         errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
