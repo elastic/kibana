@@ -80,7 +80,7 @@ const indexWithLifecyclePolicy: Index = {
   },
 };
 
-const indexWithLifecycleError = {
+const indexWithLifecycleError: Index = {
   health: 'yellow',
   status: 'open',
   name: 'testy3',

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
@@ -27,7 +25,7 @@ import { GET_TIMELINE_HEADER } from '../../screens/timeline';
 const alertRunTimeField = 'field.name.alert.page';
 const timelineRuntimeField = 'field.name.timeline';
 
-describe('Create DataView runtime field', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Create DataView runtime field', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteRuntimeField('security-solution-default', alertRunTimeField);
     deleteRuntimeField('security-solution-default', timelineRuntimeField);

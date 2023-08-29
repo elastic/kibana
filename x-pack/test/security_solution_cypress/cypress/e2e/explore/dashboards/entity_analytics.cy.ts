@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { login, visit } from '../../../tasks/login';
 
@@ -56,7 +55,7 @@ const SIEM_KIBANA_HOST_ALERTS = 2;
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
 
-describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -78,8 +77,8 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
   describe('Risk Score enabled but still no data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_hosts_no_data');
-      cy.task('esArchiverLoad', 'risk_users_no_data');
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts_no_data' });
+      cy.task('esArchiverLoad', { archiveName: 'risk_users_no_data' });
     });
 
     beforeEach(() => {
@@ -103,8 +102,8 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
   describe('With Legacy data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_hosts_legacy_data');
-      cy.task('esArchiverLoad', 'risk_users_legacy_data');
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts_legacy_data' });
+      cy.task('esArchiverLoad', { archiveName: 'risk_users_legacy_data' });
     });
 
     beforeEach(() => {
@@ -128,7 +127,7 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
   describe('With host risk data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_hosts');
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
     });
 
     beforeEach(() => {
@@ -216,7 +215,7 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
   describe('With user risk data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_users');
+      cy.task('esArchiverLoad', { archiveName: 'risk_users' });
     });
 
     beforeEach(() => {
@@ -305,7 +304,7 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
   describe('With anomalies data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'network');
+      cy.task('esArchiverLoad', { archiveName: 'network' });
       login();
       visit(ENTITY_ANALYTICS_URL);
       cy.get(ANOMALIES_TABLE).should('be.visible');

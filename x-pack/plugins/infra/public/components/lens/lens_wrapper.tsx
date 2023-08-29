@@ -107,9 +107,6 @@ export const LensWrapper = ({
         border-radius: ${euiTheme.size.s};
         overflow: hidden;
         height: 100%;
-        .echLegend .echLegendList {
-          display: flex;
-        }
         .echMetric {
           border-radius: ${euiTheme.border.radius.medium};
           pointer-events: none;

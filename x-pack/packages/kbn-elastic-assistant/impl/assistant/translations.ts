@@ -41,13 +41,6 @@ export const API_ERROR = i18n.translate('xpack.elasticAssistant.assistant.apiErr
     'An error occurred sending your message. If the problem persists, please test the connector configuration.',
 });
 
-export const TOOLTIP_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.technicalPreview.tooltipTitle',
-  {
-    defaultMessage: 'Beta',
-  }
-);
-
 export const TOOLTIP_ARIA_LABEL = i18n.translate(
   'xpack.elasticAssistant.documentationLinks.ariaLabel',
   {

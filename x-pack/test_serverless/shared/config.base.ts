@@ -28,6 +28,8 @@ export default async () => {
     '../../test/security_api_integration/plugins/saml_provider'
   );
 
+  const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
+
   return {
     servers,
 
@@ -35,8 +37,25 @@ export default async () => {
       license: 'trial',
       from: 'snapshot',
       serverArgs: [
+        'xpack.security.authc.realms.file.file1.order=-100',
+
+        'xpack.security.authc.realms.jwt.jwt1.order=-98',
+        `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
+        'xpack.security.authc.realms.jwt.jwt1.client_authentication.type=shared_secret',
+        `xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret=my_super_secret`,
+        `xpack.security.authc.realms.jwt.jwt1.allowed_issuer=https://kibana.elastic.co/jwt/`,
+        `xpack.security.authc.realms.jwt.jwt1.allowed_subjects=elastic-agent`,
+        'xpack.security.authc.realms.jwt.jwt1.allowed_audiences=elasticsearch',
+        `xpack.security.authc.realms.jwt.jwt1.allowed_signature_algorithms=[RS256]`,
+        `xpack.security.authc.realms.jwt.jwt1.claims.principal=sub`,
+        `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${jwksPath}`,
+
+        // TODO: We should set this flag to `false` as soon as we fully migrate tests to SAML and file realms.
+        `xpack.security.authc.realms.native.native1.enabled=true`,
+        `xpack.security.authc.realms.native.native1.order=-97`,
+
         'xpack.security.authc.token.enabled=true',
-        'xpack.security.authc.realms.saml.cloud-saml-kibana.order=0',
+        'xpack.security.authc.realms.saml.cloud-saml-kibana.order=101',
         `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${idpPath}`,
         'xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:${servers.kibana.port}`,

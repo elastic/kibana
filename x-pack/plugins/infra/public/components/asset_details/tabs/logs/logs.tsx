@@ -13,18 +13,18 @@ import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elas
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
-
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
+import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = () => {
-  const { asset, assetType, overrides, onTabsStateChange, dateRangeTs } =
-    useAssetDetailsStateContext();
+  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
+  const { asset, assetType, overrides, onTabsStateChange } = useAssetDetailsStateContext();
   const { logs } = useDataViewsProviderContext();
 
   const { query: overrideQuery } = overrides?.logs ?? {};
@@ -35,7 +35,7 @@ export const Logs = () => {
   const [textQuery, setTextQuery] = useState(overrideQuery ?? '');
   const [textQueryDebounced, setTextQueryDebounced] = useState(overrideQuery ?? '');
 
-  const currentTimestamp = dateRangeTs.to;
+  const currentTimestamp = getDateRangeInTimestamp().to;
   const startTimestamp = currentTimestamp - 60 * 60 * 1000; // 60 minutes
 
   useDebounce(

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import {
   addLiveQueryToCase,
   checkActionItemsInResults,
@@ -22,13 +21,14 @@ describe('Add to Cases', () => {
     loadLiveQuery({
       agent_all: true,
       query: "SELECT * FROM os_version where name='Ubuntu';",
+      kuery: '',
     }).then((liveQuery) => {
       liveQueryId = liveQuery.action_id;
       liveQueryQuery = liveQuery.queries[0].query;
     });
   });
 
-  describe('observability', { tags: [tag.ESS] }, () => {
+  describe('observability', { tags: ['@ess'] }, () => {
     let caseId: string;
     let caseTitle: string;
     before(() => {
@@ -59,7 +59,7 @@ describe('Add to Cases', () => {
     });
   });
 
-  describe('security', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('security', { tags: ['@ess', '@serverless'] }, () => {
     let caseId: string;
     let caseTitle: string;
 
