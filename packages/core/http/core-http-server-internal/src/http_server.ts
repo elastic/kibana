@@ -399,7 +399,7 @@ export class HttpServer {
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
-      if(log.isLevelEnabled('debug')) {
+      if (log.isLevelEnabled('debug')) {
         const { message, meta } = getEcsResponseLog(request, this.log);
         log.debug(message!, meta);
       }
