@@ -26,6 +26,7 @@ interface SummaryInfo {
   title: string;
   value?: string | number;
   hint?: string;
+  dataTestSubj?: string;
 }
 
 export function Summary({ data, isLoading }: Props) {
@@ -38,6 +39,7 @@ export function Summary({ data, isLoading }: Props) {
 
   const summaryInfo: SummaryInfo[] = [
     {
+      dataTestSubj: 'totalData',
       title: i18n.translate('xpack.profiling.storageExplorer.summary.totalData', {
         defaultMessage: 'Total data',
       }),
@@ -50,6 +52,7 @@ export function Summary({ data, isLoading }: Props) {
       }),
     },
     {
+      dataTestSubj: 'dailyDataGeneration',
       title: i18n.translate('xpack.profiling.storageExplorer.summary.dailyDataGeneration', {
         defaultMessage: 'Daily data generation',
       }),
@@ -58,6 +61,7 @@ export function Summary({ data, isLoading }: Props) {
         : undefined,
     },
     {
+      dataTestSubj: 'totalDebugSymbolsSize',
       title: i18n.translate('xpack.profiling.storageExplorer.summary.totalDebugSymbolsSize', {
         defaultMessage: 'Total debug symbols size',
       }),
@@ -67,6 +71,7 @@ export function Summary({ data, isLoading }: Props) {
       }),
     },
     {
+      dataTestSubj: 'diskSpaceUsed',
       title: i18n.translate('xpack.profiling.storageExplorer.summary.discSpaceUsed', {
         defaultMessage: 'Disk space used',
       }),
@@ -77,6 +82,7 @@ export function Summary({ data, isLoading }: Props) {
       }),
     },
     {
+      dataTestSubj: 'numberOfHostsAgents',
       title: i18n.translate('xpack.profiling.storageExplorer.summary.numberOfHosts', {
         defaultMessage: 'Number of host agents',
       }),
@@ -102,7 +108,7 @@ export function Summary({ data, isLoading }: Props) {
                   )
                 }
                 titleSize="s"
-                title={item.value}
+                title={<span data-test-subj={item.dataTestSubj}>{item.value}</span>}
                 isLoading={isLoading}
               />
             </EuiFlexItem>

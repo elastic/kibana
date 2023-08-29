@@ -165,7 +165,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
     <FrameInformationPanel>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <KeyValueList rows={informationRows} />
+          <KeyValueList data-test-subj="informationRows" rows={informationRows} />
         </EuiFlexItem>
         {aiAssistant.isEnabled() && promptMessages ? (
           <>
@@ -196,7 +196,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <KeyValueList rows={impactRows} />
+              <KeyValueList data-test-subj="impactEstimates" rows={impactRows} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

@@ -20,6 +20,7 @@
     "@kbn/utility-types",
     "@kbn/std",
     "@kbn/safer-lodash-set",
+    "@kbn/serverless",
   ],
   "exclude": [
     "target/**/*",

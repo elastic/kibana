@@ -27,7 +27,7 @@
         "label": "CodeBox",
         "description": [],
         "signature": [
-          "({ application, codeSnippet, http, languageType, languages, pluginId, selectedLanguage, setSelectedLanguage, sharePlugin, showTryInConsole, }: React.PropsWithChildren<CodeBoxProps>) => JSX.Element"
+          "({ application, codeSnippet, languageType, languages, assetBasePath, selectedLanguage, setSelectedLanguage, sharePlugin, consoleRequest, }: React.PropsWithChildren<CodeBoxProps>) => JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/code_box.tsx",
         "deprecated": false,
@@ -38,12 +38,60 @@
             "id": "def-common.CodeBox.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  application,\n  codeSnippet,\n  http,\n  languageType,\n  languages,\n  pluginId,\n  selectedLanguage,\n  setSelectedLanguage,\n  sharePlugin,\n  showTryInConsole,\n}",
+            "label": "{\n  application,\n  codeSnippet,\n  languageType,\n  languages,\n  assetBasePath,\n  selectedLanguage,\n  setSelectedLanguage,\n  sharePlugin,\n  consoleRequest,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<CodeBoxProps>"
             ],
             "path": "packages/kbn-search-api-panels/components/code_box.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.getConsoleRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "getConsoleRequest",
+        "description": [],
+        "signature": [
+          "(code: keyof ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.LanguageDefinition",
+            "text": "LanguageDefinition"
+          },
+          ") => string | undefined"
+        ],
+        "path": "packages/kbn-search-api-panels/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.getConsoleRequest.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "keyof ",
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.LanguageDefinition",
+                "text": "LanguageDefinition"
+              }
+            ],
+            "path": "packages/kbn-search-api-panels/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -168,15 +216,7 @@
         "label": "GithubLink",
         "description": [],
         "signature": [
-          "({ label, href, http, pluginId }: React.PropsWithChildren<{ label: string; href: string; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; pluginId: string; }>) => JSX.Element"
+          "({ assetBasePath, label, href }: React.PropsWithChildren<{ assetBasePath: string; label: string; href: string; }>) => JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/github_link.tsx",
         "deprecated": false,
@@ -187,18 +227,10 @@
             "id": "def-common.GithubLink.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ label, href, http, pluginId }",
+            "label": "{ assetBasePath, label, href }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<{ label: string; href: string; http: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
-              },
-              "; pluginId: string; }>"
+              "React.PropsWithChildren<{ assetBasePath: string; label: string; href: string; }>"
             ],
             "path": "packages/kbn-search-api-panels/components/github_link.tsx",
             "deprecated": false,
@@ -217,7 +249,7 @@
         "label": "IngestData",
         "description": [],
         "signature": [
-          "({ codeSnippet, selectedLanguage, setSelectedLanguage, docLinks, http, pluginId, application, sharePlugin, languages, showTryInConsole, }: React.PropsWithChildren<IngestDataProps>) => JSX.Element"
+          "({ codeSnippet, selectedLanguage, setSelectedLanguage, docLinks, assetBasePath, application, sharePlugin, languages, consoleRequest, }: React.PropsWithChildren<IngestDataProps>) => JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/ingest_data.tsx",
         "deprecated": false,
@@ -228,7 +260,7 @@
             "id": "def-common.IngestData.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  codeSnippet,\n  selectedLanguage,\n  setSelectedLanguage,\n  docLinks,\n  http,\n  pluginId,\n  application,\n  sharePlugin,\n  languages,\n  showTryInConsole,\n}",
+            "label": "{\n  codeSnippet,\n  selectedLanguage,\n  setSelectedLanguage,\n  docLinks,\n  assetBasePath,\n  application,\n  sharePlugin,\n  languages,\n  consoleRequest,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<IngestDataProps>"
@@ -250,7 +282,7 @@
         "label": "InstallClientPanel",
         "description": [],
         "signature": [
-          "({ codeSnippet, showTryInConsole, language, languages, setSelectedLanguage, http, pluginId, application, sharePlugin, isPanelLeft, overviewPanelProps, }: React.PropsWithChildren<InstallClientProps>) => JSX.Element"
+          "({ codeSnippet, consoleRequest, language, languages, setSelectedLanguage, assetBasePath, application, sharePlugin, isPanelLeft, overviewPanelProps, }: React.PropsWithChildren<InstallClientProps>) => JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/install_client.tsx",
         "deprecated": false,
@@ -261,7 +293,7 @@
             "id": "def-common.InstallClientPanel.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  codeSnippet,\n  showTryInConsole,\n  language,\n  languages,\n  setSelectedLanguage,\n  http,\n  pluginId,\n  application,\n  sharePlugin,\n  isPanelLeft = true,\n  overviewPanelProps,\n}",
+            "label": "{\n  codeSnippet,\n  consoleRequest,\n  language,\n  languages,\n  setSelectedLanguage,\n  assetBasePath,\n  application,\n  sharePlugin,\n  isPanelLeft = true,\n  overviewPanelProps,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<InstallClientProps>"
@@ -283,7 +315,7 @@
         "label": "IntegrationsPanel",
         "description": [],
         "signature": [
-          "({ docLinks, http, pluginId, }: React.PropsWithChildren<",
+          "({ docLinks, assetBasePath, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/search-api-panels",
             "scope": "common",
@@ -302,7 +334,7 @@
             "id": "def-common.IntegrationsPanel.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  docLinks,\n  http,\n  pluginId,\n}",
+            "label": "{\n  docLinks,\n  assetBasePath,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -332,7 +364,7 @@
         "label": "LanguageClientPanel",
         "description": [],
         "signature": [
-          "({ language, setSelectedLanguage, isSelectedLanguage, http, pluginId, src, }: React.PropsWithChildren<SelectClientProps>) => JSX.Element"
+          "({ language, setSelectedLanguage, isSelectedLanguage, assetBasePath, src, }: React.PropsWithChildren<SelectClientProps>) => JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/language_client_panel.tsx",
         "deprecated": false,
@@ -343,7 +375,7 @@
             "id": "def-common.LanguageClientPanel.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  language,\n  setSelectedLanguage,\n  isSelectedLanguage,\n  http,\n  pluginId,\n  src,\n}",
+            "label": "{\n  language,\n  setSelectedLanguage,\n  isSelectedLanguage,\n  assetBasePath,\n  src,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<SelectClientProps>"
@@ -551,12 +583,12 @@
           {
             "parentPluginId": "@kbn/search-api-panels",
             "id": "def-common.IntegrationsPanelProps.docLinks",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "docLinks",
             "description": [],
             "signature": [
-              "any"
+              "{ beats: string; connectors: string; logStash: string; }"
             ],
             "path": "packages/kbn-search-api-panels/components/integrations_panel.tsx",
             "deprecated": false,
@@ -564,30 +596,10 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.IntegrationsPanelProps.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
-              }
-            ],
-            "path": "packages/kbn-search-api-panels/components/integrations_panel.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.IntegrationsPanelProps.pluginId",
+            "id": "def-common.IntegrationsPanelProps.assetBasePath",
             "type": "string",
             "tags": [],
-            "label": "pluginId",
+            "label": "assetBasePath",
             "description": [],
             "path": "packages/kbn-search-api-panels/components/integrations_panel.tsx",
             "deprecated": false,
