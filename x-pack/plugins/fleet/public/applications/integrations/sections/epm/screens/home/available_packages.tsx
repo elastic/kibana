@@ -111,6 +111,9 @@ export const AvailablePackages: React.FC<{
     preference,
     setPreference,
     isLoading,
+    isLoadingCategories,
+    isLoadingAllPackages,
+    isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
     searchTerm,
@@ -180,7 +183,7 @@ export const AvailablePackages: React.FC<{
 
   return (
     <PackageListGrid
-      isLoading={isLoading}
+      isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       controls={controls}
       searchTerm={searchTerm}
       setSearchTerm={setSearchTerm}
