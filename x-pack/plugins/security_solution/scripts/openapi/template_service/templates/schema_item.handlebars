@@ -78,6 +78,7 @@ z.unknown()
       {{@key}}: {{> schema_item requiredBool=(includes ../required @key)}},
     {{/each}}
   })
+  {{#if (eq additionalProperties false)}}.strict(){{/if}}
 {{~/inline~}}
 
 {{~#*inline "type_string"~}}

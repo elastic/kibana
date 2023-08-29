@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import { login, visit } from '../../tasks/login';
 
 import {
@@ -26,7 +24,7 @@ import { NOT_FOUND } from '../../screens/common/page';
 
 const mockRuleId = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
-describe('Display not found page', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Display not found page', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visit(TIMELINES_URL);
