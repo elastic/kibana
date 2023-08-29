@@ -7,7 +7,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { type DocProps, buildSearchBody, useEsDocSearch } from './use_es_doc_search';
+import { type EsDocSearchProps, buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Subject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
@@ -226,9 +226,9 @@ describe('Test of <Doc /> helper / hook', () => {
       id: '1',
       index: 'index1',
       dataView,
-    } as unknown as DocProps;
+    } as unknown as EsDocSearchProps;
 
-    const hook = renderHook((p: DocProps) => useEsDocSearch(p), {
+    const hook = renderHook((p: EsDocSearchProps) => useEsDocSearch(p), {
       initialProps: props,
       wrapper: ({ children }) => (
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
@@ -250,9 +250,9 @@ describe('Test of <Doc /> helper / hook', () => {
       id: '1',
       index: 'index1',
       dataView,
-    } as unknown as DocProps;
+    } as unknown as EsDocSearchProps;
 
-    const hook = renderHook((p: DocProps) => useEsDocSearch(p), {
+    const hook = renderHook((p: EsDocSearchProps) => useEsDocSearch(p), {
       initialProps: props,
       wrapper: ({ children }) => (
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
@@ -304,9 +304,9 @@ describe('Test of <Doc /> helper / hook', () => {
           flattened: { field1: 1, field2: 2 },
         },
       ],
-    } as unknown as DocProps;
+    } as unknown as EsDocSearchProps;
 
-    const hook = renderHook((p: DocProps) => useEsDocSearch(p), {
+    const hook = renderHook((p: EsDocSearchProps) => useEsDocSearch(p), {
       initialProps: props,
       wrapper: ({ children }) => (
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>

@@ -18,7 +18,7 @@ import { useUnifiedDocViewerServices } from './use_doc_viewer_services';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;
 
-export interface DocProps {
+export interface EsDocSearchProps {
   /**
    * Id of the doc in ES
    */
@@ -36,10 +36,6 @@ export interface DocProps {
    */
   requestSource?: boolean;
   /**
-   * Discover main view url
-   */
-  referrer?: string;
-  /**
    * Records fetched from text based query
    */
   textBasedHits?: DataTableRecord[];
@@ -54,7 +50,7 @@ export function useEsDocSearch({
   dataView,
   requestSource,
   textBasedHits,
-}: DocProps): [ElasticRequestState, DataTableRecord | null, () => void] {
+}: EsDocSearchProps): [ElasticRequestState, DataTableRecord | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<DataTableRecord | null>(null);
   const { data, uiSettings, analytics } = useUnifiedDocViewerServices();
