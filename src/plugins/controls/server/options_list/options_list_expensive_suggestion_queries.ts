@@ -259,9 +259,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       sort,
       size,
       searchTechnique,
-      fieldSpec,
     }: OptionsListRequestBody) => {
-      console.log({ format: fieldSpec?.format });
       let dateQuery: any = {
         suggestions: {
           terms: {
@@ -283,7 +281,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         },
         unique_terms: {
           cardinality: {
-            field: `${fieldName}_formatted`,
+            field: `${fieldName}`,
           },
         },
       };
@@ -317,7 +315,9 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
           console.log(JSON.stringify(suggestion, null, 2));
           acc.push({
-            value: suggestion.timestamp.hits.hits[0]._source['@timestamp'],
+            // value: suggestion.key,
+            // label: suggestion.key_as_string,
+            value: suggestion.timestamp.hits.hits[0]._source[request.fieldName],
             label: suggestion.key,
             docCount: suggestion.doc_count,
           });
