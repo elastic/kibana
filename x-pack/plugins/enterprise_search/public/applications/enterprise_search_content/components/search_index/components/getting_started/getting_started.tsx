@@ -37,8 +37,6 @@ import {
   getConsoleRequest,
 } from '@kbn/search-api-panels';
 
-import { LanguageDefinition } from '@kbn/search-api-panels';
-
 import { PLUGIN_ID } from '../../../../../../../common/constants';
 import { KibanaDeps } from '../../../../../../../common/types';
 
