@@ -51,6 +51,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
+  const refreshPageWithDelay = async () => {
+    /**
+     * Delay gives React a chance to finish
+     * running effects (like updating the URL) before
+     * refreshing the page.
+     */
+    await pageObjects.common.sleep(1000);
+    await browser.refresh();
+  };
+
   describe('Node Details', () => {
     describe('#With Asset Details', () => {
       before(async () => {
@@ -111,6 +121,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           }
         );
+
+        it('preserves selected date range between page reloads', async () => {
+          const start = moment.utc(START_HOST_ALERTS_DATE).format(DATE_PICKER_FORMAT);
+          const end = moment.utc(END_HOST_ALERTS_DATE).format(DATE_PICKER_FORMAT);
+
+          await pageObjects.timePicker.setAbsoluteRange(start, end);
+          await refreshPageWithDelay();
+
+          const datePickerValue = await pageObjects.timePicker.getTimeConfig();
+
+          expect(datePickerValue.start).to.equal(start);
+          expect(datePickerValue.end).to.equal(end);
+        });
       });
 
       describe('#Asset Type: host', () => {
@@ -119,6 +142,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
             END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
           );
+        });
+
+        it('preserves selected tab between page reloads', async () => {
+          await testSubjects.missingOrFail('infraAssetDetailsMetadataTable');
+          await pageObjects.assetDetails.clickMetadataTab();
+          await pageObjects.assetDetails.metadataTableExists();
+
+          await refreshPageWithDelay();
+
+          await pageObjects.assetDetails.metadataTableExists();
         });
 
         describe('Overview Tab', () => {
@@ -181,6 +214,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickRemoveMetadataPin();
             expect(await pageObjects.assetDetails.metadataRemovePinExists()).to.be(false);
           });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getMetadataSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            await retry.try(async () => {
+              expect(await searchInput.getAttribute('value')).to.be('test');
+            });
+            await searchInput.clearValue();
+          });
         });
 
         describe('Processes Tab', () => {
@@ -200,6 +247,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.getProcessesTableBody();
             await pageObjects.assetDetails.clickProcessesTableExpandButton();
           });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getProcessesSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            await retry.try(async () => {
+              expect(await searchInput.getAttribute('value')).to.be('test');
+            });
+            await searchInput.clearValue();
+          });
         });
 
         describe('Logs Tab', () => {
@@ -209,6 +270,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should render logs tab', async () => {
             await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+          });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getLogsSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            await retry.try(async () => {
+              expect(await searchInput.getAttribute('value')).to.be('test');
+            });
+            await searchInput.clearValue();
           });
         });
 
