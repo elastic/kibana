@@ -19,62 +19,26 @@ export const ERROR_MESSAGE = (message: string) =>
     defaultMessage: 'There was an error displaying {message}',
   });
 
-export const CORRELATIONS_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlationsText',
-  {
-    defaultMessage: 'fields of correlation',
-  }
-);
+export const CORRELATIONS_ANCESTRY_ALERTS = (count: number) =>
+  i18n.translate('xpack.securitySolution.flyout.documentDetails.correlations.ancestryAlerts', {
+    defaultMessage: '{count, plural, one {alert} other {alerts}} related by ancestry',
+    values: { count },
+  });
 
-export const CORRELATIONS_ANCESTRY_ALERT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.ancestryAlert',
-  {
-    defaultMessage: 'alert related by ancestry',
-  }
-);
+export const CORRELATIONS_SAME_SOURCE_ALERTS = (count: number) =>
+  i18n.translate('xpack.securitySolution.flyout.documentDetails.correlations.sourceAlerts', {
+    defaultMessage: '{count, plural, one {alert} other {alerts}} related by source event',
+    values: { count },
+  });
 
-export const CORRELATIONS_ANCESTRY_ALERTS = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.ancestryAlerts',
-  {
-    defaultMessage: 'alerts related by ancestry',
-  }
-);
-export const CORRELATIONS_SAME_SOURCE_EVENT_ALERT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlert',
-  {
-    defaultMessage: 'alert related by the same source event',
-  }
-);
+export const CORRELATIONS_SESSION_ALERTS = (count: number) =>
+  i18n.translate('xpack.securitySolution.flyout.documentDetails.correlations.sessionAlerts', {
+    defaultMessage: '{count, plural, one {alert} other {alerts}} related by session',
+    values: { count },
+  });
 
-export const CORRELATIONS_SAME_SOURCE_EVENT_ALERTS = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlerts',
-  {
-    defaultMessage: 'alerts related by the same source event',
-  }
-);
-export const CORRELATIONS_SAME_SESSION_ALERT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSessionAlert',
-  {
-    defaultMessage: 'alert related by session',
-  }
-);
-
-export const CORRELATIONS_SAME_SESSION_ALERTS = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSessionAlerts',
-  {
-    defaultMessage: 'alerts related by session',
-  }
-);
-export const CORRELATIONS_RELATED_CASE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.relatedCase',
-  {
-    defaultMessage: 'related case',
-  }
-);
-
-export const CORRELATIONS_RELATED_CASES = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.relatedCases',
-  {
-    defaultMessage: 'related cases',
-  }
-);
+export const CORRELATIONS_RELATED_CASES = (count: number) =>
+  i18n.translate('xpack.securitySolution.flyout.documentDetails.correlations.relatedCases', {
+    defaultMessage: 'related {count, plural, one {case} other {cases}}',
+    values: { count },
+  });
