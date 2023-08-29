@@ -14,10 +14,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-import { createOptionsFromFields } from '../../helpers/create_options';
+import {
+  Field,
+  useFetchIndexPatternFields,
+} from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { Option, createOptionsFromFields } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 
 interface Props {
@@ -25,8 +28,18 @@ interface Props {
 }
 export function GroupByFieldSelector({ index }: Props) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const [options, setOptions] = useState<Option[]>([]);
+
   const { isLoading, data: indexFields = [] } = useFetchIndexPatternFields(index);
-  const groupableFields = indexFields.filter((field) => field.aggregatable);
+  const [groupableFields, setGroupableFields] = useState<Field[]>([]);
+
+  useEffect(() => {
+    if (indexFields.length > 0) {
+      const indexFieldsGroupable = indexFields.filter((field) => field.aggregatable);
+      setGroupableFields(indexFieldsGroupable);
+      setOptions(createOptionsFromFields(indexFieldsGroupable));
+    }
+  }, [indexFields]);
 
   const label = i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
     defaultMessage: 'Select an optional field to partition by',
@@ -72,7 +85,14 @@ export function GroupByFieldSelector({ index }: Props) {
 
                 field.onChange(ALL_VALUE);
               }}
-              options={createOptionsFromFields(groupableFields)}
+              options={options}
+              onSearchChange={(searchValue: string) => {
+                setOptions(
+                  createOptionsFromFields(groupableFields, ({ value }) =>
+                    value.includes(searchValue)
+                  )
+                );
+              }}
               selectedOptions={
                 !!index &&
                 !!field.value &&
