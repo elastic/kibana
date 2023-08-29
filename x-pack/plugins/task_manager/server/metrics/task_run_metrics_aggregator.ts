@@ -7,17 +7,24 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { merge } from 'lodash';
-import { isOk, unwrap } from '../lib/result_type';
+import { isOk, Ok, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { ErroredTask, RanTask, TaskRun } from '../task_events';
+import {
+  ErroredTask,
+  isTaskManagerStatEvent,
+  isTaskRunEvent,
+  RanTask,
+  TaskManagerStat,
+  TaskRun,
+} from '../task_events';
 import { MetricCounterService } from './counter/metric_counter_service';
 import { SimpleHistogram } from './simple_histogram';
 import { ITaskMetricsAggregator } from './types';
 
 const taskTypeGrouping = new Set<string>(['alerting:', 'actions:']);
 
-const HDR_HISTOGRAM_MAX = 30000; // 30 seconds
-const HDR_HISTOGRAM_BUCKET_SIZE = 100; // 100 millis
+const HDR_HISTOGRAM_MAX = 1800; // 30 minutes
+const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
 
 enum TaskRunKeys {
   SUCCESS = 'success',
@@ -73,10 +80,19 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
 
   public reset() {
     this.counter.reset();
+    this.delayHistogram.reset();
   }
 
   public processTaskLifecycleEvent(taskEvent: TaskLifecycleEvent) {
-    const { task, isExpired }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
+    if (isTaskRunEvent(taskEvent)) {
+      this.processTaskRunEvent(taskEvent);
+    } else if (isTaskManagerStatEvent(taskEvent)) {
+      this.processTaskManagerStatEvent(taskEvent);
+    }
+  }
+
+  private processTaskRunEvent(taskEvent: TaskRun) {
+    const { task, isExpired }: RanTask | ErroredTask = unwrap(taskEvent.event);
     const success = isOk((taskEvent as TaskRun).event);
     const taskType = task.taskType.replaceAll('.', '__');
     const taskTypeGroup = this.getTaskTypeGroup(taskType);
@@ -92,6 +108,13 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     // increment expired counters
     if (!isExpired) {
       this.incrementCounters(TaskRunKeys.RUN_WITHIN_TIMEOUT, taskType, taskTypeGroup);
+    }
+  }
+
+  private processTaskManagerStatEvent(taskEvent: TaskManagerStat) {
+    if (taskEvent.id === 'runDelay') {
+      const delayInSec = (taskEvent.event as Ok<number>).value;
+      this.delayHistogram.record(delayInSec);
     }
   }
 

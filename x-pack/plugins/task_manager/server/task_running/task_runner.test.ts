@@ -16,6 +16,7 @@ import {
   asTaskMarkRunningEvent,
   TaskRun,
   TaskPersistence,
+  asTaskManagerStatEvent,
 } from '../task_events';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -927,7 +928,10 @@ describe('TaskManagerRunner', () => {
           )
         )
       );
-      expect(onTaskEvent).toHaveBeenCalledTimes(1);
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+      );
+      expect(onTaskEvent).toHaveBeenCalledTimes(2);
     });
 
     test('tasks that return runAt override the schedule', async () => {
@@ -1260,6 +1264,9 @@ describe('TaskManagerRunner', () => {
             )
           )
         );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
       });
 
       test('emits TaskEvent when a task is run successfully but completes after timeout', async () => {
@@ -1300,6 +1307,9 @@ describe('TaskManagerRunner', () => {
             )
           )
         );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
       });
 
       test('emits TaskEvent when a recurring task is run successfully', async () => {
@@ -1338,6 +1348,9 @@ describe('TaskManagerRunner', () => {
               })
             )
           )
+        );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
         );
       });
 
@@ -1381,6 +1394,9 @@ describe('TaskManagerRunner', () => {
             )
           )
         );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
       });
 
       test('emits TaskEvent when a recurring task returns a success result with hasError=true', async () => {
@@ -1420,6 +1436,9 @@ describe('TaskManagerRunner', () => {
               })
             )
           )
+        );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
         );
       });
 
@@ -1464,6 +1483,9 @@ describe('TaskManagerRunner', () => {
             )
           )
         );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
       });
 
       test('emits TaskEvent when a task run throws an error', async () => {
@@ -1502,7 +1524,10 @@ describe('TaskManagerRunner', () => {
             )
           )
         );
-        expect(onTaskEvent).toHaveBeenCalledTimes(1);
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
       });
 
       test('emits TaskEvent when a task run throws an error and has timed out', async () => {
@@ -1544,7 +1569,10 @@ describe('TaskManagerRunner', () => {
             )
           )
         );
-        expect(onTaskEvent).toHaveBeenCalledTimes(1);
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
       });
 
       test('emits TaskEvent when a task run returns an error', async () => {
@@ -1586,7 +1614,10 @@ describe('TaskManagerRunner', () => {
             )
           )
         );
-        expect(onTaskEvent).toHaveBeenCalledTimes(1);
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
       });
 
       test('emits TaskEvent when a task returns an error and is marked as failed', async () => {
@@ -1639,7 +1670,10 @@ describe('TaskManagerRunner', () => {
             )
           )
         );
-        expect(onTaskEvent).toHaveBeenCalledTimes(1);
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
       });
     });
 
