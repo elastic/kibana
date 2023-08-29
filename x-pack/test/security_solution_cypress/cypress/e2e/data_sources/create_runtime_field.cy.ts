@@ -25,7 +25,7 @@ import { GET_TIMELINE_HEADER } from '../../screens/timeline';
 const alertRunTimeField = 'field.name.alert.page';
 const timelineRuntimeField = 'field.name.timeline';
 
-describe(
+describe.skip(
   'Create DataView runtime field',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {

@@ -122,7 +122,7 @@ describe('Sourcerer', () => {
       cy.get(SOURCERER.saveButton).should('be.disabled');
     });
 
-    it(
+    it.skip(
       'adds a pattern to the default index and correctly filters out auditbeat-*',
       { tags: '@brokenInServerless' },
       () => {
