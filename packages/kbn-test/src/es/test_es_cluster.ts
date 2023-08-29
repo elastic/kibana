@@ -237,6 +237,7 @@ export function createTestEsCluster<
           ssl: true,
           background: true,
           files,
+          kill: true, // likely don't need this but avoids any issues where the ESS cluster wasn't cleaned up
         });
       } else if (Path.isAbsolute(esFrom)) {
         installPath = esFrom;
