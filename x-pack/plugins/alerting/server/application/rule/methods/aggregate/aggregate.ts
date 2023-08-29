@@ -7,7 +7,6 @@
 
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { RuleAttributes } from '../../../../data/rule/types';
-import { validateRuleAggregationFields } from '../../../../../common/routes/rule/validation/validate_rule_aggregation_fields/latest';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { buildKueryNodeFilter } from '../../../../rules_client/common';
@@ -15,6 +14,7 @@ import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common
 import { RulesClientContext } from '../../../../rules_client/types';
 
 import type { AggregateParams } from './types';
+import { validateRuleAggregationFields } from './validation';
 
 export async function aggregate<T = Record<string, unknown>>(
   context: RulesClientContext,

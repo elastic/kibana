@@ -4,4 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { transformAggregateBodyResponse as transformAggregateBodyResponseV1 } from './v1';
+
+export { validateRuleAggregationFields } from './validate_rule_aggregation_fields/latest';
+export { validateRuleAggregationFields as validateRuleAggregationFieldsV1 } from './validate_rule_aggregation_fields/v1';

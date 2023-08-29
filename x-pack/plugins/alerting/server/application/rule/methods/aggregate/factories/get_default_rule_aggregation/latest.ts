@@ -4,4 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { getDefaultRuleAggregation as getDefaultRuleAggregationV1 } from './v1';
+export { getDefaultRuleAggregation } from './v1';

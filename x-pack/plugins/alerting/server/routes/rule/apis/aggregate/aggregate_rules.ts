@@ -8,6 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
+import { getDefaultRuleAggregationV1 } from '../../../../application/rule/methods/aggregate/factories';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
@@ -19,7 +20,6 @@ import {
 import { formatDefaultAggregationResultV1 } from './transforms';
 import { transformAggregateQueryRequestV1, transformAggregateBodyResponseV1 } from './transforms';
 import { DefaultRuleAggregationResultV1 } from './types';
-import { getDefaultRuleAggregationV1 } from './factories/get_default_rule_aggregation';
 
 export const aggregateRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
