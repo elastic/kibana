@@ -30,6 +30,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const retry = getService('retry');
+  const logger = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
@@ -1799,6 +1800,8 @@ instanceStateValue: true
             },
             pattern: { alertA: [true, true, false, false, false, false] },
           });
+
+          logger.error(JSON.stringify(createdRule));
 
           const ruleId = createdRule.body.id;
 
