@@ -118,11 +118,7 @@ export const cli = () => {
         writeTo: process.stdout,
       });
 
-      if (
-        !files?.length ||
-        grepSpecPattern === spec ||
-        grepSpecPattern === cypressConfigFile.e2e.specPattern
-      ) {
+      if (!files?.length) {
         log.info('No tests found');
         // eslint-disable-next-line no-process-exit
         return process.exit(0);
