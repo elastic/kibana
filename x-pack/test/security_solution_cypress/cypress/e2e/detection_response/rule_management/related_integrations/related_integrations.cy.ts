@@ -19,7 +19,7 @@ import {
   RULE_NAME,
 } from '../../../../screens/alerts_detection_rules';
 import {
-  addAvailableToInstallPrebuiltRules,
+  installPrebuiltRuleAssets,
   installAllPrebuiltRulesRequest,
   SAMPLE_PREBUILT_RULE,
 } from '../../../../tasks/api_calls/prebuilt_rules';
@@ -276,7 +276,7 @@ describe('Related integrations', { tags: ['@ess', '@brokenInServerless'] }, () =
 const INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS = 'prebuiltRules';
 
 function addAndInstallPrebuiltRules(rules: Array<typeof SAMPLE_PREBUILT_RULE>): void {
-  addAvailableToInstallPrebuiltRules(rules);
+  installPrebuiltRuleAssets(rules);
   installAllPrebuiltRulesRequest().as(INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS);
 }
 

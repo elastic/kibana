@@ -198,14 +198,20 @@ export const preventPrebuiltRulesPackageInstallation = () => {
   cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*', {});
 };
 
-export const addAvailableToInstallPrebuiltRules = (
-  rules: Array<typeof SAMPLE_PREBUILT_RULE>
-): void => {
-  cy.log('Create mocked available to install prebuilt rules', rules.length);
+/**
+ * Install prebuilt rule assets. After installing these assets become available to be installed
+ * as prebuilt rules. Prebuilt rule assets can be generated via `createRuleAssetSavedObject()` helper function.
+ *
+ * It's also important to take into account that business logic tries to fetch prebuilt rules Fleet package
+ * and you need to add `preventPrebuiltRulesPackageInstallation()` to `beforeEach` section (before visit commands)
+ * to avoid actually pulling a real Fleet package and have only provided prebuilt rule assets for testing.
+ */
+export const installPrebuiltRuleAssets = (ruleAssets: Array<typeof SAMPLE_PREBUILT_RULE>): void => {
+  cy.log('Create mocked available to install prebuilt rules', ruleAssets.length);
   preventPrebuiltRulesPackageInstallation();
   // TODO: use this bulk method once the issue with Cypress is fixed
   // bulkCreateRuleAssets({ rules });
-  rules.forEach((rule) => {
+  ruleAssets.forEach((rule) => {
     createNewRuleAsset({ rule });
   });
 };
@@ -222,16 +228,16 @@ export const addAvailableToInstallPrebuiltRules = (
  * * @param {string} installToKibana - Flag to decide whether to install the rules as 'alerts' SO. Defaults to true.
  */
 export const createAndInstallMockedPrebuiltRules = ({
-  rules,
+  rules: ruleAssets,
   installToKibana = true,
 }: {
   rules: Array<typeof SAMPLE_PREBUILT_RULE>;
   installToKibana?: boolean;
 }) => {
-  addAvailableToInstallPrebuiltRules(rules);
+  installPrebuiltRuleAssets(ruleAssets);
 
   if (installToKibana) {
-    cy.log('Install prebuilt rules', rules.length);
+    cy.log('Install prebuilt rules', ruleAssets.length);
     return installAllPrebuiltRulesRequest();
   }
 };
