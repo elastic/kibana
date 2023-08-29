@@ -259,7 +259,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.observabilityLogExplorer.assertNoIntegrationsPromptExists();
         });
 
-        // skipped until https://github.com/elastic/kibana/pull/165080 is available
         it('should load more integrations by scrolling to the end of the list', async () => {
           // Install more integrations and reload the page
           const cleanupAdditionalSetup =
@@ -272,14 +271,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const { nodes } = await PageObjects.observabilityLogExplorer.getIntegrations();
             expect(nodes.length).to.be(15);
-            await nodes.at(-1)?.scrollIntoViewIfNecessary();
+            await nodes.at(-1)?.scrollIntoView();
           });
 
           // Load more integrations
           await retry.try(async () => {
             const { nodes } = await PageObjects.observabilityLogExplorer.getIntegrations();
             expect(nodes.length).to.be(20);
-            await nodes.at(-1)?.scrollIntoViewIfNecessary();
+            await nodes.at(-1)?.scrollIntoView();
           });
 
           // No other integrations to load after scrolling to last integration
