@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -30,11 +30,15 @@ export function RulesPage() {
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout, getRulesSettingsLink: RulesSettingsLink },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
-
+  const history = useHistory();
   const { path } = useRouteMatch();
-
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
   const [stateRefresh, setRefresh] = useState(new Date());
+
+  const onTabChange = (tabName: 'rules' | 'logs') => {
+    const routePath = tabName === 'rules' ? path : `${path}/logs`;
+    history.push(routePath);
+  };
 
   useBreadcrumbs([
     {
@@ -95,16 +99,16 @@ export function RulesPage() {
         ],
         tabs: [
           {
-            id: 'Logs',
-            name: 'logs',
-            label: 'Logs',
-            onClick: () => console.log('clicked on logs'),
-          },
-          {
             id: 'Rules',
             name: 'rules',
             label: 'Rules',
-            onClick: () => console.log('clicked on rules'),
+            onClick: () => onTabChange('rules'),
+          },
+          {
+            id: 'Logs',
+            name: 'logs',
+            label: 'Logs',
+            onClick: () => onTabChange('logs'),
           },
         ],
       }}
