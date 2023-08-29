@@ -6,7 +6,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { LogExplorerConfig } from '../common/plugin_config';
 import { createLogExplorer } from './components/log_explorer';
 import {
   LogExplorerPluginSetup,
@@ -16,11 +15,7 @@ import {
 } from './types';
 
 export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExplorerPluginStart> {
-  private config: LogExplorerConfig;
-
-  constructor(context: PluginInitializerContext<LogExplorerConfig>) {
-    this.config = context.config.get();
-  }
+  constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: LogExplorerSetupDeps) {}
 

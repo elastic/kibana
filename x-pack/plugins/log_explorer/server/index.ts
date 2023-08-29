@@ -7,6 +7,4 @@
 
 import { LogExplorerServerPlugin } from './plugin';
 
-export { config } from './config';
-
 export const plugin = () => new LogExplorerServerPlugin();
