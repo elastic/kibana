@@ -25,33 +25,38 @@ enum TaskRunKeys {
   TOTAL = 'total',
 }
 
+enum TaskRunMetricKeys {
+  OVERALL = 'overall',
+  BY_TYPE = 'by_type',
+}
+
 interface TaskRunCounts extends JsonObject {
   [TaskRunKeys.SUCCESS]: number;
   [TaskRunKeys.RUN_WITHIN_TIMEOUT]: number;
   [TaskRunKeys.TOTAL]: number;
 }
 
-export interface AllTaskRunCounts extends JsonObject {
-  overall: TaskRunCounts;
-  by_type: {
+export interface TaskRunMetrics extends JsonObject {
+  [TaskRunMetricKeys.OVERALL]: TaskRunCounts;
+  [TaskRunMetricKeys.BY_TYPE]: {
     [key: string]: TaskRunCounts;
   };
 }
 
 export interface TaskRunMetric extends JsonObject {
-  overall: AllTaskRunCounts['overall'] & {
+  overall: TaskRunMetrics['overall'] & {
     delay: {
       counts: number[];
       values: number[];
     };
   };
-  by_type: AllTaskRunCounts['by_type'];
+  by_type: TaskRunMetrics['by_type'];
 }
 
 export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunMetric> {
-  private counter: MetricCounterService<AllTaskRunCounts> = new MetricCounterService(
+  private counter: MetricCounterService<TaskRunMetrics> = new MetricCounterService(
     Object.values(TaskRunKeys),
-    'overall'
+    TaskRunMetricKeys.OVERALL
   );
   private delayHistogram = new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);
 
@@ -77,28 +82,24 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     const taskTypeGroup = this.getTaskTypeGroup(taskType);
 
     // increment the total counters
-    this.counter.increment(TaskRunKeys.TOTAL, 'overall');
-    this.counter.increment(TaskRunKeys.TOTAL, `by_type.${taskType}`);
-    if (taskTypeGroup) {
-      this.counter.increment(TaskRunKeys.TOTAL, `by_type.${taskTypeGroup}`);
-    }
+    this.incrementCounters(TaskRunKeys.TOTAL, taskType, taskTypeGroup);
 
     // increment success counters
     if (success) {
-      this.counter.increment(TaskRunKeys.SUCCESS, 'overall');
-      this.counter.increment(TaskRunKeys.SUCCESS, `by_type.${taskType}`);
-      if (taskTypeGroup) {
-        this.counter.increment(TaskRunKeys.SUCCESS, `by_type.${taskTypeGroup}`);
-      }
+      this.incrementCounters(TaskRunKeys.SUCCESS, taskType, taskTypeGroup);
     }
 
     // increment expired counters
     if (!isExpired) {
-      this.counter.increment(TaskRunKeys.RUN_WITHIN_TIMEOUT, 'overall');
-      this.counter.increment(TaskRunKeys.RUN_WITHIN_TIMEOUT, `by_type.${taskType}`);
-      if (taskTypeGroup) {
-        this.counter.increment(TaskRunKeys.RUN_WITHIN_TIMEOUT, `by_type.${taskTypeGroup}`);
-      }
+      this.incrementCounters(TaskRunKeys.RUN_WITHIN_TIMEOUT, taskType, taskTypeGroup);
+    }
+  }
+
+  private incrementCounters(key: TaskRunKeys, taskType: string, group?: string) {
+    this.counter.increment(key, TaskRunMetricKeys.OVERALL);
+    this.counter.increment(key, `${TaskRunMetricKeys.BY_TYPE}.${taskType}`);
+    if (group) {
+      this.counter.increment(key, `${TaskRunMetricKeys.BY_TYPE}.${group}`);
     }
   }
 

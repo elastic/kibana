@@ -12,7 +12,7 @@ import { asTaskRunEvent, TaskPersistence } from '../task_events';
 import { TaskRunResult } from '../task_running';
 import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 
-export const getTaskRunSuccessEvent = (type: string) => {
+export const getTaskRunSuccessEvent = (type: string, isExpired: boolean = false) => {
   const id = uuid.v4();
   return asTaskRunEvent(
     id,
@@ -33,7 +33,7 @@ export const getTaskRunSuccessEvent = (type: string) => {
       },
       persistence: TaskPersistence.Recurring,
       result: TaskRunResult.Success,
-      isExpired: false,
+      isExpired,
     }),
     {
       start: 1689698780490,
@@ -42,7 +42,7 @@ export const getTaskRunSuccessEvent = (type: string) => {
   );
 };
 
-export const getTaskRunFailedEvent = (type: string) => {
+export const getTaskRunFailedEvent = (type: string, isExpired: boolean = false) => {
   const id = uuid.v4();
   return asTaskRunEvent(
     id,
@@ -64,7 +64,7 @@ export const getTaskRunFailedEvent = (type: string) => {
       },
       persistence: TaskPersistence.Recurring,
       result: TaskRunResult.Failed,
-      isExpired: false,
+      isExpired,
     })
   );
 };
@@ -99,6 +99,17 @@ describe('TaskRunMetricsAggregator', () => {
     });
   });
 
+  test('should correctly process task run success event where task run has timed out', () => {
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry', true));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry', true));
+    expect(taskRunMetricsAggregator.collect()).toEqual({
+      overall: { success: 2, on_time: 0, total: 2, delay: { counts: [], values: [] } },
+      by_type: {
+        telemetry: { success: 2, on_time: 0, total: 2 },
+      },
+    });
+  });
+
   test('should correctly process task run failure event', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
@@ -110,15 +121,26 @@ describe('TaskRunMetricsAggregator', () => {
     });
   });
 
+  test('should correctly process task run failure event where task run has timed out', () => {
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry', true));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry', true));
+    expect(taskRunMetricsAggregator.collect()).toEqual({
+      overall: { success: 0, on_time: 0, total: 2, delay: { counts: [], values: [] } },
+      by_type: {
+        telemetry: { success: 0, on_time: 0, total: 2 },
+      },
+    });
+  });
+
   test('should correctly process different task types', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report', true));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 3, on_time: 4, total: 4, delay: { counts: [], values: [] } },
+      overall: { success: 3, on_time: 3, total: 4, delay: { counts: [], values: [] } },
       by_type: {
-        report: { success: 2, on_time: 2, total: 2 },
+        report: { success: 2, on_time: 1, total: 2 },
         telemetry: { success: 1, on_time: 2, total: 2 },
       },
     });
@@ -129,7 +151,9 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('alerting:example', true)
+    );
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
       getTaskRunSuccessEvent('alerting:.index-threshold')
@@ -141,17 +165,17 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:.email'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold')
+      getTaskRunSuccessEvent('alerting:.index-threshold', true)
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 11, on_time: 14, total: 14, delay: { counts: [], values: [] } },
+      overall: { success: 11, on_time: 12, total: 14, delay: { counts: [], values: [] } },
       by_type: {
         actions: { success: 3, on_time: 3, total: 3 },
         'actions:__email': { success: 1, on_time: 1, total: 1 },
         'actions:webhook': { success: 2, on_time: 2, total: 2 },
-        alerting: { success: 5, on_time: 7, total: 7 },
-        'alerting:example': { success: 3, on_time: 5, total: 5 },
-        'alerting:__index-threshold': { success: 2, on_time: 2, total: 2 },
+        alerting: { success: 5, on_time: 5, total: 7 },
+        'alerting:example': { success: 3, on_time: 4, total: 5 },
+        'alerting:__index-threshold': { success: 2, on_time: 1, total: 2 },
         report: { success: 2, on_time: 2, total: 2 },
         telemetry: { success: 1, on_time: 2, total: 2 },
       },
@@ -163,10 +187,12 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('alerting:example', true)
+    );
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold')
+      getTaskRunSuccessEvent('alerting:.index-threshold', true)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
@@ -178,14 +204,14 @@ describe('TaskRunMetricsAggregator', () => {
       getTaskRunSuccessEvent('alerting:.index-threshold')
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 11, on_time: 14, total: 14, delay: { counts: [], values: [] } },
+      overall: { success: 11, on_time: 12, total: 14, delay: { counts: [], values: [] } },
       by_type: {
         actions: { success: 3, on_time: 3, total: 3 },
         'actions:__email': { success: 1, on_time: 1, total: 1 },
         'actions:webhook': { success: 2, on_time: 2, total: 2 },
-        alerting: { success: 5, on_time: 7, total: 7 },
-        'alerting:example': { success: 3, on_time: 5, total: 5 },
-        'alerting:__index-threshold': { success: 2, on_time: 2, total: 2 },
+        alerting: { success: 5, on_time: 5, total: 7 },
+        'alerting:example': { success: 3, on_time: 4, total: 5 },
+        'alerting:__index-threshold': { success: 2, on_time: 1, total: 2 },
         report: { success: 2, on_time: 2, total: 2 },
         telemetry: { success: 1, on_time: 2, total: 2 },
       },

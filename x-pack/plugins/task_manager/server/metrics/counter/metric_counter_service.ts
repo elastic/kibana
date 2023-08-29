@@ -20,7 +20,7 @@ export const unflattenObject = <T extends object = GenericObject>(object: object
 
 export class MetricCounterService<T extends JsonObject> {
   private readonly counters = new Map<string, Counter>();
-  private keys: string[];
+  private readonly keys: string[];
 
   constructor(keys: string[], initialNamespace?: string) {
     if (!keys || !keys.length) {
@@ -42,26 +42,29 @@ export class MetricCounterService<T extends JsonObject> {
   }
 
   public increment(key: string, namespace?: string) {
+    // initialize counters for namespace if necessary
     this.initializeCountersForNamespace(namespace);
-    this.counters.get(this.buildKey(key, namespace))?.increment();
+
+    // increment counter in specified namespace
+    this.counters.get(this.buildCounterKey(key, namespace))?.increment();
   }
 
   public collect(): T {
     return this.toJson();
   }
 
-  private buildKey(key: string, namespace?: string) {
-    const prefix = namespace ? `${namespace}.` : '';
-    return `${prefix}${key}`;
-  }
-
   private initializeCountersForNamespace(namespace?: string) {
     for (const key of this.keys) {
-      const namespacedKey = this.buildKey(key, namespace);
-      if (!this.counters.get(namespacedKey)) {
-        this.counters.set(namespacedKey, new Counter());
+      const counterKey = this.buildCounterKey(key, namespace);
+      if (!this.counters.get(counterKey)) {
+        this.counters.set(counterKey, new Counter());
       }
     }
+  }
+
+  private buildCounterKey(key: string, namespace?: string) {
+    const prefix = namespace ? `${namespace}.` : '';
+    return `${prefix}${key}`;
   }
 
   private toJson(initialMetric: boolean = false): T {

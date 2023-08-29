@@ -734,6 +734,8 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
 
+    const taskHasExpired = this.isExpired;
+
     await eitherAsync(
       result,
       async ({ runAt, schedule, hasError }: SuccessfulRunResult) => {
@@ -754,14 +756,14 @@ export class TaskManagerRunner implements TaskRunner {
               this.id,
               asErr({
                 ...processedResult,
-                isExpired: this.isExpired,
+                isExpired: taskHasExpired,
                 error: new Error(`Alerting task failed to run.`),
               }),
               taskTiming
             )
           : asTaskRunEvent(
               this.id,
-              asOk({ ...processedResult, isExpired: this.isExpired }),
+              asOk({ ...processedResult, isExpired: taskHasExpired }),
               taskTiming
             );
         this.onTaskEvent(taskRunEvent);

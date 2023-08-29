@@ -13,17 +13,22 @@ describe('MetricCounterService', () => {
     expect(counterService.collect()).toEqual({ success: 0, total: 0 });
   });
 
+  test('should correctly initialize with initial namespace', () => {
+    const counterService = new MetricCounterService(['success', 'total'], 'overall');
+    expect(counterService.collect()).toEqual({ overall: { success: 0, total: 0 } });
+  });
+
+  test('should correctly initialize with initial flattened namespace', () => {
+    const counterService = new MetricCounterService(['success', 'total'], 'overall.count');
+    expect(counterService.collect()).toEqual({ overall: { count: { success: 0, total: 0 } } });
+  });
+
   test('should throw error if no keys provided', () => {
     expect(() => {
       new MetricCounterService([]);
     }).toThrowErrorMatchingInlineSnapshot(
       `"Metrics counter service must be initialized with at least one key"`
     );
-  });
-
-  test('should correctly initialize with initial namespace', () => {
-    const counterService = new MetricCounterService(['success', 'total'], 'overall');
-    expect(counterService.collect()).toEqual({ overall: { success: 0, total: 0 } });
   });
 
   test('should correctly return initialMetrics', () => {
@@ -38,7 +43,7 @@ describe('MetricCounterService', () => {
     expect(counterService.collect()).toEqual({ success: 2, total: 0 });
   });
 
-  test('should correctly increment counter for unknown namespace', () => {
+  test('should correctly increment counter for new namespace', () => {
     const counterService = new MetricCounterService(['success', 'total'], 'overall');
     counterService.increment('success', 'foo');
     expect(counterService.collect()).toEqual({
