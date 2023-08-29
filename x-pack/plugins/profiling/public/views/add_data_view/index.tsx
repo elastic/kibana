@@ -431,7 +431,7 @@ EOF`}
                     link: (
                       <EuiLink
                         target="_blank"
-                        href={`https://www.elastic.co/guide/en/observability/current/profiling-add-symbols.html`}
+                        href={`${core.docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${core.docLinks.DOC_LINK_VERSION}/profiling-add-symbols.html`}
                       >
                         {i18n.translate('xpack.profiling.tabs.symbols.step3.doc-ref.link', {
                           defaultMessage: 'the corresponding documentation page',
@@ -487,7 +487,7 @@ EOF`}
             title={
               <FormattedMessage
                 id="xpack.profiling.tabs.debWarning"
-                defaultMessage="Due to a {linuxLink}, we have stopped host-agents on kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more."
+                defaultMessage="Due to a {linuxLink} which impacts stability, the profiling agent will refuse to run on kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more. If you are running such a kernel with a backported fix, please refer to {advancedLink} for instructions to override the precautionary measure."
                 values={{
                   versionFrom: <strong>5.19</strong>,
                   versionTo: <strong>6.4</strong>,
@@ -518,6 +518,16 @@ EOF`}
                     >
                       {i18n.translate('xpack.profiling.tabs.debWarning.fedoraLink', {
                         defaultMessage: 'Fedora/CentOS',
+                      })}
+                    </EuiLink>
+                  ),
+                  advancedLink: (
+                    <EuiLink
+                      target="_blank"
+                      href={`${core.docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${core.docLinks.DOC_LINK_VERSION}/profiling-advanced-configuration.html`}
+                    >
+                      {i18n.translate('xpack.profiling.tabs.debWarning.fedoraLink', {
+                        defaultMessage: 'Advanced configuration',
                       })}
                     </EuiLink>
                   ),
