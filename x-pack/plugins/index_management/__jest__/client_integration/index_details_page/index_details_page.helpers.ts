@@ -40,6 +40,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
     getActiveTabContent: () => string;
     mappings: {
       getCodeBlockContent: () => string;
+      getDocsLinkHref: () => string;
       isErrorDisplayed: () => boolean;
       clickErrorReloadButton: () => Promise<void>;
     };
@@ -99,6 +100,9 @@ export const setup = async (
   const mappings = {
     getCodeBlockContent: () => {
       return find('indexDetailsMappingsCodeBlock').text();
+    },
+    getDocsLinkHref: () => {
+      return find('indexDetailsMappingsDocsLink').prop('href');
     },
     isErrorDisplayed: () => {
       return exists('indexDetailsMappingsError');

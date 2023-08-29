@@ -22,7 +22,7 @@ import { css } from '@emotion/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
-import { useLoadIndexMappings } from '../../../../services';
+import { useLoadIndexMappings, documentationService } from '../../../../services';
 
 export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexName: string }>> = ({
   match: {
@@ -123,7 +123,12 @@ export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexN
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiLink href={'example.com'} target="_blank" external>
+          <EuiLink
+            data-test-subj="indexDetailsMappingsDocsLink"
+            href={documentationService.getMappingDocumentationLink()}
+            target="_blank"
+            external
+          >
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.mappings.docsCardLink"
               defaultMessage="Learn more"

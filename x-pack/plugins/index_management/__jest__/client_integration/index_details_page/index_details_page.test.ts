@@ -103,6 +103,15 @@ describe('<IndexDetailsPage />', () => {
       expect(tabContent).toEqual(JSON.stringify(testIndexMappings, null, 2));
     });
 
+    it('sets the docs link href from the documenation service', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      const docsLinkHref = testBed.actions.mappings.getDocsLinkHref();
+      // the url from the mocked docs mock
+      expect(docsLinkHref).toEqual(
+        'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/mapping.html'
+      );
+    });
+
     describe('error loading mappings', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, undefined, {
