@@ -32,61 +32,66 @@ import { getListClient } from '..';
  * And ensuring they're all gone
  */
 export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
-  router.delete(
-    {
+  router.versioned
+    .delete({
+      access: 'public',
       options: {
         tags: ['access:lists-all'],
       },
       path: LIST_INDEX,
-      validate: false,
-    },
-    async (context, _, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const lists = await getListClient(context);
-        const listIndexExists = await lists.getListIndexExists();
-        const listItemIndexExists = await lists.getListItemIndexExists();
+    })
+    .addVersion(
+      {
+        validate: false,
+        version: '2023-10-31',
+      },
+      async (context, _, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const lists = await getListClient(context);
+          const listIndexExists = await lists.getListIndexExists();
+          const listItemIndexExists = await lists.getListItemIndexExists();
 
-        const listDataStreamExists = await lists.getListDataStreamExists();
-        const listItemDataStreamExists = await lists.getListItemDataStreamExists();
+          const listDataStreamExists = await lists.getListDataStreamExists();
+          const listItemDataStreamExists = await lists.getListItemDataStreamExists();
 
-        // return early if no data stream or indices exist
-        if (
-          !listDataStreamExists &&
-          !listItemDataStreamExists &&
-          !listIndexExists &&
-          !listItemIndexExists
-        ) {
+          // return early if no data stream or indices exist
+          if (
+            !listDataStreamExists &&
+            !listItemDataStreamExists &&
+            !listIndexExists &&
+            !listItemIndexExists
+          ) {
+            return siemResponse.error({
+              body: `index and data stream: "${lists.getListName()}" and "${lists.getListItemName()}" does not exist`,
+              statusCode: 404,
+            });
+          }
+
+          // ensure data streams deleted if exist
+          await deleteDataStreams(lists, listDataStreamExists, listItemDataStreamExists);
+
+          // ensure indices deleted if exist and were not migrated
+          await deleteIndices(lists, listIndexExists, listItemIndexExists);
+
+          await deleteIndexTemplates(lists);
+          await removeLegacyTemplatesIfExist(lists);
+
+          const [validated, errors] = validate({ acknowledged: true }, deleteListIndexResponse);
+          if (errors != null) {
+            return siemResponse.error({ body: errors, statusCode: 500 });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
-            body: `index and data stream: "${lists.getListName()}" and "${lists.getListItemName()}" does not exist`,
-            statusCode: 404,
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-
-        // ensure data streams deleted if exist
-        await deleteDataStreams(lists, listDataStreamExists, listItemDataStreamExists);
-
-        // ensure indices deleted if exist and were not migrated
-        await deleteIndices(lists, listIndexExists, listItemIndexExists);
-
-        await deleteIndexTemplates(lists);
-        await removeLegacyTemplatesIfExist(lists);
-
-        const [validated, errors] = validate({ acknowledged: true }, deleteListIndexResponse);
-        if (errors != null) {
-          return siemResponse.error({ body: errors, statusCode: 500 });
-        } else {
-          return response.ok({ body: validated ?? {} });
-        }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };
 
 /**
