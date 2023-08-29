@@ -35,6 +35,7 @@ import {
   RiskEngineStatus,
   getRiskScoreLatestIndex,
   MAX_SPACES_COUNT,
+  RiskScoreEntity,
 } from '../../../common/risk_engine';
 import {
   getLegacyTransforms,
@@ -51,6 +52,7 @@ import {
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { removeRiskScoringTask, startRiskScoringTask } from './tasks';
 import { createIndex } from './utils/create_index';
+import { bulkDeleteSavedObjects } from '../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
 
 interface InitOpts {
   namespace: string;
@@ -211,6 +213,17 @@ export class RiskEngineDataClient {
       esClient: this.options.esClient,
       namespace,
     });
+
+    const deleteDashboardsPromises = [RiskScoreEntity.host, RiskScoreEntity.user].map((entity) =>
+      bulkDeleteSavedObjects({
+        deleteAll: true,
+        savedObjectsClient: this.options.soClient,
+        spaceId: namespace,
+        savedObjectTemplate: `${entity}RiskScoreDashboards`,
+      })
+    );
+
+    await Promise.all(deleteDashboardsPromises);
 
     const newlegacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 

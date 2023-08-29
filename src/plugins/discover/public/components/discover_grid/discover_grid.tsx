@@ -623,7 +623,7 @@ export const DiscoverGrid = ({
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
     return (
-      <div className="euiDataGrid__loading">
+      <div className="euiDataGrid__loading" data-test-subj="discoverDataGridLoading">
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />

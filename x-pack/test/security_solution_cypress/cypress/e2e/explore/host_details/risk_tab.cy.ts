@@ -13,7 +13,7 @@ import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_hosts');
+    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
   });
 
   beforeEach(() => {
