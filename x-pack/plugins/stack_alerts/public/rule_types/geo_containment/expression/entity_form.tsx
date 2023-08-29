@@ -97,7 +97,7 @@ export const EntityForm = (props: Props) => {
         </h5>
       </EuiTitle>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       <EuiSkeletonText lines={3} size="s" isLoading={isLoading}>
         <EuiFormRow

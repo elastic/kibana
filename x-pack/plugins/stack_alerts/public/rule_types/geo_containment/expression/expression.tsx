@@ -27,7 +27,7 @@ export const GeoContainmentRuleTypeExpression: React.FunctionComponent<
         unifiedSearch={props.unifiedSearch}
       />
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       <BoundaryForm
         data={props.data}
@@ -43,7 +43,7 @@ export const GeoContainmentRuleTypeExpression: React.FunctionComponent<
         unifiedSearch={props.unifiedSearch}
       />
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
     </>
   );
 }
