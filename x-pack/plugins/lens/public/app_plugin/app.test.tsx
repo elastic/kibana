@@ -33,6 +33,7 @@ import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { LensByValueInput } from '../embeddable/embeddable';
 import { SavedObjectReference } from '@kbn/core/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { serverlessMock } from '@kbn/serverless/public/mocks';
 import moment from 'moment';
 
 import { setState, LensAppState } from '../state_management';
@@ -364,6 +365,30 @@ describe('Lens App', () => {
         },
         { text: 'Daaaaaaadaumching!' },
       ]);
+    });
+
+    it('sets serverless breadcrumbs when the document title changes when serverless service is available', async () => {
+      const serverless = serverlessMock.createStart();
+      const { instance, services, lensStore } = await mountWith({
+        services: {
+          ...makeDefaultServices(),
+          serverless,
+        },
+      });
+      expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalled();
+      expect(serverless.setBreadcrumbs).toHaveBeenCalledWith({ text: 'Create' });
+
+      await act(async () => {
+        instance.setProps({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+        lensStore.dispatch(
+          setState({
+            persistedDoc: breadcrumbDoc,
+          })
+        );
+      });
+
+      expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalled();
+      expect(serverless.setBreadcrumbs).toHaveBeenCalledWith({ text: 'Daaaaaaadaumching!' });
     });
   });
 
@@ -1187,6 +1212,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
@@ -1198,6 +1224,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           },
         }),
         {}
@@ -1214,6 +1241,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       act(() => {
@@ -1225,6 +1253,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });
@@ -1237,6 +1266,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           },
         }),
         {}
@@ -1254,6 +1284,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: 'abc:def', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });
@@ -1304,6 +1335,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       act(() => {
@@ -1315,6 +1347,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });

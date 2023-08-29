@@ -51,3 +51,5 @@ export { incrementPolicyName } from './increment_policy_name';
 export { getCloudFormationPropsFromPackagePolicy } from './get_cloud_formation_props_from_package_policy';
 export { getCloudFormationTemplateUrlFromAgentPolicy } from './get_cloud_formation_template_url_from_agent_policy';
 export { getCloudFormationTemplateUrlFromPackageInfo } from './get_cloud_formation_template_url_from_package_info';
+export { getCloudShellUrlFromPackagePolicy } from './get_cloud_shell_url_from_package_policy';
+export { getCloudShellUrlFromAgentPolicy } from './get_cloud_shell_url_from_agent_policy';

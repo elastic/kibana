@@ -151,6 +151,40 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ]);
     });
 
+    it('returns a useful error if the request fails', async () => {
+      requestHandler = (request, response) => {
+        response.writeHead(400, {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+        });
+
+        response.write(
+          JSON.stringify({
+            error: {
+              code: 'context_length_exceeded',
+              message:
+                "This model's maximum context length is 8192 tokens. However, your messages resulted in 11036 tokens. Please reduce the length of the messages.",
+              param: 'messages',
+              type: 'invalid_request_error',
+            },
+          })
+        );
+
+        response.end();
+      };
+
+      const response = await supertest.post(CHAT_API_URL).set('kbn-xsrf', 'foo').send({
+        messages,
+        connectorId,
+        functions: [],
+      });
+
+      expect(response.body.message).to.contain(
+        `400 - Bad Request - This model's maximum context length is 8192 tokens. However, your messages resulted in 11036 tokens. Please reduce the length of the messages.`
+      );
+    });
+
     after(async () => {
       requestHandler = () => {};
       await supertest

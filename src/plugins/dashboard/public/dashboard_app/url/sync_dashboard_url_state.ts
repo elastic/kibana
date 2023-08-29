@@ -32,7 +32,12 @@ import { migrateLegacyQuery } from '../../services/dashboard_content_management/
  */
 export const isPanelVersionTooOld = (panels: SavedDashboardPanel[]) => {
   for (const panel of panels) {
-    if (!panel.version || semverSatisfies(panel.version, '<7.3')) return true;
+    if (
+      !panel.gridData ||
+      !panel.embeddableConfig ||
+      (panel.version && semverSatisfies(panel.version, '<7.3'))
+    )
+      return true;
   }
   return false;
 };

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const COVERAGE_OVERVIEW_DASHBOARD_TITLE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.pageTitle',
   {
-    defaultMessage: 'MITRE ATT&CK\u00AE Coverage',
+    defaultMessage: 'MITRE ATT&CK\u00AE coverage',
   }
 );
 
@@ -103,5 +103,77 @@ export const CoverageOverviewLegendRulesLabel = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.legendRulesLabel',
   {
     defaultMessage: 'rules',
+  }
+);
+
+export const CoverageOverviewEnabledRuleActivity = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.enabledRuleActivity',
+  {
+    defaultMessage: 'Enabled rules',
+  }
+);
+
+export const CoverageOverviewDisabledRuleActivity = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.disabledRuleActivity',
+  {
+    defaultMessage: 'Disabled rules',
+  }
+);
+
+export const CoverageOverviewElasticRuleSource = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.elasticRuleSource',
+  {
+    defaultMessage: 'Elastic rules',
+  }
+);
+
+export const CoverageOverviewCustomRuleSource = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.customRuleSource',
+  {
+    defaultMessage: 'Custom rules',
+  }
+);
+
+export const CoverageOverviewRuleActivityFilterLabel = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.ruleActivityFilterLabel',
+  {
+    defaultMessage: 'Installed rule status',
+  }
+);
+
+export const CoverageOverviewRuleSourceFilterLabel = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.ruleSourceFilterLabel',
+  {
+    defaultMessage: 'Installed rule type',
+  }
+);
+
+export const CoverageOverviewSearchBarPlaceholder = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.searchBarPlaceholder',
+  {
+    defaultMessage:
+      'Search for the tactic, technique (e.g.,"defense evasion" or "TA0005") or rule name',
+  }
+);
+
+export const CoverageOverviewFilterPopoverTitle = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.filterPopoverTitle',
+  {
+    defaultMessage: 'Select to view on framework',
+  }
+);
+
+export const CoverageOverviewFilterPopoverClearAll = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.filterPopoverClearAll',
+  {
+    defaultMessage: 'Clear all',
+  }
+);
+
+export const CoverageOverviewDashboardInformation = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.dashboardInformation',
+  {
+    defaultMessage:
+      "Your current coverage of MITRE ATT&CK\u00AE tactics and techniques, based on installed rules. Click a cell to view and enable a technique's rules. Rules must be mapped to the MITRE ATT&CK\u00AE framework to be displayed.",
   }
 );

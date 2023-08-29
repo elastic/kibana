@@ -1,9 +1,19 @@
 {
   "searchable_snapshots.mount": {
     "url_params": {
-      "master_timeout": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
       "wait_for_completion": "__flag__",
-      "storage": ""
+      "storage": [
+        "full_copy"
+      ]
     },
     "methods": [
       "POST"
@@ -11,6 +21,10 @@
     "patterns": [
       "_snapshot/{repository}/{snapshot}/_mount"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-api-mount-snapshot.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-api-mount-snapshot.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

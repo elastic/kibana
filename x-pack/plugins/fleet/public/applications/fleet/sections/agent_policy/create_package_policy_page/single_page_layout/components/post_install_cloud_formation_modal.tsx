@@ -58,7 +58,7 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
       </EuiModalHeader>
 
       <EuiModalBody>
-        <CloudFormationGuide />
+        <CloudFormationGuide awsAccountType={cloudFormationProps.awsAccountType} />
         {error && isError && (
           <>
             <EuiSpacer size="m" />

@@ -7,7 +7,7 @@
 
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
-import { getSystemMessage } from '../../service/get_system_message';
+import { getAssistantSetupMessage } from '../../service/get_assistant_setup_message';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
 import { ChatFlyout as Component } from './chat_flyout';
 
@@ -21,7 +21,7 @@ type ChatFlyoutProps = React.ComponentProps<typeof Component>;
 
 const Template: ComponentStory<typeof Component> = (props: ChatFlyoutProps) => {
   return (
-    <div style={{ display: 'flex', minHeight: 800 }}>
+    <div style={{ display: 'flex', minHeight: 800, maxWidth: 600 }}>
       <Component {...props} />
     </div>
   );
@@ -30,7 +30,7 @@ const Template: ComponentStory<typeof Component> = (props: ChatFlyoutProps) => {
 const defaultProps: ChatFlyoutProps = {
   isOpen: true,
   title: 'How is this working',
-  messages: [getSystemMessage()],
+  messages: [getAssistantSetupMessage({ contexts: [] })],
   onClose: () => {},
 };
 

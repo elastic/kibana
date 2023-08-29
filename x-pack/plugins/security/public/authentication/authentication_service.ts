@@ -12,15 +12,15 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/public';
 
-import type { AuthenticatedUser } from '../../common/model';
-import type { ConfigType } from '../config';
-import type { PluginStartDependencies } from '../plugin';
 import { accessAgreementApp } from './access_agreement';
 import { captureURLApp } from './capture_url';
 import { loggedOutApp } from './logged_out';
 import { loginApp } from './login';
 import { logoutApp } from './logout';
 import { overwrittenSessionApp } from './overwritten_session';
+import type { AuthenticatedUser } from '../../common/model';
+import type { ConfigType } from '../config';
+import type { PluginStartDependencies } from '../plugin';
 
 interface SetupParams {
   application: ApplicationSetup;

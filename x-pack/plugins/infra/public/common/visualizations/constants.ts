@@ -7,6 +7,13 @@
 
 import {
   cpuUsage,
+  cpuUsageIowait,
+  cpuUsageIrq,
+  cpuUsageNice,
+  cpuUsageSoftirq,
+  cpuUsageSteal,
+  cpuUsageUser,
+  cpuUsageSystem,
   diskIORead,
   diskIOWrite,
   diskReadThroughput,
@@ -16,8 +23,14 @@ import {
   diskSpaceUsage,
   logRate,
   normalizedLoad1m,
+  load1m,
+  load5m,
+  load15m,
   memoryUsage,
   memoryFree,
+  memoryUsed,
+  memoryFreeExcludingCache,
+  memoryCache,
   rx,
   tx,
   hostCount,
@@ -25,6 +38,13 @@ import {
 
 export const hostLensFormulas = {
   cpuUsage,
+  cpuUsageIowait,
+  cpuUsageIrq,
+  cpuUsageNice,
+  cpuUsageSoftirq,
+  cpuUsageSteal,
+  cpuUsageUser,
+  cpuUsageSystem,
   diskIORead,
   diskIOWrite,
   diskReadThroughput,
@@ -35,10 +55,17 @@ export const hostLensFormulas = {
   hostCount,
   logRate,
   normalizedLoad1m,
+  load1m,
+  load5m,
+  load15m,
   memoryUsage,
   memoryFree,
+  memoryUsed,
+  memoryFreeExcludingCache,
+  memoryCache,
   rx,
   tx,
 };
 
 export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';
+export const HOST_METRICS_DOTTED_LINES_DOC_HREF = 'https://ela.st/docs-infra-why-dotted';

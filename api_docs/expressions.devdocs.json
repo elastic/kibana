@@ -37922,7 +37922,7 @@
           "\nMode of the expression render environment.\nThis value can be set from a consumer embedding an expression renderer and is accessible\nfrom within the active render function as part of the handlers.\nThe following modes are supported:\n* view (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)\n* preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline\n* edit: The chart is rendered within an editor and configuration elements within the chart should be displayed"
         ],
         "signature": [
-          "\"edit\" | \"view\" | \"preview\""
+          "\"edit\" | \"preview\" | \"view\""
         ],
         "path": "src/plugins/expressions/common/expression_renderers/types.ts",
         "deprecated": false,
@@ -38608,13 +38608,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.createTable.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/create_table.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -38658,13 +38655,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.createTable.args.ids.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/create_table.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -38727,13 +38721,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.createTable.args.names.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/create_table.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -38796,13 +38787,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.createTable.args.rowCount.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/create_table.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -38966,13 +38954,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.cumulativeSum.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/cumulative_sum.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -39002,13 +38987,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.cumulativeSum.args.by.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/cumulative_sum.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39071,13 +39053,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.cumulativeSum.args.inputColumnId.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/cumulative_sum.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39126,13 +39105,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.cumulativeSum.args.outputColumnId.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/cumulative_sum.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39181,13 +39157,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.cumulativeSum.args.outputColumnName.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/cumulative_sum.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39795,13 +39768,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.derivative.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/derivative.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -39831,13 +39801,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.derivative.args.by.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/derivative.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39900,13 +39867,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.derivative.args.inputColumnId.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/derivative.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -39955,13 +39919,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.derivative.args.outputColumnId.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/derivative.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40010,13 +39971,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.derivative.args.outputColumnName.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/derivative.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40597,13 +40555,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.font.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -40658,13 +40613,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.font.args.align.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40731,13 +40683,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.font.args.color.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40783,13 +40732,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.font.args.family.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40835,13 +40781,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.font.args.italic.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40915,13 +40858,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.font.args.lHeight.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -40967,13 +40907,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.font.args.size.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41019,13 +40956,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.font.args.sizeUnit.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41085,13 +41019,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.font.args.underline.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41151,13 +41082,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.font.args.weight.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41536,13 +41464,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.mapColumn.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -41586,13 +41511,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.mapColumn.args.id.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41669,13 +41591,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.mapColumn.args.name.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41752,13 +41671,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.mapColumn.args.expression.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -41807,13 +41723,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.mapColumn.args.copyMetaFrom.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -42012,13 +41925,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.math.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/math.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -42076,13 +41986,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.math.args.expression.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/math.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -42131,13 +42038,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.math.args.onError.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/math.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -42280,13 +42184,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.mathColumn.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -42344,13 +42245,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.mathColumn.args.id.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -42413,13 +42311,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.mathColumn.args.name.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -42482,13 +42377,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.mathColumn.args.castColumns.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -42537,13 +42429,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.mathColumn.args.copyMetaFrom.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -42786,13 +42675,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.movingAverage.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -42822,13 +42708,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.movingAverage.args.by.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -42891,13 +42774,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.movingAverage.args.inputColumnId.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -42946,13 +42826,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.movingAverage.args.outputColumnId.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -43001,13 +42878,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.movingAverage.args.outputColumnName.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -43056,13 +42930,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.movingAverage.args.window.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -43818,13 +43689,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.overallMetric.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -43854,13 +43722,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.overallMetric.args.by.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -43923,13 +43788,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.overallMetric.args.metric.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -43978,13 +43840,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.overallMetric.args.inputColumnId.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -44033,13 +43892,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.overallMetric.args.outputColumnId.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -44088,13 +43944,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.overallMetric.args.outputColumnName.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -45355,13 +45208,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.theme.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -45419,13 +45269,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.theme.args.variable.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -45474,13 +45321,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.theme.args.default.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -45915,13 +45759,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.variable.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -45993,13 +45834,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.variable.args.name.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -46148,13 +45986,10 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.variableSet.help",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -46240,13 +46075,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.variableSet.args.name.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -46295,13 +46127,10 @@
                   {
                     "parentPluginId": "expressions",
                     "id": "def-common.variableSet.args.value.help",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
                     "deprecated": false,
                     "trackAdoption": false

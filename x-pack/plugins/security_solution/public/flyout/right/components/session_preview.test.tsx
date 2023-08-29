@@ -12,8 +12,6 @@ import { TestProviders } from '../../../common/mock';
 import React from 'react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
-import { SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID } from './test_ids';
-import { LeftPanelKey, LeftPanelVisualizeTabPath } from '../../left';
 
 jest.mock('../hooks/use_process_data');
 
@@ -87,30 +85,5 @@ describe('SessionPreview', () => {
     expect(screen.queryByText('at')).not.toBeInTheDocument();
     expect(screen.queryByText('with rule')).not.toBeInTheDocument();
     expect(screen.queryByText('by')).not.toBeInTheDocument();
-  });
-
-  it('should navigate to left section Visualize tab when clicking on title', () => {
-    jest.mocked(useProcessData).mockReturnValue({
-      processName: 'process1',
-      userName: 'user1',
-      startAt: '2022-01-01T00:00:00.000Z',
-      ruleName: 'rule1',
-      ruleId: 'id',
-      workdir: '/path/to/workdir',
-      command: 'command1',
-    });
-
-    const { getByTestId } = renderSessionPreview();
-
-    getByTestId(SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID).click();
-    expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
-      id: LeftPanelKey,
-      path: LeftPanelVisualizeTabPath,
-      params: {
-        id: panelContextValue.eventId,
-        indexName: panelContextValue.indexName,
-        scopeId: panelContextValue.scopeId,
-      },
-    });
   });
 });

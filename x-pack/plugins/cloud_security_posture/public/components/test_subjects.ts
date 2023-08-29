@@ -29,6 +29,9 @@ export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
   NO_VULNERABILITIES: 'no-vulnerabilities-vuln-mgmt-found',
   INDEX_TIMEOUT: 'vulnerabilities-timeout',
 };
+export const CNVM_NOT_INSTALLED_ACTION_SUBJ = 'cnvm-not-installed-action';
+export const CSPM_NOT_INSTALLED_ACTION_SUBJ = 'cspm-not-installed-action';
+export const KSPM_NOT_INSTALLED_ACTION_SUBJ = 'kspm-not-installed-action';
 
 export const VULNERABILITIES_CONTAINER_TEST_SUBJ = 'vulnerabilities_container';
 

@@ -14,7 +14,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
 import {
@@ -50,6 +50,7 @@ export interface HistogramProps {
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
+  withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
 
 export function Histogram({
@@ -69,6 +70,7 @@ export function Histogram({
   onChartLoad,
   onFilter,
   onBrushEnd,
+  withDefaultActions,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
   const [chartSize, setChartSize] = useState('100%');
@@ -101,10 +103,10 @@ export function Histogram({
         | undefined;
       const response = json?.rawResponse;
 
-      // Lens will swallow shard failures and return `isLoading: false` because it displays
-      // its own errors, but this causes us to emit onTotalHitsChange(UnifiedHistogramFetchStatus.complete, 0).
-      // This is incorrect, so we check for request failures and shard failures here, and emit an error instead.
-      if (requestFailed || response?._shards.failed) {
+      // The response can have `response?._shards.failed` but we should still be able to show hits number
+      // TODO: show shards warnings as a badge next to the total hits number
+
+      if (requestFailed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
         return;
@@ -189,6 +191,7 @@ export function Histogram({
           disabledActions={disabledActions}
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
+          withDefaultActions={withDefaultActions}
         />
       </div>
       {timeRangeDisplay}

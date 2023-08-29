@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { errors } from '@elastic/elasticsearch';
-import type { QueryDslTextExpansionQuery, SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { internal, notFound, serverUnavailable } from '@hapi/boom';
-import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { internal, notFound } from '@hapi/boom';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -17,29 +16,23 @@ import type {
   ChatCompletionFunctions,
   ChatCompletionRequestMessage,
   CreateChatCompletionRequest,
+  CreateChatCompletionResponse,
 } from 'openai';
 import { v4 } from 'uuid';
 import {
-  KnowledgeBaseEntry,
+  type CompatibleJSONSchema,
   MessageRole,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
-  type FunctionDefinition,
+  type KnowledgeBaseEntry,
   type Message,
 } from '../../../common/types';
-import type {
-  IObservabilityAIAssistantClient,
-  ObservabilityAIAssistantResourceNames,
-} from '../types';
+import type { KnowledgeBaseService } from '../kb_service';
+import type { ObservabilityAIAssistantResourceNames } from '../types';
+import { getAccessQuery } from '../util/get_access_query';
 
-const ELSER_MODEL_ID = '.elser_model_1';
-
-function throwKnowledgeBaseNotReady(body: any) {
-  throw serverUnavailable(`Knowledge base is not ready yet`, body);
-}
-
-export class ObservabilityAIAssistantClient implements IObservabilityAIAssistantClient {
+export class ObservabilityAIAssistantClient {
   constructor(
     private readonly dependencies: {
       actionsClient: PublicMethodsOf<ActionsClient>;
@@ -51,41 +44,9 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
         id?: string;
         name: string;
       };
+      knowledgeBaseService: KnowledgeBaseService;
     }
   ) {}
-
-  private getAccessQuery() {
-    return [
-      {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      'user.name': this.dependencies.user.name,
-                    },
-                  },
-                  {
-                    term: {
-                      public: true,
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-            {
-              term: {
-                namespace: this.dependencies.namespace,
-              },
-            },
-          ],
-        },
-      },
-    ];
-  }
 
   private getConversationWithMetaFields = async (
     conversationId: string
@@ -94,7 +55,13 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
       index: this.dependencies.resources.aliases.conversations,
       query: {
         bool: {
-          filter: [...this.getAccessQuery(), { term: { 'conversation.id': conversationId } }],
+          filter: [
+            ...getAccessQuery({
+              user: this.dependencies.user,
+              namespace: this.dependencies.namespace,
+            }),
+            { term: { 'conversation.id': conversationId } },
+          ],
         },
       },
       size: 1,
@@ -137,15 +104,19 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
     });
   };
 
-  chat = async ({
+  chat = async <TStream extends boolean | undefined = true>({
     messages,
     connectorId,
     functions,
+    functionCall,
+    stream = true,
   }: {
     messages: Message[];
     connectorId: string;
-    functions: Array<FunctionDefinition['options']>;
-  }): Promise<IncomingMessage> => {
+    functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
+    functionCall?: string;
+    stream?: TStream;
+  }): Promise<TStream extends false ? CreateChatCompletionResponse : IncomingMessage> => {
     const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
       messages
         .filter((message) => message.message.content || message.message.function_call?.name)
@@ -164,24 +135,23 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
         })
     );
 
-    const functionsForOpenAI: ChatCompletionFunctions[] = functions.map((fn) =>
-      omit(fn, 'contexts')
-    );
+    const functionsForOpenAI: ChatCompletionFunctions[] | undefined = functions;
 
     const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
       messages: messagesForOpenAI,
       stream: true,
       functions: functionsForOpenAI,
       temperature: 0,
+      function_call: functionCall ? { name: functionCall } : undefined,
     };
 
     const executeResult = await this.dependencies.actionsClient.execute({
       actionId: connectorId,
       params: {
-        subAction: 'stream',
+        subAction: stream ? 'stream' : 'run',
         subActionParams: {
           body: JSON.stringify(request),
-          stream: true,
+          ...(stream ? { stream: true } : {}),
         },
       },
     });
@@ -190,7 +160,7 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
       throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
     }
 
-    return executeResult.data as IncomingMessage;
+    return executeResult.data as any;
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
@@ -199,7 +169,12 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
       allow_no_indices: true,
       query: {
         bool: {
-          filter: [...this.getAccessQuery()],
+          filter: [
+            ...getAccessQuery({
+              user: this.dependencies.user,
+              namespace: this.dependencies.namespace,
+            }),
+          ],
         },
       },
       sort: {
@@ -236,6 +211,88 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
     return updatedConversation;
   };
 
+  autoTitle = async ({
+    conversationId,
+    connectorId,
+  }: {
+    conversationId: string;
+    connectorId: string;
+  }) => {
+    const document = await this.getConversationWithMetaFields(conversationId);
+    if (!document) {
+      throw notFound();
+    }
+
+    const conversation = await this.get(conversationId);
+
+    if (!conversation) {
+      throw notFound();
+    }
+
+    const response = await this.chat({
+      messages: [
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.Assistant,
+            content: conversation.messages.slice(1).reduce((acc, curr) => {
+              return `${acc} ${curr.message.role}: ${curr.message.content}`;
+            }, 'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on this content: '),
+          },
+        },
+      ],
+      connectorId,
+      stream: false,
+    });
+
+    if ('object' in response && response.object === 'chat.completion') {
+      const title =
+        response.choices[0].message?.content?.slice(1, -1) ||
+        `Conversation on ${conversation['@timestamp']}`;
+
+      const updatedConversation: Conversation = merge(
+        {},
+        conversation,
+        { conversation: { title } },
+        this.getConversationUpdateValues(new Date().toISOString())
+      );
+
+      await this.setTitle({ conversationId, title });
+
+      return updatedConversation;
+    }
+    return conversation;
+  };
+
+  setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {
+    const document = await this.getConversationWithMetaFields(conversationId);
+    if (!document) {
+      throw notFound();
+    }
+
+    const conversation = await this.get(conversationId);
+
+    if (!conversation) {
+      throw notFound();
+    }
+
+    const updatedConversation: Conversation = merge(
+      {},
+      conversation,
+      { conversation: { title } },
+      this.getConversationUpdateValues(new Date().toISOString())
+    );
+
+    await this.dependencies.esClient.update({
+      id: document._id,
+      index: document._index,
+      doc: { conversation: { title } },
+      refresh: 'wait_for',
+    });
+
+    return updatedConversation;
+  };
+
   create = async (conversation: ConversationCreateRequest): Promise<Conversation> => {
     const now = new Date().toISOString();
 
@@ -258,104 +315,33 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
     return createdConversation;
   };
 
-  recall = async (query: string): Promise<{ entries: KnowledgeBaseEntry[] }> => {
-    try {
-      const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
-        index: this.dependencies.resources.aliases.kb,
-        query: {
-          bool: {
-            should: [
-              {
-                text_expansion: {
-                  'ml.tokens': {
-                    model_text: query,
-                    model_id: '.elser_model_1',
-                  },
-                } as unknown as QueryDslTextExpansionQuery,
-              },
-            ],
-            filter: [...this.getAccessQuery()],
-          },
-        },
-        _source: {
-          excludes: ['ml.tokens'],
-        },
-      });
-
-      return { entries: response.hits.hits.map((hit) => hit._source!) };
-    } catch (error) {
-      if (
-        (error instanceof errors.ResponseError &&
-          error.body.error.type === 'resource_not_found_exception') ||
-        error.body.error.type === 'status_exception'
-      ) {
-        throwKnowledgeBaseNotReady(error.body);
-      }
-      throw error;
-    }
+  recall = async (
+    queries: string[]
+  ): Promise<{ entries: Array<Pick<KnowledgeBaseEntry, 'text' | 'id'>> }> => {
+    return this.dependencies.knowledgeBaseService.recall({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+      queries,
+    });
   };
 
   summarise = async ({
-    entry: { id, ...document },
+    entry,
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
   }): Promise<void> => {
-    try {
-      await this.dependencies.esClient.index({
-        index: this.dependencies.resources.aliases.kb,
-        id,
-        document: {
-          '@timestamp': new Date().toISOString(),
-          ...document,
-          user: this.dependencies.user,
-          namespace: this.dependencies.namespace,
-        },
-        pipeline: this.dependencies.resources.pipelines.kb,
-      });
-    } catch (error) {
-      if (error instanceof errors.ResponseError && error.body.error.type === 'status_exception') {
-        throwKnowledgeBaseNotReady(error.body);
-      }
-      throw error;
-    }
+    return this.dependencies.knowledgeBaseService.summarise({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+      entry,
+    });
   };
 
-  setupKnowledgeBase = async () => {
-    // if this fails, it's fine to propagate the error to the user
-    await this.dependencies.esClient.ml.putTrainedModel({
-      model_id: ELSER_MODEL_ID,
-      input: {
-        field_names: ['text_field'],
-      },
-    });
+  getKnowledgeBaseStatus = () => {
+    return this.dependencies.knowledgeBaseService.status();
+  };
 
-    try {
-      await this.dependencies.esClient.ml.startTrainedModelDeployment({
-        model_id: ELSER_MODEL_ID,
-      });
-
-      const modelStats = await this.dependencies.esClient.ml.getTrainedModelsStats({
-        model_id: ELSER_MODEL_ID,
-      });
-
-      const elserModelStats = modelStats.trained_model_stats[0];
-
-      if (elserModelStats?.deployment_stats?.state !== 'started') {
-        throwKnowledgeBaseNotReady({
-          message: `Deployment has not started`,
-          deployment_stats: elserModelStats.deployment_stats,
-        });
-      }
-      return;
-    } catch (error) {
-      if (
-        (error instanceof errors.ResponseError &&
-          error.body.error.type === 'resource_not_found_exception') ||
-        error.body.error.type === 'status_exception'
-      ) {
-        throwKnowledgeBaseNotReady(error.body);
-      }
-      throw error;
-    }
+  setupKnowledgeBase = () => {
+    return this.dependencies.knowledgeBaseService.setup();
   };
 }

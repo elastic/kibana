@@ -11,10 +11,10 @@ import type { TimeRange } from '@kbn/es-query';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { ChartLoadingProgress, ChartPlaceholder } from './chart_placeholder';
 import { parseDateRange } from '../../utils/datemath';
-import { LensAttributes } from '../../common/visualizations';
 
 export type LensWrapperProps = Omit<
   TypedLensByValueInput,
@@ -107,9 +107,6 @@ export const LensWrapper = ({
         border-radius: ${euiTheme.size.s};
         overflow: hidden;
         height: 100%;
-        .echLegend .echLegendList {
-          display: flex;
-        }
         .echMetric {
           border-radius: ${euiTheme.border.radius.medium};
           pointer-events: none;

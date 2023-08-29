@@ -54,6 +54,9 @@ import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
+import type { AppFeatures } from '../lib/app_features';
+import { createAppFeaturesMock } from '../lib/app_features/mocks';
+import { ALL_APP_FEATURE_KEYS } from '../../common';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -74,6 +77,7 @@ describe('ingest_integration tests ', () => {
   });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
+  let appFeatures: AppFeatures;
 
   beforeEach(() => {
     endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
@@ -82,6 +86,7 @@ describe('ingest_integration tests ', () => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
+    appFeatures = endpointAppContextMock.appFeatures;
 
     jest
       .spyOn(endpointAppContextMock.endpointMetadataService, 'getFleetEndpointPackagePolicy')
@@ -104,7 +109,8 @@ describe('ingest_integration tests ', () => {
       cloud = cloudService.isCloudEnabled,
       licenseUuid = 'updated-uid',
       clusterUuid = '',
-      clusterName = ''
+      clusterName = '',
+      isServerlessEnabled = cloudService.isServerlessEnabled
     ) => ({
       type: 'endpoint',
       enabled: true,
@@ -113,7 +119,14 @@ describe('ingest_integration tests ', () => {
         integration_config: {},
         policy: {
           value: disableProtections(
-            policyFactory(license, cloud, licenseUuid, clusterUuid, clusterName)
+            policyFactory(
+              license,
+              cloud,
+              licenseUuid,
+              clusterUuid,
+              clusterName,
+              isServerlessEnabled
+            )
           ),
         },
         artifact_manifest: { value: manifest },
@@ -129,7 +142,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.alerting,
         licenseService,
         exceptionListClient,
-        cloudService
+        cloudService,
+        appFeatures
       );
 
       return callback(
@@ -363,6 +377,7 @@ describe('ingest_integration tests ', () => {
       );
     });
   });
+
   describe('package policy update callback (when the license is below platinum)', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -379,7 +394,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
         cloudService,
-        esClient
+        esClient,
+        appFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -397,7 +413,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
         cloudService,
-        esClient
+        esClient,
+        appFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -419,6 +436,7 @@ describe('ingest_integration tests ', () => {
     beforeEach(() => {
       licenseEmitter.next(Platinum); // set license level to platinum
     });
+
     it('updates successfully when paid features are turned on', async () => {
       const mockPolicy = policyFactory();
       mockPolicy.windows.popup.malware.message = 'paid feature';
@@ -429,7 +447,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
         cloudService,
-        esClient
+        esClient,
+        appFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -441,6 +460,50 @@ describe('ingest_integration tests ', () => {
         req
       );
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
+    });
+
+    it('should turn off protections if endpointPolicyProtections appFeature is disabled', async () => {
+      appFeatures = createAppFeaturesMock(
+        ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
+      );
+      const callback = getPackagePolicyUpdateCallback(
+        endpointAppContextMock.logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService,
+        cloudService,
+        esClient,
+        appFeatures
+      );
+
+      const updatedPolicy = await callback(
+        generator.generatePolicyPackagePolicy(),
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+
+      expect(updatedPolicy.inputs?.[0]?.config?.policy.value).toMatchObject({
+        linux: {
+          behavior_protection: { mode: 'off' },
+          malware: { mode: 'off' },
+          memory_protection: { mode: 'off' },
+        },
+        mac: {
+          behavior_protection: { mode: 'off' },
+          malware: { mode: 'off' },
+          memory_protection: { mode: 'off' },
+        },
+        windows: {
+          antivirus_registration: { enabled: false },
+          attack_surface_reduction: { credential_hardening: { enabled: false } },
+          behavior_protection: { mode: 'off' },
+          malware: { blocklist: false },
+          memory_protection: { mode: 'off' },
+          ransomware: { mode: 'off' },
+        },
+      });
     });
   });
 
@@ -472,6 +535,7 @@ describe('ingest_integration tests ', () => {
     beforeEach(() => {
       licenseEmitter.next(Platinum); // set license level to platinum
     });
+
     it('updates successfully when meta fields differ from services', async () => {
       const mockPolicy = policyFactory();
       mockPolicy.meta.cloud = true; // cloud mock will return true
@@ -479,6 +543,7 @@ describe('ingest_integration tests ', () => {
       mockPolicy.meta.cluster_name = 'updated-name';
       mockPolicy.meta.cluster_uuid = 'updated-uuid';
       mockPolicy.meta.license_uid = 'updated-uid';
+      mockPolicy.meta.serverless = false;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
         logger,
@@ -486,7 +551,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
         cloudService,
-        esClient
+        esClient,
+        appFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
 
@@ -496,6 +562,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'original-name';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'original-uuid';
       policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'original-uid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.serverless = true;
       const updatedPolicyConfig = await callback(
         policyConfig,
         soClient,
@@ -513,6 +580,7 @@ describe('ingest_integration tests ', () => {
       mockPolicy.meta.cluster_name = 'updated-name';
       mockPolicy.meta.cluster_uuid = 'updated-uuid';
       mockPolicy.meta.license_uid = 'updated-uid';
+      mockPolicy.meta.serverless = false;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
         logger,
@@ -520,7 +588,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
         cloudService,
-        esClient
+        esClient,
+        appFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       // values should be updated
@@ -529,6 +598,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'updated-name';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'updated-uuid';
       policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'updated-uid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.serverless = false;
       const updatedPolicyConfig = await callback(
         policyConfig,
         soClient,

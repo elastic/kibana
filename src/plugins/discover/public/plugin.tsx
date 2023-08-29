@@ -44,7 +44,9 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { PLUGIN_ID } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
@@ -211,6 +213,8 @@ export interface DiscoverStartPlugins {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
+  serverless?: ServerlessPluginStart;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 /**

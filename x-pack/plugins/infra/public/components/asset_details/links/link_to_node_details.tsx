@@ -9,35 +9,32 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { getNodeDetailUrl } from '../../../pages/link_to';
-import { findInventoryModel } from '../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface LinkToNodeDetailsProps {
-  currentTimestamp: number;
-  nodeName: string;
-  nodeType: InventoryItemType;
+  dateRangeTimestamp: { from: number; to: number };
+  asset: Asset;
+  assetType: InventoryItemType;
 }
 
 export const LinkToNodeDetails = ({
-  nodeName,
-  nodeType,
-  currentTimestamp,
+  asset,
+  assetType,
+  dateRangeTimestamp,
 }: LinkToNodeDetailsProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  const nodeDetailFrom = currentTimestamp - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
-
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
-      nodeType,
-      nodeId: nodeName,
-      from: nodeDetailFrom,
-      to: currentTimestamp,
+      nodeType: assetType,
+      nodeId: asset.id,
+      from: dateRangeTimestamp.from,
+      to: dateRangeTimestamp.to,
+      assetName: asset.name,
     }),
   });
 
   return (
     <EuiButtonEmpty
-      data-test-subj="infraNodeContextPopoverOpenAsPageButton"
+      data-test-subj="infraAssetDetailsOpenAsPageButton"
       size="xs"
       flush="both"
       {...nodeDetailMenuItemLinkProps}

@@ -1,8 +1,12 @@
 {
   "synonyms_sets.get": {
     "url_params": {
-      "from": 0,
-      "size": 0
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "from": "",
+      "size": ""
     },
     "methods": [
       "GET"
@@ -10,6 +14,10 @@
     "patterns": [
       "_synonyms"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/list-synonyms.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/list-synonyms-sets.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }
