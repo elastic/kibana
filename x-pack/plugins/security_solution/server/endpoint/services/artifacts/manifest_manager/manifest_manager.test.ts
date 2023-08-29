@@ -256,7 +256,7 @@ describe('ManifestManager', () => {
 
       (
         manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
-      ).listArtifacts.mockImplementation(async (id) => {
+      ).listArtifacts.mockImplementation(async () => {
         // report the MACOS Exceptions artifact as not found
         return {
           items: [
