@@ -23,10 +23,9 @@ import {
   readDirectory,
   createParseArchiveStreams,
   createCreateIndexStream,
-  createIndexDocRecordsStream,
-  // createIndexDocRecordsStreamSvrLess
+  createIndexDocRecordsStreamWithoutProgess,
+  // createIndexDocRecordsStream,
   migrateSavedObjectIndices,
-  Progress,
   createDefaultSpace,
 } from '../lib';
 import { atLeastOne, freshenUp, hasDotKibanaPrefix, indexingOccurred } from './load_utils';
@@ -58,18 +57,16 @@ export async function loadAction({
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
-  const progress = new Progress();
-  progress.activate(log);
 
   await createPromiseFromStreams([
     // This used to be  const recordStream = concatStreamProviders()...
     bothFiles$(inputDir, prioritizeMappings(await readDirectory(inputDir))),
     createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
-    createIndexDocRecordsStream(client, stats, progress, useCreate),
+    createIndexDocRecordsStreamWithoutProgess(client, stats, useCreate),
+    // createIndexDocRecordsStream(client, stats, progress, useCreate),
     // createIndexDocRecordsStreamSvrLess(client, stats, useCreate),
   ]);
 
-  progress.deactivate();
   const result = stats.toJSON();
 
   const indicesWithDocs: string[] = [];

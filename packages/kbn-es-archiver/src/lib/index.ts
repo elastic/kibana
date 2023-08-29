@@ -8,6 +8,7 @@
 
 export {
   createIndexDocRecordsStreamSvrLess,
+  createIndexDocRecordsStreamWithoutProgess,
   createIndexDocRecordsStream,
   createGenerateDocRecordsStream,
 } from './docs';
