@@ -198,17 +198,20 @@ export class SampleDataInstaller {
   private async importSavedObjects(dataset: SampleDatasetSchema) {
     const savedObjects = dataset.savedObjects.map(({ version, ...obj }) => obj);
     const readStream = Readable.from(savedObjects);
-
     const { errors = [] } = await this.soImporter.import({
       readStream,
       overwrite: true,
       createNewCopies: false,
+      managed: true,
+      refresh: false,
     });
+    console.log(errors)
     if (errors.length > 0) {
       const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
         errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
       )}`;
       this.logger.warn(errMsg);
+      // I think this is where the 500 is getting returned
       throw new SampleDataInstallError(errMsg, 500);
     }
     return savedObjects.length;
