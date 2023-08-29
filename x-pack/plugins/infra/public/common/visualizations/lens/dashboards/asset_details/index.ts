@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { hostMetricCharts } from './host/host_metric_charts';
+import { hostMetricCharts, hostMetricChartsFullPage } from './host/host_metric_charts';
 import { hostKPICharts, KPIChartProps } from './host/host_kpi_charts';
 
 export { type KPIChartProps };
 export const assetDetailsDashboards = {
-  host: { hostMetricCharts, hostKPICharts },
+  host: { hostMetricCharts, hostMetricChartsFullPage, hostKPICharts },
 };
