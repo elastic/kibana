@@ -27,15 +27,13 @@ import { FieldIcon } from '@kbn/react-field';
 
 import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
+import type { RequiredFieldArray } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import type {
-  RequiredFieldArray,
-  Threshold,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { Threshold } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
@@ -199,6 +197,38 @@ export const buildUnorderedListArrayDescription = (
     ];
   }
   return [];
+};
+
+export const buildHighlightedFieldsOverrideDescription = (
+  label: string,
+  values: string[]
+): ListItems[] => {
+  if (isEmpty(values)) {
+    return [];
+  }
+  const description = (
+    <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+      {values.map((val: string) =>
+        isEmpty(val) ? null : (
+          <EuiFlexItem grow={false} key={`${label}-${val}`}>
+            <EuiBadgeWrap
+              data-test-subj="customHighlightedFieldsStringArrayDescriptionBadgeItem"
+              color="hollow"
+            >
+              {val}
+            </EuiBadgeWrap>
+          </EuiFlexItem>
+        )
+      )}
+    </EuiFlexGroup>
+  );
+
+  return [
+    {
+      title: label,
+      description,
+    },
+  ];
 };
 
 export const buildStringArrayDescription = (

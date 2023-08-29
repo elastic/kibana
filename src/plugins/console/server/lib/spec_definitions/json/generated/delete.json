@@ -1,21 +1,32 @@
 {
   "delete": {
     "url_params": {
-      "wait_for_active_shards": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "if_primary_term": "",
+      "if_seq_no": "",
       "refresh": [
         "true",
         "false",
         "wait_for"
       ],
       "routing": "",
-      "timeout": "",
-      "if_seq_no": "",
-      "if_primary_term": "",
+      "timeout": [
+        "-1",
+        "0"
+      ],
       "version": "",
       "version_type": [
         "internal",
         "external",
-        "external_gte"
+        "external_gte",
+        "force"
+      ],
+      "wait_for_active_shards": [
+        "all",
+        "index-setting"
       ]
     },
     "methods": [
@@ -24,6 +35,10 @@
     "patterns": [
       "{index}/_doc/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

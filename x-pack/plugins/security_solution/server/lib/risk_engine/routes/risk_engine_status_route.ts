@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../common/constants';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
-export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: RISK_ENGINE_STATUS_URL,
@@ -25,19 +24,18 @@ export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter, logg
       const siemResponse = buildSiemResponse(response);
 
       const securitySolution = await context.securitySolution;
-      const soClient = (await context.core).savedObjects.client;
       const riskEngineClient = securitySolution.getRiskEngineDataClient();
       const spaceId = securitySolution.getSpaceId();
 
       try {
         const result = await riskEngineClient.getStatus({
-          savedObjectsClient: soClient,
           namespace: spaceId,
         });
         return response.ok({
           body: {
             risk_engine_status: result.riskEngineStatus,
             legacy_risk_engine_status: result.legacyRiskEngineStatus,
+            is_max_amount_of_risk_engines_reached: result.isMaxAmountOfRiskEnginesReached,
           },
         });
       } catch (e) {

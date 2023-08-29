@@ -32,7 +32,7 @@ export const RULE_PREVIEW_ACTIONS_TEXT = i18n.translate(
   { defaultMessage: 'Actions' }
 );
 
-export const ENABLE_RULE_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.rulePreviewEnableRuleText',
-  { defaultMessage: 'Enable' }
+export const ALERT_REASON_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.alertReasonTitle',
+  { defaultMessage: 'Alert reason' }
 );

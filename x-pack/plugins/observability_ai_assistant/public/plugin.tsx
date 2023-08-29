@@ -17,13 +17,6 @@ import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type {
-  ContextRegistry,
-  FunctionRegistry,
-  RegisterContextDefinition,
-  RegisterFunctionDefinition,
-} from '../common/types';
-import { registerFunctions } from './functions';
 import { createService } from './service/create_service';
 import type {
   ConfigSchema,
@@ -101,35 +94,25 @@ export class ObservabilityAIAssistantPlugin
     coreStart: CoreStart,
     pluginsStart: ObservabilityAIAssistantPluginStartDependencies
   ): ObservabilityAIAssistantPluginStart {
-    const contextRegistry: ContextRegistry = new Map();
-    const functionRegistry: FunctionRegistry = new Map();
-
     const service = (this.service = createService({
       coreStart,
       securityStart: pluginsStart.security,
-      contextRegistry,
-      functionRegistry,
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
     }));
 
-    const registerContext: RegisterContextDefinition = (context) => {
-      contextRegistry.set(context.name, context);
-    };
+    service.register(async ({ signal, registerContext, registerFunction }) => {
+      const mod = await import('./functions');
 
-    const registerFunction: RegisterFunctionDefinition = (def, respond, render) => {
-      functionRegistry.set(def.name, { options: def, respond, render });
-    };
-
-    registerFunctions({
-      registerContext,
-      registerFunction,
-      service,
+      return mod.registerFunctions({
+        service,
+        signal,
+        pluginsStart,
+        coreStart,
+        registerContext,
+        registerFunction,
+      });
     });
 
-    return {
-      ...service,
-      registerContext,
-      registerFunction,
-    };
+    return service;
   }
 }

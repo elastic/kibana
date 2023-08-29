@@ -42,6 +42,7 @@ interface Props {
   sortField: TopNFunctionSortField;
   sortDirection: 'asc' | 'desc';
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
+  dataTestSubj?: string;
 }
 
 export const TopNFunctionsGrid = forwardRef(
@@ -61,6 +62,7 @@ export const TopNFunctionsGrid = forwardRef(
       sortField,
       sortDirection,
       onChangeSort,
+      dataTestSubj = 'topNFunctionsGrid',
     }: Props,
     ref: Ref<EuiDataGridRefProps> | undefined
   ) => {
@@ -88,8 +90,15 @@ export const TopNFunctionsGrid = forwardRef(
         comparisonScaleFactor,
         comparisonTopNFunctions,
         topNFunctions,
+        totalSeconds,
       });
-    }, [topNFunctions, comparisonTopNFunctions, comparisonScaleFactor, baselineScaleFactor]);
+    }, [
+      baselineScaleFactor,
+      comparisonScaleFactor,
+      comparisonTopNFunctions,
+      topNFunctions,
+      totalSeconds,
+    ]);
 
     const { columns, leadingControlColumns } = useMemo(() => {
       const gridColumns: EuiDataGridColumn[] = [
@@ -255,11 +264,12 @@ export const TopNFunctionsGrid = forwardRef(
     return (
       <>
         <EuiDataGrid
+          data-test-subj={dataTestSubj}
           ref={ref}
           aria-label="TopN functions"
           columns={columns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
-          rowCount={100}
+          rowCount={totalCount > 100 ? 100 : totalCount}
           renderCellValue={RenderCellValue}
           inMemory={{ level: 'sorting' }}
           sorting={{ columns: [{ id: sortField, direction: sortDirection }], onSort }}
@@ -324,7 +334,6 @@ export const TopNFunctionsGrid = forwardRef(
             }}
             totalSeconds={totalSeconds}
             totalSamples={totalCount}
-            samplingRate={topNFunctions?.SamplingRate ?? 1.0}
           />
         )}
       </>

@@ -20,6 +20,7 @@ import {
   getSimpleRule,
   installPrebuiltRulesAndTimelines,
 } from '../../utils';
+import { createNonSecurityRule } from '../../utils/create_non_security_rule';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -32,11 +33,42 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
+    it('does NOT error when there are no security rules', async () => {
+      await createNonSecurityRule(supertest);
+      const rule1 = await createRule(supertest, log, {
+        ...getSimpleRule(),
+        threat: generateThreatArray(1),
+      });
+
+      const { body } = await supertest
+        .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
+        .send({})
+        .expect(200);
+
+      expect(body).to.eql({
+        coverage: {
+          T001: [rule1.id],
+          TA001: [rule1.id],
+          'T001.001': [rule1.id],
+        },
+        unmapped_rule_ids: [],
+        rules_data: {
+          [rule1.id]: {
+            activity: 'disabled',
+            name: 'Simple Rule Query',
+          },
+        },
+      });
+    });
+
     describe('without filters', () => {
       it('returns an empty response if there are no rules', async () => {
         const { body } = await supertest
           .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
           .send({})
           .expect(200);
 
@@ -56,6 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
           .send({})
           .expect(200);
 
@@ -81,6 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
           .send({})
           .expect(200);
 
@@ -112,6 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 search_term: 'TA002',
@@ -148,6 +183,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 search_term: 'T002',
@@ -184,6 +220,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 search_term: 'T002.002',
@@ -217,6 +254,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 search_term: 'rule-2',
@@ -249,6 +287,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 search_term: 'index-pattern-2',
@@ -283,6 +322,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 activity: ['disabled'],
@@ -319,6 +359,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 activity: ['enabled'],
@@ -337,6 +378,52 @@ export default ({ getService }: FtrProviderContext): void => {
               [expectedRule.id]: {
                 activity: 'enabled',
                 name: 'Simple Rule Query',
+              },
+            },
+          });
+        });
+
+        it('returns all rules if both enabled and disabled filters are specified in the request', async () => {
+          const expectedRule1 = await createRule(supertest, log, {
+            ...getSimpleRule('rule-1', false),
+            name: 'Disabled rule',
+            threat: generateThreatArray(1),
+          });
+          const expectedRule2 = await createRule(supertest, log, {
+            ...getSimpleRule('rule-2', true),
+            name: 'Enabled rule',
+            threat: generateThreatArray(2),
+          });
+
+          const { body } = await supertest
+            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
+            .send({
+              filter: {
+                activity: ['enabled', 'disabled'],
+              },
+            })
+            .expect(200);
+
+          expect(body).to.eql({
+            coverage: {
+              T001: [expectedRule1.id],
+              TA001: [expectedRule1.id],
+              'T001.001': [expectedRule1.id],
+              T002: [expectedRule2.id],
+              TA002: [expectedRule2.id],
+              'T002.002': [expectedRule2.id],
+            },
+            unmapped_rule_ids: [],
+            rules_data: {
+              [expectedRule1.id]: {
+                activity: 'disabled',
+                name: 'Disabled rule',
+              },
+              [expectedRule2.id]: {
+                activity: 'enabled',
+                name: 'Enabled rule',
               },
             },
           });
@@ -361,6 +448,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 source: ['custom'],

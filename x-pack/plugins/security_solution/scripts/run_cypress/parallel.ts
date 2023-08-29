@@ -16,6 +16,7 @@ import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
 import minimatch from 'minimatch';
 import path from 'path';
+import grep from '@cypress/grep/src/plugin';
 
 import {
   EsVersion,
@@ -35,19 +36,17 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
-import { parseTestFileConfig } from './utils';
+import { isSkipped, parseTestFileConfig } from './utils';
 
 /**
  * Retrieve test files using a glob pattern.
  * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
  */
-const retrieveIntegrations = (
-  /** Pattern passed to globby to find spec files. */ specPattern: string[]
-) => {
-  const integrationsPaths = globby.sync(specPattern);
+const retrieveIntegrations = (integrationsPaths: string[]) => {
+  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath));
 
   if (process.env.RUN_ALL_TESTS === 'true') {
-    return integrationsPaths;
+    return nonSkippedSpecs;
   } else {
     // The number of instances of this job were created
     const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
@@ -58,13 +57,13 @@ const retrieveIntegrations = (
       ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
       : 0;
 
-    const integrationsPathsForChunk: string[] = [];
+    const nonSkippedSpecsForChunk: string[] = [];
 
-    for (let i = chunkIndex; i < integrationsPaths.length; i += chunksTotal) {
-      integrationsPathsForChunk.push(integrationsPaths[i]);
+    for (let i = chunkIndex; i < nonSkippedSpecs.length; i += chunksTotal) {
+      nonSkippedSpecsForChunk.push(nonSkippedSpecs[i]);
     }
 
-    return integrationsPathsForChunk;
+    return nonSkippedSpecsForChunk;
   }
 };
 
@@ -84,10 +83,22 @@ export const cli = () => {
       );
 
       const isOpen = argv._[0] === 'open';
-      const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
-      const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
+      const cypressConfigFilePath = require.resolve(
+        `../../${_.isArray(argv.configFile) ? _.last(argv.configFile) : argv.configFile}`
+      ) as string;
+      const cypressConfigFile = await import(cypressConfigFilePath);
       const spec: string | undefined = argv?.spec as string;
-      let files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
+      const grepSpecPattern = grep({
+        ...cypressConfigFile,
+        specPattern: spec ?? cypressConfigFile.e2e.specPattern,
+        excludeSpecPattern: [],
+      }).specPattern;
+
+      let files = retrieveIntegrations(
+        _.isArray(grepSpecPattern)
+          ? grepSpecPattern
+          : globby.sync(spec ? [spec] : cypressConfigFile.e2e.specPattern)
+      );
 
       if (argv.changedSpecsOnly) {
         const basePath = process.cwd().split('kibana/')[1];
@@ -103,10 +114,15 @@ export const cli = () => {
           // eslint-disable-next-line no-process-exit
           return process.exit(0);
         }
+
+        // to avoid running too many tests, we limit the number of files to 3
+        // we may extend this in the future
+        files = files.slice(0, 3);
       }
 
       if (!files?.length) {
-        throw new Error('No files found');
+        // eslint-disable-next-line no-process-exit
+        return process.exit(0);
       }
 
       const esPorts: number[] = [9200, 9220];
@@ -192,7 +208,9 @@ export const cli = () => {
             const config = await readConfigFile(
               log,
               EsVersion.getDefault(),
-              _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile,
+              path.resolve(
+                _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile
+              ),
               {
                 servers: {
                   elasticsearch: {
@@ -259,8 +277,17 @@ export const cli = () => {
 
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
+                    `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
+                  );
+                  vars.kbnTestServer.serverArgs.push(
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
                   );
+
+                  if (vars.serverless) {
+                    vars.kbnTestServer.serverArgs.push(
+                      `--xpack.fleet.internal.fleetServerStandalone=false`
+                    );
+                  }
                 }
 
                 // Serverless Specific
@@ -329,16 +356,20 @@ ${JSON.stringify(config.getAll(), null, 2)}
               { retries: 2, forever: false }
             );
 
-            await runKibanaServer({
-              procs,
-              config,
-              installDir: options?.installDir,
-              extraKbnOpts:
-                options?.installDir || options?.ci || !isOpen
-                  ? []
-                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
-              onEarlyExit,
-            });
+            await pRetry(
+              async () =>
+                runKibanaServer({
+                  procs,
+                  config,
+                  installDir: options?.installDir,
+                  extraKbnOpts:
+                    options?.installDir || options?.ci || !isOpen
+                      ? []
+                      : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+                  onEarlyExit,
+                }),
+              { retries: 2, forever: false }
+            );
 
             await providers.loadAll();
 
@@ -461,11 +492,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
           return result;
         },
         {
-          concurrency: (argv.concurrency as number | undefined)
-            ? (argv.concurrency as number)
-            : !isOpen
-            ? 2
-            : 1,
+          concurrency: 1,
         }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);

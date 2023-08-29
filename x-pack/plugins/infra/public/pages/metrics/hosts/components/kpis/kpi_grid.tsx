@@ -9,13 +9,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { HostMetricsDocsLink } from '../../../../../components/lens';
-import { Tile } from './tile';
+import { Kpi } from './kpi';
 import { HostCountProvider } from '../../hooks/use_host_count';
-import { HostsTile } from './hosts_tile';
-import {
-  KPI_CHARTS,
-  KPI_CHART_HEIGHT,
-} from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
+import { HostCountKpi } from './host_count_kpi';
+import { assetDetailsDashboards, KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
 
 export const KPIGrid = () => {
   return (
@@ -24,11 +21,11 @@ export const KPIGrid = () => {
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="hostsViewKPIGrid">
         <EuiFlexItem>
-          <HostsTile height={KPI_CHART_HEIGHT} />
+          <HostCountKpi height={KPI_CHART_HEIGHT} />
         </EuiFlexItem>
-        {KPI_CHARTS.map((chartProp, index) => (
+        {assetDetailsDashboards.host.hostKPICharts.map((chartProp, index) => (
           <EuiFlexItem key={index}>
-            <Tile {...chartProp} height={KPI_CHART_HEIGHT} />
+            <Kpi {...chartProp} height={KPI_CHART_HEIGHT} />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

@@ -123,7 +123,9 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <PageTitle alert={alert} />,
+        pageTitle: (
+          <PageTitle alert={alert} dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'} />
+        ),
         rightSideItems: [
           <CasesContext
             owner={[observabilityFeatureId]}

@@ -119,7 +119,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.is_managed).to.equal(false);
         expect(body.item.inactivity_timeout).to.equal(1209600);
         expect(body.item.status).to.be('active');
-        expect(body.item.is_protected).to.equal(false);
       });
 
       it('sets given is_managed value', async () => {
@@ -445,14 +444,42 @@ export default function (providerContext: FtrProviderContext) {
           status: 'active',
           description: 'Test',
           is_managed: false,
-          is_protected: false,
           namespace: 'default',
           monitoring_enabled: ['logs', 'metrics'],
           revision: 1,
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
+          is_protected: false,
         });
+      });
+
+      it('should copy inactivity timeout', async () => {
+        const {
+          body: { item: policyWithTimeout },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Inactivity test',
+            namespace: 'default',
+            is_managed: true,
+            inactivity_timeout: 123,
+          })
+          .expect(200);
+
+        const {
+          body: { item: newPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${policyWithTimeout.id}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Inactivity test copy',
+            description: 'Test',
+          })
+          .expect(200);
+
+        expect(newPolicy.inactivity_timeout).to.eql(123);
       });
 
       it('should increment package policy copy names', async () => {
@@ -732,7 +759,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Updated name',
             description: 'Updated description',
             namespace: 'default',
-            is_protected: true,
+            is_protected: false,
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
@@ -750,7 +777,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           inactivity_timeout: 1209600,
           package_policies: [],
-          is_protected: true,
+          is_protected: false,
         });
       });
 

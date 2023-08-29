@@ -19,22 +19,15 @@ export const COLLAPSE_DETAILS_BUTTON = i18n.translate(
   { defaultMessage: 'Collapse details' }
 );
 
-export const DOCUMENT_DETAILS = i18n.translate(
+export const EVENT_DETAILS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.headerTitle',
-  { defaultMessage: 'Document details' }
+  { defaultMessage: 'Event details' }
 );
 
 export const SEVERITY_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.severityTitle',
   {
     defaultMessage: 'Severity',
-  }
-);
-
-export const STATUS_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.statusTitle',
-  {
-    defaultMessage: 'Status',
   }
 );
 
@@ -49,6 +42,13 @@ export const RULE_SUMMARY_TEXT = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.ruleSummaryText',
   {
     defaultMessage: 'Rule summary',
+  }
+);
+
+export const ALERT_REASON_DETAILS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.alertReasonDetailsText',
+  {
+    defaultMessage: 'Show full reason',
   }
 );
 
@@ -71,6 +71,11 @@ export const RULE_DESCRIPTION_TITLE = i18n.translate(
 export const PREVIEW_RULE_DETAILS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.previewRuleDetailsText',
   { defaultMessage: 'Preview rule details' }
+);
+
+export const PREVIEW_ALERT_REASON_DETAILS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.previewAlertReasonDetailsText',
+  { defaultMessage: 'Preview alert reason' }
 );
 
 export const DOCUMENT_DESCRIPTION_TITLE = i18n.translate(
@@ -140,36 +145,21 @@ export const CORRELATIONS_TITLE = i18n.translate(
   { defaultMessage: 'Correlations' }
 );
 
+export const CORRELATIONS_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.correlations.error',
+  {
+    defaultMessage: 'No correlations data available',
+  }
+);
+
 export const PREVALENCE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.prevalenceTitle',
   { defaultMessage: 'Prevalence' }
 );
 
-export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
-  { defaultMessage: 'Technical Preview' }
-);
-
-export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage',
-  {
-    defaultMessage:
-      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-  }
-);
-
-export const ENTITIES_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.entitiesText',
-  {
-    defaultMessage: 'entities',
-  }
-);
-
-export const THREAT_INTELLIGENCE_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligenceText',
-  {
-    defaultMessage: 'fields of threat intelligence',
-  }
+export const PREVALENCE_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.prevalenceNoData',
+  { defaultMessage: 'No field/value pairs are uncommon' }
 );
 
 export const THREAT_MATCH_DETECTED = i18n.translate(
@@ -200,73 +190,6 @@ export const THREAT_ENRICHMENTS = i18n.translate(
   }
 );
 
-export const CORRELATIONS_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlationsText',
-  {
-    defaultMessage: 'fields of correlation',
-  }
-);
-
-export const CORRELATIONS_ANCESTRY_ALERT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.ancestryAlert',
-  {
-    defaultMessage: 'alert related by ancestry',
-  }
-);
-
-export const CORRELATIONS_ANCESTRY_ALERTS = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.ancestryAlerts',
-  {
-    defaultMessage: 'alerts related by ancestry',
-  }
-);
-export const CORRELATIONS_SAME_SOURCE_EVENT_ALERT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlert',
-  {
-    defaultMessage: 'alert related by the same source event',
-  }
-);
-
-export const CORRELATIONS_SAME_SOURCE_EVENT_ALERTS = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlerts',
-  {
-    defaultMessage: 'alerts related by the same source event',
-  }
-);
-export const CORRELATIONS_SAME_SESSION_ALERT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSessionAlert',
-  {
-    defaultMessage: 'alert related by session',
-  }
-);
-
-export const CORRELATIONS_SAME_SESSION_ALERTS = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSessionAlerts',
-  {
-    defaultMessage: 'alerts related by session',
-  }
-);
-export const CORRELATIONS_RELATED_CASE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.relatedCase',
-  {
-    defaultMessage: 'related case',
-  }
-);
-
-export const CORRELATIONS_RELATED_CASES = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.relatedCases',
-  {
-    defaultMessage: 'related cases',
-  }
-);
-
-export const PREVALENCE_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceText',
-  {
-    defaultMessage: 'fields of prevalence',
-  }
-);
-
 export const PREVALENCE_ROW_UNCOMMON = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceRowText',
   {
@@ -274,11 +197,6 @@ export const PREVALENCE_ROW_UNCOMMON = i18n.translate(
   }
 );
 
-export const VIEW_ALL = (text: string) =>
-  i18n.translate('xpack.securitySolution.flyout.documentDetails.overviewTab.viewAllButton', {
-    values: { text },
-    defaultMessage: 'View all {text}',
-  });
 export const VISUALIZATIONS_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.visualizationsTitle',
   { defaultMessage: 'Visualizations' }
@@ -289,10 +207,10 @@ export const ANALYZER_PREVIEW_TITLE = i18n.translate(
   { defaultMessage: 'Analyzer preview' }
 );
 
-export const ANALYZER_PREVIEW_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.analyzerPreviewText',
+export const ANALYZER_PREVIEW_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.analyzerPreview.error',
   {
-    defaultMessage: 'analyzer preview.',
+    defaultMessage: 'No analyzer graph data available',
   }
 );
 
@@ -301,9 +219,23 @@ export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetai
 });
 
 export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.investigationGuideText',
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideTitle',
   {
     defaultMessage: 'Investigation guide',
+  }
+);
+
+export const INVESTIGATION_GUIDE_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideButton',
+  {
+    defaultMessage: 'Show investigation guide',
+  }
+);
+
+export const INVESTIGATION_GUIDE_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideNoData',
+  {
+    defaultMessage: 'An investigation guide has not been created for this rule.',
   }
 );
 
@@ -311,6 +243,21 @@ export const SESSION_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.sessionPreview.title',
   {
     defaultMessage: 'Session viewer preview',
+  }
+);
+
+export const SESSION_PREVIEW_UPSELL = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.upsell',
+  {
+    defaultMessage:
+      'Session preview is disabled because your license does not support it. Please upgrade your license.',
+  }
+);
+
+export const SESSION_PREVIEW_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.error',
+  {
+    defaultMessage: 'No session view data available',
   }
 );
 
@@ -349,13 +296,14 @@ export const RESPONSE_TITLE = i18n.translate(
   }
 );
 
-export const RESPONSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.responseSectionButton',
-  {
-    defaultMessage: 'Response details',
-  }
-);
-
 export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
   defaultMessage: 'There are no response actions defined for this event.',
 });
+
+export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);

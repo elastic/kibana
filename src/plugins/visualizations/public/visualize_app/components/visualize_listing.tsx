@@ -378,8 +378,10 @@ export const VisualizeListing = () => {
             entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
               defaultMessage: 'visualizations',
             })}
-            getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
-              getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
+            getDetailViewLink={({ attributes: { editApp, editUrl, error, readOnly } }) =>
+              readOnly
+                ? undefined
+                : getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
             }
             tableCaption={visualizeLibraryTitle}
             {...tableViewProps}
