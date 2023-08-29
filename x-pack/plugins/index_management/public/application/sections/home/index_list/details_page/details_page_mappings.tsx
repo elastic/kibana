@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { RouteComponentProps } from 'react-router-dom';
@@ -107,14 +108,14 @@ export const DetailsPageMappings: FunctionComponent<RouteComponentProps<{ indexN
               <EuiIcon type="iInCircle" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>
-                <b>
+              <EuiTitle size="xs">
+                <h2>
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.mappings.docsCardTitle"
                     defaultMessage="About index mappings"
                   />
-                </b>
-              </EuiText>
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
