@@ -84,7 +84,8 @@ describe.skip('Isolate command', { tags: '@ess' }, () => {
 
       filterOutIsolatedHosts();
       cy.contains('No items found');
-      cy.getByTestSubj('adminSearchBar').click().type('{selectall}{backspace}');
+      cy.getByTestSubj('adminSearchBar').click();
+      cy.getByTestSubj('adminSearchBar').type('{selectall}{backspace}');
       cy.getByTestSubj('querySubmitButton').click();
       cy.getByTestSubj('endpointTableRowActions').click();
       cy.getByTestSubj('isolateLink').click();
@@ -105,7 +106,8 @@ describe.skip('Isolate command', { tags: '@ess' }, () => {
       releaseHostWithComment(releaseComment, createdHost.hostname);
       cy.contains('Confirm').click();
       cy.getByTestSubj('euiFlyoutCloseButton').click();
-      cy.getByTestSubj('adminSearchBar').click().type('{selectall}{backspace}');
+      cy.getByTestSubj('adminSearchBar').click();
+      cy.getByTestSubj('adminSearchBar').type('{selectall}{backspace}');
       cy.getByTestSubj('querySubmitButton').click();
       checkEndpointListForOnlyUnIsolatedHosts();
     });

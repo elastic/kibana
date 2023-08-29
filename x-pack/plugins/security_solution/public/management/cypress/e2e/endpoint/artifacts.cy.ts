@@ -61,6 +61,7 @@ describe('Artifact pages', { tags: '@ess' }, () => {
 
     // wait for ManifestManager to pick up artifact changes that happened either here
     // or in a previous test suite `after`
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(6000); //  packagerTaskInterval + 1s
 
     yieldEndpointPolicyRevision().then((actualEndpointPolicyRevision) => {

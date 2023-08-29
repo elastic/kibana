@@ -165,6 +165,7 @@ describe('Isolate command', { tags: '@ess' }, () => {
       cy.contains(`Isolation on host ${hostname} successfully submitted`);
 
       cy.getByTestSubj('euiFlyoutCloseButton').click();
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
       cy.wait(1000);
       openAlertDetails();
 
