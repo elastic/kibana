@@ -157,6 +157,19 @@ describe('RuleRunMetricsStore', () => {
     ).toBe(1);
   });
 
+  // decrement
+  test('decrements numberOfTriggeredActions by 1', () => {
+    ruleRunMetricsStore.decrementNumberOfTriggeredActions();
+    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(5);
+  });
+
+  test('decrements numberOfTriggeredActionsByConnectorType by 1', () => {
+    ruleRunMetricsStore.decrementNumberOfTriggeredActionsByConnectorType(testConnectorId);
+    expect(
+      ruleRunMetricsStore.getStatusByConnectorType(testConnectorId).numberOfTriggeredActions
+    ).toBe(0);
+  });
+
   // Checker
   test('checks if it has reached the executable actions limit', () => {
     expect(ruleRunMetricsStore.hasReachedTheExecutableActionsLimit({ default: { max: 10 } })).toBe(

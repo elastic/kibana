@@ -1490,7 +1490,7 @@ describe('Task Runner', () => {
 
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
-        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
+        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true, actionTypeId: 'slack' })
       );
     }
   );
@@ -1562,7 +1562,7 @@ describe('Task Runner', () => {
 
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
-        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
+        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true, actionTypeId: 'slack' })
       );
       expect(result.state.summaryActions).toEqual({
         '111-111': { date: new Date(DATE_1970) },

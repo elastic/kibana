@@ -657,11 +657,11 @@ describe('Execution Handler', () => {
   });
 
   test('Stops triggering actions when the number of total queued actions is reached the number of max queued actions', async () => {
-    actionsClient.bulkEnqueueExecution.mockImplementationOnce(() =>
-      Promise.reject(
+    actionsClient.bulkEnqueueExecution.mockImplementationOnce(() => {
+      throw new Error(
         'Unable to execute actions because the maximum number of queued actions has been reached.'
-      )
-    );
+      );
+    });
     const actions = [
       {
         id: '1',

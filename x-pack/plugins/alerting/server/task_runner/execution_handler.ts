@@ -335,7 +335,7 @@ export class ExecutionHandler<
             await this.actionsClient!.bulkEnqueueExecution(c);
           } catch (error) {
             if (
-              error ===
+              error.message ===
               'Unable to execute actions because the maximum number of queued actions has been reached.'
             ) {
               ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
