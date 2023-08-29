@@ -35,6 +35,7 @@ export const GeoContainmentRuleTypeExpression: React.FunctionComponent<
 
       <BoundaryForm
         data={props.data}
+        getValidationError={getValidationError}
         ruleParams={props.ruleParams}
         setDataViewId={(id: string) => {
           props.setRuleParams('boundaryIndexId', id);

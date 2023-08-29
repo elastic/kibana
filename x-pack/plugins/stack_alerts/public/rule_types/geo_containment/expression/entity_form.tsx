@@ -54,7 +54,7 @@ export const EntityForm = (props: Props) => {
   const [geoFields, setGeoFields] = useState<DataViewField[]>([]);
 
   useEffect(() => {
-    if (!props.ruleParams.indexId) {
+    if (!props.ruleParams.indexId || props.ruleParams.indexId === dataView?.id) {
       return;
     }
 

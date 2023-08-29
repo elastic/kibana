@@ -31,6 +31,7 @@ function getNameFields(fields: DataViewField[]) {
 
 interface Props {
   data: DataPublicPluginStart;
+  getValidationError: (key: string) => string | null;
   ruleParams: GeoContainmentAlertParams;
   setDataViewId: (id: string) => void;
   setDataViewTitle: (title: string) => void;
@@ -47,7 +48,7 @@ export const BoundaryForm = (props: Props) => {
   const [nameFields, setNameFields] = useState<DataViewField[]>([]);
 
   useEffect(() => {
-    if (!props.ruleParams.boundaryIndexId) {
+    if (!props.ruleParams.boundaryIndexId || props.ruleParams.boundaryIndexId === dataView?.id) {
       return;
     }
 
@@ -76,6 +77,35 @@ export const BoundaryForm = (props: Props) => {
     };
   }, [props.ruleParams.boundaryIndexId]);
 
+  function getDataViewError() {
+    const validationError = props.getValidationError('boundaryIndexTitle');
+    if (validationError) {
+      return validationError;
+    }
+
+    if (dataView && geoFields.length === 0) {
+      return i18n.translate('xpack.stackAlerts.geoContainment.noGeoFieldInIndexPattern.message', {
+        defaultMessage:
+          'Data view does not contain geospatial fields. Must have one of type: {geoFieldTypes}.',
+        values: {
+          geoFieldTypes: BOUNDARY_GEO_FIELD_TYPES.join(', '),
+        },
+      });
+    }
+
+    if (dataViewNotFound) {
+      return i18n.translate('xpack.stackAlerts.geoContainment.dataViewNotFound', {
+        defaultMessage: `Unable to find data view '{id}'`,
+        values: { id: props.ruleParams.indexId },
+      });
+    }
+
+    return null;
+  }
+
+  const dataViewError = getDataViewError();
+  const geoFieldError = props.getValidationError('boundaryGeoField');
+
   return (
     <EuiPanel>
       <EuiTitle size="xs">
@@ -91,6 +121,8 @@ export const BoundaryForm = (props: Props) => {
 
       <EuiSkeletonText lines={3} size="s" isLoading={isLoading}>
         <EuiFormRow
+          error={dataViewError}
+          isInvalid={Boolean(dataViewError)}
           label={i18n.translate('xpack.stackAlerts.geoContainment.dataViewLabel', {
             defaultMessage: 'Data view',
           })}
@@ -98,7 +130,7 @@ export const BoundaryForm = (props: Props) => {
           <DataViewSelect
             dataViewId={props.ruleParams.boundaryIndexId}
             data={props.data}
-            isInvalid={false}
+            isInvalid={Boolean(dataViewError)}
             onChange={(dataView: DataView) => {
               props.setDataViewId(dataView.id);
               props.setDataViewTitle(dataView.title);
@@ -115,11 +147,14 @@ export const BoundaryForm = (props: Props) => {
         {props.ruleParams.boundaryIndexId && (
           <>
             <EuiFormRow
+              error={geoFieldError}
+              isInvalid={Boolean(geoFieldError)}
               label={i18n.translate('xpack.stackAlerts.geoContainment.geofieldLabel', {
                 defaultMessage: 'Location',
               })}
             >
               <SingleFieldSelect
+                isInvalid={Boolean(geoFieldError)}
                 placeholder={i18n.translate('xpack.stackAlerts.geoContainment.selectGeoLabel', {
                   defaultMessage: 'Select location field',
                 })}
