@@ -100,7 +100,6 @@ describe('Sourcerer', () => {
         openSourcerer();
         cy.get(SOURCERER.badgeModifiedOption).should(`not.exist`);
         isDataViewSelection(siemDataViewTitle);
-        isDataViewSelection(siemDataViewTitle);
       });
     });
 
