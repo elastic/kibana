@@ -625,10 +625,12 @@ packages/kbn-securitysolution-utils @elastic/security-detection-engine
 packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
 x-pack/plugins/serverless @elastic/appex-sharedux
+packages/serverless/settings/common @elastic/appex-sharedux @elastic/platform-deployment-management
 x-pack/plugins/serverless_observability @elastic/appex-sharedux @elastic/apm-ui
 packages/serverless/project_switcher @elastic/appex-sharedux
 x-pack/plugins/serverless_search @elastic/enterprise-search-frontend
-packages/serverless/settings @elastic/appex-sharedux @elastic/platform-deployment-management
+packages/serverless/settings/search_project @elastic/enterprise-search-frontend @elastic/platform-deployment-management
+packages/serverless/settings/security_project @elastic/security-solution @elastic/platform-deployment-management
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
 test/plugin_functional/plugins/session_notifications @elastic/kibana-core
