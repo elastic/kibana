@@ -445,15 +445,15 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('investigation_fields', () => {
-        it('should overwrite investigation_fields value on update - non additive', async () => {
+        it('should overwrite investigation_fields value on patch - non additive', async () => {
           await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
-            investigation_fields: ['blob', 'boop'],
+            investigation_fields: { field_names: ['blob', 'boop'] },
           });
 
           const rulePatch = {
             rule_id: 'rule-1',
-            investigation_fields: ['foo', 'bar'],
+            investigation_fields: { field_names: ['foo', 'bar'] },
           };
 
           const { body } = await supertest
@@ -463,7 +463,47 @@ export default ({ getService }: FtrProviderContext) => {
             .send(rulePatch)
             .expect(200);
 
-          expect(body.investigation_fields).to.eql(['foo', 'bar']);
+          expect(body.investigation_fields.field_names).to.eql(['foo', 'bar']);
+        });
+
+        it('should not allow field to be unset', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            investigation_fields: { field_names: ['blob', 'boop'] },
+          });
+
+          const rulePatch = {
+            rule_id: 'rule-1',
+            investigation_fields: undefined,
+          };
+
+          const { body } = await supertest
+            .patch(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(rulePatch)
+            .expect(200);
+
+          expect(body.investigation_fields).to.eql({ field_names: ['blob', 'boop'] });
+        });
+
+        it('should not unset investigation_fields if not specified in patch', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            investigation_fields: { field_names: ['blob', 'boop'] },
+          });
+
+          const rulePatch = {
+            rule_id: 'rule-1',
+            name: 'New name',
+          };
+
+          const { body } = await supertest
+            .patch(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(rulePatch)
+            .expect(200);
+
+          expect(body.investigation_fields.field_names).to.eql(['blob', 'boop']);
         });
       });
     });
