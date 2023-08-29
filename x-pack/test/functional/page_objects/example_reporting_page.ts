@@ -8,8 +8,5 @@
 import { FtrService } from '../ftr_provider_context';
 
 export class ExampleReportingPageObject extends FtrService {
-    //go to localhost:5601/app/developerExamples 
-    // in input type="search" euiFieldSearch class 
-    // value="report"
-    // click button need to add a data-test-subj
+
 }

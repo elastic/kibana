@@ -314,6 +314,7 @@ enabled:
   - x-pack/test/functional/apps/ml/stack_management_jobs/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
   - x-pack/test/functional/apps/remote_clusters/config.ts
+  - x-pack/test/functional/apps/reporting/config.ts
   - x-pack/test/functional/apps/reporting_management/config.ts
   - x-pack/test/functional/apps/rollup_job/config.ts
   - x-pack/test/functional/apps/saved_objects_management/config.ts

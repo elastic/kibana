@@ -8,9 +8,17 @@
 import { FtrProviderContext } from "../../ftr_provider_context"
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-    const examples = getPageObjects(['exampleReportingApp'])
-
-    describe('Example app of reporting functionality', () => {
-
+    const PageObjects = getPageObjects(['common'])
+    const testSubjects = getService('testSubjects');
+        //go to localhost:5601/app/developerExamples 
+    // in input type="search" euiFieldSearch class 
+    // value="report"
+    // click button need to add a data-test-subj
+before(() => {})
+    describe('Example app of reporting functionality', async () => {
+        await PageObjects.common.navigateToApp('Developer examples')
+        console.log(PageObjects)
+        await testSubjects.click('euiFieldSearch')
+        describe('')
     })
 }
