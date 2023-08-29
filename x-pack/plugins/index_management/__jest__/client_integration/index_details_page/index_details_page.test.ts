@@ -9,7 +9,7 @@ import { setupEnvironment } from '../helpers';
 import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
 import { IndexDetailsSection } from '../../../public/application/sections/home/index_list/details_page';
-import { testIndexMock, testIndexName, testIndexStats } from './mocks';
+import { testIndexMappings, testIndexMock, testIndexName, testIndexStats } from './mocks';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 
 describe('<IndexDetailsPage />', () => {
@@ -23,6 +23,7 @@ describe('<IndexDetailsPage />', () => {
     // testIndexName is configured in initialEntries of the memory router
     httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testIndexMock);
     httpRequestsMockHelpers.setLoadIndexStatsResponse(testIndexName, testIndexStats);
+    httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, testIndexMappings);
 
     await act(async () => {
       testBed = await setup(httpSetup, {
@@ -150,10 +151,59 @@ describe('<IndexDetailsPage />', () => {
     expect(tabContent).toEqual('Documents');
   });
 
-  it('mappings tab', async () => {
-    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-    const tabContent = testBed.actions.getActiveTabContent();
-    expect(tabContent).toEqual('Mappings');
+  describe('mappings tab', () => {
+    it('loads mappings from the API', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
+        asSystemRequest: undefined,
+        body: undefined,
+        query: undefined,
+        version: undefined,
+      });
+    });
+
+    it('displays the mappings in the code block', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+
+      const tabContent = testBed.actions.mappings.getCodeBlockContent();
+      expect(tabContent).toEqual(JSON.stringify(testIndexMappings, null, 2));
+    });
+
+    it('sets the docs link href from the documenation service', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      const docsLinkHref = testBed.actions.mappings.getDocsLinkHref();
+      // the url from the mocked docs mock
+      expect(docsLinkHref).toEqual(
+        'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/mapping.html'
+      );
+    });
+
+    describe('error loading mappings', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, undefined, {
+          statusCode: 400,
+          message: `Was not able to load mappings`,
+        });
+        await act(async () => {
+          testBed = await setup(httpSetup);
+        });
+
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      });
+
+      it('there is an error prompt', async () => {
+        expect(testBed.actions.mappings.isErrorDisplayed()).toBe(true);
+      });
+
+      it('resends a request when reload button is clicked', async () => {
+        // already sent 3 requests while setting up the component
+        const numberOfRequests = 3;
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+        await testBed.actions.mappings.clickErrorReloadButton();
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+      });
+    });
   });
 
   it('settings tab', async () => {

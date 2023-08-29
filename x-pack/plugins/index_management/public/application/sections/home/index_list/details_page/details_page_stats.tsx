@@ -24,8 +24,8 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { SectionLoading } from '../../../../../../shared_imports';
-import { useLoadIndexStats, documentationService } from '../../../../../services';
+import { SectionLoading } from '../../../../../shared_imports';
+import { useLoadIndexStats, documentationService } from '../../../../services';
 
 export const DetailsPageStats: FunctionComponent<RouteComponentProps<{ indexName: string }>> = ({
   match: {

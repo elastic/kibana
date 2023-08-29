@@ -25,6 +25,7 @@ export {
   simulateIndexTemplate,
   useLoadNodesPlugins,
   loadIndex,
+  useLoadIndexMappings,
   useLoadIndexStats,
 } from './api';
 

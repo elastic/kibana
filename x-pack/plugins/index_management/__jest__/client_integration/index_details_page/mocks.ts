@@ -30,6 +30,18 @@ export const testIndexMock: Index = {
   isFollowerIndex: false,
 };
 
+export const testIndexMappings = {
+  mappings: {
+    dynamic: 'false',
+    dynamic_templates: [],
+    properties: {
+      '@timestamp': {
+        type: 'date',
+      },
+    },
+  },
+};
+
 // Mocking partial index stats response
 export const testIndexStats = {
   _shards: {
