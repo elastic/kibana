@@ -19,6 +19,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
 
   // Failing
+  // Issue: https://github.com/elastic/kibana/issues/165135
   describe.skip('persistable attachment', () => {
     describe('lens visualization', () => {
       before(async () => {
