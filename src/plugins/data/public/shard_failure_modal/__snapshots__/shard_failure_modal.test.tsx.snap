@@ -5,6 +5,7 @@ exports[`ShardFailureModal renders matching snapshot given valid properties 1`] 
   <EuiModalHeader>
     <EuiModalHeaderTitle
       data-test-subj="shardFailureModalTitle"
+      size="xs"
     >
       test
     </EuiModalHeaderTitle>

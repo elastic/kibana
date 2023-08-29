@@ -8,7 +8,11 @@
 
 import React from 'react';
 import { AggregateQuery, Query } from '@kbn/es-query';
-import { DiscoverGridEmbeddable, DiscoverGridEmbeddableProps } from './saved_search_grid';
+import {
+  DiscoverGridEmbeddable,
+  DiscoverGridEmbeddableProps,
+  DataLoadingState,
+} from './saved_search_grid';
 import { DiscoverDocTableEmbeddable } from '../components/doc_table/create_doc_table_embeddable';
 import { DocTableEmbeddableProps } from '../components/doc_table/doc_table_embeddable';
 import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
@@ -32,14 +36,15 @@ export function SavedSearchEmbeddableComponent({
     const isPlainRecord = isTextBasedQuery(query);
     return (
       <DiscoverDocTableEmbeddableMemoized
-        {...(searchProps as DocTableEmbeddableProps)}
+        {...(searchProps as DocTableEmbeddableProps)} // TODO later: remove the type casting to prevent unexpected errors due to missing props!
         isPlainRecord={isPlainRecord}
       />
     );
   }
   return (
     <DiscoverGridEmbeddableMemoized
-      {...(searchProps as DiscoverGridEmbeddableProps)}
+      {...(searchProps as DiscoverGridEmbeddableProps)} // TODO later: remove the type casting to prevent unexpected errors due to missing props!
+      loadingState={searchProps.isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
       showFullScreenButton={false}
       query={query}
       className="dscDiscoverGrid"

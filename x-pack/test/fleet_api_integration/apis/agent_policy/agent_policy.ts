@@ -21,6 +21,64 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
+
+    describe('GET /api/fleet/agent_policies', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+      setupFleetAndAgents(providerContext);
+
+      it('should get list agent policies', async () => {
+        await supertest.get(`/api/fleet/agent_policies`).expect(200);
+      });
+
+      it('should get a list of agent policies by kuery', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: 'default',
+          })
+          .expect(200);
+        const { body: responseBody } = await supertest
+          .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.name:TEST`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(responseBody.items.length).to.eql(1);
+      });
+
+      it('should return 200 even if the passed kuery does not have prefix ingest-agent-policies', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST-1',
+            namespace: 'default',
+          })
+          .expect(200);
+        await supertest
+          .get(`/api/fleet/agent_policies?kuery=name:TEST-1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 400 if passed kuery is not correct', async () => {
+        await supertest
+          .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.non_existent_parameter:test`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return 400 if passed kuery is invalid', async () => {
+        await supertest
+          .get(`/api/fleet/agent_policies?kuery='test%3A'`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+    });
+
     describe('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
       before(async () => {
@@ -61,7 +119,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.is_managed).to.equal(false);
         expect(body.item.inactivity_timeout).to.equal(1209600);
         expect(body.item.status).to.be('active');
-        expect(body.item.is_protected).to.equal(false);
       });
 
       it('sets given is_managed value', async () => {
@@ -387,14 +444,42 @@ export default function (providerContext: FtrProviderContext) {
           status: 'active',
           description: 'Test',
           is_managed: false,
-          is_protected: false,
           namespace: 'default',
           monitoring_enabled: ['logs', 'metrics'],
           revision: 1,
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
+          is_protected: false,
         });
+      });
+
+      it('should copy inactivity timeout', async () => {
+        const {
+          body: { item: policyWithTimeout },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Inactivity test',
+            namespace: 'default',
+            is_managed: true,
+            inactivity_timeout: 123,
+          })
+          .expect(200);
+
+        const {
+          body: { item: newPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${policyWithTimeout.id}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Inactivity test copy',
+            description: 'Test',
+          })
+          .expect(200);
+
+        expect(newPolicy.inactivity_timeout).to.eql(123);
       });
 
       it('should increment package policy copy names', async () => {
@@ -674,7 +759,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Updated name',
             description: 'Updated description',
             namespace: 'default',
-            is_protected: true,
+            is_protected: false,
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
@@ -692,7 +777,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           inactivity_timeout: 1209600,
           package_policies: [],
-          is_protected: true,
+          is_protected: false,
         });
       });
 

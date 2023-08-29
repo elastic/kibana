@@ -19,6 +19,7 @@ const MAP_SHAPES = {
   RECTANGLE: 'rectangle',
   DIAMOND: 'diamond',
   TRIANGLE: 'triangle',
+  ROUND_RECTANGLE: 'round-rectangle',
 } as const;
 type MapShapes = typeof MAP_SHAPES[keyof typeof MAP_SHAPES];
 
@@ -33,6 +34,9 @@ function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShape
       return MAP_SHAPES.DIAMOND;
     case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
       return MAP_SHAPES.TRIANGLE;
+    case JOB_MAP_NODE_TYPES.INGEST_PIPELINE:
+      return MAP_SHAPES.ROUND_RECTANGLE;
+
     default:
       return MAP_SHAPES.ELLIPSE;
   }
@@ -69,6 +73,9 @@ function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
       return theme.euiColorVis2;
     case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
       return theme.euiColorVis3;
+    case JOB_MAP_NODE_TYPES.INGEST_PIPELINE:
+      return theme.euiColorVis7;
+
     default:
       return theme.euiColorMediumShade;
   }

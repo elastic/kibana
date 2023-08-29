@@ -23,15 +23,10 @@ export const syncParamsSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = ()
   }): Promise<any> => {
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-    const allPrivateLocations = await getPrivateLocations(
-      syntheticsMonitorClient,
-      savedObjectsClient
-    );
+    const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
 
     await syntheticsMonitorClient.syncGlobalParams({
-      request,
       spaceId,
-      savedObjectsClient,
       allPrivateLocations,
       encryptedSavedObjects: server.encryptedSavedObjects,
     });

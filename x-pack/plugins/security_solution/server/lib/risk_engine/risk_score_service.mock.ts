@@ -6,24 +6,27 @@
  */
 
 import type { RiskScoreService } from './risk_score_service';
-import type { RiskScore } from './types';
+import type { RiskScore } from '../../../common/risk_engine';
 
 const createRiskScoreMock = (overrides: Partial<RiskScore> = {}): RiskScore => ({
   '@timestamp': '2023-02-15T00:15:19.231Z',
-  identifierField: 'host.name',
-  identifierValue: 'hostname',
-  level: 'High',
-  totalScore: 149,
-  totalScoreNormalized: 85.332,
-  alertsScore: 85,
-  otherScore: 0,
+  id_field: 'host.name',
+  id_value: 'hostname',
+  calculated_level: 'High',
+  calculated_score: 149,
+  calculated_score_norm: 85.332,
+  category_1_score: 85,
+  category_1_count: 12,
   notes: [],
-  riskiestInputs: [],
+  inputs: [],
   ...overrides,
 });
 
 const createRiskScoreServiceMock = (): jest.Mocked<RiskScoreService> => ({
-  getScores: jest.fn(),
+  calculateScores: jest.fn(),
+  calculateAndPersistScores: jest.fn(),
+  getConfiguration: jest.fn(),
+  getRiskInputsIndex: jest.fn(),
 });
 
 export const riskScoreServiceMock = {

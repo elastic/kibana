@@ -1171,12 +1171,12 @@
                 "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
               },
               {
-                "plugin": "@kbn/core-application-browser-mocks",
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
-              },
-              {
                 "plugin": "management",
                 "path": "src/plugins/management/public/application.tsx"
+              },
+              {
+                "plugin": "@kbn/core-application-browser-mocks",
+                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -1777,7 +1777,15 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; searchable?: boolean | undefined; } & ",
+          " | undefined; searchable?: boolean | undefined; category?: ",
+          {
+            "pluginId": "@kbn/core-application-common",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationCommonPluginApi",
+            "section": "def-common.AppCategory",
+            "text": "AppCategory"
+          },
+          " | undefined; } & ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2014,7 +2022,7 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; tooltip?: string | undefined; navLinkStatus?: ",
+          " | undefined; navLinkStatus?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2022,7 +2030,7 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; searchable?: boolean | undefined; tooltip?: string | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",

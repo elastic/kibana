@@ -64,6 +64,7 @@ export const UNINSTALL_TOKENS = {
 
 export const SETTINGS_FLEET_SERVER_HOST_HEADING = 'fleetServerHostHeader';
 export const SETTINGS_SAVE_BTN = 'saveApplySettingsBtn';
+export const SETTINGS_CONFIRM_MODAL_BTN = 'confirmModalConfirmButton';
 
 export const AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX = 'agentPolicyFormSystemMonitoringCheckbox';
 export const INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN = 'AgentPolicyAdvancedOptions.AccordionBtn';
@@ -119,6 +120,68 @@ export const SETTINGS_OUTPUTS = {
   ADD_BTN: 'addOutputBtn',
   NAME_INPUT: 'settingsOutputsFlyout.nameInput',
   TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
+  ADD_HOST_ROW_BTN: 'fleetServerHosts.multiRowInput.addRowButton',
+  WARNING_KAFKA_CALLOUT: 'settingsOutputsFlyout.kafkaOutputTypeCallout',
+  WARNING_ELASTICSEARCH_CALLOUT: 'settingsOutputsFlyout.elasticsearchOutputTypeCallout',
+};
+
+export const getSpecificSelectorId = (selector: string, id: number) => {
+  const lastChar = selector.charAt(selector.length - 1);
+
+  if (!isNaN(Number(lastChar))) {
+    return selector.slice(0, selector.length - 1) + id;
+  }
+
+  return selector;
+};
+
+export const SETTINGS_OUTPUTS_KAFKA = {
+  VERSION_SELECT: 'settingsOutputsFlyout.kafkaVersionInput',
+  AUTHENTICATION_SELECT: 'settingsOutputsFlyout.kafkaAuthenticationRadioInput',
+  AUTHENTICATION_NONE_OPTION: 'kafkaAuthenticationNoneRadioButton',
+  AUTHENTICATION_USERNAME_PASSWORD_OPTION: 'kafkaAuthenticationUsernamePasswordRadioButton',
+  AUTHENTICATION_SSL_OPTION: 'kafkaAuthenticationSSLRadioButton',
+  AUTHENTICATION_KERBEROS_OPTION: 'kafkaAuthenticationKerberosRadioButton',
+  AUTHENTICATION_USERNAME_INPUT: 'settingsOutputsFlyout.kafkaUsernameInput',
+  AUTHENTICATION_PASSWORD_INPUT: 'settingsOutputsFlyout.kafkaPasswordInput',
+  AUTHENTICATION_VERIFICATION_MODE_INPUT: 'settingsOutputsFlyout.kafkaVerificationModeInput',
+  AUTHENTICATION_CONNECTION_TYPE_SELECT: 'settingsOutputsFlyout.kafkaConnectionTypeRadioInput',
+  AUTHENTICATION_CONNECTION_TYPE_PLAIN_OPTION: 'kafkaConnectionTypePlaintextRadioButton',
+  AUTHENTICATION_CONNECTION_TYPE_ENCRYPTION_OPTION: 'kafkaConnectionTypeEncryptionRadioButton',
+  AUTHENTICATION_SASL_SELECT: 'settingsOutputsFlyout.kafkaSaslInput',
+  AUTHENTICATION_SASL_PLAIN_OPTION: 'kafkaSaslPlainRadioButton',
+  AUTHENTICATION_SASL_SCRAM_256_OPTION: 'kafkaSaslScramSha256RadioButton',
+  AUTHENTICATION_SASL_SCRAM_512_OPTION: 'kafkaSaslScramSha512RadioButton',
+  PARTITIONING_PANEL: 'settingsOutputsFlyout.kafkaPartitionPanel',
+  PARTITIONING_SELECT: 'settingsOutputsFlyout.kafkaPartitioningRadioInput',
+  PARTITIONING_RANDOM_OPTION: 'kafkaPartitionRandomRadioButton',
+  PARTITIONING_HASH_OPTION: 'kafkaPartitionHashRadioButton',
+  PARTITIONING_ROUND_ROBIN_OPTION: 'kafkaPartitionRoundRobinRadioButton',
+  PARTITIONING_EVENTS_INPUT: 'settingsOutputsFlyout.kafkaPartitionTypeRandomInput',
+  PARTITIONING_HASH_INPUT: 'settingsOutputsFlyout.kafkaPartitionTypeHashInput',
+  TOPICS_PANEL: 'settingsOutputsFlyout.kafkaTopicsPanel',
+  TOPICS_DEFAULT_TOPIC_INPUT: 'settingsOutputsFlyout.kafkaDefaultTopicInput',
+  TOPICS_ADD_ROW_BUTTON: 'fleetServerHosts.kafkaTopicsInput.addRowButton',
+  TOPICS_DRAG_HANDLE_ICON: 'settingsOutputsFlyout.kafkaTopicsProcessorDragHandle0',
+  TOPICS_WHEN_INPUT: 'settingsOutputsFlyout.kafkaTopicsProcessorWhenInput0',
+  TOPICS_CONDITION_INPUT: 'settingsOutputsFlyout.kafkaTopicsProcessorConditionInput0',
+  TOPICS_TOPIC_INPUT: 'settingsOutputsFlyout.kafkaTopicsProcessorTopicInput0',
+  TOPICS_REMOVE_ROW_BUTTON: 'settingsOutputsFlyout.kafkaTopicsProcessorDeleteButton0',
+  HEADERS_PANEL: 'settingsOutputsFlyout.kafkaHeadersPanel',
+  HEADERS_KEY_INPUT: 'settingsOutputsFlyout.kafkaHeadersKeyInput0',
+  HEADERS_VALUE_INPUT: 'settingsOutputsFlyout.kafkaHeadersValueInput0',
+  HEADERS_ADD_ROW_BUTTON: 'kafkaHeaders.multiRowInput.addRowButton',
+  HEADERS_REMOVE_ROW_BUTTON: 'settingsOutputsFlyout.kafkaHeadersDeleteButton0',
+  HEADERS_CLIENT_ID_INPUT: 'settingsOutputsFlyout.kafkaClientIdInput',
+  COMPRESSION_PANEL: 'settingsOutputsFlyout.kafkaCompressionPanel',
+  COMPRESSION_SWITCH: 'settingsOutputsFlyout.kafkaCompressionSwitch',
+  COMPRESSION_CODEC_INPUT: 'settingsOutputsFlyout.kafkaCompressionCodecInput',
+  COMPRESSION_LEVEL_INPUT: 'settingsOutputsFlyout.kafkaCompressionLevelInput',
+  BROKER_PANEL: 'settingsOutputsFlyout.kafkaBrokerSettingsPanel',
+  BROKER_TIMEOUT_SELECT: 'settingsOutputsFlyout.kafkaBrokerTimeoutInput',
+  BROKER_REACHABILITY_TIMEOUT_SELECT: 'settingsOutputsFlyout.kafkaBrokerReachabilityTimeoutInput',
+  BROKER_ACK_RELIABILITY_SELECT: 'settingsOutputsFlyout.kafkaBrokerAckReliabilityInputLabel',
+  KEY_INPUT: 'settingsOutputsFlyout.kafkaKeyInput',
 };
 
 export const SETTINGS_FLEET_SERVER_HOSTS = {

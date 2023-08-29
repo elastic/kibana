@@ -7,5 +7,5 @@
 
 export const UPDATE_STATUS = `[data-test-subj="updateStatus"]`;
 export const SECURITY_SOLUTION_NAVBAR_MANAGE_ITEM = `[data-test-subj="solutionSideNavItemLink-administration"]`;
-export const SECURITY_SOLUTION_NAVBAR_THREAT_INTELLIGENCE_ITEM = `[data-test-subj="solutionSideNavItemLink-threat_intelligence-indicators"]`;
+export const SECURITY_SOLUTION_NAVBAR_THREAT_INTELLIGENCE_ITEM = `[data-test-subj="solutionSideNavItemLink-threat_intelligence"]`;
 export const MANAGE_NAVIGATION_ITEMS = `.euiLink`;

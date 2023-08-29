@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { isEmpty, isError } from 'lodash';
+import { isError } from 'lodash';
+import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -27,7 +29,7 @@ const ALERT_CONTEXT_TAGS = 'tags';
 const HOST_NAME = 'host.name';
 const HOST_HOSTNAME = 'host.hostname';
 const HOST_ID = 'host.id';
-const CONTAINER_ID = 'container.id';
+export const CONTAINER_ID = 'container.id';
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -41,21 +43,18 @@ export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
       arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
   });
 
-export const validateIsStringElasticsearchJSONFilter = (value: string) => {
+export const validateKQLStringFilter = (value: string) => {
   if (value === '') {
     // Allow clearing the filter.
     return;
   }
 
-  const errorMessage = 'filterQuery must be a valid Elasticsearch filter expressed in JSON';
   try {
-    const parsedValue = JSON.parse(value);
-    if (!isEmpty(parsedValue.bool)) {
-      return undefined;
-    }
-    return errorMessage;
+    kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], []);
   } catch (e) {
-    return errorMessage;
+    return i18n.translate('xpack.observability.threshold.rule.schema.invalidFilterQuery', {
+      defaultMessage: 'filterQuery must be a valid KQL filter',
+    });
   }
 };
 
@@ -118,7 +117,6 @@ export const getAlertDetailsUrl = (
 
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const NUMBER_OF_DOCUMENTS = 10;
-export const termsAggField: Record<string, string> = { [KUBERNETES_POD_UID]: CONTAINER_ID };
 
 export interface AdditionalContext {
   [x: string]: any;

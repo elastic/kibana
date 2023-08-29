@@ -7,7 +7,7 @@
 
 import http from 'http';
 import expect from '@kbn/expect';
-import { User } from '@kbn/cases-plugin/common/api';
+import { User } from '@kbn/cases-plugin/common/types/domain';
 import {
   PushedUserAction,
   UserActionWithDeprecatedResponse,

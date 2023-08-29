@@ -24,7 +24,7 @@ export const renderApp = (
   const { notifications, http } = core;
   const { newsfeed, home, navigation } = deps;
   const newsfeed$ = newsfeed?.createNewsFeed$(NewsfeedApiEndpoint.KIBANA_ANALYTICS);
-  const features = home.featureCatalogue.get();
+  const features$ = home.featureCatalogue.getFeatures$();
 
   core.chrome.setBreadcrumbs([
     { text: i18n.translate('kibanaOverview.breadcrumbs.title', { defaultMessage: 'Analytics' }) },
@@ -42,7 +42,7 @@ export const renderApp = (
           <KibanaContextProvider services={{ ...core, ...deps }}>
             <KibanaOverviewApp
               basename={appBasePath}
-              {...{ notifications, http, navigation, newsfeed$, solutions, features }}
+              {...{ notifications, http, navigation, newsfeed$, solutions, features$ }}
             />
           </KibanaContextProvider>
         </KibanaThemeProvider>

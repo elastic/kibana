@@ -102,8 +102,12 @@ post:
         schema:
           $ref: '../components/schemas/create_rule_request.yaml'
         examples:
-          createRuleIdRequest:
-            $ref: '../components/examples/create_rule_request.yaml'
+          createEsQueryRuleIdRequest:
+            $ref: '../components/examples/create_es_query_rule_request.yaml'
+          createEsQueryKqlRuleIdRequest:
+            $ref: '../components/examples/create_es_query_kql_rule_request.yaml'
+          createIndexThreholdRuleIdRequest:
+            $ref: '../components/examples/create_index_threshold_rule_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -112,8 +116,12 @@ post:
           schema:
             $ref: '../components/schemas/rule_response_properties.yaml' 
           examples:
-            createRuleIdResponse:
-              $ref: '../components/examples/create_rule_response.yaml'
+            createEsQueryRuleIdResponse:
+              $ref: '../components/examples/create_es_query_rule_response.yaml'
+            createEsQueryKqlRuleIdResponse:
+              $ref: '../components/examples/create_es_query_kql_rule_response.yaml'
+            createIndexThresholdRuleIdResponse:
+              $ref: '../components/examples/create_index_threshold_rule_response.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:

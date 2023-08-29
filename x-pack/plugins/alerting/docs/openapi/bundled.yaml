@@ -8,12 +8,15 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
-tags:
-  - name: alerting
-    description: Alerting APIs enable you to create and manage rules and alerts.
 servers:
   - url: http://localhost:5601
     description: local
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
+tags:
+  - name: alerting
+    description: Alerting APIs enable you to create and manage rules and alerts.
 paths:
   /s/{spaceId}/api/alerting/rule:
     post:
@@ -33,8 +36,12 @@ paths:
             schema:
               $ref: '#/components/schemas/create_rule_request'
             examples:
-              createRuleRequest:
-                $ref: '#/components/examples/create_rule_request'
+              createEsQueryRuleRequest:
+                $ref: '#/components/examples/create_es_query_rule_request'
+              createEsQueryKqlRuleRequest:
+                $ref: '#/components/examples/create_es_query_kql_rule_request'
+              createIndexThresholdRuleRequest:
+                $ref: '#/components/examples/create_index_threshold_rule_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -43,8 +50,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/rule_response_properties'
               examples:
-                createRuleResponse:
-                  $ref: '#/components/examples/create_rule_response'
+                createEsQueryRuleResponse:
+                  $ref: '#/components/examples/create_es_query_rule_response'
+                createEsQueryKqlRuleResponse:
+                  $ref: '#/components/examples/create_es_query_kql_rule_response'
+                createIndexThresholdRuleResponse:
+                  $ref: '#/components/examples/create_index_threshold_rule_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -149,8 +160,12 @@ paths:
             schema:
               $ref: '#/components/schemas/create_rule_request'
             examples:
-              createRuleIdRequest:
-                $ref: '#/components/examples/create_rule_request'
+              createEsQueryRuleIdRequest:
+                $ref: '#/components/examples/create_es_query_rule_request'
+              createEsQueryKqlRuleIdRequest:
+                $ref: '#/components/examples/create_es_query_kql_rule_request'
+              createIndexThreholdRuleIdRequest:
+                $ref: '#/components/examples/create_index_threshold_rule_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -159,8 +174,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/rule_response_properties'
               examples:
-                createRuleIdResponse:
-                  $ref: '#/components/examples/create_rule_response'
+                createEsQueryRuleIdResponse:
+                  $ref: '#/components/examples/create_es_query_rule_response'
+                createEsQueryKqlRuleIdResponse:
+                  $ref: '#/components/examples/create_es_query_kql_rule_response'
+                createIndexThresholdRuleIdResponse:
+                  $ref: '#/components/examples/create_index_threshold_rule_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -720,6 +739,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key:
+    post:
+      summary: Updates the API key for a rule.
+      operationId: updateRuleAPIKey
+      description: The new API key has the credentials of the user that submits the request.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/rule_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1593,6 +1636,42 @@ components:
         type: string
         example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   schemas:
+    filter:
+      type: object
+      description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
+      properties:
+        meta:
+          type: object
+          properties:
+            alias:
+              type: string
+              nullable: true
+            controlledBy:
+              type: string
+            disabled:
+              type: boolean
+            field:
+              type: string
+            group:
+              type: string
+            index:
+              type: string
+            isMultiIndex:
+              type: boolean
+            key:
+              type: string
+            negate:
+              type: boolean
+            params:
+              type: object
+            type:
+              type: string
+            value:
+              type: string
+        query:
+          type: object
+        $state:
+          type: object
     notify_when:
       type: string
       description: |
@@ -1612,13 +1691,15 @@ components:
     actions:
       type: array
       default: []
-      required:
-        - group
-        - id
-        - params
       nullable: true
       items:
         type: object
+        required:
+          - group
+          - id
+          - params
+        description: |
+          An action that runs under defined conditions.
         properties:
           alerts_filter:
             type: object
@@ -1635,41 +1716,7 @@ components:
                   filters:
                     type: array
                     items:
-                      type: object
-                      description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
-                      properties:
-                        meta:
-                          type: object
-                          properties:
-                            alias:
-                              type: string
-                              nullable: true
-                            controlledBy:
-                              type: string
-                            disabled:
-                              type: boolean
-                            field:
-                              type: string
-                            group:
-                              type: string
-                            index:
-                              type: string
-                            isMultiIndex:
-                              type: boolean
-                            key:
-                              type: string
-                            negate:
-                              type: boolean
-                            params:
-                              type: object
-                            type:
-                              type: string
-                            value:
-                              type: string
-                        query:
-                          type: object
-                        $state:
-                          type: object
+                      $ref: '#/components/schemas/filter'
               timeframe:
                 type: object
                 description: Defines a period that limits whether the action runs.
@@ -1711,7 +1758,7 @@ components:
           frequency:
             type: object
             description: |
-              The parameters that affect how often actions are generated. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
+              The properties that affect how often actions are generated. If the rule type supports setting `summary` to `true`, the action can be a summary of alerts at the specified notification interval. Otherwise, an action runs for each alert at the specified notification interval. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
             required:
               - notify_when
               - summary
@@ -1725,7 +1772,8 @@ components:
                 $ref: '#/components/schemas/throttle'
           group:
             type: string
-            description: The group name for the actions. If you don't need to group actions, set to `default`.
+            description: |
+              The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.
             example: default
           id:
             type: string
@@ -2150,6 +2198,197 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
+    aggfield:
+      description: |
+        The name of the numeric field that is used in the aggregation. This property is required when `aggType` is `avg`, `max`, `min` or `sum`.
+      type: string
+    aggtype:
+      description: The type of aggregation to perform.
+      type: string
+      enum:
+        - avg
+        - count
+        - max
+        - min
+        - sum
+      default: count
+    excludehitsfrompreviousrun:
+      description: |
+        Indicates whether to exclude matches from previous runs. If `true`, you can avoid alert duplication by excluding documents that have already been detected by the previous rule run. This option is not available when a grouping field is specified.
+      type: boolean
+    groupby:
+      description: |
+        Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.
+      type: string
+      enum:
+        - all
+        - top
+      default: all
+    termfield:
+      description: |
+        This property is required when `groupBy` is `top`. The name of the field that is used for grouping the aggregation.
+      type: string
+    termsize:
+      description: |
+        This property is required when `groupBy` is `top`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.
+      type: integer
+    threshold:
+      description: |
+        The threshold value that is used with the `thresholdComparator`. If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.
+      type: array
+      items:
+        type: integer
+        example: 4000
+    thresholdcomparator:
+      description: The comparison function for the threshold. For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "is not between".
+      type: string
+      enum:
+        - '>'
+        - '>='
+        - <
+        - <=
+        - between
+        - notBetween
+      example: '>'
+    timefield:
+      description: The field that is used to calculate the time window.
+      type: string
+    timewindowsize:
+      description: |
+        The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
+      type: integer
+      example: 5
+    timewindowunit:
+      description: |
+        The type of units for the time window: seconds, minutes, hours, or days.
+      type: string
+      enum:
+        - s
+        - m
+        - h
+        - d
+      example: m
+    params_es_query_rule:
+      oneOf:
+        - type: object
+          description: The parameters for an Elasticsearch query rule that uses KQL or Lucene to define the query.
+          required:
+            - searchType
+            - size
+            - threshold
+            - thresholdComparator
+            - timeWindowSize
+            - timeWindowUnit
+          properties:
+            aggField:
+              $ref: '#/components/schemas/aggfield'
+            aggType:
+              $ref: '#/components/schemas/aggtype'
+            excludeHitsFromPreviousRun:
+              $ref: '#/components/schemas/excludehitsfrompreviousrun'
+            groupBy:
+              $ref: '#/components/schemas/groupby'
+            searchConfiguration:
+              description: The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.
+              type: object
+              properties:
+                filter:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/filter'
+                index:
+                  description: The indices to query.
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                query:
+                  type: object
+                  properties:
+                    language:
+                      type: string
+                      example: kuery
+                    query:
+                      type: string
+            searchType:
+              description: The type of query, in this case a text-based query that uses KQL or Lucene.
+              type: string
+              enum:
+                - searchSource
+              example: searchSource
+            size:
+              description: |
+                The number of documents to pass to the configured actions when the threshold condition is met.
+              type: integer
+            termField:
+              $ref: '#/components/schemas/termfield'
+            termSize:
+              $ref: '#/components/schemas/termsize'
+            threshold:
+              $ref: '#/components/schemas/threshold'
+            thresholdComparator:
+              $ref: '#/components/schemas/thresholdcomparator'
+            timeField:
+              $ref: '#/components/schemas/timefield'
+            timeWindowSize:
+              $ref: '#/components/schemas/timewindowsize'
+            timeWindowUnit:
+              $ref: '#/components/schemas/timewindowunit'
+        - type: object
+          description: The parameters for an Elasticsearch query rule that uses Elasticsearch Query DSL to define the query.
+          required:
+            - esQuery
+            - index
+            - threshold
+            - thresholdComparator
+            - timeField
+            - timeWindowSize
+            - timeWindowUnit
+          properties:
+            aggField:
+              $ref: '#/components/schemas/aggfield'
+            aggType:
+              $ref: '#/components/schemas/aggtype'
+            esQuery:
+              description: The query definition, which uses Elasticsearch Query DSL.
+              type: string
+            excludeHitsFromPreviousRun:
+              $ref: '#/components/schemas/excludehitsfrompreviousrun'
+            groupBy:
+              $ref: '#/components/schemas/groupby'
+            index:
+              description: The indices to query.
+              oneOf:
+                - type: array
+                  items:
+                    type: string
+                - type: string
+            searchType:
+              description: The type of query, in this case a query that uses Elasticsearch Query DSL.
+              type: string
+              enum:
+                - esQuery
+              default: esQuery
+              example: esQuery
+            size:
+              description: |
+                The number of documents to pass to the configured actions when the threshold condition is met.
+              type: integer
+            termField:
+              $ref: '#/components/schemas/termfield'
+            termSize:
+              $ref: '#/components/schemas/termsize'
+            threshold:
+              $ref: '#/components/schemas/threshold'
+            thresholdComparator:
+              $ref: '#/components/schemas/thresholdcomparator'
+            timeField:
+              $ref: '#/components/schemas/timefield'
+            timeWindowSize:
+              $ref: '#/components/schemas/timewindowsize'
+            timeWindowUnit:
+              $ref: '#/components/schemas/timewindowunit'
     create_es_query_rule_request:
       title: Create Elasticsearch query rule request
       description: |
@@ -2173,9 +2412,7 @@ components:
         notify_when:
           $ref: '#/components/schemas/notify_when'
         params:
-          type: object
-          description: The parameters for an Elasticsearch query rule.
-          additionalProperties: true
+          $ref: '#/components/schemas/params_es_query_rule'
         rule_type_id:
           type: string
           description: The ID of the rule type that you want to call when the rule is scheduled to run.
@@ -2224,6 +2461,45 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
+    params_index_threshold_rule:
+      type: object
+      description: The parameters for an index threshold rule.
+      required:
+        - index
+        - threshold
+        - thresholdComparator
+        - timeField
+        - timeWindowSize
+        - timeWindowUnit
+      properties:
+        aggField:
+          $ref: '#/components/schemas/aggfield'
+        aggType:
+          $ref: '#/components/schemas/aggtype'
+        filterKuery:
+          description: A KQL expression thats limits the scope of alerts.
+          type: string
+        groupBy:
+          $ref: '#/components/schemas/groupby'
+        index:
+          description: The indices to query.
+          type: array
+          items:
+            type: string
+        termField:
+          $ref: '#/components/schemas/termfield'
+        termSize:
+          $ref: '#/components/schemas/termsize'
+        threshold:
+          $ref: '#/components/schemas/threshold'
+        thresholdComparator:
+          $ref: '#/components/schemas/thresholdcomparator'
+        timeField:
+          $ref: '#/components/schemas/timefield'
+        timeWindowSize:
+          $ref: '#/components/schemas/timewindowsize'
+        timeWindowUnit:
+          $ref: '#/components/schemas/timewindowunit'
     create_index_threshold_rule_request:
       title: Create index threshold rule request
       description: A rule that runs an Elasticsearch query, aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
@@ -2246,9 +2522,7 @@ components:
         notify_when:
           $ref: '#/components/schemas/notify_when'
         params:
-          type: object
-          description: The parameters for an index threshold rule.
-          additionalProperties: true
+          $ref: '#/components/schemas/params_index_threshold_rule'
         rule_type_id:
           type: string
           description: The ID of the rule type that you want to call when the rule is scheduled to run.
@@ -4264,6 +4538,24 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
+    400_response:
+      title: Bad request
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+          enum:
+            - Bad Request
+        message:
+          type: string
+        statusCode:
+          type: integer
+          enum:
+            - 400
     alert_response_properties:
       title: Legacy alert response properties
       type: object
@@ -4348,7 +4640,68 @@ components:
           nullable: true
           example: elastic
   examples:
-    create_rule_request:
+    create_es_query_rule_request:
+      summary: Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL) to define its query and a server log connector to send notifications.
+      value:
+        actions:
+          - group: query matched
+            params:
+              level: info
+              message: The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts.
+            id: fdbece50-406c-11ee-850e-c71febc4ca7f
+            frequency:
+              throttle: 1d
+              summary: true
+              notify_when: onThrottleInterval
+          - group: recovered
+            params:
+              level: info
+              message: Recovered
+            id: fdbece50-406c-11ee-850e-c71febc4ca7f
+            frequency:
+              summary: false
+              notify_when: onActionGroupChange
+        consumer: alerts
+        name: my Elasticsearch query rule
+        params:
+          esQuery: '"""{"query":{"match_all" : {}}}"""'
+          index:
+            - kibana_sample_data_logs
+          size: 100
+          threshold:
+            - 100
+          thresholdComparator: '>'
+          timeField: '@timestamp'
+          timeWindowSize: 1
+          timeWindowUnit: d
+        rule_type_id: .es-query
+        schedule:
+          interval: 1d
+    create_es_query_kql_rule_request:
+      summary: Create an Elasticsearch query rule that uses Kibana query language (KQL).
+      value:
+        consumer: alerts
+        name: my Elasticsearch query KQL rule
+        params:
+          aggType: count
+          excludeHitsFromPreviousRun: true
+          groupBy: all
+          searchConfiguration:
+            query:
+              query: '""geo.src : "US" ""'
+              language: kuery
+            index: 90943e30-9a47-11e8-b64d-95841ca0b247
+          searchType: searchSource
+          size: 100
+          threshold:
+            - 1000
+          thresholdComparator: '>'
+          timeWindowSize: 5
+          timeWindowUnit: m
+        rule_type_id: .es-query
+        schedule:
+          interval: 1m
+    create_index_threshold_rule_request:
       summary: Create an index threshold rule.
       value:
         actions:
@@ -4386,7 +4739,116 @@ components:
           interval: 1m
         tags:
           - cpu
-    create_rule_response:
+    create_es_query_rule_response:
+      summary: The create rule API returns a JSON object that contains details about the rule.
+      value:
+        id: 58148c70-407f-11ee-850e-c71febc4ca7f
+        enabled: true
+        name: my Elasticsearch query rule
+        tags: []
+        rule_type_id: .es-query
+        consumer: alerts
+        schedule:
+          interval: 1d
+        actions:
+          - group: query matched
+            id: fdbece50-406c-11ee-850e-c71febc4ca7f
+            params:
+              level: info
+              message: The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts.
+            connector_type_id: .server-log
+            frequency:
+              summary: true
+              notify_when: onThrottleInterval
+              throttle: 1d
+            uuid: 53f3c2a3-e5d0-4cfa-af3b-6f0881385e78
+          - group: recovered
+            id: fdbece50-406c-11ee-850e-c71febc4ca7f
+            params:
+              level: info
+              message: Recovered
+            connector_type_id: .server-log
+            frequency:
+              summary: false
+              notify_when: onActionGroupChange
+              throttle: null
+            uuid: 2324e45b-c0df-45c7-9d70-4993e30be758
+        params:
+          thresholdComparator: '>'
+          timeWindowSize: 1
+          timeWindowUnit: d
+          threshold:
+            - 100
+          size: 100
+          timeField: '@timestamp'
+          index:
+            - kibana_sample_data_logs
+          esQuery: '"""{"query":{"match_all" : {}}}"""'
+          excludeHitsFromPreviousRun: true
+          aggType: count
+          groupBy: all
+          searchType: esQuery
+        scheduled_task_id: 58148c70-407f-11ee-850e-c71febc4ca7f
+        created_by: elastic
+        updated_by: elastic
+        created_at: '2023-08-22T00:03:38.263Z'
+        updated_at: '2023-08-22T00:03:38.263Z'
+        api_key_owner: elastic
+        api_key_created_by_user: false
+        throttle: null
+        mute_all: false
+        notify_when: null
+        muted_alert_ids: []
+        execution_status:
+          status: pending
+          last_execution_date: '2023-08-22T00:03:38.263Z'
+        revision: 0
+        running: false
+    create_es_query_kql_rule_response:
+      summary: The create rule API returns a JSON object that contains details about the rule.
+      value:
+        id: 7bd506d0-2284-11ee-8fad-6101956ced88
+        enabled: true
+        name: my Elasticsearch query KQL rule"
+        tags: []
+        rule_type_id: .es-query
+        consumer: alerts
+        schedule:
+          interval: 1m
+        actions: []
+        params:
+          searchConfiguration:
+            query:
+              query: '""geo.src : "US" ""'
+              language: kuery
+            index: 90943e30-9a47-11e8-b64d-95841ca0b247
+          searchType: searchSource
+          timeWindowSize: 5
+          timeWindowUnit: m
+          threshold:
+            - 1000
+          thresholdComparator: '>'
+          size: 100
+          aggType: count
+          groupBy: all
+          excludeHitsFromPreviousRun: true
+        created_by: elastic
+        updated_by: elastic
+        created_at: '2023-07-14T20:24:50.729Z'
+        updated_at: '2023-07-14T20:24:50.729Z'
+        api_key_owner: elastic
+        api_key_created_by_user: false
+        throttle: null
+        notify_when: null
+        mute_all: false
+        muted_alert_ids: []
+        scheduled_task_id: 7bd506d0-2284-11ee-8fad-6101956ced88
+        execution_status:
+          status: pending
+          last_execution_date: '2023-07-14T20:24:50.729Z'
+        revision: 0
+        running: false
+    create_index_threshold_rule_response:
       summary: The create rule API returns a JSON object that contains details about the rule.
       value:
         actions:
@@ -4910,6 +5372,3 @@ components:
             id: recovered
             name: Recovered
           rule_task_timeout: 5m
-security:
-  - basicAuth: []
-  - apiKeyAuth: []

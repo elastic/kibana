@@ -712,14 +712,6 @@ describe('<DefaultNavigation />', () => {
 
         expect(
           await (
-            await findByTestId(
-              /nav-item-project_settings_project_nav.settings.cloudLinkPerformance/
-            )
-          ).textContent
-        ).toBe('Mock PerformanceExternal link');
-
-        expect(
-          await (
             await findByTestId(/nav-item-project_settings_project_nav.settings.cloudLinkBilling/)
           ).textContent
         ).toBe('Mock Billing & SubscriptionsExternal link');

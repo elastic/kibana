@@ -34,6 +34,7 @@ describe('createEsContext', () => {
   test('should return is ready state as falsy if not initialized', () => {
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test0',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
@@ -48,6 +49,7 @@ describe('createEsContext', () => {
   test('should return esNames', () => {
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test-index',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
@@ -57,15 +59,15 @@ describe('createEsContext', () => {
     expect(esNames).toStrictEqual({
       base: 'test-index',
       dataStream: 'test-index-event-log-1.2.3',
-      ilmPolicy: 'test-index-event-log-policy',
       indexPattern: 'test-index-event-log-*',
       indexTemplate: 'test-index-event-log-1.2.3-template',
     });
   });
 
-  test('should return exist false for esAdapter ilm policy, index template and data stream before initialize', async () => {
+  test('should return exist false for esAdapter index template and data stream before initialize', async () => {
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test1',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
@@ -84,20 +86,16 @@ describe('createEsContext', () => {
     expect(doesIndexTemplateExist).toBeFalsy();
   });
 
-  test('should return exist true for esAdapter ilm policy, index template and data stream after initialize', async () => {
+  test('should return exist true for esAdapter index template and data stream after initialize', async () => {
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test2',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     elasticsearchClient.indices.existsTemplate.mockResponse(true);
     context.initialize();
-
-    const doesIlmPolicyExist = await context.esAdapter.doesIlmPolicyExist(
-      context.esNames.ilmPolicy
-    );
-    expect(doesIlmPolicyExist).toBeTruthy();
 
     elasticsearchClient.indices.getDataStream.mockResolvedValue(GetDataStreamsResponse);
     const doesDataStreamExist = await context.esAdapter.doesDataStreamExist(
@@ -123,6 +121,7 @@ describe('createEsContext', () => {
 
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test2',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
@@ -140,6 +139,7 @@ describe('createEsContext', () => {
     jest.requireMock('./init').initializeEs.mockResolvedValue(false);
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test2',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),

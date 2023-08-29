@@ -139,7 +139,11 @@ export class EndpointTestResources extends FtrService {
           alertsPerHost,
           enableFleetIntegration,
           undefined,
-          CurrentKibanaVersionDocGenerator
+          CurrentKibanaVersionDocGenerator,
+          undefined,
+          undefined,
+          undefined,
+          this.log
         );
 
     if (waitUntilTransformed && customIndexFn) {
@@ -272,7 +276,7 @@ export class EndpointTestResources extends FtrService {
   async installOrUpgradeEndpointFleetPackage(): ReturnType<
     typeof installOrUpgradeEndpointFleetPackage
   > {
-    return installOrUpgradeEndpointFleetPackage(this.kbnClient);
+    return installOrUpgradeEndpointFleetPackage(this.kbnClient, this.log);
   }
 
   /**

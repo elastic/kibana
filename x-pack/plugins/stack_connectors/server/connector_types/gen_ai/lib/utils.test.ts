@@ -6,7 +6,11 @@
  */
 
 import { sanitizeRequest, getRequestWithStreamOption, getAxiosOptions } from './utils';
-import { OpenAiProviderType, OPENAI_CHAT_URL } from '../../../../common/gen_ai/constants';
+import {
+  DEFAULT_OPENAI_MODEL,
+  OpenAiProviderType,
+  OPENAI_CHAT_URL,
+} from '../../../../common/gen_ai/constants';
 import {
   sanitizeRequest as openAiSanitizeRequest,
   getRequestWithStreamOption as openAiGetRequestWithStreamOption,
@@ -39,8 +43,12 @@ describe('Utils', () => {
     });
 
     it('calls openai_utils sanitizeRequest when provider is OpenAi', () => {
-      sanitizeRequest(OpenAiProviderType.OpenAi, OPENAI_CHAT_URL, bodyString);
-      expect(mockOpenAiSanitizeRequest).toHaveBeenCalledWith(OPENAI_CHAT_URL, bodyString);
+      sanitizeRequest(OpenAiProviderType.OpenAi, OPENAI_CHAT_URL, bodyString, DEFAULT_OPENAI_MODEL);
+      expect(mockOpenAiSanitizeRequest).toHaveBeenCalledWith(
+        OPENAI_CHAT_URL,
+        bodyString,
+        DEFAULT_OPENAI_MODEL
+      );
       expect(mockAzureAiSanitizeRequest).not.toHaveBeenCalled();
     });
 
@@ -65,12 +73,19 @@ describe('Utils', () => {
     });
 
     it('calls openai_utils getRequestWithStreamOption when provider is OpenAi', () => {
-      getRequestWithStreamOption(OpenAiProviderType.OpenAi, OPENAI_CHAT_URL, bodyString, true);
+      getRequestWithStreamOption(
+        OpenAiProviderType.OpenAi,
+        OPENAI_CHAT_URL,
+        bodyString,
+        true,
+        DEFAULT_OPENAI_MODEL
+      );
 
       expect(mockOpenAiGetRequestWithStreamOption).toHaveBeenCalledWith(
         OPENAI_CHAT_URL,
         bodyString,
-        true
+        true,
+        DEFAULT_OPENAI_MODEL
       );
       expect(mockAzureAiGetRequestWithStreamOption).not.toHaveBeenCalled();
     });
@@ -87,7 +102,12 @@ describe('Utils', () => {
     });
 
     it('does not call any helper fns when provider is unrecognized', () => {
-      getRequestWithStreamOption('foo', OPENAI_CHAT_URL, bodyString, true);
+      getRequestWithStreamOption(
+        'foo' as unknown as OpenAiProviderType,
+        OPENAI_CHAT_URL,
+        bodyString,
+        true
+      );
       expect(mockOpenAiGetRequestWithStreamOption).not.toHaveBeenCalled();
       expect(mockAzureAiGetRequestWithStreamOption).not.toHaveBeenCalled();
     });

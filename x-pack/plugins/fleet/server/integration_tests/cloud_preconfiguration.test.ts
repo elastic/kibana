@@ -164,201 +164,209 @@ describe('Fleet preconfiguration reset', () => {
         data.signed.data = '';
         data.signed.signature = '';
 
-        expect(data).toEqual({
-          agent: {
-            download: {
-              sourceURI: 'https://artifacts.elastic.co/downloads/',
-            },
-            features: {},
-            monitoring: {
-              enabled: false,
-              logs: false,
-              metrics: false,
-            },
-            protection: {
-              enabled: false,
-              signing_key: '',
-              uninstall_token_hash: '',
-            },
-          },
-          id: 'policy-elastic-agent-on-cloud',
-          inputs: [
-            {
-              data_stream: {
-                namespace: 'default',
+        expect(data).toEqual(
+          expect.objectContaining({
+            agent: {
+              download: {
+                sourceURI: 'https://artifacts.elastic.co/downloads/',
               },
-              id: 'fleet-server-fleet_server-elastic-cloud-fleet-server',
-              meta: {
-                package: {
-                  name: 'fleet_server',
-                },
+              features: {},
+              monitoring: {
+                enabled: false,
+                logs: false,
+                metrics: false,
               },
-              name: 'Fleet Server',
-              package_policy_id: 'elastic-cloud-fleet-server',
-              revision: 1,
-              'server.runtime': {
-                gc_percent: 20,
+              protection: {
+                enabled: false,
+                signing_key: '',
+                uninstall_token_hash: '',
               },
-              type: 'fleet-server',
-              unused_key: 'not_used',
-              use_output: 'es-containerhost',
             },
-            {
-              'apm-server': {
-                agent: {
-                  config: {
-                    elasticsearch: {
-                      api_key: '',
-                    },
+            id: 'policy-elastic-agent-on-cloud',
+            inputs: expect.arrayContaining([
+              {
+                data_stream: {
+                  namespace: 'default',
+                },
+                id: 'fleet-server-fleet_server-elastic-cloud-fleet-server',
+                meta: {
+                  package: {
+                    name: 'fleet_server',
                   },
                 },
-                agent_config: [],
-                auth: {
-                  anonymous: {
-                    allow_agent: ['rum-js', 'js-base', 'iOS/swift'],
-                    allow_service: null,
-                    enabled: true,
-                    rate_limit: {
-                      event_limit: 300,
-                      ip_limit: 1000,
-                    },
-                  },
-                  api_key: {
-                    enabled: true,
-                    limit: 100,
-                  },
-                  secret_token: 'CLOUD_SECRET_TOKEN',
+                name: 'Fleet Server',
+                package_policy_id: 'elastic-cloud-fleet-server',
+                revision: 1,
+                'server.runtime': {
+                  gc_percent: 20,
                 },
-                capture_personal_data: true,
-                default_service_environment: null,
-                'expvar.enabled': false,
-                host: '0.0.0.0:8200',
-                idle_timeout: '45s',
-                java_attacher: {
-                  'discovery-rules': null,
-                  'download-agent-version': null,
-                  enabled: false,
-                },
-                max_connections: 0,
-                max_event_size: 307200,
-                max_header_size: 1048576,
-                'pprof.enabled': false,
-                read_timeout: '3600s',
-                response_headers: null,
-                rum: {
-                  allow_headers: null,
-                  allow_origins: ['*'],
-                  enabled: true,
-                  exclude_from_grouping: '^/webpack',
-                  library_pattern: 'node_modules|bower_components|~',
-                  response_headers: null,
-                  source_mapping: {
-                    elasticsearch: {
-                      api_key: '',
-                    },
-                    metadata: [],
-                  },
-                },
-                sampling: {
-                  tail: {
-                    enabled: false,
-                    interval: '1m',
-                    policies: [
-                      {
-                        sample_rate: 0.1,
+                type: 'fleet-server',
+                unused_key: 'not_used',
+                use_output: 'es-containerhost',
+              },
+              {
+                'apm-server': {
+                  agent: {
+                    config: {
+                      elasticsearch: {
+                        api_key: '',
                       },
-                    ],
-                    storage_limit: '3GB',
+                    },
+                  },
+                  agent_config: [],
+                  auth: {
+                    anonymous: {
+                      allow_agent: ['rum-js', 'js-base', 'iOS/swift'],
+                      allow_service: null,
+                      enabled: true,
+                      rate_limit: {
+                        event_limit: 300,
+                        ip_limit: 1000,
+                      },
+                    },
+                    api_key: {
+                      enabled: true,
+                      limit: 100,
+                    },
+                    secret_token: 'CLOUD_SECRET_TOKEN',
+                  },
+                  capture_personal_data: true,
+                  default_service_environment: null,
+                  'expvar.enabled': false,
+                  host: '0.0.0.0:8200',
+                  idle_timeout: '45s',
+                  java_attacher: {
+                    'discovery-rules': null,
+                    'download-agent-version': null,
+                    enabled: false,
+                  },
+                  max_connections: 0,
+                  max_event_size: 307200,
+                  max_header_size: 1048576,
+                  'pprof.enabled': false,
+                  read_timeout: '3600s',
+                  response_headers: null,
+                  rum: {
+                    allow_headers: null,
+                    allow_origins: ['*'],
+                    enabled: true,
+                    exclude_from_grouping: '^/webpack',
+                    library_pattern: 'node_modules|bower_components|~',
+                    response_headers: null,
+                    source_mapping: {
+                      elasticsearch: {
+                        api_key: '',
+                      },
+                      metadata: [],
+                    },
+                  },
+                  sampling: {
+                    tail: {
+                      enabled: false,
+                      interval: '1m',
+                      policies: [
+                        {
+                          sample_rate: 0.1,
+                        },
+                      ],
+                      storage_limit: '3GB',
+                    },
+                  },
+                  shutdown_timeout: '30s',
+                  ssl: {
+                    certificate: '/app/config/certs/node.crt',
+                    cipher_suites: null,
+                    curve_types: null,
+                    enabled: true,
+                    key: '/app/config/certs/node.key',
+                    key_passphrase: null,
+                    supported_protocols: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+                  },
+                  write_timeout: '30s',
+                },
+                data_stream: {
+                  namespace: 'default',
+                },
+                id: 'elastic-cloud-apm',
+                meta: {
+                  package: {
+                    name: 'apm',
                   },
                 },
-                shutdown_timeout: '30s',
-                ssl: {
-                  certificate: '/app/config/certs/node.crt',
-                  cipher_suites: null,
-                  curve_types: null,
-                  enabled: true,
-                  key: '/app/config/certs/node.key',
-                  key_passphrase: null,
-                  supported_protocols: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+                name: 'Elastic APM',
+                package_policy_id: 'elastic-cloud-apm',
+                revision: 2,
+                type: 'apm',
+                use_output: 'es-containerhost',
+              },
+            ]),
+            output_permissions: {
+              'es-containerhost': {
+                _elastic_agent_checks: {
+                  cluster: ['monitor'],
                 },
-                write_timeout: '30s',
-              },
-              data_stream: {
-                namespace: 'default',
-              },
-              id: 'elastic-cloud-apm',
-              meta: {
-                package: {
-                  name: 'apm',
+                _elastic_agent_monitoring: {
+                  indices: [],
+                },
+                'elastic-cloud-apm': {
+                  cluster: ['cluster:monitor/main'],
+                  indices: [
+                    {
+                      names: ['logs-apm.app-default'],
+                      privileges: ['auto_configure', 'create_doc'],
+                    },
+                    {
+                      names: ['metrics-apm.app.*-default'],
+                      privileges: ['auto_configure', 'create_doc'],
+                    },
+                    {
+                      names: ['logs-apm.error-default'],
+                      privileges: ['auto_configure', 'create_doc'],
+                    },
+                    {
+                      names: ['metrics-apm.internal-default'],
+                      privileges: ['auto_configure', 'create_doc'],
+                    },
+                    {
+                      names: ['metrics-apm.profiling-default'],
+                      privileges: ['auto_configure', 'create_doc'],
+                    },
+                    {
+                      names: ['traces-apm.rum-default'],
+                      privileges: ['auto_configure', 'create_doc'],
+                    },
+                    {
+                      names: ['traces-apm.sampled-default'],
+                      privileges: [
+                        'auto_configure',
+                        'create_doc',
+                        'maintenance',
+                        'monitor',
+                        'read',
+                      ],
+                    },
+                    {
+                      names: ['traces-apm-default'],
+                      privileges: ['auto_configure', 'create_doc'],
+                    },
+                  ],
                 },
               },
-              name: 'Elastic APM',
-              package_policy_id: 'elastic-cloud-apm',
-              revision: 2,
-              type: 'apm',
-              use_output: 'es-containerhost',
             },
-          ],
-          output_permissions: {
-            'es-containerhost': {
-              _elastic_agent_checks: {
-                cluster: ['monitor'],
-              },
-              _elastic_agent_monitoring: {
-                indices: [],
-              },
-              'elastic-cloud-apm': {
-                cluster: ['cluster:monitor/main'],
-                indices: [
-                  {
-                    names: ['logs-apm.app-default'],
-                    privileges: ['auto_configure', 'create_doc'],
-                  },
-                  {
-                    names: ['metrics-apm.app.*-default'],
-                    privileges: ['auto_configure', 'create_doc'],
-                  },
-                  {
-                    names: ['logs-apm.error-default'],
-                    privileges: ['auto_configure', 'create_doc'],
-                  },
-                  {
-                    names: ['metrics-apm.internal-default'],
-                    privileges: ['auto_configure', 'create_doc'],
-                  },
-                  {
-                    names: ['metrics-apm.profiling-default'],
-                    privileges: ['auto_configure', 'create_doc'],
-                  },
-                  {
-                    names: ['traces-apm.rum-default'],
-                    privileges: ['auto_configure', 'create_doc'],
-                  },
-                  {
-                    names: ['traces-apm.sampled-default'],
-                    privileges: ['auto_configure', 'create_doc', 'maintenance', 'monitor', 'read'],
-                  },
-                  {
-                    names: ['traces-apm-default'],
-                    privileges: ['auto_configure', 'create_doc'],
-                  },
-                ],
+            outputs: {
+              'es-containerhost': {
+                hosts: ['https://cloudinternales:9200'],
+                type: 'elasticsearch',
               },
             },
-          },
-          outputs: {
-            'es-containerhost': {
-              hosts: ['https://cloudinternales:9200'],
-              type: 'elasticsearch',
+            revision: 5,
+            secret_references: [],
+            signed: {
+              data: '',
+              signature: '',
             },
-          },
-          revision: 5,
-          secret_references: [],
-          signed: {
-            data: '',
-            signature: '',
-          },
-        });
+          })
+        );
       });
 
       it('Create correct package policies', async () => {

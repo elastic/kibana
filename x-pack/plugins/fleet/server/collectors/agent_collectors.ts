@@ -70,12 +70,24 @@ export interface AgentData {
     degraded: number;
   };
   agents_per_policy: number[];
+  agents_per_os: Array<{
+    name: string;
+    version: string;
+    count: number;
+  }>;
+  components_status: Array<{
+    id: string;
+    status: string;
+    count: number;
+  }>;
 }
 
 const DEFAULT_AGENT_DATA = {
   agent_checkin_status: { error: 0, degraded: 0 },
   agents_per_policy: [],
   agents_per_version: [],
+  agents_per_os: [],
+  components_status: [],
 };
 
 export const getAgentData = async (
@@ -116,6 +128,37 @@ export const getAgentData = async (
           },
           policies: {
             terms: { field: 'policy_id' },
+          },
+          os: {
+            multi_terms: {
+              terms: [
+                {
+                  field: 'local_metadata.os.name.keyword',
+                },
+                {
+                  field: 'local_metadata.os.version.keyword',
+                },
+              ],
+            },
+          },
+          components: {
+            nested: {
+              path: 'components',
+            },
+            aggs: {
+              components_status: {
+                multi_terms: {
+                  terms: [
+                    {
+                      field: 'components.id',
+                    },
+                    {
+                      field: 'components.status',
+                    },
+                  ],
+                },
+              },
+            },
           },
         },
       },
@@ -166,10 +209,26 @@ export const getAgentData = async (
       (bucket: any) => bucket.doc_count
     );
 
+    const agentsPerOS = ((response?.aggregations?.os as any).buckets ?? []).map((bucket: any) => ({
+      name: bucket.key[0],
+      version: bucket.key[1],
+      count: bucket.doc_count,
+    }));
+
+    const componentsStatus = (
+      (response?.aggregations?.components as any).components_status?.buckets ?? []
+    ).map((bucket: any) => ({
+      id: bucket.key[0],
+      status: bucket.key[1],
+      count: bucket.doc_count,
+    }));
+
     return {
       agent_checkin_status: statuses,
       agents_per_policy: agentsPerPolicy,
       agents_per_version: agentsPerVersion,
+      agents_per_os: agentsPerOS,
+      components_status: componentsStatus,
     };
   } catch (error) {
     if (error.statusCode === 404) {

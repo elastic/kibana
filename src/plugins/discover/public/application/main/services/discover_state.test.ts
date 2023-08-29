@@ -21,7 +21,7 @@ import {
   savedSearchMockWithTimeFieldNew,
 } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverAppStateContainer } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
@@ -522,7 +522,7 @@ describe('Test discover state actions', () => {
       timeFieldName: 'mock-time-field-name',
     };
     const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
-    dataViewsCreateMock.mockImplementation(() => ({
+    dataViewsCreateMock.mockImplementationOnce(() => ({
       ...dataViewMock,
       ...dataViewSpecMock,
       isPersisted: () => false,
@@ -678,7 +678,7 @@ describe('Test discover state actions', () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
-    await state.actions.onCreateDefaultAdHocDataView({ title: 'ad-hoc-test' });
+    await state.actions.createAndAppendAdHocDataView({ title: 'ad-hoc-test' });
     expect(state.appState.getState().index).toBe('ad-hoc-id');
     expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
     unsubscribe();
@@ -735,5 +735,45 @@ describe('Test discover state actions', () => {
     expect(setTime).toHaveBeenCalledTimes(1);
     expect(setTime).toHaveBeenCalledWith({ from: 'now-15d', to: 'now-10d' });
     expect(setRefreshInterval).toHaveBeenCalledWith({ pause: false, value: 1000 });
+  });
+});
+
+describe('Test discover state with embedded mode', () => {
+  let stopSync = () => {};
+  let history: History;
+  let state: DiscoverStateContainer;
+  const getCurrentUrl = () => history.createHref(history.location);
+
+  beforeEach(async () => {
+    history = createBrowserHistory();
+    history.push('/');
+    state = getDiscoverStateContainer({
+      services: discoverServiceMock,
+      history,
+      mode: 'embedded',
+    });
+    state.savedSearchState.set(savedSearchMock);
+    await state.appState.update({}, true);
+    stopSync = startSync(state.appState);
+  });
+  afterEach(() => {
+    stopSync();
+    stopSync = () => {};
+  });
+  test('setting app state and syncing to URL', async () => {
+    state.appState.update({ index: 'modified' });
+    await new Promise(process.nextTick);
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
+    );
+  });
+
+  test('changing URL to be propagated to appState', async () => {
+    history.push('/?_a=(index:modified)');
+    expect(state.appState.getState()).toMatchObject(
+      expect.objectContaining({
+        index: 'modified',
+      })
+    );
   });
 });

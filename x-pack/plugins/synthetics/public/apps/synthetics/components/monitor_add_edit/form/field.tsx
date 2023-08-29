@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
-import { Controller, useFormContext, FieldError, ControllerFieldState } from 'react-hook-form';
+import { Controller, useFormContext, FieldError } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { selectServiceLocationsState } from '../../../state';
-import { useKibanaSpace, useIsEditFlow } from '../hooks';
+import { useKibanaSpace, useIsEditFlow, useValidateField } from '../hooks';
 import { ControlledField } from './controlled_field';
 import { FormConfig, FieldMeta } from '../types';
 
@@ -24,39 +24,29 @@ export const Field = memo<Props>(
     props,
     fieldKey,
     controlled,
-    shouldUseSetValue,
     required,
     validation,
-    error,
+    error: validationError,
     fieldError,
     dependencies,
     customHook,
     hidden,
   }: Props) => {
-    const { register, watch, control, setValue, reset, getFieldState, formState } =
-      useFormContext<FormConfig>();
+    const { register, control, setValue, reset, formState, trigger } = useFormContext<FormConfig>();
     const { locations } = useSelector(selectServiceLocationsState);
     const { space } = useKibanaSpace();
     const isEdit = useIsEditFlow();
-    const [dependenciesFieldMeta, setDependenciesFieldMeta] = useState<
-      Record<string, ControllerFieldState>
-    >({});
-    let dependenciesValues: unknown[] = [];
-    if (dependencies) {
-      dependenciesValues = watch(dependencies);
-    }
-    useEffect(() => {
-      if (dependencies) {
-        dependencies.forEach((dependency) => {
-          setDependenciesFieldMeta((prevState) => ({
-            ...prevState,
-            [dependency]: getFieldState(dependency),
-          }));
-        });
+
+    const { dependenciesValues, dependenciesFieldMeta, error, isInvalid, rules } = useValidateField(
+      {
+        fieldKey,
+        validation,
+        dependencies,
+        required: required ?? false,
+        customHook,
+        validationError,
       }
-      // run effect when dependencies values change, to get the most up to date meta state
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(dependenciesValues || []), dependencies, getFieldState]);
+    );
 
     if (hidden && hidden(dependenciesValues)) {
       return null;
@@ -73,22 +63,18 @@ export const Field = memo<Props>(
       <Controller<FormConfig, keyof FormConfig>
         control={control}
         name={fieldKey}
-        rules={{
-          required,
-          ...(validation ? validation(dependenciesValues) : {}),
-        }}
+        rules={rules}
         render={({ field, fieldState: fieldStateT }) => {
           return (
             <ControlledField
               field={field}
               component={Component}
               props={props}
-              shouldUseSetValue={shouldUseSetValue}
               fieldKey={fieldKey}
-              customHook={customHook}
               formRowProps={formRowProps}
               fieldState={fieldStateT}
               error={error}
+              isInvalid={isInvalid}
               dependenciesValues={dependenciesValues}
               dependenciesFieldMeta={dependenciesFieldMeta}
             />
@@ -102,15 +88,13 @@ export const Field = memo<Props>(
         error={fieldError?.message || error}
       >
         <Component
-          {...register(fieldKey, {
-            required,
-            ...(validation ? validation(dependenciesValues) : {}),
-          })}
+          {...register(fieldKey, rules)}
           {...(props
             ? props({
                 field: undefined,
                 formState,
                 setValue,
+                trigger,
                 reset,
                 locations: locations.map((location) => ({ ...location, key: location.id })),
                 dependencies: dependenciesValues,
@@ -119,7 +103,7 @@ export const Field = memo<Props>(
                 isEdit,
               })
             : {})}
-          isInvalid={Boolean(fieldError)}
+          isInvalid={isInvalid}
           fullWidth
         />
       </EuiFormRow>

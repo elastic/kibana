@@ -66,7 +66,8 @@
     "@kbn/ml-date-utils",
     "@kbn/saved-search-plugin",
     "@kbn/unified-field-list",
-    "@kbn/ebt-tools"
+    "@kbn/ebt-tools",
+    "@kbn/content-management-plugin"
   ],
   "exclude": [
     "target/**/*",

@@ -13,6 +13,8 @@ import type {
   SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
 
+import { getMSearch, type GetMSearchType } from '@kbn/content-management-utils';
+
 import { CONTENT_ID } from '../../common/content_management';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';
 import type {
@@ -91,7 +93,14 @@ function savedObjectToLensSavedObject(
 const SO_TYPE: LensContentType = 'lens';
 
 export class LensStorage implements ContentStorage<LensSavedObject, PartialLensSavedObject> {
-  constructor() {}
+  mSearch: GetMSearchType<LensSavedObject>;
+  constructor() {
+    this.mSearch = getMSearch<LensSavedObject, LensSearchOut>({
+      savedObjectType: SO_TYPE,
+      cmServicesDefinition,
+      allowedSavedObjectAttributes: ['title', 'description', 'visualizationType', 'state'],
+    });
+  }
 
   async get(ctx: StorageContext, id: string): Promise<LensGetOut> {
     const {

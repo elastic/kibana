@@ -25,8 +25,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
   const retry = getService('retry');
   const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/156792
-  describe.skip('getAlertSummary', () => {
+  describe('getAlertSummary', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
@@ -272,6 +271,26 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
     });
 
     it('handles multi-alert status during maintenance window', async () => {
+      const { body: createdMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          title: 'test-maintenance-window',
+          duration: 60 * 60 * 1000, // 1 hr
+          r_rule: {
+            dtstart: new Date().toISOString(),
+            tzid: 'UTC',
+            freq: 2, // weekly
+          },
+        });
+      objectRemover.add(
+        Spaces.space1.id,
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
+
       // pattern of when the rule should fire
       const pattern = {
         alertA: [true, true, true, true],
@@ -292,27 +311,6 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
         .expect(200);
 
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-      const { body: createdMaintenanceWindow } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          title: 'test-maintenance-window',
-          duration: 60 * 60 * 1000, // 1 hr
-          r_rule: {
-            dtstart: new Date().toISOString(),
-            tzid: 'UTC',
-            freq: 2, // weekly
-          },
-        });
-
-      objectRemover.add(
-        Spaces.space1.id,
-        createdMaintenanceWindow.id,
-        'rules/maintenance_window',
-        'alerting',
-        true
-      );
 
       await alertUtils.muteInstance(createdRule.id, 'alertC');
       await alertUtils.muteInstance(createdRule.id, 'alertD');

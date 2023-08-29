@@ -26,9 +26,7 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
   const history = useHistory();
   const {
     handleSubmit,
-    formState: { errors, defaultValues },
-    getValues,
-    getFieldState,
+    formState: { defaultValues, isValid },
   } = useFormContext();
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<SyntheticsMonitor | null>(
@@ -42,12 +40,7 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
   const canEditSynthetics = useCanEditSynthetics();
 
   const formSubmitter = (formData: Record<string, any>) => {
-    // An additional invalid field check to account for customHook managed validation
-    const isAnyFieldInvalid = Object.keys(getValues()).some(
-      (fieldKey) => getFieldState(fieldKey).invalid
-    );
-
-    if (!Object.keys(errors).length && !isAnyFieldInvalid) {
+    if (isValid) {
       setMonitorData(format(formData, readOnly));
     }
   };

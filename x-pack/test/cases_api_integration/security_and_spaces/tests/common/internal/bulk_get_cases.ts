@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import { MAX_BULK_GET_CASES } from '@kbn/cases-plugin/common/constants';
 import { getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
             alertId: ['test-id-1', 'test-id-2'],
             index: ['test-index', 'test-index'],
             rule: { id: 'test-rule-id', name: 'test-index-id' },
-            type: CommentType.alert,
+            type: AttachmentType.alert,
             owner: 'securitySolutionFixture',
           },
         });
@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
             alertId: ['test-id-3'],
             index: ['test-index'],
             rule: { id: 'test-rule-id', name: 'test-index-id' },
-            type: CommentType.alert,
+            type: AttachmentType.alert,
             owner: 'securitySolutionFixture',
           },
         });
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: caseOne.id,
           params: {
             comment: 'a comment',
-            type: CommentType.user,
+            type: AttachmentType.user,
             owner: 'securitySolutionFixture',
           },
         });

@@ -31,6 +31,7 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -132,6 +133,8 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     },
     [direction, sortField, type, dispatch]
   );
+
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   const dispatchSeverityUpdate = useCallback(
@@ -151,8 +154,12 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   );
 
   const hostsColumns = useMemo(
-    () => getHostsColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate),
-    [dispatchSeverityUpdate, isPlatinumOrTrialLicense]
+    () =>
+      getHostsColumns(
+        isPlatinumOrTrialLicense && hasEntityAnalyticsCapability,
+        dispatchSeverityUpdate
+      ),
+    [dispatchSeverityUpdate, isPlatinumOrTrialLicense, hasEntityAnalyticsCapability]
   );
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);

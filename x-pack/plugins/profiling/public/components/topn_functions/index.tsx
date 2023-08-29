@@ -14,18 +14,17 @@ import {
   EuiDataGridRefProps,
   EuiDataGridSorting,
   EuiScreenReaderOnly,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
 import React, { forwardRef, Ref, useMemo, useState } from 'react';
 import { GridOnScrollProps } from 'react-window';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from './function_row';
-import { TotalSamplesStat } from './total_samples_stat';
 import { getFunctionsRows, IFunctionRow } from './utils';
 
 interface Props {
@@ -43,6 +42,7 @@ interface Props {
   sortField: TopNFunctionSortField;
   sortDirection: 'asc' | 'desc';
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
+  dataTestSubj?: string;
 }
 
 export const TopNFunctionsGrid = forwardRef(
@@ -62,10 +62,12 @@ export const TopNFunctionsGrid = forwardRef(
       sortField,
       sortDirection,
       onChangeSort,
+      dataTestSubj = 'topNFunctionsGrid',
     }: Props,
     ref: Ref<EuiDataGridRefProps> | undefined
   ) => {
     const [selectedRow, setSelectedRow] = useState<IFunctionRow | undefined>();
+    const trackProfilingEvent = useUiTracker({ app: 'profiling' });
 
     function onSort(newSortingColumns: EuiDataGridSorting['columns']) {
       const lastItem = last(newSortingColumns);
@@ -91,11 +93,11 @@ export const TopNFunctionsGrid = forwardRef(
         totalSeconds,
       });
     }, [
-      topNFunctions,
-      comparisonTopNFunctions,
-      totalSeconds,
-      comparisonScaleFactor,
       baselineScaleFactor,
+      comparisonScaleFactor,
+      comparisonTopNFunctions,
+      topNFunctions,
+      totalSeconds,
     ]);
 
     const { columns, leadingControlColumns } = useMemo(() => {
@@ -220,6 +222,7 @@ export const TopNFunctionsGrid = forwardRef(
           },
           rowCellRender: function RowCellRender({ rowIndex }) {
             function handleOnClick() {
+              trackProfilingEvent({ metric: 'topN_function_details_click' });
               setSelectedRow(rows[rowIndex]);
             }
             return (
@@ -234,7 +237,7 @@ export const TopNFunctionsGrid = forwardRef(
         });
       }
       return { columns: gridColumns, leadingControlColumns: gridLeadingControlColumns };
-    }, [isDifferentialView, rows, showDiffColumn]);
+    }, [isDifferentialView, rows, showDiffColumn, trackProfilingEvent]);
 
     const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
 
@@ -260,19 +263,13 @@ export const TopNFunctionsGrid = forwardRef(
 
     return (
       <>
-        <TotalSamplesStat
-          baselineTotalSamples={totalCount}
-          baselineScaleFactor={baselineScaleFactor}
-          comparisonTotalSamples={comparisonTopNFunctions?.TotalCount}
-          comparisonScaleFactor={comparisonScaleFactor}
-        />
-        <EuiSpacer size="s" />
         <EuiDataGrid
+          data-test-subj={dataTestSubj}
           ref={ref}
           aria-label="TopN functions"
           columns={columns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
-          rowCount={100}
+          rowCount={totalCount > 100 ? 100 : totalCount}
           renderCellValue={RenderCellValue}
           inMemory={{ level: 'sorting' }}
           sorting={{ columns: [{ id: sortField, direction: sortDirection }], onSort }}
@@ -337,7 +334,6 @@ export const TopNFunctionsGrid = forwardRef(
             }}
             totalSeconds={totalSeconds}
             totalSamples={totalCount}
-            samplingRate={topNFunctions?.SamplingRate ?? 1.0}
           />
         )}
       </>

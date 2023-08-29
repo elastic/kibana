@@ -1,6 +1,10 @@
 title: Summary
 type: object
 description: The SLO computed data
+required:
+  - status
+  - sliValue
+  - errorBudget
 properties:
   status:
     $ref: './summary_status.yaml'

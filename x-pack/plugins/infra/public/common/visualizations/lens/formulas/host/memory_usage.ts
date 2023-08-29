@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const memoryUsage: FormulaConfig = {
+export const memoryUsage: FormulaValueConfig = {
   label: 'Memory Usage',
   value: 'average(system.memory.actual.used.pct)',
   format: {

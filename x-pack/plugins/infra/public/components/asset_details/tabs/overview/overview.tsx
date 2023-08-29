@@ -7,58 +7,32 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiHorizontalRule } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TimeRange } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import { useMetadata } from '../../hooks/use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
-import { MetadataSummary } from './metadata_summary';
+import { MetadataSummaryList } from './metadata_summary/metadata_summary_list';
+import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
 import { MetricsGrid } from './metrics/metrics_grid';
-import { toTimestampRange } from '../../utils';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { useDataViewsProviderContext } from '../../hooks/use_data_views';
+import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 
-export interface MetadataSearchUrlState {
-  metadataSearchUrlState: string;
-  setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
-}
-
-export interface OverviewProps {
-  dateRange: TimeRange;
-  nodeName: string;
-  nodeType: InventoryItemType;
-  metricsDataView?: DataView;
-  logsDataView?: DataView;
-}
-
-export const Overview = ({
-  nodeName,
-  dateRange,
-  nodeType,
-  metricsDataView,
-  logsDataView,
-}: OverviewProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId } = useSourceContext();
+export const Overview = () => {
+  const { dateRange } = useDateRangeProviderContext();
+  const { asset, assetType, renderMode } = useAssetDetailsRenderPropsContext();
   const {
+    metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-    metadata,
-  } = useMetadata(
-    nodeName,
-    nodeType,
-    inventoryModel.requiredMetrics,
-    sourceId,
-    toTimestampRange(dateRange)
-  );
+  } = useMetadataStateProviderContext();
+  const { logs, metrics } = useDataViewsProviderContext();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={nodeName} timeRange={dateRange} dataView={metricsDataView} />
+        <KPIGrid nodeName={asset.name} timeRange={dateRange} dataView={metrics.dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
@@ -76,7 +50,7 @@ export const Overview = ({
               values={{
                 reload: (
                   <EuiLink
-                    data-test-subj="infraMetadataReloadPageLink"
+                    data-test-subj="infraAssetDetailsMetadataReloadPageLink"
                     onClick={() => window.location.reload()}
                   >
                     {i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorAction', {
@@ -88,16 +62,25 @@ export const Overview = ({
             />
           </EuiCallOut>
         ) : (
-          <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
+          <MetadataSummaryList
+            metadata={metadata}
+            metadataLoading={metadataLoading}
+            isCompactView={renderMode?.mode === 'flyout'}
+          />
         )}
+        <SectionSeparator />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AlertsSummaryContent assetName={asset.name} assetType={assetType} dateRange={dateRange} />
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <MetricsGrid
           timeRange={dateRange}
-          logsDataView={logsDataView}
-          metricsDataView={metricsDataView}
-          nodeName={nodeName}
+          logsDataView={logs.dataView}
+          metricsDataView={metrics.dataView}
+          nodeName={asset.name}
+          isCompactView={renderMode?.mode === 'flyout'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

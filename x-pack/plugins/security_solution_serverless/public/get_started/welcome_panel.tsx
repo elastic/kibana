@@ -6,6 +6,7 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+
 import { css } from '@emotion/react';
 import React from 'react';
 import progress from './images/progress.svg';
@@ -18,28 +19,42 @@ import {
   WELCOME_PANEL_INVITE_YOUR_TEAM_DESCRIPTION,
   WELCOME_PANEL_PROGRESS_TRACKER_TITLE,
 } from './translations';
+import { ProgressTracker } from './progress_tracker';
 
 const headerCards: HeaderSection[] = [
   {
     icon: { type: 'checkInCircleFilled', color: '#00BFB3' },
     title: WELCOME_PANEL_PROJECT_CREATED_TITLE,
-    description: WELCOME_PANEL_PROJECT_CREATED_DESCRIPTION,
+    description: () => WELCOME_PANEL_PROJECT_CREATED_DESCRIPTION,
     id: 'projectCreated',
   },
   {
     icon: { type: invite },
     title: WELCOME_PANEL_INVITE_YOUR_TEAM_TITLE,
-    description: WELCOME_PANEL_INVITE_YOUR_TEAM_DESCRIPTION,
+    description: () => WELCOME_PANEL_INVITE_YOUR_TEAM_DESCRIPTION,
     id: 'inviteYourTeam',
   },
   {
     icon: { type: progress },
     title: WELCOME_PANEL_PROGRESS_TRACKER_TITLE,
     id: 'progressTracker',
+    description: ({
+      totalActiveSteps,
+      totalStepsLeft,
+    }: {
+      totalActiveSteps?: number | null;
+      totalStepsLeft?: number | null;
+    }) => <ProgressTracker totalActiveSteps={totalActiveSteps} totalStepsLeft={totalStepsLeft} />,
   },
 ];
 
-const WelcomePanelComponent = () => {
+const WelcomePanelComponent = ({
+  totalActiveSteps,
+  totalStepsLeft,
+}: {
+  totalActiveSteps: number | null;
+  totalStepsLeft: number | null;
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -74,7 +89,7 @@ const WelcomePanelComponent = () => {
                     color: ${euiTheme.colors.mediumShade};
                   `}
                 >
-                  {item.description}
+                  {item?.description?.({ totalActiveSteps, totalStepsLeft })}
                 </span>
               }
               hasBorder

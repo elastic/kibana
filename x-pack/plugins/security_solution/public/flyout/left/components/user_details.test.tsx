@@ -21,6 +21,7 @@ import {
   USER_DETAILS_INFO_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID,
 } from './test_ids';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../shared/components/test_ids';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -71,6 +72,8 @@ jest.mock('../../../common/components/ml/anomaly/anomaly_table_provider', () => 
   }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
 }));
 
+jest.mock('../../../helper_hooks', () => ({ useHasSecurityCapability: () => true }));
+
 jest.mock('../../../explore/users/containers/users/observed_details');
 const mockUseObservedUserDetails = useObservedUserDetails as jest.Mock;
 
@@ -85,6 +88,7 @@ const timestamp = '2022-07-25T08:20:18.966Z';
 const defaultProps = {
   userName: 'test user',
   timestamp,
+  scopeId: 'scopeId',
 };
 
 const mockUserDetailsResponse = [
@@ -105,7 +109,7 @@ const mockRiskScoreResponse = {
       },
     },
   ],
-  isLicenseValid: true,
+  isAuthorized: true,
 };
 
 const mockRelatedHostsResponse = {
@@ -130,7 +134,7 @@ describe('<HostDetails />', () => {
         <UserDetails {...defaultProps} />
       </TestProviders>
     );
-    expect(getByTestId(USER_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID))).toBeInTheDocument();
   });
 
   describe('Host overview', () => {
@@ -165,7 +169,7 @@ describe('<HostDetails />', () => {
     });
 
     it('should not render user risk score when license is not valid', () => {
-      mockUseRiskScore.mockReturnValue({ data: [], isLicenseValid: false });
+      mockUseRiskScore.mockReturnValue({ data: [], isAuthorized: false });
       const { queryByText } = render(
         <TestProviders>
           <UserDetails {...defaultProps} />

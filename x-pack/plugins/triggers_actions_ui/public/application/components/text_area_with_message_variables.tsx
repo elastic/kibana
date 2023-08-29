@@ -20,6 +20,7 @@ interface Props {
   isDisabled?: boolean;
   editAction: (property: string, value: any, index: number) => void;
   label: string;
+  helpText?: string;
   errors?: string[];
 }
 
@@ -32,6 +33,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
   editAction,
   label,
   errors,
+  helpText,
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
 
@@ -64,6 +66,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
           paramsProperty={paramsProperty}
         />
       }
+      helpText={helpText}
     >
       <EuiTextArea
         disabled={isDisabled}

@@ -82,6 +82,8 @@ describe('find()', () => {
       name: 'myType',
       producer: 'myApp',
       enabledInLicense: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
     },
   ]);
   beforeEach(() => {
@@ -142,6 +144,8 @@ describe('find()', () => {
             myApp: { read: true, all: true },
           },
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ])
     );
@@ -296,6 +300,103 @@ describe('find()', () => {
     `);
   });
 
+  test('finds rules with actions using system connectors', async () => {
+    unsecuredSavedObjectsClient.find.mockReset();
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'alert',
+          attributes: {
+            alertTypeId: 'myType',
+            schedule: { interval: '10s' },
+            params: {
+              bar: true,
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+              {
+                group: 'default',
+                actionRef: 'system_action:system_action-id',
+                params: {},
+              },
+            ],
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+          ],
+        },
+      ],
+    });
+    const rulesClient = new RulesClient(rulesClientParams);
+    const result = await rulesClient.find({ options: {} });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "data": Array [
+          Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "1",
+                "params": Object {
+                  "foo": true,
+                },
+              },
+              Object {
+                "group": "default",
+                "id": "system_action-id",
+                "params": Object {},
+              },
+            ],
+            "alertTypeId": "myType",
+            "createdAt": 2019-02-12T21:01:22.479Z,
+            "id": "1",
+            "notifyWhen": "onActiveAlert",
+            "params": Object {
+              "bar": true,
+            },
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "snoozeSchedule": Array [],
+            "updatedAt": 2019-02-12T21:01:22.479Z,
+          },
+        ],
+        "page": 1,
+        "perPage": 10,
+        "total": 1,
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "fields": undefined,
+          "filter": null,
+          "sortField": undefined,
+          "type": "alert",
+        },
+      ]
+    `);
+  });
+
   test('calls mapSortField', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.find({ options: { sortField: 'name' } });
@@ -356,6 +457,8 @@ describe('find()', () => {
           name: 'myType',
           producer: 'myApp',
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ])
     );
@@ -562,6 +665,8 @@ describe('find()', () => {
           name: 'myType',
           producer: 'myApp',
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ])
     );

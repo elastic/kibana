@@ -32,6 +32,7 @@ describe('CreateMlInferencePipelineApiLogic', () => {
           },
         ],
         indexName: 'my-index',
+        modelId: 'my-model-id',
         pipelineName: 'my-pipeline',
         pipelineDefinition: { processors: [], version: 1 },
       };
@@ -39,7 +40,7 @@ describe('CreateMlInferencePipelineApiLogic', () => {
       expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/indices/my-index/ml_inference/pipeline_processors',
         {
-          body: '{"field_mappings":[{"sourceField":"my_source_field","targetField":"my_target_field"}],"pipeline_definition":{"processors":[],"version":1},"pipeline_name":"my-pipeline"}',
+          body: '{"field_mappings":[{"sourceField":"my_source_field","targetField":"my_target_field"}],"model_id":"my-model-id","pipeline_definition":{"processors":[],"version":1},"pipeline_name":"my-pipeline"}',
         }
       );
       expect(result).toEqual({

@@ -37,7 +37,7 @@ interface AlertTestInstance {
   state: any;
 }
 
-let persistAlertInstances = false; // eslint-disable-line prefer-const
+const persistAlertInstances = false;
 
 type TestRuleState = Record<string, unknown> & {
   aRuleStateKey: string;
@@ -1394,7 +1394,7 @@ describe.skip('The metric threshold alert type', () => {
       await execute(true);
       const recentAction = mostRecentAction(instanceID);
       expect(recentAction.action).toEqual({
-        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
+        alertDetailsUrl: '',
         alertState: 'NO DATA',
         group: '*',
         groupByKeys: undefined,
@@ -1785,8 +1785,7 @@ describe.skip('The metric threshold alert type', () => {
             },
           ],
           sourceId: 'default',
-          filterQuery: '',
-          filterQueryText:
+          filterQuery:
             'host.name:(look.there.is.no.space.after.these.parentheses)and uh.oh: "wow that is bad"',
         },
       });
@@ -1888,6 +1887,11 @@ const mockLibs: any = {
     prepend: (path: string) => path,
   },
   logger,
+  config: {
+    thresholdRule: {
+      groupByPageSize: 10_000,
+    },
+  },
 };
 
 const executor = createMetricThresholdExecutor(mockLibs);

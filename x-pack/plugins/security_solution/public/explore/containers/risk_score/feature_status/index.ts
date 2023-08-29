@@ -10,15 +10,16 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { REQUEST_NAMES, useFetch } from '../../../../common/hooks/use_fetch';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { getRiskScoreIndexStatus } from './api';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 interface RiskScoresFeatureStatus {
   error: unknown;
   // Is transform index an old version?
   isDeprecated: boolean;
-  // does the transform index exist?
+  // Does the transform index exist?
   isEnabled: boolean;
-  // is the user's license platinum?
-  isLicenseValid: boolean;
+  // Does the user has the authorization for the risk score feature?
+  isAuthorized: boolean;
   isLoading: boolean;
   refetch: (indexName: string) => void;
 }
@@ -28,6 +29,8 @@ export const useRiskScoreFeatureStatus = (
   defaultIndex?: string
 ): RiskScoresFeatureStatus => {
   const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
+  const isAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
 
   const { fetch, data, isLoading, error } = useFetch(
     REQUEST_NAMES.GET_RISK_SCORE_DEPRECATED,
@@ -35,35 +38,36 @@ export const useRiskScoreFeatureStatus = (
   );
 
   const response = useMemo(
-    // if license is enabled, let isDeprecated = true so the actual
+    // if authorized is true, let isDeprecated = true so the actual
     // risk score fetch is not called until this check is complete
-    () =>
-      data ? data : { isDeprecated: isPlatinumOrTrialLicense, isEnabled: isPlatinumOrTrialLicense },
-    // isPlatinumOrTrialLicense is initial state, not update requirement
+    () => (data ? data : { isDeprecated: isAuthorized, isEnabled: isAuthorized }),
+    // isAuthorized is initial state, not update requirement
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data]
   );
 
   const searchIndexStatus = useCallback(
     (indexName: string) => {
-      fetch({
-        query: { indexName, entity: riskEntity },
-      });
+      if (isAuthorized) {
+        fetch({
+          query: { indexName, entity: riskEntity },
+        });
+      }
     },
-    [riskEntity, fetch]
+    [isAuthorized, fetch, riskEntity]
   );
 
   useEffect(() => {
-    if (isPlatinumOrTrialLicense && defaultIndex != null) {
+    if (defaultIndex != null) {
       searchIndexStatus(defaultIndex);
     }
-  }, [isPlatinumOrTrialLicense, defaultIndex, searchIndexStatus]);
+  }, [defaultIndex, searchIndexStatus]);
 
   return {
     error,
     isLoading: isLoading || !capabilitiesFetched || defaultIndex == null,
     refetch: searchIndexStatus,
-    isLicenseValid: isPlatinumOrTrialLicense,
+    isAuthorized,
     ...response,
   };
 };

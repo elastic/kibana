@@ -45,6 +45,7 @@ Any modifications made to this file will be overwritten.
   <li><a href="#unmuteAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute</code></a></li>
   <li><a href="#unmuteAllAlerts"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all</code></a></li>
   <li><a href="#updateRule"><code><span class="http-method">put</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
+  <li><a href="#updateRuleAPIKey"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key</code></a></li>
   </ul>
 
   <h1><a name="Alerting">Alerting</a></h1>
@@ -2827,12 +2828,61 @@ Any modifications made to this file will be overwritten.
         <a href="#404_response">404_response</a>
   </div> <!-- method -->
   <hr/>
+  <div class="method"><a name="updateRuleAPIKey"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key</code></pre></div>
+    <div class="method-summary">Updates the API key for a rule. (<span class="nickname">updateRuleAPIKey</span>)</div>
+    <div class="method-notes">The new API key has the credentials of the user that submits the request.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#400_response">400_response</a>
+  </div> <!-- method -->
+  <hr/>
 
   <h2><a name="__Models">Models</a></h2>
   [ Jump to <a href="#__Methods">Methods</a> ]
 
   <h3>Table of Contents</h3>
   <ol>
+    <li><a href="#400_response"><code>400_response</code> - Bad request</a></li>
     <li><a href="#401_response"><code>401_response</code> - Unsuccessful rule API response</a></li>
     <li><a href="#404_response"><code>404_response</code> - </a></li>
     <li><a href="#Count"><code>Count</code> - Count</a></li>
@@ -2848,11 +2898,10 @@ Any modifications made to this file will be overwritten.
     <li><a href="#actions_inner"><code>actions_inner</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter"><code>actions_inner_alerts_filter</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter_query"><code>actions_inner_alerts_filter_query</code> - </a></li>
-    <li><a href="#actions_inner_alerts_filter_query_filters_inner"><code>actions_inner_alerts_filter_query_filters_inner</code> - </a></li>
-    <li><a href="#actions_inner_alerts_filter_query_filters_inner_meta"><code>actions_inner_alerts_filter_query_filters_inner_meta</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter_timeframe"><code>actions_inner_alerts_filter_timeframe</code> - </a></li>
     <li><a href="#actions_inner_alerts_filter_timeframe_hours"><code>actions_inner_alerts_filter_timeframe_hours</code> - </a></li>
     <li><a href="#actions_inner_frequency"><code>actions_inner_frequency</code> - </a></li>
+    <li><a href="#aggtype"><code>aggtype</code> - </a></li>
     <li><a href="#alert_response_properties"><code>alert_response_properties</code> - Legacy alert response properties</a></li>
     <li><a href="#alert_response_properties_executionStatus"><code>alert_response_properties_executionStatus</code> - </a></li>
     <li><a href="#alert_response_properties_schedule"><code>alert_response_properties_schedule</code> - </a></li>
@@ -2904,6 +2953,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#custom_criterion_customMetric_inner"><code>custom_criterion_customMetric_inner</code> - </a></li>
     <li><a href="#custom_criterion_customMetric_inner_oneOf"><code>custom_criterion_customMetric_inner_oneOf</code> - </a></li>
     <li><a href="#custom_criterion_customMetric_inner_oneOf_1"><code>custom_criterion_customMetric_inner_oneOf_1</code> - </a></li>
+    <li><a href="#filter"><code>filter</code> - </a></li>
+    <li><a href="#filter_meta"><code>filter_meta</code> - </a></li>
     <li><a href="#findRules_200_response"><code>findRules_200_response</code> - </a></li>
     <li><a href="#findRules_has_reference_parameter"><code>findRules_has_reference_parameter</code> - </a></li>
     <li><a href="#findRules_search_fields_parameter"><code>findRules_search_fields_parameter</code> - </a></li>
@@ -2920,6 +2971,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#getRuleTypes_200_response_inner_authorized_consumers"><code>getRuleTypes_200_response_inner_authorized_consumers</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts"><code>getRuleTypes_200_response_inner_authorized_consumers_alerts</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner_recovery_action_group"><code>getRuleTypes_200_response_inner_recovery_action_group</code> - </a></li>
+    <li><a href="#groupby"><code>groupby</code> - </a></li>
     <li><a href="#legacyFindAlerts_200_response"><code>legacyFindAlerts_200_response</code> - </a></li>
     <li><a href="#legacyGetAlertTypes_200_response_inner"><code>legacyGetAlertTypes_200_response_inner</code> - </a></li>
     <li><a href="#legacyGetAlertTypes_200_response_inner_actionVariables"><code>legacyGetAlertTypes_200_response_inner_actionVariables</code> - </a></li>
@@ -2932,6 +2984,12 @@ Any modifications made to this file will be overwritten.
     <li><a href="#legacyGetAlertingHealth_200_response_alertingFrameworkHealth_readHealth"><code>legacyGetAlertingHealth_200_response_alertingFrameworkHealth_readHealth</code> - </a></li>
     <li><a href="#non_count_criterion"><code>non_count_criterion</code> - non count criterion</a></li>
     <li><a href="#notify_when"><code>notify_when</code> - </a></li>
+    <li><a href="#params_es_query_rule"><code>params_es_query_rule</code> - </a></li>
+    <li><a href="#params_es_query_rule_oneOf"><code>params_es_query_rule_oneOf</code> - </a></li>
+    <li><a href="#params_es_query_rule_oneOf_1"><code>params_es_query_rule_oneOf_1</code> - </a></li>
+    <li><a href="#params_es_query_rule_oneOf_searchConfiguration"><code>params_es_query_rule_oneOf_searchConfiguration</code> - </a></li>
+    <li><a href="#params_es_query_rule_oneOf_searchConfiguration_query"><code>params_es_query_rule_oneOf_searchConfiguration_query</code> - </a></li>
+    <li><a href="#params_index_threshold_rule"><code>params_index_threshold_rule</code> - </a></li>
     <li><a href="#params_property_apm_anomaly"><code>params_property_apm_anomaly</code> - </a></li>
     <li><a href="#params_property_apm_error_count"><code>params_property_apm_error_count</code> - </a></li>
     <li><a href="#params_property_apm_transaction_duration"><code>params_property_apm_transaction_duration</code> - </a></li>
@@ -2956,9 +3014,24 @@ Any modifications made to this file will be overwritten.
     <li><a href="#rule_response_properties_last_run"><code>rule_response_properties_last_run</code> - </a></li>
     <li><a href="#rule_response_properties_last_run_alerts_count"><code>rule_response_properties_last_run_alerts_count</code> - </a></li>
     <li><a href="#schedule"><code>schedule</code> - </a></li>
+    <li><a href="#thresholdcomparator"><code>thresholdcomparator</code> - </a></li>
+    <li><a href="#timewindowunit"><code>timewindowunit</code> - </a></li>
     <li><a href="#update_rule_request"><code>update_rule_request</code> - Update rule request</a></li>
   </ol>
 
+  <div class="model">
+    <h3><a name="400_response"><code>400_response</code> - Bad request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">Bad Request</div>
+<div class="param">message </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">400</div>
+    </div>  <!-- field-items -->
+  </div>
   <div class="model">
     <h3><a name="401_response"><code>401_response</code> - Unsuccessful rule API response</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
@@ -3103,14 +3176,14 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="actions_inner"><code>actions_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
+    <div class='model-description'>An action that runs under defined conditions.</div>
     <div class="field-items">
       <div class="param">alerts_filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter">actions_inner_alerts_filter</a></span>  </div>
 <div class="param">connector_type_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. This property appears in responses but cannot be set in requests. </div>
 <div class="param">frequency (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_frequency">actions_inner_frequency</a></span>  </div>
-<div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name for the actions. If you don't need to group actions, set to <code>default</code>. </div>
-<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
-<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. The <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
+<div class="param">group </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to <code>default</code>. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. The <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
 <div class="param">uuid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A universally unique identifier (UUID) for the action. </div>
     </div>  <!-- field-items -->
   </div>
@@ -3127,34 +3200,7 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'>Defines a query filter that determines whether the action runs.</div>
     <div class="field-items">
       <div class="param">kql (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A filter written in Kibana Query Language (KQL). </div>
-<div class="param">filters (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query_filters_inner">array[actions_inner_alerts_filter_query_filters_inner]</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="actions_inner_alerts_filter_query_filters_inner"><code>actions_inner_alerts_filter_query_filters_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the <code>kbn-es-query</code> package.</div>
-    <div class="field-items">
-      <div class="param">meta (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query_filters_inner_meta">actions_inner_alerts_filter_query_filters_inner_meta</a></span>  </div>
-<div class="param">query (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
-<div class="param">Dollarstate (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="actions_inner_alerts_filter_query_filters_inner_meta"><code>actions_inner_alerts_filter_query_filters_inner_meta</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">alias (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">controlledBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">disabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
-<div class="param">field (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">isMultiIndex (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
-<div class="param">key (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">negate (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
-<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
-<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">value (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">filters (optional)</div><div class="param-desc"><span class="param-type"><a href="#filter">array[filter]</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -3176,12 +3222,18 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="actions_inner_frequency"><code>actions_inner_frequency</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The parameters that affect how often actions are generated. NOTE: You cannot specify these parameters when <code>notify_when</code> or <code>throttle</code> are defined at the rule level.</div>
+    <div class='model-description'>The properties that affect how often actions are generated. If the rule type supports setting <code>summary</code> to <code>true</code>, the action can be a summary of alerts at the specified notification interval. Otherwise, an action runs for each alert at the specified notification interval. NOTE: You cannot specify these parameters when <code>notify_when</code> or <code>throttle</code> are defined at the rule level.</div>
     <div class="field-items">
       <div class="param">notify_when </div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
 <div class="param">summary </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the action is a summary. </div>
 <div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values. </div>
     </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="aggtype"><code>aggtype</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The type of aggregation to perform.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="alert_response_properties"><code>alert_response_properties</code> - Legacy alert response properties</a> <a class="up" href="#__Models">Up</a></h3>
@@ -3359,7 +3411,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
 <div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
-<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for an Elasticsearch query rule. </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#params_es_query_rule">params_es_query_rule</a></span>  </div>
 <div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.es-query</div>
@@ -3395,7 +3447,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
 <div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
-<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for an index threshold rule. </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#params_index_threshold_rule">params_index_threshold_rule</a></span>  </div>
 <div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.index-threshold</div>
@@ -4073,6 +4125,33 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="filter"><code>filter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the <code>kbn-es-query</code> package.</div>
+    <div class="field-items">
+      <div class="param">meta (optional)</div><div class="param-desc"><span class="param-type"><a href="#filter_meta">filter_meta</a></span>  </div>
+<div class="param">query (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+<div class="param">Dollarstate (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="filter_meta"><code>filter_meta</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">alias (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">controlledBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">disabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">field (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">isMultiIndex (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">key (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">negate (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">value (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="findRules_200_response"><code>findRules_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
@@ -4230,6 +4309,12 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="groupby"><code>groupby</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Indicates whether the aggregation is applied over all documents (<code>all</code>) or split into groups (<code>top</code>) using a grouping field (<code>termField</code>). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to <code>termSize</code> number of groups) are checked.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="legacyFindAlerts_200_response"><code>legacyFindAlerts_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
@@ -4354,6 +4439,110 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'>Indicates how often alerts generate actions. Valid values include: <code>onActionGroupChange</code>: Actions run when the alert status changes; <code>onActiveAlert</code>: Actions run when the alert becomes active and at each check interval while the rule conditions are met; <code>onThrottleInterval</code>: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify <code>notify_when</code> at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.</div>
     <div class="field-items">
           </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="params_es_query_rule"><code>params_es_query_rule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">aggField (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the numeric field that is used in the aggregation. This property is required when <code>aggType</code> is <code>avg</code>, <code>max</code>, <code>min</code> or <code>sum</code>. </div>
+<div class="param">aggType (optional)</div><div class="param-desc"><span class="param-type"><a href="#aggtype">aggtype</a></span>  </div>
+<div class="param">excludeHitsFromPreviousRun (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether to exclude matches from previous runs. If <code>true</code>, you can avoid alert duplication by excluding documents that have already been detected by the previous rule run. This option is not available when a grouping field is specified. </div>
+<div class="param">groupBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#groupby">groupby</a></span>  </div>
+<div class="param">searchConfiguration (optional)</div><div class="param-desc"><span class="param-type"><a href="#params_es_query_rule_oneOf_searchConfiguration">params_es_query_rule_oneOf_searchConfiguration</a></span>  </div>
+<div class="param">searchType </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of query, in this case a query that uses Elasticsearch Query DSL. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">esQuery</div>
+<div class="param">size </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The number of documents to pass to the configured actions when the threshold condition is met. </div>
+<div class="param">termField (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> This property is required when <code>groupBy</code> is <code>top</code>. The name of the field that is used for grouping the aggregation. </div>
+<div class="param">termSize (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> This property is required when <code>groupBy</code> is <code>top</code>. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields. </div>
+<div class="param">threshold </div><div class="param-desc"><span class="param-type"><a href="#integer">array[Integer]</a></span> The threshold value that is used with the <code>thresholdComparator</code>. If the <code>thresholdComparator</code> is <code>between</code> or <code>notBetween</code>, you must specify the boundary values. </div>
+<div class="param">thresholdComparator </div><div class="param-desc"><span class="param-type"><a href="#thresholdcomparator">thresholdcomparator</a></span>  </div>
+<div class="param">timeField </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The field that is used to calculate the time window. </div>
+<div class="param">timeWindowSize </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The size of the time window (in <code>timeWindowUnit</code> units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection. </div>
+<div class="param">timeWindowUnit </div><div class="param-desc"><span class="param-type"><a href="#timewindowunit">timewindowunit</a></span>  </div>
+<div class="param">esQuery </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The query definition, which uses Elasticsearch Query DSL. </div>
+<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#oneOf<array,string>">oneOf<array,string></a></span> The indices to query. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="params_es_query_rule_oneOf"><code>params_es_query_rule_oneOf</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The parameters for an Elasticsearch query rule that uses KQL or Lucene to define the query.</div>
+    <div class="field-items">
+      <div class="param">aggField (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the numeric field that is used in the aggregation. This property is required when <code>aggType</code> is <code>avg</code>, <code>max</code>, <code>min</code> or <code>sum</code>. </div>
+<div class="param">aggType (optional)</div><div class="param-desc"><span class="param-type"><a href="#aggtype">aggtype</a></span>  </div>
+<div class="param">excludeHitsFromPreviousRun (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether to exclude matches from previous runs. If <code>true</code>, you can avoid alert duplication by excluding documents that have already been detected by the previous rule run. This option is not available when a grouping field is specified. </div>
+<div class="param">groupBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#groupby">groupby</a></span>  </div>
+<div class="param">searchConfiguration (optional)</div><div class="param-desc"><span class="param-type"><a href="#params_es_query_rule_oneOf_searchConfiguration">params_es_query_rule_oneOf_searchConfiguration</a></span>  </div>
+<div class="param">searchType </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of query, in this case a text-based query that uses KQL or Lucene. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">searchSource</div>
+<div class="param">size </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The number of documents to pass to the configured actions when the threshold condition is met. </div>
+<div class="param">termField (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> This property is required when <code>groupBy</code> is <code>top</code>. The name of the field that is used for grouping the aggregation. </div>
+<div class="param">termSize (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> This property is required when <code>groupBy</code> is <code>top</code>. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields. </div>
+<div class="param">threshold </div><div class="param-desc"><span class="param-type"><a href="#integer">array[Integer]</a></span> The threshold value that is used with the <code>thresholdComparator</code>. If the <code>thresholdComparator</code> is <code>between</code> or <code>notBetween</code>, you must specify the boundary values. </div>
+<div class="param">thresholdComparator </div><div class="param-desc"><span class="param-type"><a href="#thresholdcomparator">thresholdcomparator</a></span>  </div>
+<div class="param">timeField (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The field that is used to calculate the time window. </div>
+<div class="param">timeWindowSize </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The size of the time window (in <code>timeWindowUnit</code> units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection. </div>
+<div class="param">timeWindowUnit </div><div class="param-desc"><span class="param-type"><a href="#timewindowunit">timewindowunit</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="params_es_query_rule_oneOf_1"><code>params_es_query_rule_oneOf_1</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The parameters for an Elasticsearch query rule that uses Elasticsearch Query DSL to define the query.</div>
+    <div class="field-items">
+      <div class="param">aggField (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the numeric field that is used in the aggregation. This property is required when <code>aggType</code> is <code>avg</code>, <code>max</code>, <code>min</code> or <code>sum</code>. </div>
+<div class="param">aggType (optional)</div><div class="param-desc"><span class="param-type"><a href="#aggtype">aggtype</a></span>  </div>
+<div class="param">esQuery </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The query definition, which uses Elasticsearch Query DSL. </div>
+<div class="param">excludeHitsFromPreviousRun (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether to exclude matches from previous runs. If <code>true</code>, you can avoid alert duplication by excluding documents that have already been detected by the previous rule run. This option is not available when a grouping field is specified. </div>
+<div class="param">groupBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#groupby">groupby</a></span>  </div>
+<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#oneOf<array,string>">oneOf<array,string></a></span> The indices to query. </div>
+<div class="param">searchType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of query, in this case a query that uses Elasticsearch Query DSL. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">esQuery</div>
+<div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The number of documents to pass to the configured actions when the threshold condition is met. </div>
+<div class="param">termField (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> This property is required when <code>groupBy</code> is <code>top</code>. The name of the field that is used for grouping the aggregation. </div>
+<div class="param">termSize (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> This property is required when <code>groupBy</code> is <code>top</code>. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields. </div>
+<div class="param">threshold </div><div class="param-desc"><span class="param-type"><a href="#integer">array[Integer]</a></span> The threshold value that is used with the <code>thresholdComparator</code>. If the <code>thresholdComparator</code> is <code>between</code> or <code>notBetween</code>, you must specify the boundary values. </div>
+<div class="param">thresholdComparator </div><div class="param-desc"><span class="param-type"><a href="#thresholdcomparator">thresholdcomparator</a></span>  </div>
+<div class="param">timeField </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The field that is used to calculate the time window. </div>
+<div class="param">timeWindowSize </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The size of the time window (in <code>timeWindowUnit</code> units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection. </div>
+<div class="param">timeWindowUnit </div><div class="param-desc"><span class="param-type"><a href="#timewindowunit">timewindowunit</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="params_es_query_rule_oneOf_searchConfiguration"><code>params_es_query_rule_oneOf_searchConfiguration</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.</div>
+    <div class="field-items">
+      <div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#filter">array[filter]</a></span>  </div>
+<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The indices to query. </div>
+<div class="param">query (optional)</div><div class="param-desc"><span class="param-type"><a href="#params_es_query_rule_oneOf_searchConfiguration_query">params_es_query_rule_oneOf_searchConfiguration_query</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="params_es_query_rule_oneOf_searchConfiguration_query"><code>params_es_query_rule_oneOf_searchConfiguration_query</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">language (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">query (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="params_index_threshold_rule"><code>params_index_threshold_rule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The parameters for an index threshold rule.</div>
+    <div class="field-items">
+      <div class="param">aggField (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the numeric field that is used in the aggregation. This property is required when <code>aggType</code> is <code>avg</code>, <code>max</code>, <code>min</code> or <code>sum</code>. </div>
+<div class="param">aggType (optional)</div><div class="param-desc"><span class="param-type"><a href="#aggtype">aggtype</a></span>  </div>
+<div class="param">filterKuery (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A KQL expression thats limits the scope of alerts. </div>
+<div class="param">groupBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#groupby">groupby</a></span>  </div>
+<div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The indices to query. </div>
+<div class="param">termField (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> This property is required when <code>groupBy</code> is <code>top</code>. The name of the field that is used for grouping the aggregation. </div>
+<div class="param">termSize (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> This property is required when <code>groupBy</code> is <code>top</code>. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields. </div>
+<div class="param">threshold </div><div class="param-desc"><span class="param-type"><a href="#integer">array[Integer]</a></span> The threshold value that is used with the <code>thresholdComparator</code>. If the <code>thresholdComparator</code> is <code>between</code> or <code>notBetween</code>, you must specify the boundary values. </div>
+<div class="param">thresholdComparator </div><div class="param-desc"><span class="param-type"><a href="#thresholdcomparator">thresholdcomparator</a></span>  </div>
+<div class="param">timeField </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The field that is used to calculate the time window. </div>
+<div class="param">timeWindowSize </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The size of the time window (in <code>timeWindowUnit</code> units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection. </div>
+<div class="param">timeWindowUnit </div><div class="param-desc"><span class="param-type"><a href="#timewindowunit">timewindowunit</a></span>  </div>
+    </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="params_property_apm_anomaly"><code>params_property_apm_anomaly</code> - </a> <a class="up" href="#__Models">Up</a></h3>
@@ -4686,6 +4875,18 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">interval (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="thresholdcomparator"><code>thresholdcomparator</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The comparison function for the threshold. For example, &quot;is above&quot;, &quot;is above or equals&quot;, &quot;is below&quot;, &quot;is below or equals&quot;, &quot;is between&quot;, and &quot;is not between&quot;.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="timewindowunit"><code>timewindowunit</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The type of units for the time window: seconds, minutes, hours, or days.</div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="update_rule_request"><code>update_rule_request</code> - Update rule request</a> <a class="up" href="#__Models">Up</a></h3>

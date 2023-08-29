@@ -33,7 +33,9 @@
       "savedObjectsTaggingOss",
       "screenshotMode",
       "usageCollection",
-      "taskManager"
+      "taskManager",
+      "serverless",
+      "noDataPage"
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationUtil"]
   }

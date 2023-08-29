@@ -25,6 +25,7 @@ interface PolicyArtifactsDeleteModalProps {
   labels: typeof POLICY_ARTIFACT_DELETE_MODAL_LABELS;
 }
 
+// eslint-disable-next-line react/display-name
 export const PolicyArtifactsDeleteModal = React.memo<PolicyArtifactsDeleteModalProps>(
   ({ policyId, policyName, apiClient, exception, onClose, labels }) => {
     const toasts = useToasts();

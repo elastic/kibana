@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RESPONSE_BASE_TEST_ID } from '../../left/components/test_ids';
 import { CONTENT_TEST_ID, HEADER_TEST_ID } from './expandable_section';
 
 /* Header */
@@ -31,14 +32,14 @@ export const FLYOUT_HEADER_CHAT_BUTTON_TEST_ID = 'newChatById';
 export const ABOUT_SECTION_TEST_ID = 'securitySolutionDocumentDetailsFlyoutAboutSection';
 export const ABOUT_SECTION_HEADER_TEST_ID = ABOUT_SECTION_TEST_ID + HEADER_TEST_ID;
 export const ABOUT_SECTION_CONTENT_TEST_ID = ABOUT_SECTION_TEST_ID + CONTENT_TEST_ID;
+export const RULE_SUMMARY_BUTTON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutRuleSummaryButton';
 export const DESCRIPTION_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutDescriptionTitle';
 export const DESCRIPTION_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutDescriptionDetails';
-export const DESCRIPTION_EXPAND_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutDescriptionExpandButton';
-export const DESCRIPTION_NAVIGATE_TO_RULE_TEST_ID = 'goToRuleDetails';
 export const REASON_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonTitle';
 export const REASON_DETAILS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonDetails';
+export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutReasonDetailsPreviewButton';
 export const MITRE_ATTACK_TITLE_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackTitle';
 export const MITRE_ATTACK_DETAILS_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackDetails';
 
@@ -53,86 +54,91 @@ export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsTitle';
 export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsDetails';
-export const HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK = 'summary-view-go-to-table-link';
-export const INVESTIGATION_GUIDE_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInvestigationGuideButton';
+export const HIGHLIGHTED_FIELDS_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsCell';
+export const HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsBasicCell';
+export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsLinkedCell';
+export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsAgentStatusCell';
 
-/* Insights section*/
+export const INVESTIGATION_GUIDE_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInvestigationGuide';
+export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button`;
+export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading`;
+export const INVESTIGATION_GUIDE_NO_DATA_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}NoData`;
+
+/* Insights section */
 
 export const INSIGHTS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsights';
-export const INSIGHTS_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsHeader';
-export const ENTITIES_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesHeader';
-export const ENTITIES_CONTENT_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesContent';
-export const ENTITIES_USER_CONTENT_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesUserContent';
-export const ENTITIES_HOST_CONTENT_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesHostContent';
-export const ENTITIES_VIEW_ALL_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesViewAllButton';
-export const ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntityPanelToggleButton';
-export const ENTITY_PANEL_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelHeader';
-export const ENTITY_PANEL_HEADER_LEFT_SECTION_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderLeftSection';
-export const ENTITY_PANEL_HEADER_RIGHT_SECTION_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderRightSection';
-export const ENTITY_PANEL_CONTENT_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntityPanelContent';
-export const TECHNICAL_PREVIEW_ICON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutTechnicalPreviewIcon';
+export const INSIGHTS_HEADER_TEST_ID = `${INSIGHTS_TEST_ID}Header`;
+
+/* Summary row */
+
+export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Loading`;
+export const SUMMARY_ROW_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Icon`;
+export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
+
+/* Insights Entities */
+
+export const INSIGHTS_ENTITIES_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsEntities';
+export const INSIGHTS_ENTITIES_NO_DATA_TEST_ID = `${INSIGHTS_ENTITIES_TEST_ID}NoData` as const;
 export const ENTITIES_USER_OVERVIEW_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesUserOverview';
-export const ENTITIES_USER_OVERVIEW_IP_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesUserOverviewIP';
-export const ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesUserOverviewRiskLevel';
+export const ENTITIES_USER_OVERVIEW_LINK_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Link`;
+export const ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Domain`;
+export const ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}LastSeen`;
+export const ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}RiskLevel`;
 export const ENTITIES_HOST_OVERVIEW_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesHostOverview';
-export const ENTITIES_HOST_OVERVIEW_IP_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesHostOverviewIP';
-export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesHostOverviewRiskLevel';
+export const ENTITIES_HOST_OVERVIEW_LINK_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}Link`;
+export const ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}OsFamily`;
+export const ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}LastSeen`;
+export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}RiskLevel`;
+export const TECHNICAL_PREVIEW_ICON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutTechnicalPreviewIcon';
 
 /* Insights Threat Intelligence */
 
 export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsThreatIntelligence';
-export const INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Title`;
-export const INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Content`;
-export const INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ViewAllButton`;
-export const INSIGHTS_THREAT_INTELLIGENCE_LOADING_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Loading`;
-export const INSIGHTS_THREAT_INTELLIGENCE_VALUE_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Value`;
+export const INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Container`;
 
 /* Insights Correlations */
 
 export const INSIGHTS_CORRELATIONS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsCorrelations';
-export const INSIGHTS_CORRELATIONS_TITLE_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Title`;
-export const INSIGHTS_CORRELATIONS_CONTENT_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Content`;
-export const INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}ViewAllButton`;
-export const INSIGHTS_CORRELATIONS_LOADING_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Loading`;
-export const INSIGHTS_CORRELATIONS_VALUE_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Value`;
+export const INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsSupressedAlerts';
+export const SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutSupressedAlertsTechnicalPreview';
+export const INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsRelatedCases';
+export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsRelatedAlertsBySession';
+export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsRelatedAlertsBySameSourceEvent';
+export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsRelatedAlertsByAncestry';
 
 /* Insights Prevalence */
 
 export const INSIGHTS_PREVALENCE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsPrevalence';
-export const INSIGHTS_PREVALENCE_TITLE_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}Title`;
-export const INSIGHTS_PREVALENCE_CONTENT_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}Content`;
-export const INSIGHTS_PREVALENCE_VIEW_ALL_BUTTON_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}ViewAllButton`;
-export const INSIGHTS_PREVALENCE_VALUE_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}Value`;
 
 /* Visualizations section */
 
 export const VISUALIZATIONS_SECTION_TEST_ID = 'securitySolutionDocumentDetailsVisualizationsTitle';
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
   'securitySolutionDocumentDetailsVisualizationsTitleHeader';
-export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerPreview';
-export const ANALYZER_TREE_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTree';
-export const ANALYZER_TREE_VIEW_DETAILS_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsAnalayzerTreeViewDetailsButton';
-export const ANALYZER_TREE_LOADING_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTreeLoading';
-export const ANALYZER_TREE_ERROR_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTreeError';
+export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalyzerPreview';
 export const SESSION_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsSessionPreview';
-export const SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsSessionPreviewViewDetailsButton';
+
+/* Response section */
+
+export const RESPONSE_SECTION_TEST_ID = 'securitySolutionDocumentDetailsFlyoutResponseSection';
+export const RESPONSE_SECTION_HEADER_TEST_ID = RESPONSE_SECTION_TEST_ID + HEADER_TEST_ID;
+export const RESPONSE_SECTION_CONTENT_TEST_ID = RESPONSE_SECTION_TEST_ID + CONTENT_TEST_ID;
+export const RESPONSE_BUTTON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutResponseButton';
+export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_BASE_TEST_ID}Empty` as const;

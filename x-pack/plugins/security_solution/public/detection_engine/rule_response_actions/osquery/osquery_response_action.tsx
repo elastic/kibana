@@ -9,6 +9,8 @@ import React, { useMemo } from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
+import { AppFeatureKey } from '../../../../common';
 import { ResponseActionFormField } from './osquery_response_action_form_field';
 import type { ArrayItem } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
@@ -29,6 +31,9 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
   );
   const isMounted = useIsMounted();
 
+  // serverless component that is returned when users do not have Endpoint.Complete tier
+  const UpsellingComponent = useUpsellingComponent(AppFeatureKey.osqueryAutomatedResponseActions);
+
   if (osquery) {
     const { disabled, permissionDenied } = osquery.fetchInstallationStatus();
     const disabledOsqueryPermission = !(
@@ -37,6 +42,10 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
         (application?.capabilities?.osquery?.readSavedQueries ||
           application?.capabilities?.osquery?.readPacks))
     );
+
+    if (UpsellingComponent) {
+      return <UpsellingComponent />;
+    }
 
     if (permissionDenied || disabledOsqueryPermission) {
       return (
@@ -76,6 +85,7 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
       );
     }
 
+    // @ts-expect-error ts upgrade v4.7.4
     if (isMounted() && OsqueryForm) {
       return (
         <UseField

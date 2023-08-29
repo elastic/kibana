@@ -261,4 +261,54 @@ export const fleetUsagesSchema: RootSchema<any> = {
       _meta: { description: 'Top messages from fleet server error logs' },
     },
   },
+  agents_per_os: {
+    type: 'array',
+    items: {
+      properties: {
+        name: {
+          type: 'keyword',
+          _meta: {
+            description: 'Agent OS enrolled to this kibana',
+          },
+        },
+        version: {
+          type: 'keyword',
+          _meta: {
+            description: 'Agent OS version enrolled to this kibana',
+          },
+        },
+        count: {
+          type: 'long',
+          _meta: {
+            description: 'Number of agents enrolled that use this OS',
+          },
+        },
+      },
+    },
+  },
+  components_status: {
+    type: 'array',
+    items: {
+      properties: {
+        id: {
+          type: 'keyword',
+          _meta: {
+            description: 'Component Id',
+          },
+        },
+        status: {
+          type: 'keyword',
+          _meta: {
+            description: 'Component Status',
+          },
+        },
+        count: {
+          type: 'long',
+          _meta: {
+            description: 'Number of this component with this status',
+          },
+        },
+      },
+    },
+  },
 };

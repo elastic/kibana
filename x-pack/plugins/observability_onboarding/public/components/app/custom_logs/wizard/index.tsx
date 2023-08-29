@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import { ComponentType } from 'react';
-import { createWizardContext } from '../../../../context/create_wizard_context';
+import { i18n } from '@kbn/i18n';
+import { IntegrationOptions } from '../../../../hooks/use_create_integration';
+import {
+  createWizardContext,
+  Step,
+} from '../../../../context/create_wizard_context';
 import { ConfigureLogs } from './configure_logs';
 import { Inspect } from './inspect';
 import { InstallElasticAgent } from './install_elastic_agent';
 import { SelectLogs } from './select_logs';
 
 interface WizardState {
+  integrationName: string;
+  lastCreatedIntegration?: IntegrationOptions;
   datasetName: string;
   serviceName: string;
   logFilePaths: string[];
@@ -34,6 +40,7 @@ interface WizardState {
 }
 
 const initialState: WizardState = {
+  integrationName: '',
   datasetName: '',
   serviceName: '',
   logFilePaths: [''],
@@ -51,11 +58,19 @@ export type CustomLogsSteps =
   | 'installElasticAgent'
   | 'inspect';
 
-const steps: Record<CustomLogsSteps, ComponentType<{}>> = {
-  selectLogs: SelectLogs,
-  configureLogs: ConfigureLogs,
-  installElasticAgent: InstallElasticAgent,
-  inspect: Inspect,
+const steps: Record<CustomLogsSteps, Step> = {
+  selectLogs: { component: SelectLogs },
+  configureLogs: { component: ConfigureLogs },
+  installElasticAgent: {
+    component: InstallElasticAgent,
+    title: i18n.translate(
+      'xpack.observability_onboarding.customLogs.installShipper.title',
+      {
+        defaultMessage: 'Install shipper to collect logs',
+      }
+    ),
+  },
+  inspect: { component: Inspect },
 };
 
 const {
@@ -64,7 +79,7 @@ const {
   routes: customLogsRoutes,
 } = createWizardContext({
   initialState,
-  initialStep: 'selectLogs',
+  initialStep: 'configureLogs',
   steps,
   basePath: '/customLogs',
 });

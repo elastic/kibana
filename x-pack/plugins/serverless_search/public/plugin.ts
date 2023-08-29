@@ -47,14 +47,15 @@ export class ServerlessSearchPlugin
         return await renderApp(element, coreStart, { userProfile, ...services });
       },
     });
+
     core.application.register({
-      id: 'serverlessIndexingApi',
-      title: i18n.translate('xpack.serverlessSearch.app.indexingApi.title', {
-        defaultMessage: 'Indexing API',
+      id: 'serverlessConnectors',
+      title: i18n.translate('xpack.serverlessSearch.app.connectors.title', {
+        defaultMessage: 'Connectors',
       }),
-      appRoute: '/app/indexing_api',
+      appRoute: '/app/connectors',
       async mount({ element }: AppMountParameters) {
-        const { renderApp } = await import('./application/indexing_api');
+        const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
         const { security } = services;
         docLinks.setDocLinks(coreStart.docLinks.links);
@@ -64,16 +65,16 @@ export class ServerlessSearchPlugin
         return await renderApp(element, coreStart, { userProfile, ...services });
       },
     });
+
     return {};
   }
 
   public start(
     core: CoreStart,
-    { serverless, management, observabilityShared, cloud }: ServerlessSearchPluginStartDependencies
+    { serverless, management, cloud }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     serverless.setProjectHome('/app/elasticsearch');
     serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
-    observabilityShared.setIsSidebarEnabled(false);
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],

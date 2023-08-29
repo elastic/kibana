@@ -35,11 +35,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await svlCommonNavigation.sidenav.expectSectionClosed('project_settings_project_nav');
 
-      // TODO: test something oblt project specific instead of generic discover
       // navigate to discover
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'discover' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'discover' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover:log-explorer' });
+      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'discover:log-explorer' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'discover:log-explorer',
+      });
       await expect(await browser.getCurrentUrl()).contain('/app/discover');
 
       // check the aiops subsection
@@ -78,12 +79,28 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('navigate using search', async () => {
       await svlCommonNavigation.search.showSearch();
-      // TODO: test something oblt project specific instead of generic discover
-      await svlCommonNavigation.search.searchFor('discover');
+      await svlCommonNavigation.search.searchFor('discover log explorer');
       await svlCommonNavigation.search.clickOnOption(0);
       await svlCommonNavigation.search.hideSearch();
 
-      await expect(await browser.getCurrentUrl()).contain('/app/discover');
+      await expect(await browser.getCurrentUrl()).contain('/app/discover#/p/log-explorer');
+    });
+
+    it('shows cases in sidebar navigation', async () => {
+      await svlCommonNavigation.expectExists();
+
+      await svlCommonNavigation.sidenav.expectLinkExists({
+        deepLinkId: 'observability-overview:cases',
+      });
+    });
+
+    it('navigates to cases app', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:cases',
+      });
+      expect(await browser.getCurrentUrl()).contain('/app/observability/cases');
     });
   });
 }

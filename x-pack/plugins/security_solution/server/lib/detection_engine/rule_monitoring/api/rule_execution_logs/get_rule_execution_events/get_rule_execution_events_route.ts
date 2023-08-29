@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -22,43 +23,52 @@ import {
  * Accepts rule's saved object ID (`rule.id`) and options for filtering, sorting and pagination.
  */
 export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: GET_RULE_EXECUTION_EVENTS_URL,
-      validate: {
-        params: buildRouteValidation(GetRuleExecutionEventsRequestParams),
-        query: buildRouteValidation(GetRuleExecutionEventsRequestQuery),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const { params, query } = request;
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidation(GetRuleExecutionEventsRequestParams),
+            query: buildRouteValidation(GetRuleExecutionEventsRequestQuery),
+          },
+        },
+      },
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<GetRuleExecutionEventsResponse>> => {
+        const { params, query } = request;
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const ctx = await context.resolve(['securitySolution']);
-        const executionLog = ctx.securitySolution.getRuleExecutionLog();
-        const executionEventsResponse = await executionLog.getExecutionEvents({
-          ruleId: params.ruleId,
-          eventTypes: query.event_types,
-          logLevels: query.log_levels,
-          sortOrder: query.sort_order,
-          page: query.page,
-          perPage: query.per_page,
-        });
+        try {
+          const ctx = await context.resolve(['securitySolution']);
+          const executionLog = ctx.securitySolution.getRuleExecutionLog();
+          const executionEventsResponse = await executionLog.getExecutionEvents({
+            ruleId: params.ruleId,
+            eventTypes: query.event_types,
+            logLevels: query.log_levels,
+            sortOrder: query.sort_order,
+            page: query.page,
+            perPage: query.per_page,
+          });
 
-        const responseBody: GetRuleExecutionEventsResponse = executionEventsResponse;
-
-        return response.ok({ body: responseBody });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return response.ok({ body: executionEventsResponse });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

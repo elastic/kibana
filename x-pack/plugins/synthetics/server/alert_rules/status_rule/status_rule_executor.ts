@@ -22,7 +22,7 @@ import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { StatusRuleParams } from '../../../common/rules/status_rule';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   OverviewStatus,
   OverviewStatusMetaData,
 } from '../../../common/runtime_types';
@@ -47,7 +47,7 @@ export class StatusRuleExecutor {
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
-  monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
+  monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
 
   public locationIdNameMap: Record<string, string> = {};
 

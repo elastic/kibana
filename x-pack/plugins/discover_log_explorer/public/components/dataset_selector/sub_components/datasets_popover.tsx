@@ -45,7 +45,8 @@ export const DatasetsPopover = ({
   return (
     <EuiPopover
       id={POPOVER_ID}
-      data-test-subj={POPOVER_ID}
+      data-test-subj="datasetSelectorPopover"
+      anchorPosition={isMobile ? 'downCenter' : 'downLeft'}
       button={
         <EuiButton
           css={buttonStyles}
@@ -53,6 +54,7 @@ export const DatasetsPopover = ({
           iconSide="right"
           onClick={onClick}
           fullWidth={isMobile}
+          data-test-subj="datasetSelectorPopoverButton"
         >
           {iconType ? (
             <EuiIcon type={iconType} />
@@ -73,7 +75,12 @@ export const DatasetsPopover = ({
       {...(isMobile && { display: 'block' })}
       {...props}
     >
-      <EuiPanel paddingSize="none" hasShadow={false} css={panelStyle}>
+      <EuiPanel
+        paddingSize="none"
+        hasShadow={false}
+        css={panelStyle}
+        data-test-subj="datasetSelectorContent"
+      >
         <Title size="xxs">
           <span>{selectDatasetLabel}</span>
         </Title>

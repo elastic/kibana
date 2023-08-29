@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiCodeBlock } from '@elastic/eui';
-import { CategoryFieldExample } from '../../../../../../../../../common/types/categories';
+import { CategoryFieldExample } from '@kbn/ml-category-validator';
 
 interface Props {
   fieldExamples: CategoryFieldExample[] | null;

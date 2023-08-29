@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiCollapsibleNav, EuiCollapsibleNavProps, useIsWithinMinBreakpoint } from '@elastic/eui';
+import { EuiCollapsibleNav, EuiCollapsibleNavProps } from '@elastic/eui';
 
 const SIZE_EXPANDED = 248;
-const SIZE_COLLAPSED = 48;
+const SIZE_COLLAPSED = 0;
 
 export interface ProjectNavigationProps {
   isOpen: boolean;
@@ -31,27 +31,30 @@ export const ProjectNavigation: React.FC<ProjectNavigationProps> = ({
     flex-direction: row,
   `;
 
-  // on small screen isOpen hides the nav,
-  // on larger screen isOpen makes it smaller
   const DOCKED_BREAKPOINT = 's' as const;
-  const isCollapsible = useIsWithinMinBreakpoint(DOCKED_BREAKPOINT);
-  const isVisible = isCollapsible ? true : isOpen;
-  const isCollapsed = isCollapsible ? !isOpen : false;
+  const isVisible = isOpen;
 
   return (
-    <EuiCollapsibleNav
-      css={collabsibleNavCSS}
-      isOpen={isVisible}
-      showButtonIfDocked={true}
-      onClose={closeNav}
-      isDocked={true}
-      size={isCollapsed ? SIZE_COLLAPSED : SIZE_EXPANDED}
-      hideCloseButton={false}
-      dockedBreakpoint={DOCKED_BREAKPOINT}
-      ownFocus={false}
-      button={button}
-    >
-      {!isCollapsed && children}
-    </EuiCollapsibleNav>
+    <>
+      {
+        /* must render the tree to initialize the navigation, even if it shouldn't be visible */
+        !isOpen && <div hidden>{children}</div>
+      }
+      <EuiCollapsibleNav
+        className="projectLayoutSideNav"
+        css={collabsibleNavCSS}
+        isOpen={isVisible /* only affects docked state */}
+        showButtonIfDocked={true}
+        onClose={closeNav}
+        isDocked={true}
+        size={isVisible ? SIZE_EXPANDED : SIZE_COLLAPSED}
+        hideCloseButton={false}
+        dockedBreakpoint={DOCKED_BREAKPOINT}
+        ownFocus={false}
+        button={button}
+      >
+        {isOpen && children}
+      </EuiCollapsibleNav>
+    </>
   );
 };

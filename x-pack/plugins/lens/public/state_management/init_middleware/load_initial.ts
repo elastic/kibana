@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { setState, initEmpty, LensStoreDeps } from '..';
+import { setState, initExisting, initEmpty, LensStoreDeps } from '..';
 import { disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
@@ -98,14 +98,8 @@ export function loadInitial(
   },
   autoApplyDisabled: boolean
 ) {
-  const {
-    lensServices,
-    datasourceMap,
-    embeddableEditorIncomingState,
-    initialContext,
-    initialStateFromLocator,
-    visualizationMap,
-  } = storeDeps;
+  const { lensServices, datasourceMap, initialContext, initialStateFromLocator, visualizationMap } =
+    storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
     getPreloadedState(storeDeps);
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
@@ -171,7 +165,7 @@ export function loadInitial(
             const currentSessionId =
               initialStateFromLocator?.searchSessionId || data.search.session.getSessionId();
             store.dispatch(
-              setState({
+              initExisting({
                 isSaveable: true,
                 filters: initialStateFromLocator.filters || data.query.filterManager.getFilters(),
                 query: initialStateFromLocator.query || emptyState.query,
@@ -331,14 +325,13 @@ export function loadInitial(
               }) => {
                 const currentSessionId = data.search.session.getSessionId();
                 store.dispatch(
-                  setState({
+                  initExisting({
                     isSaveable: true,
                     sharingSavedObjectProps,
                     filters: data.query.filterManager.getFilters(),
                     query: doc.state.query,
                     searchSessionId:
                       dashboardFeatureFlag.allowByValueEmbeddables &&
-                      Boolean(embeddableEditorIncomingState?.originatingApp) &&
                       !(initialInput as LensByReferenceInput)?.savedObjectId &&
                       currentSessionId
                         ? currentSessionId

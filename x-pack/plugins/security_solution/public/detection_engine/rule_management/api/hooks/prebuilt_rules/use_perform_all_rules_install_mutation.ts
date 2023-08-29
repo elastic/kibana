@@ -14,6 +14,7 @@ import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
 import { performInstallAllRules } from '../../api';
+import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview';
 
 export const PERFORM_ALL_RULES_INSTALLATION_KEY = [
   'POST',
@@ -30,6 +31,7 @@ export const usePerformAllRulesInstallMutation = (
   const invalidateFetchPrebuiltRulesInstallReview =
     useInvalidateFetchPrebuiltRulesInstallReviewQuery();
   const invalidateRuleStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
+  const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
 
   return useMutation<PerformRuleInstallationResponseBody, Error>(() => performInstallAllRules(), {
     ...options,
@@ -41,6 +43,7 @@ export const usePerformAllRulesInstallMutation = (
 
       invalidateFetchPrebuiltRulesInstallReview();
       invalidateRuleStatus();
+      invalidateFetchCoverageOverviewQuery();
 
       if (options?.onSettled) {
         options.onSettled(...args);
