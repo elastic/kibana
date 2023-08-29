@@ -23,7 +23,7 @@ import { FlameGraphView } from '../views/flamegraphs/flamegraph';
 import { FunctionsView } from '../views/functions';
 import { DifferentialTopNFunctionsView } from '../views/functions/differential_topn';
 import { TopNFunctionsView } from '../views/functions/topn';
-import { NoDataTabs, NoDataView } from '../views/no_data_view';
+import { AddDataTabs, AddDataView } from '../views/add_data_view';
 import { StackTracesView } from '../views/stack_traces_view';
 import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
@@ -42,23 +42,23 @@ const routes = {
     ),
     children: {
       '/add-data-instructions': {
-        element: <NoDataView />,
+        element: <AddDataView />,
         params: t.type({
           query: t.type({
             selectedTab: t.union([
-              t.literal(NoDataTabs.Binary),
-              t.literal(NoDataTabs.Deb),
-              t.literal(NoDataTabs.Docker),
-              t.literal(NoDataTabs.ElasticAgentIntegration),
-              t.literal(NoDataTabs.Kubernetes),
-              t.literal(NoDataTabs.RPM),
-              t.literal(NoDataTabs.Symbols),
+              t.literal(AddDataTabs.Binary),
+              t.literal(AddDataTabs.Deb),
+              t.literal(AddDataTabs.Docker),
+              t.literal(AddDataTabs.ElasticAgentIntegration),
+              t.literal(AddDataTabs.Kubernetes),
+              t.literal(AddDataTabs.RPM),
+              t.literal(AddDataTabs.Symbols),
             ]),
           }),
         }),
         defaults: {
           query: {
-            selectedTab: NoDataTabs.Kubernetes,
+            selectedTab: AddDataTabs.Kubernetes,
           },
         },
       },

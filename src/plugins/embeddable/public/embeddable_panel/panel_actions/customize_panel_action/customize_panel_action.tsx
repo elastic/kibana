@@ -9,11 +9,19 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { IEmbeddable, Embeddable, EmbeddableInput, EmbeddableOutput } from '../../..';
+import { core } from '../../../kibana_services';
+import {
+  IEmbeddable,
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  EditPanelAction,
+} from '../../..';
 import { ViewMode, CommonlyUsedRange } from '../../../lib/types';
 import { tracksOverlays } from '../track_overlays';
 import { CustomizePanelEditor } from './customize_panel_editor';
@@ -52,6 +60,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
   constructor(
     protected readonly overlays: OverlayStart,
     protected readonly theme: ThemeServiceStart,
+    protected readonly editPanel: EditPanelAction,
     protected readonly commonlyUsedRanges?: CommonlyUsedRange[],
     protected readonly dateFormat?: string
   ) {}
@@ -99,19 +108,30 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
     const rootEmbeddable = embeddable.getRoot();
     const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
 
+    const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+      uiSettings: core.uiSettings,
+    });
+
+    const onEdit = () => {
+      this.editPanel.execute({ embeddable });
+    };
+
     const handle = this.overlays.openFlyout(
       toMountPoint(
-        <CustomizePanelEditor
-          embeddable={embeddable}
-          timeRangeCompatible={this.isTimeRangeCompatible({ embeddable })}
-          dateFormat={this.dateFormat}
-          commonlyUsedRanges={this.commonlyUsedRanges}
-          onClose={() => {
-            if (overlayTracker) overlayTracker.clearOverlays();
-            handle.close();
-          }}
-        />,
-        { theme$: this.theme.theme$ }
+        <KibanaReactContextProvider>
+          <CustomizePanelEditor
+            embeddable={embeddable}
+            timeRangeCompatible={this.isTimeRangeCompatible({ embeddable })}
+            dateFormat={this.dateFormat}
+            commonlyUsedRanges={this.commonlyUsedRanges}
+            onClose={() => {
+              if (overlayTracker) overlayTracker.clearOverlays();
+              handle.close();
+            }}
+            onEdit={onEdit}
+          />
+        </KibanaReactContextProvider>,
+        { theme: this.theme, i18n: core.i18n }
       ),
       {
         size: 's',
@@ -120,6 +140,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
           if (overlayTracker) overlayTracker.clearOverlays();
           overlayRef.close();
         },
+        maxWidth: true,
       }
     );
     overlayTracker?.openOverlay(handle);

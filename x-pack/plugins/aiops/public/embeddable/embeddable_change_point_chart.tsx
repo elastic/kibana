@@ -13,7 +13,7 @@ import {
   EmbeddableOutput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { type CoreStart, IUiSettingsClient } from '@kbn/core/public';
@@ -21,6 +21,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { Subject } from 'rxjs';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { EmbeddableInputTracker } from './embeddable_chart_component_wrapper';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
@@ -29,7 +30,7 @@ import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart
 
 export type EmbeddableChangePointChartInput = EmbeddableInput & EmbeddableChangePointChartProps;
 
-export type EmbeddableChangePointChartOutput = EmbeddableOutput;
+export type EmbeddableChangePointChartOutput = EmbeddableOutput & { indexPatterns?: DataView[] };
 
 export interface EmbeddableChangePointChartDeps {
   theme: ThemeServiceStart;
@@ -57,12 +58,31 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
 
   private node?: HTMLElement;
 
+  // Need to defer embeddable load in order to resolve data views
+  deferEmbeddableLoad = true;
+
   constructor(
     private readonly deps: EmbeddableChangePointChartDeps,
     initialInput: EmbeddableChangePointChartInput,
     parent?: IContainer
   ) {
     super(initialInput, { defaultTitle: initialInput.title }, parent);
+
+    this.initOutput().finally(() => this.setInitializationFinished());
+  }
+
+  private async initOutput() {
+    const {
+      data: { dataViews: dataViewsService },
+    } = this.deps;
+
+    const { dataViewId } = this.getInput();
+
+    const dataView = await dataViewsService.get(dataViewId);
+
+    this.updateOutput({
+      indexPatterns: [dataView],
+    });
   }
 
   public reportsEmbeddableLoad() {
@@ -94,9 +114,7 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     const I18nContext = this.deps.i18n.Context;
 
     const datePickerDeps = {
-      ...pick(this.deps, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-      toMountPoint,
-      wrapWithTheme,
+      ...pick(this.deps, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
       uiSettingsKeys: UI_SETTINGS,
     };
 
@@ -113,6 +131,10 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
                   input$={input$}
                   initialInput={input}
                   reload$={this.reload$}
+                  onOutputChange={this.updateOutput.bind(this)}
+                  onRenderComplete={this.onRenderComplete.bind(this)}
+                  onLoading={this.onLoading.bind(this)}
+                  onError={this.onError.bind(this)}
                 />
               </Suspense>
             </DatePickerContextProvider>

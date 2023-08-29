@@ -95,16 +95,40 @@ export const getToggleButtonId = ({
   pattern: string;
 }): string => (isExpanded ? `collapse${indexName}${pattern}` : `expand${indexName}${pattern}`);
 
+export const getSummaryTableILMPhaseColumn = (
+  isILMAvailable: boolean
+): Array<EuiBasicTableColumn<IndexSummaryTableItem>> =>
+  isILMAvailable
+    ? [
+        {
+          field: 'ilmPhase',
+          name: i18n.ILM_PHASE,
+          render: (_, { ilmPhase }) =>
+            ilmPhase != null ? (
+              <EuiToolTip content={getIlmPhaseDescription(ilmPhase)}>
+                <EuiBadge color="hollow" data-test-subj="ilmPhase">
+                  {ilmPhase}
+                </EuiBadge>
+              </EuiToolTip>
+            ) : null,
+          sortable: true,
+          truncateText: false,
+        },
+      ]
+    : [];
+
 export const getSummaryTableColumns = ({
   formatBytes,
   formatNumber,
   itemIdToExpandedRowMap,
+  isILMAvailable,
   pattern,
   toggleExpanded,
 }: {
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   itemIdToExpandedRowMap: Record<string, React.ReactNode>;
+  isILMAvailable: boolean;
   pattern: string;
   toggleExpanded: (indexName: string) => void;
 }): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
@@ -201,20 +225,7 @@ export const getSummaryTableColumns = ({
     sortable: true,
     truncateText: false,
   },
-  {
-    field: 'ilmPhase',
-    name: i18n.ILM_PHASE,
-    render: (_, { ilmPhase }) =>
-      ilmPhase != null ? (
-        <EuiToolTip content={getIlmPhaseDescription(ilmPhase)}>
-          <EuiBadge color="hollow" data-test-subj="ilmPhase">
-            {ilmPhase}
-          </EuiBadge>
-        </EuiToolTip>
-      ) : null,
-    sortable: true,
-    truncateText: false,
-  },
+  ...getSummaryTableILMPhaseColumn(isILMAvailable),
   {
     field: 'sizeInBytes',
     name: i18n.SIZE,

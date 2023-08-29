@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 
 export const TLSParamsType = t.partial({
+  stackVersion: t.string,
   search: t.string,
   certAgeThreshold: t.number,
   certExpirationThreshold: t.number,

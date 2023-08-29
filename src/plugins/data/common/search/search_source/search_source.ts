@@ -106,7 +106,6 @@ import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 import {
   getEsQueryConfig,
   IKibanaSearchResponse,
-  isErrorResponse,
   isPartialResponse,
   isCompleteResponse,
   UI_SETTINGS,
@@ -138,6 +137,7 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
+  scriptedFieldsEnabled: boolean;
 }
 
 interface ExpressionAstOptions {
@@ -546,9 +546,7 @@ export class SearchSource {
         // For testing timeout messages in UI, uncomment the next line
         // response.rawResponse.timed_out = true;
         return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
-          if (isErrorResponse(response)) {
-            obs.error(response);
-          } else if (isPartialResponse(response)) {
+          if (isPartialResponse(response)) {
             obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
@@ -798,10 +796,12 @@ export class SearchSource {
     // set defaults
     let fieldsFromSource = searchRequest.fieldsFromSource || [];
     body.fields = body.fields || [];
-    body.script_fields = {
-      ...body.script_fields,
-      ...scriptFields,
-    };
+    body.script_fields = this.dependencies.scriptedFieldsEnabled
+      ? {
+          ...body.script_fields,
+          ...scriptFields,
+        }
+      : {};
     body.stored_fields = storedFields;
     body.runtime_mappings = runtimeFields || {};
 

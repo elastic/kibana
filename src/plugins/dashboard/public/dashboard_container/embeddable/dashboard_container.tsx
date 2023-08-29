@@ -41,7 +41,6 @@ import {
   runQuickSave,
   replacePanel,
   addFromLibrary,
-  showPlaceholderUntil,
   addOrUpdateEmbeddable,
 } from './api';
 
@@ -128,6 +127,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     reduxToolsPackage: ReduxToolsPackage,
     initialSessionId?: string,
     initialLastSavedInput?: DashboardContainerInput,
+    anyMigrationRun?: boolean,
     dashboardCreationStartTime?: number,
     parent?: Container,
     creationOptions?: DashboardCreationOptions,
@@ -175,6 +175,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           ...DEFAULT_DASHBOARD_INPUT,
           id: initialInput.id,
         },
+        hasRunClientsideMigrations: anyMigrationRun,
         isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
         animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
         hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
@@ -312,7 +313,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public addFromLibrary = addFromLibrary;
 
   public replacePanel = replacePanel;
-  public showPlaceholderUntil = showPlaceholderUntil;
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
   public forceRefresh(refreshControlGroup: boolean = true) {

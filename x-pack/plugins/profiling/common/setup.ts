@@ -88,6 +88,7 @@ export function areResourcesSetupForViewer(state: SetupState): boolean {
 
 export function areResourcesSetupForAdmin(state: SetupState): boolean {
   return (
+    areResourcesSetupForViewer(state) &&
     state.resource_management.enabled &&
     state.resources.created &&
     state.permissions.configured &&

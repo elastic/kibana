@@ -58,7 +58,6 @@ export function ShowShareModal({
         },
       },
     },
-    initializerContext: { kibanaVersion },
     share: { toggleShareContextMenu },
   } = pluginServices.getServices();
 
@@ -131,8 +130,7 @@ export function ShowShareModal({
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels
         ? (convertPanelMapToSavedPanels(
-            unsavedDashboardState.panels,
-            kibanaVersion
+            unsavedDashboardState.panels
           ) as DashboardAppLocatorParams['panels'])
         : undefined,
 
