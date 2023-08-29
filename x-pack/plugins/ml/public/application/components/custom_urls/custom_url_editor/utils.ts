@@ -460,8 +460,8 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
     // No anomalies yet for this job, so do a preview of the search
     // configured in the job datafeed to obtain sample docs.
 
-    let { datafeed_config: datafeedConfig } = job;
-    let jobConfig = job;
+    let jobConfig = cloneDeep(job);
+    let { datafeed_config: datafeedConfig } = jobConfig;
     try {
       // attempt load the non-combined job and datafeed so they can be used in the datafeed preview
       const [{ jobs }, { datafeeds }] = await Promise.all([
@@ -483,7 +483,6 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
       delete datafeedConfig.authorization;
     }
     if (datafeedConfig && jobConfig.datafeed_config !== undefined) {
-      jobConfig = cloneDeep(jobConfig);
       delete jobConfig.datafeed_config;
     }
 
