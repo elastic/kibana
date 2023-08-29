@@ -113,7 +113,7 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
 
   private processTaskManagerStatEvent(taskEvent: TaskManagerStat) {
     if (taskEvent.id === 'runDelay') {
-      const delayInSec = (taskEvent.event as Ok<number>).value;
+      const delayInSec = Math.round((taskEvent.event as Ok<number>).value);
       this.delayHistogram.record(delayInSec);
     }
   }

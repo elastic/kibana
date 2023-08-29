@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { Subject, Observable } from 'rxjs';
 import { take, bufferCount, skip } from 'rxjs/operators';
-import { isTaskPollingCycleEvent, isTaskRunEvent } from '../task_events';
+import { isTaskManagerStatEvent, isTaskPollingCycleEvent, isTaskRunEvent } from '../task_events';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
@@ -16,7 +16,11 @@ import { TaskManagerConfig } from '../config';
 import { createAggregator } from './create_aggregator';
 import { TaskClaimMetric, TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
 import { taskClaimFailureEvent, taskClaimSuccessEvent } from './task_claim_metrics_aggregator.test';
-import { getTaskRunFailedEvent, getTaskRunSuccessEvent } from './task_run_metrics_aggregator.test';
+import {
+  getTaskRunFailedEvent,
+  getTaskRunSuccessEvent,
+  getTaskManagerStatEvent,
+} from './task_run_metrics_aggregator.test';
 import { TaskRunMetric, TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 import * as TaskClaimMetricsAggregatorModule from './task_claim_metrics_aggregator';
 import { metricsAggregatorMock } from './metrics_aggregator.mock';
@@ -370,17 +374,27 @@ describe('createAggregator', () => {
   });
 
   describe('with TaskRunMetricsAggregator', () => {
-    test('returns a cumulative count of successful task runs and total task runs, broken down by type', async () => {
+    test('returns a cumulative count of successful task runs, on time task runs and total task runs, broken down by type, along with histogram of run delays', async () => {
       const taskRunEvents = [
+        getTaskManagerStatEvent(3.234),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(10.45),
         getTaskRunSuccessEvent('telemetry'),
+        getTaskManagerStatEvent(3.454),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(35.45),
         getTaskRunSuccessEvent('report'),
+        getTaskManagerStatEvent(8.85673),
         getTaskRunFailedEvent('alerting:example'),
+        getTaskManagerStatEvent(4.5745),
         getTaskRunSuccessEvent('alerting:.index-threshold'),
+        getTaskManagerStatEvent(11.564),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(3.78),
         getTaskRunFailedEvent('alerting:example'),
+        getTaskManagerStatEvent(3.7863),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(3.245),
         getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
@@ -393,7 +407,8 @@ describe('createAggregator', () => {
         taskPollingLifecycle,
         config,
         resetMetrics$: new Subject<boolean>(),
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent),
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
+          isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
         metricsAggregator: new TaskRunMetricsAggregator(),
       });
 
@@ -410,17 +425,43 @@ describe('createAggregator', () => {
             expect(metrics[0]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 1, on_time: 1, total: 1, delay: { counts: [], values: [] } },
+                overall: { success: 0, on_time: 0, total: 0, delay: { counts: [1], values: [10] } },
+              },
+            });
+            expect(metrics[1]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: { success: 1, on_time: 1, total: 1, delay: { counts: [1], values: [10] } },
                 by_type: {
                   alerting: { success: 1, on_time: 1, total: 1 },
                   'alerting:example': { success: 1, on_time: 1, total: 1 },
                 },
               },
             });
-            expect(metrics[1]).toEqual({
+            expect(metrics[2]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 2, on_time: 2, total: 2, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 1,
+                  on_time: 1,
+                  total: 1,
+                  delay: { counts: [1, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[3]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 2,
+                  on_time: 2,
+                  total: 2,
+                  delay: { counts: [1, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 1, on_time: 1, total: 1 },
                   'alerting:example': { success: 1, on_time: 1, total: 1 },
@@ -428,10 +469,31 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[2]).toEqual({
+            expect(metrics[4]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 3, on_time: 3, total: 3, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 2,
+                  on_time: 2,
+                  total: 2,
+                  delay: { counts: [2, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 1, on_time: 1, total: 1 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[5]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 3,
+                  on_time: 3,
+                  total: 3,
+                  delay: { counts: [2, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 2, total: 2 },
                   'alerting:example': { success: 2, on_time: 2, total: 2 },
@@ -439,10 +501,31 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[3]).toEqual({
+            expect(metrics[6]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 4, on_time: 4, total: 4, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 3,
+                  on_time: 3,
+                  total: 3,
+                  delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
+                by_type: {
+                  alerting: { success: 2, on_time: 2, total: 2 },
+                  'alerting:example': { success: 2, on_time: 2, total: 2 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[7]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 4,
+                  on_time: 4,
+                  total: 4,
+                  delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 2, total: 2 },
                   'alerting:example': { success: 2, on_time: 2, total: 2 },
@@ -451,10 +534,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[4]).toEqual({
+            expect(metrics[8]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 4, on_time: 5, total: 5, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 4,
+                  on_time: 4,
+                  total: 4,
+                  delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
+                by_type: {
+                  alerting: { success: 2, on_time: 2, total: 2 },
+                  'alerting:example': { success: 2, on_time: 2, total: 2 },
+                  report: { success: 1, on_time: 1, total: 1 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[9]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 4,
+                  on_time: 5,
+                  total: 5,
+                  delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 3, total: 3 },
                   'alerting:example': { success: 2, on_time: 3, total: 3 },
@@ -463,10 +568,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[5]).toEqual({
+            expect(metrics[10]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 5, on_time: 6, total: 6, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 4,
+                  on_time: 5,
+                  total: 5,
+                  delay: { counts: [4, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
+                by_type: {
+                  alerting: { success: 2, on_time: 3, total: 3 },
+                  'alerting:example': { success: 2, on_time: 3, total: 3 },
+                  report: { success: 1, on_time: 1, total: 1 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[11]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 5,
+                  on_time: 6,
+                  total: 6,
+                  delay: { counts: [4, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
                 by_type: {
                   alerting: { success: 3, on_time: 4, total: 4 },
                   'alerting:__index-threshold': { success: 1, on_time: 1, total: 1 },
@@ -476,10 +603,33 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[6]).toEqual({
+            expect(metrics[12]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 6, on_time: 7, total: 7, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 5,
+                  on_time: 6,
+                  total: 6,
+                  delay: { counts: [4, 2, 0, 1], values: [10, 20, 30, 40] },
+                },
+                by_type: {
+                  alerting: { success: 3, on_time: 4, total: 4 },
+                  'alerting:__index-threshold': { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 2, on_time: 3, total: 3 },
+                  report: { success: 1, on_time: 1, total: 1 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[13]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 6,
+                  on_time: 7,
+                  total: 7,
+                  delay: { counts: [4, 2, 0, 1], values: [10, 20, 30, 40] },
+                },
                 by_type: {
                   alerting: { success: 4, on_time: 5, total: 5 },
                   'alerting:__index-threshold': { success: 1, on_time: 1, total: 1 },
@@ -489,10 +639,33 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[7]).toEqual({
+            expect(metrics[14]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 6, on_time: 8, total: 8, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 6,
+                  on_time: 7,
+                  total: 7,
+                  delay: { counts: [5, 2, 0, 1], values: [10, 20, 30, 40] },
+                },
+                by_type: {
+                  alerting: { success: 4, on_time: 5, total: 5 },
+                  'alerting:__index-threshold': { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 3, on_time: 4, total: 4 },
+                  report: { success: 1, on_time: 1, total: 1 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[15]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 6,
+                  on_time: 8,
+                  total: 8,
+                  delay: { counts: [5, 2, 0, 1], values: [10, 20, 30, 40] },
+                },
                 by_type: {
                   alerting: { success: 4, on_time: 6, total: 6 },
                   'alerting:__index-threshold': { success: 1, on_time: 1, total: 1 },
@@ -502,10 +675,33 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[8]).toEqual({
+            expect(metrics[16]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 7, on_time: 9, total: 9, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 6,
+                  on_time: 8,
+                  total: 8,
+                  delay: { counts: [6, 2, 0, 1], values: [10, 20, 30, 40] },
+                },
+                by_type: {
+                  alerting: { success: 4, on_time: 6, total: 6 },
+                  'alerting:__index-threshold': { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 3, on_time: 5, total: 5 },
+                  report: { success: 1, on_time: 1, total: 1 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[17]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 7,
+                  on_time: 9,
+                  total: 9,
+                  delay: { counts: [6, 2, 0, 1], values: [10, 20, 30, 40] },
+                },
                 by_type: {
                   alerting: { success: 5, on_time: 7, total: 7 },
                   'alerting:__index-threshold': { success: 1, on_time: 1, total: 1 },
@@ -515,10 +711,33 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[9]).toEqual({
+            expect(metrics[18]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 7, on_time: 10, total: 10, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 7,
+                  on_time: 9,
+                  total: 9,
+                  delay: { counts: [7, 2, 0, 1], values: [10, 20, 30, 40] },
+                },
+                by_type: {
+                  alerting: { success: 5, on_time: 7, total: 7 },
+                  'alerting:__index-threshold': { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 4, on_time: 6, total: 6 },
+                  report: { success: 1, on_time: 1, total: 1 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[19]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 7,
+                  on_time: 10,
+                  total: 10,
+                  delay: { counts: [7, 2, 0, 1], values: [10, 20, 30, 40] },
+                },
                 by_type: {
                   actions: { success: 0, on_time: 1, total: 1 },
                   alerting: { success: 5, on_time: 7, total: 7 },
@@ -542,18 +761,28 @@ describe('createAggregator', () => {
     test('resets count when resetMetric$ event is received', async () => {
       const resetMetrics$ = new Subject<boolean>();
       const taskRunEvents1 = [
+        getTaskManagerStatEvent(3.234),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(10.45),
         getTaskRunSuccessEvent('telemetry'),
+        getTaskManagerStatEvent(3.454),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(35.45),
         getTaskRunSuccessEvent('report'),
+        getTaskManagerStatEvent(8.85673),
         getTaskRunFailedEvent('alerting:example'),
       ];
 
       const taskRunEvents2 = [
+        getTaskManagerStatEvent(4.5745),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(11.564),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(3.78),
         getTaskRunFailedEvent('alerting:example'),
+        getTaskManagerStatEvent(3.7863),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(3.245),
         getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
@@ -566,7 +795,8 @@ describe('createAggregator', () => {
         taskPollingLifecycle,
         config,
         resetMetrics$,
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent),
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
+          isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
         metricsAggregator: new TaskRunMetricsAggregator(),
       });
 
@@ -583,17 +813,43 @@ describe('createAggregator', () => {
             expect(metrics[0]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 1, on_time: 1, total: 1, delay: { counts: [], values: [] } },
+                overall: { success: 0, on_time: 0, total: 0, delay: { counts: [1], values: [10] } },
+              },
+            });
+            expect(metrics[1]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: { success: 1, on_time: 1, total: 1, delay: { counts: [1], values: [10] } },
                 by_type: {
                   alerting: { success: 1, on_time: 1, total: 1 },
                   'alerting:example': { success: 1, on_time: 1, total: 1 },
                 },
               },
             });
-            expect(metrics[1]).toEqual({
+            expect(metrics[2]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 2, on_time: 2, total: 2, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 1,
+                  on_time: 1,
+                  total: 1,
+                  delay: { counts: [1, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[3]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 2,
+                  on_time: 2,
+                  total: 2,
+                  delay: { counts: [1, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 1, on_time: 1, total: 1 },
                   'alerting:example': { success: 1, on_time: 1, total: 1 },
@@ -601,10 +857,31 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[2]).toEqual({
+            expect(metrics[4]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 3, on_time: 3, total: 3, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 2,
+                  on_time: 2,
+                  total: 2,
+                  delay: { counts: [2, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 1, on_time: 1, total: 1 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[5]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 3,
+                  on_time: 3,
+                  total: 3,
+                  delay: { counts: [2, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 2, total: 2 },
                   'alerting:example': { success: 2, on_time: 2, total: 2 },
@@ -612,10 +889,31 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[3]).toEqual({
+            expect(metrics[6]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 4, on_time: 4, total: 4, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 3,
+                  on_time: 3,
+                  total: 3,
+                  delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
+                by_type: {
+                  alerting: { success: 2, on_time: 2, total: 2 },
+                  'alerting:example': { success: 2, on_time: 2, total: 2 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[7]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 4,
+                  on_time: 4,
+                  total: 4,
+                  delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 2, total: 2 },
                   'alerting:example': { success: 2, on_time: 2, total: 2 },
@@ -624,10 +922,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[4]).toEqual({
+            expect(metrics[8]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 4, on_time: 5, total: 5, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 4,
+                  on_time: 4,
+                  total: 4,
+                  delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
+                by_type: {
+                  alerting: { success: 2, on_time: 2, total: 2 },
+                  'alerting:example': { success: 2, on_time: 2, total: 2 },
+                  report: { success: 1, on_time: 1, total: 1 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[9]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 4,
+                  on_time: 5,
+                  total: 5,
+                  delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 3, total: 3 },
                   'alerting:example': { success: 2, on_time: 3, total: 3 },
@@ -637,10 +957,22 @@ describe('createAggregator', () => {
               },
             });
             // reset event should have been received here
-            expect(metrics[5]).toEqual({
+            expect(metrics[10]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 1, on_time: 1, total: 1, delay: { counts: [], values: [] } },
+                overall: { success: 0, on_time: 0, total: 0, delay: { counts: [1], values: [10] } },
+                by_type: {
+                  alerting: { success: 0, on_time: 0, total: 0 },
+                  'alerting:example': { success: 0, on_time: 0, total: 0 },
+                  report: { success: 0, on_time: 0, total: 0 },
+                  telemetry: { success: 0, on_time: 0, total: 0 },
+                },
+              },
+            });
+            expect(metrics[11]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: { success: 1, on_time: 1, total: 1, delay: { counts: [1], values: [10] } },
                 by_type: {
                   alerting: { success: 1, on_time: 1, total: 1 },
                   'alerting:example': { success: 1, on_time: 1, total: 1 },
@@ -649,10 +981,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[6]).toEqual({
+            expect(metrics[12]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 2, on_time: 2, total: 2, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 1,
+                  on_time: 1,
+                  total: 1,
+                  delay: { counts: [1, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 1, on_time: 1, total: 1 },
+                  report: { success: 0, on_time: 0, total: 0 },
+                  telemetry: { success: 0, on_time: 0, total: 0 },
+                },
+              },
+            });
+            expect(metrics[13]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 2,
+                  on_time: 2,
+                  total: 2,
+                  delay: { counts: [1, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 2, total: 2 },
                   'alerting:example': { success: 2, on_time: 2, total: 2 },
@@ -661,10 +1015,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[7]).toEqual({
+            expect(metrics[14]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 2, on_time: 3, total: 3, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 2,
+                  on_time: 2,
+                  total: 2,
+                  delay: { counts: [2, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 2, on_time: 2, total: 2 },
+                  'alerting:example': { success: 2, on_time: 2, total: 2 },
+                  report: { success: 0, on_time: 0, total: 0 },
+                  telemetry: { success: 0, on_time: 0, total: 0 },
+                },
+              },
+            });
+            expect(metrics[15]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 2,
+                  on_time: 3,
+                  total: 3,
+                  delay: { counts: [2, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 3, total: 3 },
                   'alerting:example': { success: 2, on_time: 3, total: 3 },
@@ -673,10 +1049,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[8]).toEqual({
+            expect(metrics[16]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 3, on_time: 4, total: 4, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 2,
+                  on_time: 3,
+                  total: 3,
+                  delay: { counts: [3, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 2, on_time: 3, total: 3 },
+                  'alerting:example': { success: 2, on_time: 3, total: 3 },
+                  report: { success: 0, on_time: 0, total: 0 },
+                  telemetry: { success: 0, on_time: 0, total: 0 },
+                },
+              },
+            });
+            expect(metrics[17]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 3,
+                  on_time: 4,
+                  total: 4,
+                  delay: { counts: [3, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 3, on_time: 4, total: 4 },
                   'alerting:example': { success: 3, on_time: 4, total: 4 },
@@ -685,10 +1083,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[9]).toEqual({
+            expect(metrics[18]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 3, on_time: 5, total: 5, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 3,
+                  on_time: 4,
+                  total: 4,
+                  delay: { counts: [4, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 3, on_time: 4, total: 4 },
+                  'alerting:example': { success: 3, on_time: 4, total: 4 },
+                  report: { success: 0, on_time: 0, total: 0 },
+                  telemetry: { success: 0, on_time: 0, total: 0 },
+                },
+              },
+            });
+            expect(metrics[19]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 3,
+                  on_time: 5,
+                  total: 5,
+                  delay: { counts: [4, 1], values: [10, 20] },
+                },
                 by_type: {
                   actions: { success: 0, on_time: 1, total: 1 },
                   alerting: { success: 3, on_time: 4, total: 4 },
@@ -716,18 +1136,28 @@ describe('createAggregator', () => {
       const clock = sinon.useFakeTimers();
       clock.tick(0);
       const taskRunEvents1 = [
+        getTaskManagerStatEvent(3.234),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(10.45),
         getTaskRunSuccessEvent('telemetry'),
+        getTaskManagerStatEvent(3.454),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(35.45),
         getTaskRunSuccessEvent('report'),
+        getTaskManagerStatEvent(8.85673),
         getTaskRunFailedEvent('alerting:example'),
       ];
 
       const taskRunEvents2 = [
+        getTaskManagerStatEvent(4.5745),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(11.564),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(3.78),
         getTaskRunFailedEvent('alerting:example'),
+        getTaskManagerStatEvent(3.7863),
         getTaskRunSuccessEvent('alerting:example'),
+        getTaskManagerStatEvent(3.245),
         getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
@@ -743,7 +1173,8 @@ describe('createAggregator', () => {
           metrics_reset_interval: 10,
         },
         resetMetrics$: new Subject<boolean>(),
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent),
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
+          isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
         metricsAggregator: new TaskRunMetricsAggregator(),
       });
 
@@ -760,17 +1191,43 @@ describe('createAggregator', () => {
             expect(metrics[0]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 1, on_time: 1, total: 1, delay: { counts: [], values: [] } },
+                overall: { success: 0, on_time: 0, total: 0, delay: { counts: [1], values: [10] } },
+              },
+            });
+            expect(metrics[1]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: { success: 1, on_time: 1, total: 1, delay: { counts: [1], values: [10] } },
                 by_type: {
                   alerting: { success: 1, on_time: 1, total: 1 },
                   'alerting:example': { success: 1, on_time: 1, total: 1 },
                 },
               },
             });
-            expect(metrics[1]).toEqual({
+            expect(metrics[2]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 2, on_time: 2, total: 2, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 1,
+                  on_time: 1,
+                  total: 1,
+                  delay: { counts: [1, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[3]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 2,
+                  on_time: 2,
+                  total: 2,
+                  delay: { counts: [1, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 1, on_time: 1, total: 1 },
                   'alerting:example': { success: 1, on_time: 1, total: 1 },
@@ -778,10 +1235,31 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[2]).toEqual({
+            expect(metrics[4]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 3, on_time: 3, total: 3, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 2,
+                  on_time: 2,
+                  total: 2,
+                  delay: { counts: [2, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 1, on_time: 1, total: 1 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[5]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 3,
+                  on_time: 3,
+                  total: 3,
+                  delay: { counts: [2, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 2, total: 2 },
                   'alerting:example': { success: 2, on_time: 2, total: 2 },
@@ -789,10 +1267,31 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[3]).toEqual({
+            expect(metrics[6]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 4, on_time: 4, total: 4, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 3,
+                  on_time: 3,
+                  total: 3,
+                  delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
+                by_type: {
+                  alerting: { success: 2, on_time: 2, total: 2 },
+                  'alerting:example': { success: 2, on_time: 2, total: 2 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[7]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 4,
+                  on_time: 4,
+                  total: 4,
+                  delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 2, total: 2 },
                   'alerting:example': { success: 2, on_time: 2, total: 2 },
@@ -801,10 +1300,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[4]).toEqual({
+            expect(metrics[8]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 4, on_time: 5, total: 5, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 4,
+                  on_time: 4,
+                  total: 4,
+                  delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
+                by_type: {
+                  alerting: { success: 2, on_time: 2, total: 2 },
+                  'alerting:example': { success: 2, on_time: 2, total: 2 },
+                  report: { success: 1, on_time: 1, total: 1 },
+                  telemetry: { success: 1, on_time: 1, total: 1 },
+                },
+              },
+            });
+            expect(metrics[9]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 4,
+                  on_time: 5,
+                  total: 5,
+                  delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 3, total: 3 },
                   'alerting:example': { success: 2, on_time: 3, total: 3 },
@@ -814,10 +1335,22 @@ describe('createAggregator', () => {
               },
             });
             // reset event should have been received here
-            expect(metrics[5]).toEqual({
+            expect(metrics[10]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 1, on_time: 1, total: 1, delay: { counts: [], values: [] } },
+                overall: { success: 0, on_time: 0, total: 0, delay: { counts: [1], values: [10] } },
+                by_type: {
+                  alerting: { success: 0, on_time: 0, total: 0 },
+                  'alerting:example': { success: 0, on_time: 0, total: 0 },
+                  report: { success: 0, on_time: 0, total: 0 },
+                  telemetry: { success: 0, on_time: 0, total: 0 },
+                },
+              },
+            });
+            expect(metrics[11]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: { success: 1, on_time: 1, total: 1, delay: { counts: [1], values: [10] } },
                 by_type: {
                   alerting: { success: 1, on_time: 1, total: 1 },
                   'alerting:example': { success: 1, on_time: 1, total: 1 },
@@ -826,10 +1359,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[6]).toEqual({
+            expect(metrics[12]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 2, on_time: 2, total: 2, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 1,
+                  on_time: 1,
+                  total: 1,
+                  delay: { counts: [1, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 1, on_time: 1, total: 1 },
+                  'alerting:example': { success: 1, on_time: 1, total: 1 },
+                  report: { success: 0, on_time: 0, total: 0 },
+                  telemetry: { success: 0, on_time: 0, total: 0 },
+                },
+              },
+            });
+            expect(metrics[13]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 2,
+                  on_time: 2,
+                  total: 2,
+                  delay: { counts: [1, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 2, total: 2 },
                   'alerting:example': { success: 2, on_time: 2, total: 2 },
@@ -838,10 +1393,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[7]).toEqual({
+            expect(metrics[14]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 2, on_time: 3, total: 3, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 2,
+                  on_time: 2,
+                  total: 2,
+                  delay: { counts: [2, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 2, on_time: 2, total: 2 },
+                  'alerting:example': { success: 2, on_time: 2, total: 2 },
+                  report: { success: 0, on_time: 0, total: 0 },
+                  telemetry: { success: 0, on_time: 0, total: 0 },
+                },
+              },
+            });
+            expect(metrics[15]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 2,
+                  on_time: 3,
+                  total: 3,
+                  delay: { counts: [2, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 2, on_time: 3, total: 3 },
                   'alerting:example': { success: 2, on_time: 3, total: 3 },
@@ -850,10 +1427,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[8]).toEqual({
+            expect(metrics[16]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 3, on_time: 4, total: 4, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 2,
+                  on_time: 3,
+                  total: 3,
+                  delay: { counts: [3, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 2, on_time: 3, total: 3 },
+                  'alerting:example': { success: 2, on_time: 3, total: 3 },
+                  report: { success: 0, on_time: 0, total: 0 },
+                  telemetry: { success: 0, on_time: 0, total: 0 },
+                },
+              },
+            });
+            expect(metrics[17]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 3,
+                  on_time: 4,
+                  total: 4,
+                  delay: { counts: [3, 1], values: [10, 20] },
+                },
                 by_type: {
                   alerting: { success: 3, on_time: 4, total: 4 },
                   'alerting:example': { success: 3, on_time: 4, total: 4 },
@@ -862,10 +1461,32 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[9]).toEqual({
+            expect(metrics[18]).toEqual({
               key: 'task_run',
               value: {
-                overall: { success: 3, on_time: 5, total: 5, delay: { counts: [], values: [] } },
+                overall: {
+                  success: 3,
+                  on_time: 4,
+                  total: 4,
+                  delay: { counts: [4, 1], values: [10, 20] },
+                },
+                by_type: {
+                  alerting: { success: 3, on_time: 4, total: 4 },
+                  'alerting:example': { success: 3, on_time: 4, total: 4 },
+                  report: { success: 0, on_time: 0, total: 0 },
+                  telemetry: { success: 0, on_time: 0, total: 0 },
+                },
+              },
+            });
+            expect(metrics[19]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 3,
+                  on_time: 5,
+                  total: 5,
+                  delay: { counts: [4, 1], values: [10, 20] },
+                },
                 by_type: {
                   actions: { success: 0, on_time: 1, total: 1 },
                   alerting: { success: 3, on_time: 4, total: 4 },

@@ -8,7 +8,12 @@
 import * as uuid from 'uuid';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskStatus } from '../task';
-import { asTaskRunEvent, TaskPersistence } from '../task_events';
+import {
+  asTaskManagerStatEvent,
+  asTaskRunEvent,
+  TaskManagerStats,
+  TaskPersistence,
+} from '../task_events';
 import { TaskRunResult } from '../task_running';
 import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 
@@ -69,6 +74,10 @@ export const getTaskRunFailedEvent = (type: string, isExpired: boolean = false) 
   );
 };
 
+export const getTaskManagerStatEvent = (value: number, id: TaskManagerStats = 'runDelay') => {
+  return asTaskManagerStatEvent(id, asOk(value));
+};
+
 describe('TaskRunMetricsAggregator', () => {
   let taskRunMetricsAggregator: TaskRunMetricsAggregator;
   beforeEach(() => {
@@ -96,6 +105,22 @@ describe('TaskRunMetricsAggregator', () => {
       by_type: {
         telemetry: { success: 2, on_time: 2, total: 2 },
       },
+    });
+  });
+
+  test('should correctly process task manager runDelay stat', () => {
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(3.343));
+    expect(taskRunMetricsAggregator.collect()).toEqual({
+      overall: { success: 0, on_time: 0, total: 0, delay: { counts: [1], values: [10] } },
+    });
+  });
+
+  test('should ignore task manager stats that are not runDelays', () => {
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskManagerStatEvent(3.343, 'pollingDelay')
+    );
+    expect(taskRunMetricsAggregator.collect()).toEqual({
+      overall: { success: 0, on_time: 0, total: 0, delay: { counts: [], values: [] } },
     });
   });
 
@@ -183,6 +208,11 @@ describe('TaskRunMetricsAggregator', () => {
   });
 
   test('should correctly reset counter', () => {
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(3.343));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(25.45));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(6.4478));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(9.241));
+
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
@@ -204,7 +234,12 @@ describe('TaskRunMetricsAggregator', () => {
       getTaskRunSuccessEvent('alerting:.index-threshold')
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 11, on_time: 12, total: 14, delay: { counts: [], values: [] } },
+      overall: {
+        success: 11,
+        on_time: 12,
+        total: 14,
+        delay: { counts: [3, 0, 1], values: [10, 20, 30] },
+      },
       by_type: {
         actions: { success: 3, on_time: 3, total: 3 },
         'actions:__email': { success: 1, on_time: 1, total: 1 },
