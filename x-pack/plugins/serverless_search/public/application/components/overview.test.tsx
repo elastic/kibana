@@ -33,7 +33,11 @@ describe('<Overview />', () => {
   });
   test('api key', () => {
     const { getByRole } = render(<Overview />);
-    expect(getByRole('heading', { name: 'Store your API key and Cloud ID' })).toBeDefined();
+    expect(getByRole('heading', { name: 'Prepare an API Key' })).toBeDefined();
+  });
+  test('cloud id', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Copy your connection details' })).toBeDefined();
   });
   test('configure client', () => {
     const { getByRole } = render(<Overview />);
