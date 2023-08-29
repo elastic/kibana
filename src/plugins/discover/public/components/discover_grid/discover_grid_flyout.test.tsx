@@ -21,6 +21,8 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
+import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
+import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 
 const waitNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -55,10 +57,8 @@ describe('Discover flyout', function () {
       },
       contextLocator: { getRedirectUrl: jest.fn(() => 'mock-context-redirect-url') },
       singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url') },
-      unifiedDocViewer: {
-        getDocViews: () => [],
-      },
     } as unknown as DiscoverServices;
+    setUnifiedDocViewerServices(Promise.resolve(mockUnifiedDocViewerServices));
 
     const hit = buildDataTableRecord(
       hitIndex ? esHitsMock[hitIndex] : (esHitsMock[0] as EsHitRecord),
