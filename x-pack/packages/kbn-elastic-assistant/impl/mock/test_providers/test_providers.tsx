@@ -66,6 +66,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
           <AssistantProvider
             actionTypeRegistry={actionTypeRegistry}
             assistantAvailability={assistantAvailability}
+            assistantLangChain={false}
             augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
             baseAllow={[]}
             baseAllowReplacement={[]}

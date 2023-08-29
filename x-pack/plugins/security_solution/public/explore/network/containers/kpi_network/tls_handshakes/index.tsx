@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isCompleteResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
@@ -70,7 +70,7 @@ export const useNetworkKpiTlsHandshakes = ({
       isInspected: false,
       refetch: refetch.current,
     });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const networkKpiTlsHandshakesSearch = useCallback(
     (request: NetworkKpiTlsHandshakesRequestOptions | null) => {
@@ -100,10 +100,6 @@ export const useNetworkKpiTlsHandshakes = ({
                   refetch: refetch.current,
                 }));
                 searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_NETWORK_KPI_TLS_HANDSHAKES);
-                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
@@ -120,7 +116,7 @@ export const useNetworkKpiTlsHandshakes = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip]
+    [data.search, addError, skip]
   );
 
   useEffect(() => {

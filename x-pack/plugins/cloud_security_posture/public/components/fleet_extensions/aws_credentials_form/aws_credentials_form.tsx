@@ -235,7 +235,9 @@ export const AwsCredentialsForm = ({
         size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
-        onChange={onSetupFormatChange}
+        onChange={(idSelected: SetupFormat) =>
+          idSelected !== setupFormat && onSetupFormatChange(idSelected)
+        }
       />
       <EuiSpacer size="l" />
       {setupFormat === 'cloud_formation' && (
