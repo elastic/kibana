@@ -39,6 +39,8 @@ export default defineCypressConfig({
     ELASTICSEARCH_USERNAME: 'system_indices_superuser',
     ELASTICSEARCH_PASSWORD: 'changeme',
 
+    grepFilterSpecs: true,
+    grepOmitFiltered: true,
     grepTags: '@serverless --@brokenInServerless',
 
     'cypress-react-selector': {
