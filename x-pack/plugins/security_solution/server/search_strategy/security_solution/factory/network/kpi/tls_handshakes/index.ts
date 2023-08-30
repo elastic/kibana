@@ -12,21 +12,16 @@ import type {
 } from '../../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
-import { parseOptions } from './parse_options';
 import { buildTlsHandshakeQuery } from './query.network_kpi_tls_handshakes.dsl';
 
 export const networkKpiTlsHandshakes: SecuritySolutionFactory<NetworkKpiQueries.tlsHandshakes> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     return buildTlsHandshakeQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkKpiTlsHandshakesStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const inspect = {
       dsl: [inspectStringifyObject(buildTlsHandshakeQuery(options))],
     };

@@ -12,20 +12,16 @@ import type {
 } from '../../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
-import { parseOptions } from './parse_options';
 import { buildDnsQuery } from './query.network_kpi_dns.dsl';
 
 export const networkKpiDns: SecuritySolutionFactory<NetworkKpiQueries.dns> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
+  buildDsl: (options) => {
     return buildDnsQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkKpiDnsStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const inspect = {
       dsl: [inspectStringifyObject(buildDnsQuery(options))],
     };

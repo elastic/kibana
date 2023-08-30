@@ -16,19 +16,15 @@ import type {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
 import { buildOverviewHostQuery } from './query.overview_host.dsl';
-import { parseOptions } from './parse_options';
 
 export const hostOverview: SecuritySolutionFactory<HostsQueries.overview> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
+  buildDsl: (options) => {
     return buildOverviewHostQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<OverviewHostHit>
   ): Promise<HostsOverviewStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     // @ts-expect-error specify aggregations type explicitly
     const aggregations: OverviewHostHit = get('aggregations', response.rawResponse) || {};
     const inspect = {

@@ -16,19 +16,15 @@ import type {
   AzureManagedUser,
   ManagedUserDetailsStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
-import { parseOptions } from './parse_options';
 
 export const managedUserDetails: SecuritySolutionFactory<UsersQueries.managedDetails> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
+  buildDsl: (options) => {
     return buildManagedUserDetailsQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<AzureManagedUser>
   ): Promise<ManagedUserDetailsStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const inspect = {
       dsl: [inspectStringifyObject(buildManagedUserDetailsQuery(options))],
     };

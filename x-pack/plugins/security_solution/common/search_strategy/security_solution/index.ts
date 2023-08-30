@@ -60,38 +60,71 @@ import type { UsersRelatedHostsStrategyResponse } from './related_entities/relat
 import type { HostsRelatedUsersStrategyResponse } from './related_entities/related_users';
 
 import type {
+  AuthenticationsKpiRequestOptions,
   AuthenticationsKpiRequestOptionsInput,
+  EventEnrichmentRequestOptions,
   EventEnrichmentRequestOptionsInput,
+  FirstLastSeenRequestOptions,
   FirstLastSeenRequestOptionsInput,
+  HostDetailsRequestOptions,
   HostDetailsRequestOptionsInput,
+  HostOverviewRequestOptions,
   HostOverviewRequestOptionsInput,
+  HostsRequestOptions,
   HostsRequestOptionsInput,
+  HostUncommonProcessesRequestOptions,
   HostUncommonProcessesRequestOptionsInput,
+  KpiHostsRequestOptions,
   KpiHostsRequestOptionsInput,
+  KpiUniqueIpsRequestOptions,
   KpiUniqueIpsRequestOptionsInput,
+  ManagedUserDetailsRequestOptions,
   ManagedUserDetailsRequestOptionsInput,
+  MatrixHistogramRequestOptions,
   MatrixHistogramRequestOptionsInput,
+  NetworkDetailsRequestOptions,
   NetworkDetailsRequestOptionsInput,
+  NetworkDnsRequestOptions,
   NetworkDnsRequestOptionsInput,
+  NetworkHttpRequestOptions,
   NetworkHttpRequestOptionsInput,
+  NetworkKpiDnsRequestOptions,
   NetworkKpiDnsRequestOptionsInput,
+  NetworkKpiEventsRequestOptions,
   NetworkKpiEventsRequestOptionsInput,
+  NetworkKpiTlsHandshakesRequestOptions,
   NetworkKpiTlsHandshakesRequestOptionsInput,
+  NetworkKpiUniqueFlowsRequestOptions,
   NetworkKpiUniqueFlowsRequestOptionsInput,
+  NetworkKpiUniquePrivateIpsRequestOptions,
   NetworkKpiUniquePrivateIpsRequestOptionsInput,
+  NetworkOverviewRequestOptions,
   NetworkOverviewRequestOptionsInput,
+  NetworkTlsRequestOptions,
   NetworkTlsRequestOptionsInput,
+  NetworkTopCountriesRequestOptions,
   NetworkTopCountriesRequestOptionsInput,
+  NetworkTopNFlowRequestOptions,
   NetworkTopNFlowRequestOptionsInput,
+  NetworkUsersRequestOptions,
   NetworkUsersRequestOptionsInput,
+  ObservedUserDetailsRequestOptions,
   ObservedUserDetailsRequestOptionsInput,
+  RelatedHostsRequestOptions,
   RelatedHostsRequestOptionsInput,
+  RelatedUsersRequestOptions,
   RelatedUsersRequestOptionsInput,
+  RiskScoreKpiRequestOptions,
   RiskScoreKpiRequestOptionsInput,
+  RiskScoreRequestOptions,
   RiskScoreRequestOptionsInput,
+  ThreatIntelSourceRequestOptions,
   ThreatIntelSourceRequestOptionsInput,
+  TotalUsersKpiRequestOptions,
   TotalUsersKpiRequestOptionsInput,
+  UserAuthenticationsRequestOptions,
   UserAuthenticationsRequestOptionsInput,
+  UsersRequestOptions,
   UsersRequestOptionsInput,
 } from '../../api/search_strategy';
 
@@ -186,7 +219,7 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? UsersRelatedHostsStrategyResponse
   : never;
 
-export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
+export type StrategyRequestInputType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptionsInput
   : T extends HostsQueries.details
   ? HostDetailsRequestOptionsInput
@@ -254,6 +287,76 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? RelatedHostsRequestOptionsInput
   : T extends RelatedEntitiesQueries.relatedUsers
   ? RelatedUsersRequestOptionsInput
+  : never;
+
+export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
+  ? HostsRequestOptions
+  : T extends HostsQueries.details
+  ? HostDetailsRequestOptions
+  : T extends HostsQueries.overview
+  ? HostOverviewRequestOptions
+  : T extends typeof FirstLastSeenQuery
+  ? FirstLastSeenRequestOptions
+  : T extends HostsQueries.uncommonProcesses
+  ? HostUncommonProcessesRequestOptions
+  : T extends HostsKpiQueries.kpiHosts
+  ? KpiHostsRequestOptions
+  : T extends HostsKpiQueries.kpiUniqueIps
+  ? KpiUniqueIpsRequestOptions
+  : T extends UsersQueries.authentications
+  ? UserAuthenticationsRequestOptions
+  : T extends UsersQueries.observedDetails
+  ? ObservedUserDetailsRequestOptions
+  : T extends UsersQueries.managedDetails
+  ? ManagedUserDetailsRequestOptions
+  : T extends UsersQueries.kpiTotalUsers
+  ? TotalUsersKpiRequestOptions
+  : T extends UsersQueries.users
+  ? UsersRequestOptions
+  : T extends UsersQueries.kpiAuthentications
+  ? AuthenticationsKpiRequestOptions
+  : T extends NetworkQueries.details
+  ? NetworkDetailsRequestOptions
+  : T extends NetworkQueries.dns
+  ? NetworkDnsRequestOptions
+  : T extends NetworkQueries.http
+  ? NetworkHttpRequestOptions
+  : T extends NetworkQueries.overview
+  ? NetworkOverviewRequestOptions
+  : T extends NetworkQueries.tls
+  ? NetworkTlsRequestOptions
+  : T extends NetworkQueries.topCountries
+  ? NetworkTopCountriesRequestOptions
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowRequestOptions
+  : T extends NetworkQueries.users
+  ? NetworkUsersRequestOptions
+  : T extends NetworkKpiQueries.dns
+  ? NetworkKpiDnsRequestOptions
+  : T extends NetworkKpiQueries.networkEvents
+  ? NetworkKpiEventsRequestOptions
+  : T extends NetworkKpiQueries.tlsHandshakes
+  ? NetworkKpiTlsHandshakesRequestOptions
+  : T extends NetworkKpiQueries.uniqueFlows
+  ? NetworkKpiUniqueFlowsRequestOptions
+  : T extends NetworkKpiQueries.uniquePrivateIps
+  ? NetworkKpiUniquePrivateIpsRequestOptions
+  : T extends typeof MatrixHistogramQuery
+  ? MatrixHistogramRequestOptions
+  : T extends CtiQueries.eventEnrichment
+  ? EventEnrichmentRequestOptions
+  : T extends CtiQueries.dataSource
+  ? ThreatIntelSourceRequestOptions
+  : T extends RiskQueries.hostsRiskScore
+  ? RiskScoreRequestOptions
+  : T extends RiskQueries.usersRiskScore
+  ? RiskScoreRequestOptions
+  : T extends RiskQueries.kpiRiskScore
+  ? RiskScoreKpiRequestOptions
+  : T extends RelatedEntitiesQueries.relatedHosts
+  ? RelatedHostsRequestOptions
+  : T extends RelatedEntitiesQueries.relatedUsers
+  ? RelatedUsersRequestOptions
   : never;
 
 export interface CommonFields {

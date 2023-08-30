@@ -16,19 +16,15 @@ import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiHostsQuery } from './query.hosts_kpi_hosts.dsl';
 import { formatGeneralHistogramData } from '../../../common/format_general_histogram_data';
-import { parseOptions } from './parse_options';
 
 export const hostsKpiHosts: SecuritySolutionFactory<HostsKpiQueries.kpiHosts> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
+  buildDsl: (options) => {
     return buildHostsKpiHostsQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<HostsKpiHostsStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const inspect = {
       dsl: [inspectStringifyObject(buildHostsKpiHostsQuery(options))],
     };

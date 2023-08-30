@@ -21,14 +21,11 @@ import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildRiskScoreQuery } from './query.risk_score.dsl';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { getTotalCount } from '../../cti/event_enrichment/helpers';
-import { parseOptions } from './parse_options';
 
 export const riskScore: SecuritySolutionFactory<
   RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore
 > = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -36,15 +33,13 @@ export const riskScore: SecuritySolutionFactory<
     return buildRiskScoreQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse,
     deps?: {
       spaceId?: string;
       ruleDataClient?: IRuleDataClient | null;
     }
   ) => {
-    const options = parseOptions(maybeOptions);
-
     const inspect = {
       dsl: [inspectStringifyObject(buildRiskScoreQuery(options))],
     };

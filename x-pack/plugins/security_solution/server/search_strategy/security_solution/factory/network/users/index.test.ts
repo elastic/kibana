@@ -13,7 +13,7 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
-import type { NetworkUsersRequestOptionsInput } from '../../../../../../common/api/search_strategy';
+import type { NetworkUsersRequestOptions } from '../../../../../../common/api/search_strategy';
 
 describe('networkUsers search strategy', () => {
   const buildUsersQuery = jest.spyOn(buildQuery, 'buildUsersQuery');
@@ -35,7 +35,7 @@ describe('networkUsers search strategy', () => {
           ...mockOptions.pagination,
           querySize: DEFAULT_MAX_TABLE_QUERY_SIZE,
         },
-      } as NetworkUsersRequestOptionsInput;
+      } as NetworkUsersRequestOptions;
 
       expect(() => {
         networkUsers.buildDsl(overSizeOptions);

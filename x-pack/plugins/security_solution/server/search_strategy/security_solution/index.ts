@@ -42,7 +42,7 @@ export const securitySolutionSearchStrategyProvider = (
           };
         }),
         mergeMap((esSearchRes) =>
-          queryFactory.parse(request, esSearchRes, {
+          queryFactory.parse(parsedRequest, esSearchRes, {
             esClient: deps.esClient,
             savedObjectsClient: deps.savedObjectsClient,
             endpointContext,

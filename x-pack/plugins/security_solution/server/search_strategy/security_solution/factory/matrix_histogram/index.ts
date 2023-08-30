@@ -26,7 +26,6 @@ import { authenticationsMatrixHistogramConfig } from './authentications';
 import { dnsMatrixHistogramConfig } from './dns';
 import { eventsMatrixHistogramConfig } from './events';
 import { previewMatrixHistogramConfig } from './preview';
-import { parseOptions } from './parse_options';
 
 const matrixHistogramConfig: MatrixHistogramDataConfig = {
   [MatrixHistogramType.alerts]: alertsMatrixHistogramConfig,
@@ -38,9 +37,7 @@ const matrixHistogramConfig: MatrixHistogramDataConfig = {
 };
 
 export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuery> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     const myConfig = getOr(null, options.histogramType, matrixHistogramConfig);
     if (myConfig == null) {
       throw new Error(`This histogram type ${options.histogramType} is unknown to the server side`);
@@ -48,11 +45,9 @@ export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuer
     return myConfig.buildDsl(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<MatrixHistogramStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const myConfig = getOr(null, options.histogramType, matrixHistogramConfig);
     if (myConfig == null) {
       throw new Error(`This histogram type ${options.histogramType} is unknown to the server side`);

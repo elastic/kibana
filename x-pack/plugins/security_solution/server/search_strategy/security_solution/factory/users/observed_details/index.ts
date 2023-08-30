@@ -14,19 +14,15 @@ import { buildObservedUserDetailsQuery } from './query.observed_user_details.dsl
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type { ObservedUserDetailsStrategyResponse } from '../../../../../../common/search_strategy/security_solution/users/observed_details';
 import { formatUserItem } from './helpers';
-import { parseOptions } from './parse_options';
 
 export const observedUserDetails: SecuritySolutionFactory<UsersQueries.observedDetails> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
+  buildDsl: (options) => {
     return buildObservedUserDetailsQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<ObservedUserDetailsStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const aggregations = response.rawResponse.aggregations;
 
     const inspect = {

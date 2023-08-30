@@ -28,26 +28,22 @@ import {
   RiskScoreEntity,
   RiskQueries,
 } from '../../../../../../common/search_strategy';
-import { parseOptions } from './parse_options';
 
 export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildUsersQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
       spaceId?: string;
     }
   ): Promise<UsersStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const inspect = {
       dsl: [inspectStringifyObject(buildUsersQuery(options))],

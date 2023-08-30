@@ -16,22 +16,17 @@ import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
 import { formatHistogramData } from '../common';
 import { buildUniquePrivateIpsQuery } from './query.network_kpi_unique_private_ips.dsl';
-import { parseOptions } from './parse_options';
 
 export const networkKpiUniquePrivateIps: SecuritySolutionFactory<NetworkKpiQueries.uniquePrivateIps> =
   {
     // @ts-expect-error auto_date_histogram.buckets is incompatible
-    buildDsl: (maybeOptions: unknown) => {
-      const options = parseOptions(maybeOptions);
-
+    buildDsl: (options) => {
       return buildUniquePrivateIpsQuery(options);
     },
     parse: async (
-      maybeOptions: unknown,
+      options,
       response: IEsSearchResponse<unknown>
     ): Promise<NetworkKpiUniquePrivateIpsStrategyResponse> => {
-      const options = parseOptions(maybeOptions);
-
       const inspect = {
         dsl: [inspectStringifyObject(buildUniquePrivateIpsQuery(options))],
       };

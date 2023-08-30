@@ -20,16 +20,13 @@ import type {
 import { buildRelatedHostsQuery } from './query.related_hosts.dsl';
 import { getHostRiskData } from '../../hosts/all';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { parseOptions } from './parse_options';
 
 export const usersRelatedHosts: SecuritySolutionFactory<RelatedEntitiesQueries.relatedHosts> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     return buildRelatedHostsQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
@@ -37,8 +34,6 @@ export const usersRelatedHosts: SecuritySolutionFactory<RelatedEntitiesQueries.r
       endpointContext: EndpointAppContext;
     }
   ): Promise<UsersRelatedHostsStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const aggregations = response.rawResponse.aggregations;
 
     const inspect = {

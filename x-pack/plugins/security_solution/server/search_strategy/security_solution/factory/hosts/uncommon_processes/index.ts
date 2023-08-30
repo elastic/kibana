@@ -19,23 +19,18 @@ import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
 import { buildQuery } from './dsl/query.dsl';
 import { formatUncommonProcessesData, getHits } from './helpers';
-import { parseOptions } from './parse_options';
 
 export const uncommonProcesses: SecuritySolutionFactory<HostsQueries.uncommonProcesses> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<HostsUncommonProcessesStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.process_count.value', response.rawResponse);
     const buckets = getOr([], 'aggregations.group_by_process.buckets', response.rawResponse);

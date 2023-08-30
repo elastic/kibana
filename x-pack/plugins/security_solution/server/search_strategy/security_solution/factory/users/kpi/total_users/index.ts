@@ -21,19 +21,15 @@ import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
 import { buildTotalUsersKpiQuery } from './query.build_total_users_kpi.dsl';
 import { formatGeneralHistogramData } from '../../../common/format_general_histogram_data';
-import { parseOptions } from './parse_options';
 
 export const totalUsersKpi: SecuritySolutionFactory<UsersQueries.kpiTotalUsers> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
+  buildDsl: (options) => {
     return buildTotalUsersKpiQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<TotalUsersKpiStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const inspect = {
       dsl: [inspectStringifyObject(buildTotalUsersKpiQuery(options))],
     };

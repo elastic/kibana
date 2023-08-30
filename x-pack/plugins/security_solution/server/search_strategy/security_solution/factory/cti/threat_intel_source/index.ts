@@ -13,20 +13,15 @@ import type {
 } from '../../../../../../common/search_strategy/security_solution/cti';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
-import { parseOptions } from './parse_options';
 
 export const dataSource: SecuritySolutionFactory<CtiQueries.dataSource> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     return buildTiDataSourceQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<CtiDataSourceStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const inspect = {
       dsl: [inspectStringifyObject(buildTiDataSourceQuery(options))],
     };

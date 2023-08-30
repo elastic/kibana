@@ -16,19 +16,15 @@ import type {
   UsersQueries,
 } from '../../../../../../../common/search_strategy';
 import { formatGeneralHistogramData } from '../../../common/format_general_histogram_data';
-import { parseOptions } from './parse_options';
 
 export const usersKpiAuthentications: SecuritySolutionFactory<UsersQueries.kpiAuthentications> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
+  buildDsl: (options) => {
     return buildUsersKpiAuthenticationsQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<UsersKpiAuthenticationsStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const inspect = {
       dsl: [inspectStringifyObject(buildUsersKpiAuthenticationsQuery(options))],
     };

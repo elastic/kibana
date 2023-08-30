@@ -14,7 +14,7 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
-import type { HostUncommonProcessesRequestOptionsInput } from '../../../../../../common/api/search_strategy';
+import type { HostUncommonProcessesRequestOptions } from '../../../../../../common/api/search_strategy';
 
 describe('uncommonProcesses search strategy', () => {
   const buildUncommonProcessesQuery = jest.spyOn(buildQuery, 'buildQuery');
@@ -36,7 +36,7 @@ describe('uncommonProcesses search strategy', () => {
           ...mockOptions.pagination,
           querySize: DEFAULT_MAX_TABLE_QUERY_SIZE,
         },
-      } as HostUncommonProcessesRequestOptionsInput;
+      } as HostUncommonProcessesRequestOptions;
 
       expect(() => {
         uncommonProcesses.buildDsl(overSizeOptions);

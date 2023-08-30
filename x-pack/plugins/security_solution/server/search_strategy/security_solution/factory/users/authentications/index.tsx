@@ -22,12 +22,9 @@ import type { SecuritySolutionFactory } from '../../types';
 import { buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
 
 import { formatAuthenticationData, getHits } from './helpers';
-import { parseOptions } from './parse_options';
 
 export const authentications: SecuritySolutionFactory<UsersQueries.authentications> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -35,11 +32,9 @@ export const authentications: SecuritySolutionFactory<UsersQueries.authenticatio
     return buildAuthenticationQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<UserAuthenticationsStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.stack_by_count.value', response.rawResponse);
 

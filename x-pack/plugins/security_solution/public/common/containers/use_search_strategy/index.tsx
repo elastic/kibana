@@ -15,7 +15,7 @@ import * as i18n from './translations';
 
 import type {
   FactoryQueryTypes,
-  StrategyRequestType,
+  StrategyRequestInputType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
 import { getInspectResponse } from '../../../helpers';
@@ -26,7 +26,7 @@ import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../../common/constants';
 
 interface UseSearchFunctionParams<QueryType extends FactoryQueryTypes> {
-  request: Omit<StrategyRequestType<QueryType>, 'factoryQueryType'>;
+  request: Omit<StrategyRequestInputType<QueryType>, 'factoryQueryType'>;
   abortSignal: AbortSignal;
 }
 
@@ -35,7 +35,7 @@ type UseSearchFunction<QueryType extends FactoryQueryTypes> = (
 ) => Observable<StrategyResponseType<QueryType>>;
 
 type SearchFunction<QueryType extends FactoryQueryTypes> = (
-  params: Omit<StrategyRequestType<QueryType>, 'factoryQueryType'>
+  params: Omit<StrategyRequestInputType<QueryType>, 'factoryQueryType'>
 ) => void;
 
 const EMPTY_INSPECT = {
@@ -57,8 +57,8 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
       });
 
       const observable = data.search
-        .search<StrategyRequestType<QueryType>, StrategyResponseType<QueryType>>(
-          { ...request, factoryQueryType } as StrategyRequestType<QueryType>,
+        .search<StrategyRequestInputType<QueryType>, StrategyResponseType<QueryType>>(
+          { ...request, factoryQueryType } as unknown as StrategyRequestInputType<QueryType>,
           {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal,

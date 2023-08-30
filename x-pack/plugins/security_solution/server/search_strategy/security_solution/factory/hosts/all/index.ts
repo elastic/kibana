@@ -17,8 +17,9 @@ import type {
   HostsEdges,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
-import { HostRiskScore, RiskQueries } from '../../../../../../common/search_strategy';
+import type { HostRiskScore } from '../../../../../../common/search_strategy';
 import {
+  RiskQueries,
   RiskScoreEntity,
   getHostRiskIndex,
   buildHostNamesFilter,
@@ -31,19 +32,16 @@ import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
 
 import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
-import { parseOptions } from './parse_options';
 
 export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildHostsQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
@@ -51,8 +49,6 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
       endpointContext: EndpointAppContext;
     }
   ): Promise<HostsStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response.rawResponse);
     const buckets: HostAggEsItem[] = getOr(

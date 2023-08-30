@@ -17,7 +17,7 @@ import { get } from 'lodash/fp';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
-import type { RiskScoreRequestOptionsInput } from '../../../../../../common/api/search_strategy';
+import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
 import { RiskQueries } from '../../../../../../common/api/search_strategy';
 
 export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
@@ -74,7 +74,7 @@ const mockDeps = {
   request: {} as KibanaRequest,
 };
 
-export const mockOptions: RiskScoreRequestOptionsInput = {
+export const mockOptions: RiskScoreRequestOptions = {
   defaultIndex: ['logs-*'],
   riskScoreEntity: RiskScoreEntity.host,
   includeAlertsCount: true,

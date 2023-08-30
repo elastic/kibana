@@ -17,7 +17,10 @@ import { usersFactory } from './users';
 import { firstLastSeenFactory } from './last_first_seen';
 import { relatedEntitiesFactory } from './related_entities';
 
-export const securitySolutionFactory: Record<string, SecuritySolutionFactory<FactoryQueryTypes>> = {
+export const securitySolutionFactory: Record<
+  FactoryQueryTypes,
+  SecuritySolutionFactory<FactoryQueryTypes>
+> = {
   ...hostsFactory,
   ...usersFactory,
   ...matrixHistogramFactory,

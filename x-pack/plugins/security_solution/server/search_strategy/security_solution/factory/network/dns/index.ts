@@ -20,24 +20,19 @@ import { inspectStringifyObject } from '../../../../../utils/build_query';
 
 import { getDnsEdges } from './helpers';
 import { buildDnsQuery } from './query.dns_network.dsl';
-import { parseOptions } from './parse_options';
 import type { SecuritySolutionFactory } from '../../types';
 
 export const networkDns: SecuritySolutionFactory<NetworkQueries.dns> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildDnsQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkDnsStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const { activePage, fakePossibleCount } = options.pagination;
     const totalCount = getOr(0, 'aggregations.dns_count.value', response.rawResponse);
     const edges: NetworkDnsEdges[] = getDnsEdges(response);

@@ -21,23 +21,18 @@ import type { SecuritySolutionFactory } from '../../types';
 
 import { getHttpEdges } from './helpers';
 import { buildHttpQuery } from './query.http_network.dsl';
-import { parseOptions } from './parse_options';
 
 export const networkHttp: SecuritySolutionFactory<NetworkQueries.http> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildHttpQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkHttpStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.http_count.value', response.rawResponse);
     const networkHttpEdges: NetworkHttpEdges[] = getHttpEdges(response);

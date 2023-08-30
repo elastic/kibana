@@ -17,7 +17,6 @@ import type {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
 import { buildKpiRiskScoreQuery } from './query.kpi_risk_score.dsl';
-import { parseOptions } from './parse_options';
 
 interface AggBucket {
   key: RiskSeverity;
@@ -25,17 +24,13 @@ interface AggBucket {
 }
 
 export const kpiRiskScore: SecuritySolutionFactory<RiskQueries.kpiRiskScore> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     return buildKpiRiskScoreQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<KpiRiskScoreStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const inspect = {
       dsl: [inspectStringifyObject(buildKpiRiskScoreQuery(options))],
     };

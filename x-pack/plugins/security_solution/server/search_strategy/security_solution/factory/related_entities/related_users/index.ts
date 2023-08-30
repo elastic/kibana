@@ -19,24 +19,19 @@ import type {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildRelatedUsersQuery } from './query.related_users.dsl';
 import { getUserRiskData } from '../../users/all';
-import { parseOptions } from './parse_options';
 
 export const hostsRelatedUsers: SecuritySolutionFactory<RelatedEntitiesQueries.relatedUsers> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
-
+  buildDsl: (options) => {
     return buildRelatedUsersQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
       spaceId?: string;
     }
   ): Promise<HostsRelatedUsersStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const aggregations = response.rawResponse.aggregations;
 
     const inspect = {
