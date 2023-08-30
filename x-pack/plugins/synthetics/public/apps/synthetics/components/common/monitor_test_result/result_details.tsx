@@ -96,7 +96,6 @@ export const TimingDetails = ({ step }: { step: JourneyStep }) => {
   return (
     <EuiDescriptionList
       compressed={true}
-      rowGutterSize="s"
       type="column"
       listItems={items}
       style={{ maxWidth: 265 }}

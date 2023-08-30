@@ -17,15 +17,10 @@
 .shardFailureModal__desc {
   // set for IE11, since without it depending on the content the width of the list
   // could be much higher than the available screenspace
+  // 30 Aug, 2023 - Added shims for grid columns. `EuiDescriptionList` was updated
+  // to use CSS Grid in EUI v88.0.0.
   max-width: 686px;
-}
-
-.shardFailureModal__descTitle {
-  width: 12% !important;
-}
-
-.shardFailureModal__descValue {
-  width: 88% !important;
+  grid-template-columns: 1fr 6fr;
 }
 
 @include euiBreakpoint('xs','s') {
