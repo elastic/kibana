@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
@@ -131,7 +132,11 @@ export const Processes = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {!error && (response?.processList ?? []).length > 0 && <ProcessesExplanationMessage />}
+        {loading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          !error && (response?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
+        )}
         <EuiFlexItem grow={false}>
           <EuiSearchBar
             query={searchBarState}
