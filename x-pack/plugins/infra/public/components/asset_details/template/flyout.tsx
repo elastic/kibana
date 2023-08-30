@@ -14,7 +14,7 @@ import { InfraLoadingPanel } from '../../loading';
 import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
 import { FlyoutHeader } from '../header/flyout_header';
-import { useAssetDetailsStateContext } from '../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import type { ContentTemplateProps } from '../types';
@@ -23,9 +23,9 @@ export const Flyout = ({
   header: { tabs = [], links = [] },
   closeFlyout,
 }: ContentTemplateProps & { closeFlyout: () => void }) => {
-  const { asset, assetType, loading } = useAssetDetailsStateContext();
+  const { asset, assetType, loading } = useAssetDetailsRenderPropsContext();
   const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
-  const { initialActiveTabId } = useTabSwitcherContext();
+  const { activeTabId } = useTabSwitcherContext();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
@@ -34,7 +34,7 @@ export const Flyout = ({
     telemetry.reportAssetDetailsFlyoutViewed({
       componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
       assetType,
-      tabId: initialActiveTabId,
+      tabId: activeTabId,
     });
   });
 
