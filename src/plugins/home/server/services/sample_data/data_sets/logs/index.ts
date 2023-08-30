@@ -41,6 +41,7 @@ export const logsSpecProvider = function (): SampleDatasetSchema {
         isDataStream: true,
       },
     ],
+    settingsForIndex: true,
     status: 'not_installed',
     iconPath: GLOBE_ICON_PATH,
   };
