@@ -29,34 +29,6 @@ NOTE: If you are using the <<action-settings, `xpack.actions.allowedHosts`>> set
 API Key::   The Opsgenie API authentication key for HTTP Basic authentication. For more details about generating Opsgenie API keys, refer to https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/[Opsgenie documentation].
 
 [float]
-[[preconfigured-opsgenie-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by
-adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-For example:
-
-[source,text]
---
-xpack.actions.preconfigured:
-  my-opsgenie:
-    name: preconfigured-opsgenie-connector-type
-    actionTypeId: .opsgenie
-    config:
-      apiUrl: https://api.opsgenie.com
-    secrets:
-      apiKey: apikey
---
-
-Config defines information for the connector type.
-
-`apiUrl`:: A string that corresponds to *URL*.
-
-Secrets defines sensitive information for the connector type.
-
-`apiKey`:: A string that corresponds to *API Key*.
-
-[float]
 [[opsgenie-action-configuration]]
 === Test connectors
 
