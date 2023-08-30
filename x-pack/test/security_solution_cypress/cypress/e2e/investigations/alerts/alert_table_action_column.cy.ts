@@ -23,6 +23,8 @@ describe(
       cleanKibana();
       cy.task('esArchiverLoad', {
         archiveName: 'process_ancestry',
+        useCreate: true,
+        docsOnly: true,
       });
     });
 

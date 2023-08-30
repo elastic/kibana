@@ -23,6 +23,8 @@ describe(
       cleanKibana();
       cy.task('esArchiverLoad', {
         archiveName: 'ransomware_prevention',
+        useCreate: true,
+        docsOnly: true,
       });
     });
 

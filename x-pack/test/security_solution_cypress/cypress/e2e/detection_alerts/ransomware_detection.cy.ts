@@ -21,6 +21,8 @@ describe(
     before(() => {
       cy.task('esArchiverLoad', {
         archiveName: 'ransomware_detection',
+        useCreate: true,
+        docsOnly: true,
       });
     });
 
