@@ -18,7 +18,6 @@ export function GlobalLogsTab() {
   return (
     <GlobalRuleEventLogList
       filteredRuleTypes={filteredRuleTypes}
-      setHeaderActions={() => {}} // TODO: what's this?
       localStorageKey="observability:global-rule-event-log-list"
     />
   );

@@ -111,7 +111,7 @@ export const routes = {
   },
   [RULES_LOGS_PATH]: {
     handler: () => {
-      return <RulesPage logs />;
+      return <RulesPage activeTab="logs" />;
     },
     params: {},
     exact: true,

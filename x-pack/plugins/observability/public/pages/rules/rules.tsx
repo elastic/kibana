@@ -7,7 +7,7 @@
 
 import React, { lazy, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,10 +24,12 @@ import { RulesTab } from './rules_tab';
 
 const GlobalLogsTab = lazy(() => import('./global_logs_tab'));
 
+const RULES_TAB_NAME = 'rules';
+
 interface RulesPageProps {
-  logs?: boolean;
+  activeTab?: string;
 }
-export function RulesPage({ logs }: RulesPageProps) {
+export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   const {
     http,
     docLinks,
@@ -35,13 +37,8 @@ export function RulesPage({ logs }: RulesPageProps) {
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
-  // const { path } = useRouteMatch();
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
   const [stateRefresh, setRefresh] = useState(new Date());
-
-  const onTabChange = (path: typeof RULES_LOGS_PATH | typeof RULES_PATH) => {
-    history.push(path);
-  };
 
   useBreadcrumbs([
     {
@@ -67,13 +64,26 @@ export function RulesPage({ logs }: RulesPageProps) {
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
 
-  return (
-    <ObservabilityPageTemplate
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.rulesTitle', {
-          defaultMessage: 'Rules',
-        }),
-        rightSideItems: [
+  const tabs = [
+    {
+      name: 'rules',
+      label: (
+        <FormattedMessage id="xpack.triggersActionsUI.home.rulesTabTitle" defaultMessage="Rules" />
+      ),
+      onClick: () => history.push(RULES_PATH),
+    },
+    {
+      name: 'logs',
+      label: (
+        <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />
+      ),
+      onClick: () => history.push(RULES_LOGS_PATH),
+    },
+  ];
+
+  const rightSideItems = [
+    ...(activeTab === RULES_TAB_NAME
+      ? [
           <EuiButton
             data-test-subj="createRuleButton"
             disabled={!authorizedToCreateAnyRules}
@@ -87,47 +97,43 @@ export function RulesPage({ logs }: RulesPageProps) {
               defaultMessage="Create rule"
             />
           </EuiButton>,
-          <RulesSettingsLink />,
-          <EuiButtonEmpty
-            data-test-subj="documentationLink"
-            href={docLinks.links.observability.createAlerts}
-            iconType="help"
-            target="_blank"
-          >
-            <FormattedMessage
-              id="xpack.observability.rules.docsLinkText"
-              defaultMessage="Documentation"
-            />
-          </EuiButtonEmpty>,
-        ],
-        tabs: [
-          {
-            id: 'Rules',
-            name: 'rules',
-            label: 'Rules',
-            onClick: () => onTabChange(RULES_PATH),
-          },
-          {
-            id: 'Logs',
-            name: 'logs',
-            label: 'Logs',
-            onClick: () => onTabChange(RULES_LOGS_PATH),
-          },
-        ],
+        ]
+      : []),
+    <RulesSettingsLink />,
+    <EuiButtonEmpty
+      data-test-subj="documentationLink"
+      href={docLinks.links.observability.createAlerts}
+      iconType="help"
+      target="_blank"
+    >
+      <FormattedMessage
+        id="xpack.observability.rules.docsLinkText"
+        defaultMessage="Documentation"
+      />
+    </EuiButtonEmpty>,
+  ];
+
+  return (
+    <ObservabilityPageTemplate
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.observability.rulesTitle', {
+          defaultMessage: 'Rules',
+        }),
+        tabs,
+        rightSideItems,
       }}
       data-test-subj="rulesPage"
     >
       <HeaderMenu />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <div>Pam</div>
           <Routes>
-            <Route exact path={RULES_LOGS_PATH} component={GlobalLogsTab} />
             <Route
               exact
               path={RULES_PATH}
               render={() => <RulesTab setRefresh={setRefresh} stateRefresh={stateRefresh} />}
             />
+            <Route exact path={RULES_LOGS_PATH} component={GlobalLogsTab} />
           </Routes>
         </EuiFlexItem>
       </EuiFlexGroup>
