@@ -8,7 +8,6 @@
   "kbn_references": [
     "@kbn/datemath",
     "@kbn/apm-synthtrace-client",
-    "@kbn/fleet-plugin",
   ],
   "exclude": [
     "target/**/*",
