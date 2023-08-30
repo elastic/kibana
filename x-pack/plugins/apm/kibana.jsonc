@@ -19,7 +19,7 @@
       "inspector",
       "licensing",
       "infra",
-      "metricsData",
+      "metricsDataAccess",
       "observability",
       "observabilityShared",
       "exploratoryView",

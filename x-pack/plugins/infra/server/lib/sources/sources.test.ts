@@ -6,7 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { MetricsDataClient } from '@kbn/metrics-data-plugin/server';
+import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import { InfraConfig } from '../../types';
 import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import { InfraSources } from './sources';

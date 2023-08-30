@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
-import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-plugin/server';
+import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {

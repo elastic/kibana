@@ -12,7 +12,7 @@ import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { ILogsSharedLogEntriesDomain } from '@kbn/logs-shared-plugin/server';
-import type { MetricsDataClient } from '@kbn/metrics-data-plugin/server';
+import type { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';

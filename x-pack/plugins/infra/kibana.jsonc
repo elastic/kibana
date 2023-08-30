@@ -21,7 +21,7 @@
       "fieldFormats",
       "lens",
       "logsShared",
-      "metricsData",
+      "metricsDataAccess",
       "observability",
       "observabilityAIAssistant",
       "observabilityShared",

@@ -16,7 +16,7 @@ type InfraMetricsSearchParams = Omit<ESSearchRequest, 'index'> & {
 export type InfraMetricsClient = ReturnType<typeof createInfraMetricsClient>;
 
 export function createInfraMetricsClient(resources: APMRouteHandlerResources) {
-  const metricsClient = resources.plugins.metricsData.setup.client;
+  const metricsClient = resources.plugins.metricsDataAccess.setup.client;
 
   return {
     async search<TDocument, TParams extends InfraMetricsSearchParams>(

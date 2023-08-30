@@ -97,7 +97,7 @@
     "@kbn/discover-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/apm-data-access-plugin",
-    "@kbn/metrics-data-plugin"
+    "@kbn/metrics-data-access-plugin"
   ],
   "exclude": ["target/**/*"]
 }

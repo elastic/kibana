@@ -4865,7 +4865,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/metrics-data-plugin@link:x-pack/plugins/metrics_data":
+"@kbn/metrics-data-access-plugin@link:x-pack/plugins/metrics_data_access":
   version "0.0.0"
   uid ""
 

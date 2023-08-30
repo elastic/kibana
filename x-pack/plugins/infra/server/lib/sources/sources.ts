@@ -15,7 +15,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { MetricsDataClient } from '@kbn/metrics-data-plugin/server';
+import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import {
   InfraSavedSourceConfiguration,
   InfraSource,

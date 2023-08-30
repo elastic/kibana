@@ -507,7 +507,7 @@
     "@kbn/maps-ems-plugin": "link:src/plugins/maps_ems",
     "@kbn/maps-plugin": "link:x-pack/plugins/maps",
     "@kbn/maps-vector-tile-utils": "link:x-pack/packages/maps/vector_tile_utils",
-    "@kbn/metrics-data-plugin": "link:x-pack/plugins/metrics_data",
+    "@kbn/metrics-data-access-plugin": "link:x-pack/plugins/metrics_data_access",
     "@kbn/ml-agg-utils": "link:x-pack/packages/ml/agg_utils",
     "@kbn/ml-anomaly-utils": "link:x-pack/packages/ml/anomaly_utils",
     "@kbn/ml-category-validator": "link:x-pack/packages/ml/category_validator",

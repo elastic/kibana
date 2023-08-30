@@ -1,13 +1,13 @@
 {
   "type": "plugin",
-  "id": "@kbn/metrics-data-plugin",
+  "id": "@kbn/metrics-data-access-plugin",
   "owner": "@elastic/infra-monitoring-ui",
   "description": "Exposes utilities for accessing metrics data",
   "plugin": {
-    "id": "metricsData",
+    "id": "metricsDataAccess",
     "server": true,
     "browser": false,
-    "configPath": ["xpack", "metrics_data"],
+    "configPath": ["xpack", "metrics_data_access"],
     "requiredPlugins": [],
     "requiredBundles": [],
     "extraPublicDirs": []
