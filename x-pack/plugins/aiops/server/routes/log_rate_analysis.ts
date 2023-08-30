@@ -23,9 +23,8 @@ import type {
 } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
-import { criticalTableLookup, type Histogram } from '@kbn/ml-chi2test';
 
-import { LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD, RANDOM_SAMPLER_SEED } from '../../common/constants';
+import { RANDOM_SAMPLER_SEED } from '../../common/constants';
 import {
   addSignificantTermsAction,
   addSignificantTermsGroupAction,
@@ -47,7 +46,7 @@ import { PLUGIN_ID } from '../../common';
 import { isRequestAbortedError } from '../lib/is_request_aborted_error';
 import type { AiopsLicense } from '../types';
 
-import { fetchCategories } from './queries/fetch_categories';
+import { fetchSignificantCategories } from './queries/fetch_significant_categories';
 import { fetchSignificantTermPValues } from './queries/fetch_significant_term_p_values';
 import { fetchIndexInfo } from './queries/fetch_index_info';
 import { fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
@@ -203,9 +202,10 @@ export const defineLogRateAnalysisRoute = (
 
               // Step 1: Index Info: Field candidates, total doc count, sample probability
 
-              const fieldCandidates: Awaited<ReturnType<typeof fetchIndexInfo>>['fieldCandidates'] =
-                [];
+              const fieldCandidates: string[] = [];
               let fieldCandidatesCount = fieldCandidates.length;
+
+              const textFieldCandidates: string[] = [];
 
               let totalDocCount = 0;
 
@@ -231,122 +231,10 @@ export const defineLogRateAnalysisRoute = (
                     ['message'],
                     abortSignal
                   );
-                  // console.log('fieldCandidates', indexInfo.fieldCandidates);
-                  // console.log('textFieldCandidates', indexInfo.textFieldCandidates);
 
-                  if (indexInfo.textFieldCandidates.length > 0) {
-                    const categoriesBaseline = await fetchCategories(
-                      client,
-                      request.body,
-                      indexInfo.textFieldCandidates,
-                      request.body.baselineMin,
-                      request.body.baselineMax,
-                      logger,
-                      sampleProbability,
-                      pushError,
-                      abortSignal
-                    );
-
-                    const categoriesBaselineTotalCount = categoriesBaseline[0].categories.reduce(
-                      (p, c) => p + c.count,
-                      0
-                    );
-                    const categoriesBaselineTestData: Histogram[] =
-                      categoriesBaseline[0].categories.map((d) => ({
-                        key: d.key,
-                        doc_count: d.count,
-                        percentage: d.count / categoriesBaselineTotalCount,
-                      }));
-
-                    const categoriesDeviation = await fetchCategories(
-                      client,
-                      request.body,
-                      indexInfo.textFieldCandidates,
-                      request.body.deviationMin,
-                      request.body.deviationMax,
-                      logger,
-                      sampleProbability,
-                      pushError,
-                      abortSignal
-                    );
-
-                    const categoriesDeviationTotalCount = categoriesDeviation[0].categories.reduce(
-                      (p, c) => p + c.count,
-                      0
-                    );
-                    const categoriesDeviationTestData: Histogram[] =
-                      categoriesDeviation[0].categories.map((d) => ({
-                        key: d.key,
-                        doc_count: d.count,
-                        percentage: d.count / categoriesDeviationTotalCount,
-                      }));
-
-                    // console.log(
-                    //   'totals',
-                    //   categoriesBaselineTotalCount,
-                    //   categoriesDeviationTotalCount
-                    // );
-
-                    // Get all unique keys from both arrays
-                    const allKeys: string[] = Array.from(
-                      new Set([
-                        ...categoriesBaselineTestData.map((term) => term.key.toString()),
-                        ...categoriesDeviationTestData.map((term) => term.key.toString()),
-                      ])
-                    ).slice(0, 100);
-
-                    const significantCategories: SignificantTerm[] = [];
-
-                    allKeys.forEach((key) => {
-                      const baselineTerm = categoriesBaselineTestData.find(
-                        (term) => term.key === key
-                      );
-                      const deviationTerm = categoriesDeviationTestData.find(
-                        (term) => term.key === key
-                      );
-
-                      const observed: number = deviationTerm?.percentage ?? 0;
-                      const expected: number = baselineTerm?.percentage ?? 0;
-                      const chiSquared =
-                        Math.pow(observed - expected, 2) / (expected > 0 ? expected : 1e-6); // Prevent divide by zero
-
-                      const pValue = criticalTableLookup(chiSquared, 1);
-
-                      if (pValue <= LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD && observed > expected) {
-                        significantCategories.push({
-                          fieldName: 'message',
-                          fieldValue: key,
-                          doc_count: deviationTerm?.doc_count ?? 0,
-                          bg_count: baselineTerm?.doc_count ?? 0,
-                          total_doc_count: categoriesDeviationTotalCount,
-                          total_bg_count: categoriesBaselineTotalCount,
-                          score: 0,
-                          pValue,
-                          normalizedScore: 0,
-                        });
-                        push(
-                          addSignificantTermsAction([
-                            {
-                              fieldName: 'message',
-                              fieldValue: key,
-                              doc_count: deviationTerm?.doc_count ?? 0,
-                              bg_count: baselineTerm?.doc_count ?? 0,
-                              total_doc_count: categoriesDeviationTotalCount,
-                              total_bg_count: categoriesBaselineTotalCount,
-                              score: 0,
-                              pValue,
-                              normalizedScore: 0,
-                            },
-                          ])
-                        );
-                      }
-                    });
-                  }
-
-                  // console.log('categories.baseline', categoriesBaseline[0].categories);
-                  // console.log('categories.deviation', categoriesDeviation[0].categories);
                   fieldCandidates.push(...indexInfo.fieldCandidates);
                   fieldCandidatesCount = fieldCandidates.length;
+                  textFieldCandidates.push(...indexInfo.textFieldCandidates);
                   totalDocCount = indexInfo.totalDocCount;
                 } catch (e) {
                   // console.log(e);
@@ -392,6 +280,23 @@ export const defineLogRateAnalysisRoute = (
               }
 
               // Step 2: Significant Terms
+
+              // Get significant categories of text fields
+              if (textFieldCandidates.length > 0) {
+                const significantCategories = await fetchSignificantCategories(
+                  client,
+                  request.body,
+                  textFieldCandidates,
+                  logger,
+                  sampleProbability,
+                  pushError,
+                  abortSignal
+                );
+
+                if (significantCategories.length > 0) {
+                  push(addSignificantTermsAction(significantCategories));
+                }
+              }
 
               const significantTerms: SignificantTerm[] = request.body.overrides?.significantTerms
                 ? request.body.overrides?.significantTerms
