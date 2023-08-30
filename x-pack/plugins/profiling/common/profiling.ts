@@ -11,13 +11,6 @@ export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
 
-export function createStackFrameID(fileID: FileID, addressOrLine: number): StackFrameID {
-  const buf = Buffer.alloc(24);
-  Buffer.from(fileID, 'base64url').copy(buf);
-  buf.writeBigUInt64BE(BigInt(addressOrLine), 16);
-  return buf.toString('base64url');
-}
-
 /* eslint no-bitwise: ["error", { "allow": ["&"] }] */
 export function getFileIDFromStackFrameID(frameID: StackFrameID): FileID {
   return frameID.slice(0, 21) + safeBase64Encoder[frameID.charCodeAt(21) & 0x30];
