@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -40,7 +39,7 @@ export const AssistantHeaderLink = React.memo(() => {
       <EuiHeaderLink data-test-subj="assistantHeaderLink" color="primary" onClick={showOverlay}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <AssistantAvatar size="xs" />
+            <EuiIcon data-test-subj="titleIcon" type="logoSecurity" size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {i18n.translate('xpack.securitySolution.globalHeader.assistantHeaderLink', {

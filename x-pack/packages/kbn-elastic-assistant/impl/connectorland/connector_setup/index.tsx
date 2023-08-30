@@ -25,7 +25,6 @@ import { clearPresentationData, conversationHasNoPresentationData } from './help
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../use_load_connectors';
-import { AssistantAvatar } from '../../assistant/assistant_avatar/assistant_avatar';
 import { getGenAiConfig } from '../helpers';
 
 const ConnectorButtonWrapper = styled.div`
@@ -180,7 +179,7 @@ export const useConnectorSetup = ({
               name={i18n.CONNECTOR_SETUP_USER_ASSISTANT}
               size="l"
               color="subdued"
-              iconType={AssistantAvatar}
+              iconType="logoSecurity"
             />
           ),
           timestamp: `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${message.timestamp}`,

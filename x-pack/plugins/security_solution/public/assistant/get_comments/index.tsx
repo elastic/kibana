@@ -10,7 +10,6 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import { EuiAvatar, EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import React from 'react';
 
-import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
 
@@ -58,7 +57,7 @@ export const getComments = ({
       timelineAvatar: isUser ? (
         <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
       ) : (
-        <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
+        <EuiAvatar name="machine" size="l" color="subdued" iconType="logoSecurity" />
       ),
       timestamp: i18n.AT(
         message.timestamp.length === 0 ? new Date().toLocaleString() : message.timestamp
