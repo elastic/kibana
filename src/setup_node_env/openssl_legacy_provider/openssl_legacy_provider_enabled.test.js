@@ -25,7 +25,6 @@ describe('openSSLLegacyProviderEnabled', function () {
       }
     );
     var stdout = result.stdout.trim();
-    console.log(result);
     return stdout === 'true';
   }
 
