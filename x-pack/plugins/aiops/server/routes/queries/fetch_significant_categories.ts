@@ -10,10 +10,23 @@ import type { Logger } from '@kbn/logging';
 import { criticalTableLookup, type Histogram } from '@kbn/ml-chi2test';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
-import { fetchCategories } from './fetch_categories';
-
+import type { Category } from '../../../common/api/log_categorization/types';
 import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
 import { LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD } from '../../../common/constants';
+
+import { fetchCategories } from './fetch_categories';
+
+const getCategoriesTestData = (categories: Category[]): Histogram[] => {
+  const categoriesBaselineTotalCount = getCategoriesTotalCount(categories);
+  return categories.map((d) => ({
+    key: d.key,
+    doc_count: d.count,
+    percentage: d.count / categoriesBaselineTotalCount,
+  }));
+};
+
+const getCategoriesTotalCount = (categories: Category[]): number =>
+  categories.reduce((p, c) => p + c.count, 0);
 
 export const fetchSignificantCategories = async (
   esClient: ElasticsearchClient,
@@ -37,16 +50,6 @@ export const fetchSignificantCategories = async (
     abortSignal
   );
 
-  const categoriesBaselineTotalCount = categoriesBaseline[0].categories.reduce(
-    (p, c) => p + c.count,
-    0
-  );
-  const categoriesBaselineTestData: Histogram[] = categoriesBaseline[0].categories.map((d) => ({
-    key: d.key,
-    doc_count: d.count,
-    percentage: d.count / categoriesBaselineTotalCount,
-  }));
-
   const categoriesDeviation = await fetchCategories(
     esClient,
     params,
@@ -59,21 +62,13 @@ export const fetchSignificantCategories = async (
     abortSignal
   );
 
-  const categoriesDeviationTotalCount = categoriesDeviation[0].categories.reduce(
-    (p, c) => p + c.count,
-    0
-  );
-  const categoriesDeviationTestData: Histogram[] = categoriesDeviation[0].categories.map((d) => ({
-    key: d.key,
-    doc_count: d.count,
-    percentage: d.count / categoriesDeviationTotalCount,
-  }));
+  if (categoriesBaseline.length === 0 || categoriesDeviation.length === 0) return [];
 
-  // console.log(
-  //   'totals',
-  //   categoriesBaselineTotalCount,
-  //   categoriesDeviationTotalCount
-  // );
+  const categoriesBaselineTotalCount = getCategoriesTotalCount(categoriesBaseline[0].categories);
+  const categoriesBaselineTestData = getCategoriesTestData(categoriesBaseline[0].categories);
+
+  const categoriesDeviationTotalCount = getCategoriesTotalCount(categoriesDeviation[0].categories);
+  const categoriesDeviationTestData = getCategoriesTestData(categoriesDeviation[0].categories);
 
   // Get all unique keys from both arrays
   const allKeys: string[] = Array.from(
