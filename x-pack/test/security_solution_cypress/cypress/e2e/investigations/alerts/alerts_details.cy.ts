@@ -135,7 +135,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Url state management', () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', { archiveName: 'query_alert' });
+      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
     beforeEach(() => {
@@ -181,7 +181,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Localstorage management', () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', { archiveName: 'query_alert' });
+      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
     beforeEach(() => {

@@ -99,7 +99,7 @@ describe('createLifecycleExecutor', () => {
       expect.objectContaining({
         body: [
           // alert documents
-          { index: { _id: expect.any(String) } },
+          { create: { _id: expect.any(String) } },
           expect.objectContaining({
             [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
@@ -107,7 +107,7 @@ describe('createLifecycleExecutor', () => {
             [EVENT_KIND]: 'signal',
             [TAGS]: ['source-tag1', 'source-tag2', 'rule-tag1', 'rule-tag2'],
           }),
-          { index: { _id: expect.any(String) } },
+          { create: { _id: expect.any(String) } },
           expect.objectContaining({
             [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
@@ -122,7 +122,7 @@ describe('createLifecycleExecutor', () => {
       expect.objectContaining({
         body: expect.arrayContaining([
           // evaluation documents
-          { index: {} },
+          { create: {} },
           expect.objectContaining({
             [EVENT_KIND]: 'event',
           }),
@@ -153,6 +153,9 @@ describe('createLifecycleExecutor', () => {
               [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
             },
+            _index: 'alerts-index-name',
+            _seq_no: 4,
+            _primary_term: 2,
           },
           {
             _source: {
@@ -170,6 +173,9 @@ describe('createLifecycleExecutor', () => {
               [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
             },
+            _index: 'alerts-index-name',
+            _seq_no: 1,
+            _primary_term: 3,
           },
         ],
       },
@@ -224,7 +230,15 @@ describe('createLifecycleExecutor', () => {
       expect.objectContaining({
         body: [
           // alert document
-          { index: { _id: 'TEST_ALERT_0_UUID' } },
+          {
+            index: {
+              _id: 'TEST_ALERT_0_UUID',
+              _index: 'alerts-index-name',
+              if_primary_term: 2,
+              if_seq_no: 4,
+              require_alias: false,
+            },
+          },
           expect.objectContaining({
             [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
             [ALERT_WORKFLOW_STATUS]: 'closed',
@@ -234,7 +248,15 @@ describe('createLifecycleExecutor', () => {
             [EVENT_ACTION]: 'active',
             [EVENT_KIND]: 'signal',
           }),
-          { index: { _id: 'TEST_ALERT_1_UUID' } },
+          {
+            index: {
+              _id: 'TEST_ALERT_1_UUID',
+              _index: 'alerts-index-name',
+              if_primary_term: 3,
+              if_seq_no: 1,
+              require_alias: false,
+            },
+          },
           expect.objectContaining({
             [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
             [ALERT_WORKFLOW_STATUS]: 'open',
@@ -281,6 +303,9 @@ describe('createLifecycleExecutor', () => {
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
               [TAGS]: ['source-tag1', 'source-tag2'],
             },
+            _index: 'alerts-index-name',
+            _seq_no: 4,
+            _primary_term: 2,
           },
           {
             _source: {
@@ -298,6 +323,9 @@ describe('createLifecycleExecutor', () => {
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
               [TAGS]: ['source-tag3', 'source-tag4'],
             },
+            _index: 'alerts-index-name',
+            _seq_no: 4,
+            _primary_term: 2,
           },
         ],
       },
@@ -349,7 +377,7 @@ describe('createLifecycleExecutor', () => {
       expect.objectContaining({
         body: expect.arrayContaining([
           // alert document
-          { index: { _id: 'TEST_ALERT_0_UUID' } },
+          { index: expect.objectContaining({ _id: 'TEST_ALERT_0_UUID' }) },
           expect.objectContaining({
             [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
             [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
@@ -358,7 +386,7 @@ describe('createLifecycleExecutor', () => {
             [EVENT_ACTION]: 'close',
             [EVENT_KIND]: 'signal',
           }),
-          { index: { _id: 'TEST_ALERT_1_UUID' } },
+          { index: expect.objectContaining({ _id: 'TEST_ALERT_1_UUID' }) },
           expect.objectContaining({
             [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
@@ -512,6 +540,9 @@ describe('createLifecycleExecutor', () => {
                 [SPACE_IDS]: ['fake-space-id'],
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -529,6 +560,9 @@ describe('createLifecycleExecutor', () => {
                 [SPACE_IDS]: ['fake-space-id'],
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
           ],
         },
@@ -624,6 +658,9 @@ describe('createLifecycleExecutor', () => {
                 [SPACE_IDS]: ['fake-space-id'],
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -641,6 +678,9 @@ describe('createLifecycleExecutor', () => {
                 [SPACE_IDS]: ['fake-space-id'],
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
           ],
         },
@@ -735,6 +775,9 @@ describe('createLifecycleExecutor', () => {
                 [SPACE_IDS]: ['fake-space-id'],
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -751,6 +794,9 @@ describe('createLifecycleExecutor', () => {
                 [SPACE_IDS]: ['fake-space-id'],
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
           ],
         },
@@ -843,6 +889,9 @@ describe('createLifecycleExecutor', () => {
                 [SPACE_IDS]: ['fake-space-id'],
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -859,6 +908,9 @@ describe('createLifecycleExecutor', () => {
                 [SPACE_IDS]: ['fake-space-id'],
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
           ],
         },
@@ -959,7 +1011,7 @@ describe('createLifecycleExecutor', () => {
         expect.objectContaining({
           body: [
             // alert documents
-            { index: { _id: expect.any(String) } },
+            { create: { _id: expect.any(String) } },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
@@ -968,7 +1020,7 @@ describe('createLifecycleExecutor', () => {
               [TAGS]: ['source-tag1', 'source-tag2', 'rule-tag1', 'rule-tag2'],
               [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds,
             }),
-            { index: { _id: expect.any(String) } },
+            { create: { _id: expect.any(String) } },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
@@ -1015,6 +1067,9 @@ describe('createLifecycleExecutor', () => {
                 [SPACE_IDS]: ['fake-space-id'],
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -1032,6 +1087,9 @@ describe('createLifecycleExecutor', () => {
                 [SPACE_IDS]: ['fake-space-id'],
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
           ],
         },
@@ -1088,7 +1146,7 @@ describe('createLifecycleExecutor', () => {
         expect.objectContaining({
           body: [
             // alert document
-            { index: { _id: 'TEST_ALERT_0_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_0_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_WORKFLOW_STATUS]: 'closed',
@@ -1097,7 +1155,7 @@ describe('createLifecycleExecutor', () => {
               [EVENT_ACTION]: 'active',
               [EVENT_KIND]: 'signal',
             }),
-            { index: { _id: 'TEST_ALERT_1_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_1_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_WORKFLOW_STATUS]: 'open',
@@ -1143,6 +1201,9 @@ describe('createLifecycleExecutor', () => {
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
                 [TAGS]: ['source-tag1', 'source-tag2'],
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -1160,6 +1221,9 @@ describe('createLifecycleExecutor', () => {
                 labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
                 [TAGS]: ['source-tag3', 'source-tag4'],
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
           ],
         },
@@ -1212,7 +1276,7 @@ describe('createLifecycleExecutor', () => {
         expect.objectContaining({
           body: expect.arrayContaining([
             // alert document
-            { index: { _id: 'TEST_ALERT_0_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_0_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
@@ -1221,7 +1285,7 @@ describe('createLifecycleExecutor', () => {
               [EVENT_ACTION]: 'close',
               [EVENT_KIND]: 'signal',
             }),
-            { index: { _id: 'TEST_ALERT_1_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_1_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
@@ -1271,6 +1335,9 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_WORKFLOW_STATUS]: 'closed',
                 [SPACE_IDS]: ['fake-space-id'],
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -1287,6 +1354,9 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_WORKFLOW_STATUS]: 'open',
                 [SPACE_IDS]: ['fake-space-id'],
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -1303,6 +1373,9 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_WORKFLOW_STATUS]: 'open',
                 [SPACE_IDS]: ['fake-space-id'],
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -1319,6 +1392,9 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_WORKFLOW_STATUS]: 'open',
                 [SPACE_IDS]: ['fake-space-id'],
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
           ],
         },
@@ -1434,7 +1510,7 @@ describe('createLifecycleExecutor', () => {
         expect.objectContaining({
           body: [
             // alert document
-            { index: { _id: 'TEST_ALERT_0_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_0_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_WORKFLOW_STATUS]: 'closed',
@@ -1443,7 +1519,7 @@ describe('createLifecycleExecutor', () => {
               [EVENT_ACTION]: 'active',
               [EVENT_KIND]: 'signal',
             }),
-            { index: { _id: 'TEST_ALERT_1_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_1_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_WORKFLOW_STATUS]: 'open',
@@ -1452,7 +1528,7 @@ describe('createLifecycleExecutor', () => {
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: false,
             }),
-            { index: { _id: 'TEST_ALERT_2_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_2_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
               [ALERT_WORKFLOW_STATUS]: 'open',
@@ -1461,7 +1537,7 @@ describe('createLifecycleExecutor', () => {
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: true,
             }),
-            { index: { _id: 'TEST_ALERT_3_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_3_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
               [ALERT_WORKFLOW_STATUS]: 'open',
@@ -1495,6 +1571,9 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                 [SPACE_IDS]: ['fake-space-id'],
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -1510,6 +1589,9 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                 [SPACE_IDS]: ['fake-space-id'],
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -1525,6 +1607,9 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                 [SPACE_IDS]: ['fake-space-id'],
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
             {
               _source: {
@@ -1540,6 +1625,9 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                 [SPACE_IDS]: ['fake-space-id'],
               },
+              _index: 'alerts-index-name',
+              _seq_no: 4,
+              _primary_term: 2,
             },
           ],
         },
@@ -1639,7 +1727,7 @@ describe('createLifecycleExecutor', () => {
         expect.objectContaining({
           body: expect.arrayContaining([
             // alert document
-            { index: { _id: 'TEST_ALERT_0_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_0_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
@@ -1647,7 +1735,7 @@ describe('createLifecycleExecutor', () => {
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: false,
             }),
-            { index: { _id: 'TEST_ALERT_1_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_1_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
@@ -1655,7 +1743,7 @@ describe('createLifecycleExecutor', () => {
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: false,
             }),
-            { index: { _id: 'TEST_ALERT_2_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_2_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
               [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
@@ -1663,7 +1751,7 @@ describe('createLifecycleExecutor', () => {
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: true,
             }),
-            { index: { _id: 'TEST_ALERT_3_UUID' } },
+            { index: expect.objectContaining({ _id: 'TEST_ALERT_3_UUID' }) },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
               [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
