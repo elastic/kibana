@@ -17,7 +17,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   const MILLISECOND_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
   const SPACES = ['default', 'other'];
-  const FLIGHTS_OVERVIEW_DASHBOARD_ID = '7adfa750-4c81-11e8-b3d7-01146121b73d'; // default ID of the flights overview dashboard
+  /**
+   * default ID of the flights overview dashboard
+   * @see src/plugins/home/server/services/sample_data/data_sets/flights/index.ts
+   */
+  const FLIGHTS_OVERVIEW_DASHBOARD_ID = '7adfa750-4c81-11e8-b3d7-01146121b73d';
   const FLIGHTS_CANVAS_APPLINK_PATH =
     '/app/canvas#/workpad/workpad-a474e74b-aedc-47c3-894a-db77e62c41e0'; // includes default ID of the flights canvas applink path
 
@@ -26,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/164568
-  describe.skip('sample data apis', () => {
+  describe('sample data apis', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
     });
@@ -81,6 +85,8 @@ export default function ({ getService }: FtrProviderContext) {
             const doc = resp.hits.hits[0];
             const docMilliseconds = Date.parse(doc._source!.timestamp);
             const nowMilliseconds = Date.now();
+            expect(Number.isNaN(docMilliseconds)).not.to.be(true);
+            expect(Number.isNaN(nowMilliseconds)).not.to.be(true);
             const delta = Math.abs(nowMilliseconds - docMilliseconds);
             expect(delta).to.be.lessThan(MILLISECOND_IN_WEEK * 5);
           });
@@ -99,6 +105,8 @@ export default function ({ getService }: FtrProviderContext) {
             const doc = resp.hits.hits[0];
             const docMilliseconds = Date.parse(doc._source!.timestamp);
             const nowMilliseconds = Date.parse(nowString);
+            expect(Number.isNaN(docMilliseconds)).not.to.be(true);
+            expect(Number.isNaN(nowMilliseconds)).not.to.be(true);
             const delta = Math.abs(nowMilliseconds - docMilliseconds);
             expect(delta).to.be.lessThan(MILLISECOND_IN_WEEK * 5);
           });
