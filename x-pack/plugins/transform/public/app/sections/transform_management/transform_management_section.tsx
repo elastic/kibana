@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { type FC, useEffect, useMemo, useState } from 'react';
 
 import {
-  EuiButtonEmpty,
-  EuiSkeletonText,
-  EuiModal,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiCallOut,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiModal,
+  EuiPageTemplate,
+  EuiSkeletonText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -151,7 +150,7 @@ export const TransformManagement: FC = () => {
 
   return (
     <>
-      <EuiPageHeader
+      <EuiPageTemplate.Header
         pageTitle={
           <span data-test-subj="transformAppTitle">
             <FormattedMessage
@@ -168,9 +167,10 @@ export const TransformManagement: FC = () => {
         }
         rightSideItems={[docsLink]}
         bottomBorder
+        paddingSize={'none'}
       />
 
-      <EuiPageContentBody data-test-subj="transformPageTransformList">
+      <EuiPageTemplate.Section paddingSize={'none'} data-test-subj="transformPageTransformList">
         {isInitialLoading && (
           <>
             <EuiSpacer size="s" />
@@ -246,7 +246,7 @@ export const TransformManagement: FC = () => {
             </AlertRulesManageContext.Provider>
           </>
         )}
-      </EuiPageContentBody>
+      </EuiPageTemplate.Section>
 
       {isSearchSelectionVisible && (
         <EuiModal

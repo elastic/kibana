@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
@@ -60,7 +53,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
         'canStartStopTransform',
       ]}
     >
-      <EuiPageHeader
+      <EuiPageTemplate.Header
         pageTitle={
           <FormattedMessage
             id="xpack.transform.transformsWizard.createTransformTitle"
@@ -69,11 +62,12 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
         }
         rightSideItems={[docsLink]}
         bottomBorder
+        paddingSize={'none'}
       />
 
       <EuiSpacer size="l" />
 
-      <EuiPageContentBody data-test-subj="transformPageCreateTransform">
+      <EuiPageTemplate.Section data-test-subj="transformPageCreateTransform" paddingSize={'none'}>
         {searchItemsError !== undefined && (
           <>
             <EuiCallOut title={searchItemsError} color="danger" iconType="warning" />
@@ -81,7 +75,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
           </>
         )}
         {searchItems !== undefined && <Wizard searchItems={searchItems} />}
-      </EuiPageContentBody>
+      </EuiPageTemplate.Section>
     </CapabilitiesWrapper>
   );
 };

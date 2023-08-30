@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import React, { type MouseEventHandler, type FC, useState } from 'react';
+import React, { type FC, type MouseEventHandler, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPopover,
-  EuiSpacer,
-  EuiTitle,
   EuiInMemoryTable,
+  EuiPageTemplate,
+  EuiPopover,
   EuiSearchBarProps,
+  EuiTitle,
 } from '@elastic/eui';
-
 import {
   isReauthorizeActionDisabled,
   ReauthorizeActionModal,
@@ -38,33 +34,32 @@ import { useRefreshTransformList, useTransformCapabilities } from '../../../../h
 import { CreateTransformButton } from '../create_transform_button';
 import { RefreshTransformListButton } from '../refresh_transform_list_button';
 import {
+  DeleteActionModal,
+  DeleteActionName,
   isDeleteActionDisabled,
   useDeleteAction,
-  DeleteActionName,
-  DeleteActionModal,
 } from '../action_delete';
 import {
   isResetActionDisabled,
-  useResetAction,
-  ResetActionName,
   ResetActionModal,
+  ResetActionName,
+  useResetAction,
 } from '../action_reset';
 import {
   isStartActionDisabled,
-  useStartAction,
-  StartActionName,
   StartActionModal,
+  StartActionName,
+  useStartAction,
 } from '../action_start';
 import {
   isScheduleNowActionDisabled,
-  useScheduleNowAction,
   ScheduleNowActionName,
+  useScheduleNowAction,
 } from '../action_schedule_now';
 import { isStopActionDisabled, StopActionName, useStopAction } from '../action_stop';
-
 import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
-import { transformFilters, filterTransforms } from './transform_search_bar_filters';
+import { filterTransforms, transformFilters } from './transform_search_bar_filters';
 import { useTableSettings } from './use_table_settings';
 import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
@@ -141,36 +136,30 @@ export const TransformList: FC<TransformListProps> = ({
 
   if (transforms.length === 0) {
     return (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiSpacer size="l" />
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-            <EuiEmptyPrompt
-              title={
-                <h2>
-                  {i18n.translate('xpack.transform.list.emptyPromptTitle', {
-                    defaultMessage: 'No transforms found',
-                  })}
-                </h2>
-              }
-              actions={[
-                <EuiButton
-                  color="primary"
-                  fill
-                  onClick={onCreateTransform}
-                  isDisabled={disabled}
-                  data-test-subj="transformCreateFirstButton"
-                >
-                  {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
-                    defaultMessage: 'Create your first transform',
-                  })}
-                </EuiButton>,
-              ]}
-              data-test-subj="transformNoTransformsFound"
-            />
-          </EuiPageContent>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiPageTemplate.EmptyPrompt
+        color={'subdued'}
+        title={
+          <h2>
+            {i18n.translate('xpack.transform.list.emptyPromptTitle', {
+              defaultMessage: 'No transforms found',
+            })}
+          </h2>
+        }
+        actions={[
+          <EuiButton
+            color="primary"
+            fill
+            onClick={onCreateTransform}
+            isDisabled={disabled}
+            data-test-subj="transformCreateFirstButton"
+          >
+            {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
+              defaultMessage: 'Create your first transform',
+            })}
+          </EuiButton>,
+        ]}
+        data-test-subj="transformNoTransformsFound"
+      />
     );
   }
 

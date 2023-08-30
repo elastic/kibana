@@ -65,7 +65,7 @@ export type {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
 } from './remove_references_to';
-export type { SavedObjectsResolveResponse } from './resolve';
+export type { SavedObjectsResolveOptions, SavedObjectsResolveResponse } from './resolve';
 export type { SavedObjectsUpdateResponse, SavedObjectsUpdateOptions } from './update';
 export type {
   SavedObjectsUpdateObjectsSpacesObject,

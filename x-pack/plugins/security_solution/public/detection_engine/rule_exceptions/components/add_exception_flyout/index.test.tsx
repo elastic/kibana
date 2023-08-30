@@ -671,7 +671,7 @@ describe('When the add exception modal is opened', () => {
                 rules={[
                   {
                     ...getRulesSchemaMock(),
-                    investigation_fields: ['foo.bar'],
+                    investigation_fields: { field_names: ['foo.bar'] },
                     exceptions_list: [],
                   } as Rule,
                 ]}

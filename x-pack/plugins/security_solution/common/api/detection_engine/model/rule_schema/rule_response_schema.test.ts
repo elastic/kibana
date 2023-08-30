@@ -234,27 +234,17 @@ describe('Rule response schema', () => {
   });
 
   describe('investigation_fields', () => {
-    test('it should validate rule with empty array for "investigation_fields"', () => {
-      const payload = getRulesSchemaMock();
-      payload.investigation_fields = [];
-
-      const decoded = RuleResponse.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      const expected = { ...getRulesSchemaMock(), investigation_fields: [] };
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(expected);
-    });
-
     test('it should validate rule with "investigation_fields"', () => {
       const payload = getRulesSchemaMock();
-      payload.investigation_fields = ['foo', 'bar'];
+      payload.investigation_fields = { field_names: ['foo', 'bar'] };
 
       const decoded = RuleResponse.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
-      const expected = { ...getRulesSchemaMock(), investigation_fields: ['foo', 'bar'] };
+      const expected = {
+        ...getRulesSchemaMock(),
+        investigation_fields: { field_names: ['foo', 'bar'] },
+      };
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
@@ -273,6 +263,42 @@ describe('Rule response schema', () => {
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
+    });
+
+    test('it should validate "investigation_fields" not in schema', () => {
+      const payload: RuleResponse = {
+        ...getRulesSchemaMock(),
+        investigation_fields: undefined,
+      };
+
+      delete payload.investigation_fields;
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getRulesSchemaMock();
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should NOT validate an empty array for "investigation_fields.field_names"', () => {
+      const payload: RuleResponse = {
+        ...getRulesSchemaMock(),
+        investigation_fields: {
+          field_names: [],
+        },
+      };
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "[]" supplied to "investigation_fields,field_names"',
+        'Invalid value "{"field_names":[]}" supplied to "investigation_fields"',
+      ]);
+      expect(message.schema).toEqual({});
     });
 
     test('it should NOT validate a string for "investigation_fields"', () => {

@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { parse } from 'query-string';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
 import { TransformConfigUnion } from '../../../../common/types/transform';
 
@@ -26,7 +20,7 @@ import { useGetTransform } from '../../hooks';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
 
-import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
+import { BREADCRUMB_SECTION, breadcrumbService, docTitleService } from '../../services/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
 import { Wizard } from '../create_transform/components/wizard';
@@ -126,7 +120,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
         'canStartStopTransform',
       ]}
     >
-      <EuiPageHeader
+      <EuiPageTemplate.Header
         pageTitle={
           <FormattedMessage
             id="xpack.transform.transformsWizard.cloneTransformTitle"
@@ -135,12 +129,13 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
         }
         rightSideItems={[docsLink]}
         bottomBorder
+        paddingSize={'none'}
       />
 
       <EuiSpacer size="l" />
 
-      <EuiPageContentBody data-test-subj="transformPageCloneTransform">
-        {typeof errorMessage !== 'undefined' && (
+      <EuiPageTemplate.Section data-test-subj="transformPageCloneTransform" paddingSize={'none'}>
+        {typeof errorMessage !== 'undefined' ? (
           <>
             <EuiCallOut
               title={i18n.translate('xpack.transform.clone.errorPromptTitle', {
@@ -153,11 +148,12 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
             </EuiCallOut>
             <EuiSpacer size="l" />
           </>
-        )}
+        ) : null}
+
         {searchItems !== undefined && isInitialized === true && transformConfig !== undefined && (
           <Wizard cloneConfig={transformConfig} searchItems={searchItems} />
         )}
-      </EuiPageContentBody>
+      </EuiPageTemplate.Section>
     </CapabilitiesWrapper>
   );
 };
