@@ -20007,7 +20007,6 @@
     "xpack.ingestPipelines.list.table.emptyPromptDescription": "在建立索引之前，请使用管道删除或转换字段，从文本中提取值，并扩充您的数据。",
     "xpack.ingestPipelines.list.table.emptyPromptDocumentionLink": "了解详情",
     "xpack.ingestPipelines.list.table.emptyPromptTitle": "首先创建管道",
-    "xpack.ingestPipelines.list.table.isManagedFilterLabel": "托管",
     "xpack.ingestPipelines.list.table.managedBadgeLabel": "托管",
     "xpack.ingestPipelines.list.table.nameColumnTitle": "名称",
     "xpack.ingestPipelines.list.table.reloadButtonLabel": "重新加载",
