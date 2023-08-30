@@ -123,11 +123,7 @@ const updateSignalsStatusByIds = async (
 ) =>
   esClient.updateByQuery({
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-    // conflicts: options.conflicts,
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2
-    // Note: Before we tried to use "refresh: wait_for" but I do not think that was available and instead it defaulted to "refresh: true"
-    // but the tests do not pass with "refresh: false". If at some point a "refresh: wait_for" is implemented, we should use that instead.
-    refresh: true,
+    refresh: false,
     body: {
       script: getUpdateSignalStatusScript(status),
       query: {
@@ -154,10 +150,7 @@ const updateSignalsStatusByQuery = async (
   esClient.updateByQuery({
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
     conflicts: options.conflicts,
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2
-    // Note: Before we tried to use "refresh: wait_for" but I do not think that was available and instead it defaulted to "refresh: true"
-    // but the tests do not pass with "refresh: false". If at some point a "refresh: wait_for" is implemented, we should use that instead.
-    refresh: true,
+    refresh: false,
     body: {
       script: getUpdateSignalStatusScript(status),
       query: {
