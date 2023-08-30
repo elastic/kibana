@@ -10,7 +10,8 @@ import { resolvePathVariables } from '../../../../../../common/utils/resolve_pat
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../../../../common/endpoint/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-export const PROTECTION_UPDATES_NOTE_QUERY_KEY = 'note';
+export const getProtectionUpdatesNoteQueryKey = (packagePolicyId: string) =>
+  `protection-updates-note-${packagePolicyId}`;
 
 interface UseProtectionUpdatesNote {
   packagePolicyId: string;
@@ -24,7 +25,7 @@ export const useGetProtectionUpdatesNote = ({ packagePolicyId }: UseProtectionUp
   const { http } = useKibana().services;
 
   return useQuery<{ data: NoteResponse }, unknown, NoteResponse>(
-    [PROTECTION_UPDATES_NOTE_QUERY_KEY],
+    [getProtectionUpdatesNoteQueryKey(packagePolicyId)],
     () =>
       http.get(
         resolvePathVariables(PROTECTION_UPDATES_NOTE_ROUTE, { package_policy_id: packagePolicyId }),

@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { PROTECTION_UPDATES_NOTE_QUERY_KEY } from './use_get_protection_updates_note';
+import { getProtectionUpdatesNoteQueryKey } from './use_get_protection_updates_note';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { resolvePathVariables } from '../../../../../../common/utils/resolve_path_variables';
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../../../../common/endpoint/constants';
@@ -38,7 +38,7 @@ export const useCreateProtectionUpdatesNote = ({ packagePolicyId }: UseProtectio
       ),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries([PROTECTION_UPDATES_NOTE_QUERY_KEY]);
+        queryClient.invalidateQueries([getProtectionUpdatesNoteQueryKey(packagePolicyId)]);
       },
     }
   );
