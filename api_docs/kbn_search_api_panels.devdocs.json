@@ -588,7 +588,7 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              "{ beats: string; connectors: string; logStash: string; }"
+              "{ beats: string; connectors: string; logstash: string; }"
             ],
             "path": "packages/kbn-search-api-panels/components/integrations_panel.tsx",
             "deprecated": false,
