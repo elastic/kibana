@@ -44,6 +44,7 @@ import { InvalidInternalManifestError } from '../errors';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 import type { Artifact } from '@kbn/fleet-plugin/server';
 import { AppFeatureSecurityKey } from '../../../../../common/types/app_features';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types/src/response/exception_list_item_schema';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
@@ -518,6 +519,138 @@ describe('ManifestManager', () => {
         expect(manifest.isDefaultArtifact(artifact)).toBe(true);
         expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
           new Set([TEST_POLICY_ID_1])
+        );
+      }
+    });
+
+    test('Builds fully new manifest with single entries when they are duplicated', async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: [`policy:${TEST_POLICY_ID_1}`],
+      });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
+      const blocklistsListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        tags: ['policy:all'],
+      });
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      const duplicatedEventFilterInDifferentPolicy = {
+        ...eventFiltersListItem,
+        tags: [`policy:${TEST_POLICY_ID_2}`],
+      };
+      const duplicatedEndpointExceptionInDifferentOS: ExceptionListItemSchema = {
+        ...exceptionListItem,
+        os_types: ['windows'],
+      };
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_LIST_ID]: {
+          macos: [exceptionListItem, exceptionListItem],
+          windows: [duplicatedEndpointExceptionInDifferentOS],
+        },
+        [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem, trustedAppListItem] },
+        [ENDPOINT_EVENT_FILTERS_LIST_ID]: {
+          windows: [eventFiltersListItem, duplicatedEventFilterInDifferentPolicy],
+        },
+        [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: {
+          linux: [
+            hostIsolationExceptionsItem,
+            { ...hostIsolationExceptionsItem, tags: [`policy:${TEST_POLICY_ID_2}`] },
+          ],
+        },
+        [ENDPOINT_BLOCKLISTS_LIST_ID]: { macos: [blocklistsListItem, blocklistsListItem] },
+      });
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((_type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([
+        TEST_POLICY_ID_1,
+        TEST_POLICY_ID_2,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(16);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
+
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
+      });
+      expect(getArtifactObject(artifacts[1])).toStrictEqual({
+        entries: translateToEndpointExceptions([duplicatedEndpointExceptionInDifferentOS], 'v1'),
+      });
+      expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
+      });
+      expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[9])).toStrictEqual({
+        entries: translateToEndpointExceptions(
+          [eventFiltersListItem, duplicatedEventFilterInDifferentPolicy],
+          'v1'
+        ),
+      });
+      expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[11])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[12])).toStrictEqual({
+        entries: translateToEndpointExceptions([hostIsolationExceptionsItem], 'v1'),
+      });
+      expect(getArtifactObject(artifacts[13])).toStrictEqual({
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1'),
+      });
+      expect(getArtifactObject(artifacts[14])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[15])).toStrictEqual({ entries: [] });
+
+      // Default artifacts used by both policies
+      for (const artifact of artifacts.slice(0, 7)) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
+        );
+      }
+
+      // Default event filters artifact for windows not used by test policies
+      expect(manifest.isDefaultArtifact(artifacts[7])).toBe(true);
+      expect(manifest.getArtifactTargetPolicies(artifacts[7])).toStrictEqual(new Set([]));
+
+      // Default event filters artifact for linux used by both policies
+      expect(manifest.isDefaultArtifact(artifacts[8])).toBe(true);
+      expect(manifest.getArtifactTargetPolicies(artifacts[8])).toStrictEqual(
+        new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
+      );
+
+      // Policy specific event filters artifact for windows used by both policies
+      expect(manifest.isDefaultArtifact(artifacts[9])).toBe(false);
+      expect(manifest.getArtifactTargetPolicies(artifacts[9])).toStrictEqual(
+        new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
+      );
+
+      // Default artifacts used by both policies
+      for (const artifact of artifacts.slice(10)) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
         );
       }
     });

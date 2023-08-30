@@ -31,6 +31,7 @@ import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../components/shared/charts/transaction_charts/helper';
+import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
 
 export function registerGetApmTimeseriesFunction({
   registerFunction,
@@ -47,7 +48,7 @@ export function registerGetApmTimeseriesFunction({
           defaultMessage: `Display different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions`,
         }
       ),
-      description: `Display different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions. In KQL, escaping happens with double quotes, not single quotes. Some characters that need escaping are: ':()\\\/\". Always put a field value in double quotes. Best: service.name:\"opbeans-go\". Wrong: service.name:opbeans-go. This is very important!`,
+      description: `Visualise and analyse different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. A visualisation will be displayed above your reply - DO NOT attempt to display or generate an image yourself, or any other placeholder. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions.`,
       parameters: {
         type: 'object',
         properties: {
@@ -135,11 +136,11 @@ export function registerGetApmTimeseriesFunction({
                   ],
                 },
                 'service.name': {
-                  type: 'string',
+                  ...NON_EMPTY_STRING,
                   description: 'The name of the service',
                 },
                 'service.environment': {
-                  type: 'string',
+                  ...NON_EMPTY_STRING,
                   description:
                     'The environment that the service is running in.',
                 },
@@ -201,7 +202,7 @@ export function registerGetApmTimeseriesFunction({
                 const groupId = groupSeries[0].group;
 
                 const maxY = getMaxY(groupSeries);
-                const latencyFormatter = getDurationFormatter(maxY);
+                const latencyFormatter = getDurationFormatter(maxY, 10, 1000);
 
                 let yLabelFormat: (value: number) => string;
 
@@ -229,6 +230,8 @@ export function registerGetApmTimeseriesFunction({
                 const timeseries: Array<TimeSeries<Coordinate>> =
                   groupSeries.map((series): TimeSeries<Coordinate> => {
                     let chartType: ChartType;
+
+                    const data = series.data;
 
                     switch (series.stat.timeseries.name) {
                       case 'transaction_throughput':
@@ -270,7 +273,7 @@ export function registerGetApmTimeseriesFunction({
                       title: series.id,
                       type: 'line',
                       color: getTimeSeriesColor(chartType!).currentPeriodColor,
-                      data: series.data,
+                      data,
                     };
                   });
 

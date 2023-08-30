@@ -45,14 +45,16 @@ function ChatContent({
   const reloadReply = useCallback(() => {
     setLoading(true);
 
-    const nextSubscription = chatService.chat({ messages, connectorId }).subscribe({
-      next: (msg) => {
-        setPendingMessage(() => msg);
-      },
-      complete: () => {
-        setLoading(false);
-      },
-    });
+    const nextSubscription = chatService
+      .chat({ messages, connectorId, function: 'none' })
+      .subscribe({
+        next: (msg) => {
+          setPendingMessage(() => msg);
+        },
+        complete: () => {
+          setLoading(false);
+        },
+      });
 
     setSubscription(nextSubscription);
   }, [messages, connectorId, chatService]);

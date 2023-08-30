@@ -80,7 +80,7 @@ export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.0') => {
+export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.2') => {
   return {
     version: packageVersion,
     name: 'cspm',
@@ -130,9 +130,10 @@ const getPolicyMock = (
   };
 
   const gcpVarsMock = {
-    project_id: { type: 'text' },
-    credentials_file: { type: 'text' },
-    credentials_json: { type: 'text' },
+    'gcp.project_id': { type: 'text' },
+    'gcp.credentials.file': { type: 'text' },
+    'gcp.credentials.json': { type: 'text' },
+    'gcp.credentials.type': { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };

@@ -33,8 +33,8 @@ export const AccountsEvaluatedWidget = ({
   const cisAwsClusterAmount = filterClustersById(CIS_AWS).length;
   const cisGcpClusterAmount = filterClustersById(CIS_GCP).length;
 
-  const cisAwsBenchmarkName = filterClustersById(CIS_AWS)[0]?.meta.benchmark.name || '';
-  const cisGcpBenchmarkName = filterClustersById(CIS_GCP)[0]?.meta.benchmark.name || '';
+  const cisAwsBenchmarkName = 'Amazon Web Services (AWS)';
+  const cisGcpBenchmarkName = 'Google Cloud Platform (GCP)';
 
   return (
     <>

@@ -18,11 +18,12 @@ import {
   IndexDetailsSection,
 } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
+import { testIndexName } from './mocks';
 
 let routerMock: typeof reactRouterMock;
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
-    initialEntries: [`/indices/test_index`],
+    initialEntries: [`/indices/${testIndexName}`],
     componentRoutePath: `/indices/:indexName/:indexDetailsSection?`,
     onRouter: (router) => {
       routerMock = router;
@@ -37,11 +38,20 @@ export interface IndexDetailsPageTestBed extends TestBed {
     getHeader: () => string;
     clickIndexDetailsTab: (tab: IndexDetailsSection) => Promise<void>;
     getActiveTabContent: () => string;
+    mappings: {
+      getCodeBlockContent: () => string;
+      getDocsLinkHref: () => string;
+      isErrorDisplayed: () => boolean;
+      clickErrorReloadButton: () => Promise<void>;
+    };
     clickBackToIndicesButton: () => Promise<void>;
     discoverLinkExists: () => boolean;
     contextMenu: {
       clickManageIndexButton: () => Promise<void>;
       isOpened: () => boolean;
+      clickIndexAction: (indexAction: string) => Promise<void>;
+      confirmForcemerge: (numSegments: string) => Promise<void>;
+      confirmDelete: () => Promise<void>;
     };
     errorSection: {
       isDisplayed: () => boolean;
@@ -87,6 +97,24 @@ export const setup = async (
     return find('indexDetailsContent').text();
   };
 
+  const mappings = {
+    getCodeBlockContent: () => {
+      return find('indexDetailsMappingsCodeBlock').text();
+    },
+    getDocsLinkHref: () => {
+      return find('indexDetailsMappingsDocsLink').prop('href');
+    },
+    isErrorDisplayed: () => {
+      return exists('indexDetailsMappingsError');
+    },
+    clickErrorReloadButton: async () => {
+      await act(async () => {
+        find('indexDetailsMappingsReloadButton').simulate('click');
+      });
+      component.update();
+    },
+  };
+
   const clickBackToIndicesButton = async () => {
     await act(async () => {
       find('indexDetailsBackToIndicesButton').simulate('click');
@@ -108,6 +136,28 @@ export const setup = async (
     isOpened: () => {
       return exists('indexContextMenu');
     },
+    clickIndexAction: async (indexAction: string) => {
+      await act(async () => {
+        find(`indexContextMenu.${indexAction}`).simulate('click');
+      });
+      component.update();
+    },
+    confirmForcemerge: async (numSegments: string) => {
+      await act(async () => {
+        testBed.form.setInputValue('indexActionsForcemergeNumSegments', numSegments);
+      });
+      component.update();
+      await act(async () => {
+        find('confirmModalConfirmButton').simulate('click');
+      });
+      component.update();
+    },
+    confirmDelete: async () => {
+      await act(async () => {
+        find('confirmModalConfirmButton').simulate('click');
+      });
+      component.update();
+    },
   };
   return {
     ...testBed,
@@ -116,6 +166,7 @@ export const setup = async (
       getHeader,
       clickIndexDetailsTab,
       getActiveTabContent,
+      mappings,
       clickBackToIndicesButton,
       discoverLinkExists,
       contextMenu,
