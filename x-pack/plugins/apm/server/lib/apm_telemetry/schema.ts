@@ -6,164 +6,157 @@
  */
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import {
-  AggregatedTransactionsCounts,
-  APMUsage,
-  TimeframeMap,
-  TimeframeMap1d,
-  TimeframeMapAll,
-  APMPerService,
-} from './types';
+import { AggregatedTransactionsCounts, APMUsage, APMPerService } from './types';
 import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const long: { type: 'long' } = { type: 'long' };
 
 const keyword: { type: 'keyword' } = { type: 'keyword' };
 
-const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts> =
+const aggregatedTransactionCountSchema: MakeSchemaFrom<
+  AggregatedTransactionsCounts,
+  true
+> = {
+  expected_metric_document_count: {
+    type: 'long',
+    _meta: {
+      description: '',
+    },
+  },
+  transaction_count: {
+    type: 'long',
+    _meta: {
+      description: '',
+    },
+  },
+};
+
+const agentSchema: MakeSchemaFrom<APMUsage, true>['agents'][ElasticAgentName] =
   {
-    expected_metric_document_count: long,
-    transaction_count: long,
+    agent: {
+      version: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'An array of the top 3 agent versions within the last day',
+          },
+        },
+      },
+      activation_method: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'An array of the top 3 agent activation methods within the last day',
+          },
+        },
+      },
+    },
+    service: {
+      framework: {
+        name: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'An array of the top 3 service framework name  within the last day',
+            },
+          },
+        },
+        version: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'An array of the top 3 service framework version within the last day',
+            },
+          },
+        },
+        composite: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'Composite field containing service framework and version sorted by doc count',
+            },
+          },
+        },
+      },
+      language: {
+        name: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'An array of the top 3 service language name within the last day',
+            },
+          },
+        },
+        version: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'An array of the top 3 service language version within the last day',
+            },
+          },
+        },
+        composite: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'Composite field containing service language name and version sorted by doc count.',
+            },
+          },
+        },
+      },
+      runtime: {
+        name: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'An array of the top 3 service runtime name within the last day',
+            },
+          },
+        },
+        version: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'An array of the top 3 service runtime version within the last day',
+            },
+          },
+        },
+        composite: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'Composite field containing service runtime name and version sorted by doc count.',
+            },
+          },
+        },
+      },
+    },
   };
 
-const timeframeMap1dSchema: MakeSchemaFrom<TimeframeMap1d> = {
-  '1d': long,
-};
-
-const timeframeMapAllSchema: MakeSchemaFrom<TimeframeMapAll> = {
-  all: long,
-};
-
-const timeframeMapSchema: MakeSchemaFrom<TimeframeMap> = {
-  ...timeframeMap1dSchema,
-  ...timeframeMapAllSchema,
-};
-
-const agentSchema: MakeSchemaFrom<APMUsage>['agents'][ElasticAgentName] = {
-  agent: {
-    version: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'An array of the top 3 agent versions within the last day',
-        },
-      },
-    },
-    activation_method: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'An array of the top 3 agent activation methods within the last day',
-        },
-      },
-    },
-  },
-  service: {
-    framework: {
-      name: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'An array of the top 3 service framework name  within the last day',
-          },
-        },
-      },
-      version: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'An array of the top 3 service framework version within the last day',
-          },
-        },
-      },
-      composite: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'Composite field containing service framework and version sorted by doc count',
-          },
-        },
-      },
-    },
-    language: {
-      name: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'An array of the top 3 service language name within the last day',
-          },
-        },
-      },
-      version: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'An array of the top 3 service language version within the last day',
-          },
-        },
-      },
-      composite: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'Composite field containing service language name and version sorted by doc count.',
-          },
-        },
-      },
-    },
-    runtime: {
-      name: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'An array of the top 3 service runtime name within the last day',
-          },
-        },
-      },
-      version: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'An array of the top 3 service runtime version within the last day',
-          },
-        },
-      },
-      composite: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'Composite field containing service runtime name and version sorted by doc count.',
-          },
-        },
-      },
-    },
-  },
-};
-
 const apmPerAgentSchema: Pick<
-  MakeSchemaFrom<APMUsage>,
+  MakeSchemaFrom<APMUsage, true>,
   'services_per_agent' | 'agents'
 > = {
   // services_per_agent: AGENT_NAMES.reduce(
@@ -177,30 +170,174 @@ const apmPerAgentSchema: Pick<
   // TODO: Find a way for `@kbn/telemetry-tools` to understand and evaluate expressions.
   //  In the meanwhile, we'll have to maintain these lists up to date (TS will remind us to update)
   services_per_agent: {
-    'android/java': long,
-    dotnet: long,
-    'iOS/swift': long,
-    go: long,
-    java: long,
-    'js-base': long,
-    nodejs: long,
-    php: long,
-    python: long,
-    ruby: long,
-    'rum-js': long,
-    otlp: long,
-    'opentelemetry/cpp': long,
-    'opentelemetry/dotnet': long,
-    'opentelemetry/erlang': long,
-    'opentelemetry/go': long,
-    'opentelemetry/java': long,
-    'opentelemetry/nodejs': long,
-    'opentelemetry/php': long,
-    'opentelemetry/python': long,
-    'opentelemetry/ruby': long,
-    'opentelemetry/rust': long,
-    'opentelemetry/swift': long,
-    'opentelemetry/webjs': long,
+    'android/java': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the android/java agent within the last day',
+      },
+    },
+    dotnet: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the dotnet (.Net) agent within the last day',
+      },
+    },
+    'iOS/swift': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the iOS/swift agent within the last day',
+      },
+    },
+    go: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the go agent within the last day',
+      },
+    },
+    java: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the Java agent within the last day',
+      },
+    },
+    'js-base': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the js-base agent within the last day',
+      },
+    },
+    nodejs: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the nodeJS agent within the last day',
+      },
+    },
+    php: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the PHH agent within the last day',
+      },
+    },
+    python: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the Python agent within the last day',
+      },
+    },
+    ruby: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the Ruby agent within the last day',
+      },
+    },
+    'rum-js': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the rum-js agent within the last day',
+      },
+    },
+    otlp: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the otlp agent within the last day',
+      },
+    },
+    'opentelemetry/cpp': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/cpp agent within the last day',
+      },
+    },
+    'opentelemetry/dotnet': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/dotnet agent within the last day',
+      },
+    },
+    'opentelemetry/erlang': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/erlang agent within the last day',
+      },
+    },
+    'opentelemetry/go': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/go agent within the last day',
+      },
+    },
+    'opentelemetry/java': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/java agent within the last day',
+      },
+    },
+    'opentelemetry/nodejs': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/nodejs agent within the last day',
+      },
+    },
+    'opentelemetry/php': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/php agent within the last day',
+      },
+    },
+    'opentelemetry/python': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/python agent within the last day',
+      },
+    },
+    'opentelemetry/ruby': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/ruby agent within the last day',
+      },
+    },
+    'opentelemetry/rust': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/rust agent within the last day',
+      },
+    },
+    'opentelemetry/swift': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/swift agent within the last day',
+      },
+    },
+    'opentelemetry/webjs': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/webjs agent within the last day',
+      },
+    },
   },
   agents: {
     'android/java': agentSchema,
@@ -217,7 +354,7 @@ const apmPerAgentSchema: Pick<
   },
 };
 
-export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
+export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
   service_id: {
     ...keyword,
     _meta: {
@@ -367,16 +504,26 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
   // No data found
   kubernetes: {
     pod: {
-      name: keyword,
+      name: {
+        type: 'keyword',
+        _meta: {
+          description: 'Kuberneted pod name ',
+        },
+      },
     },
   },
   // No data found
   container: {
-    id: keyword,
+    id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Container id',
+      },
+    },
   },
 };
 
-export const apmSchema: MakeSchemaFrom<APMUsage> = {
+export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   ...apmPerAgentSchema,
   has_any_services: {
     type: 'boolean',
@@ -433,7 +580,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       },
     },
   },
-  // #NOTE No task identified for extracting the following information
   aggregated_transactions: {
     current_implementation: aggregatedTransactionCountSchema,
     no_observer_name: aggregatedTransactionCountSchema,
@@ -602,8 +748,14 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         },
       },
     },
-    // No tasks found
-    services: timeframeMapSchema,
+    services: {
+      '1d': {
+        ...long,
+        _meta: {
+          description: 'Total number of unique services within the last day',
+        },
+      },
+    },
     environments: {
       '1d': {
         ...long,
@@ -746,23 +898,44 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
   },
 
   indices: {
-    // cannot find related data
     metric: {
-      shards: { total: long },
+      shards: {
+        total: {
+          type: 'long',
+          _meta: {
+            description: 'Total number of shards for metric indices',
+          },
+        },
+      },
       all: {
         total: {
-          docs: { count: long },
-          store: { size_in_bytes: long },
+          docs: {
+            count: {
+              ...long,
+              _meta: {
+                description: 'Total number of metric documents overall',
+              },
+            },
+          },
+          store: {
+            size_in_bytes: {
+              ...long,
+              _meta: {
+                description:
+                  'Size of the metric indicess in byte units overall.',
+              },
+            },
+          },
         },
       },
     },
-    // cannot find related data
     traces: {
       shards: {
         total: {
           ...long,
           _meta: {
-            description: 'Total number of shards overall',
+            description:
+              'Total number of shards for span and trasnaction indices',
           },
         },
       },
