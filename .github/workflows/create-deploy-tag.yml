@@ -1,0 +1,68 @@
+---
+# - This workflow creates a tag with the format "deploy@<timestamp>" on the main branch.
+# - It is triggered manually from the GitHub Actions UI.
+# - It is only allowed to run on the main branch and ensures that the tag is created
+#   on the main branch only in a verification step.
+#   This is only to prevent accidental creation of the tag on other branches and cannot be used to prevent malicious creation of the tag.
+
+name: Initiate Serverless Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "The commit to deploy (default: latest commit on main)"
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  create-deploy-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Select commit to be tagged
+        run: |
+          commit="${{ github.event.inputs.commit || github.sha }}"
+          echo "COMMIT=${commit}" >> "${GITHUB_ENV}"
+      - name: Verify selected or newer commit isn't already tagged
+        run: |
+          git tag --contains ${COMMIT} | grep -P "^deploy@\d+$" && {
+            echo "A deploy-tag already exists on the selected or newer commit!"
+            exit 1
+          } || true
+      - name: Verify branch
+        run: |
+          if [[ "${GITHUB_REF}" != "refs/heads/main" ]]; then
+            echo "This workflow can only be run on the main branch"
+            exit 1
+          fi
+      - name: Prepare tag
+        run: |
+          tag_name="deploy@$(date +%s)"
+          echo "TAG_NAME=${tag_name}" >> "${GITHUB_ENV}"
+      - name: Create tag
+        run: |
+          git tag ${TAG_NAME} ${COMMIT}
+          git push origin "refs/tags/${TAG_NAME}"
+      - if: always()
+        name: Post Slack message
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          # Channel ID for #kibana-mission-control
+          channel-id: "C05NJL80DB8"
+          payload: |
+            {
+              "text": >
+                Initiate Serverless Deploy GitHub Workflow: ${{ job.status }}
+                Workflow: https://github.com/elastic/kibana/actions/workflows/create-deploy-tag.yml
+                ${{ job.status == 'success' && format('Tag: `{0}`\nCommit: `{1}`', env.TAG_NAME, env.COMMIT) || '' }}
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
