@@ -1,21 +1,24 @@
 steps:
   - label: ":pipeline::kibana::seedling: Trigger Kibana Serverless Tests for ${ENVIRONMENT}"
-    trigger: appex-qa-kibana-serverless-ftr-tests
+    trigger: appex-qa-kibana-serverless-ftr-tests # https://buildkite.com/elastic/appex-qa-kibana-serverless-ftr-tests
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
       message: Triggered by pipeline.tests.qa.yaml
-      branch: $BUILDKITE_BRANCH
-      commit: $BUILDKITE_COMMIT
 
   - label: ":pipeline::weight_lifter::seedling: Trigger RAC Alert Load tests for ${ENVIRONMENT}"
-    trigger: appex-qa-rac-alert-load
+    trigger: appex-qa-rac-alert-load # https://buildkite.com/elastic/appex-qa-rac-alert-load
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
       message: Triggered by pipeline.tests.qa.yaml
-      branch: $BUILDKITE_BRANCH
-      commit: $BUILDKITE_COMMIT
+
+  - label: ":pipeline::ship::seedling: Trigger Fleet serverless smoke tests for ${ENVIRONMENT}"
+    trigger: fleet-smoke-tests # https://buildkite.com/elastic/fleet-smoke-tests
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
+      message: Triggered by pipeline.tests.qa.yaml
 
   - wait: ~
 
