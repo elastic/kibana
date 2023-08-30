@@ -20,15 +20,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Metric', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/metric.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/metric.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
@@ -38,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert to Lens', async () => {
       const visPanel = await panelActions.getPanelHeading('Metric - Basic');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('mtrVis');
 
       const data = await lens.getMetricVisualizationData();
@@ -58,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert aggregation with params', async () => {
       const visPanel = await panelActions.getPanelHeading('Metric - Agg with params');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -84,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert sibling pipeline aggregation', async () => {
       const visPanel = await panelActions.getPanelHeading('Metric - Sibling pipeline agg');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -116,7 +117,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert color ranges', async () => {
       const visPanel = await panelActions.getPanelHeading('Metric - Color ranges');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -192,24 +193,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(colorStops).to.eql([
         {
           color: 'rgba(0, 104, 55, 1)',
-          stop: '12000000000'
+          stop: '12000000000',
         },
         {
           color: 'rgba(183, 224, 117, 1)',
-          stop: '13000000000'
+          stop: '13000000000',
         },
         {
           color: 'rgba(253, 191, 111, 1)',
-          stop: '13100000000'
+          stop: '13100000000',
         },
         {
           color: 'rgba(165, 0, 38, 1)',
-          stop: '13200000000'
+          stop: '13200000000',
         },
         {
           color: undefined,
-          stop: '13300000000'
-        }
+          stop: '13300000000',
+        },
       ]);
     });
   });

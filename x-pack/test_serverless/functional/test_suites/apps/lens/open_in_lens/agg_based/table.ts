@@ -20,15 +20,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Table', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/table.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/table.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
@@ -48,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert aggregation with params', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Agg with params');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -60,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert total function to summary row', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Summary row');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -76,7 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert sibling pipeline aggregation', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Sibling pipeline agg');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -92,7 +93,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert parent pipeline aggregation', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Parent pipeline agg');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -108,7 +109,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert split rows and split table to split table rows', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Split rows and tables');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -126,7 +127,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert percentage column', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Percentage Column');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);

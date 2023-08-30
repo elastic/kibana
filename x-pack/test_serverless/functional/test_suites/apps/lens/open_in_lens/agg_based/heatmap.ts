@@ -12,22 +12,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { lens, timePicker, dashboard } = getPageObjects([
     'lens',
     'timePicker',
-    'dashboard'
+    'dashboard',
   ]);
 
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
 
   describe('Heatmap', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/heatmap.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/heatmap.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
@@ -47,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert to Lens', async () => {
       const visPanel = await panelActions.getPanelHeading('Heatmap - With X-Axis only');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('heatmapChart');
       await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
@@ -81,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert to Lens if Y-axis is defined, but X-axis is not', async () => {
       const visPanel = await panelActions.getPanelHeading('Heatmap - With Y-Axis only');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('heatmapChart');
       await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
@@ -96,7 +97,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should respect heatmap colors number', async () => {
       const visPanel = await panelActions.getPanelHeading('Heatmap - Color number');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('heatmapChart');
       await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
@@ -140,7 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should show respect heatmap custom color ranges', async () => {
       const visPanel = await panelActions.getPanelHeading('Heatmap - Custom Color ranges');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('heatmapChart');
       await lens.enableEchDebugState();
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');

@@ -51,5 +51,6 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-plugin",
     "@kbn/bfetch-plugin",
+    "@kbn/es-archiver",
   ]
 }

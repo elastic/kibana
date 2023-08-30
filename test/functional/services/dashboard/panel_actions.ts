@@ -350,7 +350,7 @@ export class DashboardPanelActionsService extends FtrService {
 
     await this.retry.try(async () => {
       if (!(await this.canConvertToLens(parent))) {
-        throw new Error('Convert to Lens option not found')
+        throw new Error('Convert to Lens option not found');
       }
 
       await this.testSubjects.click(CONVERT_TO_LENS_TEST_SUBJ);

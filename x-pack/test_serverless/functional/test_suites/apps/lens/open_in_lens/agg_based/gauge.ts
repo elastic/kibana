@@ -21,15 +21,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Gauge', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/gauge.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/gauge.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
@@ -44,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert aggregation with params', async () => {
       const visPanel = await panelActions.getPanelHeading('Gauge - Agg with params');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('gaugeChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -71,7 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert color ranges', async () => {
       const visPanel = await panelActions.getPanelHeading('Gauge - Color ranges');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('gaugeChart');
 
       expect(await lens.getLayerCount()).to.be(1);
