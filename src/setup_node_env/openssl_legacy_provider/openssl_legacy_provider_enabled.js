@@ -6,28 +6,8 @@
  * Side Public License, v 1.
  */
 
-module.exports = function () {
-  var nodeOptions = process.env.NODE_OPTIONS
-    ? process.env.NODE_OPTIONS.split(' ').filter(Boolean)
-    : [];
-  var execOptions = process.execArgv;
+const crypto = require('crypto');
 
-  var cliOpenSSLLegacyProvider = checkOpenSSLLegacyProvider(execOptions);
-  var envOpenSSLLegacyProvider = checkOpenSSLLegacyProvider(nodeOptions);
+// The blowfish cipher is only available when node is running with the --openssl-legacy-provider flag
+module.exports = crypto.getCiphers().includes('blowfish');
 
-  if (typeof cliOpenSSLLegacyProvider === 'boolean') return cliOpenSSLLegacyProvider;
-  return Boolean(envOpenSSLLegacyProvider);
-};
-
-function checkOpenSSLLegacyProvider(options) {
-  var openSSLLegacyProvider = null;
-  options.forEach(function (option) {
-    if (option === '--openssl-legacy-provider') {
-      openSSLLegacyProvider = true;
-    }
-    if (option === '--no-openssl-legacy-provider') {
-      openSSLLegacyProvider = false;
-    }
-  });
-  return openSSLLegacyProvider;
-}
