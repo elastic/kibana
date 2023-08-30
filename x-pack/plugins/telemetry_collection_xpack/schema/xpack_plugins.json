@@ -31,6 +31,9 @@
             "__index": {
               "type": "long"
             },
+            "[__gen-ai]": {
+              "type": "long"
+            },
             "__pagerduty": {
               "type": "long"
             },
@@ -60,6 +63,19 @@
             }
           }
         },
+        "count_gen_ai_provider_types": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "[Azure OpenAI]": {
+              "type": "long"
+            },
+            "[OpenAI]": {
+              "type": "long"
+            }
+          }
+        },
         "count_active_total": {
           "type": "long"
         },
@@ -78,6 +94,9 @@
               "type": "long"
             },
             "__index": {
+              "type": "long"
+            },
+            "[__gen-ai]": {
               "type": "long"
             },
             "__pagerduty": {
@@ -121,6 +140,9 @@
               "type": "long"
             },
             "__index": {
+              "type": "long"
+            },
+            "[__gen-ai]": {
               "type": "long"
             },
             "__pagerduty": {
@@ -194,6 +216,9 @@
             "__index": {
               "type": "long"
             },
+            "[__gen-ai]": {
+              "type": "long"
+            },
             "__pagerduty": {
               "type": "long"
             },
@@ -235,6 +260,9 @@
               "type": "long"
             },
             "__index": {
+              "type": "long"
+            },
+            "[__gen-ai]": {
               "type": "long"
             },
             "__pagerduty": {
@@ -2700,76 +2728,148 @@
         "services_per_agent": {
           "properties": {
             "android/java": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the android/java agent within the last day"
+              }
             },
             "dotnet": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the dotnet (.Net) agent within the last day"
+              }
             },
             "iOS/swift": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the iOS/swift agent within the last day"
+              }
             },
             "go": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the go agent within the last day"
+              }
             },
             "java": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the Java agent within the last day"
+              }
             },
             "js-base": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the js-base agent within the last day"
+              }
             },
             "nodejs": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the nodeJS agent within the last day"
+              }
             },
             "php": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the PHH agent within the last day"
+              }
             },
             "python": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the Python agent within the last day"
+              }
             },
             "ruby": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the Ruby agent within the last day"
+              }
             },
             "rum-js": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the rum-js agent within the last day"
+              }
             },
             "otlp": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the otlp agent within the last day"
+              }
             },
             "opentelemetry/cpp": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/cpp agent within the last day"
+              }
             },
             "opentelemetry/dotnet": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/dotnet agent within the last day"
+              }
             },
             "opentelemetry/erlang": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/erlang agent within the last day"
+              }
             },
             "opentelemetry/go": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/go agent within the last day"
+              }
             },
             "opentelemetry/java": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/java agent within the last day"
+              }
             },
             "opentelemetry/nodejs": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/nodejs agent within the last day"
+              }
             },
             "opentelemetry/php": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/php agent within the last day"
+              }
             },
             "opentelemetry/python": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/python agent within the last day"
+              }
             },
             "opentelemetry/ruby": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/ruby agent within the last day"
+              }
             },
             "opentelemetry/rust": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/rust agent within the last day"
+              }
             },
             "opentelemetry/swift": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/swift agent within the last day"
+              }
             },
             "opentelemetry/webjs": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/webjs agent within the last day"
+              }
             }
           }
         },
@@ -4192,60 +4292,96 @@
             "current_implementation": {
               "properties": {
                 "expected_metric_document_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 },
                 "transaction_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 }
               }
             },
             "no_observer_name": {
               "properties": {
                 "expected_metric_document_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 },
                 "transaction_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 }
               }
             },
             "no_rum": {
               "properties": {
                 "expected_metric_document_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 },
                 "transaction_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 }
               }
             },
             "no_rum_no_observer_name": {
               "properties": {
                 "expected_metric_document_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 },
                 "transaction_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 }
               }
             },
             "only_rum": {
               "properties": {
                 "expected_metric_document_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 },
                 "transaction_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 }
               }
             },
             "only_rum_no_observer_name": {
               "properties": {
                 "expected_metric_document_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 },
                 "transaction_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": ""
+                  }
                 }
               }
             }
@@ -4430,10 +4566,10 @@
             "services": {
               "properties": {
                 "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of unique services within the last day"
+                  }
                 }
               }
             },
@@ -4616,7 +4752,10 @@
                 "shards": {
                   "properties": {
                     "total": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of shards for metric indices"
+                      }
                     }
                   }
                 },
@@ -4627,14 +4766,20 @@
                         "docs": {
                           "properties": {
                             "count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of metric documents overall"
+                              }
                             }
                           }
                         },
                         "store": {
                           "properties": {
                             "size_in_bytes": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Size of the metric indicess in byte units overall."
+                              }
                             }
                           }
                         }
@@ -4651,7 +4796,7 @@
                     "total": {
                       "type": "long",
                       "_meta": {
-                        "description": "Total number of shards overall"
+                        "description": "Total number of shards for span and trasnaction indices"
                       }
                     }
                   }
@@ -4900,7 +5045,10 @@
                   "pod": {
                     "properties": {
                       "name": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "Kuberneted pod name "
+                        }
                       }
                     }
                   }
@@ -4909,7 +5057,10 @@
               "container": {
                 "properties": {
                   "id": {
-                    "type": "keyword"
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Container id"
+                    }
                   }
                 }
               }
@@ -6582,6 +6733,31 @@
               },
               "account_type": {
                 "type": "keyword"
+              }
+            }
+          }
+        },
+        "alerts_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "posture_type": {
+                "type": "keyword"
+              },
+              "rules_count": {
+                "type": "long"
+              },
+              "alerts_count": {
+                "type": "long"
+              },
+              "alerts_open_count": {
+                "type": "long"
+              },
+              "alerts_closed_count": {
+                "type": "long"
+              },
+              "alerts_acknowledged_count": {
+                "type": "long"
               }
             }
           }

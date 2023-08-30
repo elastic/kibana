@@ -7,7 +7,7 @@
  */
 
 // Export Type Definitions
-export const CSV_REPORT_TYPE = 'CSV';
+export const CSV_REPORT_TYPE = 'csv_searchsource';
 export const CSV_REPORT_TYPE_V2 = 'csv_v2';
 
 export const PDF_REPORT_TYPE = 'printablePdf';

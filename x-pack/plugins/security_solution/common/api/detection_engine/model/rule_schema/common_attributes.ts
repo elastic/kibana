@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
-import { NonEmptyString, version, UUID } from '@kbn/securitysolution-io-ts-types';
+import { NonEmptyString, version, UUID, NonEmptyArray } from '@kbn/securitysolution-io-ts-types';
 import { max_signals, threat } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export type RuleObjectId = t.TypeOf<typeof RuleObjectId>;
@@ -257,3 +257,32 @@ export const RelatedIntegration = t.exact(
  */
 export type RelatedIntegrationArray = t.TypeOf<typeof RelatedIntegrationArray>;
 export const RelatedIntegrationArray = t.array(RelatedIntegration);
+
+/**
+ * Schema for fields relating to investigation fields, these are user defined fields we use to highlight
+ * in various features in the UI such as alert details flyout and exceptions auto-population from alert.
+ * Added in PR #163235
+ * Right now we only have a single field but anticipate adding more related fields to store various
+ * configuration states such as `override` - where a user might say if they want only these fields to
+ * display, or if they want these fields + the fields we select. When expanding this field, it may look
+ * something like:
+ * export const investigationFields = t.intersection([
+ * t.exact(
+ *   t.type({
+ *     field_names: NonEmptyArray(NonEmptyString),
+ *   })
+ * ),
+ * t.exact(
+ *   t.partial({
+ *     overide: t.boolean,
+ *   })
+ * ),
+ * ]);
+ *
+ */
+export type InvestigationFields = t.TypeOf<typeof InvestigationFields>;
+export const InvestigationFields = t.exact(
+  t.type({
+    field_names: NonEmptyArray(NonEmptyString),
+  })
+);

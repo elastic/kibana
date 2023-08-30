@@ -190,7 +190,7 @@ export class ReportingPublicPlugin
           core,
           start,
           license$,
-          this.config.poll,
+          this.config,
           apiClient,
           share.url,
           params

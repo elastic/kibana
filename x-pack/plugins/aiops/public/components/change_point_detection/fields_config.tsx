@@ -11,18 +11,15 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiContextMenu,
-  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
   EuiPanel,
   EuiPopover,
   EuiProgress,
   EuiSpacer,
   EuiSwitch,
-  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -35,7 +32,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
-import { numberValidator } from '@kbn/ml-agg-utils';
+import { MaxSeriesControl } from './max_series_control';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../../common/constants';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
@@ -54,7 +51,6 @@ import {
 } from './change_point_detection_context';
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
-import { MAX_SERIES } from '../../embeddable/const';
 
 const selectControlCss = { width: '350px' };
 
@@ -183,8 +179,8 @@ const FieldPanel: FC<FieldPanelProps> = ({
   const splitFieldCardinality = useSplitFieldCardinality(fieldConfig.splitField, combinedQuery);
 
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
-
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+  const [isDashboardFormValid, setIsDashboardFormValid] = useState(true);
 
   const canEditDashboards = capabilities.dashboard?.createNew ?? false;
   const { create: canCreateCase, update: canUpdateCase } = cases?.helpers?.canUseCases() ?? {
@@ -217,13 +213,6 @@ const FieldPanel: FC<FieldPanelProps> = ({
     isDefined(fieldConfig.splitField) && selectedPartitions.length === 0;
 
   const timeRange = useTimeRangeUpdates();
-
-  const maxSeriesValidator = useMemo(
-    () => numberValidator({ min: 1, max: MAX_SERIES, integerOnly: true }),
-    []
-  );
-
-  const maxSeriesInvalid = maxSeriesValidator(dashboardAttachment.maxSeriesToPlot) !== null;
 
   const panels = useMemo<EuiContextMenuProps['panels']>(() => {
     return [
@@ -348,54 +337,20 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 />
               </EuiFormRow>
               {isDefined(fieldConfig.splitField) && selectedPartitions.length === 0 ? (
-                <EuiFormRow
-                  fullWidth
-                  isInvalid={maxSeriesInvalid}
-                  error={
-                    <FormattedMessage
-                      id="xpack.aiops.changePointDetection.maxSeriesToPlotError"
-                      defaultMessage="Max series value must be between {minValue} and {maxValue}"
-                      values={{ minValue: 1, maxValue: MAX_SERIES }}
-                    />
-                  }
-                  label={
-                    <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
-                      <EuiFlexItem grow={false}>
-                        <FormattedMessage
-                          id="xpack.aiops.changePointDetection.maxSeriesToPlotLabel"
-                          defaultMessage="Max series"
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          content={i18n.translate(
-                            'xpack.aiops.changePointDetection.maxSeriesToPlotDescription',
-                            {
-                              defaultMessage: 'The maximum number of change points to visualize.',
-                            }
-                          )}
-                        >
-                          <EuiIcon type={'questionInCircle'} />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  }
-                >
-                  <EuiFieldNumber
-                    isInvalid={maxSeriesInvalid}
-                    value={dashboardAttachment.maxSeriesToPlot}
-                    onChange={(e) =>
-                      setDashboardAttachment((prevState) => {
-                        return {
-                          ...prevState,
-                          maxSeriesToPlot: Number(e.target.value),
-                        };
-                      })
-                    }
-                    min={1}
-                    max={MAX_SERIES}
-                  />
-                </EuiFormRow>
+                <MaxSeriesControl
+                  value={dashboardAttachment.maxSeriesToPlot}
+                  onChange={(v) => {
+                    setDashboardAttachment((prevState) => {
+                      return {
+                        ...prevState,
+                        maxSeriesToPlot: v,
+                      };
+                    });
+                  }}
+                  onValidationChange={(result) => {
+                    setIsDashboardFormValid(result === null);
+                  }}
+                />
               ) : null}
 
               <EuiSpacer size={'m'} />
@@ -405,7 +360,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 type={'submit'}
                 fullWidth
                 onClick={setDashboardAttachmentReady.bind(null, true)}
-                disabled={maxSeriesInvalid}
+                disabled={!isDashboardFormValid}
               >
                 <FormattedMessage
                   id="xpack.aiops.changePointDetection.submitDashboardAttachButtonLabel"
@@ -428,12 +383,12 @@ const FieldPanel: FC<FieldPanelProps> = ({
     fieldConfig.fn,
     fieldConfig.metricField,
     fieldConfig.splitField,
+    isDashboardFormValid,
     onRemove,
     openCasesModalCallback,
     removeDisabled,
     selectedPartitions,
     timeRange,
-    maxSeriesInvalid,
   ]);
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(

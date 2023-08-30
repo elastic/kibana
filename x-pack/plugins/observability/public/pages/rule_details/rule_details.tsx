@@ -38,6 +38,8 @@ import {
   getDefaultAlertSummaryTimeRange,
 } from '../../utils/alert_summary_widget';
 import type { AlertStatus } from '../../../common/typings';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 
 export type TabId = typeof RULE_DETAILS_ALERTS_TAB | typeof RULE_DETAILS_EXECUTION_TAB;
 
@@ -63,7 +65,7 @@ export function RuleDetailsPage() {
       getRuleStatusPanel: RuleStatusPanel,
     },
   } = useKibana().services;
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { search } = useLocation();
@@ -72,9 +74,9 @@ export function RuleDetailsPage() {
   const baseTheme = useChartsBaseTheme();
 
   const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
-
+  const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useFetchRuleTypes({
-    filterByRuleTypeIds: observabilityRuleTypeRegistry.list(),
+    filterByRuleTypeIds: filteredRuleTypes,
   });
 
   useBreadcrumbs([
@@ -217,6 +219,7 @@ export function RuleDetailsPage() {
         ],
       }}
     >
+      <HeaderMenu />
       <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
           <RuleStatusPanel

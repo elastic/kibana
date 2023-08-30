@@ -44,7 +44,7 @@ describe.each(packageInfos)('Chromium archive: %s/%s', (architecture, platform) 
 
   const originalAxios = axios.defaults.adapter;
   beforeAll(async () => {
-    axios.defaults.adapter = require('axios/lib/adapters/http'); // allow Axios to send actual requests
+    axios.defaults.adapter = 'http';
   });
 
   afterAll(() => {

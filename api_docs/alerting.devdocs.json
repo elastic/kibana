@@ -586,6 +586,69 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.AlertingAuthorization.getAuthorizedRuleTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getAuthorizedRuleTypes",
+            "description": [],
+            "signature": [
+              "(authorizationEntity: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertingAuthorizationEntity",
+                "text": "AlertingAuthorizationEntity"
+              },
+              ", featuresIds?: Set<string> | undefined) => Promise<",
+              "RegistryAlertTypeWithAuth",
+              "[]>"
+            ],
+            "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.getAuthorizedRuleTypes.$1",
+                "type": "Enum",
+                "tags": [],
+                "label": "authorizationEntity",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "alerting",
+                    "scope": "server",
+                    "docId": "kibAlertingPluginApi",
+                    "section": "def-server.AlertingAuthorizationEntity",
+                    "text": "AlertingAuthorizationEntity"
+                  }
+                ],
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.getAuthorizedRuleTypes.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "featuresIds",
+                "description": [],
+                "signature": [
+                  "Set<string> | undefined"
+                ],
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.AlertingAuthorization.getAuthorizationFilter",
             "type": "Function",
             "tags": [],
@@ -1831,7 +1894,7 @@
                 "section": "def-common.RuleTypeState",
                 "text": "RuleTypeState"
               },
-              ", InstanceState extends { [x: string]: unknown; } = { [x: string]: unknown; }, InstanceContext extends { [x: string]: unknown; } = { [x: string]: unknown; }, ActionGroupIds extends string = never, RecoveryActionGroupId extends string = never, AlertData extends ",
+              ", InstanceState extends Record<string, any> = Record<string, any>, InstanceContext extends { [x: string]: unknown; } = { [x: string]: unknown; }, ActionGroupIds extends string = never, RecoveryActionGroupId extends string = never, AlertData extends ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -2038,7 +2101,7 @@
                 "section": "def-common.RuleTypeState",
                 "text": "RuleTypeState"
               },
-              ", InstanceState extends { [x: string]: unknown; } = { [x: string]: unknown; }, InstanceContext extends { [x: string]: unknown; } = { [x: string]: unknown; }, ActionGroupIds extends string = string, RecoveryActionGroupId extends string = string, AlertData extends ",
+              ", InstanceState extends Record<string, any> = Record<string, any>, InstanceContext extends { [x: string]: unknown; } = { [x: string]: unknown; }, ActionGroupIds extends string = string, RecoveryActionGroupId extends string = string, AlertData extends ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -2071,6 +2134,51 @@
                 "label": "id",
                 "description": [],
                 "path": "x-pack/plugins/alerting/server/rule_type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.PluginStartContract.getAlertIndicesAlias",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlertIndicesAlias",
+            "description": [],
+            "signature": [
+              "(rulesTypes: string[], spaceId?: string | undefined) => string[]"
+            ],
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.PluginStartContract.getAlertIndicesAlias.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "rulesTypes",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/alerting/server/lib/create_get_alert_indices_alias.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.PluginStartContract.getAlertIndicesAlias.$2",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/alerting/server/lib/create_get_alert_indices_alias.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2998,28 +3106,36 @@
                 "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts"
               },
               {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/register_jobs_monitoring_rule_type.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/register_jobs_monitoring_rule_type.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/register_anomaly_detection_alert_type.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/register_anomaly_detection_alert_type.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/notifications/legacy_rules_notification_alert_type.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts"
               },
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/server/lib/rules/threshold/threshold_executor.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/register_jobs_monitoring_rule_type.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/register_jobs_monitoring_rule_type.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/register_anomaly_detection_alert_type.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/register_anomaly_detection_alert_type.ts"
               },
               {
                 "plugin": "infra",
@@ -3050,14 +3166,6 @@
                 "path": "x-pack/plugins/monitoring/server/alerts/base_rule.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/notifications/legacy_rules_notification_alert_type.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
-              },
-              {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/server/rule_types/index_threshold/rule_type.ts"
               },
@@ -3076,10 +3184,6 @@
               {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/server/rule_types/geo_containment/executor.ts"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts"
               },
               {
                 "plugin": "synthetics",
@@ -3303,7 +3407,7 @@
                 "section": "def-common.FieldSpec",
                 "text": "FieldSpec"
               },
-              "[]>; getFieldsForIndexPattern: (indexPattern: ",
+              "[]>; getExistingIndices: (indices: string[]) => Promise<string[]>; getFieldsForIndexPattern: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4095,21 +4199,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-server.AlertInstanceState",
-        "type": "Type",
-        "tags": [],
-        "label": "AlertInstanceState",
-        "description": [],
-        "signature": [
-          "{ [x: string]: unknown; }"
-        ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-server.BulkEditOperation",
         "type": "Type",
         "tags": [],
@@ -4227,6 +4316,21 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.LatestAlertInstanceStateSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "LatestAlertInstanceStateSchema",
+        "description": [],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
+        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4450,7 +4554,7 @@
           },
           "<Params>>; getAlertState: (params: ",
           "GetAlertStateParams",
-          ") => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; uuid?: string | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; uuid?: string | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; summaryActions?: { [x: string]: { date: Date; }; } | undefined; }>; getAlertSummary: (params: ",
+          ") => Promise<void | Readonly<{ alertTypeState?: Record<string, any> | undefined; alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; previousStartedAt?: string | null | undefined; summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; } & {}>>; getAlertSummary: (params: ",
           "GetAlertSummaryParams",
           ") => Promise<",
           {
@@ -4588,7 +4692,7 @@
           "MuteOptions",
           ") => Promise<void>; unmuteInstance: (options: ",
           "MuteOptions",
-          ") => Promise<void>; runSoon: (options: { id: string; }) => Promise<any>; listRuleTypes: () => Promise<Set<",
+          ") => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
           ">>; getSpaceId: () => string | undefined; getAuthorization: () => ",
           {
@@ -5423,67 +5527,6 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.wrappedStateRt",
-        "type": "Function",
-        "tags": [],
-        "label": "wrappedStateRt",
-        "description": [],
-        "signature": [
-          "<State extends RuleTypeState>() => ",
-          "TypeC",
-          "<{ wrapped: ",
-          "Type",
-          "<State, State, unknown>; trackedAlerts: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "TypeC",
-          "<{ alertId: ",
-          "StringC",
-          "; alertUuid: ",
-          "StringC",
-          "; started: ",
-          "StringC",
-          "; flappingHistory: ",
-          "ArrayC",
-          "<",
-          "BooleanC",
-          ">; flapping: ",
-          "BooleanC",
-          "; pendingRecoveredCount: ",
-          "NumberC",
-          "; }>>; trackedAlertsRecovered: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "TypeC",
-          "<{ alertId: ",
-          "StringC",
-          "; alertUuid: ",
-          "StringC",
-          "; started: ",
-          "StringC",
-          "; flappingHistory: ",
-          "ArrayC",
-          "<",
-          "BooleanC",
-          ">; flapping: ",
-          "BooleanC",
-          "; pendingRecoveredCount: ",
-          "NumberC",
-          "; }>>; }>"
-        ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/lifecycle_state.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -9287,18 +9330,6 @@
     "enums": [
       {
         "parentPluginId": "alerting",
-        "id": "def-common.ActionsCompletion",
-        "type": "Enum",
-        "tags": [],
-        "label": "ActionsCompletion",
-        "description": [],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/rule_task_instance.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.HealthStatus",
         "type": "Enum",
         "tags": [],
@@ -9426,36 +9457,6 @@
         "type": "Type",
         "tags": [],
         "label": "AlertInstanceContext",
-        "description": [],
-        "signature": [
-          "{ [x: string]: unknown; }"
-        ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.AlertInstanceMeta",
-        "type": "Type",
-        "tags": [],
-        "label": "AlertInstanceMeta",
-        "description": [],
-        "signature": [
-          "{ lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; uuid?: string | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.AlertInstanceState",
-        "type": "Type",
-        "tags": [],
-        "label": "AlertInstanceState",
         "description": [],
         "signature": [
           "{ [x: string]: unknown; }"
@@ -9744,15 +9745,90 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.LastScheduledActions",
+        "id": "def-common.LatestAlertInstanceMetaSchema",
         "type": "Type",
         "tags": [],
-        "label": "LastScheduledActions",
+        "label": "LatestAlertInstanceMetaSchema",
         "description": [],
         "signature": [
-          "{ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }"
+          "{ readonly uuid?: string | undefined; readonly lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; readonly flappingHistory?: boolean[] | undefined; readonly flapping?: boolean | undefined; readonly maintenanceWindowIds?: string[] | undefined; readonly pendingRecoveredCount?: number | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
+        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.LatestAlertInstanceStateSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "LatestAlertInstanceStateSchema",
+        "description": [],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
+        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.LatestLastScheduledActionsSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "LatestLastScheduledActionsSchema",
+        "description": [],
+        "signature": [
+          "{ readonly actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; readonly subgroup?: string | undefined; readonly date: string; readonly group: string; }"
+        ],
+        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.LatestRawAlertInstanceSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "LatestRawAlertInstanceSchema",
+        "description": [],
+        "signature": [
+          "{ readonly meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; readonly state?: Record<string, any> | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.LatestTaskStateSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "LatestTaskStateSchema",
+        "description": [],
+        "signature": [
+          "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.LatestThrottledActionSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "LatestThrottledActionSchema",
+        "description": [],
+        "signature": [
+          "{ [x: string]: Readonly<{} & { date: string; }>; }"
+        ],
+        "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10052,21 +10128,6 @@
           "200"
         ],
         "path": "x-pack/plugins/alerting/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.RawAlertInstance",
-        "type": "Type",
-        "tags": [],
-        "label": "RawAlertInstance",
-        "description": [],
-        "signature": [
-          "{ state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; uuid?: string | undefined; } | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10520,21 +10581,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.RuleTaskState",
-        "type": "Type",
-        "tags": [],
-        "label": "RuleTaskState",
-        "description": [],
-        "signature": [
-          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; uuid?: string | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; uuid?: string | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; summaryActions?: { [x: string]: { date: Date; }; } | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/rule_task_instance.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.RuleTypeParams",
         "type": "Type",
         "tags": [],
@@ -10644,21 +10690,6 @@
           "<never>, \"id\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\" | \"revision\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.ThrottledActions",
-        "type": "Type",
-        "tags": [],
-        "label": "ThrottledActions",
-        "description": [],
-        "signature": [
-          "{ [x: string]: { date: Date; }; }"
-        ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12694,22 +12725,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.DateFromString",
-        "type": "Object",
-        "tags": [],
-        "label": "DateFromString",
-        "description": [],
-        "signature": [
-          "Type",
-          "<Date, string, unknown>"
-        ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/date_from_string.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.DEFAULT_FLAPPING_SETTINGS",
         "type": "Object",
         "tags": [],
@@ -13088,66 +13103,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.rawAlertInstance",
-        "type": "Object",
-        "tags": [],
-        "label": "rawAlertInstance",
-        "description": [],
-        "signature": [
-          "PartialC",
-          "<{ state: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "UnknownC",
-          ">; meta: ",
-          "PartialC",
-          "<{ lastScheduledActions: ",
-          "IntersectionC",
-          "<[",
-          "PartialC",
-          "<{ subgroup: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ group: ",
-          "StringC",
-          "; date: ",
-          "Type",
-          "<Date, string, unknown>; }>, ",
-          "PartialC",
-          "<{ actions: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "TypeC",
-          "<{ date: ",
-          "Type",
-          "<Date, string, unknown>; }>>; }>]>; flappingHistory: ",
-          "ArrayC",
-          "<",
-          "BooleanC",
-          ">; flapping: ",
-          "BooleanC",
-          "; maintenanceWindowIds: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; pendingRecoveredCount: ",
-          "NumberC",
-          "; uuid: ",
-          "StringC",
-          "; }>; }>"
-        ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.RecoveredActionGroup",
         "type": "Object",
         "tags": [],
@@ -13249,166 +13204,6 @@
           "readonly [\"onActionGroupChange\", \"onActiveAlert\", \"onThrottleInterval\"]"
         ],
         "path": "x-pack/plugins/alerting/common/rule_notify_when_type.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.ruleParamsSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "ruleParamsSchema",
-        "description": [],
-        "signature": [
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ alertId: ",
-          "StringC",
-          "; }>, ",
-          "PartialC",
-          "<{ spaceId: ",
-          "StringC",
-          "; }>]>"
-        ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/rule_task_instance.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.ruleStateSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "ruleStateSchema",
-        "description": [],
-        "signature": [
-          "PartialC",
-          "<{ alertTypeState: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "UnknownC",
-          ">; alertInstances: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "PartialC",
-          "<{ state: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "UnknownC",
-          ">; meta: ",
-          "PartialC",
-          "<{ lastScheduledActions: ",
-          "IntersectionC",
-          "<[",
-          "PartialC",
-          "<{ subgroup: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ group: ",
-          "StringC",
-          "; date: ",
-          "Type",
-          "<Date, string, unknown>; }>, ",
-          "PartialC",
-          "<{ actions: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "TypeC",
-          "<{ date: ",
-          "Type",
-          "<Date, string, unknown>; }>>; }>]>; flappingHistory: ",
-          "ArrayC",
-          "<",
-          "BooleanC",
-          ">; flapping: ",
-          "BooleanC",
-          "; maintenanceWindowIds: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; pendingRecoveredCount: ",
-          "NumberC",
-          "; uuid: ",
-          "StringC",
-          "; }>; }>>; alertRecoveredInstances: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "PartialC",
-          "<{ state: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "UnknownC",
-          ">; meta: ",
-          "PartialC",
-          "<{ lastScheduledActions: ",
-          "IntersectionC",
-          "<[",
-          "PartialC",
-          "<{ subgroup: ",
-          "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ group: ",
-          "StringC",
-          "; date: ",
-          "Type",
-          "<Date, string, unknown>; }>, ",
-          "PartialC",
-          "<{ actions: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "TypeC",
-          "<{ date: ",
-          "Type",
-          "<Date, string, unknown>; }>>; }>]>; flappingHistory: ",
-          "ArrayC",
-          "<",
-          "BooleanC",
-          ">; flapping: ",
-          "BooleanC",
-          "; maintenanceWindowIds: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; pendingRecoveredCount: ",
-          "NumberC",
-          "; uuid: ",
-          "StringC",
-          "; }>; }>>; previousStartedAt: ",
-          "UnionC",
-          "<[",
-          "NullC",
-          ", ",
-          "Type",
-          "<Date, string, unknown>]>; summaryActions: ",
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "TypeC",
-          "<{ date: ",
-          "Type",
-          "<Date, string, unknown>; }>>; }>"
-        ],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/rule_task_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

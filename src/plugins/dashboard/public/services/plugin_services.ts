@@ -42,6 +42,8 @@ import { customBrandingServiceFactory } from './custom_branding/custom_branding_
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service';
 import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management_service';
 import { contentManagementServiceFactory } from './content_management/content_management_service';
+import { serverlessServiceFactory } from './serverless/serverless_service';
+import { noDataPageServiceFactory } from './no_data_page/no_data_page_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
@@ -84,6 +86,8 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   customBranding: new PluginServiceProvider(customBrandingServiceFactory),
   savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
   contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
+  serverless: new PluginServiceProvider(serverlessServiceFactory),
+  noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

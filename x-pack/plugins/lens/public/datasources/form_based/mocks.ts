@@ -216,3 +216,15 @@ export const createMockedIndexPatternWithoutType = (
     getFieldByName: getFieldByNameFactory(filteredFields),
   };
 };
+
+export const createMockedIndexPatternWithAdditionalFields = (
+  newFields: IndexPatternField[]
+): IndexPattern => {
+  const { fields, ...otherIndexPatternProps } = createMockedIndexPattern();
+  const completeFields = fields.concat(newFields);
+  return {
+    ...otherIndexPatternProps,
+    fields: completeFields,
+    getFieldByName: getFieldByNameFactory(completeFields),
+  };
+};

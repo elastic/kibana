@@ -164,6 +164,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
     >
       <EuiText color="default">
         <EuiSideNav
+          mobileBreakpoints={/* turn off responsive behavior */ []}
           items={filteredItems.map((item) =>
             navigationNodeToEuiItem(item, { navigateToUrl, basePath })
           )}

@@ -15,6 +15,7 @@ import { ListingProps as Props } from '.';
 import { setup, TestBed, TestDependencies, mockJobs } from './__test__';
 import { Job } from '../lib/job';
 import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/url';
+import { mockConfig } from './__test__/report_listing.test.helpers';
 
 describe('ReportListing', () => {
   let testBed: TestBed;
@@ -266,6 +267,23 @@ describe('ReportListing', () => {
       await remountComponent();
 
       expect(testBed.actions.hasIlmPolicyLink()).toBe(true);
+    });
+  });
+  describe('Screenshotting Diagnostic', () => {
+    it('shows screenshotting diagnostic link if config enables image reports', () => {
+      expect(testBed.actions.hasScreenshotDiagnosticLink()).toBe(true);
+    });
+    it('does not show when image reporting not set in config', async () => {
+      const mockNoImageConfig = {
+        ...mockConfig,
+        export_types: {
+          csv: { enabled: true },
+          pdf: { enabled: false },
+          png: { enabled: false },
+        },
+      };
+      await runSetup({ config: mockNoImageConfig });
+      expect(testBed.actions.hasScreenshotDiagnosticLink()).toBe(false);
     });
   });
 });

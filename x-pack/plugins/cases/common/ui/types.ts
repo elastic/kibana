@@ -59,6 +59,9 @@ export interface CasesUiConfigType {
     maxSize?: number;
     allowedMimeTypes: string[];
   };
+  stack: {
+    enabled: boolean;
+  };
 }
 
 export const StatusAll = 'all' as const;

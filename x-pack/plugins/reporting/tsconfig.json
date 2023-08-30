@@ -43,6 +43,7 @@
     "@kbn/reporting-export-types-pdf",
     "@kbn/reporting-export-types-deprecated",
     "@kbn/reporting-export-types-png",
+    "@kbn/core-http-common",
   ],
   "exclude": [
     "target/**/*",

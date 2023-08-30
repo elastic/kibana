@@ -12,6 +12,7 @@ import {
   EuiCallOut,
   EuiCheckbox,
   EuiEmptyPrompt,
+  EuiFormErrorText,
   EuiFormRow,
   EuiIcon,
   EuiLink,
@@ -40,7 +41,7 @@ import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionChart } from './components/expression_chart';
 import { ExpressionRow } from './components/expression_row';
-import { MetricsExplorerKueryBar } from './components/kuery_bar';
+import { RuleFlyoutKueryBar } from '../rule_kql_filter/kuery_bar';
 import { MetricsExplorerGroupBy } from './components/group_by';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
 
@@ -67,6 +68,7 @@ export default function Expressions(props: Props) {
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
+  const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [paramsError, setParamsError] = useState<Error>();
   const derivedIndexPattern = useMemo<DataViewBase>(
@@ -99,6 +101,25 @@ export default function Expressions(props: Props) {
         setRuleParams('searchConfiguration', initialSearchConfiguration);
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
+
+        if (createdSearchSource.getField('index')) {
+          const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
+          if (!timeFieldName) {
+            setDataViewTimeFieldError(
+              i18n.translate(
+                'xpack.observability.threshold.rule.alertFlyout.dataViewError.noTimestamp',
+                {
+                  defaultMessage:
+                    'The selected data view does not have a timestamp field, please select another data view.',
+                }
+              )
+            );
+          } else {
+            setDataViewTimeFieldError(undefined);
+          }
+        } else {
+          setDataViewTimeFieldError(undefined);
+        }
       } catch (error) {
         setParamsError(error);
       }
@@ -106,7 +127,7 @@ export default function Expressions(props: Props) {
 
     initSearchSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.search.searchSource, data.dataViews]);
+  }, [data.search.searchSource, data.dataViews, dataView]);
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -336,6 +357,13 @@ export default function Expressions(props: Props) {
     );
   }
 
+  const placeHolder = i18n.translate(
+    'xpack.observability.threshold.rule.homePage.toolbar.kqlSearchFieldPlaceholder',
+    {
+      defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+    }
+  );
+
   return (
     <>
       <EuiTitle size="xs">
@@ -356,6 +384,11 @@ export default function Expressions(props: Props) {
           onChangeMetaData({ ...metadata, adHocDataViewList });
         }}
       />
+      {dataViewTimeFieldError && (
+        <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
+          {dataViewTimeFieldError}
+        </EuiFormErrorText>
+      )}
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h5>
@@ -366,7 +399,8 @@ export default function Expressions(props: Props) {
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <MetricsExplorerKueryBar
+      <RuleFlyoutKueryBar
+        placeholder={placeHolder}
         derivedIndexPattern={derivedIndexPattern}
         onChange={debouncedOnFilterChange}
         onSubmit={onFilterChange}
@@ -381,42 +415,56 @@ export default function Expressions(props: Props) {
           />
         </h5>
       </EuiTitle>
-      <EuiSpacer size="s" />
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
-            <ExpressionRow
-              canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
-              fields={derivedIndexPattern.fields as any}
-              remove={removeExpression}
-              addExpression={addExpression}
-              key={idx} // idx's don't usually make good key's but here the index has semantic meaning
-              expressionId={idx}
-              setRuleParams={updateParams}
-              errors={(errors[idx] as IErrorObject) || emptyError}
-              expression={e || {}}
-              dataView={derivedIndexPattern}
-            >
-              {/* Preview */}
-              <ExpressionChart
-                expression={e}
-                derivedIndexPattern={derivedIndexPattern}
-                filterQuery={ruleParams.filterQuery}
-                groupBy={ruleParams.groupBy}
-                timeFieldName={dataView?.timeFieldName}
-              />
-            </ExpressionRow>
+            <div key={idx}>
+              {/* index has semantic meaning, we show the condition title starting from the 2nd one  */}
+              {idx >= 1 && (
+                <EuiTitle size="xs">
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.observability.threshold.rule.alertFlyout.condition"
+                      defaultMessage="Condition {conditionNumber}"
+                      values={{ conditionNumber: idx + 1 }}
+                    />
+                  </h5>
+                </EuiTitle>
+              )}
+              <ExpressionRow
+                canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
+                fields={derivedIndexPattern.fields as any}
+                remove={removeExpression}
+                addExpression={addExpression}
+                key={idx} // idx's don't usually make good key's but here the index has semantic meaning
+                expressionId={idx}
+                setRuleParams={updateParams}
+                errors={(errors[idx] as IErrorObject) || emptyError}
+                expression={e || {}}
+                dataView={derivedIndexPattern}
+              >
+                {/* Preview */}
+                <ExpressionChart
+                  expression={e}
+                  derivedIndexPattern={derivedIndexPattern}
+                  filterQuery={ruleParams.filterQuery}
+                  groupBy={ruleParams.groupBy}
+                  timeFieldName={dataView?.timeFieldName}
+                />
+              </ExpressionRow>
+            </div>
           );
         })}
-      <div style={{ marginLeft: 28 }}>
-        <ForLastExpression
-          timeWindowSize={timeSize}
-          timeWindowUnit={timeUnit}
-          errors={emptyError}
-          onChangeWindowSize={updateTimeSize}
-          onChangeWindowUnit={updateTimeUnit}
-        />
-      </div>
+
+      <ForLastExpression
+        timeWindowSize={timeSize}
+        timeWindowUnit={timeUnit}
+        errors={emptyError}
+        onChangeWindowSize={updateTimeSize}
+        onChangeWindowUnit={updateTimeUnit}
+        display="fullWidth"
+      />
+
       <EuiSpacer size="m" />
       <div>
         <EuiButtonEmpty

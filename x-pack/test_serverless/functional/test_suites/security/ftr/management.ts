@@ -19,7 +19,7 @@ export default function ({ getPageObject }: FtrProviderContext) {
         shouldUseHashForSubUrl: false,
       });
 
-      await PageObject.waitUntilUrlIncludes('/security/manage');
+      await PageObject.waitUntilUrlIncludes('/security/project_settings');
     });
   });
 }

@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { SecurityPageName } from '../../../common';
-import { UpsellingService } from '../lib/upsellings';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { useUpsellingComponent, useUpsellingMessage, useUpsellingPage } from './use_upselling';
 import { UpsellingProvider } from '../components/upselling_provider';
 
@@ -35,7 +35,7 @@ const RenderWrapper: React.FunctionComponent = ({ children }) => {
 
 describe('use_upselling', () => {
   test('useUpsellingComponent returns sections', () => {
-    mockUpselling.registerSections({
+    mockUpselling.setSections({
       entity_analytics_panel: TestComponent,
     });
 
@@ -47,7 +47,7 @@ describe('use_upselling', () => {
   });
 
   test('useUpsellingPage returns pages', () => {
-    mockUpselling.registerPages({
+    mockUpselling.setPages({
       [SecurityPageName.hosts]: TestComponent,
     });
 
@@ -57,9 +57,9 @@ describe('use_upselling', () => {
     expect(result.current).toBe(TestComponent);
   });
 
-  test('useUpsellingMessage returns pages', () => {
+  test('useUpsellingMessage returns messages', () => {
     const testMessage = 'test message';
-    mockUpselling.registerMessages({
+    mockUpselling.setMessages({
       investigation_guide: testMessage,
     });
 
@@ -72,7 +72,7 @@ describe('use_upselling', () => {
 
   test('useUpsellingMessage returns null when upsellingMessageId not found', () => {
     const emptyMessages = {};
-    mockUpselling.registerMessages(emptyMessages);
+    mockUpselling.setPages(emptyMessages);
 
     const { result } = renderHook(
       () => useUpsellingMessage('my_fake_message_id' as 'investigation_guide'),

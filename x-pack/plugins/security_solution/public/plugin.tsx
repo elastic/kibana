@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { combineLatest, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -16,8 +16,9 @@ import type {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '@kbn/core/public';
+
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
@@ -37,14 +38,14 @@ import { SOLUTION_NAME } from './common/translations';
 
 import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
-import { updateAppLinks, updateExtraAppLinks, type LinksPermissions } from './common/links';
+import { updateAppLinks, type LinksPermissions } from './common/links';
 import { registerDeepLinksUpdater } from './common/links/deep_links';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
-import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
+import { getLazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { LazyEndpointPolicyCreateMultiStepExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_multi_step_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
@@ -169,16 +170,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         http: core.http,
       });
 
-      const filterManager = new FilterManager(core.uiSettings);
-
       // used for creating a custom stateful KQL Query Bar
       const customDataService: DataPublicPluginStart = {
         ...startPlugins.data,
-        query: {
-          ...query,
-          filterManager,
-        },
+        query,
+        // @ts-expect-error
+        _name: 'custom',
       };
+
+      // @ts-expect-error
+      customDataService.query.filterManager._name = 'customFilterManager';
 
       const services: StartServices = {
         ...coreStart,
@@ -195,7 +196,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         telemetry: this.telemetry.start(),
-        discoverFilterManager: filterManager,
         customDataService,
         topValuesPopover: new TopValuesPopoverService(),
       };
@@ -306,7 +306,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-create',
-        Component: LazyEndpointPolicyCreateExtension,
+        Component: getLazyEndpointPolicyCreateExtension(registerOptions),
       });
 
       registerExtension({
@@ -511,7 +511,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
     const { license$ } = plugins.licensing;
-    const { upsellingService, extraAppLinks$ } = this.contract;
+    const { upsellingService, appLinksSwitcher } = this.contract;
 
     registerDeepLinksUpdater(this.appUpdater$);
 
@@ -528,18 +528,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       };
 
       // set initial links to not block rendering
-      updateAppLinks(links, linksPermissions);
+      updateAppLinks(appLinksSwitcher(links), linksPermissions);
 
       // set filtered links asynchronously
       const filteredLinks = await getFilteredLinks(core, plugins);
-      updateAppLinks(filteredLinks, linksPermissions);
-    });
-
-    combineLatest([extraAppLinks$, license$]).subscribe(([extraAppLinks, license]) => {
-      updateExtraAppLinks(extraAppLinks, {
-        ...baseLinksPermissions,
-        ...(license.type != null && { license }),
-      });
+      updateAppLinks(appLinksSwitcher(filteredLinks), linksPermissions);
     });
   }
 }

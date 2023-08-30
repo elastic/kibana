@@ -19,11 +19,15 @@
       "securitySolution",
       "serverless",
       "taskManager",
-      "cloud"
+      "cloud",
+      "fleet"
     ],
     "optionalPlugins": [
       "securitySolutionEss"
     ],
-    "requiredBundles": ["kibanaUtils"]
+    "requiredBundles": [
+      "kibanaUtils",
+      "usageCollection"
+    ]
   }
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '..';
 import { defineChangeUserPasswordRoutes } from './change_password';
 import { defineCreateOrUpdateUserRoutes } from './create_or_update';
 import { defineDeleteUserRoutes } from './delete';
@@ -13,6 +12,7 @@ import { defineDisableUserRoutes } from './disable';
 import { defineEnableUserRoutes } from './enable';
 import { defineGetUserRoutes } from './get';
 import { defineGetAllUsersRoutes } from './get_all';
+import type { RouteDefinitionParams } from '..';
 
 export function defineUsersRoutes(params: RouteDefinitionParams) {
   defineGetUserRoutes(params);

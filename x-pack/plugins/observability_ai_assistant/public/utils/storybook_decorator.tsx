@@ -9,15 +9,38 @@ import { Observable } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
 import { ObservabilityAIAssistantAPIClient } from '../api';
 import type { Message } from '../../common';
-import type { ObservabilityAIAssistantService, PendingMessage } from '../types';
+import type {
+  ObservabilityAIAssistantChatService,
+  ObservabilityAIAssistantService,
+  PendingMessage,
+} from '../types';
 import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './builders';
+import { ObservabilityAIAssistantChatServiceProvider } from '../context/observability_ai_assistant_chat_service_provider';
+
+const chatService: ObservabilityAIAssistantChatService = {
+  chat: (options: { messages: Message[]; connectorId: string }) => new Observable<PendingMessage>(),
+  getContexts: () => [],
+  getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
+  executeFunction: async (
+    name: string,
+    args: string | undefined,
+    signal: AbortSignal
+  ): Promise<{ content?: Serializable; data?: Serializable }> => ({}),
+  renderFunction: (name: string, args: string | undefined, response: {}) => (
+    <div>Hello! {name}</div>
+  ),
+  hasRenderFunction: () => true,
+};
 
 const service: ObservabilityAIAssistantService = {
   isEnabled: () => true,
-  chat: (options: { messages: Message[]; connectorId: string }) => new Observable<PendingMessage>(),
+  start: async () => {
+    return chatService;
+  },
   callApi: {} as ObservabilityAIAssistantAPIClient,
   getCurrentUser: async (): Promise<AuthenticatedUser> => ({
     username: 'user',
@@ -29,14 +52,12 @@ const service: ObservabilityAIAssistantService = {
     authentication_type: '',
     elastic_cloud_user: false,
   }),
-  getContexts: () => [],
-  getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
-  executeFunction: async (
-    name: string,
-    args: string | undefined,
-    signal: AbortSignal
-  ): Promise<{ content?: Serializable; data?: Serializable }> => ({}),
-  renderFunction: (name: string, response: {}) => <div>Hello! {name}</div>,
+  getLicense: () => new Observable(),
+  getLicenseManagementLocator: () =>
+    ({
+      url: {},
+      navigate: () => {},
+    } as unknown as SharePluginStart),
 };
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
@@ -54,7 +75,9 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
       }}
     >
       <ObservabilityAIAssistantProvider value={service}>
-        <Story />
+        <ObservabilityAIAssistantChatServiceProvider value={chatService}>
+          <Story />
+        </ObservabilityAIAssistantChatServiceProvider>
       </ObservabilityAIAssistantProvider>
     </KibanaContextProvider>
   );

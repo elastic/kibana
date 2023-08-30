@@ -14,41 +14,35 @@ export const orderedFlyoutTabs: Tab[] = [
     name: i18n.translate('xpack.infra.nodeDetails.tabs.overview.title', {
       defaultMessage: 'Overview',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-overview',
   },
   {
     id: FlyoutTabIds.METADATA,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.metadata.title', {
       defaultMessage: 'Metadata',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-metadata',
   },
   {
     id: FlyoutTabIds.PROCESSES,
     name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
       defaultMessage: 'Processes',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-processes',
   },
   {
     id: FlyoutTabIds.LOGS,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.logs.title', {
       defaultMessage: 'Logs',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-logs',
   },
   {
     id: FlyoutTabIds.ANOMALIES,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.anomalies', {
       defaultMessage: 'Anomalies',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-anomalies',
   },
   {
     id: FlyoutTabIds.OSQUERY,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
       defaultMessage: 'Osquery',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-Osquery',
   },
 ];

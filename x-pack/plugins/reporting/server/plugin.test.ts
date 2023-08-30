@@ -7,9 +7,9 @@
 
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-common';
-import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-common/report_types';
+import { PNG_REPORT_TYPE_V2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-common/report_types';
 import type { ReportingCore, ReportingInternalStart } from './core';
+import { ExportTypesRegistry } from './lib/export_types_registry';
 import { ReportingPlugin } from './plugin';
 import {
   createMockConfigSchema,
@@ -31,6 +31,8 @@ describe('Reporting Plugin', () => {
   let plugin: ReportingPlugin;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     configSchema = createMockConfigSchema();
     initContext = coreMock.createPluginInitializerContext(configSchema);
     coreSetup = coreMock.createSetup(configSchema);
@@ -82,50 +84,62 @@ describe('Reporting Plugin', () => {
     `);
     expect(logger.error).toHaveBeenCalledTimes(2);
   });
-  describe('config and export types registry validation', () => {
-    it('expect image reporting to be in registry by default', async () => {
-      // wait for the setup phase background work
-      plugin.setup(coreSetup, pluginSetup);
-      await new Promise(setImmediate);
 
-      // create a way for an error to happen
-      const reportingCore = (plugin as unknown as { reportingCore: ReportingCore }).reportingCore;
+  describe('config and export types registration', () => {
+    jest.mock('./lib/export_types_registry');
+    ExportTypesRegistry.prototype.getAll = jest.fn(() => []); // code breaks if getAll returns undefined
+    let registerSpy: jest.SpyInstance;
 
-      // wait for the startup phase background work
-      plugin.start(coreStart, pluginStart);
-      await new Promise(setImmediate);
-      expect(reportingCore.getExportTypesRegistry().getById(PDF_REPORT_TYPE_V2)).toHaveProperty(
-        'id',
-        PDF_REPORT_TYPE_V2
-      );
-      expect(reportingCore.getExportTypesRegistry().getById(PNG_REPORT_TYPE_V2)).toHaveProperty(
-        'id',
-        PNG_REPORT_TYPE_V2
-      );
+    beforeEach(async () => {
+      registerSpy = jest.spyOn(ExportTypesRegistry.prototype, 'register');
+      pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
+      pluginStart = await createMockPluginStart(coreStart, configSchema);
+      plugin = new ReportingPlugin(initContext);
     });
-    it('expect pdf to not be in registry if config does not enable it', async () => {
-      configSchema = { ...createMockConfigSchema(), export_types: { pdf: { enabled: false } } };
+
+    it('expect all report types to be in registry', async () => {
+      // check the spy function
+      expect(registerSpy).toHaveBeenCalledTimes(5);
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE }));
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE_V2 }));
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: PDF_REPORT_TYPE }));
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: PDF_REPORT_TYPE_V2 }));
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: PNG_REPORT_TYPE_V2 }));
+    });
+
+    it('expect image report types not to be in registry if disabled', async () => {
+      jest.clearAllMocks();
+
+      configSchema = createMockConfigSchema({
+        export_types: {
+          csv: { enabled: true },
+          pdf: { enabled: false },
+          png: { enabled: false },
+        },
+      });
+
       initContext = coreMock.createPluginInitializerContext(configSchema);
       coreSetup = coreMock.createSetup(configSchema);
       coreStart = coreMock.createStart();
       pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
       pluginStart = await createMockPluginStart(coreStart, configSchema);
-
       plugin = new ReportingPlugin(initContext);
-      // wait for the setup phase background work
-      plugin.setup(coreSetup, pluginSetup);
-      await new Promise(setImmediate);
 
-      // create a way for an error to happen
-      const reportingCore = (plugin as unknown as { reportingCore: ReportingCore }).reportingCore;
+      // check the spy function was called with CSV
+      expect(registerSpy).toHaveBeenCalledTimes(2);
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE }));
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE_V2 }));
 
-      // wait for the startup phase background work
-      plugin.start(coreStart, pluginStart);
-      await new Promise(setImmediate);
-      const checkPdf = () => reportingCore.getExportTypesRegistry().getById(PDF_REPORT_TYPE_V2);
-      const checkPng = () => reportingCore.getExportTypesRegistry().getById(PNG_REPORT_TYPE_V2);
-      expect(checkPdf).toThrowError(`Unknown id ${PDF_REPORT_TYPE_V2}`);
-      expect(checkPng).toThrowError(`Unknown id ${PNG_REPORT_TYPE_V2}`);
+      // check the spy function was NOT called with anything else
+      expect(registerSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: PDF_REPORT_TYPE })
+      );
+      expect(registerSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: PDF_REPORT_TYPE_V2 })
+      );
+      expect(registerSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: PNG_REPORT_TYPE_V2 })
+      );
     });
   });
 });

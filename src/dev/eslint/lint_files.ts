@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CLIEngine } from 'eslint';
+import { ESLint } from 'eslint';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError } from '@kbn/dev-cli-errors';
@@ -21,26 +21,39 @@ import { File } from '../file';
  * @param  {Array<File>} files
  * @return {undefined}
  */
-export function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boolean } = {}) {
-  const cli = new CLIEngine({
+export async function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boolean } = {}) {
+  const eslint = new ESLint({
     cache: true,
     cwd: REPO_ROOT,
     fix,
   });
 
   const paths = files.map((file) => file.getRelativePath());
-  const report = cli.executeOnFiles(paths);
+  const reports = await eslint.lintFiles(paths);
 
   if (fix) {
-    CLIEngine.outputFixes(report);
+    await ESLint.outputFixes(reports);
   }
 
-  if (report.errorCount || report.warningCount) {
-    log[report.errorCount ? 'error' : 'warning'](cli.getFormatter()(report.results));
-  }
+  let foundError = false;
+  let foundWarning = false;
+  reports.some((report) => {
+    if (report.errorCount !== 0) {
+      foundError = true;
+      return true;
+    } else if (report.warningCount !== 0) {
+      foundWarning = true;
+    }
+  });
 
-  if (report.errorCount) {
-    throw createFailError(`[eslint] errors`);
+  if (foundError || foundWarning) {
+    const formatter = await eslint.loadFormatter();
+    const msg = await formatter.format(reports);
+    log[foundError ? 'error' : 'warning'](msg);
+
+    if (foundError) {
+      throw createFailError(`[eslint] errors`);
+    }
   }
 
   log.success('[eslint] %d files linted successfully', files.length);
