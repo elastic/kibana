@@ -28,6 +28,7 @@ import { useKibanaServices } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../routes';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
 import { CreateApiKeyResponse } from './types';
+import './api_key.scss';
 
 export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: string) => void }) => {
   const { http, userProfile } = useKibanaServices();
@@ -52,7 +53,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
         />
       )}
       {apiKey ? (
-        <EuiPanel color="success">
+        <EuiPanel className="apiKeySuccessPanel">
           <EuiStep
             css={css`
               .euiStep__content {
