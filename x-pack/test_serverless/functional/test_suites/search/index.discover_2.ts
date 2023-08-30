@@ -8,11 +8,8 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('serverless search UI - Discover', function () {
+  describe('serverless search UI - Discover 2', function () {
     loadTestFile(require.resolve('./discover/embeddable'));
-    loadTestFile(require.resolve('./discover/group1'));
-    loadTestFile(require.resolve('./discover/group2'));
-    loadTestFile(require.resolve('./discover/group3'));
     loadTestFile(require.resolve('./discover/x_pack'));
     loadTestFile(require.resolve('./discover_ml_uptime/discover'));
     loadTestFile(require.resolve('./context'));

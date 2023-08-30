@@ -9,8 +9,8 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'es',
-  testFiles: [require.resolve('./index.discover')],
+  testFiles: [require.resolve('./index.discover_1')],
   junit: {
-    reportName: 'Serverless Search Functional Tests - Discover',
+    reportName: 'Serverless Search Functional Tests - Discover 1',
   },
 });

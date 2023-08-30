@@ -92,7 +92,8 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
-  - x-pack/test_serverless/functional/test_suites/search/config.discover.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.discover_1.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.discover_2.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
