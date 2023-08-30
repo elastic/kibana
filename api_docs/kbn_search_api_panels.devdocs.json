@@ -583,12 +583,12 @@
           {
             "parentPluginId": "@kbn/search-api-panels",
             "id": "def-common.IntegrationsPanelProps.docLinks",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "docLinks",
             "description": [],
             "signature": [
-              "any"
+              "{ beats: string; connectors: string; logstash: string; }"
             ],
             "path": "packages/kbn-search-api-panels/components/integrations_panel.tsx",
             "deprecated": false,

@@ -856,7 +856,7 @@ export class TaskRunner<
     ): RuleTaskState => {
       return {
         ...omit(runStateWithMetrics, ['metrics']),
-        previousStartedAt: startedAt,
+        previousStartedAt: startedAt?.toISOString(),
       };
     };
 

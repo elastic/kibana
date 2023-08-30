@@ -6,22 +6,15 @@
  */
 
 import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
-
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonText,
-  EuiModal,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiCallOut,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiModal,
+  EuiPageTemplate,
+  EuiSkeletonText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { needsReauthorization } from '../../common/reauthorization_utils';
@@ -29,14 +22,12 @@ import {
   APP_GET_TRANSFORM_CLUSTER_PRIVILEGES,
   TRANSFORM_STATE,
 } from '../../../../common/constants';
-
-import { useRefreshTransformList, TransformListRow } from '../../common';
+import { TransformListRow, useRefreshTransformList } from '../../common';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useDeleteTransforms, useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { AuthorizationContext, PrivilegesWrapper } from '../../lib/authorization';
-import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
-
+import { BREADCRUMB_SECTION, breadcrumbService, docTitleService } from '../../services/navigation';
 import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
 import { SearchSelection } from './components/search_selection';
 import { TransformList } from './components/transform_list';
@@ -151,7 +142,7 @@ export const TransformManagement: FC = () => {
 
   return (
     <>
-      <EuiPageHeader
+      <EuiPageTemplate.Header
         pageTitle={
           <span data-test-subj="transformAppTitle">
             <FormattedMessage
@@ -168,11 +159,32 @@ export const TransformManagement: FC = () => {
         }
         rightSideItems={[docsLink]}
         bottomBorder
+        paddingSize={'none'}
       />
 
       <EuiSpacer size="l" />
 
-      <EuiPageContentBody data-test-subj="transformPageTransformList">
+      {typeof errorMessage !== 'undefined' && (
+        <EuiPageTemplate.EmptyPrompt
+          iconType="warning"
+          color="danger"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.transform.list.errorPromptTitle"
+                defaultMessage="An error occurred getting the transform list"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <pre>{JSON.stringify(errorMessage)}</pre>
+            </p>
+          }
+        />
+      )}
+
+      <EuiPageTemplate.Section paddingSize={'none'} data-test-subj="transformPageTransformList">
         {!isInitialized && <EuiSkeletonText lines={2} />}
         {isInitialized && (
           <>
@@ -180,36 +192,7 @@ export const TransformManagement: FC = () => {
 
             <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
             <EuiSpacer size="s" />
-            {typeof errorMessage !== 'undefined' && (
-              <EuiFlexGroup justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>
-                  <EuiSpacer size="l" />
-                  <EuiPageContent
-                    verticalPosition="center"
-                    horizontalPosition="center"
-                    color="danger"
-                  >
-                    <EuiEmptyPrompt
-                      iconType="warning"
-                      title={
-                        <h2>
-                          <FormattedMessage
-                            id="xpack.transform.list.errorPromptTitle"
-                            defaultMessage="An error occurred getting the transform list"
-                          />
-                        </h2>
-                      }
-                      body={
-                        <p>
-                          <pre>{JSON.stringify(errorMessage)}</pre>
-                        </p>
-                      }
-                      actions={[]}
-                    />
-                  </EuiPageContent>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
+
             {typeof errorMessage === 'undefined' && (
               <AlertRulesManageContext.Provider value={getAlertRuleManageContext()}>
                 {transformIdsWithoutConfig ? (
@@ -268,7 +251,7 @@ export const TransformManagement: FC = () => {
             )}
           </>
         )}
-      </EuiPageContentBody>
+      </EuiPageTemplate.Section>
 
       {isSearchSelectionVisible && (
         <EuiModal
