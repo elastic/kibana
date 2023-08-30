@@ -45,7 +45,6 @@ export class LogsSharedPlugin
     this.logger = context.logger.get();
     this.usageCollector = {};
 
-    console.log('Plugin config', this.config);
     this.logViews = new LogViewsService(this.logger.get('logViews'));
   }
 
