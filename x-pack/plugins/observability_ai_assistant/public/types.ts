@@ -30,7 +30,7 @@ import type {
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   ContextDefinition,
   FunctionDefinition,

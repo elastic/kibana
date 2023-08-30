@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eu
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import ctaImage from '../../assets/elastic-ai-assistant.png';
+import ctaImage from '../../assets/elastic_ai_assistant.png';
 
 const incorrectLicenseContainer = css`
   height: 100%;

@@ -20,7 +20,7 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { UPGRADE_LICENSE_TITLE } from '../../i18n';
-import ctaImage from '../../assets/elastic-ai-assistant.png';
+import ctaImage from '../../assets/elastic_ai_assistant.png';
 import { useLicenseManagementLocator } from '../../hooks/use_license_management_locator';
 
 const incorrectLicenseContainer = css`
