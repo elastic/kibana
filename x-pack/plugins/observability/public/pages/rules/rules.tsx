@@ -68,14 +68,14 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     {
       name: 'rules',
       label: (
-        <FormattedMessage id="xpack.triggersActionsUI.home.rulesTabTitle" defaultMessage="Rules" />
+        <FormattedMessage id="xpack.observability.rulePage.rulesTabTitle" defaultMessage="Rules" />
       ),
       onClick: () => history.push(RULES_PATH),
     },
     {
       name: 'logs',
       label: (
-        <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />
+        <FormattedMessage id="xpack.observability.rulePage.logsTabTitle" defaultMessage="Logs" />
       ),
       onClick: () => history.push(RULES_LOGS_PATH),
       ['data-test-subj']: 'ruleLogsTab',
