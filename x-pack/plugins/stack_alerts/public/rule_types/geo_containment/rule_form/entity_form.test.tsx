@@ -30,13 +30,13 @@ test('should not call prop callbacks on render', async () => {
         type: 'geo_point',
       },
     ],
-    title: DATA_VIEW_TITLE
+    title: DATA_VIEW_TITLE,
   };
   const props = {
     data: {
       indexPatterns: {
         get: async () => mockDataView,
-      }
+      },
     } as unknown as DataPublicPluginStart,
     getValidationError: () => null,
     ruleParams: {
@@ -60,28 +60,32 @@ test('should not call prop callbacks on render', async () => {
       ui: {
         IndexPatternSelect: () => {
           return '<div>mock IndexPatternSelect</div>';
-        }
-      }
+        },
+      },
     } as unknown as UnifiedSearchPublicPluginStart,
-  }
+  };
 
   const wrapper = mountWithIntl(<EntityForm {...props} />);
   await act(async () => {
-      await nextTick();
-      wrapper.update();
+    await nextTick();
+    wrapper.update();
   });
 
   // Assert that geospatial dataView fields are loaded
   // to ensure test is properly awaiting async useEffect
   let geoFieldsLoaded = false;
-  wrapper.findWhere(n => {
-    if (n.name() === 'SingleFieldSelect' && n.props().value === 'location' && n.props().fields.length === 1) {
+  wrapper.findWhere((n) => {
+    if (
+      n.name() === 'SingleFieldSelect' &&
+      n.props().value === 'location' &&
+      n.props().fields.length === 1
+    ) {
       geoFieldsLoaded = true;
     }
     return false;
   });
   expect(geoFieldsLoaded).toBe(true);
-  
+
   expect(props.setDataViewId).not.toHaveBeenCalled();
   expect(props.setDataViewTitle).not.toHaveBeenCalled();
   expect(props.setDateField).not.toHaveBeenCalled();
