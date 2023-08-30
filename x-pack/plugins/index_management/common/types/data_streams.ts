@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import {
+  ByteSize,
+  IndicesDataLifecycleWithRollover,
+  IndicesDataStream,
+  IndicesDataStreamsStatsDataStreamsStatsItem,
+  Metadata,
+} from '@elastic/elasticsearch/lib/api/types';
+
 interface TimestampFieldFromEs {
   name: string;
 }
 
 type TimestampField = TimestampFieldFromEs;
-
-interface MetaFromEs {
-  managed_by: string;
-  package: any;
-  managed: boolean;
-}
-
-type Meta = MetaFromEs;
 
 interface PrivilegesFromEs {
   delete_index: boolean;
@@ -27,20 +27,13 @@ type Privileges = PrivilegesFromEs;
 
 export type HealthFromEs = 'GREEN' | 'YELLOW' | 'RED';
 
-export interface DataStreamFromEs {
-  name: string;
-  timestamp_field: TimestampFieldFromEs;
-  indices: DataStreamIndexFromEs[];
-  generation: number;
-  _meta?: MetaFromEs;
-  status: HealthFromEs;
-  template: string;
-  ilm_policy?: string;
-  store_size?: string;
-  store_size_bytes?: number;
-  maximum_timestamp?: number;
-  privileges: PrivilegesFromEs;
-  hidden: boolean;
+export interface EnhancedDataStreamFromEs extends IndicesDataStream {
+  store_size?: IndicesDataStreamsStatsDataStreamsStatsItem['store_size'];
+  store_size_bytes?: IndicesDataStreamsStatsDataStreamsStatsItem['store_size_bytes'];
+  maximum_timestamp?: IndicesDataStreamsStatsDataStreamsStatsItem['maximum_timestamp'];
+  privileges: {
+    delete_index: boolean;
+  };
 }
 
 export interface DataStreamIndexFromEs {
@@ -58,12 +51,13 @@ export interface DataStream {
   health: Health;
   indexTemplateName: string;
   ilmPolicyName?: string;
-  storageSize?: string;
+  storageSize?: ByteSize;
   storageSizeBytes?: number;
   maxTimeStamp?: number;
-  _meta?: Meta;
+  _meta?: Metadata;
   privileges: Privileges;
   hidden: boolean;
+  lifecycle?: IndicesDataLifecycleWithRollover;
 }
 
 export interface DataStreamIndex {

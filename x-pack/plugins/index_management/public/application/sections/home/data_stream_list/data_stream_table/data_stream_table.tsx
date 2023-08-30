@@ -71,7 +71,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     render: (health: DataStream['health']) => {
       return <DataHealth health={health} />;
     },
-    width: '100px',
   });
 
   if (includeStats) {
@@ -80,7 +79,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnTitle', {
         defaultMessage: 'Last updated',
       }),
-      width: '300px',
       truncateText: true,
       sortable: true,
       render: (maxTimeStamp: DataStream['maxTimeStamp']) =>
@@ -118,6 +116,16 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         {indices.length}
       </EuiLink>
     ),
+  });
+
+  columns.push({
+    field: 'lifecycle',
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
+      defaultMessage: 'Data retention',
+    }),
+    truncateText: true,
+    sortable: true,
+    render: (lifecycle: DataStream['lifecycle']) => lifecycle?.data_retention,
   });
 
   columns.push({
