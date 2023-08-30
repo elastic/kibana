@@ -7499,7 +7499,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"not-started\" | \"result\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -11686,7 +11686,7 @@
             "label": "padding",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | undefined"
+              "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false,
@@ -18892,7 +18892,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"not-started\" | \"result\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -31189,7 +31189,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"not-started\" | \"result\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
