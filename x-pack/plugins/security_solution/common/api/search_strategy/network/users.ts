@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { NetworkQueries } from '../model/factory_query_type';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
 import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
@@ -21,6 +22,7 @@ export const networkUsersSchema = requestOptionsPaginatedSchema.extend({
   flowTarget,
   sort,
   timerange,
+  factoryQueryType: z.literal(NetworkQueries.users),
 });
 
 export type NetworkUsersRequestOptionsInput = z.input<typeof networkUsersSchema>;

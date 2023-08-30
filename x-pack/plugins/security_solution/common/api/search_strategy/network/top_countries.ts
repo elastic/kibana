@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { NetworkQueries } from '../model/factory_query_type';
 import { filterQuery } from '../model/filter_query';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
 import { sort } from '../model/sort';
@@ -18,6 +19,7 @@ export const networkTopCountriesSchema = requestOptionsPaginatedSchema.extend({
   sort,
   filterQuery,
   timerange,
+  factoryQueryType: z.literal(NetworkQueries.topCountries),
 });
 
 export type NetworkTopCountriesRequestOptionsInput = z.input<typeof networkTopCountriesSchema>;

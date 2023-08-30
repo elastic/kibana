@@ -6,11 +6,12 @@
  */
 
 import { z } from 'zod';
+import { HostsQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
 
 export const hostOverviewSchema = requestBasicOptionsSchema.extend({
-  factoryQueryType: z.string(),
+  factoryQueryType: z.literal(HostsQueries.overview),
   timerange,
 });
 

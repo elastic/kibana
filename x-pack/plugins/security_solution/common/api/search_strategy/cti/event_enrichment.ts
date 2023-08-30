@@ -6,12 +6,14 @@
  */
 
 import { z } from 'zod';
+import { CtiQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
 
 export const eventEnrichmentRequestOptionsSchema = requestBasicOptionsSchema.extend({
   eventFields: z.record(z.unknown()),
   timerange,
+  factoryQueryType: z.literal(CtiQueries.eventEnrichment),
 });
 
 export type EventEnrichmentRequestOptionsInput = z.input<

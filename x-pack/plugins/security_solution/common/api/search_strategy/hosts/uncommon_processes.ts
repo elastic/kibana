@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { z } from 'zod';
+import { z } from 'zod';
+import { HostsQueries } from '../model/factory_query_type';
 import { pagination } from '../model/pagination';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { sort } from '../model/sort';
@@ -15,6 +16,7 @@ export const hostUncommonProcessesSchema = requestBasicOptionsSchema.extend({
   sort,
   pagination,
   timerange,
+  factoryQueryType: z.literal(HostsQueries.uncommonProcesses),
 });
 
 export type HostUncommonProcessesRequestOptionsInput = z.input<typeof hostUncommonProcessesSchema>;

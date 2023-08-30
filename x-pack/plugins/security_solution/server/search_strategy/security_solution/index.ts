@@ -11,38 +11,26 @@ import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type { FactoryQueryTypes } from '../../../common/search_strategy/security_solution';
+import type { z } from 'zod';
+import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
 import { securitySolutionFactory } from './factory';
 import type { EndpointAppContext } from '../../endpoint/types';
-
-function isObj(req: unknown): req is Record<string, unknown> {
-  return typeof req === 'object' && req !== null;
-}
-function assertValidRequestType(
-  req: unknown
-): asserts req is { factoryQueryType: FactoryQueryTypes } {
-  if (!isObj(req) || req.factoryQueryType == null) {
-    throw new Error('factoryQueryType is required');
-  }
-}
 
 export const securitySolutionSearchStrategyProvider = (
   data: PluginStart,
   endpointContext: EndpointAppContext,
   getSpaceId?: (request: KibanaRequest) => string,
   ruleDataClient?: IRuleDataClient | null
-  // TODO: add type for this
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): ISearchStrategy<any, any> => {
+): ISearchStrategy<z.input<typeof searchStrategyRequestSchema>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
   return {
     search: (request, options, deps) => {
-      assertValidRequestType(request);
+      const parsedRequest = searchStrategyRequestSchema.parse(request);
 
-      const queryFactory = securitySolutionFactory[request.factoryQueryType];
+      const queryFactory = securitySolutionFactory[parsedRequest.factoryQueryType];
 
-      const dsl = queryFactory.buildDsl(request);
+      const dsl = queryFactory.buildDsl(parsedRequest);
       return es.search({ ...request, params: dsl }, options, deps).pipe(
         map((response) => {
           return {

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { z } from 'zod';
+import { z } from 'zod';
+import { CtiQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
-export const threatIntelSourceRequestOptionsSchema = requestBasicOptionsSchema;
+export const threatIntelSourceRequestOptionsSchema = requestBasicOptionsSchema.extend({
+  factoryQueryType: z.literal(CtiQueries.dataSource),
+});
 
 export type ThreatIntelSourceRequestOptionsInput = z.input<
   typeof threatIntelSourceRequestOptionsSchema

@@ -6,7 +6,6 @@
  */
 
 import { z } from 'zod';
-import { factoryQueryType } from './factory_query_type';
 import { filterQuery } from './filter_query';
 import { timerange } from './timerange';
 
@@ -15,7 +14,6 @@ export const requestBasicOptionsSchema = z
     timerange: timerange.optional(),
     filterQuery,
     defaultIndex: z.array(z.string()).optional(),
-    factoryQueryType,
     id: z.string().optional(),
     params: z.any().optional(),
   })

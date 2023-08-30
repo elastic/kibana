@@ -10,12 +10,14 @@ import { z } from 'zod';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { inspect } from '../model/inspect';
 import { timerange } from '../model/timerange';
+import { UsersQueries } from '../model/factory_query_type';
 
-export const observedUserDetailsSchema = requestBasicOptionsSchema.partial().extend({
+export const observedUserDetailsSchema = requestBasicOptionsSchema.extend({
   userName: z.string(),
   skip: z.boolean().optional(),
   timerange,
   inspect,
+  factoryQueryType: z.literal(UsersQueries.observedDetails),
 });
 
 export type ObservedUserDetailsRequestOptionsInput = z.input<typeof observedUserDetailsSchema>;

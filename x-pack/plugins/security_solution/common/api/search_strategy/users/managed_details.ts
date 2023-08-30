@@ -6,11 +6,13 @@
  */
 
 import { z } from 'zod';
+import { UsersQueries } from '../model/factory_query_type';
 
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
 export const managedUserDetailsSchema = requestBasicOptionsSchema.extend({
   userName: z.string(),
+  factoryQueryType: z.literal(UsersQueries.managedDetails),
 });
 
 export type ManagedUserDetailsRequestOptionsInput = z.input<typeof managedUserDetailsSchema>;

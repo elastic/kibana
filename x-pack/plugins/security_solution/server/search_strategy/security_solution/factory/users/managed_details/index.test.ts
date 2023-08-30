@@ -10,10 +10,12 @@ import { managedUserDetails } from '.';
 import type { AzureManagedUser } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import type { IEsSearchResponse } from '@kbn/data-plugin/public';
 import type { ManagedUserDetailsRequestOptionsInput } from '../../../../../../common/api/search_strategy';
+import { UsersQueries } from '../../../../../../common/api/search_strategy';
 
 export const mockOptions: ManagedUserDetailsRequestOptionsInput = {
   defaultIndex: ['logs-*'],
   userName: 'test-user-name',
+  factoryQueryType: UsersQueries.managedDetails,
 };
 
 export const mockSearchStrategyResponse: IEsSearchResponse<AzureManagedUser> = {

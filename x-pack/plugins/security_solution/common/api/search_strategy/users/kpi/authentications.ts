@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { z } from 'zod';
+import { z } from 'zod';
+import { UsersQueries } from '../../model/factory_query_type';
 
 import { requestBasicOptionsSchema } from '../../model/request_basic_options';
 import { timerange } from '../../model/timerange';
 
 export const authenticationsKpiSchema = requestBasicOptionsSchema.extend({
   timerange,
+  factoryQueryType: z.literal(UsersQueries.kpiAuthentications),
 });
 
 export type AuthenticationsKpiRequestOptionsInput = z.input<typeof authenticationsKpiSchema>;

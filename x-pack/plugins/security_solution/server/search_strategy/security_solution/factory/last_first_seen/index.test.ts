@@ -84,6 +84,9 @@ describe('firstLastSeen search strategy', () => {
           expect(error.flatten()).toMatchInlineSnapshot(`
             Object {
               "fieldErrors": Object {
+                "factoryQueryType": Array [
+                  "Invalid literal value, expected \\"firstlastseen\\"",
+                ],
                 "field": Array [
                   "Required",
                 ],

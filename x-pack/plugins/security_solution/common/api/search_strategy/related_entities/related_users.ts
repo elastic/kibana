@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { RelatedEntitiesQueries } from '../model/factory_query_type';
 import { inspect } from '../model/inspect';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
@@ -15,6 +16,7 @@ export const relatedUsersRequestOptionsSchema = requestBasicOptionsSchema.extend
   from: z.string(),
   inspect,
   isNewRiskScoreModuleAvailable: z.boolean().default(false),
+  factoryQueryType: z.literal(RelatedEntitiesQueries.relatedUsers),
 });
 
 export type RelatedUsersRequestOptionsInput = z.input<typeof relatedUsersRequestOptionsSchema>;

@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { MatrixHistogramQuery } from '../model/factory_query_type';
 import { inspect } from '../model/inspect';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
@@ -47,6 +48,7 @@ export const matrixHistogramSchema = requestBasicOptionsSchema.extend({
   // TODO: add stricter type here
   runtimeMappings: z.record(z.any()).optional(),
   timerange,
+  factoryQueryType: z.literal(MatrixHistogramQuery),
 });
 
 export type MatrixHistogramRequestOptionsInput = z.input<typeof matrixHistogramSchema>;

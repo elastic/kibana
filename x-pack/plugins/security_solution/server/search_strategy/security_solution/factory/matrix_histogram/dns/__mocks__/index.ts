@@ -6,6 +6,7 @@
  */
 
 import type { MatrixHistogramRequestOptions } from '../../../../../../../common/api/search_strategy';
+import { MatrixHistogramQuery } from '../../../../../../../common/api/search_strategy';
 import { MatrixHistogramType } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: MatrixHistogramRequestOptions = {
@@ -25,6 +26,7 @@ export const mockOptions: MatrixHistogramRequestOptions = {
   timerange: { interval: '12h', from: '2020-09-08T15:41:15.528Z', to: '2020-09-09T15:41:15.529Z' },
   stackByField: 'dns.question.registered_domain',
   includeMissingData: false,
+  factoryQueryType: MatrixHistogramQuery,
 };
 
 export const expectedDsl = {

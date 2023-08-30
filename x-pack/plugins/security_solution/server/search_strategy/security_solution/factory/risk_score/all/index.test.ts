@@ -18,6 +18,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 import type { RiskScoreRequestOptionsInput } from '../../../../../../common/api/search_strategy';
+import { RiskQueries } from '../../../../../../common/api/search_strategy';
 
 export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
   rawResponse: {
@@ -77,6 +78,7 @@ export const mockOptions: RiskScoreRequestOptionsInput = {
   defaultIndex: ['logs-*'],
   riskScoreEntity: RiskScoreEntity.host,
   includeAlertsCount: true,
+  factoryQueryType: RiskQueries.hostsRiskScore,
 };
 
 describe('buildRiskScoreQuery search strategy', () => {

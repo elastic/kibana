@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { RiskQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
@@ -22,7 +23,7 @@ export enum RiskScoreFields {
   alertsCount = 'alertsCount',
 }
 
-export const riskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
+const baseRiskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
   alertsTimerange: timerange.optional(),
   riskScoreEntity,
   includeAlertsCount: z.boolean().optional(),
@@ -49,6 +50,19 @@ export const riskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
     })
     .optional(),
 });
+
+export const hostsRiskScoreRequestOptionsSchema = baseRiskScoreRequestOptionsSchema.extend({
+  factoryQueryType: z.literal(RiskQueries.hostsRiskScore),
+});
+
+export const usersRiskScoreRequestOptionsSchema = baseRiskScoreRequestOptionsSchema.extend({
+  factoryQueryType: z.literal(RiskQueries.usersRiskScore),
+});
+
+export const riskScoreRequestOptionsSchema = z.union([
+  hostsRiskScoreRequestOptionsSchema,
+  usersRiskScoreRequestOptionsSchema,
+]);
 
 export type RiskScoreRequestOptionsInput = z.input<typeof riskScoreRequestOptionsSchema>;
 

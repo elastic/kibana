@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { z } from 'zod';
+import { z } from 'zod';
+import { NetworkQueries } from '../model/factory_query_type';
 
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
 
 export const networkOverviewSchema = requestBasicOptionsSchema.extend({
   timerange,
+  factoryQueryType: z.literal(NetworkQueries.overview),
 });
 
 export type NetworkOverviewRequestOptionsInput = z.input<typeof networkOverviewSchema>;

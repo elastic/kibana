@@ -6,10 +6,12 @@
  */
 
 import { z } from 'zod';
+import { NetworkQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
 export const networkDetailsSchema = requestBasicOptionsSchema.extend({
   ip: z.string().ip(),
+  factoryQueryType: z.literal(NetworkQueries.details),
 });
 
 export type NetworkDetailsRequestOptionsInput = z.input<typeof networkDetailsSchema>;

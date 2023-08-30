@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { NetworkQueries } from '../model/factory_query_type';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
 import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
@@ -23,6 +24,7 @@ export const networkDnsSchema = requestOptionsPaginatedSchema.extend({
   stackByField: z.string().nullable().optional(),
   sort,
   timerange,
+  factoryQueryType: z.literal(NetworkQueries.dns),
 });
 
 export type NetworkDnsRequestOptionsInput = z.input<typeof networkDnsSchema>;

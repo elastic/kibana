@@ -6,19 +6,20 @@
  */
 
 import { z } from 'zod';
+import { HostsQueries } from '../model/factory_query_type';
 import { pagination } from '../model/pagination';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
 import { sort } from './model/sort';
 
-export const allHostsSchema = z
-  .object({
+export const allHostsSchema = requestBasicOptionsSchema
+  .extend({
     sort,
     pagination,
+    timerange,
     isNewRiskScoreModuleAvailable: z.boolean().default(false),
+    factoryQueryType: z.literal(HostsQueries.hosts),
   })
-  .extend(requestBasicOptionsSchema.partial().shape)
-  .extend(z.object({ timerange }).shape)
   .passthrough();
 
 export type HostsRequestOptionsInput = z.input<typeof allHostsSchema>;

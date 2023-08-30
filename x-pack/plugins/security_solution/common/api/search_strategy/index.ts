@@ -5,6 +5,59 @@
  * 2.0.
  */
 
+import { z } from 'zod';
+
+import {
+  threatIntelSourceRequestOptionsSchema,
+  eventEnrichmentRequestOptionsSchema,
+} from './cti/cti';
+
+import { firstLastSeenRequestOptionsSchema } from './first_seen_last_seen/first_seen_last_seen';
+import {
+  allHostsSchema,
+  hostDetailsSchema,
+  hostOverviewSchema,
+  hostUncommonProcessesSchema,
+  kpiHostsSchema,
+  kpiUniqueIpsSchema,
+} from './hosts/hosts';
+import { matrixHistogramSchema } from './matrix_histogram/matrix_histogram';
+import { networkDetailsSchema } from './network/details';
+import { networkDnsSchema } from './network/dns';
+import { networkHttpSchema } from './network/http';
+import {
+  networkKpiDns,
+  networkKpiEvents,
+  networkKpiTlsHandshakes,
+  networkKpiUniqueFlows,
+  networkKpiUniquePrivateIps,
+} from './network/kpi';
+import { networkOverviewSchema } from './network/overview';
+import { networkTlsSchema } from './network/tls';
+import { networkTopCountriesSchema } from './network/top_countries';
+import { networkTopNFlowSchema } from './network/top_n_flow';
+import { networkUsersSchema } from './network/users';
+
+import {
+  relatedHostsRequestOptionsSchema,
+  relatedUsersRequestOptionsSchema,
+} from './related_entities/related_entities';
+
+import {
+  hostsRiskScoreRequestOptionsSchema,
+  riskScoreKpiRequestOptionsSchema,
+  usersRiskScoreRequestOptionsSchema,
+} from './risk_score/risk_score';
+
+import {
+  authenticationsKpiSchema,
+  managedUserDetailsSchema,
+  observedUserDetailsSchema,
+  totalUsersKpiSchema,
+  userAuthenticationsSchema,
+  usersSchema,
+} from './users/users';
+
 export * from './first_seen_last_seen/first_seen_last_seen';
 
 export * from './hosts/hosts';
@@ -24,3 +77,40 @@ export * from './cti/cti';
 export * from './model/pagination';
 
 export * from './model/factory_query_type';
+
+export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryType', [
+  firstLastSeenRequestOptionsSchema,
+  allHostsSchema,
+  hostDetailsSchema,
+  kpiHostsSchema,
+  kpiUniqueIpsSchema,
+  hostOverviewSchema,
+  hostUncommonProcessesSchema,
+  usersSchema,
+  observedUserDetailsSchema,
+  managedUserDetailsSchema,
+  totalUsersKpiSchema,
+  authenticationsKpiSchema,
+  userAuthenticationsSchema,
+  hostsRiskScoreRequestOptionsSchema,
+  usersRiskScoreRequestOptionsSchema,
+  riskScoreKpiRequestOptionsSchema,
+  relatedHostsRequestOptionsSchema,
+  relatedUsersRequestOptionsSchema,
+  networkDetailsSchema,
+  networkDnsSchema,
+  networkHttpSchema,
+  networkOverviewSchema,
+  networkTlsSchema,
+  networkTopCountriesSchema,
+  networkTopNFlowSchema,
+  networkUsersSchema,
+  networkKpiDns,
+  networkKpiEvents,
+  networkKpiTlsHandshakes,
+  networkKpiUniqueFlows,
+  networkKpiUniquePrivateIps,
+  matrixHistogramSchema,
+  threatIntelSourceRequestOptionsSchema,
+  eventEnrichmentRequestOptionsSchema,
+]);

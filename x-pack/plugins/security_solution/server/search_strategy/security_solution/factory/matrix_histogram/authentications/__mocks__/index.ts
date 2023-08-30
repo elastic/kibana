@@ -6,6 +6,7 @@
  */
 
 import type { MatrixHistogramRequestOptions } from '../../../../../../../common/api/search_strategy';
+import { MatrixHistogramQuery } from '../../../../../../../common/api/search_strategy';
 import { MatrixHistogramType } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: MatrixHistogramRequestOptions = {
@@ -25,6 +26,7 @@ export const mockOptions: MatrixHistogramRequestOptions = {
   stackByField: 'event.outcome',
   includeMissingData: false,
   isPtrIncluded: false,
+  factoryQueryType: MatrixHistogramQuery,
 };
 
 export const expectedDsl = {

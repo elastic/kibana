@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { NetworkQueries } from '../model/factory_query_type';
 
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
 import { sort } from '../model/sort';
@@ -16,6 +17,7 @@ export const networkHttpSchema = requestOptionsPaginatedSchema.extend({
   defaultIndex: z.array(z.string()).min(1).optional(),
   timerange,
   sort,
+  factoryQueryType: z.literal(NetworkQueries.http),
 });
 
 export type NetworkHttpRequestOptionsInput = z.input<typeof networkHttpSchema>;

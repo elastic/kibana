@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { z } from 'zod';
+import { z } from 'zod';
+import { HostsKpiQueries } from '../model/factory_query_type';
 import { pagination } from '../model/pagination';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
@@ -15,6 +16,7 @@ export const kpiUniqueIpsSchema = requestBasicOptionsSchema.extend({
   sort,
   pagination,
   timerange,
+  factoryQueryType: z.literal(HostsKpiQueries.kpiUniqueIps),
 });
 
 export type KpiUniqueIpsRequestOptionsInput = z.input<typeof kpiUniqueIpsSchema>;

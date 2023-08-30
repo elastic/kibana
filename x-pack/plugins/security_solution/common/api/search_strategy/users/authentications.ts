@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-// export interface UserAuthenticationsRequestOptions extends RequestOptionsPaginated {
-//     defaultIndex: string[];
-//     stackByField: AuthStackByField;
-//   }
-
 import { z } from 'zod';
+import { UsersQueries } from '../model/factory_query_type';
 
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
 import { timerange } from '../model/timerange';
@@ -23,6 +19,7 @@ export enum AuthStackByField {
 export const userAuthenticationsSchema = requestOptionsPaginatedSchema.extend({
   stackByField: z.enum([AuthStackByField.userName, AuthStackByField.hostName]),
   timerange,
+  factoryQueryType: z.literal(UsersQueries.authentications),
 });
 
 export type UserAuthenticationsRequestOptionsInput = z.input<typeof userAuthenticationsSchema>;

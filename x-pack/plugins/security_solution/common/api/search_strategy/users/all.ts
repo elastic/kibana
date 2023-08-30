@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { UsersQueries } from '../model/factory_query_type';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
 import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
@@ -23,6 +24,7 @@ export const usersSchema = requestOptionsPaginatedSchema
     }),
     timerange,
     isNewRiskScoreModuleAvailable: z.boolean().default(false),
+    factoryQueryType: z.literal(UsersQueries.users),
   })
   .passthrough();
 
