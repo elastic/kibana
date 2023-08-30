@@ -5089,6 +5089,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/profiling-data-access-plugin@link:x-pack/plugins/profiling_data_access":
+  version "0.0.0"
+  uid ""
+
 "@kbn/profiling-plugin@link:x-pack/plugins/profiling":
   version "0.0.0"
   uid ""
