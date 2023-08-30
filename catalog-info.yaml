@@ -128,7 +128,7 @@ spec:
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: kibana-release
+  name: kibana-serverless-release
   description: Definition of the kibana release pipeline
   links:
     - title: Pipeline
@@ -141,7 +141,7 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana-release
+      name: kibana-serverless-release
       description: Pipeline that releases kibana by triggering the release flow through qa, staging, and production
     spec:
       repository: elastic/kibana
@@ -151,9 +151,11 @@ spec:
         build_pull_request_forks: false
         build_tags: true
         # https://regex101.com/r/tY52jo/1
-        filter_condition: 'build.tag =~ "/^deploy@\d+$$/"'
+        filter_condition: 'build.tag =~ "/^deploy@\d+\$/"'
         filter_enabled: true
         trigger_mode: none
       teams:
         kibana-operations:
-          access_level: BUILD_AND_READ
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY
