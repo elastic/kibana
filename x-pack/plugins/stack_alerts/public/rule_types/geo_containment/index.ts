@@ -19,7 +19,7 @@ export function getRuleType(): RuleTypeModel<GeoContainmentAlertParams> {
     }),
     iconClass: 'globe',
     documentationUrl: null,
-    ruleParamsExpression: lazy(() => import('./expression')),
+    ruleParamsExpression: lazy(() => import('./rule_form')),
     validate: validateExpression,
     requiresAppContext: false,
   };

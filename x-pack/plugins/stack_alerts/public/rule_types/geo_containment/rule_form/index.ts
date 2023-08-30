@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GeoContainmentRuleTypeExpression } from './expression';
+import { RuleForm } from './rule_form';
 
 // eslint-disable-next-line import/no-default-export
-export default GeoContainmentRuleTypeExpression;
+export default RuleForm;

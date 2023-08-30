@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { BoundaryForm } from './boundary_form';
 import { EntityForm } from './entity_form';
 
-export const GeoContainmentRuleTypeExpression: React.FunctionComponent<
+export const RuleForm: React.FunctionComponent<
   RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
 > = (props) => {
   function getValidationError(key: string) {
