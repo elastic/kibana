@@ -488,7 +488,7 @@ x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-gis
 x-pack/plugins/maps @elastic/kibana-gis
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
-x-pack/plugins/metrics_data @elastic/infra-monitoring-ui
+x-pack/plugins/metrics_data_access @elastic/infra-monitoring-ui
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/category_validator @elastic/ml-ui
