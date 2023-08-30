@@ -59,10 +59,7 @@ jobs:
           channel-id: "C05NJL80DB8"
           payload: |
             {
-              "text": >
-                Initiate Serverless Deploy GitHub Workflow: ${{ job.status }}
-                Workflow: https://github.com/elastic/kibana/actions/workflows/create-deploy-tag.yml
-                ${{ job.status == 'success' && format('Tag: `{0}`\nCommit: `{1}`', env.TAG_NAME, env.COMMIT) || '' }}
+              "text": "Initiate Serverless Deploy GitHub Workflow: ${{ job.status }}\nWorkflow: https://github.com/elastic/kibana/actions/workflows/create-deploy-tag.yml${{ job.status == 'success' && format('\nTag: `{0}`\nCommit: `{1}`', env.TAG_NAME, env.COMMIT) || '' }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
