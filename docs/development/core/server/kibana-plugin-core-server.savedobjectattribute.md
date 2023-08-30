@@ -6,7 +6,7 @@
 
 Type definition for a Saved Object attribute value
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];

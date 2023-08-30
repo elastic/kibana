@@ -6,7 +6,7 @@
 
 APIs to retrieves metrics gathered and exposed by the core platform.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type MetricsServiceStart = MetricsServiceSetup;

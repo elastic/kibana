@@ -6,7 +6,7 @@
 
 Specify whether browsers that do not support CSP should be able to use Kibana. Use `true` to block and `false` to allow.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly strict: boolean;

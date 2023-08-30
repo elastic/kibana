@@ -6,7 +6,7 @@
 
 Route handler common definition
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type RouteRegistrar<Method extends RouteMethod, Context extends RequestHandlerContext = RequestHandlerContext> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Context, Method>) => void;

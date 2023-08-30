@@ -6,7 +6,7 @@
 
 Inputs for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ToastInput = string | ToastInputFields;

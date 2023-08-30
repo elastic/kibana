@@ -6,7 +6,7 @@
 
 logger instance to be used by the migration handler
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly log: SavedObjectsMigrationLogger;

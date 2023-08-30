@@ -6,7 +6,7 @@
 
 matched route details
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;

@@ -6,7 +6,7 @@
 
 Adds a new source of loading counts. Used to show the global loading indicator when sum of all observed counts are more than 0.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 addLoadingCountSource(countSource$: Observable<number>): void;
@@ -18,7 +18,7 @@ addLoadingCountSource(countSource$: Observable<number>): void;
 |  --- | --- | --- |
 |  countSource$ | Observable&lt;number&gt; | an Observable to subscribe to for loading count updates. |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

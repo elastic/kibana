@@ -6,7 +6,7 @@
 
 Specify whether users with legacy browsers should be warned about their lack of Kibana security compliance.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly warnLegacyBrowsers: boolean;

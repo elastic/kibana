@@ -6,7 +6,7 @@
 
 How long should the toast remain on screen.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 toastLifeTimeMs?: number;

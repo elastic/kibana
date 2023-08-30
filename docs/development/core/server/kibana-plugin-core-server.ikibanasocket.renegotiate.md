@@ -6,7 +6,7 @@
 
 Renegotiates a connection to obtain the peer's certificate. This cannot be used when the protocol version is TLSv1.3.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 renegotiate(options: {
@@ -21,7 +21,7 @@ renegotiate(options: {
 |  --- | --- | --- |
 |  options | { rejectUnauthorized?: boolean; requestCert?: boolean; } | The options may contain the following fields: rejectUnauthorized, requestCert (See tls.createServer() for details). |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;void&gt;
 

@@ -6,7 +6,7 @@
 
 The Elasticsearch Refresh setting for this operation
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 refresh?: MutatingOperationRefreshSetting;

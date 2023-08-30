@@ -5,7 +5,7 @@
 ## HttpServiceStart interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpServiceStart 
@@ -13,9 +13,9 @@ export interface HttpServiceStart
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [auth](./kibana-plugin-core-server.httpservicestart.auth.md) | HttpAuth | Auth status. See [HttpAuth](./kibana-plugin-core-server.httpauth.md) |
-|  [basePath](./kibana-plugin-core-server.httpservicestart.basepath.md) | IBasePath | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
-|  [getServerInfo](./kibana-plugin-core-server.httpservicestart.getserverinfo.md) | () =&gt; HttpServerInfo | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running http server. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [auth](./kibana-plugin-core-server.httpservicestart.auth.md) |  | HttpAuth | Auth status. See [HttpAuth](./kibana-plugin-core-server.httpauth.md) |
+|  [basePath](./kibana-plugin-core-server.httpservicestart.basepath.md) |  | IBasePath | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
+|  [getServerInfo](./kibana-plugin-core-server.httpservicestart.getserverinfo.md) |  | () =&gt; HttpServerInfo | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running http server. |
 

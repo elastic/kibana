@@ -4,7 +4,7 @@
 
 ## SavedObjectsFindResponse.pit\_id property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 pit_id?: string;

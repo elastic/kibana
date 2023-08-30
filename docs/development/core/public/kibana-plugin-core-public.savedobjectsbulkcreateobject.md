@@ -4,17 +4,17 @@
 
 ## SavedObjectsBulkCreateObject interface
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions 
 ```
-<b>Extends:</b> SavedObjectsCreateOptions
+**Extends:** SavedObjectsCreateOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [attributes](./kibana-plugin-core-public.savedobjectsbulkcreateobject.attributes.md) | T |  |
-|  [type](./kibana-plugin-core-public.savedobjectsbulkcreateobject.type.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [attributes](./kibana-plugin-core-public.savedobjectsbulkcreateobject.attributes.md) |  | T |  |
+|  [type](./kibana-plugin-core-public.savedobjectsbulkcreateobject.type.md) |  | string |  |
 

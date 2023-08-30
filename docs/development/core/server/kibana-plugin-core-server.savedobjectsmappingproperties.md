@@ -6,7 +6,7 @@
 
 Describe the fields of a [saved object type](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsMappingProperties 

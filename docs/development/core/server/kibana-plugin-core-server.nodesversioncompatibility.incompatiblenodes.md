@@ -4,7 +4,7 @@
 
 ## NodesVersionCompatibility.incompatibleNodes property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 incompatibleNodes: NodeInfo[];

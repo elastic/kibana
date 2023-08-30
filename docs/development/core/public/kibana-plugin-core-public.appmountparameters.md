@@ -5,7 +5,7 @@
 ## AppMountParameters interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface AppMountParameters<HistoryLocationState = unknown> 
@@ -13,11 +13,11 @@ export interface AppMountParameters<HistoryLocationState = unknown>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [appBasePath](./kibana-plugin-core-public.appmountparameters.appbasepath.md) | string | The route path for configuring navigation to the application. This string should not include the base path from HTTP. |
-|  [element](./kibana-plugin-core-public.appmountparameters.element.md) | HTMLElement | The container element to render the application into. |
-|  [history](./kibana-plugin-core-public.appmountparameters.history.md) | ScopedHistory&lt;HistoryLocationState&gt; | A scoped history instance for your application. Should be used to wire up your applications Router. |
-|  [onAppLeave](./kibana-plugin-core-public.appmountparameters.onappleave.md) | (handler: AppLeaveHandler) =&gt; void | A function that can be used to register a handler that will be called when the user is leaving the current application, allowing to prompt a confirmation message before actually changing the page.<!-- -->This will be called either when the user goes to another application, or when trying to close the tab or manually changing the url. |
-|  [setHeaderActionMenu](./kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md) | (menuMount: MountPoint \| undefined) =&gt; void | A function that can be used to set the mount point used to populate the application action container in the chrome header.<!-- -->Calling the handler multiple time will erase the current content of the action menu with the mount from the latest call. Calling the handler with <code>undefined</code> will unmount the current mount point. Calling the handler after the application has been unmounted will have no effect. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [appBasePath](./kibana-plugin-core-public.appmountparameters.appbasepath.md) |  | string | The route path for configuring navigation to the application. This string should not include the base path from HTTP. |
+|  [element](./kibana-plugin-core-public.appmountparameters.element.md) |  | HTMLElement | The container element to render the application into. |
+|  [history](./kibana-plugin-core-public.appmountparameters.history.md) |  | ScopedHistory&lt;HistoryLocationState&gt; | A scoped history instance for your application. Should be used to wire up your applications Router. |
+|  [onAppLeave](./kibana-plugin-core-public.appmountparameters.onappleave.md) |  | (handler: AppLeaveHandler) =&gt; void | <p>A function that can be used to register a handler that will be called when the user is leaving the current application, allowing to prompt a confirmation message before actually changing the page.</p><p>This will be called either when the user goes to another application, or when trying to close the tab or manually changing the url.</p> |
+|  [setHeaderActionMenu](./kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md) |  | (menuMount: MountPoint \| undefined) =&gt; void | <p>A function that can be used to set the mount point used to populate the application action container in the chrome header.</p><p>Calling the handler multiple time will erase the current content of the action menu with the mount from the latest call. Calling the handler with <code>undefined</code> will unmount the current mount point. Calling the handler after the application has been unmounted will have no effect.</p> |
 

@@ -4,7 +4,7 @@
 
 ## SavedObjectsRawDoc.\_source property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 _source: SavedObjectsRawDocSource;

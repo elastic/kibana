@@ -6,7 +6,7 @@
 
 Returns whether the type is namespace-agnostic (global); resolves to `false` if the type is not registered
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isNamespaceAgnostic(type: string): boolean;
@@ -18,7 +18,7 @@ isNamespaceAgnostic(type: string): boolean;
 |  --- | --- | --- |
 |  type | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

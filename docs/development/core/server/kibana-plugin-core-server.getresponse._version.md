@@ -4,7 +4,7 @@
 
 ## GetResponse.\_version property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 _version: number;

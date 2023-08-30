@@ -5,7 +5,7 @@
 ## AuthNotHandled interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface AuthNotHandled 
@@ -13,7 +13,7 @@ export interface AuthNotHandled
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [type](./kibana-plugin-core-server.authnothandled.type.md) | AuthResultType.notHandled |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [type](./kibana-plugin-core-server.authnothandled.type.md) |  | AuthResultType.notHandled |  |
 

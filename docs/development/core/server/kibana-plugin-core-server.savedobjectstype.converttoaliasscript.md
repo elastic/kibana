@@ -6,7 +6,7 @@
 
 If defined, will be used to convert the type to an alias.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 convertToAliasScript?: string;

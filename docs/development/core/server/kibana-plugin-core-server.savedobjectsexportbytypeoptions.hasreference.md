@@ -6,7 +6,7 @@
 
 optional array of references to search object for.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 hasReference?: SavedObjectsFindOptionsReference[];

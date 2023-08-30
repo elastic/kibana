@@ -6,7 +6,7 @@
 
 Creating a new instance from EventLoopDelaysMonitor will automatically start tracking event loop delays.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor();

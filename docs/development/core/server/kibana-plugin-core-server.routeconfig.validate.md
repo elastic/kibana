@@ -6,7 +6,7 @@
 
 A schema created with `@kbn/config-schema` that every request will be validated against.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 validate: RouteValidatorFullConfig<P, Q, B> | false;

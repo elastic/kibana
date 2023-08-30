@@ -10,7 +10,7 @@
 
 Specifies directory names that can be imported by other ui-plugins built using the same instance of the @<!-- -->kbn/optimizer. A temporary measure we plan to replace with better mechanisms for sharing static code between plugins
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly extraPublicDirs?: string[];

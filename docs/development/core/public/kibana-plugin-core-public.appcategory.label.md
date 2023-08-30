@@ -6,7 +6,7 @@
 
 Label used for category name. Also used as aria-label if one isn't set.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 label: string;

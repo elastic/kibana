@@ -6,7 +6,7 @@
 
 (optional) specify the fix for this deprecation requires a full kibana restart.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 requireRestart?: boolean;

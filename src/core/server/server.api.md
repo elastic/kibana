@@ -31,7 +31,7 @@ import { EnvironmentMode } from '@kbn/config';
 import type { estypes } from '@elastic/elasticsearch';
 import { IncomingHttpHeaders } from 'http';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { Logger } from '@kbn/logging';
+import { Logger as Logger_2 } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
@@ -943,7 +943,7 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
-// Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export class EventLoopDelaysMonitor {
@@ -1400,7 +1400,7 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 // @public
 export type LifecycleResponseFactory = typeof lifecycleResponseFactory;
 
-export { Logger }
+export { Logger_2 as Logger }
 
 // Warning: (ae-forgotten-export) The symbol "loggerSchema" needs to be exported by the entry point index.d.ts
 //
@@ -1445,7 +1445,7 @@ export type MetricsServiceStart = MetricsServiceSetup;
 // @public
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 
-// Warning: (ae-missing-release-tag) "NodesVersionCompatibility" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "NodesVersionCompatibility" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export interface NodesVersionCompatibility {
@@ -1869,7 +1869,7 @@ export interface RouteValidatorOptions {
 // @public
 export type SafeRouteMethod = 'get' | 'options';
 
-// Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "SavedObject" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
@@ -2262,7 +2262,7 @@ export class SavedObjectsExporter {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         exportSizeLimit: number;
-        logger: Logger;
+        logger: Logger_2;
     });
     exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
     exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
@@ -2664,7 +2664,7 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "IKibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: IKibanaMigrator, typeRegistry: ISavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, logger: Logger, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: IKibanaMigrator, typeRegistry: ISavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, logger: Logger_2, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     // (undocumented)
@@ -2828,7 +2828,7 @@ export class SavedObjectsUtils {
     static generateId(): string;
     static getConvertedObjectId(namespace: string | undefined, type: string, id: string): string;
     static isRandomId(id: string | undefined): boolean;
-    static namespaceIdToString: (namespace?: string | undefined) => string;
+    static namespaceIdToString: (namespace?: string) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
 
@@ -3058,6 +3058,7 @@ export const validBodyOutput: readonly ["data", "stream"];
 
 // Warnings were encountered during analysis:
 //
+// bazel-kibana/packages/kbn-config-schema/src/byte_size_value/index.ts:1:1 - (ae-wrong-input-file-type) Incorrect file type; API Extractor expects to analyze compiler outputs with the .d.ts file extension. Troubleshooting tips: https://api-extractor.com/link/dts-error
 // src/core/server/elasticsearch/client/types.ts:94:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:406:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts

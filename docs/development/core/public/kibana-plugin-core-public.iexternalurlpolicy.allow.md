@@ -6,7 +6,7 @@
 
 Indicates if this policy allows or denies access to the described destination.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 allow: boolean;

@@ -4,7 +4,7 @@
 
 ## GetResponse.\_index property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 _index: string;

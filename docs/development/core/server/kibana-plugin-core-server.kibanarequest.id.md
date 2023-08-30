@@ -6,7 +6,7 @@
 
 A identifier to identify this request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly id: string;

@@ -6,16 +6,16 @@
 
 Options for collecting references.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsCollectMultiNamespaceReferencesOptions extends SavedObjectsBaseOptions 
 ```
-<b>Extends:</b> SavedObjectsBaseOptions
+**Extends:** SavedObjectsBaseOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [purpose?](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesoptions.purpose.md) | 'collectMultiNamespaceReferences' \| 'updateObjectsSpaces' | <i>(Optional)</i> Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences' |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [purpose?](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesoptions.purpose.md) |  | 'collectMultiNamespaceReferences' \| 'updateObjectsSpaces' | _(Optional)_ Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences' |
 

@@ -6,7 +6,7 @@
 
 Register `path` as not requiring authentication. `path` should not include the current basePath.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 register(path: string): void;
@@ -18,7 +18,7 @@ register(path: string): void;
 |  --- | --- | --- |
 |  path | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

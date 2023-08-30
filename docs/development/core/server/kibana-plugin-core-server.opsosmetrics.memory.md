@@ -6,7 +6,7 @@
 
 system memory usage metrics
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 memory: {

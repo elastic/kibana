@@ -6,7 +6,7 @@
 
 The dynamic property of the mapping, either `false` or `'strict'`<!-- -->. If unspecified `dynamic: 'strict'` will be inherited from the top-level index mappings.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 dynamic?: false | 'strict';

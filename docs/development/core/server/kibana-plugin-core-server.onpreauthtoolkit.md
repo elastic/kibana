@@ -6,7 +6,7 @@
 
 A tool set defining an outcome of OnPreAuth interceptor for incoming request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OnPreAuthToolkit 
@@ -14,7 +14,7 @@ export interface OnPreAuthToolkit
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [next](./kibana-plugin-core-server.onpreauthtoolkit.next.md) | () =&gt; OnPreAuthResult | To pass request to the next handler |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [next](./kibana-plugin-core-server.onpreauthtoolkit.next.md) |  | () =&gt; OnPreAuthResult | To pass request to the next handler |
 

@@ -6,7 +6,7 @@
 
 The protocol used by the server
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 protocol: 'http' | 'https' | 'socket';

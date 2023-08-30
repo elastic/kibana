@@ -6,7 +6,7 @@
 
 See [OnPreRoutingToolkit](./kibana-plugin-core-server.onpreroutingtoolkit.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type OnPreResponseHandler = (request: KibanaRequest, preResponse: OnPreResponseInfo, toolkit: OnPreResponseToolkit) => OnPreResponseResult | Promise<OnPreResponseResult>;

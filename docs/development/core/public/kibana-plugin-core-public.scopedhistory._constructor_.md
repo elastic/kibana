@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `ScopedHistory` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(parentHistory: History<HistoryLocationState>, basePath: string);

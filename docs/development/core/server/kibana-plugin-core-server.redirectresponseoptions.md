@@ -6,7 +6,7 @@
 
 HTTP response parameters for redirection response
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type RedirectResponseOptions = HttpResponseOptions & {

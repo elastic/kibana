@@ -6,7 +6,7 @@
 
 flag to also include all related saved objects in the export stream.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 includeReferencesDeep?: boolean;

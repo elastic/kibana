@@ -5,7 +5,7 @@
 ## SearchResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SearchResponse<T = unknown> 
@@ -13,13 +13,13 @@ export interface SearchResponse<T = unknown>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [\_scroll\_id?](./kibana-plugin-core-server.searchresponse._scroll_id.md) | string | <i>(Optional)</i> |
-|  [\_shards](./kibana-plugin-core-server.searchresponse._shards.md) | ShardsResponse |  |
-|  [aggregations?](./kibana-plugin-core-server.searchresponse.aggregations.md) | any | <i>(Optional)</i> |
-|  [hits](./kibana-plugin-core-server.searchresponse.hits.md) | { total: number; max\_score: number; hits: Array&lt;{ \_index: string; \_type: string; \_id: string; \_score: number; \_source: T; \_version?: number; \_explanation?: Explanation; fields?: any; highlight?: any; inner\_hits?: any; matched\_queries?: string\[\]; sort?: unknown\[\]; }&gt;; } |  |
-|  [pit\_id?](./kibana-plugin-core-server.searchresponse.pit_id.md) | string | <i>(Optional)</i> |
-|  [timed\_out](./kibana-plugin-core-server.searchresponse.timed_out.md) | boolean |  |
-|  [took](./kibana-plugin-core-server.searchresponse.took.md) | number |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [\_scroll\_id?](./kibana-plugin-core-server.searchresponse._scroll_id.md) |  | string | _(Optional)_ |
+|  [\_shards](./kibana-plugin-core-server.searchresponse._shards.md) |  | ShardsResponse |  |
+|  [aggregations?](./kibana-plugin-core-server.searchresponse.aggregations.md) |  | any | _(Optional)_ |
+|  [hits](./kibana-plugin-core-server.searchresponse.hits.md) |  | { total: number; max\_score: number; hits: Array&lt;{ \_index: string; \_type: string; \_id: string; \_score: number; \_source: T; \_version?: number; \_explanation?: Explanation; fields?: any; highlight?: any; inner\_hits?: any; matched\_queries?: string\[\]; sort?: unknown\[\]; }&gt;; } |  |
+|  [pit\_id?](./kibana-plugin-core-server.searchresponse.pit_id.md) |  | string | _(Optional)_ |
+|  [timed\_out](./kibana-plugin-core-server.searchresponse.timed_out.md) |  | boolean |  |
+|  [took](./kibana-plugin-core-server.searchresponse.took.md) |  | number |  |
 

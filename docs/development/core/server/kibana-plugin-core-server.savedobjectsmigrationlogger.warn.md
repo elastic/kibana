@@ -4,7 +4,7 @@
 
 ## SavedObjectsMigrationLogger.warn property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 warn: (msg: string) => void;

@@ -6,7 +6,7 @@
 
 An array of fields to include in the results
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 fields?: string[];

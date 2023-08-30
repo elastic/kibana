@@ -6,7 +6,7 @@
 
 Set of HTTP methods not changing the state of the server.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SafeRouteMethod = 'get' | 'options';

@@ -5,7 +5,7 @@
 ## SavedObjectsBaseOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsBaseOptions 
@@ -13,7 +13,7 @@ export interface SavedObjectsBaseOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [namespace?](./kibana-plugin-core-public.savedobjectsbaseoptions.namespace.md) | string | <i>(Optional)</i> Specify the namespace for this operation |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [namespace?](./kibana-plugin-core-public.savedobjectsbaseoptions.namespace.md) |  | string | _(Optional)_ Specify the namespace for this operation |
 

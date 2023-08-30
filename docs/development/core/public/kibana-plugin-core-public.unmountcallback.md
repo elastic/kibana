@@ -6,7 +6,7 @@
 
 A function that will unmount the element previously mounted by the associated [MountPoint](./kibana-plugin-core-public.mountpoint.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type UnmountCallback = () => void;

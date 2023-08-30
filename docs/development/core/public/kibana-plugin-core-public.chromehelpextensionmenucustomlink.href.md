@@ -6,7 +6,7 @@
 
 URL of the link
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 href: string;

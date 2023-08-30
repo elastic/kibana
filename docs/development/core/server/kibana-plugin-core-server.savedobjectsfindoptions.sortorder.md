@@ -4,7 +4,7 @@
 
 ## SavedObjectsFindOptions.sortOrder property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 sortOrder?: estypes.SearchSortOrder;

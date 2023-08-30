@@ -6,7 +6,7 @@
 
 Replace a banner in place
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 replace(id: string | undefined, mount: MountPoint, priority?: number): string;
@@ -18,9 +18,9 @@ replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 |  --- | --- | --- |
 |  id | string \| undefined | the unique identifier for the banner returned by [OverlayBannersStart.add()](./kibana-plugin-core-public.overlaybannersstart.add.md) |
 |  mount | MountPoint | [MountPoint](./kibana-plugin-core-public.mountpoint.md) |
-|  priority | number | optional priority order to display this banner. Higher priority values are shown first. |
+|  priority | number | _(Optional)_ optional priority order to display this banner. Higher priority values are shown first. |
 
-<b>Returns:</b>
+**Returns:**
 
 string
 

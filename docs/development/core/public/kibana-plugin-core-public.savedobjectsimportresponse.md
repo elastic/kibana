@@ -6,7 +6,7 @@
 
 The response describing the result of an import.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportResponse 
@@ -14,11 +14,11 @@ export interface SavedObjectsImportResponse
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [errors?](./kibana-plugin-core-public.savedobjectsimportresponse.errors.md) | SavedObjectsImportFailure\[\] | <i>(Optional)</i> |
-|  [success](./kibana-plugin-core-public.savedobjectsimportresponse.success.md) | boolean |  |
-|  [successCount](./kibana-plugin-core-public.savedobjectsimportresponse.successcount.md) | number |  |
-|  [successResults?](./kibana-plugin-core-public.savedobjectsimportresponse.successresults.md) | SavedObjectsImportSuccess\[\] | <i>(Optional)</i> |
-|  [warnings](./kibana-plugin-core-public.savedobjectsimportresponse.warnings.md) | SavedObjectsImportWarning\[\] |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [errors?](./kibana-plugin-core-public.savedobjectsimportresponse.errors.md) |  | SavedObjectsImportFailure\[\] | _(Optional)_ |
+|  [success](./kibana-plugin-core-public.savedobjectsimportresponse.success.md) |  | boolean |  |
+|  [successCount](./kibana-plugin-core-public.savedobjectsimportresponse.successcount.md) |  | number |  |
+|  [successResults?](./kibana-plugin-core-public.savedobjectsimportresponse.successresults.md) |  | SavedObjectsImportSuccess\[\] | _(Optional)_ |
+|  [warnings](./kibana-plugin-core-public.savedobjectsimportresponse.warnings.md) |  | SavedObjectsImportWarning\[\] |  |
 

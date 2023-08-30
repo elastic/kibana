@@ -6,7 +6,7 @@
 
 Gets an observable of the current value for a config key, and all updates to that config key in the future. Providing a `defaultOverride` argument behaves the same as it does in \#get()
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;

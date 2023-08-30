@@ -6,7 +6,7 @@
 
 Persists an object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;

@@ -6,7 +6,7 @@
 
 An optional list of the other plugins that \*\*must be\*\* installed and enabled for this plugin to function properly.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly requiredPlugins: readonly PluginName[];

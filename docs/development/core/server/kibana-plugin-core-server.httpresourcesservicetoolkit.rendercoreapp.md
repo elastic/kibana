@@ -6,7 +6,7 @@
 
 To respond with HTML page bootstrapping Kibana application.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 renderCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;

@@ -6,7 +6,7 @@
 
 Access or manipulate the Kibana base path
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class BasePath 
@@ -22,8 +22,8 @@ The constructor for this class is marked as internal. Third-party code should no
 |  --- | --- | --- | --- |
 |  [get](./kibana-plugin-core-server.basepath.get.md) |  | (request: KibanaRequest) =&gt; string | returns <code>basePath</code> value, specific for an incoming request. |
 |  [prepend](./kibana-plugin-core-server.basepath.prepend.md) |  | (path: string) =&gt; string | Prepends <code>path</code> with the basePath. |
-|  [publicBaseUrl?](./kibana-plugin-core-server.basepath.publicbaseurl.md) |  | string | <i>(Optional)</i> The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the [BasePath.serverBasePath](./kibana-plugin-core-server.basepath.serverbasepath.md)<!-- -->. |
+|  [publicBaseUrl?](./kibana-plugin-core-server.basepath.publicbaseurl.md) | <code>readonly</code> | string | _(Optional)_ The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the [BasePath.serverBasePath](./kibana-plugin-core-server.basepath.serverbasepath.md)<!-- -->. |
 |  [remove](./kibana-plugin-core-server.basepath.remove.md) |  | (path: string) =&gt; string | Removes the prepended basePath from the <code>path</code>. |
-|  [serverBasePath](./kibana-plugin-core-server.basepath.serverbasepath.md) |  | string | returns the server's basePath<!-- -->See [BasePath.get](./kibana-plugin-core-server.basepath.get.md) for getting the basePath value for a specific request |
+|  [serverBasePath](./kibana-plugin-core-server.basepath.serverbasepath.md) | <code>readonly</code> | string | <p>returns the server's basePath</p><p>See [BasePath.get](./kibana-plugin-core-server.basepath.get.md) for getting the basePath value for a specific request</p> |
 |  [set](./kibana-plugin-core-server.basepath.set.md) |  | (request: KibanaRequest, requestSpecificBasePath: string) =&gt; void | sets <code>basePath</code> value, specific for an incoming request. |
 

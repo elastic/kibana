@@ -8,7 +8,7 @@ index of the settings within its category (ascending order, smallest will be dis
 
  settings without order defined will be displayed last and ordered by name
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 order?: number;

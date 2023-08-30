@@ -6,12 +6,12 @@
 
 Get an observable of the current header banner presence state.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 hasHeaderBanner$(): Observable<boolean>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;boolean&gt;
 

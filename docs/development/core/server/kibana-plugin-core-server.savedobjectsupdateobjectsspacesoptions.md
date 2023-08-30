@@ -6,16 +6,16 @@
 
 Options for the update operation.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsUpdateObjectsSpacesOptions extends SavedObjectsBaseOptions 
 ```
-<b>Extends:</b> SavedObjectsBaseOptions
+**Extends:** SavedObjectsBaseOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [refresh?](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesoptions.refresh.md) | MutatingOperationRefreshSetting | <i>(Optional)</i> The Elasticsearch Refresh setting for this operation |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [refresh?](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesoptions.refresh.md) |  | MutatingOperationRefreshSetting | _(Optional)_ The Elasticsearch Refresh setting for this operation |
 

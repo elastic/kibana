@@ -8,7 +8,7 @@ Access or manipulate the Kibana base path
 
 [BasePath](./kibana-plugin-core-server.basepath.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type IBasePath = Pick<BasePath, keyof BasePath>;

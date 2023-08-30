@@ -6,7 +6,7 @@
 
 Returns an object representing the peer's certificate. The returned object has some properties corresponding to the field of the certificate. If detailed argument is true the full chain with issuer property will be returned, if false only the top certificate without issuer property. If the peer does not provide a certificate, it returns null.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
@@ -16,9 +16,9 @@ getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificat
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  detailed | boolean | If true; the full chain with issuer property will be returned. |
+|  detailed | boolean | _(Optional)_ If true; the full chain with issuer property will be returned. |
 
-<b>Returns:</b>
+**Returns:**
 
 PeerCertificate \| DetailedPeerCertificate \| null
 

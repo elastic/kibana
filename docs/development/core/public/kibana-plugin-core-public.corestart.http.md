@@ -6,7 +6,7 @@
 
 [HttpStart](./kibana-plugin-core-public.httpstart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 http: HttpStart;

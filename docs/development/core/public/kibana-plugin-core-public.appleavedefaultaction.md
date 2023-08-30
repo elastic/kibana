@@ -8,7 +8,7 @@ Action to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleaveha
 
 See 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface AppLeaveDefaultAction 
@@ -16,7 +16,7 @@ export interface AppLeaveDefaultAction
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [type](./kibana-plugin-core-public.appleavedefaultaction.type.md) | AppLeaveActionType.default |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [type](./kibana-plugin-core-public.appleavedefaultaction.type.md) |  | AppLeaveActionType.default |  |
 

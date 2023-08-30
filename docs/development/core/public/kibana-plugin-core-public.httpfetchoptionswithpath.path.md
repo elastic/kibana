@@ -4,7 +4,7 @@
 
 ## HttpFetchOptionsWithPath.path property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 path: string;

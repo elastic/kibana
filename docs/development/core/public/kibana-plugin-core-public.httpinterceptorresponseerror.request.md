@@ -4,7 +4,7 @@
 
 ## HttpInterceptorResponseError.request property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 request: Readonly<Request>;

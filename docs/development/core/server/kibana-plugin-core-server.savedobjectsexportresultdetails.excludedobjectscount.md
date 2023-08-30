@@ -6,7 +6,7 @@
 
 number of objects that were excluded from the export
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 excludedObjectsCount: number;

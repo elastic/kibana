@@ -6,7 +6,7 @@
 
 Parsed body received, may be undefined if there was an error.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly body?: TResponseBody;

@@ -5,7 +5,7 @@
 ## LoggerContextConfigInput interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface LoggerContextConfigInput 
@@ -13,8 +13,8 @@ export interface LoggerContextConfigInput
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [appenders?](./kibana-plugin-core-server.loggercontextconfiginput.appenders.md) | Record&lt;string, AppenderConfigType&gt; \| Map&lt;string, AppenderConfigType&gt; | <i>(Optional)</i> |
-|  [loggers?](./kibana-plugin-core-server.loggercontextconfiginput.loggers.md) | LoggerConfigType\[\] | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [appenders?](./kibana-plugin-core-server.loggercontextconfiginput.appenders.md) |  | Record&lt;string, AppenderConfigType&gt; \| Map&lt;string, AppenderConfigType&gt; | _(Optional)_ |
+|  [loggers?](./kibana-plugin-core-server.loggercontextconfiginput.loggers.md) |  | LoggerConfigType\[\] | _(Optional)_ |
 

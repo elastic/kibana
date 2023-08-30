@@ -8,12 +8,12 @@ Return all [types](./kibana-plugin-core-server.savedobjectstype.md) currently re
 
 To only get the visible types (which is the most common use case), use `getVisibleTypes` instead.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getAllTypes(): SavedObjectsType<any>[];
 ```
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectsType&lt;any&gt;\[\]
 

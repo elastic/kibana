@@ -6,7 +6,7 @@
 
 A reference to another saved object.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectReference 
@@ -14,9 +14,9 @@ export interface SavedObjectReference
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectreference.id.md) | string |  |
-|  [name](./kibana-plugin-core-server.savedobjectreference.name.md) | string |  |
-|  [type](./kibana-plugin-core-server.savedobjectreference.type.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./kibana-plugin-core-server.savedobjectreference.id.md) |  | string |  |
+|  [name](./kibana-plugin-core-server.savedobjectreference.name.md) |  | string |  |
+|  [type](./kibana-plugin-core-server.savedobjectreference.type.md) |  | string |  |
 

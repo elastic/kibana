@@ -6,7 +6,7 @@
 
 An object that may define global interceptor functions for different parts of the request and response lifecycle. See [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpInterceptor 
@@ -16,8 +16,8 @@ export interface HttpInterceptor
 
 |  Method | Description |
 |  --- | --- |
-|  [request(fetchOptions, controller)?](./kibana-plugin-core-public.httpinterceptor.request.md) | <i>(Optional)</i> Define an interceptor to be executed before a request is sent. |
-|  [requestError(httpErrorRequest, controller)?](./kibana-plugin-core-public.httpinterceptor.requesterror.md) | <i>(Optional)</i> Define an interceptor to be executed if a request interceptor throws an error or returns a rejected Promise. |
-|  [response(httpResponse, controller)?](./kibana-plugin-core-public.httpinterceptor.response.md) | <i>(Optional)</i> Define an interceptor to be executed after a response is received. |
-|  [responseError(httpErrorResponse, controller)?](./kibana-plugin-core-public.httpinterceptor.responseerror.md) | <i>(Optional)</i> Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise. |
+|  [request(fetchOptions, controller)?](./kibana-plugin-core-public.httpinterceptor.request.md) | _(Optional)_ Define an interceptor to be executed before a request is sent. |
+|  [requestError(httpErrorRequest, controller)?](./kibana-plugin-core-public.httpinterceptor.requesterror.md) | _(Optional)_ Define an interceptor to be executed if a request interceptor throws an error or returns a rejected Promise. |
+|  [response(httpResponse, controller)?](./kibana-plugin-core-public.httpinterceptor.response.md) | _(Optional)_ Define an interceptor to be executed after a response is received. |
+|  [responseError(httpErrorResponse, controller)?](./kibana-plugin-core-public.httpinterceptor.responseerror.md) | _(Optional)_ Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise. |
 

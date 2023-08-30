@@ -6,12 +6,12 @@
 
 Get an observable for a sorted list of navlinks.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;Array&lt;Readonly&lt;ChromeNavLink&gt;&gt;&gt;
 

@@ -6,7 +6,7 @@
 
 Specify the namespace for this operation
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 namespace?: string;

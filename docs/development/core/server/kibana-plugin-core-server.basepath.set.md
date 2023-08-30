@@ -6,7 +6,7 @@
 
 sets `basePath` value, specific for an incoming request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 set: (request: KibanaRequest, requestSpecificBasePath: string) => void;

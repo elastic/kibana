@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static decorateRequestEntityTooLargeError(error: Error, reason?: string): DecoratedError;
@@ -15,9 +15,9 @@ static decorateRequestEntityTooLargeError(error: Error, reason?: string): Decora
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  error | Error |  |
-|  reason | string |  |
+|  reason | string | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 DecoratedError
 

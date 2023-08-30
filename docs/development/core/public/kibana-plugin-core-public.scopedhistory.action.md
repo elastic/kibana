@@ -6,7 +6,7 @@
 
 The last action dispatched on the history stack.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get action(): Action;

@@ -6,7 +6,7 @@
 
 Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
@@ -18,7 +18,7 @@ resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedO
 |  --- | --- | --- |
 |  { readStream, createNewCopies, namespace, retries, } | SavedObjectsResolveImportErrorsOptions |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsImportResponse&gt;
 

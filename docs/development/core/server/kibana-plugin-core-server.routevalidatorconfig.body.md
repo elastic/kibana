@@ -6,7 +6,7 @@
 
 Validation logic for the body payload
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 body?: RouteValidationSpec<B>;

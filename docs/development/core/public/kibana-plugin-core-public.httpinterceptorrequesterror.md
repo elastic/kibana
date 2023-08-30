@@ -5,7 +5,7 @@
 ## HttpInterceptorRequestError interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpInterceptorRequestError 
@@ -13,8 +13,8 @@ export interface HttpInterceptorRequestError
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [error](./kibana-plugin-core-public.httpinterceptorrequesterror.error.md) | Error |  |
-|  [fetchOptions](./kibana-plugin-core-public.httpinterceptorrequesterror.fetchoptions.md) | Readonly&lt;HttpFetchOptionsWithPath&gt; |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [error](./kibana-plugin-core-public.httpinterceptorrequesterror.error.md) |  | Error |  |
+|  [fetchOptions](./kibana-plugin-core-public.httpinterceptorrequesterror.fetchoptions.md) |  | Readonly&lt;HttpFetchOptionsWithPath&gt; |  |
 

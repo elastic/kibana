@@ -6,7 +6,7 @@
 
 Provides APIs to plugins for customizing the plugin's logger.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface LoggingServiceSetup 

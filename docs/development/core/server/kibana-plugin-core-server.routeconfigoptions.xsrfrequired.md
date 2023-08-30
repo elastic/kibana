@@ -8,7 +8,7 @@ Defines xsrf protection requirements for a route: - true. Requires an incoming P
 
 Set to true by default
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 xsrfRequired?: Method extends 'get' ? never : boolean;

@@ -6,7 +6,7 @@
 
 FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface FatalErrorsSetup 
@@ -14,8 +14,8 @@ export interface FatalErrorsSetup
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [add](./kibana-plugin-core-public.fatalerrorssetup.add.md) | (error: string \| Error, source?: string) =&gt; never | Add a new fatal error. This will stop the Kibana Public Core and display a fatal error screen with details about the Kibana build and the error. |
-|  [get$](./kibana-plugin-core-public.fatalerrorssetup.get_.md) | () =&gt; Rx.Observable&lt;FatalErrorInfo&gt; | An Observable that will emit whenever a fatal error is added with <code>add()</code> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [add](./kibana-plugin-core-public.fatalerrorssetup.add.md) |  | (error: string \| Error, source?: string) =&gt; never | Add a new fatal error. This will stop the Kibana Public Core and display a fatal error screen with details about the Kibana build and the error. |
+|  [get$](./kibana-plugin-core-public.fatalerrorssetup.get_.md) |  | () =&gt; Rx.Observable&lt;FatalErrorInfo&gt; | An Observable that will emit whenever a fatal error is added with <code>add()</code> |
 

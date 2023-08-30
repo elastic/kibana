@@ -4,7 +4,7 @@
 
 ## SavedObjectsCreatePointInTimeFinderDependencies.client property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 client: Pick<SavedObjectsClientContract, 'find' | 'openPointInTimeForType' | 'closePointInTime'>;

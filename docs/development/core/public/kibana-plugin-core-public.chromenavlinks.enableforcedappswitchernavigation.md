@@ -6,12 +6,12 @@
 
 Enable forced navigation mode, which will trigger a page refresh when a nav link is clicked and only the hash is updated.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 enableForcedAppSwitcherNavigation(): void;
 ```
-<b>Returns:</b>
+**Returns:**
 
 void
 

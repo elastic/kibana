@@ -6,7 +6,7 @@
 
 [IToasts](./kibana-plugin-core-public.itoasts.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ToastsSetup = IToasts;

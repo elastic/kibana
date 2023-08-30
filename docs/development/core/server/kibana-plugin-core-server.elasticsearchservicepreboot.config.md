@@ -6,7 +6,7 @@
 
 A limited set of Elasticsearch configuration entries.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly config: Readonly<ElasticsearchConfigPreboot>;

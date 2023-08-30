@@ -6,7 +6,7 @@
 
 The current status of a service at a point in time.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ServiceStatus<Meta extends Record<string, any> | unknown = unknown> 
@@ -14,11 +14,11 @@ export interface ServiceStatus<Meta extends Record<string, any> | unknown = unkn
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [detail?](./kibana-plugin-core-server.servicestatus.detail.md) | string | <i>(Optional)</i> A more detailed description of the service status. |
-|  [documentationUrl?](./kibana-plugin-core-server.servicestatus.documentationurl.md) | string | <i>(Optional)</i> A URL to open in a new tab about how to resolve or troubleshoot the problem. |
-|  [level](./kibana-plugin-core-server.servicestatus.level.md) | ServiceStatusLevel | The current availability level of the service. |
-|  [meta?](./kibana-plugin-core-server.servicestatus.meta.md) | Meta | <i>(Optional)</i> Any JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained, machine-readable information about the service status. May include status information for underlying features. |
-|  [summary](./kibana-plugin-core-server.servicestatus.summary.md) | string | A high-level summary of the service status. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [detail?](./kibana-plugin-core-server.servicestatus.detail.md) |  | string | _(Optional)_ A more detailed description of the service status. |
+|  [documentationUrl?](./kibana-plugin-core-server.servicestatus.documentationurl.md) |  | string | _(Optional)_ A URL to open in a new tab about how to resolve or troubleshoot the problem. |
+|  [level](./kibana-plugin-core-server.servicestatus.level.md) |  | ServiceStatusLevel | The current availability level of the service. |
+|  [meta?](./kibana-plugin-core-server.servicestatus.meta.md) |  | Meta | _(Optional)_ Any JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained, machine-readable information about the service status. May include status information for underlying features. |
+|  [summary](./kibana-plugin-core-server.servicestatus.summary.md) |  | string | A high-level summary of the service status. |
 

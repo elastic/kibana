@@ -4,7 +4,7 @@
 
 ## GetResponse.\_seq\_no property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 _seq_no: number;

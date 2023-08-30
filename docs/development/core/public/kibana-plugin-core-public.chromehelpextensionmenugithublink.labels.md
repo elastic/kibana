@@ -6,7 +6,7 @@
 
 Include at least one app-specific label to be applied to the new github issue
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 labels: string[];

@@ -6,7 +6,7 @@
 
 An object that should have its spaces updated.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsUpdateObjectsSpacesObject 
@@ -14,8 +14,8 @@ export interface SavedObjectsUpdateObjectsSpacesObject
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesobject.id.md) | string | The type of the object to update |
-|  [type](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesobject.type.md) | string | The ID of the object to update |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesobject.id.md) |  | string | The type of the object to update |
+|  [type](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesobject.type.md) |  | string | The ID of the object to update |
 

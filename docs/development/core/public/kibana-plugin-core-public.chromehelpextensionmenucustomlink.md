@@ -5,18 +5,18 @@
 ## ChromeHelpExtensionMenuCustomLink interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLinkBase 
 ```
-<b>Extends:</b> ChromeHelpExtensionLinkBase
+**Extends:** ChromeHelpExtensionLinkBase
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [content](./kibana-plugin-core-public.chromehelpextensionmenucustomlink.content.md) | React.ReactNode | Content of the button (in lieu of <code>children</code>) |
-|  [href](./kibana-plugin-core-public.chromehelpextensionmenucustomlink.href.md) | string | URL of the link |
-|  [linkType](./kibana-plugin-core-public.chromehelpextensionmenucustomlink.linktype.md) | 'custom' | Extend EuiButtonEmpty to provide extra functionality |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [content](./kibana-plugin-core-public.chromehelpextensionmenucustomlink.content.md) |  | React.ReactNode | Content of the button (in lieu of <code>children</code>) |
+|  [href](./kibana-plugin-core-public.chromehelpextensionmenucustomlink.href.md) |  | string | URL of the link |
+|  [linkType](./kibana-plugin-core-public.chromehelpextensionmenucustomlink.linktype.md) |  | 'custom' | Extend EuiButtonEmpty to provide extra functionality |
 

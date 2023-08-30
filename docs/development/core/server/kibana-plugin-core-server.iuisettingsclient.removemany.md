@@ -6,7 +6,7 @@
 
 Removes multiple uiSettings values by keys.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 removeMany: (keys: string[]) => Promise<void>;

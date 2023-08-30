@@ -6,7 +6,7 @@
 
 CSP configuration for use in Kibana.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ICspConfig 
@@ -14,11 +14,11 @@ export interface ICspConfig
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [disableEmbedding](./kibana-plugin-core-server.icspconfig.disableembedding.md) | boolean | Whether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled \*and\* no custom rules have been defined, a restrictive 'frame-ancestors' rule will be added to the default CSP rules. |
-|  [header](./kibana-plugin-core-server.icspconfig.header.md) | string | The CSP rules in a formatted directives string for use in a <code>Content-Security-Policy</code> header. |
-|  [rules](./kibana-plugin-core-server.icspconfig.rules.md) | string\[\] | The CSP rules used for Kibana. |
-|  [strict](./kibana-plugin-core-server.icspconfig.strict.md) | boolean | Specify whether browsers that do not support CSP should be able to use Kibana. Use <code>true</code> to block and <code>false</code> to allow. |
-|  [warnLegacyBrowsers](./kibana-plugin-core-server.icspconfig.warnlegacybrowsers.md) | boolean | Specify whether users with legacy browsers should be warned about their lack of Kibana security compliance. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [disableEmbedding](./kibana-plugin-core-server.icspconfig.disableembedding.md) | <code>readonly</code> | boolean | Whether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled \*and\* no custom rules have been defined, a restrictive 'frame-ancestors' rule will be added to the default CSP rules. |
+|  [header](./kibana-plugin-core-server.icspconfig.header.md) | <code>readonly</code> | string | The CSP rules in a formatted directives string for use in a <code>Content-Security-Policy</code> header. |
+|  [rules](./kibana-plugin-core-server.icspconfig.rules.md) | <code>readonly</code> | string\[\] | The CSP rules used for Kibana. |
+|  [strict](./kibana-plugin-core-server.icspconfig.strict.md) | <code>readonly</code> | boolean | Specify whether browsers that do not support CSP should be able to use Kibana. Use <code>true</code> to block and <code>false</code> to allow. |
+|  [warnLegacyBrowsers](./kibana-plugin-core-server.icspconfig.warnlegacybrowsers.md) | <code>readonly</code> | boolean | Specify whether users with legacy browsers should be warned about their lack of Kibana security compliance. |
 

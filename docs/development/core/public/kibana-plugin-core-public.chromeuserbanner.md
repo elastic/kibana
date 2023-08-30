@@ -5,7 +5,7 @@
 ## ChromeUserBanner interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ChromeUserBanner 
@@ -13,7 +13,7 @@ export interface ChromeUserBanner
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [content](./kibana-plugin-core-public.chromeuserbanner.content.md) | MountPoint&lt;HTMLDivElement&gt; |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [content](./kibana-plugin-core-public.chromeuserbanner.content.md) |  | MountPoint&lt;HTMLDivElement&gt; |  |
 

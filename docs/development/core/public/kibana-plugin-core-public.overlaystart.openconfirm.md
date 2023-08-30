@@ -5,7 +5,7 @@
 ## OverlayStart.openConfirm property
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 openConfirm: OverlayModalStart['openConfirm'];

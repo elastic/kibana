@@ -6,7 +6,7 @@
 
 Function returning the title to display in the management table. If not defined, will use the object's type and id to generate a label.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getTitle?: (savedObject: SavedObject<Attributes>) => string;

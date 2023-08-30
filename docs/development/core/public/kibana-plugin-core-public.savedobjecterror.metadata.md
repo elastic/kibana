@@ -4,7 +4,7 @@
 
 ## SavedObjectError.metadata property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 metadata?: Record<string, unknown>;

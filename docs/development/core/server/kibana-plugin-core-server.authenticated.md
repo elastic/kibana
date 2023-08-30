@@ -5,16 +5,16 @@
 ## Authenticated interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface Authenticated extends AuthResultParams 
 ```
-<b>Extends:</b> AuthResultParams
+**Extends:** AuthResultParams
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [type](./kibana-plugin-core-server.authenticated.type.md) | AuthResultType.authenticated |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [type](./kibana-plugin-core-server.authenticated.type.md) |  | AuthResultType.authenticated |  |
 

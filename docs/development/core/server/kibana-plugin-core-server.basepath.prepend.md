@@ -6,7 +6,7 @@
 
 Prepends `path` with the basePath.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 prepend: (path: string) => string;

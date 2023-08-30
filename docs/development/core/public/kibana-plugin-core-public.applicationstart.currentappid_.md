@@ -6,7 +6,7 @@
 
 An observable that emits the current application id and each subsequent id update.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 currentAppId$: Observable<string | undefined>;

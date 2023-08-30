@@ -8,7 +8,7 @@ Composite type of all the possible types of import warnings.
 
 See [SavedObjectsImportSimpleWarning](./kibana-plugin-core-public.savedobjectsimportsimplewarning.md) and [SavedObjectsImportActionRequiredWarning](./kibana-plugin-core-public.savedobjectsimportactionrequiredwarning.md) for more details.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SavedObjectsImportWarning = SavedObjectsImportSimpleWarning | SavedObjectsImportActionRequiredWarning;

@@ -4,7 +4,7 @@
 
 ## SavedObjectsBulkCreateObject.references property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 references?: SavedObjectReference[];

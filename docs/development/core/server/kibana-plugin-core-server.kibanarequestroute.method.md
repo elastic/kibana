@@ -4,7 +4,7 @@
 
 ## KibanaRequestRoute.method property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 method: Method;

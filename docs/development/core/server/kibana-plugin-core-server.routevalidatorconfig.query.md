@@ -6,7 +6,7 @@
 
 Validation logic for the Query params
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 query?: RouteValidationSpec<Q>;

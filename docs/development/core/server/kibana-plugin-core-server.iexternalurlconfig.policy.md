@@ -6,7 +6,7 @@
 
 A set of policies describing which external urls are allowed.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly policy: IExternalUrlPolicy[];

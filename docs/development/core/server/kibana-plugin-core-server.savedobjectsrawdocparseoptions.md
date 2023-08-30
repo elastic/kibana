@@ -6,7 +6,7 @@
 
 Options that can be specified when using the saved objects serializer to parse a raw document.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsRawDocParseOptions 
@@ -14,7 +14,7 @@ export interface SavedObjectsRawDocParseOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [namespaceTreatment?](./kibana-plugin-core-server.savedobjectsrawdocparseoptions.namespacetreatment.md) | 'strict' \| 'lax' | <i>(Optional)</i> Optional setting to allow for lax handling of the raw document ID and namespace field. This is needed when a previously single-namespace object type is converted to a multi-namespace object type, and it is only intended to be used during upgrade migrations.<!-- -->If not specified, the default treatment is <code>strict</code>. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [namespaceTreatment?](./kibana-plugin-core-server.savedobjectsrawdocparseoptions.namespacetreatment.md) |  | 'strict' \| 'lax' | <p>_(Optional)_ Optional setting to allow for lax handling of the raw document ID and namespace field. This is needed when a previously single-namespace object type is converted to a multi-namespace object type, and it is only intended to be used during upgrade migrations.</p><p>If not specified, the default treatment is <code>strict</code>.</p> |
 

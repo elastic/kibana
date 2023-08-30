@@ -6,7 +6,7 @@
 
 Send the user one location back in the history stack. Equivalent to calling [ScopedHistory.go(-1)](./kibana-plugin-core-public.scopedhistory.go.md)<!-- -->. If no more entries are available backwards, this is a no-op.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 goBack: () => void;

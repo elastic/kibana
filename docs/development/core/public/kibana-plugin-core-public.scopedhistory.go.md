@@ -6,7 +6,7 @@
 
 Send the user forward or backwards in the history stack.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 go: (n: number) => void;

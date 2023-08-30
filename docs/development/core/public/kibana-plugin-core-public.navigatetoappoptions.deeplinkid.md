@@ -6,7 +6,7 @@
 
 optional [deep link](./kibana-plugin-core-public.app.deeplinks.md) id inside the application to navigate to. If an additional [path](./kibana-plugin-core-public.navigatetoappoptions.path.md) is defined it will be appended to the deep link path.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 deepLinkId?: string;

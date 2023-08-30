@@ -5,7 +5,7 @@
 ## GetDeprecationsContext interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface GetDeprecationsContext 
@@ -13,8 +13,8 @@ export interface GetDeprecationsContext
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [esClient](./kibana-plugin-core-server.getdeprecationscontext.esclient.md) | IScopedClusterClient |  |
-|  [savedObjectsClient](./kibana-plugin-core-server.getdeprecationscontext.savedobjectsclient.md) | SavedObjectsClientContract |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [esClient](./kibana-plugin-core-server.getdeprecationscontext.esclient.md) |  | IScopedClusterClient |  |
+|  [savedObjectsClient](./kibana-plugin-core-server.getdeprecationscontext.savedobjectsclient.md) |  | SavedObjectsClientContract |  |
 

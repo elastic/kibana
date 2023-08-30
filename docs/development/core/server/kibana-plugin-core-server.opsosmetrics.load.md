@@ -6,7 +6,7 @@
 
 cpu load metrics
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 load: {

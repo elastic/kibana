@@ -6,7 +6,7 @@
 
 Context passed to the `setup` method of `preboot` plugins.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface CorePreboot 
@@ -14,9 +14,9 @@ export interface CorePreboot
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [elasticsearch](./kibana-plugin-core-server.corepreboot.elasticsearch.md) | ElasticsearchServicePreboot | [ElasticsearchServicePreboot](./kibana-plugin-core-server.elasticsearchservicepreboot.md) |
-|  [http](./kibana-plugin-core-server.corepreboot.http.md) | HttpServicePreboot | [HttpServicePreboot](./kibana-plugin-core-server.httpservicepreboot.md) |
-|  [preboot](./kibana-plugin-core-server.corepreboot.preboot.md) | PrebootServicePreboot | [PrebootServicePreboot](./kibana-plugin-core-server.prebootservicepreboot.md) |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [elasticsearch](./kibana-plugin-core-server.corepreboot.elasticsearch.md) |  | ElasticsearchServicePreboot | [ElasticsearchServicePreboot](./kibana-plugin-core-server.elasticsearchservicepreboot.md) |
+|  [http](./kibana-plugin-core-server.corepreboot.http.md) |  | HttpServicePreboot | [HttpServicePreboot](./kibana-plugin-core-server.httpservicepreboot.md) |
+|  [preboot](./kibana-plugin-core-server.corepreboot.preboot.md) |  | PrebootServicePreboot | [PrebootServicePreboot](./kibana-plugin-core-server.prebootservicepreboot.md) |
 

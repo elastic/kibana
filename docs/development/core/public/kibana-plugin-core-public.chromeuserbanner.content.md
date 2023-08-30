@@ -4,7 +4,7 @@
 
 ## ChromeUserBanner.content property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 content: MountPoint<HTMLDivElement>;

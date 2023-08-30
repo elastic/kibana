@@ -6,7 +6,7 @@
 
 A URL to an image file used as an icon. Used as a fallback if `euiIconType` is not provided.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly icon?: string;

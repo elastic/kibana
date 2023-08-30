@@ -8,7 +8,7 @@ If Elasticsearch security features are enabled, this setting provides the servic
 
 This is an alternative to specifying a username and password.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly serviceAccountToken?: string;

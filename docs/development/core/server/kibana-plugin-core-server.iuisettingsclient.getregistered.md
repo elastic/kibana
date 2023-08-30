@@ -6,7 +6,7 @@
 
 Returns registered uiSettings values [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getRegistered: () => Readonly<Record<string, PublicUiSettingsParams>>;

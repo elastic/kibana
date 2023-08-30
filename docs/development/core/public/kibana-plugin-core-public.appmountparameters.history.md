@@ -6,7 +6,7 @@
 
 A scoped history instance for your application. Should be used to wire up your applications Router.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 history: ScopedHistory<HistoryLocationState>;

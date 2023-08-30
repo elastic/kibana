@@ -6,7 +6,7 @@
 
 An Observable that will emit whenever a fatal error is added with `add()`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get$: () => Rx.Observable<FatalErrorInfo>;

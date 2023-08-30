@@ -6,7 +6,7 @@
 
 Navigate to a given app
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
@@ -17,9 +17,9 @@ navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  appId | string |  |
-|  options | NavigateToAppOptions | navigation options |
+|  options | NavigateToAppOptions | _(Optional)_ navigation options |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;void&gt;
 

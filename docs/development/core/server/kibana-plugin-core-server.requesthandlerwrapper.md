@@ -6,7 +6,7 @@
 
 Type-safe wrapper for [RequestHandler](./kibana-plugin-core-server.requesthandler.md) function.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type RequestHandlerWrapper = <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Context, Method, ResponseFactory>) => RequestHandler<P, Q, B, Context, Method, ResponseFactory>;

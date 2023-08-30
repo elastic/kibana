@@ -6,7 +6,7 @@
 
 Represents a failure to import due to a conflict, which can be resolved in different ways with an overwrite.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportAmbiguousConflictError 
@@ -14,8 +14,8 @@ export interface SavedObjectsImportAmbiguousConflictError
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [destinations](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.destinations.md) | Array&lt;{ id: string; title?: string; updatedAt?: string; }&gt; |  |
-|  [type](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.type.md) | 'ambiguous\_conflict' |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [destinations](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.destinations.md) |  | Array&lt;{ id: string; title?: string; updatedAt?: string; }&gt; |  |
+|  [type](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.type.md) |  | 'ambiguous\_conflict' |  |
 

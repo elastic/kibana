@@ -4,7 +4,7 @@
 
 ## GetDeprecationsContext.savedObjectsClient property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 savedObjectsClient: SavedObjectsClientContract;

@@ -6,7 +6,7 @@
 
 Use the sort values from the previous page to retrieve the next page of results.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 searchAfter?: estypes.Id[];

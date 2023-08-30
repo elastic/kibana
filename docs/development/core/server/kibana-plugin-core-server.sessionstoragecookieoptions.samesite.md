@@ -6,7 +6,7 @@
 
 Defines SameSite attribute of the Set-Cookie Header. https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 sameSite?: 'Strict' | 'Lax' | 'None';

@@ -6,7 +6,7 @@
 
 Possible type of actions on application leave.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare enum AppLeaveActionType 

@@ -6,7 +6,7 @@
 
 HttpResources service is responsible for serving static &amp; dynamic assets for Kibana application via HTTP. Provides API allowing plug-ins to respond with: - a pre-configured HTML page bootstrapping Kibana client app - custom HTML page - custom JS script file.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpResources 
@@ -14,7 +14,7 @@ export interface HttpResources
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [register](./kibana-plugin-core-server.httpresources.register.md) | &lt;P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext&gt;(route: RouteConfig&lt;P, Q, B, 'get'&gt;, handler: HttpResourcesRequestHandler&lt;P, Q, B, Context&gt;) =&gt; void | To register a route handler executing passed function to form response. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [register](./kibana-plugin-core-server.httpresources.register.md) |  | &lt;P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext&gt;(route: RouteConfig&lt;P, Q, B, 'get'&gt;, handler: HttpResourcesRequestHandler&lt;P, Q, B, Context&gt;) =&gt; void | To register a route handler executing passed function to form response. |
 

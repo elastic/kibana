@@ -6,7 +6,7 @@
 
 Timeout after which HTTP request will be aborted and retried.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly requestTimeout: Duration;

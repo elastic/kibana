@@ -6,7 +6,7 @@
 
 [PrebootServicePreboot](./kibana-plugin-core-server.prebootservicepreboot.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 preboot: PrebootServicePreboot;

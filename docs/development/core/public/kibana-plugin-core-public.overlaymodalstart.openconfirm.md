@@ -6,7 +6,7 @@
 
 Opens a confirmation modal with the given text or mountpoint as a message. Returns a Promise resolving to `true` if user confirmed or `false` otherwise.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 openConfirm(message: MountPoint | string, options?: OverlayModalConfirmOptions): Promise<boolean>;
@@ -17,9 +17,9 @@ openConfirm(message: MountPoint | string, options?: OverlayModalConfirmOptions):
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  message | MountPoint \| string | [MountPoint](./kibana-plugin-core-public.mountpoint.md) - string or mountpoint to be used a the confirm message body |
-|  options | OverlayModalConfirmOptions | [OverlayModalConfirmOptions](./kibana-plugin-core-public.overlaymodalconfirmoptions.md) - options for the confirm modal |
+|  options | OverlayModalConfirmOptions | _(Optional)_ [OverlayModalConfirmOptions](./kibana-plugin-core-public.overlaymodalconfirmoptions.md) - options for the confirm modal |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;boolean&gt;
 

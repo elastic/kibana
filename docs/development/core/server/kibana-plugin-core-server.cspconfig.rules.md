@@ -4,7 +4,7 @@
 
 ## CspConfig.rules property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly rules: string[];

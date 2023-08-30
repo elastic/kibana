@@ -6,7 +6,7 @@
 
 The default search field to use for this type. Defaults to `id`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 defaultSearchField?: string;

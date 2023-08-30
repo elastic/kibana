@@ -6,12 +6,12 @@
 
 Disables updating the interval timer for collecting new data points.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 stop(): void;
 ```
-<b>Returns:</b>
+**Returns:**
 
 void
 

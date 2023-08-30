@@ -6,7 +6,7 @@
 
 If true, will override existing object if present. Note: this has no effect when used with the `createNewCopies` option.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 overwrite: boolean;

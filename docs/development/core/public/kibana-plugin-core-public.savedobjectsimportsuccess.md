@@ -6,7 +6,7 @@
 
 Represents a successful import.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportSuccess 
@@ -14,12 +14,12 @@ export interface SavedObjectsImportSuccess
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [createNewCopy?](./kibana-plugin-core-public.savedobjectsimportsuccess.createnewcopy.md) | boolean | <i>(Optional)</i> |
-|  [destinationId?](./kibana-plugin-core-public.savedobjectsimportsuccess.destinationid.md) | string | <i>(Optional)</i> If <code>destinationId</code> is specified, the new object has a new ID that is different from the import ID. |
-|  [id](./kibana-plugin-core-public.savedobjectsimportsuccess.id.md) | string |  |
-|  [meta](./kibana-plugin-core-public.savedobjectsimportsuccess.meta.md) | { title?: string; icon?: string; } |  |
-|  [overwrite?](./kibana-plugin-core-public.savedobjectsimportsuccess.overwrite.md) | boolean | <i>(Optional)</i> If <code>overwrite</code> is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution). |
-|  [type](./kibana-plugin-core-public.savedobjectsimportsuccess.type.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [createNewCopy?](./kibana-plugin-core-public.savedobjectsimportsuccess.createnewcopy.md) |  | boolean | _(Optional)_ |
+|  [destinationId?](./kibana-plugin-core-public.savedobjectsimportsuccess.destinationid.md) |  | string | _(Optional)_ If <code>destinationId</code> is specified, the new object has a new ID that is different from the import ID. |
+|  [id](./kibana-plugin-core-public.savedobjectsimportsuccess.id.md) |  | string |  |
+|  [meta](./kibana-plugin-core-public.savedobjectsimportsuccess.meta.md) |  | { title?: string; icon?: string; } |  |
+|  [overwrite?](./kibana-plugin-core-public.savedobjectsimportsuccess.overwrite.md) |  | boolean | _(Optional)_ If <code>overwrite</code> is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution). |
+|  [type](./kibana-plugin-core-public.savedobjectsimportsuccess.type.md) |  | string |  |
 

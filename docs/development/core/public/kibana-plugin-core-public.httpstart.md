@@ -6,7 +6,7 @@
 
 See [HttpSetup](./kibana-plugin-core-public.httpsetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type HttpStart = HttpSetup;

@@ -6,7 +6,7 @@
 
 The version in which this object type is being converted to a multi-namespace type
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly convertToMultiNamespaceTypeVersion?: string;

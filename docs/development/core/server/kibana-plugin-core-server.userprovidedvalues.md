@@ -6,7 +6,7 @@
 
 Describes the values explicitly set by user.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface UserProvidedValues<T = any> 
@@ -14,8 +14,8 @@ export interface UserProvidedValues<T = any>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [isOverridden?](./kibana-plugin-core-server.userprovidedvalues.isoverridden.md) | boolean | <i>(Optional)</i> |
-|  [userValue?](./kibana-plugin-core-server.userprovidedvalues.uservalue.md) | T | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [isOverridden?](./kibana-plugin-core-server.userprovidedvalues.isoverridden.md) |  | boolean | _(Optional)_ |
+|  [userValue?](./kibana-plugin-core-server.userprovidedvalues.uservalue.md) |  | T | _(Optional)_ |
 

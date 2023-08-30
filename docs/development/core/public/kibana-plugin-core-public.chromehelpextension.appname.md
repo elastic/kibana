@@ -6,7 +6,7 @@
 
 Provide your plugin's name to create a header for separation
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 appName: string;

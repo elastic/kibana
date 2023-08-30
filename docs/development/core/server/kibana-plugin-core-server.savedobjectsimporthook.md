@@ -10,7 +10,7 @@ Currently, the only supported feature for import hooks is to return warnings to 
 
  The only interactions the hook can have with the import process is via the hook's response. Mutating the objects inside the hook's code will have no effect.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SavedObjectsImportHook<T = unknown> = (objects: Array<SavedObject<T>>) => SavedObjectsImportHookResult | Promise<SavedObjectsImportHookResult>;

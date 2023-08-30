@@ -6,7 +6,7 @@
 
 To respond with a custom JS script file.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 renderJs: (options: HttpResourcesResponseOptions) => IKibanaResponse;

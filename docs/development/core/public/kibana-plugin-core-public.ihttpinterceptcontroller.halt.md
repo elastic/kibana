@@ -6,12 +6,12 @@
 
 Halt the request Promise chain and do not process further interceptors or response handlers.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 halt(): void;
 ```
-<b>Returns:</b>
+**Returns:**
 
 void
 

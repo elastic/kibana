@@ -6,7 +6,7 @@
 
 Navigation link capabilities.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 navLinks: Record<string, boolean>;

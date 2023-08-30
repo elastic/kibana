@@ -6,12 +6,12 @@
 
 Generates a random ID for a saved objects.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static generateId(): string;
 ```
-<b>Returns:</b>
+**Returns:**
 
 string
 

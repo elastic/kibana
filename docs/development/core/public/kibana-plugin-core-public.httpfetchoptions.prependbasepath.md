@@ -6,7 +6,7 @@
 
 Whether or not the request should automatically prepend the basePath. Defaults to `true`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 prependBasePath?: boolean;

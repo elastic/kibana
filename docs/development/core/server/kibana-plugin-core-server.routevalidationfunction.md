@@ -6,7 +6,7 @@
 
 The custom validation function if @<!-- -->kbn/config-schema is not a valid solution for your specific plugin requirements.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type RouteValidationFunction<T> = (data: any, validationResult: RouteValidationResultFactory) => {

@@ -6,7 +6,7 @@
 
 Whether or not the request is a "system request" rather than an application-level request. Can be set on the client using the `HttpFetchOptions#asSystemRequest` option.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly isSystemRequest: boolean;

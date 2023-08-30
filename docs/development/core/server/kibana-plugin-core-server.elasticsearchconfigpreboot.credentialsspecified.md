@@ -6,7 +6,7 @@
 
 Indicates whether Elasticsearch configuration includes credentials (`username`<!-- -->, `password` or `serviceAccountToken`<!-- -->).
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly credentialsSpecified: boolean;

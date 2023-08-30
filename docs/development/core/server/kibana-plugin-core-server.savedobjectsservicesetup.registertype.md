@@ -8,7 +8,7 @@ Register a [savedObjects type](./kibana-plugin-core-server.savedobjectstype.md) 
 
 See the [mappings format](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) and [migration format](./kibana-plugin-core-server.savedobjectmigrationmap.md) for more details about these.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;

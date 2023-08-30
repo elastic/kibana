@@ -6,7 +6,7 @@
 
 Resulted path
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 routerPath: string;

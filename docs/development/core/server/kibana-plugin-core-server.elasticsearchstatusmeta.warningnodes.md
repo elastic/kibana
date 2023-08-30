@@ -4,7 +4,7 @@
 
 ## ElasticsearchStatusMeta.warningNodes property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 warningNodes: NodesVersionCompatibility['warningNodes'];

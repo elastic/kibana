@@ -5,7 +5,7 @@
 ## SavedObjectsIncrementCounterField interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsIncrementCounterField 
@@ -13,8 +13,8 @@ export interface SavedObjectsIncrementCounterField
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [fieldName](./kibana-plugin-core-server.savedobjectsincrementcounterfield.fieldname.md) | string | The field name to increment the counter by. |
-|  [incrementBy?](./kibana-plugin-core-server.savedobjectsincrementcounterfield.incrementby.md) | number | <i>(Optional)</i> The number to increment the field by (defaults to 1). |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [fieldName](./kibana-plugin-core-server.savedobjectsincrementcounterfield.fieldname.md) |  | string | The field name to increment the counter by. |
+|  [incrementBy?](./kibana-plugin-core-server.savedobjectsincrementcounterfield.incrementby.md) |  | number | _(Optional)_ The number to increment the field by (defaults to 1). |
 

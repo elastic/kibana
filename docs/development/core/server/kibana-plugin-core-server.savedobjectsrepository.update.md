@@ -6,7 +6,7 @@
 
 Updates an object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions<T>): Promise<SavedObjectsUpdateResponse<T>>;
@@ -19,9 +19,9 @@ update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: 
 |  type | string |  |
 |  id | string |  |
 |  attributes | Partial&lt;T&gt; |  |
-|  options | SavedObjectsUpdateOptions&lt;T&gt; |  {<!-- -->string<!-- -->} options.version - ensures version matches that of persisted object  {<!-- -->string<!-- -->} \[options.namespace\]  {<!-- -->array<!-- -->} \[options.references\] - \[{ name, type, id }<!-- -->\] |
+|  options | SavedObjectsUpdateOptions&lt;T&gt; | _(Optional)_  {<!-- -->string<!-- -->} options.version - ensures version matches that of persisted object  {<!-- -->string<!-- -->} \[options.namespace\]  {<!-- -->array<!-- -->} \[options.references\] - \[{ name, type, id }<!-- -->\] |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsUpdateResponse&lt;T&gt;&gt;
 

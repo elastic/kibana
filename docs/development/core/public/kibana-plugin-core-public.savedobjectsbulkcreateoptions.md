@@ -5,7 +5,7 @@
 ## SavedObjectsBulkCreateOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsBulkCreateOptions 
@@ -13,7 +13,7 @@ export interface SavedObjectsBulkCreateOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [overwrite?](./kibana-plugin-core-public.savedobjectsbulkcreateoptions.overwrite.md) | boolean | <i>(Optional)</i> If a document with the given <code>id</code> already exists, overwrite it's contents (default=false). |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [overwrite?](./kibana-plugin-core-public.savedobjectsbulkcreateoptions.overwrite.md) |  | boolean | _(Optional)_ If a document with the given <code>id</code> already exists, overwrite it's contents (default=false). |
 

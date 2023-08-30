@@ -6,7 +6,7 @@
 
 Deletes all objects from the provided namespace.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
@@ -17,9 +17,9 @@ deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOpti
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  namespace | string |  |
-|  options | SavedObjectsDeleteByNamespaceOptions |  |
+|  options | SavedObjectsDeleteByNamespaceOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;any&gt;
 

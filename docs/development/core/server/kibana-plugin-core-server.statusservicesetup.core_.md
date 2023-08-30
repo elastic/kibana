@@ -6,7 +6,7 @@
 
 Current status for all Core services.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 core$: Observable<CoreStatus>;

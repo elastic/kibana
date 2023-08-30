@@ -6,7 +6,7 @@
 
 A reference to another saved object.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 references?: SavedObjectReference[];

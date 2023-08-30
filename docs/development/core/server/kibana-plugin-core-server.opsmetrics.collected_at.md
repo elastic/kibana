@@ -6,7 +6,7 @@
 
 Time metrics were recorded at.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 collected_at: Date;

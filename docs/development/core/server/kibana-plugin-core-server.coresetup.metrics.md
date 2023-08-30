@@ -6,7 +6,7 @@
 
 [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 metrics: MetricsServiceSetup;

@@ -6,7 +6,7 @@
 
 if true, will open the app in new tab, will share session information via window.open if base
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 openInNewTab?: boolean;

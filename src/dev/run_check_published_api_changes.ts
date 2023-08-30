@@ -93,7 +93,14 @@ const apiExtractorConfig = (folder: string): ExtractorConfig => {
     packageJsonFullPath: path.resolve('package.json'),
   });
 
-  return cfg;
+  return {
+    ...cfg,
+    _getShortFilePath: cfg._getShortFilePath,
+    getDiagnosticDump: cfg.getDiagnosticDump,
+    overrideTsconfig: {
+      baseUrl: path.resolve('.'),
+    },
+  } as ExtractorConfig;
 };
 
 const runBuildTypes = async () => {

@@ -6,7 +6,7 @@
 
 Route validations config and options merged into one object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> & RouteValidatorOptions;

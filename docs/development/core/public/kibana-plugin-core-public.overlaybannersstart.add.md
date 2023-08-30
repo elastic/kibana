@@ -6,7 +6,7 @@
 
 Add a new banner
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 add(mount: MountPoint, priority?: number): string;
@@ -17,9 +17,9 @@ add(mount: MountPoint, priority?: number): string;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  mount | MountPoint | [MountPoint](./kibana-plugin-core-public.mountpoint.md) |
-|  priority | number | optional priority order to display this banner. Higher priority values are shown first. |
+|  priority | number | _(Optional)_ optional priority order to display this banner. Higher priority values are shown first. |
 
-<b>Returns:</b>
+**Returns:**
 
 string
 

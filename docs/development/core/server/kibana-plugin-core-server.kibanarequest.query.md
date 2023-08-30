@@ -4,7 +4,7 @@
 
 ## KibanaRequest.query property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly query: Query;

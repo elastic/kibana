@@ -6,12 +6,12 @@
 
 Return the locale currently in use.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getLocale(): string;
 ```
-<b>Returns:</b>
+**Returns:**
 
 string
 

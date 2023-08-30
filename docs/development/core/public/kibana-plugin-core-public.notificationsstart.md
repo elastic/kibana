@@ -5,7 +5,7 @@
 ## NotificationsStart interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface NotificationsStart 
@@ -13,7 +13,7 @@ export interface NotificationsStart
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [toasts](./kibana-plugin-core-public.notificationsstart.toasts.md) | ToastsStart | [ToastsStart](./kibana-plugin-core-public.toastsstart.md) |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [toasts](./kibana-plugin-core-public.notificationsstart.toasts.md) |  | ToastsStart | [ToastsStart](./kibana-plugin-core-public.toastsstart.md) |
 

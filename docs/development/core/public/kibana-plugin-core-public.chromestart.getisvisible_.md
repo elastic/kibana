@@ -6,12 +6,12 @@
 
 Get an observable of the current visibility state of the chrome.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getIsVisible$(): Observable<boolean>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;boolean&gt;
 

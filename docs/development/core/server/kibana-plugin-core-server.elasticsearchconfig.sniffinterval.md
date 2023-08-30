@@ -6,7 +6,7 @@
 
 Interval to perform a sniff operation and make sure the list of nodes is complete. If `false` then sniffing is disabled.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly sniffInterval: false | Duration;

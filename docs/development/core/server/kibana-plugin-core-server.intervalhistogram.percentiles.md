@@ -4,7 +4,7 @@
 
 ## IntervalHistogram.percentiles property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 percentiles: {

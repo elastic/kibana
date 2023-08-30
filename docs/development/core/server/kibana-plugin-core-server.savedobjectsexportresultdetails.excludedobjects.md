@@ -6,7 +6,7 @@
 
 excluded objects details
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 excludedObjects: SavedObjectsExportExcludedObject[];
