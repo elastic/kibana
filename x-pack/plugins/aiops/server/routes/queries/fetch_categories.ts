@@ -22,7 +22,7 @@ import type {
   Category,
   CategoriesAgg,
   SparkLinesPerCategory,
-} from '../../../common/api/log_categorization/process_category_results';
+} from '../../../common/api/log_categorization/types';
 
 import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 
