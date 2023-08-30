@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
@@ -29,8 +30,10 @@ import {
   ProcessListContextProvider,
 } from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
 import { getFieldByType } from '../../../../../common/inventory_models';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { ProcessesExplanationMessage } from '../../components/processes_explanation';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,
@@ -39,11 +42,10 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
 
 export const Processes = () => {
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
-  const { asset, assetType, overrides, onTabsStateChange } = useAssetDetailsStateContext();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const { asset, assetType } = useAssetDetailsRenderPropsContext();
 
-  const { query: overrideQuery } = overrides?.processes ?? {};
-
-  const [searchText, setSearchText] = useState(overrideQuery ?? '');
+  const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
     searchText ? Query.parse(searchText) : Query.MATCH_ALL
   );
@@ -69,12 +71,10 @@ export const Processes = () => {
 
   const debouncedSearchOnChange = useMemo(() => {
     return debounce<(queryText: string) => void>((queryText) => {
-      if (onTabsStateChange) {
-        onTabsStateChange({ processes: { query: queryText } });
-      }
+      setUrlState({ processSearch: queryText });
       setSearchText(queryText);
     }, 500);
-  }, [onTabsStateChange]);
+  }, [setUrlState]);
 
   const searchBarOnChange = useCallback(
     ({ query, queryText }) => {
@@ -86,11 +86,9 @@ export const Processes = () => {
 
   const clearSearchBar = useCallback(() => {
     setSearchBarState(Query.MATCH_ALL);
-    if (onTabsStateChange) {
-      onTabsStateChange({ processes: { query: '' } });
-    }
+    setUrlState({ processSearch: '' });
     setSearchText('');
-  }, [onTabsStateChange]);
+  }, [setUrlState]);
 
   return (
     <ProcessListContextProvider hostTerm={hostTerm} to={currentTimestamp}>
@@ -134,11 +132,17 @@ export const Processes = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        {loading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          !error && (response?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
+        )}
         <EuiFlexItem grow={false}>
           <EuiSearchBar
             query={searchBarState}
             onChange={searchBarOnChange}
             box={{
+              'data-test-subj': 'infraAssetDetailsProcessesSearchBarInput',
               incremental: true,
               placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
                 defaultMessage: 'Search for processes…',
