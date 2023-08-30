@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-export type {
-  VisualizationSavedObjectAttributes,
-  VisualizationSavedObject,
-  PartialVisualizationSavedObject,
-  VisualizationCrudTypes,
-} from './types';
+import { VisualizeListClientPlugin } from './plugin';
+
+// This exports static code and TypeScript types,
+// as well as, Kibana Platform `plugin()` initializer.
+export function plugin() {
+  return new VisualizeListClientPlugin();
+}
+export type { VisualizeListClientPluginSetup, VisualizeListClientPluginStart } from './types';

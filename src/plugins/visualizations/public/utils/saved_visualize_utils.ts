@@ -17,7 +17,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { VisualizationSavedObject } from '../../common/content_management';
+import { VisualizeListClientPluginStart } from '@kbn/visualize-list-client-plugin/public';
 import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
@@ -155,6 +155,7 @@ export async function findListItems(
   visTypes: Pick<TypesStart, 'get' | 'getAliases'>,
   search: string,
   size: number,
+  searchClient: VisualizeListClientPluginStart['mSearch'],
   references?: SavedObjectReference[],
   referencesToExclude?: SavedObjectReference[]
 ) {
@@ -175,7 +176,7 @@ export async function findListItems(
   const {
     hits: savedObjects,
     pagination: { total },
-  } = await visualizationsClient.search(
+  } = await searchClient(
     {
       text: search ? `${search}*` : undefined,
       limit: size,
@@ -192,7 +193,7 @@ export async function findListItems(
 
   return {
     total,
-    hits: savedObjects.map((savedObject: VisualizationSavedObject) => {
+    hits: savedObjects.map((savedObject) => {
       const config = extensionByType[savedObject.type];
 
       if (config) {

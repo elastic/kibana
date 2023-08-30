@@ -1562,6 +1562,8 @@
       "@kbn/visualization-ui-components/*": ["packages/kbn-visualization-ui-components/*"],
       "@kbn/visualizations-plugin": ["src/plugins/visualizations"],
       "@kbn/visualizations-plugin/*": ["src/plugins/visualizations/*"],
+      "@kbn/visualize-list-client-plugin": ["src/plugins/visualize_list_client"],
+      "@kbn/visualize-list-client-plugin/*": ["src/plugins/visualize_list_client/*"],
       "@kbn/watcher-plugin": ["x-pack/plugins/watcher"],
       "@kbn/watcher-plugin/*": ["x-pack/plugins/watcher/*"],
       "@kbn/web-worker-stub": ["packages/kbn-web-worker-stub"],

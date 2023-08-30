@@ -28,6 +28,7 @@
       "savedObjectsManagement",
       "savedSearch",
       "contentManagement",
+      "visualizeListClient"
     ],
     "optionalPlugins": [
       "home",

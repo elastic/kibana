@@ -6044,6 +6044,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/visualize-list-client-plugin@link:src/plugins/visualize_list_client":
+  version "0.0.0"
+  uid ""
+
 "@kbn/watcher-plugin@link:x-pack/plugins/watcher":
   version "0.0.0"
   uid ""

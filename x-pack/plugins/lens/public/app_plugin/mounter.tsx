@@ -129,7 +129,7 @@ export async function getLensServices(
     settings: coreStart.settings,
     application: coreStart.application,
     notifications: coreStart.notifications,
-    savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement.client),
+    savedObjectStore: new SavedObjectIndexStore(),
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,

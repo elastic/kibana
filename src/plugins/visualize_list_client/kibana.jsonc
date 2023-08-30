@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/visualize-list-client-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "description": "The visualize library content management client plugin",
+  "plugin": {
+    "id": "visualizeListClient",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "contentManagement",
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": [],
+    "extraPublicDirs": []
+  }
+}

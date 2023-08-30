@@ -774,7 +774,7 @@
     "@kbn/vis-type-xy-plugin": "link:src/plugins/vis_types/xy",
     "@kbn/visualization-ui-components": "link:packages/kbn-visualization-ui-components",
     "@kbn/visualizations-plugin": "link:src/plugins/visualizations",
-    "@kbn/visualize-listing-plugin": "link:src/plugins/visualize-listing",
+    "@kbn/visualize-list-client-plugin": "link:src/plugins/visualize_list_client",
     "@kbn/watcher-plugin": "link:x-pack/plugins/watcher",
     "@loaders.gl/core": "^3.4.7",
     "@loaders.gl/json": "^3.4.7",

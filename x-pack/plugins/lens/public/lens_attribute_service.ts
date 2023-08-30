@@ -30,7 +30,7 @@ export function getLensAttributeService(
   core: CoreStart,
   startDependencies: LensPluginStartDependencies
 ): LensAttributeService {
-  const savedObjectStore = new SavedObjectIndexStore(startDependencies.contentManagement.client);
+  const savedObjectStore = new SavedObjectIndexStore();
 
   return startDependencies.embeddable.getAttributeService<
     LensSavedObjectAttributes,

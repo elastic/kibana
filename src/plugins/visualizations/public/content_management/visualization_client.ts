@@ -7,46 +7,44 @@
  */
 
 import { SearchQuery } from '@kbn/content-management-plugin/common';
-import type {
-  VisualizationGetIn,
-  VisualizationGetOut,
-  VisualizationCreateIn,
-  VisualizationCreateOut,
-  VisualizationUpdateIn,
-  VisualizationUpdateOut,
-  VisualizationDeleteIn,
-  VisualizationDeleteOut,
-  VisualizationSearchIn,
-  VisualizationSearchOut,
-  VisualizationSearchQuery,
-} from '../../common/content_management';
+import { type VisualizationCrudTypes, CONTENT_ID } from '../../common/content_management';
 import { getContentManagement } from '../services';
 
 const get = async (id: string) => {
-  return getContentManagement().client.get<VisualizationGetIn, VisualizationGetOut>({
-    contentTypeId: 'visualization',
+  return getContentManagement().client.get<
+    VisualizationCrudTypes['GetIn'],
+    VisualizationCrudTypes['GetOut']
+  >({
+    contentTypeId: CONTENT_ID,
     id,
   });
 };
 
-const create = async ({ data, options }: Omit<VisualizationCreateIn, 'contentTypeId'>) => {
+const create = async ({
+  data,
+  options,
+}: Omit<VisualizationCrudTypes['CreateIn'], 'contentTypeId'>) => {
   const res = await getContentManagement().client.create<
-    VisualizationCreateIn,
-    VisualizationCreateOut
+    VisualizationCrudTypes['CreateIn'],
+    VisualizationCrudTypes['CreateOut']
   >({
-    contentTypeId: 'visualization',
+    contentTypeId: CONTENT_ID,
     data,
     options,
   });
   return res;
 };
 
-const update = async ({ id, data, options }: Omit<VisualizationUpdateIn, 'contentTypeId'>) => {
+const update = async ({
+  id,
+  data,
+  options,
+}: Omit<VisualizationCrudTypes['UpdateIn'], 'contentTypeId'>) => {
   const res = await getContentManagement().client.update<
-    VisualizationUpdateIn,
-    VisualizationUpdateOut
+    VisualizationCrudTypes['UpdateIn'],
+    VisualizationCrudTypes['UpdateOut']
   >({
-    contentTypeId: 'visualization',
+    contentTypeId: CONTENT_ID,
     id,
     data,
     options,
@@ -56,18 +54,24 @@ const update = async ({ id, data, options }: Omit<VisualizationUpdateIn, 'conten
 
 const deleteVisualization = async (id: string) => {
   const res = await getContentManagement().client.delete<
-    VisualizationDeleteIn,
-    VisualizationDeleteOut
+    VisualizationCrudTypes['DeleteIn'],
+    VisualizationCrudTypes['DeleteOut']
   >({
-    contentTypeId: 'visualization',
+    contentTypeId: CONTENT_ID,
     id,
   });
   return res;
 };
 
-const search = async (query: SearchQuery = {}, options?: VisualizationSearchQuery) => {
-  return getContentManagement().client.search<VisualizationSearchIn, VisualizationSearchOut>({
-    contentTypeId: 'visualization',
+const search = async (
+  query: SearchQuery = {},
+  options?: VisualizationCrudTypes['SearchOptions']
+) => {
+  return getContentManagement().client.search<
+    VisualizationCrudTypes['SearchIn'],
+    VisualizationCrudTypes['SearchOut']
+  >({
+    contentTypeId: CONTENT_ID,
     query,
     options,
   });

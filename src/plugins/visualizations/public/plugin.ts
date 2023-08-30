@@ -59,6 +59,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { VisualizeListClientPluginStart } from '@kbn/visualize-list-client-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   ContentManagementPublicSetup,
@@ -109,11 +110,13 @@ import {
   setSavedObjectsManagement,
   setContentManagement,
   setSavedSearch,
+  setVisualizeListClient,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
 import { ListingViewRegistry } from './types';
 import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
+import { visualizationsClient } from './content_management';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -168,6 +171,7 @@ export interface VisualizationsStartDeps {
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
+  visualizeListClient: VisualizeListClientPluginStart;
 }
 
 /**
@@ -418,6 +422,7 @@ export class VisualizationsPlugin
       savedObjectsManagement,
       contentManagement,
       savedSearch,
+      visualizeListClient,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -441,6 +446,9 @@ export class VisualizationsPlugin
     setSavedObjectsManagement(savedObjectsManagement);
     setContentManagement(contentManagement);
     setSavedSearch(savedSearch);
+    setVisualizeListClient(visualizeListClient);
+
+    visualizeListClient.registerType(CONTENT_ID, visualizationsClient);
 
     if (spaces) {
       setSpaces(spaces);

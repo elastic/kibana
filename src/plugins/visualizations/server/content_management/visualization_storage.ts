@@ -20,19 +20,8 @@ import { CONTENT_ID } from '../../common/content_management';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';
 import type {
   VisualizationSavedObjectAttributes,
-  VisualizationSavedObject,
-  PartialVisualizationSavedObject,
   VisualizationContentType,
-  VisualizationGetOut,
-  VisualizationCreateIn,
-  VisualizationCreateOut,
-  CreateOptions,
-  VisualizationUpdateIn,
-  VisualizationUpdateOut,
-  UpdateOptions,
-  VisualizationDeleteOut,
-  VisualizationSearchQuery,
-  VisualizationSearchOut,
+  VisualizationCrudTypes,
 } from '../../common/content_management';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
@@ -51,18 +40,18 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
 function savedObjectToVisualizationSavedObject(
   savedObject: SavedObject<VisualizationSavedObjectAttributes>,
   partial: false
-): VisualizationSavedObject;
+): VisualizationCrudTypes['Item'];
 
 function savedObjectToVisualizationSavedObject(
   savedObject: PartialSavedObject<VisualizationSavedObjectAttributes>,
   partial: true
-): PartialVisualizationSavedObject;
+): VisualizationCrudTypes['PartialItem'];
 
 function savedObjectToVisualizationSavedObject(
   savedObject:
     | SavedObject<VisualizationSavedObjectAttributes>
     | PartialSavedObject<VisualizationSavedObjectAttributes>
-): VisualizationSavedObject | PartialVisualizationSavedObject {
+): VisualizationCrudTypes['Item'] | VisualizationCrudTypes['PartialItem'] {
   const {
     id,
     type,
@@ -103,12 +92,12 @@ function savedObjectToVisualizationSavedObject(
 const SO_TYPE: VisualizationContentType = 'visualization';
 
 export class VisualizationsStorage
-  implements ContentStorage<VisualizationSavedObject, PartialVisualizationSavedObject>
+  implements ContentStorage<VisualizationCrudTypes['Item'], VisualizationCrudTypes['PartialItem']>
 {
-  mSearch: GetMSearchType<VisualizationSavedObject>;
+  mSearch: GetMSearchType<VisualizationCrudTypes['Item']>;
 
   constructor() {
-    this.mSearch = getMSearch<VisualizationSavedObject, VisualizationSearchOut>({
+    this.mSearch = getMSearch<VisualizationCrudTypes['Item'], VisualizationCrudTypes['SearchOut']>({
       savedObjectType: SO_TYPE,
       cmServicesDefinition,
       allowedSavedObjectAttributes: [
@@ -123,7 +112,7 @@ export class VisualizationsStorage
     });
   }
 
-  async get(ctx: StorageContext, id: string): Promise<VisualizationGetOut> {
+  async get(ctx: StorageContext, id: string): Promise<VisualizationCrudTypes['GetOut']> {
     const {
       utils: { getTransforms },
       version: { request: requestVersion },
@@ -139,7 +128,7 @@ export class VisualizationsStorage
       outcome,
     } = await soClient.resolve<VisualizationSavedObjectAttributes>(SO_TYPE, id);
 
-    const response: VisualizationGetOut = {
+    const response: VisualizationCrudTypes['GetOut'] = {
       item: savedObjectToVisualizationSavedObject(savedObject, false),
       meta: {
         aliasPurpose,
@@ -150,8 +139,8 @@ export class VisualizationsStorage
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.get.out.result.down<
-      VisualizationGetOut,
-      VisualizationGetOut
+      VisualizationCrudTypes['GetOut'],
+      VisualizationCrudTypes['GetOut']
     >(response);
 
     if (resultError) {
@@ -168,9 +157,9 @@ export class VisualizationsStorage
 
   async create(
     ctx: StorageContext,
-    data: VisualizationCreateIn['data'],
-    options: CreateOptions
-  ): Promise<VisualizationCreateOut> {
+    data: VisualizationCrudTypes['CreateIn']['data'],
+    options: VisualizationCrudTypes['CreateOptions']
+  ): Promise<VisualizationCrudTypes['CreateOut']> {
     const {
       utils: { getTransforms },
       version: { request: requestVersion },
@@ -187,8 +176,8 @@ export class VisualizationsStorage
     }
 
     const { value: optionsToLatest, error: optionsError } = transforms.create.in.options.up<
-      CreateOptions,
-      CreateOptions
+      VisualizationCrudTypes['CreateOptions'],
+      VisualizationCrudTypes['CreateOptions']
     >(options);
     if (optionsError) {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
@@ -204,8 +193,8 @@ export class VisualizationsStorage
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.create.out.result.down<
-      VisualizationCreateOut,
-      VisualizationCreateOut
+      VisualizationCrudTypes['CreateOut'],
+      VisualizationCrudTypes['CreateOut']
     >({
       item: savedObjectToVisualizationSavedObject(savedObject, false),
     });
@@ -220,9 +209,9 @@ export class VisualizationsStorage
   async update(
     ctx: StorageContext,
     id: string,
-    data: VisualizationUpdateIn['data'],
-    options: UpdateOptions
-  ): Promise<VisualizationUpdateOut> {
+    data: VisualizationCrudTypes['UpdateIn']['data'],
+    options: VisualizationCrudTypes['UpdateOptions']
+  ): Promise<VisualizationCrudTypes['UpdateOut']> {
     const {
       utils: { getTransforms },
       version: { request: requestVersion },
@@ -231,16 +220,16 @@ export class VisualizationsStorage
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
-      VisualizationSavedObjectAttributes,
-      VisualizationSavedObjectAttributes
+      Partial<VisualizationSavedObjectAttributes>,
+      Partial<VisualizationSavedObjectAttributes>
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 
     const { value: optionsToLatest, error: optionsError } = transforms.update.in.options.up<
-      CreateOptions,
-      CreateOptions
+      VisualizationCrudTypes['CreateOptions'],
+      VisualizationCrudTypes['CreateOptions']
     >(options);
     if (optionsError) {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
@@ -257,8 +246,8 @@ export class VisualizationsStorage
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.update.out.result.down<
-      VisualizationUpdateOut,
-      VisualizationUpdateOut
+      VisualizationCrudTypes['UpdateOut'],
+      VisualizationCrudTypes['UpdateOut']
     >({
       item: savedObjectToVisualizationSavedObject(partialSavedObject, true),
     });
@@ -270,7 +259,7 @@ export class VisualizationsStorage
     return value;
   }
 
-  async delete(ctx: StorageContext, id: string): Promise<VisualizationDeleteOut> {
+  async delete(ctx: StorageContext, id: string): Promise<VisualizationCrudTypes['DeleteOut']> {
     const soClient = await savedObjectClientFromRequest(ctx);
     await soClient.delete(SO_TYPE, id);
     return { success: true };
@@ -279,8 +268,8 @@ export class VisualizationsStorage
   async search(
     ctx: StorageContext,
     query: SearchQuery,
-    options: VisualizationSearchQuery = {}
-  ): Promise<VisualizationSearchOut> {
+    options: VisualizationCrudTypes['SearchOptions'] = {}
+  ): Promise<VisualizationCrudTypes['SearchOut']> {
     const {
       utils: { getTransforms },
       version: { request: requestVersion },
@@ -290,8 +279,8 @@ export class VisualizationsStorage
 
     // Validate and UP transform the options
     const { value: optionsToLatest, error: optionsError } = transforms.search.in.options.up<
-      VisualizationSearchQuery,
-      VisualizationSearchQuery
+      VisualizationCrudTypes['SearchOptions'],
+      VisualizationCrudTypes['SearchOptions']
     >(options);
     if (optionsError) {
       throw Boom.badRequest(`Invalid payload. ${optionsError.message}`);
@@ -329,8 +318,8 @@ export class VisualizationsStorage
 
     // Validate the response and DOWN transform to the request version
     const { value, error: resultError } = transforms.search.out.result.down<
-      VisualizationSearchOut,
-      VisualizationSearchOut
+      VisualizationCrudTypes['SearchOut'],
+      VisualizationCrudTypes['SearchOut']
     >({
       hits: response.saved_objects.map((so) => savedObjectToVisualizationSavedObject(so, false)),
       pagination: {

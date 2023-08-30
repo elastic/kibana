@@ -312,8 +312,12 @@ export class LensPlugin {
     const startServices = createStartServicesGetter(core.getStartServices);
 
     const getStartServicesForEmbeddable = async (): Promise<LensEmbeddableStartServices> => {
-      const { getLensAttributeService, setUsageCollectionStart, initMemoizedErrorNotification } =
-        await import('./async_services');
+      const {
+        getLensAttributeService,
+        setUsageCollectionStart,
+        initMemoizedErrorNotification,
+        setContentManagement,
+      } = await import('./async_services');
       const { core: coreStart, plugins } = startServices();
 
       await this.initParts(
@@ -335,6 +339,7 @@ export class LensPlugin {
       }
 
       initMemoizedErrorNotification(coreStart);
+      setContentManagement(plugins.contentManagement);
 
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
