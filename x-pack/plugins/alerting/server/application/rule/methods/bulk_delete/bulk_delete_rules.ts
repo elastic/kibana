@@ -5,6 +5,7 @@
  * 2.0.
  */
 import pMap from 'p-map';
+import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
@@ -26,17 +27,23 @@ import {
 } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type {
-  BulkOperationErrorV1,
-  BulkDeleteRulesResponseV1,
-  BulkDeleteRulesRequestParamsV1,
+  BulkOperationError,
+  BulkDeleteRulesResponse,
+  BulkDeleteRulesRequestParams,
 } from '../../../../../common/routes/rule/apis/bulk_delete';
-import { getAndValidateCommonBulkOptionsV1 } from '../../../../../common/routes/rule/apis/bulk_delete';
+import { bulkDeleteRulesRequestParamsSchema } from '../../../../../common/routes/rule/apis/bulk_delete';
 
 export const bulkDeleteRules = async (
   context: RulesClientContext,
-  options: BulkDeleteRulesRequestParamsV1
-): Promise<BulkDeleteRulesResponseV1> => {
-  const { ids, filter } = getAndValidateCommonBulkOptionsV1(options);
+  options: BulkDeleteRulesRequestParams
+): Promise<BulkDeleteRulesResponse> => {
+  try {
+    bulkDeleteRulesRequestParamsSchema.validate(options);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating create data - ${error.message}`);
+  }
+
+  const { ids, filter } = options;
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
@@ -156,7 +163,7 @@ const bulkDeleteWithOCC = async (
   const deletedRuleIds: string[] = [];
   const apiKeysToInvalidate: string[] = [];
   const taskIdsToDelete: string[] = [];
-  const errors: BulkOperationErrorV1[] = [];
+  const errors: BulkOperationError[] = [];
 
   result.statuses.forEach((status) => {
     if (status.error === undefined) {

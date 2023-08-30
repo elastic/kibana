@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { bulkDeleteRules } from './bulk_delete';
+export { bulkDeleteRules } from './bulk_delete_rules';

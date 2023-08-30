@@ -6,9 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import { BulkDeleteRulesRequestParams } from '../types/v1';
+import { BulkDeleteRulesRequestParams } from '..';
 
-export const getAndValidateCommonBulkOptions = (options: BulkDeleteRulesRequestParams) => {
+export const validateCommonBulkOptions = (options: BulkDeleteRulesRequestParams) => {
   const filter = options.filter;
   const ids = options.ids;
 
@@ -27,5 +27,4 @@ export const getAndValidateCommonBulkOptions = (options: BulkDeleteRulesRequestP
       "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
     );
   }
-  return { ids, filter };
 };

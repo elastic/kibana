@@ -8,17 +8,18 @@
 import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { schema } from '@kbn/config-schema';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { RecoveredActionGroup } from '../../../../../common';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { loggerMock } from '@kbn/logging-mocks';
 import {
   defaultRule,
   enabledRule1,
@@ -27,7 +28,6 @@ import {
   returnedRule2,
   siemRule1,
 } from '../../../../rules_client/tests/test_helpers';
-import { schema } from '@kbn/config-schema';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {

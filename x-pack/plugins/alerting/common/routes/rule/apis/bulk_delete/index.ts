@@ -19,5 +19,5 @@ export type {
   BulkDeleteRulesRequestParams as BulkDeleteRulesRequestParamsV1,
 } from './types/v1';
 
-export { getAndValidateCommonBulkOptions } from './validation/latest';
-export { getAndValidateCommonBulkOptions as getAndValidateCommonBulkOptionsV1 } from './validation/v1';
+export { validateCommonBulkOptions } from './validation/latest';
+export { validateCommonBulkOptions as validateCommonBulkOptionsV1 } from './validation/v1';
