@@ -11,22 +11,27 @@ import { createAgentDoc } from './agents';
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
 // Create a Fleet server policy
-export function setupFleetServer() {
-  let policyId: string;
+export async function setupFleetServer() {
+  const policyId: string = FLEET_SERVER_POLICY_ID;
   let kibanaVersion: string;
 
   cy.request({
     method: 'POST',
     url: '/api/fleet/agent_policies',
-    headers: { 'kbn-xsrf': 'xx', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
+    headers: { 'kbn-xsrf': 'xx' },
+    failOnStatusCode: false,
     body: {
       id: FLEET_SERVER_POLICY_ID,
       name: 'Fleet Server policy',
       namespace: 'default',
       has_fleet_server: true,
     },
-  }).then((response: any) => {
-    policyId = response.body.item.id;
+  }).then((response) => {
+    // 409 is expected if the policy already exists
+    // this allows the test to be run repeatedly in dev
+    if (response.status > 299 && response.status !== 409) {
+      throw new Error(`Failed to create Fleet Server policy: ${response.body.message}`);
+    }
   });
 
   cy.getKibanaVersion().then((version) => {

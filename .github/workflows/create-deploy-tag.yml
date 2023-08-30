@@ -1,0 +1,60 @@
+---
+# - This workflow creates a tag with the format "deploy@<timestamp>" on the main branch.
+# - It is triggered manually from the GitHub Actions UI.
+# - It is only allowed to run on the main branch and ensures that the tag is created
+#   on the main branch only in a verification step.
+#   This is only to prevent accidental creation of the tag on other branches and cannot be used to prevent malicious creation of the tag.
+
+name: create-deploy-tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "The commit to tag (default: latest commit on main)"
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  create-deploy-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Select commit to be tagged
+        run: |
+          commit="${{ github.event.inputs.commit || github.sha }}"
+          echo "COMMIT=${commit}" >> "${GITHUB_ENV}"
+      - name: Verify selected commit isn't already tagged
+        run: |
+          git tag --contains ${COMMIT} | grep -P "^deploy@\d+$" && {
+            echo "Tag already exists on selected commit"
+            exit 1
+          } || true
+      - name: Verify branch
+        run: |
+          if [[ "${GITHUB_REF}" != "refs/heads/main" ]]; then
+            echo "This workflow can only be run on the main branch"
+            exit 1
+          fi
+      - name: Prepare tag
+        run: |
+          tag_name="deploy@$(date +%s)"
+          echo "TAG_NAME=${tag_name}" >> "${GITHUB_ENV}"
+      - name: Create tag
+        run: |
+          git tag ${TAG_NAME} ${COMMIT}
+          git push origin "refs/tags/${TAG_NAME}"
+      - if: always()
+        uses: elastic/apm-pipeline-library/.github/actions/notify-build-status@current
+        with:
+          message: ${{ job.status == 'success' && format('Created tag `{0}` for commit `{1}`', env.TAG_NAME, env.COMMIT) || 'Creating a deploy tag failed' }}
+          vaultUrl: ${{ secrets.VAULT_ADDR }}
+          vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
+          vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
+          slackChannel: "#kibana-mission-control"
