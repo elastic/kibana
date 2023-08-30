@@ -70,6 +70,7 @@ export interface SignificantTerm extends FieldValuePair {
   score: number;
   pValue: number | null;
   normalizedScore: number;
+  type: 'keyword' | 'log-pattern';
   histogram?: SignificantTermHistogramItem[];
   unique?: boolean;
 }

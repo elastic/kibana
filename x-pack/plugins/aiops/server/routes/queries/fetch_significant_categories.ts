@@ -15,6 +15,7 @@ import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_an
 import { LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD } from '../../../common/constants';
 
 import { fetchCategories } from './fetch_categories';
+import { getNormalizedScore } from './get_normalized_score';
 
 const getCategoriesTestData = (categories: Category[]): Histogram[] => {
   const categoriesBaselineTotalCount = getCategoriesTotalCount(categories);
@@ -89,6 +90,7 @@ export const fetchSignificantCategories = async (
     const chiSquared = Math.pow(observed - expected, 2) / (expected > 0 ? expected : 1e-6); // Prevent divide by zero
 
     const pValue = criticalTableLookup(chiSquared, 1);
+    const score = Math.log(pValue);
 
     if (pValue <= LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD && observed > expected) {
       significantCategories.push({
@@ -98,9 +100,10 @@ export const fetchSignificantCategories = async (
         bg_count: baselineTerm?.doc_count ?? 0,
         total_doc_count: categoriesDeviationTotalCount,
         total_bg_count: categoriesBaselineTotalCount,
-        score: 0,
+        score,
         pValue,
-        normalizedScore: 0,
+        normalizedScore: getNormalizedScore(score),
+        type: 'log-pattern',
       });
     }
   });

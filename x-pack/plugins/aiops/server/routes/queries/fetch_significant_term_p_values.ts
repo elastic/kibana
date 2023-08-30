@@ -23,6 +23,7 @@ import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_an
 
 import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 
+import { getNormalizedScore } from './get_normalized_score';
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
@@ -167,13 +168,6 @@ export const fetchSignificantTermPValues = async (
     for (const bucket of overallResult.buckets) {
       const pValue = Math.exp(-bucket.score);
 
-      // Scale the score into a value from 0 - 1
-      // using a concave piecewise linear function in -log(p-value)
-      const normalizedScore =
-        0.5 * Math.min(Math.max((bucket.score - 3.912) / 2.995, 0), 1) +
-        0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
-        0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
-
       if (typeof pValue === 'number' && pValue < LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD) {
         result.push({
           fieldName,
@@ -184,7 +178,8 @@ export const fetchSignificantTermPValues = async (
           total_bg_count: overallResult.bg_count,
           score: bucket.score,
           pValue,
-          normalizedScore,
+          normalizedScore: getNormalizedScore(bucket.score),
+          type: 'keyword',
         });
       }
     }
