@@ -13,7 +13,7 @@ Previous versions: {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8
 
 [discrete]
 ==== Webhook connector improvement
-The Webhook connector now supports client certification. You can now use the webhook connector for secured integration with 3rd parties, beyond basic authentication (using usernames and passwords or tokens). 
+The Webhook connector now supports client certification. You can now use the webhook connector for secured integration with third parties, beyond basic authentication (using usernames and passwords or tokens). 
 
 [role="screenshot"]
 image::images/webhook-connector.png[A screenshot displaying the new SSL authentication option in the UI, width=70%]
