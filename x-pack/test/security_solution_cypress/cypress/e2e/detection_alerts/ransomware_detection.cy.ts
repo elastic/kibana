@@ -18,6 +18,8 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
   before(() => {
     cy.task('esArchiverLoad', {
       archiveName: 'ransomware_detection',
+      useCreate: true,
+      docsOnly: true,
     });
   });
 
