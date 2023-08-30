@@ -7620,6 +7620,77 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.DataPublicPluginStartActions.createFiltersFromMultiValueClickAction",
+            "type": "Function",
+            "tags": [],
+            "label": "createFiltersFromMultiValueClickAction",
+            "description": [],
+            "signature": [
+              "({ data, negate, }: { data: { cells: { column: number; row: number; }[]; table: Pick<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", \"meta\" | \"rows\" | \"columns\">; relation?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.BooleanRelation",
+                "text": "BooleanRelation"
+              },
+              " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }) => Promise<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined>"
+            ],
+            "path": "src/plugins/data/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.DataPublicPluginStartActions.createFiltersFromMultiValueClickAction.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ data: { cells: { column: number; row: number; }[]; table: Pick<",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.Datatable",
+                    "text": "Datatable"
+                  },
+                  ", \"meta\" | \"rows\" | \"columns\">; relation?: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.BooleanRelation",
+                    "text": "BooleanRelation"
+                  },
+                  " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+                ],
+                "path": "src/plugins/data/public/actions/filters/create_filters_from_multi_value_click.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

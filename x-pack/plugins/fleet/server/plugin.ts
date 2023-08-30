@@ -600,7 +600,7 @@ export class FleetPlugin
     };
   }
 
-  public async stop() {
+  public stop() {
     appContextService.stop();
     this.policyWatcher?.stop();
     licenseService.stop();
