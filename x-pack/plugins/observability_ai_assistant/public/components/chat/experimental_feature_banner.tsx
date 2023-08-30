@@ -33,12 +33,7 @@ export function ExperimentalFeatureBanner() {
             />
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="xs"
-              alignItems="center"
-              justifyContent="center"
-            >
+            <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
               <FormattedMessage
                 id="xpack.observabilityAiAssistant.experimentalFunctionBanner.title"
                 defaultMessage="This feature is currently in {techPreview} and may contain issues."

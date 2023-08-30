@@ -34,7 +34,7 @@ export function ChatWelcomePanel() {
             })}
           </h2>
         </EuiTitle>
-        <EuiText color="subdued">
+        <EuiText color="subdued" textAlign="center">
           <p>
             {i18n.translate('xpack.observabilityAiAssistant.chatWelcomePanel.body', {
               defaultMessage:
