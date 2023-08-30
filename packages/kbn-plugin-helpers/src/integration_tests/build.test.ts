@@ -54,7 +54,7 @@ it('builds a generated plugin into a viable archive', async () => {
   };
 
   expect(filterLogs(generateProc.all)).toMatchInlineSnapshot(`
-    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/current/production.html#openssl-legacy-provider
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/8.10/production.html#openssl-legacy-provider
      succ 🎉
 
           Your plugin has been created in plugins/foo_test_plugin
@@ -74,7 +74,7 @@ it('builds a generated plugin into a viable archive', async () => {
   );
 
   expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
-    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/current/production.html#openssl-legacy-provider
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/8.10/production.html#openssl-legacy-provider
      info deleting the build and target directories
      info run bazel and build required artifacts for the optimizer
      succ bazel run successfully and artifacts were created
