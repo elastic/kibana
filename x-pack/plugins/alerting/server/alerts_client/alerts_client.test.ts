@@ -14,6 +14,7 @@ import {
   RuleNotifyWhen,
 } from '../types';
 import * as LegacyAlertsClientModule from './legacy_alerts_client';
+import { LegacyAlertsClient } from './legacy_alerts_client';
 import { Alert } from '../alert/alert';
 import { AlertsClient, AlertsClientParams } from './alerts_client';
 import { GetSummarizedAlertsParams, ProcessAndLogAlertsOpts } from './types';
@@ -177,7 +178,7 @@ describe('Alerts Client', () => {
             meta: {
               flapping: false,
               flappingHistory: [true, false],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           }),
@@ -186,7 +187,7 @@ describe('Alerts Client', () => {
             meta: {
               flapping: false,
               flappingHistory: [true, false, false],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'def',
             },
           }),
@@ -245,7 +246,7 @@ describe('Alerts Client', () => {
             meta: {
               flapping: false,
               flappingHistory: [true, false],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: id,
             },
           });
@@ -285,7 +286,7 @@ describe('Alerts Client', () => {
             meta: {
               flapping: false,
               flappingHistory: [true, false],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           }),
@@ -540,7 +541,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           },
@@ -662,6 +663,186 @@ describe('Alerts Client', () => {
                   gte: date,
                 },
                 uuid: uuid2,
+                workflow_status: 'open',
+              },
+              space_ids: ['default'],
+              version: '8.9.0',
+            },
+            tags: ['rule-', '-tags'],
+          },
+        ],
+      });
+    });
+
+    test('should not update ongoing alerts in existing index when they are not in the processed alerts', async () => {
+      const activeAlert = {
+        state: { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' },
+        meta: {
+          flapping: false,
+          flappingHistory: [true, false],
+          maintenanceWindowIds: [],
+          lastScheduledActions: { group: 'default', date: new Date() },
+          uuid: 'abc',
+        },
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const activeAlertObj = new Alert<{}, {}, 'default'>('1', activeAlert as any);
+      activeAlertObj.scheduleActions('default', {});
+      const spy = jest
+        .spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts')
+        .mockReturnValueOnce({
+          '1': activeAlertObj, // return only the first (tracked) alert
+        })
+        .mockReturnValueOnce({});
+
+      clusterClient.search.mockResolvedValue({
+        took: 10,
+        timed_out: false,
+        _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+        hits: {
+          total: {
+            relation: 'eq',
+            value: 1,
+          },
+          hits: [
+            {
+              _id: 'abc',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              _source: {
+                '@timestamp': '2023-03-28T12:27:28.159Z',
+                event: {
+                  action: 'active',
+                  kind: 'signal',
+                },
+                kibana: {
+                  alert: {
+                    action_group: 'default',
+                    duration: {
+                      us: '0',
+                    },
+                    flapping: false,
+                    flapping_history: [true],
+                    instance: {
+                      id: '1',
+                    },
+                    rule: {
+                      category: 'My test rule',
+                      consumer: 'bar',
+                      execution: {
+                        uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                      },
+                      name: 'rule-name',
+                      parameters: {
+                        bar: true,
+                      },
+                      producer: 'alerts',
+                      revision: 0,
+                      rule_type_id: 'test.rule-type',
+                      tags: ['rule-', '-tags'],
+                      uuid: '1',
+                    },
+                    start: '2023-03-28T12:27:28.159Z',
+                    status: 'active',
+                    time_range: {
+                      gte: '2023-03-28T12:27:28.159Z',
+                    },
+                    uuid: 'abc',
+                    workflow_status: 'open',
+                  },
+                  space_ids: ['default'],
+                  version: '8.8.0',
+                },
+                tags: ['rule-', '-tags'],
+              },
+            },
+          ],
+        },
+      });
+      const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(alertsClientParams);
+
+      await alertsClient.initializeExecution({
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          '1': activeAlert as any,
+        },
+        recoveredAlertsFromState: {},
+      });
+
+      // Report 1 new alert and 1 active alert
+      const alertExecutorService = alertsClient.factory();
+      alertExecutorService.create('1').scheduleActions('default');
+      alertExecutorService.create('2').scheduleActions('default'); // will be skipped as getProcessedAlerts does not return it
+
+      alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+
+      await alertsClient.persistAlerts();
+
+      expect(spy).toHaveBeenCalledTimes(2);
+      expect(spy).toHaveBeenNthCalledWith(1, 'active');
+      expect(spy).toHaveBeenNthCalledWith(2, 'recovered');
+
+      expect(logger.error).toHaveBeenCalledWith(
+        "Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts"
+      );
+      spy.mockRestore();
+
+      expect(clusterClient.bulk).toHaveBeenCalledWith({
+        index: '.alerts-test.alerts-default',
+        refresh: 'wait_for',
+        require_alias: true,
+        body: [
+          {
+            index: {
+              _id: 'abc',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              require_alias: false,
+            },
+          },
+          // ongoing alert doc
+          {
+            '@timestamp': date,
+            event: {
+              action: 'active',
+              kind: 'signal',
+            },
+            kibana: {
+              alert: {
+                action_group: 'default',
+                duration: {
+                  us: '0',
+                },
+                flapping: false,
+                flapping_history: [true, false],
+                instance: {
+                  id: '1',
+                },
+                maintenance_window_ids: [],
+                rule: {
+                  category: 'My test rule',
+                  consumer: 'bar',
+                  execution: {
+                    uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                  },
+                  name: 'rule-name',
+                  parameters: {
+                    bar: true,
+                  },
+                  producer: 'alerts',
+                  revision: 0,
+                  rule_type_id: 'test.rule-type',
+                  tags: ['rule-', '-tags'],
+                  uuid: '1',
+                },
+                start: '2023-03-28T12:27:28.159Z',
+                status: 'active',
+                time_range: {
+                  gte: '2023-03-28T12:27:28.159Z',
+                },
+                uuid: 'abc',
                 workflow_status: 'open',
               },
               space_ids: ['default'],
@@ -800,7 +981,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           },
@@ -810,7 +991,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true, false],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'def',
             },
           },
@@ -1133,7 +1314,11 @@ describe('Alerts Client', () => {
     });
   });
 
-  describe('getSummarizedAlerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/163192
+  // FLAKY: https://github.com/elastic/kibana/issues/163193
+  // FLAKY: https://github.com/elastic/kibana/issues/163194
+  // FLAKY: https://github.com/elastic/kibana/issues/163195
+  describe.skip('getSummarizedAlerts', () => {
     beforeEach(() => {
       clusterClient.search.mockReturnValue({
         // @ts-ignore
@@ -1775,7 +1960,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           },
@@ -1785,7 +1970,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true, false],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'def',
             },
           },
@@ -1823,7 +2008,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           },
@@ -1833,7 +2018,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true, false],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'def',
             },
           },
@@ -2046,7 +2231,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           },
@@ -2223,7 +2408,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           },
@@ -2411,7 +2596,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           },
@@ -2501,7 +2686,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           },

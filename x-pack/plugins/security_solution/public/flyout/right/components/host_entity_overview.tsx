@@ -9,11 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBetaBadge,
   EuiLink,
   EuiIcon,
   useEuiTheme,
   useEuiFontSize,
+  EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
@@ -21,30 +21,30 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../common/utility_types';
 import {
-  buildHostNamesFilter,
-  RiskScoreEntity,
-  RiskSeverity,
-} from '../../../../common/search_strategy';
+  FirstLastSeen,
+  FirstLastSeenType,
+} from '../../../common/components/first_last_seen/first_last_seen';
+import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
-import { NetworkDetailsLink } from '../../../common/components/links';
 import { DescriptionListStyled } from '../../../common/components/page';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScore } from '../../../explore/components/risk_score/severity/common';
-import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
 import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
 import * as i18n from '../../../overview/components/host_overview/translations';
-import { TECHNICAL_PREVIEW_TITLE, TECHNICAL_PREVIEW_MESSAGE } from './translations';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
-  TECHNICAL_PREVIEW_ICON_TEST_ID,
   ENTITIES_HOST_OVERVIEW_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_IP_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
+  TECHNICAL_PREVIEW_ICON_TEST_ID,
 } from './test_ids';
+import { TECHNICAL_PREVIEW_TITLE, TECHNICAL_PREVIEW_MESSAGE } from './translations';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 
 const HOST_ICON = 'storage';
@@ -105,6 +105,40 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     endDate: to,
   });
 
+  const hostOSFamily: DescriptionList[] = useMemo(
+    () => [
+      {
+        title: i18n.FAMILY,
+        description: (
+          <DefaultFieldRenderer
+            rowItems={getOr([], 'host.os.family', hostDetails)}
+            attrName={'host.os.family'}
+            idPrefix={CONTEXT_ID}
+            isDraggable={false}
+          />
+        ),
+      },
+    ],
+    [hostDetails]
+  );
+
+  const hostLastSeen: DescriptionList[] = useMemo(
+    () => [
+      {
+        title: i18n.LAST_SEEN,
+        description: (
+          <FirstLastSeen
+            indexPatterns={selectedPatterns}
+            field={'host.name'}
+            value={hostName}
+            type={FirstLastSeenType.LAST_SEEN}
+          />
+        ),
+      },
+    ],
+    [hostName, selectedPatterns]
+  );
+
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
@@ -115,16 +149,15 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         title: (
           <>
             {i18n.HOST_RISK_CLASSIFICATION}
-            <EuiBetaBadge
-              css={css`
-                margin-left: ${euiTheme.size.xs};
-              `}
-              label={TECHNICAL_PREVIEW_TITLE}
-              size="s"
-              alignment="baseline"
-              iconType="beaker"
-              tooltipContent={TECHNICAL_PREVIEW_MESSAGE}
-              tooltipPosition="bottom"
+            <EuiIconTip
+              title={TECHNICAL_PREVIEW_TITLE}
+              size="m"
+              type="iInCircle"
+              content={TECHNICAL_PREVIEW_MESSAGE}
+              position="bottom"
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
               data-test-subj={TECHNICAL_PREVIEW_ICON_TEST_ID}
             />
           </>
@@ -134,31 +167,13 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
             {hostRiskData ? (
               <RiskScore severity={hostRiskData.host.risk.calculated_level} />
             ) : (
-              <RiskScore severity={RiskSeverity.unknown} />
+              getEmptyTagValue()
             )}
           </>
         ),
       },
     ];
-  }, [euiTheme.size.xs, hostRisk]);
-
-  const descriptionList: DescriptionList[] = useMemo(
-    () => [
-      {
-        title: i18n.IP_ADDRESSES,
-        description: (
-          <DefaultFieldRenderer
-            rowItems={getOr([], 'host.ip', hostDetails)}
-            attrName={'host.ip'}
-            idPrefix={CONTEXT_ID}
-            isDraggable={false}
-            render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
-          />
-        ),
-      },
-    ],
-    [hostDetails]
-  );
+  }, [hostRisk]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}>
@@ -185,15 +200,20 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         <EuiFlexGroup>
           <EuiFlexItem>
             <OverviewDescriptionList
-              dataTestSubj={ENTITIES_HOST_OVERVIEW_IP_TEST_ID}
-              descriptionList={descriptionList}
+              dataTestSubj={ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID}
+              descriptionList={hostOSFamily}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            {isAuthorized && (
+            {isAuthorized ? (
               <DescriptionListStyled
                 data-test-subj={ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID}
                 listItems={[hostRiskLevel]}
+              />
+            ) : (
+              <OverviewDescriptionList
+                dataTestSubj={ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID}
+                descriptionList={hostLastSeen}
               />
             )}
           </EuiFlexItem>

@@ -42,7 +42,7 @@ import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/ser
 
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
-import { ActionsClient } from './actions_client';
+import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
@@ -96,7 +96,7 @@ import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from
 import {
   isConnectorDeprecated,
   ConnectorWithOptionalDeprecation,
-} from './lib/is_connector_deprecated';
+} from './application/connector/lib';
 import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';

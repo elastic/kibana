@@ -66,7 +66,8 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  describe('Machine learning type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/145776
+  describe.skip('Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
@@ -248,11 +249,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {

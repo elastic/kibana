@@ -30,7 +30,10 @@ function convertMessageToMarkdownCodeBlock(message: Message['message']) {
       args,
     };
   } else {
-    const content = message.content ? JSON.parse(message.content) : undefined;
+    const content =
+      message.role !== MessageRole.Assistant && message.content
+        ? JSON.parse(message.content)
+        : message.content;
     const data = message.data ? JSON.parse(message.data) : undefined;
     value = omitBy(
       {
@@ -113,8 +116,15 @@ export function getTimelineItemsfromConversation({
 
           // User executed a function:
           if (message.message.name && prevFunctionCall) {
-            const parsedContent = JSON.parse(message.message.content ?? 'null');
-            const isError = !!(parsedContent && 'error' in parsedContent);
+            let parsedContent;
+            try {
+              parsedContent = JSON.parse(message.message.content ?? 'null');
+            } catch (error) {
+              parsedContent = message.message.content;
+            }
+
+            const isError =
+              parsedContent && typeof parsedContent === 'object' && 'error' in parsedContent;
 
             title = !isError ? (
               <FormattedMessage
@@ -177,7 +187,7 @@ export function getTimelineItemsfromConversation({
         case MessageRole.Assistant:
           actions.canRegenerate = hasConnector;
           actions.canCopy = true;
-          actions.canGiveFeedback = true;
+          actions.canGiveFeedback = false;
           display.hide = false;
 
           // is a function suggestion by the assistant
@@ -191,9 +201,19 @@ export function getTimelineItemsfromConversation({
                 }}
               />
             );
-            content = convertMessageToMarkdownCodeBlock(message.message);
+            if (message.message.content) {
+              // TODO: we want to show the content always, and hide
+              // the function request initially, but we don't have a
+              // way to do that yet, so we hide the request here until
+              // we have a fix.
+              // element = message.message.content;
+              content = message.message.content;
+              display.collapsed = false;
+            } else {
+              content = convertMessageToMarkdownCodeBlock(message.message);
+              display.collapsed = true;
+            }
 
-            display.collapsed = true;
             actions.canEdit = true;
           } else {
             // is an assistant response

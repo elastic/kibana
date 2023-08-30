@@ -11,8 +11,14 @@ import '@testing-library/jest-dom';
 import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../common/mock';
 import { EntitiesDetails } from './entities_details';
-import { ENTITIES_DETAILS_TEST_ID, HOST_DETAILS_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
+import {
+  ENTITIES_DETAILS_NO_DATA_TEST_ID,
+  ENTITIES_DETAILS_TEST_ID,
+  HOST_DETAILS_TEST_ID,
+  USER_DETAILS_TEST_ID,
+} from './test_ids';
 import { mockContextValue } from '../mocks/mock_context';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../shared/components/test_ids';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -31,6 +37,9 @@ jest.mock('react-redux', () => {
   };
 });
 
+const USER_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID);
+const HOST_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID);
+
 describe('<EntitiesDetails />', () => {
   it('renders entities details correctly', () => {
     const { getByTestId } = render(
@@ -41,12 +50,12 @@ describe('<EntitiesDetails />', () => {
       </TestProviders>
     );
     expect(getByTestId(ENTITIES_DETAILS_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(USER_DETAILS_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(HOST_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
   });
 
-  it('does not render user and host details if user name and host name are not available', () => {
-    const { queryByTestId } = render(
+  it('should render no data message if user name and host name are not available', () => {
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <LeftPanelContext.Provider
           value={{
@@ -59,12 +68,13 @@ describe('<EntitiesDetails />', () => {
         </LeftPanelContext.Provider>
       </TestProviders>
     );
-    expect(queryByTestId(USER_DETAILS_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(HOST_DETAILS_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('does not render user and host details if @timestamp is not available', () => {
-    const { queryByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <LeftPanelContext.Provider
           value={{
@@ -85,7 +95,8 @@ describe('<EntitiesDetails />', () => {
         </LeftPanelContext.Provider>
       </TestProviders>
     );
-    expect(queryByTestId(USER_DETAILS_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(HOST_DETAILS_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
 });

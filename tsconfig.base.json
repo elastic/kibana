@@ -66,6 +66,8 @@
       "@kbn/analytics-shippers-gainsight/*": ["packages/analytics/shippers/gainsight/*"],
       "@kbn/apm-config-loader": ["packages/kbn-apm-config-loader"],
       "@kbn/apm-config-loader/*": ["packages/kbn-apm-config-loader/*"],
+      "@kbn/apm-data-access-plugin": ["x-pack/plugins/apm_data_access"],
+      "@kbn/apm-data-access-plugin/*": ["x-pack/plugins/apm_data_access/*"],
       "@kbn/apm-plugin": ["x-pack/plugins/apm"],
       "@kbn/apm-plugin/*": ["x-pack/plugins/apm/*"],
       "@kbn/apm-synthtrace": ["packages/kbn-apm-synthtrace"],
@@ -672,6 +674,8 @@
       "@kbn/ecs-data-quality-dashboard-plugin/*": ["x-pack/plugins/ecs_data_quality_dashboard/*"],
       "@kbn/elastic-assistant": ["x-pack/packages/kbn-elastic-assistant"],
       "@kbn/elastic-assistant/*": ["x-pack/packages/kbn-elastic-assistant/*"],
+      "@kbn/elastic-assistant-plugin": ["x-pack/plugins/elastic_assistant"],
+      "@kbn/elastic-assistant-plugin/*": ["x-pack/plugins/elastic_assistant/*"],
       "@kbn/elasticsearch-client-plugin": ["test/plugin_functional/plugins/elasticsearch_client_plugin"],
       "@kbn/elasticsearch-client-plugin/*": ["test/plugin_functional/plugins/elasticsearch_client_plugin/*"],
       "@kbn/elasticsearch-client-xpack-plugin": ["x-pack/test/plugin_api_integration/plugins/elasticsearch_client"],
@@ -1026,6 +1030,8 @@
       "@kbn/newsfeed-plugin/*": ["src/plugins/newsfeed/*"],
       "@kbn/newsfeed-test-plugin": ["test/common/plugins/newsfeed"],
       "@kbn/newsfeed-test-plugin/*": ["test/common/plugins/newsfeed/*"],
+      "@kbn/no-data-page-plugin": ["src/plugins/no_data_page"],
+      "@kbn/no-data-page-plugin/*": ["src/plugins/no_data_page/*"],
       "@kbn/notifications-plugin": ["x-pack/plugins/notifications"],
       "@kbn/notifications-plugin/*": ["x-pack/plugins/notifications/*"],
       "@kbn/object-versioning": ["packages/kbn-object-versioning"],
@@ -1200,6 +1206,8 @@
       "@kbn/security-solution-side-nav/*": ["x-pack/packages/security-solution/side_nav/*"],
       "@kbn/security-solution-storybook-config": ["x-pack/packages/security-solution/storybook/config"],
       "@kbn/security-solution-storybook-config/*": ["x-pack/packages/security-solution/storybook/config/*"],
+      "@kbn/security-solution-upselling": ["x-pack/packages/security-solution/upselling"],
+      "@kbn/security-solution-upselling/*": ["x-pack/packages/security-solution/upselling/*"],
       "@kbn/security-test-endpoints-plugin": ["x-pack/test/security_functional/plugins/test_endpoints"],
       "@kbn/security-test-endpoints-plugin/*": ["x-pack/test/security_functional/plugins/test_endpoints/*"],
       "@kbn/securitysolution-autocomplete": ["packages/kbn-securitysolution-autocomplete"],
@@ -1646,3 +1654,4 @@
     ]
   }
 }
+

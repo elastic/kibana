@@ -20,7 +20,10 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
-import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
+import {
+  CloudPostureTableResult,
+  useCloudPostureTable,
+} from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
 import type { VulnerabilitiesQueryData } from './types';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
@@ -63,67 +66,35 @@ const getDefaultQuery = ({ query, filters }: any): any => ({
   pageIndex: 0,
 });
 
-export const Vulnerabilities = () => {
-  const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
-  const getSetupStatus = useCspSetupStatusApi();
-
-  if (getSetupStatus?.data?.vuln_mgmt?.status !== 'indexed') return <NoVulnerabilitiesStates />;
-
-  if (error) {
-    return <ErrorCallout error={error as Error} />;
-  }
-  if (isLoading) {
-    return defaultLoadingRenderer();
-  }
-
-  if (!data) {
-    return defaultNoDataRenderer();
-  }
-
-  return (
-    <Routes>
-      <Route
-        exact
-        path={findingsNavigation.resource_vulnerabilities.path}
-        render={() => <ResourceVulnerabilities dataView={data} />}
-      />
-      <Route
-        exact
-        path={findingsNavigation.vulnerabilities_by_resource.path}
-        render={() => <VulnerabilitiesByResource dataView={data} />}
-      />
-      <Route
-        path={findingsNavigation.vulnerabilities.path}
-        render={() => <VulnerabilitiesContent dataView={data} />}
-      />
-    </Routes>
-  );
-};
-
 const VulnerabilitiesDataGrid = ({
   dataView,
   data,
   isFetching,
+  onChangeItemsPerPage,
+  onChangePage,
+  onSort,
+  urlQuery,
+  onResetFilters,
+  pageSize,
+  setUrlQuery,
+  pageIndex,
+  sort,
 }: {
   dataView: DataView;
   data: VulnerabilitiesQueryData | undefined;
   isFetching: boolean;
-}) => {
-  const {
-    pageIndex,
-    sort,
-    pageSize,
-    onChangeItemsPerPage,
-    onChangePage,
-    onSort,
-    urlQuery,
-    setUrlQuery,
-    onResetFilters,
-  } = useCloudPostureTable({
-    dataView,
-    defaultQuery: getDefaultQuery,
-    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
-  });
+} & Pick<
+  CloudPostureTableResult,
+  | 'pageIndex'
+  | 'sort'
+  | 'pageSize'
+  | 'onChangeItemsPerPage'
+  | 'onChangePage'
+  | 'onSort'
+  | 'urlQuery'
+  | 'setUrlQuery'
+  | 'onResetFilters'
+>) => {
   const { euiTheme } = useEuiTheme();
   const styles = useStyles();
   const [showHighlight, setHighlight] = useState(false);
@@ -131,7 +102,9 @@ const VulnerabilitiesDataGrid = ({
   const invalidIndex = -1;
 
   const selectedVulnerability = useMemo(() => {
-    return data?.page[urlQuery.vulnerabilityIndex];
+    if (urlQuery.vulnerabilityIndex !== undefined) {
+      return data?.page[urlQuery.vulnerabilityIndex];
+    }
   }, [data?.page, urlQuery.vulnerabilityIndex]);
 
   const onCloseFlyout = () => {
@@ -165,10 +138,8 @@ const VulnerabilitiesDataGrid = ({
         (vulnerabilityRecord: VulnerabilitiesQueryData['page'][number]) =>
           vulnerabilityRecord.vulnerability?.id === vulnerabilityRow.vulnerability?.id &&
           vulnerabilityRecord.resource?.id === vulnerabilityRow.resource?.id &&
-          vulnerabilityRecord.vulnerability.package.name ===
-            vulnerabilityRow.vulnerability.package.name &&
-          vulnerabilityRecord.vulnerability.package.version ===
-            vulnerabilityRow.vulnerability.package.version
+          vulnerabilityRecord.package.name === vulnerabilityRow.package.name &&
+          vulnerabilityRecord.package.version === vulnerabilityRow.package.version
       );
       setUrlQuery({
         vulnerabilityIndex,
@@ -194,7 +165,9 @@ const VulnerabilitiesDataGrid = ({
 
   const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
 
-  const selectedVulnerabilityIndex = flyoutVulnerabilityIndex + pageIndex * pageSize;
+  const selectedVulnerabilityIndex = flyoutVulnerabilityIndex
+    ? flyoutVulnerabilityIndex + pageIndex * pageSize
+    : undefined;
 
   const renderCellValue = useMemo(() => {
     const Cell: React.FC<EuiDataGridCellValueElementProps> = ({
@@ -254,8 +227,11 @@ const VulnerabilitiesDataGrid = ({
           />
         );
       }
-      if (columnId === vulnerabilitiesColumns.resource) {
+      if (columnId === vulnerabilitiesColumns.resourceName) {
         return <>{vulnerabilityRow.resource?.name}</>;
+      }
+      if (columnId === vulnerabilitiesColumns.resourceId) {
+        return <>{vulnerabilityRow.resource?.id}</>;
       }
       if (columnId === vulnerabilitiesColumns.severity) {
         if (!vulnerabilityRow.vulnerability.severity) {
@@ -265,13 +241,13 @@ const VulnerabilitiesDataGrid = ({
       }
 
       if (columnId === vulnerabilitiesColumns.package) {
-        return <>{vulnerabilityRow.vulnerability?.package?.name}</>;
+        return <>{vulnerabilityRow?.package?.name}</>;
       }
       if (columnId === vulnerabilitiesColumns.version) {
-        return <>{vulnerabilityRow.vulnerability?.package?.version}</>;
+        return <>{vulnerabilityRow?.package?.version}</>;
       }
-      if (columnId === vulnerabilitiesColumns.fix_version) {
-        return <>{vulnerabilityRow.vulnerability?.package?.fixed_version}</>;
+      if (columnId === vulnerabilitiesColumns.fixedVersion) {
+        return <>{vulnerabilityRow?.package?.fixed_version}</>;
       }
 
       return null;
@@ -389,8 +365,21 @@ const VulnerabilitiesDataGrid = ({
     </>
   );
 };
+
 const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
-  const { pageIndex, query, sort, queryError, pageSize, setUrlQuery } = useCloudPostureTable({
+  const {
+    sort,
+    query,
+    queryError,
+    pageSize,
+    pageIndex,
+    onChangeItemsPerPage,
+    onChangePage,
+    onSort,
+    urlQuery,
+    setUrlQuery,
+    onResetFilters,
+  } = useCloudPostureTable({
     dataView,
     defaultQuery: getDefaultQuery,
     paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
@@ -442,8 +431,58 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
       <EuiSpacer size="m" />
       {error && <ErrorCallout error={error as Error} />}
       {!error && (
-        <VulnerabilitiesDataGrid dataView={dataView} data={data} isFetching={isFetching} />
+        <VulnerabilitiesDataGrid
+          dataView={dataView}
+          data={data}
+          isFetching={isFetching}
+          pageIndex={pageIndex}
+          sort={sort}
+          pageSize={pageSize}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onChangePage={onChangePage}
+          onSort={onSort}
+          urlQuery={urlQuery}
+          onResetFilters={onResetFilters}
+          setUrlQuery={setUrlQuery}
+        />
       )}
     </>
+  );
+};
+
+export const Vulnerabilities = () => {
+  const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
+  const getSetupStatus = useCspSetupStatusApi();
+
+  if (getSetupStatus?.data?.vuln_mgmt?.status !== 'indexed') return <NoVulnerabilitiesStates />;
+
+  if (error) {
+    return <ErrorCallout error={error as Error} />;
+  }
+  if (isLoading) {
+    return defaultLoadingRenderer();
+  }
+
+  if (!data) {
+    return defaultNoDataRenderer();
+  }
+
+  return (
+    <Routes>
+      <Route
+        exact
+        path={findingsNavigation.resource_vulnerabilities.path}
+        render={() => <ResourceVulnerabilities dataView={data} />}
+      />
+      <Route
+        exact
+        path={findingsNavigation.vulnerabilities_by_resource.path}
+        render={() => <VulnerabilitiesByResource dataView={data} />}
+      />
+      <Route
+        path={findingsNavigation.vulnerabilities.path}
+        render={() => <VulnerabilitiesContent dataView={data} />}
+      />
+    </Routes>
   );
 };

@@ -10,6 +10,8 @@
     "public/**/*.tsx",
     "server/**/*.ts",
     "../../../typings/**/*"
+    ,
+    "../../packages/security-solution/upselling/sections/generic_upselling_section.tsx"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
@@ -23,6 +25,7 @@
     "@kbn/shared-ux-page-solution-nav",
     "@kbn/security-solution-side-nav",
     "@kbn/security-solution-navigation",
+    "@kbn/security-solution-upselling",
     "@kbn/default-nav-ml",
     "@kbn/default-nav-devtools",
     "@kbn/kibana-react-plugin",
@@ -38,5 +41,7 @@
     "@kbn/cloud-security-posture-plugin",
     "@kbn/fleet-plugin",
     "@kbn/serverless-security-settings",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/usage-collection-plugin"
   ]
 }

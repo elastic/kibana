@@ -91,6 +91,9 @@ export function ChatPromptEditor({
   };
 
   const handleSubmit = useCallback(async () => {
+    if (loading) {
+      return;
+    }
     const currentPrompt = prompt;
     const currentPayload = functionPayload;
 
@@ -120,12 +123,11 @@ export function ChatPromptEditor({
           '@timestamp': new Date().toISOString(),
           message: { role: MessageRole.User, content: currentPrompt },
         });
-        setPrompt('');
       }
     } catch (_) {
       setPrompt(currentPrompt);
     }
-  }, [functionPayload, onSubmit, prompt, selectedFunctionName]);
+  }, [functionPayload, loading, onSubmit, prompt, selectedFunctionName]);
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
@@ -166,6 +168,7 @@ export function ChatPromptEditor({
                   <FunctionListPopover
                     selectedFunctionName={selectedFunctionName}
                     onSelectFunction={handleSelectFunction}
+                    disabled={loading || disabled}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -174,6 +177,7 @@ export function ChatPromptEditor({
                       iconType="cross"
                       iconSide="right"
                       size="xs"
+                      disabled={loading || disabled}
                       onClick={handleClearSelection}
                     >
                       {i18n.translate('xpack.observabilityAiAssistant.prompt.emptySelection', {
@@ -234,10 +238,11 @@ export function ChatPromptEditor({
                 </EuiPanel>
               ) : (
                 <EuiTextArea
+                  disabled={disabled}
                   fullWidth
                   inputRef={textAreaRef}
                   placeholder={i18n.translate('xpack.observabilityAiAssistant.prompt.placeholder', {
-                    defaultMessage: 'Press ‘$’ for function recommendations',
+                    defaultMessage: 'Send a message to the Assistant',
                   })}
                   resize="vertical"
                   rows={1}
