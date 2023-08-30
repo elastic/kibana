@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { useLicense } from '../../hooks/use_license';
 import { NewChatButton } from '../buttons/new_chat_button';
 
 const containerClassName = css`
@@ -47,7 +46,6 @@ export function ConversationList({
   loading,
   error,
   conversations,
-  onClickConversation,
   onClickNewChat,
   onClickDeleteConversation,
 }: {
@@ -55,13 +53,9 @@ export function ConversationList({
   loading: boolean;
   error?: any;
   conversations?: Array<{ id: string; label: string; href?: string }>;
-  onClickConversation: (conversationId: string) => void;
   onClickNewChat: () => void;
   onClickDeleteConversation: (id: string) => void;
 }) {
-  const { hasAtLeast } = useLicense();
-  const hasCorrectLicense = hasAtLeast('enterprise');
-
   return (
     <EuiPanel paddingSize="s" hasShadow={false} className={panelClassName}>
       <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
