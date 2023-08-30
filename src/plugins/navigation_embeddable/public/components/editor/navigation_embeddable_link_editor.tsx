@@ -138,6 +138,7 @@ export const NavigationEmbeddableLinkEditor = ({
               options={linkTypes}
               idSelected={selectedLinkType}
               onChange={(id) => {
+                setDestinationError(undefined);
                 if (link?.type === id) {
                   setLinkDestination(link.destination);
                   setCurrentLinkLabel(link.label ?? '');
