@@ -5,12 +5,13 @@
  * 2.0.
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddable-utils';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { RegisterFunctionDefinition } from '../../common/types';
-import { useKibana } from '../hooks/use_kibana';
 import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
@@ -33,20 +34,16 @@ function Lens({
   xyDataLayer,
   start,
   end,
+  lens,
+  dataViews,
 }: {
   indexPattern: string;
   xyDataLayer: XYDataLayer;
   start: string;
   end: string;
+  lens: LensPublicStart;
+  dataViews: DataViewsServicePublic;
 }) {
-  const {
-    services: {
-      plugins: {
-        start: { lens, dataViews },
-      },
-    },
-  } = useKibana();
-
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
@@ -214,7 +211,16 @@ export function registerLensFunction({
         },
       });
 
-      return <Lens indexPattern={indexPattern} xyDataLayer={xyDataLayer} start={start} end={end} />;
+      return (
+        <Lens
+          indexPattern={indexPattern}
+          xyDataLayer={xyDataLayer}
+          start={start}
+          end={end}
+          lens={pluginsStart.lens}
+          dataViews={pluginsStart.dataViews}
+        />
+      );
     }
   );
 }
