@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
+import { protectionUpdatesNoteSavedObjectType } from '../../endpoint/lib/protection_updates_note/saved_object_mappings';
 import { APP_ID } from '../../../common';
 
 const endpointListSubFeature: SubFeatureConfig = {
@@ -305,7 +306,7 @@ const policyManagementSubFeature: SubFeatureConfig = {
           includeIn: 'none',
           name: 'All',
           savedObject: {
-            all: [],
+            all: [protectionUpdatesNoteSavedObjectType],
             read: [],
           },
           ui: ['writePolicyManagement', 'readPolicyManagement'],
@@ -317,7 +318,7 @@ const policyManagementSubFeature: SubFeatureConfig = {
           name: 'Read',
           savedObject: {
             all: [],
-            read: [],
+            read: [protectionUpdatesNoteSavedObjectType],
           },
           ui: ['readPolicyManagement'],
         },
