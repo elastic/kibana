@@ -81,6 +81,10 @@ export const Overview = () => {
           metricsDataView={metrics.dataView}
           nodeName={asset.name}
           isCompactView={renderMode?.mode === 'flyout'}
+          showNginxStubstatus={
+            !!metadata?.features.find((feature) => feature.name === 'nginx.stubstatus')
+          }
+          showNginxAccess={!!metadata?.features.find((feature) => feature.name === 'nginx.acces')}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

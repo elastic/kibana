@@ -31,6 +31,8 @@ import {
   memoryUsed,
   memoryFreeExcludingCache,
   memoryCache,
+  nginxActiveConnections,
+  nginxRequestRate,
   rx,
   tx,
   hostCount,
@@ -63,6 +65,8 @@ export const hostLensFormulas = {
   memoryUsed,
   memoryFreeExcludingCache,
   memoryCache,
+  nginxActiveConnections,
+  nginxRequestRate,
   rx,
   tx,
 };

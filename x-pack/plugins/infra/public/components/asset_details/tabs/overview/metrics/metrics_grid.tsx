@@ -12,6 +12,10 @@ import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import {
+  nginxStubstatusMetrics,
+  nginxAccessMetrics,
+} from '../../../../../common/visualizations/lens/dashboards/asset_details/host/nginx_charts';
+import {
   assetDetailsDashboards,
   XY_MISSING_VALUE_DOTTED_LINE_CONFIG,
 } from '../../../../../common/visualizations';
@@ -30,10 +34,20 @@ interface Props {
   metricsDataView?: DataView;
   logsDataView?: DataView;
   isCompactView: boolean;
+  showNginxStubstatus: boolean;
+  showNginxAccess: boolean;
 }
 
 export const MetricsGrid = React.memo(
-  ({ nodeName, metricsDataView, logsDataView, timeRange, isCompactView }: Props) => {
+  ({
+    nodeName,
+    metricsDataView,
+    logsDataView,
+    timeRange,
+    isCompactView,
+    showNginxStubstatus,
+    showNginxAccess,
+  }: Props) => {
     const { setDateRange } = useDateRangeProviderContext();
     const getDataView = useCallback(
       (dataViewOrigin: DataViewOrigin) => {
@@ -41,6 +55,9 @@ export const MetricsGrid = React.memo(
       },
       [logsDataView, metricsDataView]
     );
+
+    const nginxStubstatusCharts = showNginxStubstatus ? nginxStubstatusMetrics : [];
+    const nginxAccessCharts = showNginxAccess ? nginxAccessMetrics : [];
 
     const getFilters = useCallback(
       (dataViewOrigin: DataViewOrigin) => {
@@ -81,7 +98,11 @@ export const MetricsGrid = React.memo(
           >
             {(isCompactView
               ? assetDetailsDashboards.host.hostMetricCharts
-              : assetDetailsDashboards.host.hostMetricChartsFullPage
+              : [
+                  ...assetDetailsDashboards.host.hostMetricChartsFullPage,
+                  // ...nginxStubstatusCharts,
+                  // ...nginxAccessCharts,
+                ]
             ).map(({ dataViewOrigin, id, layers, title, overrides }, index) => (
               <EuiFlexItem key={index} grow={false}>
                 <LensChart
@@ -102,6 +123,49 @@ export const MetricsGrid = React.memo(
             ))}
           </EuiFlexGrid>
         </EuiFlexItem>
+        {!isCompactView && (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <span>
+                  <FormattedMessage
+                    id="xpack.infra.assetDetails.overview.nginxMetricsSectionTitle"
+                    defaultMessage="Nginx Metrics"
+                  />
+                </span>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="s" />
+              <EuiFlexGrid
+                columns={2}
+                gutterSize="s"
+                data-test-subj="infraAssetDetailsMetricsChartGrid"
+              >
+                {[...nginxStubstatusCharts, ...nginxAccessCharts].map(
+                  ({ dataViewOrigin, id, layers, title, overrides }, index) => (
+                    <EuiFlexItem key={index} grow={false}>
+                      <LensChart
+                        id={`infraAssetDetailsMetricsChart${id}`}
+                        borderRadius="m"
+                        dataView={getDataView(dataViewOrigin)}
+                        dateRange={timeRange}
+                        height={METRIC_CHART_HEIGHT}
+                        visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG}
+                        layers={layers}
+                        filters={getFilters(dataViewOrigin)}
+                        title={title}
+                        overrides={overrides}
+                        visualizationType="lnsXY"
+                        onBrushEnd={handleBrushEnd}
+                      />
+                    </EuiFlexItem>
+                  )
+                )}
+              </EuiFlexGrid>
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
     );
   }

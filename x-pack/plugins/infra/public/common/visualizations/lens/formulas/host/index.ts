@@ -31,5 +31,7 @@ export { memoryFree } from './memory_free';
 export { memoryUsed } from './memory_used';
 export { memoryFreeExcludingCache } from './memory_free_excluding_cache';
 export { memoryCache } from './memory_cache';
+export { nginxRequestRate } from './nginx_request_rate';
+export { nginxActiveConnections } from './nginx_active_connections';
 export { rx } from './rx';
 export { tx } from './tx';
