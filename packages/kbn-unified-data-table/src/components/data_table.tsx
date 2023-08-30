@@ -34,12 +34,12 @@ import {
   type UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
-import { Serializable } from '@kbn/utility-types';
+import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord, DocViewFilterFn } from '@kbn/discover-utils/types';
 import { getShouldShowFieldHandler, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedDataTableSettings, ValueToStringConverter } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
@@ -131,11 +131,11 @@ export interface UnifiedDataTableProps {
    */
   settings?: UnifiedDataTableSettings;
   /**
-   * Saved search description
+   * Search description
    */
   searchDescription?: string;
   /**
-   * Saved search title
+   * Search title
    */
   searchTitle?: string;
   /**
@@ -718,7 +718,7 @@ export const UnifiedDataTable = ({
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
     return (
-      <div className="euiDataGrid__loading" data-test-subj="discoverDataGridLoading">
+      <div className="euiDataGrid__loading" data-test-subj="unifiedDataTableLoading">
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />

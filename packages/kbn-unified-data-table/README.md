@@ -20,8 +20,8 @@ Props description:
 | **sampleSize** | number | The max size of the documents returned by Elasticsearch. |
 | **setExpandedDoc** | (optional)(doc?: DataTableRecord) => void; | Function to set the expanded document, which is displayed in a flyout. |
 | **settings** | (optional)UnifiedDataTableSettings | Grid display settings persisted in Elasticsearch (e.g. column width). |
-| **searchDescription** | (optional)string | Saved search description. |
-| **searchTitle** | (optional)string | Saved search title. |
+| **searchDescription** | (optional)string | Search description. |
+| **searchTitle** | (optional)string | Search title. |
 | **showTimeCol** | boolean | Determines whether the time columns should be displayed (legacy settings). |
 | **showFullScreenButton** | (optional)boolean | Determines whether the full screen button should be displayed. |
 | **isSortEnabled** | (optional)boolean | Manage user sorting control. |
@@ -66,7 +66,11 @@ Props description:
 Usage example:
 
 ```
-    <UnifiedDataTable
+    // Memoize unified data table to avoid the unnecessary re-renderings
+    const DataTableMemoized = React.memo(UnifiedDataTable);
+
+   // Add memoized component with all needed props
+    <DataTableMemoized
       ariaLabelledBy="timelineDocumentsAriaLabel"
       className={'unifiedDataTableTimeline'}
       columns={['event.category', 'event.action', 'host.name', 'user.name']}
