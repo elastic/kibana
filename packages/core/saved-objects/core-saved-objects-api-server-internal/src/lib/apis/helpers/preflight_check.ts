@@ -7,10 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  isNotFoundFromUnsupportedServer,
-  isSupportedEsServer,
-} from '@kbn/core-elasticsearch-server-internal';
+import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
@@ -156,32 +153,32 @@ export class PreflightCheckHelper {
   /**
    * Pre-flight check to ensure that a multi-namespace object exists in the current namespace.
    checkDocResult
-rawDocSource
-    * if a multi-namespace type isn't found it might still exist in another namespace
+   rawDocSource
+   * if a multi-namespace type isn't found it might still exist in another namespace
    */
   public async preflightGetDocForUpdate({
     type,
     id,
     namespace,
   }: PreflightDocParams): Promise<PreflightDocResult> {
-    const response = await this.client.get<SavedObjectsRawDocSource>(
+    const { statusCode, body, headers } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this.serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
       },
       { ignore: [404], meta: true }
     );
-    const indexFound = response.statusCode !== 404;
 
-    if (!indexFound && !isSupportedEsServer(response.headers)) {
-      // checking if the 404 is from Elasticsearch
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    // checking if the 404 is from Elasticsearch
+    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
     }
 
-    if (indexFound && isFoundGetResponse(response.body)) {
+    const indexFound = statusCode !== 404;
+    if (indexFound && isFoundGetResponse(body)) {
       return {
         checkDocFound: 'found',
-        rawDocSource: response.body,
+        rawDocSource: body,
       };
     }
 
@@ -285,6 +282,7 @@ export interface PreflightNSParams {
   /** Optional; for a pre-fetched object */
   preflightDocResult: PreflightDocResult;
 }
+
 /**
  * @internal
  */

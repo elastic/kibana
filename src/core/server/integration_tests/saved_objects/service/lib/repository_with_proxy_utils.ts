@@ -28,6 +28,7 @@ export const setProxyInterrupt = (
     | 'deleteByNamespace'
     | 'internalBulkResolve'
     | 'update'
+    | 'updatePreflight'
     | null
 ) => (proxyInterrupt = testArg);
 
@@ -64,7 +65,11 @@ export const declareGetRoute = (
     path: `/${kbnIndex}/_doc/{type*}`,
     options: {
       handler: (req, h) => {
-        if (req.params.type === 'my_type:myTypeId1' || req.params.type === 'my_type:myType_123') {
+        if (
+          req.params.type === 'my_type:myTypeId1' ||
+          req.params.type === 'my_type:myType_123' ||
+          proxyInterrupt === 'updatePreflight'
+        ) {
           return proxyResponseHandler(h, hostname, port);
         } else {
           return relayHandler(h, hostname, port);
