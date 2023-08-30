@@ -20,6 +20,8 @@ describe('Alerts Table Action column', { tags: ['@ess', '@serverless'] }, () => 
     cleanKibana();
     cy.task('esArchiverLoad', {
       archiveName: 'process_ancestry',
+      useCreate: true,
+      docsOnly: true,
     });
   });
 

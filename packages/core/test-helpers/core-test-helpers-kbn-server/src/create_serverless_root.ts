@@ -113,22 +113,44 @@ const getServerlessESClient = () => {
   });
 };
 
-const defaults = {
-  server: {
-    restrictInternalApis: true,
-    versioned: {
-      versionResolution: 'newest',
-      strictClientVersionCheck: false,
+const getServerlessDefault = () => {
+  return {
+    server: {
+      restrictInternalApis: true,
+      versioned: {
+        versionResolution: 'newest',
+        strictClientVersionCheck: false,
+      },
     },
-  },
-  migrations: {
-    algorithm: 'zdt',
-  },
-  elasticsearch: {
-    serviceAccountToken: 'BEEF',
-  },
+    migrations: {
+      algorithm: 'zdt',
+      zdt: {
+        runOnRoles: ['ui'],
+      },
+    },
+    logging: {
+      loggers: [
+        {
+          name: 'root',
+          level: 'error',
+          appenders: ['console'],
+        },
+        {
+          name: 'elasticsearch.deprecation',
+          level: 'all',
+          appenders: ['deprecation'],
+        },
+      ],
+      appenders: {
+        deprecation: { type: 'console', layout: { type: 'json' } },
+        console: { type: 'console', layout: { type: 'pattern' } },
+      },
+    },
+  };
 };
-
 function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
-  return createRoot(defaultsDeep(settings, defaults), { ...cliArgs, serverless: true });
+  return createRoot(defaultsDeep(settings, getServerlessDefault()), {
+    ...cliArgs,
+    serverless: true,
+  });
 }
