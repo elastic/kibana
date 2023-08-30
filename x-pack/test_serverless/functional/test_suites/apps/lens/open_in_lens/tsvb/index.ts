@@ -72,6 +72,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     loadTestFile(require.resolve('./metric'));
     loadTestFile(require.resolve('./gauge'));
     loadTestFile(require.resolve('./timeseries'));
+    loadTestFile(require.resolve('./dashboard'));
     loadTestFile(require.resolve('./top_n'));
     loadTestFile(require.resolve('./table'));
   });

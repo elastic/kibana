@@ -115,7 +115,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
 
-    it('should bring the ignore global filters configured at panel level over - nick', async () => {
+    it('should bring the ignore global filters configured at panel level over', async () => {
       const visPanel = await panelActions.getPanelHeading('Gauge - Ignore global filters panel');
       await panelActions.convertToLens(visPanel)
       await lens.waitForVisualization('mtrVis');
