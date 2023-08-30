@@ -12,7 +12,6 @@ import {
   getAddressFromStackFrameID,
   getCalleeFunction,
   getCalleeSource,
-  getFileIDFromStackFrameID,
   getFrameSymbolStatus,
   getLanguageType,
 } from './profiling';

@@ -11,11 +11,6 @@ export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
 
-/* eslint no-bitwise: ["error", { "allow": ["&"] }] */
-export function getFileIDFromStackFrameID(frameID: StackFrameID): FileID {
-  return frameID.slice(0, 21) + safeBase64Encoder[frameID.charCodeAt(21) & 0x30];
-}
-
 /* eslint no-bitwise: ["error", { "allow": ["<<=", "&"] }] */
 export function getAddressFromStackFrameID(frameID: StackFrameID): number {
   let address = charCodeAt(frameID, 21) & 0xf;
