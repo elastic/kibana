@@ -840,6 +840,8 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /test/functional/apps/visualize/ @elastic/kibana-visualizations
 /x-pack/test/functional/apps/graph @elastic/kibana-visualizations
 /test/api_integration/apis/event_annotations @elastic/kibana-visualizations
+/x-pack/test_serverless/functional/test_suites/apps/lens/ @elastic/kibana-visualizations
+/x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
 
 # Global Experience
 
