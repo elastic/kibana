@@ -30,6 +30,7 @@ import type {
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   ContextDefinition,
   FunctionDefinition,
@@ -38,7 +39,6 @@ import type {
   RegisterFunctionDefinition,
 } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
-import { SharePluginStart } from '@kbn/share-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
