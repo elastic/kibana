@@ -84,7 +84,6 @@ describe.skip('Isolate command', { tags: ['@ess', '@serverless'] }, () => {
 
       filterOutIsolatedHosts();
       cy.contains('No items found');
-      cy.getByTestSubj('adminSearchBar').click();
       cy.getByTestSubj('adminSearchBar').type('{selectall}{backspace}');
       cy.getByTestSubj('querySubmitButton').click();
       cy.getByTestSubj('endpointTableRowActions').click();
@@ -106,7 +105,6 @@ describe.skip('Isolate command', { tags: ['@ess', '@serverless'] }, () => {
       releaseHostWithComment(releaseComment, createdHost.hostname);
       cy.contains('Confirm').click();
       cy.getByTestSubj('euiFlyoutCloseButton').click();
-      cy.getByTestSubj('adminSearchBar').click();
       cy.getByTestSubj('adminSearchBar').type('{selectall}{backspace}');
       cy.getByTestSubj('querySubmitButton').click();
       checkEndpointListForOnlyUnIsolatedHosts();
