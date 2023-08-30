@@ -120,7 +120,6 @@ export class PreflightCheckHelper {
     if (!this.registry.isMultiNamespace(type)) {
       throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
     }
-    // To be replaced with doc from args. Implies unit test updates
     const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this.serializer.generateRawId(undefined, type, id),

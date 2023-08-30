@@ -113,8 +113,6 @@ export const executeUpdate = async <T>(
   });
 
   // validate if an update (directly update or create the object instead) can be done, based on if the doc exists or not
-  // extract into canUpdate and canUpsert method instead where it mustn't be possible for BOTH to be true. It's either an update existing thing or create non-existing thing
-  // can perform request START
   const docOutsideNamespace = preflightDocNSResult?.checkResult === 'found_outside_namespace';
   const docNotFound =
     preflightDocNSResult?.checkResult === 'not_found' ||
@@ -142,9 +140,7 @@ export const executeUpdate = async <T>(
       { migrationVersionCompatibility }
     );
     try {
-      migrated = migrationHelper.migrateStorageDocument(document, {
-        downwardConversion: 'allow',
-      }) as SavedObject<T>;
+      migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
     } catch (migrateStorageDocError) {
       throw SavedObjectsErrorHelpers.decorateGeneralError(
         migrateStorageDocError,
@@ -172,7 +168,6 @@ export const executeUpdate = async <T>(
   if (shouldPerformUpsert) {
     // ignore attributes if creating a new doc: only use the upsert attributes
     // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
-    // replace inners of conditional with helper function
     const migratedUpsert = migrationHelper.migrateInputDocument({
       id,
       type,
