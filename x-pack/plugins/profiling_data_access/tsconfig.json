@@ -5,6 +5,8 @@
   },
   "include": [
     "server/**/*",
+    "common/**/*.ts",
+    "common/**/*.json",
     "jest.config.js"
   ],
   "exclude": [
