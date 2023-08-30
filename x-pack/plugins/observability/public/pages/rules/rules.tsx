@@ -78,6 +78,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
         <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />
       ),
       onClick: () => history.push(RULES_LOGS_PATH),
+      ['data-test-subj']: 'ruleLogsTab',
     },
   ];
 
@@ -119,8 +120,8 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
         pageTitle: i18n.translate('xpack.observability.rulesTitle', {
           defaultMessage: 'Rules',
         }),
-        tabs,
         rightSideItems,
+        tabs,
       }}
       data-test-subj="rulesPage"
     >
