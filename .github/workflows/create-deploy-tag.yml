@@ -21,7 +21,8 @@ jobs:
     # Temporary, we need a way to limit this to a GitHub team instead of specific users
     if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck"]', github.triggering_actor)
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
