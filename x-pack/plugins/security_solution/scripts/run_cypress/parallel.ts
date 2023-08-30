@@ -14,7 +14,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
-import minimatch from 'minimatch';
 import path from 'path';
 import grep from '@cypress/grep/src/plugin';
 
@@ -95,26 +94,26 @@ export const cli = () => {
       );
 
       if (argv.changedSpecsOnly) {
-        const basePath = process.cwd().split('kibana/')[1];
-        files = findChangedFiles('main', false)
-          .filter(
-            minimatch.filter(path.join(basePath, cypressConfigFile?.e2e?.specPattern), {
-              matchBase: true,
-            })
-          )
-          .map((filePath: string) => filePath.replace(basePath, '.'));
-
-        if (!files?.length) {
-          // eslint-disable-next-line no-process-exit
-          return process.exit(0);
-        }
+        files = (findChangedFiles('main', false) as string[]).reduce((acc, itemPath) => {
+          const existing = files.find((grepFilePath) => grepFilePath.includes(itemPath));
+          if (existing) {
+            acc.push(existing);
+          }
+          return acc;
+        }, [] as string[]);
 
         // to avoid running too many tests, we limit the number of files to 3
         // we may extend this in the future
         files = files.slice(0, 3);
       }
 
+      const log = new ToolingLog({
+        level: 'info',
+        writeTo: process.stdout,
+      });
+
       if (!files?.length) {
+        log.info('No tests found');
         // eslint-disable-next-line no-process-exit
         return process.exit(0);
       }
