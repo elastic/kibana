@@ -1,0 +1,80 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React, { useState } from 'react';
+
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+
+import {
+  NavigationLinkType,
+  EXTERNAL_LINK_TYPE,
+  DASHBOARD_LINK_TYPE,
+} from '../../../common/content_management';
+import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
+import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
+import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
+import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import { EuiFormRow } from '@elastic/eui';
+
+export const NavigationEmbeddableLinkDestination = ({
+  link,
+  setDestination,
+  parentDashboard,
+  selectedLinkType,
+}: {
+  selectedLinkType: NavigationLinkType;
+  parentDashboard?: DashboardContainer;
+  link?: NavigationEmbeddableUnorderedLink;
+  setDestination: (destination?: string, defaultLabel?: string) => void;
+}) => {
+  const [destinationError, setDestinationError] = useState<string | undefined>();
+
+  /**
+   * Store the dashboard / external destinations separately so that we can remember the selections
+   * made in each component even when the selected link type changes
+   */
+  const [dashboardLinkDestination, setDashboardLinkDestination] = useState<string | undefined>(
+    link && link.type === DASHBOARD_LINK_TYPE ? link.destination : undefined
+  );
+  const [externalLinkDestination, setExternalLinkDestination] = useState<string | undefined>(
+    link && link.type === EXTERNAL_LINK_TYPE ? link.destination : undefined
+  );
+
+  return (
+    <EuiFormRow
+      error={destinationError}
+      isInvalid={Boolean(destinationError)}
+      label={NavEmbeddableStrings.editor.linkEditor.getLinkDestinationLabel()}
+    >
+      {selectedLinkType === DASHBOARD_LINK_TYPE ? (
+        <DashboardLinkDestinationPicker
+          onUnmount={(selectedDashboardId) => {
+            setDestination(undefined, undefined);
+            if (selectedDashboardId) setDashboardLinkDestination(selectedDashboardId);
+          }}
+          parentDashboard={parentDashboard}
+          initialSelection={dashboardLinkDestination}
+          onDestinationPicked={(dashboard) =>
+            setDestination(dashboard?.id, dashboard?.attributes.title)
+          }
+        />
+      ) : (
+        <ExternalLinkDestinationPicker
+          onUnmount={(selectedUrl) => {
+            setDestinationError(undefined);
+            setDestination(undefined, undefined);
+            if (selectedUrl) setExternalLinkDestination(selectedUrl);
+          }}
+          initialSelection={externalLinkDestination}
+          onDestinationPicked={(url) => setDestination(url, url)}
+          setDestinationError={setDestinationError}
+        />
+      )}
+    </EuiFormRow>
+  );
+};

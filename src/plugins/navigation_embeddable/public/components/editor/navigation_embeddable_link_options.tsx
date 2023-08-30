@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 
+import { EuiFormRow } from '@elastic/eui';
 import {
   DashboardDrilldownOptions,
   DashboardDrilldownOptionsComponent,
@@ -25,6 +26,7 @@ import {
   DASHBOARD_LINK_TYPE,
   NavigationLinkOptions,
 } from '../../../common/content_management';
+import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
 import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
 
 export const NavigationEmbeddableLinkOptions = ({
@@ -45,21 +47,25 @@ export const NavigationEmbeddableLinkOptions = ({
     ...(link && link.type === EXTERNAL_LINK_TYPE ? link.options : {}),
   });
 
-  return selectedLinkType === DASHBOARD_LINK_TYPE ? (
-    <DashboardDrilldownOptionsComponent
-      options={dashboardLinkOptions}
-      onOptionChange={(change) => {
-        setDashboardLinkOptions({ ...dashboardLinkOptions, ...change });
-        setLinkOptions({ ...dashboardLinkOptions, ...change });
-      }}
-    />
-  ) : (
-    <UrlDrilldownOptionsComponent
-      options={externalLinkOptions}
-      onOptionChange={(change) => {
-        setExternalLinkOptions({ ...externalLinkOptions, ...change });
-        setLinkOptions({ ...externalLinkOptions, ...change });
-      }}
-    />
+  return (
+    <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkOptionsLabel()}>
+      {selectedLinkType === DASHBOARD_LINK_TYPE ? (
+        <DashboardDrilldownOptionsComponent
+          options={dashboardLinkOptions}
+          onOptionChange={(change) => {
+            setDashboardLinkOptions({ ...dashboardLinkOptions, ...change });
+            setLinkOptions({ ...dashboardLinkOptions, ...change });
+          }}
+        />
+      ) : (
+        <UrlDrilldownOptionsComponent
+          options={externalLinkOptions}
+          onOptionChange={(change) => {
+            setExternalLinkOptions({ ...externalLinkOptions, ...change });
+            setLinkOptions({ ...externalLinkOptions, ...change });
+          }}
+        />
+      )}
+    </EuiFormRow>
   );
 };

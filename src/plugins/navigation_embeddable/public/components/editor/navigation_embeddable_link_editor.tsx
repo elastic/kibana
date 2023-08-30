@@ -35,12 +35,11 @@ import {
   NavigationLinkOptions,
   NavigationEmbeddableLink,
 } from '../../../common/content_management';
+import { NavigationLinkInfo } from '../../embeddable/types';
 import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
-import { DashboardItem, NavigationLinkInfo } from '../../embeddable/types';
 import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
-import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
-import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
 import { NavigationEmbeddableLinkOptions } from './navigation_embeddable_link_options';
+import { NavigationEmbeddableLinkDestination } from './navigation_embeddable_link_destination';
 
 export const NavigationEmbeddableLinkEditor = ({
   link,
@@ -58,7 +57,6 @@ export const NavigationEmbeddableLinkEditor = ({
   );
   const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
-  const [destinationError, setDestinationError] = useState<string | undefined>();
   const [linkOptions, setLinkOptions] = useState<NavigationLinkOptions | undefined>();
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
 
@@ -82,31 +80,16 @@ export const NavigationEmbeddableLinkEditor = ({
     });
   }, []);
 
-  const onDashboardSelected = useCallback(
-    (selectedDashboard?: DashboardItem) => {
-      setLinkDestination(selectedDashboard?.id);
-      if (selectedDashboard) {
-        const dashboardTitle = selectedDashboard.attributes.title;
-        setDefaultLinkLabel(dashboardTitle);
-        if (!currentLinkLabel || currentLinkLabel === defaultLinkLabel) {
-          setCurrentLinkLabel(dashboardTitle);
-        }
+  /** When a new destination is picked, handle the logic for what to display as the current + default labels */
+  const handleDestinationPicked = useCallback(
+    (destination?: string, label?: string) => {
+      setLinkDestination(destination);
+      if (!currentLinkLabel || defaultLinkLabel === currentLinkLabel) {
+        setCurrentLinkLabel(label ?? '');
       }
+      setDefaultLinkLabel(label);
     },
-    [currentLinkLabel, defaultLinkLabel]
-  );
-
-  const onUrlSelected = useCallback(
-    (url?: string) => {
-      setLinkDestination(url);
-      if (url) {
-        setDefaultLinkLabel(url);
-        if (!currentLinkLabel || currentLinkLabel === defaultLinkLabel) {
-          setCurrentLinkLabel(url);
-        }
-      }
-    },
-    [currentLinkLabel, defaultLinkLabel]
+    [defaultLinkLabel, currentLinkLabel]
   );
 
   return (
@@ -138,40 +121,19 @@ export const NavigationEmbeddableLinkEditor = ({
               options={linkTypes}
               idSelected={selectedLinkType}
               onChange={(id) => {
-                setDestinationError(undefined);
-                if (link?.type === id) {
-                  setLinkDestination(link.destination);
-                  setCurrentLinkLabel(link.label ?? '');
-                } else {
-                  setLinkDestination(undefined);
-                  setCurrentLinkLabel('');
+                if (currentLinkLabel === defaultLinkLabel) {
+                  setCurrentLinkLabel(link?.type === id ? link.label ?? '' : '');
                 }
-                setDefaultLinkLabel(undefined);
                 setSelectedLinkType(id as NavigationLinkType);
               }}
             />
           </EuiFormRow>
-
-          <EuiFormRow
-            label={NavEmbeddableStrings.editor.linkEditor.getLinkDestinationLabel()}
-            isInvalid={Boolean(destinationError)}
-            error={destinationError}
-          >
-            {selectedLinkType === DASHBOARD_LINK_TYPE ? (
-              <DashboardLinkDestinationPicker
-                parentDashboard={parentDashboard}
-                initialSelection={linkDestination}
-                onDestinationPicked={onDashboardSelected}
-              />
-            ) : (
-              <ExternalLinkDestinationPicker
-                initialSelection={linkDestination}
-                onDestinationPicked={onUrlSelected}
-                setDestinationError={setDestinationError}
-              />
-            )}
-          </EuiFormRow>
-
+          <NavigationEmbeddableLinkDestination
+            link={link}
+            parentDashboard={parentDashboard}
+            selectedLinkType={selectedLinkType}
+            setDestination={handleDestinationPicked}
+          />
           <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkTextLabel()}>
             <EuiFieldText
               placeholder={
@@ -182,14 +144,11 @@ export const NavigationEmbeddableLinkEditor = ({
               onChange={(e) => setCurrentLinkLabel(e.target.value)}
             />
           </EuiFormRow>
-
-          <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkOptionsLabel()}>
-            <NavigationEmbeddableLinkOptions
-              link={link}
-              setLinkOptions={setLinkOptions}
-              selectedLinkType={selectedLinkType}
-            />
-          </EuiFormRow>
+          <NavigationEmbeddableLinkOptions
+            link={link}
+            setLinkOptions={setLinkOptions}
+            selectedLinkType={selectedLinkType}
+          />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

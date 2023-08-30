@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
+import useUnmount from 'react-use/lib/useUnmount';
+import React, { useCallback, useState } from 'react';
 
 import { EuiFieldText } from '@elastic/eui';
 import { urlDrilldownValidateUrl } from '@kbn/ui-actions-enhanced-plugin/public';
@@ -21,11 +22,13 @@ export const ExternalLinkDestinationPicker = ({
   onDestinationPicked,
   setDestinationError,
   initialSelection,
+  onUnmount,
   ...other
 }: {
+  initialSelection?: string;
+  onUnmount: (destination: string) => void;
   onDestinationPicked: (destination?: string) => void;
   setDestinationError: (error: string | undefined) => void;
-  initialSelection?: string;
 }) => {
   const [validUrl, setValidUrl] = useState<boolean>(true);
   const [currentUrl, setCurrentUrl] = useState<string>(initialSelection ?? '');
@@ -67,6 +70,11 @@ export const ExternalLinkDestinationPicker = ({
         onDestinationPicked(initialSelection);
       }
     }
+  });
+
+  useUnmount(() => {
+    /** Save the current selection so we can re-populate it if we switch back to this link editor */
+    onUnmount(currentUrl);
   });
 
   /* {...other} is needed so all inner elements are treated as part of the form */

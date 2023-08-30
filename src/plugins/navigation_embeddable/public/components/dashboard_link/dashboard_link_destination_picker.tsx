@@ -9,6 +9,7 @@
 import { debounce } from 'lodash';
 import useAsync from 'react-use/lib/useAsync';
 import useMount from 'react-use/lib/useMount';
+import useUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import {
@@ -31,11 +32,13 @@ export const DashboardLinkDestinationPicker = ({
   onDestinationPicked,
   initialSelection,
   parentDashboard,
+  onUnmount,
   ...other
 }: {
-  onDestinationPicked: (selectedDashboard?: DashboardItem) => void;
-  parentDashboard?: DashboardContainer;
   initialSelection?: string;
+  parentDashboard?: DashboardContainer;
+  onUnmount: (dashboardId?: string) => void;
+  onDestinationPicked: (selectedDashboard?: DashboardItem) => void;
 }) => {
   const [searchString, setSearchString] = useState<string>('');
   const [selectedOption, setSelectedOption] = useState<DashboardComboBoxOption[]>([]);
@@ -66,6 +69,11 @@ export const DashboardLinkDestinationPicker = ({
         onDestinationPicked(undefined);
       }
     }
+  });
+
+  useUnmount(() => {
+    /** Save the current selection so we can re-populate it if we switch back to this link editor */
+    onUnmount(selectedOption[0]?.key);
   });
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
