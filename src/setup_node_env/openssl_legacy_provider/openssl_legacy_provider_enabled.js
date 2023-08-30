@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-// The following require statements MUST be executed before any others - BEGIN
-require('./exit_on_warning');
-require('./harden');
-// The following require statements MUST be executed before any others - END
+var crypto = require('crypto');
 
-require('symbol-observable');
-require('source-map-support').install();
-require('./node_version_validator');
-require('./openssl_legacy_provider');
+// The blowfish cipher is only available when node is running with the --openssl-legacy-provider flag
+module.exports = function () {
+  return crypto.getCiphers().includes('blowfish');
+};
