@@ -98,32 +98,34 @@ export function getSearchResultProvider(
             ]
           : []),
         ...(config.hasConnectors ? CONNECTOR_DEFINITIONS : []),
-        ...[
-          {
-            keywords: ['app', 'search', 'engines'],
-            name: i18n.translate('xpack.enterpriseSearch.searchProvider.appSearch.name', {
-              defaultMessage: 'App Search',
-            }),
-            serviceType: 'app_search',
-            url: APP_SEARCH_PLUGIN.URL,
-          },
-          {
-            keywords: ['workplace', 'search'],
-            name: i18n.translate('xpack.enterpriseSearch.searchProvider.workplaceSearch.name', {
-              defaultMessage: 'Workplace Search',
-            }),
-            serviceType: 'workplace_search',
-            url: WORKPLACE_SEARCH_PLUGIN.URL,
-          },
-          {
-            keywords: ['esre', 'search'],
-            name: i18n.translate('xpack.enterpriseSearch.searchProvider.esre.name', {
-              defaultMessage: 'ESRE',
-            }),
-            serviceType: 'esre',
-            url: ESRE_PLUGIN.URL,
-          },
-        ],
+        ...(config.canDeployEntSearch
+          ? [
+              {
+                keywords: ['app', 'search', 'engines'],
+                name: i18n.translate('xpack.enterpriseSearch.searchProvider.appSearch.name', {
+                  defaultMessage: 'App Search',
+                }),
+                serviceType: 'app_search',
+                url: APP_SEARCH_PLUGIN.URL,
+              },
+              {
+                keywords: ['workplace', 'search'],
+                name: i18n.translate('xpack.enterpriseSearch.searchProvider.workplaceSearch.name', {
+                  defaultMessage: 'Workplace Search',
+                }),
+                serviceType: 'workplace_search',
+                url: WORKPLACE_SEARCH_PLUGIN.URL,
+              },
+              {
+                keywords: ['esre', 'search'],
+                name: i18n.translate('xpack.enterpriseSearch.searchProvider.esre.name', {
+                  defaultMessage: 'ESRE',
+                }),
+                serviceType: 'esre',
+                url: ESRE_PLUGIN.URL,
+              },
+            ]
+          : []),
       ];
       const result = services
         .map((service) => {
