@@ -645,7 +645,7 @@ using the CURL scripts in the scripts folder.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/metrics_data/README.md[metricsData]
-|undefined
+|Exposes utilities to access metrics data.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
