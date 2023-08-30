@@ -16,7 +16,7 @@ import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
 // See: https://github.com/elastic/kibana/issues/117255, the moduleNameMapper creates mocks to avoid memory leaks from kibana core.
 // We cannot import from "../../../../../../actions/server" directly here or we have a really bad memory issue. We cannot add this to the existing mocks we created, this fix must be here.
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';

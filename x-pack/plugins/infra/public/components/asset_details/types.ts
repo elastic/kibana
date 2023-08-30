@@ -6,6 +6,7 @@
  */
 
 import { TimeRange } from '@kbn/es-query';
+import { Search } from 'history';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 
 export interface Asset {
@@ -77,6 +78,12 @@ export type TabsStateChangeFn = (state: TabState) => void;
 
 export interface ContentTemplateProps {
   header: Pick<AssetDetailsProps, 'tabs' | 'links'>;
+}
+
+export interface RouteState {
+  originAppId: string;
+  originPathname?: string;
+  originSearch?: Search;
 }
 
 export type DataViewOrigin = 'logs' | 'metrics';

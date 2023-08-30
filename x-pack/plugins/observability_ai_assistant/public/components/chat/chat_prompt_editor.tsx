@@ -168,7 +168,7 @@ export function ChatPromptEditor({
                   <FunctionListPopover
                     selectedFunctionName={selectedFunctionName}
                     onSelectFunction={handleSelectFunction}
-                    disabled={loading}
+                    disabled={loading || disabled}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -177,7 +177,7 @@ export function ChatPromptEditor({
                       iconType="cross"
                       iconSide="right"
                       size="xs"
-                      disabled={loading}
+                      disabled={loading || disabled}
                       onClick={handleClearSelection}
                     >
                       {i18n.translate('xpack.observabilityAiAssistant.prompt.emptySelection', {
@@ -238,6 +238,7 @@ export function ChatPromptEditor({
                 </EuiPanel>
               ) : (
                 <EuiTextArea
+                  disabled={disabled}
                   fullWidth
                   inputRef={textAreaRef}
                   placeholder={i18n.translate('xpack.observabilityAiAssistant.prompt.placeholder', {
