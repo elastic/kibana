@@ -123,7 +123,8 @@ export function getTimelineItemsfromConversation({
               parsedContent = message.message.content;
             }
 
-            const isError = typeof parsedContent === 'object' && 'error' in parsedContent;
+            const isError =
+              parsedContent && typeof parsedContent === 'object' && 'error' in parsedContent;
 
             title = !isError ? (
               <FormattedMessage
@@ -200,9 +201,19 @@ export function getTimelineItemsfromConversation({
                 }}
               />
             );
-            content = convertMessageToMarkdownCodeBlock(message.message);
+            if (message.message.content) {
+              // TODO: we want to show the content always, and hide
+              // the function request initially, but we don't have a
+              // way to do that yet, so we hide the request here until
+              // we have a fix.
+              // element = message.message.content;
+              content = message.message.content;
+              display.collapsed = false;
+            } else {
+              content = convertMessageToMarkdownCodeBlock(message.message);
+              display.collapsed = true;
+            }
 
-            display.collapsed = true;
             actions.canEdit = true;
           } else {
             // is an assistant response

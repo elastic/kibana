@@ -28,6 +28,7 @@ elif [[ "$SERVERLESS_ENVIRONMENT" == "security" ]]; then
 fi
 
 EXIT_CODE=0
+OFFENDING_CONFIG=
 
 for CONFIG in "${SERVERLESS_CONFIGS[@]}"
 do
@@ -42,7 +43,17 @@ do
 
   if [ $LAST_CODE -ne 0 ]; then
     EXIT_CODE=10
+    OFFENDING_CONFIG=$CONFIG
   fi
 done
+
+echo "--- Serverless FTR Results for $JOB"
+if  [ $EXIT_CODE -eq 0 ]; then
+  echo "✅ Success!"
+elif [ $EXIT_CODE -eq 10 ]; then
+  echo "❌ Failed in config: $OFFENDING_CONFIG, exit code set to 10 for soft-failure"
+else
+  echo "❌ Failed."
+fi
 
 exit $EXIT_CODE
