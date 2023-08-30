@@ -331,6 +331,10 @@ export class ListClient {
     if (await this.getListPolicyExists()) {
       await this.deleteListPolicy();
     }
+
+    // as migration will be called eventually for every instance of Kibana, it's more efficient to delete
+    // legacy index template if it exists during migration
+    await this.deleteLegacyListTemplateIfExists();
   };
 
   /**
@@ -353,6 +357,10 @@ export class ListClient {
     if (await this.getListItemPolicyExists()) {
       await this.deleteListItemPolicy();
     }
+
+    // as migration will be called eventually for every instance of Kibana, it's more efficient to delete
+    // legacy index template if it exists during migration
+    await this.deleteLegacyListItemTemplateIfExists();
   };
 
   /**
@@ -589,6 +597,23 @@ export class ListClient {
   };
 
   /**
+   * Checks if legacy lists template exists and delete it
+   */
+  public deleteLegacyListTemplateIfExists = async (): Promise<void> => {
+    try {
+      const legacyTemplateExists = await this.getLegacyListTemplateExists();
+
+      if (legacyTemplateExists) {
+        await this.deleteLegacyListTemplate();
+      }
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        throw err;
+      }
+    }
+  };
+
+  /**
    * Delete the list item boot strap index for ILM policies.
    * @returns The contents of the bootstrap response from Elasticsearch
    */
@@ -596,6 +621,23 @@ export class ListClient {
     const { esClient } = this;
     const listItemName = this.getListItemName();
     return deleteTemplate(esClient, listItemName);
+  };
+
+  /**
+   * Checks if legacy list item template exists and delete it
+   */
+  public deleteLegacyListItemTemplateIfExists = async (): Promise<void> => {
+    try {
+      const legacyTemplateListItemsExists = await this.getLegacyListItemTemplateExists();
+
+      if (legacyTemplateListItemsExists) {
+        await this.deleteLegacyListItemTemplate();
+      }
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        throw err;
+      }
+    }
   };
 
   /**
