@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ENTITIES_NO_DATA_MESSAGE = i18n.translate(
   'xpack.securitySolution.flyout.entitiesNoDataMessage',
   {
-    defaultMessage: 'temp', // TODO waiting for Paul's input
+    defaultMessage: 'Host and user information are unavailable for this alert.',
   }
 );
 
@@ -42,7 +42,7 @@ export const USER_TITLE = i18n.translate('xpack.securitySolution.flyout.entities
 export const USER_PREVALENCE_COLUMN_TITLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.flyout.entities.userPrevalenceColumTitleTooltip',
   {
-    defaultMessage: 'temp', // TODO waiting for Paul's input
+    defaultMessage: 'Percentage of unique users with identical field value pairs',
   }
 );
 
@@ -95,7 +95,7 @@ export const HOST_TITLE = i18n.translate('xpack.securitySolution.flyout.entities
 export const HOST_PREVALENCE_COLUMN_TITLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.flyout.entities.hostPrevalenceColumTitleTooltip',
   {
-    defaultMessage: 'temp', // TODO waiting for Paul's input
+    defaultMessage: 'Percentage of unique hosts with identical field value pairs',
   }
 );
 
@@ -165,7 +165,7 @@ export const PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE = i18n.translate(
 export const PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.flyout.prevalenceTableAlertCountColumnTitleTooltip',
   {
-    defaultMessage: 'temp', // TODO waiting for Paul's input
+    defaultMessage: 'Total number of alerts with identical field value pairs',
   }
 );
 
@@ -179,7 +179,7 @@ export const PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE = i18n.translate(
 export const PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.flyout.prevalenceTableDocCountColumnTitleTooltip',
   {
-    defaultMessage: 'temp', // TODO waiting for Paul's input
+    defaultMessage: 'Total number of event documents with identical field value pairs',
   }
 );
 

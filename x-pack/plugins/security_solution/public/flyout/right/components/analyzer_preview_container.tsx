@@ -72,8 +72,8 @@ export const AnalyzerPreviewContainer: React.FC = () => {
             id="xpack.securitySolution.flyout.analyzerPreviewError"
             defaultMessage="You can only visualize events triggered by hosts configured with the Elastic Defend integration or any {sysmon} data from {winlogbeat}. Refer to {link} for more information."
             values={{
-              sysmon: <EuiMark>sysmon</EuiMark>,
-              winlogbeat: <EuiMark>winlogbeat</EuiMark>,
+              sysmon: <EuiMark>{'sysmon'}</EuiMark>,
+              winlogbeat: <EuiMark>{'winlogbeat'}</EuiMark>,
               link: (
                 <EuiLink
                   href="https://www.elastic.co/guide/en/security/current/visual-event-analyzer.html"

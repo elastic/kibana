@@ -77,7 +77,7 @@ export interface CorrelationsDetailsAlertsTableProps {
   /**
    * No data message to render if the table is empty
    */
-  noItemsMessage: ReactNode;
+  noItemsMessage?: ReactNode;
   /**
    * Data test subject string for testing
    */
@@ -148,18 +148,19 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
       header={{
         title,
         iconType: 'warning',
-        headerContent: (
-          <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
-            <InvestigateInTimelineButton
-              dataProviders={dataProviders}
-              filters={filters}
-              asEmptyButton
-              iconType="timeline"
-            >
-              {ACTION_INVESTIGATE_IN_TIMELINE}
-            </InvestigateInTimelineButton>
-          </div>
-        ),
+        headerContent:
+          alertIds && alertIds.length && alertIds.length > 0 ? (
+            <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
+              <InvestigateInTimelineButton
+                dataProviders={dataProviders}
+                filters={filters}
+                asEmptyButton
+                iconType="timeline"
+              >
+                {ACTION_INVESTIGATE_IN_TIMELINE}
+              </InvestigateInTimelineButton>
+            </div>
+          ) : null,
       }}
       content={{ error }}
       expand={{

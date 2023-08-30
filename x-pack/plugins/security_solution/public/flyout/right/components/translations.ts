@@ -133,7 +133,7 @@ export const ENTITIES_TITLE = i18n.translate(
 export const ENTITIES_NO_DATA_MESSAGE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.entitiesNoDataMessage',
   {
-    defaultMessage: 'temp', // TODO waiting for Paul's input
+    defaultMessage: 'Host and user information are unavailable for this alert',
   }
 );
 
@@ -166,7 +166,10 @@ export const PREVALENCE_TITLE = i18n.translate(
 
 export const PREVALENCE_NO_DATA = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.prevalenceNoData',
-  { defaultMessage: 'No unexpected hosts found' }
+  {
+    defaultMessage:
+      'Over the last 30 days, the highlighted fields for this alert were observed frequently on other host and user events.',
+  }
 );
 
 export const THREAT_MATCH_DETECTED = i18n.translate(
