@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
+import { EuiFormRow } from '@elastic/eui';
 import {
   NavigationLinkType,
   EXTERNAL_LINK_TYPE,
@@ -19,7 +20,6 @@ import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor
 import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
 import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
-import { EuiFormRow } from '@elastic/eui';
 
 export const NavigationEmbeddableLinkDestination = ({
   link,
