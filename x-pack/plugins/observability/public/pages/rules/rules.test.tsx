@@ -16,7 +16,6 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { MemoryRouter } from 'react-router-dom';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -105,11 +104,7 @@ describe('RulesPage with all capabilities', () => {
       ruleTypeIndex,
     });
 
-    return render(
-      <MemoryRouter initialEntries={['/alerts/rules']}>
-        <RulesPage />
-      </MemoryRouter>
-    );
+    return render(<RulesPage />);
   }
 
   it('should render a page template', async () => {
@@ -169,11 +164,7 @@ describe('RulesPage with show only capability', () => {
     ];
     useLoadRuleTypes.mockReturnValue({ ruleTypes, ruleTypeIndex });
 
-    return render(
-      <MemoryRouter initialEntries={['/alerts/rules']}>
-        <RulesPage />
-      </MemoryRouter>
-    );
+    return render(<RulesPage />);
   }
 
   it('renders a create rule button which is not disabled', async () => {

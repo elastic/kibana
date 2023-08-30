@@ -7,7 +7,6 @@
 
 import React, { lazy, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Route, Routes } from '@kbn/shared-ux-router';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -130,14 +129,11 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
       <HeaderMenu />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <Routes>
-            <Route
-              exact
-              path={RULES_PATH}
-              render={() => <RulesTab setRefresh={setRefresh} stateRefresh={stateRefresh} />}
-            />
-            <Route exact path={RULES_LOGS_PATH} component={GlobalLogsTab} />
-          </Routes>
+          {activeTab === RULES_TAB_NAME ? (
+            <RulesTab setRefresh={setRefresh} stateRefresh={stateRefresh} />
+          ) : (
+            <GlobalLogsTab />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
 
