@@ -13,10 +13,10 @@ import {
   renderActionParameterTemplatesDefault,
 } from '@kbn/actions-plugin/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { InjectActionParamsOpts, injectActionParams } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
-  ActionsCompletion,
   ThrottledActions,
   RuleTypeParams,
   RuleTypeState,
@@ -166,7 +166,7 @@ const generateAlert = ({
       meta: {
         maintenanceWindowIds,
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: lastScheduledActionsGroup,
           actions: throttledActions,
         },
@@ -188,7 +188,7 @@ const generateRecoveredAlert = ({ id, state }: { id: number; state?: AlertInstan
     state: state || { test: true },
     meta: {
       lastScheduledActions: {
-        date: new Date(),
+        date: new Date().toISOString(),
         group: 'recovered',
         actions: {},
       },
@@ -853,7 +853,7 @@ describe('Execution Handler', () => {
     await executionHandler.run(
       generateAlert({
         id: 1,
-        throttledActions: { '111-111': { date: new Date(DATE_1970) } },
+        throttledActions: { '111-111': { date: new Date(DATE_1970).toISOString() } },
       })
     );
 
@@ -1078,7 +1078,7 @@ describe('Execution Handler', () => {
     expect(result).toEqual({
       throttledSummaryActions: {
         '111-111': {
-          date: new Date(),
+          date: new Date().toISOString(),
         },
       },
     });
