@@ -8329,7 +8329,6 @@
     "xpack.apm.mobile.location.metrics.http.requests.title": "最常用于",
     "xpack.apm.mobile.location.metrics.launches": "大多数启动",
     "xpack.apm.mobile.location.metrics.sessions": "大多数会话",
-    "xpack.apm.mobile.metrics.crash.rate": "崩溃速率（每分钟崩溃数）",
     "xpack.apm.mobile.metrics.http.requests": "HTTP 请求",
     "xpack.apm.mobile.metrics.load.time": "最慢应用加载时间",
     "xpack.apm.mobile.metrics.sessions": "会话",
