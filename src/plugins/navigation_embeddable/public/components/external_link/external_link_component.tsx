@@ -40,9 +40,13 @@ export const ExternalLinkComponent = ({ link }: { link: NavigationEmbeddableLink
       onClick={async (event) => {
         /** Only use `navigateToUrl` if we **aren't** opening in a new window/tab; otherwise, just use default href handling */
         const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
-        if (!modifiedClick && !linkOptions.openInNewTab) {
+        if (!modifiedClick) {
           event.preventDefault();
-          await coreServices.application.navigateToUrl(destination);
+          if (linkOptions.openInNewTab) {
+            window.open(destination, '_blank');
+          } else {
+            await coreServices.application.navigateToUrl(destination);
+          }
         }
       }}
     />
