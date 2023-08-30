@@ -476,7 +476,7 @@
     "@kbn/test-subj-selector": "link:bazel-bin/packages/kbn-test-subj-selector",
     "@loaders.gl/polyfills": "^2.3.5",
     "@microsoft/api-documenter": "7.13.68",
-    "@microsoft/api-extractor": "7.18.19",
+    "@microsoft/api-extractor": "7.23.2",
     "@octokit/rest": "^16.35.0",
     "@storybook/addon-a11y": "^6.5.16",
     "@storybook/addon-actions": "^6.5.16",
