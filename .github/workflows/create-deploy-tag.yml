@@ -5,13 +5,13 @@
 #   on the main branch only in a verification step.
 #   This is only to prevent accidental creation of the tag on other branches and cannot be used to prevent malicious creation of the tag.
 
-name: create-deploy-tag
+name: Initiate Serverless Deploy
 
 on:
   workflow_dispatch:
     inputs:
       commit:
-        description: "The commit to tag (default: latest commit on main)"
+        description: "The commit to deploy (default: latest commit on main)"
 
 concurrency:
   group: ${{ github.workflow }}
@@ -30,10 +30,10 @@ jobs:
         run: |
           commit="${{ github.event.inputs.commit || github.sha }}"
           echo "COMMIT=${commit}" >> "${GITHUB_ENV}"
-      - name: Verify selected commit isn't already tagged
+      - name: Verify selected or newer commit isn't already tagged
         run: |
           git tag --contains ${COMMIT} | grep -P "^deploy@\d+$" && {
-            echo "Tag already exists on selected commit"
+            echo "A deploy-tag already exists on the selected or newer commit!"
             exit 1
           } || true
       - name: Verify branch
@@ -51,10 +51,10 @@ jobs:
           git tag ${TAG_NAME} ${COMMIT}
           git push origin "refs/tags/${TAG_NAME}"
       - if: always()
-        uses: elastic/apm-pipeline-library/.github/actions/notify-build-status@current
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
         with:
-          message: ${{ job.status == 'success' && format('Created tag `{0}` for commit `{1}`', env.TAG_NAME, env.COMMIT) || 'Creating a deploy tag failed' }}
-          vaultUrl: ${{ secrets.VAULT_ADDR }}
-          vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
-          vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
-          slackChannel: "#kibana-mission-control"
+          channel-id: kibana-mission-control
+          slack-message: ${{ job.status == 'success' && format('Created tag `{0}` for commit `{1}`', env.TAG_NAME, env.COMMIT) || 'Creating a deploy tag failed. See https://github.com/elastic/kibana/actions/workflows/create-deploy-tag.yml' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
