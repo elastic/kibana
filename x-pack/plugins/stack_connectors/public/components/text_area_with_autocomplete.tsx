@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import getCaretCoordinates from 'textarea-caret';
 import { Properties } from 'csstype';
 import {
@@ -122,15 +122,16 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     const textAreaClientRect = textAreaRef.current?.getBoundingClientRect();
 
     const top =
-      textAreaClientRect.top - textAreaRef.current.scrollTop + newPosition.top + newPosition.height;
+      textAreaClientRect.top -
+      textAreaRef.current.scrollTop +
+      window.scrollY +
+      newPosition.top +
+      newPosition.height;
     const left = textAreaClientRect.left + window.pageXOffset;
     const height = newPosition.height;
     const width = textAreaClientRect.width;
-    setPopupPosition((old) =>
-      old.top !== top || old.left !== left || old.width !== width || old.height !== height
-        ? { top, left, width, height }
-        : old
-    );
+    setPopupPosition({ top, left, width, height });
+    setListOpen(true);
   }, []);
 
   const onChangeWithMessageVariable = useCallback(() => {
@@ -154,7 +155,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
       setSearchWord(currentWord.slice(2));
       setMatches(filteredMatches);
       setTimeout(() => recalcMenuPosition(), 0);
-      setListOpen(true);
     } else if (lastTwoLetter === '}}') {
       closeList();
     } else {
@@ -291,9 +291,23 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     }
   }, [editAction, index, inputTargetValue, isListOpen, paramsProperty]);
   const onClick = useCallback(() => closeList(), [closeList]);
-  const onScroll = useCallback(() => {
-    closeList(true);
-  }, [closeList]);
+
+  const onScroll = useCallback(
+    (evt) => {
+      // FUTURE ENGINEER -> we need to make sure to not close the autocomplete option list
+      if (selectableRef?.current?.listId !== evt.target?.firstElementChild?.id) {
+        closeList(true);
+      }
+    },
+    [closeList]
+  );
+
+  useEffect(() => {
+    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll, { capture: true });
+    };
+  }, [onScroll]);
 
   return (
     <EuiFormRow
@@ -325,7 +339,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
             onKeyDown={textareaOnKeyPress}
             onBlur={onBlur}
             onClick={onClick}
-            onScroll={onScroll}
           />
         </EuiOutsideClickDetector>
         {matches.length > 0 && isListOpen && (

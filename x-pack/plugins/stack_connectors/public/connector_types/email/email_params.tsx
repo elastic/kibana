@@ -33,7 +33,7 @@ export const EmailParamsFields = ({
   showEmailSubjectAndMessage = true,
   useDefaultMessage,
 }: ActionParamsProps<EmailActionParams>) => {
-  const isMustacheAutocompleteOff = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOff');
+  const isMustacheAutocompleteOn = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOn');
   const { to, cc, bcc, subject, message } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
   const ccOptions = cc ? cc.map((label: string) => ({ label })) : [];
@@ -65,8 +65,8 @@ export const EmailParamsFields = ({
     errors.bcc !== undefined && errors.bcc.length > 0 && bcc !== undefined;
 
   const TextAreaComponent = useMemo(() => {
-    return isMustacheAutocompleteOff ? TextAreaWithMessageVariables : TextAreaWithAutocomplete;
-  }, [isMustacheAutocompleteOff]);
+    return isMustacheAutocompleteOn ? TextAreaWithAutocomplete : TextAreaWithMessageVariables;
+  }, [isMustacheAutocompleteOn]);
 
   return (
     <>
