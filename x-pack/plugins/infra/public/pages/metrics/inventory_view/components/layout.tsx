@@ -99,8 +99,11 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
 
   const dataBounds = calculateBoundsFromNodes(nodes);
   const bounds = autoBounds ? dataBounds : boundsOverride;
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
+
+  const formatter = useCallback(
+    (val: string | number) => createInventoryMetricFormatter(options.metric)(val),
+    [options.metric]
+  );
   const { onViewChange } = useWaffleViewState();
 
   useEffect(() => {
