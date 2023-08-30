@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useObservabilityAiAssistantPluginContext } from '../context/observability_ai_assistant_plugins/use_observability_ai_assistant_plugin_context';
+import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 
 const LICENSE_MANAGEMENT_LOCATOR = 'LICENSE_MANAGEMENT_LOCATOR';
 
 export const useLicenseManagementLocator = () => {
-  const {
-    start: { share },
-  } = useObservabilityAiAssistantPluginContext();
+  const service = useObservabilityAIAssistant();
 
-  const locator = share.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
+  const locators = service.getLicenseManagementLocator();
+
+  const locator = locators.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
 
   // license management does not exist on serverless
   if (!locator) return;

@@ -29,7 +29,7 @@ import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   ContextDefinition,
@@ -83,6 +83,8 @@ export interface ObservabilityAIAssistantService {
   isEnabled: () => boolean;
   callApi: ObservabilityAIAssistantAPIClient;
   getCurrentUser: () => Promise<AuthenticatedUser>;
+  getLicense: () => Observable<ILicense>;
+  getLicenseManagementLocator: () => SharePluginStart;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
 }
 

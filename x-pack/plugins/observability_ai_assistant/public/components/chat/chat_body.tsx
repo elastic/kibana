@@ -22,7 +22,7 @@ import type { Message } from '../../../common/types';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { useTimeline } from '../../hooks/use_timeline';
-import { useLicenseContext } from '../../context/license/use_license_context';
+import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { ExperimentalFeatureBanner } from './experimental_feature_banner';
@@ -74,7 +74,7 @@ export function ChatBody({
   onChatComplete: (messages: Message[]) => void;
   onSaveTitle: (title: string) => void;
 }) {
-  const license = useLicenseContext();
+  const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
 
   const chatService = useObservabilityAIAssistantChatService();
