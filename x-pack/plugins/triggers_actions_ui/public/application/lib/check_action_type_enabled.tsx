@@ -114,7 +114,11 @@ export function checkActionTypeEnabled(
     return configurationCheckResult;
   }
 
-  if (actionType?.enabled === false) {
+  if (
+    actionType?.enabledInConfig === true &&
+    actionType?.enabledInLicense === true &&
+    actionType?.enabled === false
+  ) {
     return registryCheckResult;
   }
 
@@ -139,7 +143,11 @@ export function checkActionFormActionTypeEnabled(
     return configurationCheckResult;
   }
 
-  if (actionType?.enabled === false) {
+  if (
+    actionType?.enabledInConfig === true &&
+    actionType?.enabledInLicense === true &&
+    actionType?.enabled === false
+  ) {
     return registryCheckResult;
   }
 
