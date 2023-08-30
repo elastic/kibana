@@ -11,32 +11,6 @@ export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
 
-/* eslint no-bitwise: ["error", { "allow": ["<<=", "&"] }] */
-export function getAddressFromStackFrameID(frameID: StackFrameID): number {
-  let address = charCodeAt(frameID, 21) & 0xf;
-  address <<= 6;
-  address += charCodeAt(frameID, 22);
-  address <<= 6;
-  address += charCodeAt(frameID, 23);
-  address <<= 6;
-  address += charCodeAt(frameID, 24);
-  address <<= 6;
-  address += charCodeAt(frameID, 25);
-  address <<= 6;
-  address += charCodeAt(frameID, 26);
-  address <<= 6;
-  address += charCodeAt(frameID, 27);
-  address <<= 6;
-  address += charCodeAt(frameID, 28);
-  address <<= 6;
-  address += charCodeAt(frameID, 29);
-  address <<= 6;
-  address += charCodeAt(frameID, 30);
-  address <<= 6;
-  address += charCodeAt(frameID, 31);
-  return address;
-}
-
 export enum FrameType {
   Unsymbolized = 0,
   Python,

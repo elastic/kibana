@@ -9,7 +9,6 @@ import {
   createStackFrameMetadata,
   FrameSymbolStatus,
   FrameType,
-  getAddressFromStackFrameID,
   getCalleeFunction,
   getCalleeSource,
   getFrameSymbolStatus,
