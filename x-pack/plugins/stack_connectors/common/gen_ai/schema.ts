@@ -41,20 +41,29 @@ export const GenAiRunActionResponseSchema = schema.object(
     object: schema.string(),
     created: schema.number(),
     model: schema.string(),
-    usage: schema.object({
-      prompt_tokens: schema.number(),
-      completion_tokens: schema.number(),
-      total_tokens: schema.number(),
-    }),
+    usage: schema.object(
+      {
+        prompt_tokens: schema.number(),
+        completion_tokens: schema.number(),
+        total_tokens: schema.number(),
+      },
+      { unknowns: 'ignore' }
+    ),
     choices: schema.arrayOf(
-      schema.object({
-        message: schema.object({
-          role: schema.string(),
-          content: schema.string(),
-        }),
-        finish_reason: schema.string(),
-        index: schema.number(),
-      })
+      schema.object(
+        {
+          message: schema.object(
+            {
+              role: schema.string(),
+              content: schema.string(),
+            },
+            { unknowns: 'ignore' }
+          ),
+          finish_reason: schema.string(),
+          index: schema.number(),
+        },
+        { unknowns: 'ignore' }
+      )
     ),
   },
   { unknowns: 'ignore' }
