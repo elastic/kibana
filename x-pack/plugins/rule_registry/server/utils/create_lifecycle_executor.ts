@@ -354,11 +354,9 @@ export const createLifecycleExecutor =
           indexName
             ? {
                 // this code will change to use update, and not the if_* fields
-                index: {
+                update: {
                   _id: event[ALERT_UUID]!,
                   _index: indexName,
-                  if_seq_no: seqNo,
-                  if_primary_term: primaryTerm,
                   require_alias: false,
                 },
               }
@@ -367,7 +365,8 @@ export const createLifecycleExecutor =
                   _id: event[ALERT_UUID]!,
                 },
               },
-          event,
+          // if index provided, must be an update, so wrap in a { doc: {} }
+          ...(indexName ? { doc: event } : event),
         ]),
         refresh: 'wait_for',
       });

@@ -388,7 +388,7 @@ export class AlertsClient<
             this.fetchedAlerts.primaryTerm[alert.kibana.alert.uuid],
             this.isUsingDataStreams()
           ),
-          alert,
+          getBulkDocument(this.fetchedAlerts.indices[alert.kibana.alert.uuid], alert),
         ])
       );
 
@@ -419,6 +419,12 @@ export class AlertsClient<
       }
     }
 
+    function getBulkDocument(index: string | null | undefined, alert: Alert & AlertData) {
+      // if index provided, must be an update, so wrap in a { doc: {} }
+      if (index) return { doc: alert };
+      return alert;
+    }
+
     function getBulkMeta(
       uuid: string,
       index: string | undefined,
@@ -429,11 +435,9 @@ export class AlertsClient<
       if (index && seqNo != null && primaryTerm != null) {
         return {
           // this code will change to use update, and not the if_* fields
-          index: {
+          update: {
             _id: uuid,
             _index: index,
-            if_seq_no: seqNo,
-            if_primary_term: primaryTerm,
             require_alias: false,
           },
         };
