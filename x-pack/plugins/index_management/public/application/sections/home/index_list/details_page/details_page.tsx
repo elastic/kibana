@@ -18,12 +18,14 @@ import {
 } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
+import { css } from '@emotion/react';
 import { Index } from '../../../../../../common';
 import { loadIndex } from '../../../../services';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { Section } from '../../home';
 import { DetailsPageError } from './details_page_error';
 import { ManageIndexButton } from './manage_index_button';
+import { DetailsPageMappings } from './details_page_mappings';
 
 export enum IndexDetailsSection {
   Overview = 'overview',
@@ -164,7 +166,12 @@ export const DetailsPage: React.FunctionComponent<
 
       <EuiSpacer size="l" />
 
-      <div data-test-subj={`indexDetailsContent`}>
+      <div
+        data-test-subj={`indexDetailsContent`}
+        css={css`
+          height: 100%;
+        `}
+      >
         <Routes>
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
@@ -175,8 +182,8 @@ export const DetailsPage: React.FunctionComponent<
             render={() => <div>Documents</div>}
           />
           <Route
-            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Mappings}`}
-            render={() => <div>Mappings</div>}
+            path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Mappings}`}
+            component={DetailsPageMappings}
           />
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Settings}`}
@@ -191,11 +198,6 @@ export const DetailsPage: React.FunctionComponent<
             to={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
           />
         </Routes>
-      </div>
-
-      <EuiSpacer size="l" />
-      <div>
-        <pre>{JSON.stringify(index, null, 2)}</pre>
       </div>
     </>
   );

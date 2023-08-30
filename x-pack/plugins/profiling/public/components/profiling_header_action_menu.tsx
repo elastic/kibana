@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks, EuiIcon } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHeaderLink,
+  EuiHeaderLinks,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import qs from 'query-string';
 import React from 'react';
@@ -20,32 +27,38 @@ export function ProfilingHeaderActionMenu() {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      <EuiHeaderLink
-        color="text"
-        onClick={() => {
-          const query = qs.parse(window.location.search);
-          const storageExplorerURL = url.format({
-            pathname: '/storage-explorer',
-            query: {
-              kuery: query.kuery,
-              rangeFrom: query.rangeFrom,
-              rangeTo: query.rangeTo,
-            },
-          });
-          history.push(storageExplorerURL);
-        }}
+      <EuiToolTip
+        content={i18n.translate('xpack.profiling.header.storageExplorerLink.tooltip', {
+          defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+        })}
       >
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="beaker" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.profiling.headerActionMenu.storageExplorer', {
-              defaultMessage: 'Storage Explorer',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiHeaderLink>
+        <EuiHeaderLink
+          color="text"
+          onClick={() => {
+            const query = qs.parse(window.location.search);
+            const storageExplorerURL = url.format({
+              pathname: '/storage-explorer',
+              query: {
+                kuery: query.kuery,
+                rangeFrom: query.rangeFrom || 'now-15m',
+                rangeTo: query.rangeTo || 'now',
+              },
+            });
+            history.push(storageExplorerURL);
+          }}
+        >
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="beta" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.profiling.headerActionMenu.storageExplorer', {
+                defaultMessage: 'Storage Explorer',
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiHeaderLink>
+      </EuiToolTip>
       <EuiHeaderLink
         href={router.link('/add-data-instructions', {
           query: { selectedTab: AddDataTabs.Kubernetes },
@@ -58,7 +71,7 @@ export function ProfilingHeaderActionMenu() {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {i18n.translate('xpack.profiling.headerActionMenu.addData', {
-              defaultMessage: 'Add data',
+              defaultMessage: 'Add Data',
             })}
           </EuiFlexItem>
         </EuiFlexGroup>
