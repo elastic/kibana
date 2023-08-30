@@ -28,6 +28,7 @@ export const GeoContainmentRuleTypeExpression: React.FunctionComponent<
         setDateField={(fieldName: string) => props.setRuleParams('dateField', fieldName)}
         setEntityField={(fieldName: string) => props.setRuleParams('entity', fieldName)}
         setGeoField={(fieldName: string) => props.setRuleParams('geoField', fieldName)}
+        setQuery={(query: Query) => props.setRuleParams('indexQuery', query)}
         unifiedSearch={props.unifiedSearch}
       />
 

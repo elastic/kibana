@@ -13,6 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataViewSelect } from './data_view_select';
 import { SingleFieldSelect } from './single_field_select';
+import { QueryInput } from './query_input';
 
 export const ENTITY_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
 
@@ -42,6 +43,7 @@ interface Props {
   setDateField: (fieldName: string) => void;
   setEntityField: (fieldName: string) => void;
   setGeoField: (fieldName: string) => void;
+  setQuery: (query: Query) => void;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
@@ -242,6 +244,25 @@ export const EntityForm = (props: Props) => {
                   }
                 }}
                 fields={entityFields}
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              error={entityFieldError}
+              isInvalid={Boolean(entityFieldError)}
+              helpText={i18n.translate('xpack.stackAlerts.geoContainment.filterHelpText', {
+                defaultMessage: 'Add a filter to narrow entities.',
+              })}
+              label={i18n.translate('xpack.stackAlerts.geoContainment.filterLabel', {
+                defaultMessage: 'Filter',
+              })}
+            >
+              <QueryInput
+                dataView={dataView}
+                onChange={(query: Query) => {
+                  props.setQuery(query);
+                }}
+                query={props.ruleParams.indexQuery}
               />
             </EuiFormRow>
           </>
