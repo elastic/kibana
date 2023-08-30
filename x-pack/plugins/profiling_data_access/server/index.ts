@@ -27,7 +27,7 @@ const configSchema = schema.object({
 
 export type ProfilingConfig = TypeOf<typeof configSchema>;
 
-export { ProfilingDataAccessPluginSetup, ProfilingDataAccessPluginStart };
+export type { ProfilingDataAccessPluginSetup, ProfilingDataAccessPluginStart };
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ProfilingDataAccessPlugin(initializerContext);

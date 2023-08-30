@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createStackFrameID, StackTrace } from '../../common/profiling';
+import { createStackFrameID, StackTrace } from '@kbn/profiling-data-access-plugin/common/profiling';
 import { runLengthEncode } from '../../common/run_length_encoding';
 import { decodeStackTrace, EncodedStackTrace } from './stacktrace';
 
