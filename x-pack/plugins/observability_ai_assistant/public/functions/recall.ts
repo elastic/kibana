@@ -20,16 +20,24 @@ export function registerRecallFunction({
     {
       name: 'recall',
       contexts: ['core'],
-      description: `Use this function to recall earlier learnings. Anything you will summarise can be retrieved again later via this function. The queries you use are very important, as they will decide the context that is included in the conversation. Make sure the query covers the following aspects:
-      - The user's intent
-      - Any data (like field names) mentioned in the user's request
-      - Anything you've inferred from the user's request
-      - The functions you think might be suitable for answering the user's request. If there are multiple functions that seem suitable, create multiple queries. Use the function name in the query.
+      description: `Use this function to recall earlier learnings. Anything you will summarise can be retrieved again later via this function. This is semantic/vector search so there's no need for an exact match.
       
-      For instance, when the user asks: "can you visualise the average request duration for opbeans-go over the last 7 days?", the queries could be:
-      - "visualise average request duration for APM service opbeans-go"
+      Make sure the query covers the following aspects:
+      - The user's prompt, verbatim
+      - Anything you've inferred from the user's request, but is not mentioned in the user's request
+      - The functions you think might be suitable for answering the user's request. If there are multiple functions that seem suitable, create multiple queries. Use the function name in the query.  
+      
+      Q: "can you visualise the average request duration for opbeans-go over the last 7 days?"
+      A: -"can you visualise the average request duration for opbeans-go over the last 7 days?"
+      - "APM service"
       - "lens function usage"
-      - "get_apm_timeseries function usage"`,
+      - "get_apm_timeseries function usage"
+      
+      Q: "what alerts are active?"
+      A: - "what alerts are active?"
+      - "alerts function usage"
+      
+      `,
       descriptionForUser: 'This function allows the assistant to recall previous learnings.',
       parameters: {
         type: 'object',

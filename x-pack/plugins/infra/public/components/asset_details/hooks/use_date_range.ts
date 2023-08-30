@@ -7,22 +7,31 @@
 
 import type { TimeRange } from '@kbn/es-query';
 import createContainer from 'constate';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { parseDateRange } from '../../../utils/datemath';
 
 import { toTimestampRange } from '../utils';
+import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 const DEFAULT_DATE_RANGE: TimeRange = {
   from: 'now-15m',
   to: 'now',
 };
 
-export interface UseAssetDetailsStateProps {
+export interface UseDateRangeProviderProps {
   initialDateRange: TimeRange;
 }
 
-export function useDateRangeProvider({ initialDateRange }: UseAssetDetailsStateProps) {
-  const [dateRange, setDateRange] = useState(initialDateRange);
+export function useDateRangeProvider({ initialDateRange }: UseDateRangeProviderProps) {
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const dateRange: TimeRange = urlState?.dateRange ?? initialDateRange;
+
+  const setDateRange = useCallback(
+    (newDateRange: TimeRange) => {
+      setUrlState({ dateRange: newDateRange });
+    },
+    [setUrlState]
+  );
 
   const parsedDateRange = useMemo(() => {
     const { from = DEFAULT_DATE_RANGE.from, to = DEFAULT_DATE_RANGE.to } =
