@@ -161,7 +161,7 @@ export class SampleDataInstaller {
           name: index,
           body: {
             template: {
-              // these settings are not permitted in serverless
+              // these settings are not available in serverless
               // settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
               mappings: { properties: dataIndex.fields },
             },
@@ -181,7 +181,7 @@ export class SampleDataInstaller {
             settings: {
               index: {
                 ...dataIndex.indexSettings,
-                // these settings are not permitted in serverless
+                // settings not available in serverless
                 // number_of_shards: 1,
                 // auto_expand_replicas: '0-1',
               },
@@ -200,19 +200,17 @@ export class SampleDataInstaller {
   private async importSavedObjects(dataset: SampleDatasetSchema) {
     const savedObjects = dataset.savedObjects.map(({ version, ...obj }) => obj);
     const readStream = Readable.from(savedObjects);
+
     const { errors = [] } = await this.soImporter.import({
       readStream,
       overwrite: true,
       createNewCopies: false,
-      managed: true,
-      refresh: false,
     });
     if (errors.length > 0) {
       const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
         errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
       )}`;
       this.logger.warn(errMsg);
-      // I think this is where the 500 is getting returned
       throw new SampleDataInstallError(errMsg, 500);
     }
     return savedObjects.length;
