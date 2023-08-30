@@ -8,19 +8,18 @@ import { ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM } from '@kbn/core-http-common';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { BaseParams, getRedirectAppPath } from '@kbn/reporting-common';
-import { JobId } from '@kbn/reporting-common/types';
-import { DownloadReportFn, ManagementLinkFn } from '@kbn/reporting-common/url';
+import { ManagementLinkFn } from '@kbn/reporting-common/url';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import { buildKibanaPath } from '@kbn/reporting-common';
+import { buildKibanaPath, BaseParams, JobId } from '@kbn/reporting-common';
 import {
+  getRedirectAppPath,
   INTERNAL_ROUTES,
   PUBLIC_ROUTES,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
-import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '../../../common/types';
+import { ReportApiJSON } from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
 

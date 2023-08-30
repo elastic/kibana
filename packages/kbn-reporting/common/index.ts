@@ -23,6 +23,7 @@ export type {
   RunTaskFn,
   JobParamsDownloadCSV,
   ReportingRequestHandlerContext,
+  JobId,
 } from './types';
 export type { LocatorParams, UrlOrUrlLocatorTuple, IlmPolicyStatusResponse } from './url';
 export { ExportType } from './export_type';

@@ -7,7 +7,7 @@
 
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { PNG_REPORT_TYPE_V2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-common/report_types';
+import { PNG_REPORT_TYPE_V2, PDF_REPORT_TYPE_V2, PDF_REPORT_TYPE, CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-common/report_types';
 import type { ReportingCore, ReportingInternalStart } from './core';
 import { ExportTypesRegistry } from './lib/export_types_registry';
 import { ReportingPlugin } from './plugin';
