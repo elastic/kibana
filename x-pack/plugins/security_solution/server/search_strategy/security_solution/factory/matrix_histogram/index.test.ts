@@ -56,7 +56,7 @@ describe('Alerts matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(/invalid_enum_value/);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 
@@ -92,7 +92,7 @@ describe('Anomalies matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(/invalid_enum_value/);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 
@@ -128,7 +128,7 @@ describe('Authentications matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(/invalid_enum_value/);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 
@@ -164,7 +164,7 @@ describe('Events matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(/invalid_enum_value/);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 
@@ -200,7 +200,7 @@ describe('Dns matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(/invalid_enum_value/);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 
@@ -233,7 +233,7 @@ describe('Preview matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(/invalid_enum_value/);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 

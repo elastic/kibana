@@ -8,6 +8,7 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { firstLastSeenRequestOptionsSchema } from '../../../../../common/api/search_strategy';
 import type {
   FactoryQueryTypes,
   FirstLastSeenStrategyResponse,
@@ -24,6 +25,8 @@ export const firstOrLastSeen: SecuritySolutionFactory<typeof FirstLastSeenQuery>
     options,
     response: IEsSearchResponse<unknown>
   ): Promise<FirstLastSeenStrategyResponse> => {
+    firstLastSeenRequestOptionsSchema.parse(options);
+
     // First try to get the formatted field if it exists or not.
     const formattedField: string | null = getOr(
       null,
