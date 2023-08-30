@@ -12,7 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Table } from './table';
 import { getAllFields } from './utils';
 import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
@@ -20,23 +21,22 @@ export interface MetadataSearchUrlState {
 }
 
 export const Metadata = () => {
-  const { overrides, onTabsStateChange } = useAssetDetailsStateContext();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const { overrides } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
   } = useMetadataStateProviderContext();
-  const { query, showActionsColumn = false } = overrides?.metadata ?? {};
+  const { showActionsColumn = false } = overrides?.metadata ?? {};
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
   const onSearchChange = useCallback(
     (newQuery: string) => {
-      if (onTabsStateChange) {
-        onTabsStateChange({ metadata: { query: newQuery } });
-      }
+      setUrlState({ metadataSearch: newQuery });
     },
-    [onTabsStateChange]
+    [setUrlState]
   );
 
   if (fetchMetadataError) {
@@ -71,7 +71,7 @@ export const Metadata = () => {
 
   return (
     <Table
-      search={query}
+      search={urlState?.metadataSearch}
       onSearchChange={onSearchChange}
       showActionsColumn={showActionsColumn}
       rows={fields}

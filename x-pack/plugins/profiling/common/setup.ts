@@ -35,6 +35,7 @@ export interface SetupState {
   };
   resources: {
     created: boolean;
+    pre_8_9_1_data: boolean;
   };
   settings: {
     configured: boolean;
@@ -71,6 +72,7 @@ export function createDefaultSetupState(): SetupState {
     },
     resources: {
       created: false,
+      pre_8_9_1_data: false,
     },
     settings: {
       configured: false,
@@ -78,17 +80,11 @@ export function createDefaultSetupState(): SetupState {
   };
 }
 
-export function areResourcesSetupForViewer(state: SetupState): boolean {
+export function areResourcesSetup(state: SetupState): boolean {
   return (
     state.policies.collector.installed &&
     state.policies.symbolizer.installed &&
-    !state.policies.apm.profilingEnabled
-  );
-}
-
-export function areResourcesSetupForAdmin(state: SetupState): boolean {
-  return (
-    areResourcesSetupForViewer(state) &&
+    !state.policies.apm.profilingEnabled &&
     state.resource_management.enabled &&
     state.resources.created &&
     state.permissions.configured &&

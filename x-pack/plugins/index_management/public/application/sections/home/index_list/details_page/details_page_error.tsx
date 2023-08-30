@@ -8,14 +8,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
-import { useLoadIndex } from '../../../../services';
 
 export const DetailsPageError = ({
   indexName,
   resendRequest,
 }: {
   indexName: string;
-  resendRequest: ReturnType<typeof useLoadIndex>['resendRequest'];
+  resendRequest: () => Promise<void>;
 }) => {
   return (
     <EuiPageTemplate.EmptyPrompt

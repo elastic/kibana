@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { ruleFields } from '../../../data/detection_engine';
 import {
   getNewRule,
@@ -83,7 +81,7 @@ import {
   selectRulesByName,
 } from '../../../tasks/alerts_detection_rules';
 import { deleteSelectedRules } from '../../../tasks/rules_bulk_actions';
-import { createRule } from '../../../tasks/api_calls/rules';
+import { createRule, findAllRules } from '../../../tasks/api_calls/rules';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
@@ -116,7 +114,7 @@ import { enablesRule, getDetails } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
   });
@@ -261,7 +259,7 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
           const initialNumberOfRules = rules.length;
           const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-          cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+          findAllRules().then(({ body }) => {
             const numberOfRules = body.data.length;
             expect(numberOfRules).to.eql(initialNumberOfRules);
           });
@@ -269,7 +267,7 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
           deleteFirstRule();
 
           getRulesManagementTableRows().should('have.length', expectedNumberOfRulesAfterDeletion);
-          cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+          findAllRules().then(({ body }) => {
             const numberOfRules = body.data.length;
             expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
           });
@@ -298,7 +296,7 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
             });
 
           getRulesManagementTableRows().should('have.length', expectedNumberOfRulesAfterDeletion);
-          cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+          findAllRules().then(({ body }) => {
             const numberOfRules = body.data.length;
             expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
           });
@@ -328,7 +326,7 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
           cy.waitFor('@deleteRule').then(() => {
             cy.get(RULES_MANAGEMENT_TABLE).should('exist');
             getRulesManagementTableRows().should('have.length', expectedNumberOfRulesAfterDeletion);
-            cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+            findAllRules().then(({ body }) => {
               const numberOfRules = body.data.length;
               expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
             });
