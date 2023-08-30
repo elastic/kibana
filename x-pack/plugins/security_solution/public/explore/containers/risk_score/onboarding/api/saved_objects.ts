@@ -66,7 +66,7 @@ export const bulkCreatePrebuiltSavedObjects = async ({
           body?: Array<{ type: string; title: string; id: string; name: string }>;
         }
       >
-    >(prebuiltSavedObjectsBulkCreateUrl(options.templateName))
+    >(prebuiltSavedObjectsBulkCreateUrl(options.templateName), { version: '1' })
     .then((result) => {
       const response = result[options.templateName];
       const error = response?.error?.message;
@@ -142,7 +142,7 @@ export const bulkDeletePrebuiltSavedObjects = async ({
   options: Options;
 }) => {
   const res = await http
-    .post(prebuiltSavedObjectsBulkDeleteUrl(options.templateName))
+    .post(prebuiltSavedObjectsBulkDeleteUrl(options.templateName), { version: '1' })
     .catch((e) => {
       notifications?.toasts?.addDanger({
         title: errorMessage ?? DELETE_SAVED_OBJECTS_FAILURE,

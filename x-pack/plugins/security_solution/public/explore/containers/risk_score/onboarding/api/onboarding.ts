@@ -41,6 +41,7 @@ export const installRiskScore = ({
 }) => {
   return http
     .post<Response[]>(INTERNAL_RISK_SCORE_URL, {
+      version: '1',
       body: JSON.stringify(options),
       signal,
     })
