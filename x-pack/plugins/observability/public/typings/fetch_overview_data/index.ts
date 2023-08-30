@@ -154,7 +154,7 @@ export interface UxFetchDataResponse extends FetchDataResponse {
   coreWebVitals: UXMetrics;
 }
 
-export interface UniversalProfilingDataResponse extends FetchDataResponse {}
+export type UniversalProfilingDataResponse = FetchDataResponse;
 
 export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
@@ -162,7 +162,7 @@ export interface ObservabilityFetchDataResponse {
   infra_logs: LogsFetchDataResponse;
   uptime: UptimeFetchDataResponse;
   ux: UxFetchDataResponse;
-  universal_profiling: UniversalProfilingDataResponse
+  universal_profiling: UniversalProfilingDataResponse;
 }
 
 export interface ObservabilityHasDataResponse {
@@ -171,5 +171,5 @@ export interface ObservabilityHasDataResponse {
   infra_logs: InfraLogsHasDataResponse;
   uptime: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
-  universal_profiling: UniversalProfilingHasDataResponse
+  universal_profiling: UniversalProfilingHasDataResponse;
 }
