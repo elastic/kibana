@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import {
   RuleExecutionStatus,
   RuleExecutionStatusValues,
@@ -16,7 +17,7 @@ import {
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { ActionsCompletion, RuleExecutionStatuses } from '../../common';
+import { RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { RuleRunMetrics } from './rule_run_metrics_store';
