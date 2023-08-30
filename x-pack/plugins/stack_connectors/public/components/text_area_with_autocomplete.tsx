@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import getCaretCoordinates from 'textarea-caret';
 import { Properties } from 'csstype';
 import {
@@ -283,18 +283,18 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
       popupPosition.width,
     ]
   );
-  
-  const onFocus = useCallback(() => setListOpen(true), [])
+
+  const onFocus = useCallback(() => setListOpen(true), []);
   const onBlur = useCallback(() => {
     if (!inputTargetValue && !isListOpen) {
       editAction(paramsProperty, '', index);
     }
-  }, [editAction, index, inputTargetValue, isListOpen, paramsProperty])
-  const onClick = useCallback(() => closeList(), [closeList])
+  }, [editAction, index, inputTargetValue, isListOpen, paramsProperty]);
+  const onClick = useCallback(() => closeList(), [closeList]);
   const onScroll = useCallback(() => {
     closeList(true);
-  }, [closeList])
-  
+  }, [closeList]);
+
   return (
     <EuiFormRow
       error={errors}
