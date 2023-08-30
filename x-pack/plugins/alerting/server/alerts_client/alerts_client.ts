@@ -428,6 +428,7 @@ export class AlertsClient<
     ) {
       if (index && seqNo != null && primaryTerm != null) {
         return {
+          // this code will change to use update, and not the if_* fields
           index: {
             _id: uuid,
             _index: index,

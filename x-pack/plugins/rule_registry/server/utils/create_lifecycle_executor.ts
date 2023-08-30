@@ -353,6 +353,7 @@ export const createLifecycleExecutor =
         body: allEventsToIndex.flatMap(({ event, indexName, seqNo, primaryTerm }) => [
           indexName
             ? {
+                // this code will change to use update, and not the if_* fields
                 index: {
                   _id: event[ALERT_UUID]!,
                   _index: indexName,
