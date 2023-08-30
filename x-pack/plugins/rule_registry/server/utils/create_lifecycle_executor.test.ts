@@ -1861,7 +1861,7 @@ describe('createLifecycleExecutor', () => {
         expect.objectContaining({
           body: [
             // alert documents
-            { index: { _id: expect.any(String) } },
+            { create: { _id: expect.any(String) } },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_STATUS]: ALERT_STATUS_UNTRACKED,
@@ -1869,7 +1869,7 @@ describe('createLifecycleExecutor', () => {
               [EVENT_KIND]: 'signal',
               [TAGS]: ['source-tag1', 'source-tag2', 'rule-tag1', 'rule-tag2'],
             }),
-            { index: { _id: expect.any(String) } },
+            { create: { _id: expect.any(String) } },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_STATUS]: ALERT_STATUS_UNTRACKED,
@@ -1884,7 +1884,7 @@ describe('createLifecycleExecutor', () => {
         expect.objectContaining({
           body: expect.arrayContaining([
             // evaluation documents
-            { index: {} },
+            { create: {} },
             expect.objectContaining({
               [EVENT_KIND]: 'event',
             }),
