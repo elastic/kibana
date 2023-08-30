@@ -10,7 +10,6 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createCallObservabilityAIAssistantAPI } from '../api';
-import { createChatService } from './create_chat_service';
 import type { ChatRegistrationFunction, ObservabilityAIAssistantService } from '../types';
 
 export function createService({
@@ -38,7 +37,8 @@ export function createService({
       registrations.push(fn);
     },
     start: async ({ signal }) => {
-      return await createChatService({ client, signal, registrations });
+      const mod = await import('./create_chat_service');
+      return await mod.createChatService({ client, signal, registrations });
     },
 
     callApi: client,
