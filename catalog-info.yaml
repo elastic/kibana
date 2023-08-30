@@ -145,7 +145,7 @@ spec:
       description: Pipeline that releases kibana by triggering the release flow through qa, staging, and production
     spec:
       repository: elastic/kibana
-      pipeline_file: ./.buildkite/pipelines/pipeline.kibana-release.yaml
+      pipeline_file: ./.buildkite/pipelines/pipeline.kibana-serverless-release.yaml
       provider_settings:
         build_branches: false
         build_pull_request_forks: false
