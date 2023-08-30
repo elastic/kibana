@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
-import { InsightsSummaryRow } from './insights_summary_row';
-import { useCorrelations } from '../../shared/hooks/use_correlations';
+import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
+import { RelatedAlertsBySession } from './related_alerts_by_session';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
+import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
+import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
+import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
+import { SuppressedAlerts } from './suppressed_alerts';
+import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
+import { RelatedCases } from './related_cases';
+import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
-import { CORRELATIONS_TITLE } from './translations';
+import { CORRELATIONS_ERROR, CORRELATIONS_TITLE } from './translations';
 import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 
@@ -23,8 +31,14 @@ import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details'
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview: React.FC = () => {
-  const { eventId, indexName, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
-    useRightPanelContext();
+  const {
+    dataAsNestedObject,
+    dataFormattedForFieldBrowser,
+    eventId,
+    indexName,
+    getFieldsData,
+    scopeId,
+  } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
   const goToCorrelationsTab = useCallback(() => {
@@ -42,26 +56,30 @@ export const CorrelationsOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const { loading, error, data } = useCorrelations({
-    eventId,
+  const {
+    show: showAlertsByAncestry,
+    documentId,
+    indices,
+  } = useShowRelatedAlertsByAncestry({
+    getFieldsData,
     dataAsNestedObject,
     dataFormattedForFieldBrowser,
-    scopeId,
+  });
+  const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
+    getFieldsData,
+  });
+  const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
+  const showCases = useShowRelatedCases();
+  const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
+    getFieldsData,
   });
 
-  const correlationRows = useMemo(
-    () =>
-      data.map((d) => (
-        <InsightsSummaryRow
-          icon={d.icon}
-          value={d.value}
-          text={d.text}
-          data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
-          key={`correlation-row-${d.text}`}
-        />
-      )),
-    [data]
-  );
+  const canShowAtLeastOneInsight =
+    showAlertsByAncestry ||
+    showSameSourceAlerts ||
+    showAlertsBySession ||
+    showCases ||
+    showSuppressedAlerts;
 
   return (
     <ExpandablePanel
@@ -70,12 +88,27 @@ export const CorrelationsOverview: React.FC = () => {
         callback: goToCorrelationsTab,
         iconType: 'arrowStart',
       }}
-      content={{ loading, error }}
       data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
     >
-      <EuiFlexGroup direction="column" gutterSize="none">
-        {correlationRows}
-      </EuiFlexGroup>
+      {canShowAtLeastOneInsight ? (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {showSuppressedAlerts && (
+            <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} />
+          )}
+          {showCases && <RelatedCases eventId={eventId} />}
+          {showSameSourceAlerts && originalEventId && (
+            <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
+          )}
+          {showAlertsBySession && entityId && (
+            <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
+          )}
+          {showAlertsByAncestry && documentId && indices && (
+            <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+          )}
+        </EuiFlexGroup>
+      ) : (
+        <div data-test-subj={`${INSIGHTS_CORRELATIONS_TEST_ID}Error`}>{CORRELATIONS_ERROR}</div>
+      )}
     </ExpandablePanel>
   );
 };

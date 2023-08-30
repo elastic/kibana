@@ -5,122 +5,33 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { withMetricPageProviders } from './page_providers';
-import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
+import { EuiErrorBoundary } from '@elastic/eui';
+import React from 'react';
+import { useRouteMatch } from 'react-router-dom';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { useSourceContext } from '../../../containers/metrics_source';
-import { InfraLoadingPanel } from '../../../components/loading';
-import { findInventoryModel } from '../../../../common/inventory_models';
-import { NavItem } from './lib/side_nav_context';
-import { NodeDetailsPage } from './components/node_details_page';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
-import { useMetricsTimeContext } from './hooks/use_metrics_time';
-import { MetricsPageTemplate } from '../page_template';
-import { inventoryTitle } from '../../../translations';
+import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import { AssetDetailPage } from './asset_detail_page';
+import { MetricsTimeProvider } from './hooks/use_metrics_time';
+import { MetricDetailPage } from './metric_detail_page';
 
-interface Props {
-  theme: EuiTheme | undefined;
-  match: {
-    params: {
-      type: string;
-      node: string;
-    };
-  };
-}
+export const MetricDetail = () => {
+  const {
+    params: { type: nodeType, node: nodeName },
+  } = useRouteMatch<{ type: InventoryItemType; node: string }>();
 
-export const MetricDetail = withMetricPageProviders(
-  withTheme(({ match }: Props) => {
-    const nodeId = match.params.node;
-    const nodeType = match.params.type as InventoryItemType;
-    const inventoryModel = findInventoryModel(nodeType);
-    const { sourceId, metricIndicesExist } = useSourceContext();
+  const PageContent = () => (nodeType === 'host' ? <AssetDetailPage /> : <MetricDetailPage />);
 
-    const {
-      timeRange,
-      parsedTimeRange,
-      setTimeRange,
-      refreshInterval,
-      setRefreshInterval,
-      isAutoReloading,
-      setAutoReload,
-      triggerRefresh,
-    } = useMetricsTimeContext();
-    const {
-      name,
-      filteredRequiredMetrics,
-      loading: metadataLoading,
-      cloudId,
-      metadata,
-    } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId, parsedTimeRange);
+  useMetricsBreadcrumbs([
+    {
+      text: nodeName,
+    },
+  ]);
 
-    const [sideNav, setSideNav] = useState<NavItem[]>([]);
-
-    const addNavItem = React.useCallback(
-      (item: NavItem) => {
-        if (!sideNav.some((n) => n.id === item.id)) {
-          setSideNav([item, ...sideNav]);
-        }
-      },
-      [sideNav]
-    );
-
-    const inventoryLinkProps = useLinkProps({
-      app: 'metrics',
-      pathname: '/inventory',
-    });
-
-    useMetricsBreadcrumbs([
-      {
-        ...inventoryLinkProps,
-        text: inventoryTitle,
-      },
-      {
-        text: name,
-      },
-    ]);
-
-    if (metadataLoading && !filteredRequiredMetrics.length) {
-      return (
-        <MetricsPageTemplate hasData={metricIndicesExist}>
-          <InfraLoadingPanel
-            height="100vh"
-            width="100%"
-            text={i18n.translate('xpack.infra.metrics.loadingNodeDataText', {
-              defaultMessage: 'Loading data',
-            })}
-          />
-        </MetricsPageTemplate>
-      );
-    }
-
-    return (
-      <>
-        {metadata ? (
-          <NodeDetailsPage
-            name={name}
-            requiredMetrics={filteredRequiredMetrics}
-            sourceId={sourceId}
-            timeRange={timeRange}
-            nodeType={nodeType}
-            nodeId={nodeId}
-            cloudId={cloudId}
-            metadataLoading={metadataLoading}
-            isAutoReloading={isAutoReloading}
-            refreshInterval={refreshInterval}
-            sideNav={sideNav}
-            metadata={metadata}
-            addNavItem={addNavItem}
-            setRefreshInterval={setRefreshInterval}
-            setAutoReload={setAutoReload}
-            triggerRefresh={triggerRefresh}
-            setTimeRange={setTimeRange}
-          />
-        ) : null}
-      </>
-    );
-  })
-);
+  return (
+    <EuiErrorBoundary>
+      <MetricsTimeProvider>
+        <PageContent />
+      </MetricsTimeProvider>
+    </EuiErrorBoundary>
+  );
+};

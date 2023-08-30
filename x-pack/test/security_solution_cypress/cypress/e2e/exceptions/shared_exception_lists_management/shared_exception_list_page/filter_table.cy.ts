@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 
 import { getExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
@@ -36,7 +35,7 @@ const getExceptionList2 = () => ({
   name: EXCEPTION_LIST_NAME_TWO,
   list_id: 'exception_list_2',
 });
-describe('Filter Lists', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cy.task('esArchiverResetKibana');
     login();

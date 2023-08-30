@@ -12,8 +12,7 @@
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
-    "../../../typings/**/*",
-    "./public/management/cypress/cypress.d.ts"
+    "../../../typings/**/*"
   ],
   "exclude": [
     "target/**/*",
@@ -163,12 +162,15 @@
     "@kbn/cloud-chat-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/security-solution-navigation",
+    "@kbn/security-solution-upselling",
     "@kbn/discover-plugin",
     "@kbn/data-view-editor-plugin",
-    "@kbn/navigation-plugin",
     "@kbn/alerts-ui-shared",
+    "@kbn/saved-search-plugin",
+    "@kbn/unified-histogram-plugin",
+    "@kbn/navigation-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
-    "@kbn/handlebars",
+    "@kbn/handlebars"
   ]
 }

@@ -49,6 +49,7 @@ export interface DocLinks {
   };
   readonly console: {
     readonly guide: string;
+    readonly serverlessGuide: string;
   };
   readonly dashboard: {
     readonly guide: string;
@@ -488,6 +489,8 @@ export interface DocLinks {
     fleetServer: string;
     fleetServerAddFleetServer: string;
     settings: string;
+    logstashSettings: string;
+    kafkaSettings: string;
     settingsFleetServerHostSettings: string;
     settingsFleetServerProxySettings: string;
     troubleshooting: string;
@@ -567,8 +570,29 @@ export interface DocLinks {
     readonly appSearch: string;
     readonly elasticsearch: string;
   };
+  readonly serverlessClients: {
+    readonly goApiReference: string;
+    readonly goGettingStarted: string;
+    readonly httpApis: string;
+    readonly httpApiReferences: string;
+    readonly jsApiReference: string;
+    readonly jsGettingStarted: string;
+    readonly phpApiReference: string;
+    readonly phpGettingStarted: string;
+    readonly pythonApiReference: string;
+    readonly pythonGettingStarted: string;
+    readonly pythonReferences: string;
+    readonly rubyApiReference: string;
+    readonly rubyGettingStarted: string;
+  };
   readonly serverlessSearch: {
+    readonly gettingStartedExplore: string;
+    readonly gettingStartedIngest: string;
+    readonly gettingStartedSearch: string;
     readonly integrations: string;
+    readonly integrationsBeats: string;
+    readonly integrationsConnectorClient: string;
+    readonly integrationsLogstash: string;
   };
   readonly synthetics: {
     readonly featureRoles: string;
