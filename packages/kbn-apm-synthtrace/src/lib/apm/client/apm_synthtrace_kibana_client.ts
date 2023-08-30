@@ -8,7 +8,6 @@
 
 import fetch from 'node-fetch';
 import pRetry from 'p-retry';
-import { OLDEST_INTERNAL_VERSION } from '@kbn/fleet-plugin/common/constants';
 import { Logger } from '../../utils/create_logger';
 
 export class ApmSynthtraceKibanaClient {
@@ -70,6 +69,5 @@ function kibanaHeaders() {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     'kbn-xsrf': 'kibana',
-    'Elastic-Api-Version': `${OLDEST_INTERNAL_VERSION}`,
   };
 }

@@ -312,6 +312,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     );
 
   // deprecated since 8.0
+  // This endpoint should be marked as internal but the router selects this endpoint over the new GET one
+  // For now keeping it public
   router.versioned
     .get({
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
@@ -320,11 +322,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN_DEPRECATED)
         ).granted,
-      access: INTERNAL_API_ACCESS,
     })
     .addVersion(
       {
-        version: OLDEST_INTERNAL_VERSION,
+        version: OLDEST_PUBLIC_VERSION,
         validate: { request: GetInfoRequestSchemaDeprecated },
       },
       async (context, request, response) => {

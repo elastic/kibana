@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { OLDEST_INTERNAL_VERSION } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -61,22 +60,20 @@ export default function (providerContext: FtrProviderContext) {
       expect(response.body.items.find((item: any) => item.id.includes(gaVersion)));
     });
 
-    it('should install the GA package when no version is provided - deprecated endpoint', async function () {
+    it('should install the GA package when no version is provided', async function () {
       const response = await supertest
         .post(`/api/fleet/epm/packages/${testPackage}`)
         .set('kbn-xsrf', 'xxxx')
-        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
         .send({ force: true })
         .expect(200);
 
       expect(response.body.items.find((item: any) => item.id.includes(gaVersion)));
     });
 
-    it('should install the beta package when no version is provided and prerelease is true - deprecated endpoint', async function () {
+    it('should install the beta package when no version is provided and prerelease is true', async function () {
       const response = await supertest
         .post(`/api/fleet/epm/packages/${testPackage}?prerelease=true`)
         .set('kbn-xsrf', 'xxxx')
-        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
         .send({ force: true }) // using force to ignore package verification error
         .expect(200);
 
