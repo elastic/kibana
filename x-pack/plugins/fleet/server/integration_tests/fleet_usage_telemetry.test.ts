@@ -434,23 +434,6 @@ describe('fleet usage telemetry', () => {
             count: 1,
           },
         ],
-        components_status: [
-          {
-            id: 'beat/metrics-monitoring',
-            status: 'HEALTHY',
-            count: 2,
-          },
-          {
-            id: 'filestream-monitoring',
-            status: 'HEALTHY',
-            count: 1,
-          },
-          {
-            id: 'filestream-monitoring',
-            status: 'UNHEALTHY',
-            count: 1,
-          },
-        ],
         fleet_server_config: {
           policies: [
             {
