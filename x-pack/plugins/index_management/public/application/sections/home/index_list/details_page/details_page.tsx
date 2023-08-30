@@ -29,6 +29,7 @@ import { DetailsPageError } from './details_page_error';
 import { ManageIndexButton } from './manage_index_button';
 import { DetailsPageStats } from './details_page_stats';
 import { DetailsPageMappings } from './details_page_mappings';
+import { DetailsPageSettings } from './details_page_settings';
 
 export enum IndexDetailsSection {
   Overview = 'overview',
@@ -198,8 +199,8 @@ export const DetailsPage: React.FunctionComponent<
             component={DetailsPageMappings}
           />
           <Route
-            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Settings}`}
-            render={() => <div>Settings</div>}
+            path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Settings}`}
+            component={DetailsPageSettings}
           />
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Pipelines}`}

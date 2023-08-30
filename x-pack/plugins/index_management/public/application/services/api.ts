@@ -334,3 +334,10 @@ export function loadIndexStatistics(indexName: string) {
     method: 'get',
   });
 }
+
+export function useLoadIndexSettings(indexName: string) {
+  return useRequest({
+    path: `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
+    method: 'get',
+  });
+}
