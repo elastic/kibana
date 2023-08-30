@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { fromPairs, has, isEmpty } from 'lodash';
+import { has, isEmpty } from 'lodash';
 import { KibanaRequest } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { KueryNode } from '@kbn/es-query';
