@@ -161,7 +161,8 @@ export class SampleDataInstaller {
           name: index,
           body: {
             template: {
-              settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+              // these settings are not permitted in serverless
+              // settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
               mappings: { properties: dataIndex.fields },
             },
             index_patterns: [index],
@@ -180,8 +181,9 @@ export class SampleDataInstaller {
             settings: {
               index: {
                 ...dataIndex.indexSettings,
-                number_of_shards: 1,
-                auto_expand_replicas: '0-1',
+                // these settings are not permitted in serverless
+                // number_of_shards: 1,
+                // auto_expand_replicas: '0-1',
               },
             },
             mappings: { properties: dataIndex.fields },
@@ -205,7 +207,6 @@ export class SampleDataInstaller {
       managed: true,
       refresh: false,
     });
-    console.log(errors);
     if (errors.length > 0) {
       const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
         errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
