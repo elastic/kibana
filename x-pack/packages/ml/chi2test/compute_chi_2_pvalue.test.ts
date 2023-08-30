@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { computeChi2PValue } from './data_comparison_utils';
-import { Histogram } from './types';
+import { computeChi2PValue } from './compute_chi_2_pvalue';
+import type { Histogram } from './types';
 
 describe('computeChi2PValue()', () => {
   test('should return close to 1 if datasets are both empty or nearly identical', () => {

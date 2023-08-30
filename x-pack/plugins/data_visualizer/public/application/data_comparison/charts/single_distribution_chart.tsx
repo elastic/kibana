@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { BarSeries, Chart, ScaleType, Settings } from '@elastic/charts';
-import React from 'react';
-import { NoChartsData } from './no_charts_data';
+
+import type { Histogram } from '@kbn/ml-chi2test';
+
 import { DATA_COMPARISON_TYPE } from '../constants';
-import { DataComparisonField, Histogram } from '../types';
+import type { DataComparisonField } from '../types';
+
+import { NoChartsData } from './no_charts_data';
 
 export const SingleDistributionChart = ({
   data,
