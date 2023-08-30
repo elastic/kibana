@@ -23,7 +23,7 @@ const FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY = ['GET', INTERNAL_ALERTING_API_FIND_
  * @param queryOptions - react-query options
  * @returns useQuery result
  */
-export const useFetchRulesSnoozeSettings = (
+export const useFetchRulesSnoozeSettingsQuery = (
   ids: string[],
   queryOptions?: UseQueryOptions<RulesSnoozeSettingsMap, Error, RulesSnoozeSettingsMap, string[]>
 ) => {

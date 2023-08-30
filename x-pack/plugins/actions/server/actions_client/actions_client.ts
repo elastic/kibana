@@ -25,9 +25,10 @@ import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
 import { FindConnectorResult } from '../application/connector/types';
+import { ConnectorType } from '../application/connector/types';
 import { getAll } from '../application/connector/methods/get_all';
+import { listTypes } from '../application/connector/methods/list_types';
 import {
-  ActionType,
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
   IExecutionLogResult,
@@ -48,7 +49,6 @@ import {
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
 } from '../types';
-
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import { ExecuteOptions } from '../lib/action_executor';
 import {
@@ -88,6 +88,7 @@ import {
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
+import { ListTypesParams } from '../application/connector/methods/list_types/types';
 
 interface ActionUpdate {
   name: string;
@@ -104,7 +105,7 @@ export interface CreateOptions {
   options?: { id?: string };
 }
 
-interface ConstructorOptions {
+export interface ConstructorOptions {
   logger: Logger;
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
@@ -125,11 +126,6 @@ interface ConstructorOptions {
 export interface UpdateOptions {
   id: string;
   action: ActionUpdate;
-}
-
-interface ListTypesOptions {
-  featureId?: string;
-  includeSystemActionTypes?: boolean;
 }
 
 export interface ActionsClientContext {
@@ -816,21 +812,11 @@ export class ActionsClient {
     );
   }
 
-  /**
-   * Return all available action types
-   * expect system action types
-   */
   public async listTypes({
     featureId,
     includeSystemActionTypes = false,
-  }: ListTypesOptions = {}): Promise<ActionType[]> {
-    const actionTypes = this.context.actionTypeRegistry.list(featureId);
-
-    const filteredActionTypes = includeSystemActionTypes
-      ? actionTypes
-      : actionTypes.filter((actionType) => !Boolean(actionType.isSystemActionType));
-
-    return filteredActionTypes;
+  }: ListTypesParams = {}): Promise<ConnectorType[]> {
+    return listTypes(this.context, { featureId, includeSystemActionTypes });
   }
 
   public isActionTypeEnabled(
