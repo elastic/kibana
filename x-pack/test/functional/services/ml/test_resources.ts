@@ -567,7 +567,7 @@ export function MachineLearningTestResourcesProvider(
       await retry.tryForTime(2 * 60 * 1000, async () => {
         const { body, status } = await supertest
           .post(`/api/fleet/setup`)
-          .set(getCommonRequestHeader('1'));
+          .set(getCommonRequestHeader('2023-10-31'));
         mlApi.assertResponseStatusCode(200, status, body);
       });
       log.debug(` > Setup done`);
