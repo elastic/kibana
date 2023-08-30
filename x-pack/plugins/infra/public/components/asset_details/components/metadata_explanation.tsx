@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { useDateRangeProviderContext } from '../hooks/use_date_range';
 import { Popover } from '../tabs/common/popover';
 import { useMetadataStateProviderContext } from '../hooks/use_metadata_state';
 
@@ -54,14 +53,11 @@ const MetadataExplanationTooltipContent = React.memo(() => {
 });
 
 export const MetadataExplanationMessage = () => {
-  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const { metadata, loading } = useMetadataStateProviderContext();
-
-  const dateFromRange = new Date(metadata?.info?.timestamp ?? getDateRangeInTimestamp().to);
 
   return loading ? (
     <EuiLoadingSpinner />
-  ) : (
+  ) : metadata?.info?.timestamp ? (
     <EuiFlexGroup gutterSize="xs" alignItems="baseline">
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
@@ -70,11 +66,16 @@ export const MetadataExplanationMessage = () => {
             defaultMessage="Showing metadata collected on {date} @ {time}"
             values={{
               date: (
-                <FormattedDate value={dateFromRange} month="short" day="numeric" year="numeric" />
+                <FormattedDate
+                  value={new Date(metadata?.info?.timestamp)}
+                  month="short"
+                  day="numeric"
+                  year="numeric"
+                />
               ),
               time: (
                 <FormattedTime
-                  value={dateFromRange}
+                  value={new Date(metadata?.info?.timestamp)}
                   hour12={false}
                   hour="2-digit"
                   minute="2-digit"
@@ -97,5 +98,5 @@ export const MetadataExplanationMessage = () => {
         </Popover>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
+  ) : null;
 };
