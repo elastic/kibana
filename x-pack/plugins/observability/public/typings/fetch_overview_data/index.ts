@@ -76,7 +76,7 @@ export type HasData<T extends ObservabilityFetchDataPlugins> = (
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability-overview' | 'stack_monitoring' | 'fleet' | 'synthetics'
+  'observability-overview' | 'stack_monitoring' | 'fleet' | 'synthetics' | 'universal_profiling'
 >;
 
 export interface DataHandler<
