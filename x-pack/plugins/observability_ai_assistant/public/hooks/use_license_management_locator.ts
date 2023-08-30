@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { useKibana } from './use_kibana';
+import { useObservabilityAiAssistantPluginContext } from '../context/observability_ai_assistant_plugins/use_observability_ai_assistant_plugin_context';
 
 const LICENSE_MANAGEMENT_LOCATOR = 'LICENSE_MANAGEMENT_LOCATOR';
 
 export const useLicenseManagementLocator = () => {
-  const { share } = useKibana().services;
+  const {
+    start: { share },
+  } = useObservabilityAiAssistantPluginContext();
 
   const locator = share.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
 

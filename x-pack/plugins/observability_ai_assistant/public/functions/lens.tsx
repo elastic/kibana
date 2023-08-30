@@ -40,7 +40,11 @@ function Lens({
   end: string;
 }) {
   const {
-    services: { lens, dataViews },
+    services: {
+      plugins: {
+        start: { lens, dataViews },
+      },
+    },
   } = useKibana();
 
   const formulaAsync = useAsync(() => {

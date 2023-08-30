@@ -42,7 +42,7 @@ export function ExperimentalFeatureBanner() {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill color="warning" href="https://ela.st/obs-ai-assistant" target="_blank">
+            <EuiButton color="warning" href="https://ela.st/obs-ai-assistant" target="_blank">
               {i18n.translate(
                 'xpack.observabilityAiAssistant.experimentalFunctionBanner.feedbackButton',
                 { defaultMessage: 'Give feedback' }
