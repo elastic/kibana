@@ -58,33 +58,77 @@ Sensitive properties, such as passwords, can also be stored in the
 ==============================================
 
 [float]
+[[managing-pre-configured-connectors]]
+=== View preconfigured connectors
+
+When you open the main menu, click *{stack-manage-app} > {connectors-ui}*. 
+Preconfigured connectors appear regardless of which space you are in.
+They are tagged as “preconfigured”, and you cannot delete them.
+
+[role="screenshot"]
+image::images/preconfigured-connectors-managing.png[Connectors managing tab with pre-configured]
+
+Clicking a preconfigured connector shows the description, but not the configuration.
+
+[float]
 [[build-in-preconfigured-connectors]]
 === Built-in preconfigured connectors
 
 {kib} provides the following built-in preconfigured connectors:
 
-* <<preconfigured-connector-alert-history,Alert history preconfigured {es} index connector>>
+* <<preconfigured-connector-alert-history>>
 * <<elasticcloud,`Elastic-Cloud-SMTP` preconfigured email connector>>
 
 [float]
-[[managing-pre-configured-connectors]]
-=== View preconfigured connectors
+[[preconfigured-connector-alert-history]]
+==== Preconfigured alert history {es} index connector
 
-When you open the main menu, click *{stack-manage-app} > {connectors-ui}*. 
-Preconfigured connectors appear regardless of which space you are 
-in. They are tagged as “preconfigured”, and you cannot delete them.
+preview::[]
+
+{kib} offers a preconfigured index connector to facilitate indexing active alert data into {es}.
+To use this connector, set <<action-settings,`xpack.actions.preconfiguredAlertHistoryEsIndex`>> to `true`.
+
+When you subsequently create rules, you can use the `Alert history Elasticsearch index (preconfigured)` connector.
 
 [role="screenshot"]
-image::images/preconfigured-connectors-managing.png[Connectors managing tab with pre-configured]
+image::images/pre-configured-alert-history-connector.png[Creating a rule action that uses the pre-configured alert history connector]
 
-Clicking a preconfigured connector shows the description, but not the 
-configuration.
+Documents are indexed using a preconfigured schema that captures the <<defining-rules-actions-variables,action variables>> available for the rule.
+By default, these documents are indexed into the `kibana-alert-history-default` index, but you can specify a different index.
+Index names must start with `kibana-alert-history-` to take advantage of the preconfigured alert history index template.
+
+[IMPORTANT]
+====
+* To write documents to the preconfigured index, you must have `all` or `write` privileges to the `kibana-alert-history-*` indices.
+* The `kibana-alert-history-*` indices are not configured to use ILM so they must be maintained manually. If the index size grows large, consider using the {ref}/docs-delete-by-query.html[delete by query] API to clean up older documents in the index.
+====
 
 [float]
 === Examples
 
+* <<preconfigured-index-configuration>>
 * <<preconfigured-server-log-configuration>>
 * <<preconfigured-webhook-configuration>>
+
+
+[float]
+[[preconfigured-index-configuration]]
+==== Index connectors
+
+The following example creates a <<index-action-type,index connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-index:
+    name: preconfigured-index-connector-type
+    actionTypeId: .index
+    config:
+      index: .kibana <1>
+      executionTimeField: my-field <2>
+--
+<1> The {es} index to be written to.
+<2> An time field that will indicate when each alert condition occurs.
 
 [float]
 [[preconfigured-server-log-configuration]]

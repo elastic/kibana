@@ -252,6 +252,15 @@ Specifies configuration details that are specific to the type of preconfigured c
 The type of preconfigured connector.
 For example: `.email`, `.index`, `.opsgenie`, `.server-log`, `.resilient`, `.slack`, and `.webhook`.
 
+`xpack.actions.preconfigured.<connector-id>.config`::
+The configuration details, which are specific to the type of preconfigured connector.
+
+`xpack.actions.preconfigured.<connector-id>.config.executionTimeField`::
+For an <<index-action-type,index connector>>, specifies a time field that will indicate when each alert condition occurs.
+
+`xpack.actions.preconfigured.<connector-id>.config.index`::
+For an <<index-action-type,index connector>>, specifies the {es} index.
+
 `xpack.actions.preconfigured.<connector-id>.name`::
 The name of the preconfigured connector.
 
