@@ -51,10 +51,12 @@ jobs:
           git tag ${TAG_NAME} ${COMMIT}
           git push origin "refs/tags/${TAG_NAME}"
       - if: always()
+        name: Post to a Slack channel
         id: slack
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          channel-id: kibana-mission-control
-          slack-message: ${{ job.status == 'success' && format('Created tag `{0}` for commit `{1}`', env.TAG_NAME, env.COMMIT) || 'Creating a deploy tag failed. See https://github.com/elastic/kibana/actions/workflows/create-deploy-tag.yml' }}
+          # Channel ID for #kibana-mission-control
+          channel-id: C05NJL80DB8
+          slack-message: "Initiate Serverless Deploy GitHub Workflow: ${{ job.status }}\nWorkflow: https://github.com/elastic/kibana/actions/workflows/create-deploy-tag.yml${{ job.status == 'success' && format('\nTag: `{0}`\nCommit: `{1}`', env.TAG_NAME, env.COMMIT) || '' }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
