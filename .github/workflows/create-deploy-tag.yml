@@ -5,19 +5,21 @@
 #   on the main branch only in a verification step.
 #   This is only to prevent accidental creation of the tag on other branches and cannot be used to prevent malicious creation of the tag.
 
-name: Initiate Serverless Deploy
+name: "Serverless: Promote to QA"
 
 on:
   workflow_dispatch:
     inputs:
       commit:
-        description: "The commit to deploy (default: latest commit on main)"
+        description: "Commit to promote (default: latest commit on main)"
 
 concurrency:
   group: ${{ github.workflow }}
 
 jobs:
   create-deploy-tag:
+    # Temporary, we need a way to limit this to a GitHub team instead of specific users
+    if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck"]', github.triggering_actor)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -50,16 +52,12 @@ jobs:
         run: |
           git tag ${TAG_NAME} ${COMMIT}
           git push origin "refs/tags/${TAG_NAME}"
-      - if: always()
-        name: Post Slack message
-        id: slack
-        uses: slackapi/slack-github-action@v1.24.0
+      - name: Post Slack message
+        if: always()
+        uses: elastic/apm-pipeline-library/.github/actions/notify-build-status@current
         with:
-          # Channel ID for #kibana-mission-control
-          channel-id: "C05NJL80DB8"
-          payload: |
-            {
-              "text": "Initiate Serverless Deploy GitHub Workflow: ${{ job.status }}\nWorkflow: https://github.com/elastic/kibana/actions/workflows/create-deploy-tag.yml${{ job.status == 'success' && format('\nTag: `{0}`\nCommit: `{1}`', env.TAG_NAME, env.COMMIT) || '' }}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          message: "Initiate Serverless Deploy GitHub Workflow: ${{ job.status }}\nWorkflow: https://github.com/elastic/kibana/actions/workflows/create-deploy-tag.yml${{ job.status == 'success' && format('\nTag: `{0}`\nCommit: `{1}`', env.TAG_NAME, env.COMMIT) || '' }}"
+          vaultUrl: ${{ secrets.OBLT_VAULT_ADDR }}
+          vaultRoleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
+          vaultSecretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
+          slackChannel: "#kibana-mission-control"
