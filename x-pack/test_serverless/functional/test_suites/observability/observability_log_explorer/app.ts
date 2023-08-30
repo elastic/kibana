@@ -8,18 +8,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonNavigation']);
 
   describe('Application', () => {
-    before('initialize tests', async () => {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-    });
-
-    after('clean up archives', async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-    });
-
     it('is shown in the global search', async () => {
       await PageObjects.observabilityLogExplorer.navigateTo();
       await PageObjects.svlCommonNavigation.search.showSearch();
