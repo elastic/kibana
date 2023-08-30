@@ -119,12 +119,6 @@ const CardItemComponent: React.FC<{
                   {stepsLeft != null && stepsLeft > 0 && (
                     <strong>{i18n.STEPS_LEFT(stepsLeft)}</strong>
                   )}
-                  {timeInMins != null && timeInMins > 0 && (
-                    <span>
-                      {' • '}
-                      {i18n.STEP_TIME_MIN(timeInMins)}
-                    </span>
-                  )}
                 </EuiText>
               </EuiFlexItem>
             )}

@@ -7,10 +7,10 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { useNavigation } from '@kbn/security-solution-navigation';
 
-const IntegrationsLinkComponent = () => {
+const AddIntegrationButtonComponent = () => {
   const { getAppUrl, navigateTo } = useNavigation();
 
   const integrationsUrl = getAppUrl({ appId: 'integrations', path: '/browse/security' });
@@ -23,22 +23,13 @@ const IntegrationsLinkComponent = () => {
     [navigateTo, integrationsUrl]
   );
   return (
-    <FormattedMessage
-      id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description2.linkText"
-      defaultMessage="Go to {integrations} to ingest your own data!"
-      values={{
-        integrations: (
-          // eslint-disable-next-line @elastic/eui/href-or-on-click
-          <EuiLink onClick={onClick} href={integrationsUrl}>
-            <FormattedMessage
-              id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description2.link"
-              defaultMessage="Integrations"
-            />
-          </EuiLink>
-        ),
-      }}
-    />
+    <EuiButton onClick={onClick} fill>
+      <FormattedMessage
+        id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description2.button"
+        defaultMessage="Add integrations"
+      />
+    </EuiButton>
   );
 };
 
-export const IntegrationsLink = React.memo(IntegrationsLinkComponent);
+export const AddIntegrationButton = React.memo(AddIntegrationButtonComponent);

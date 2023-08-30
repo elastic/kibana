@@ -6,29 +6,29 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback } from 'react';
 import { useGetLinkProps } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-
-import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 
-const AlertsButtonComponent = () => {
+const DashboardButtonComponent = () => {
   const getLinkProps = useGetLinkProps();
   const onClick = useCallback((e) => {
     // TODO: telemetry https://github.com/elastic/kibana/issues/163247
   }, []);
   const { onClick: onLinkClicked } = getLinkProps({
-    id: SecurityPageName.alerts,
+    id: SecurityPageName.exploreLanding,
     onClick,
   });
+
   return (
     <EuiButton onClick={onLinkClicked} fill>
       <FormattedMessage
-        id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.button"
-        defaultMessage="View alerts"
+        id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2.description2.button"
+        defaultMessage="Go to  dashboards"
       />
     </EuiButton>
   );
 };
 
-export const AlertsButton = React.memo(AlertsButtonComponent);
+export const DashboardButton = React.memo(DashboardButtonComponent);

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const GET_STARTED_PAGE_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.title',
   {
-    defaultMessage: `Welcome`,
+    defaultMessage: `Welcome!`,
   }
 );
 
@@ -120,7 +120,7 @@ export const CONFIGURE_TITLE = i18n.translate(
 export const CONFIGURE_STEP1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1',
   {
-    defaultMessage: 'Learn about Elastic Agent and Fleet',
+    defaultMessage: 'Learn about Elastic Agent',
   }
 );
 
@@ -128,22 +128,28 @@ export const CONFIGURE_STEP1_DESCRIPTION1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description1',
   {
     defaultMessage:
-      'Elastic Agent is a single, unified way to add monitoring for logs, metrics, and other types of data to a host. It can also protect hosts from security threats, query data from operating systems, forward data from remote services or hardware, and more.',
+      'Deploy the Elastic Agent to each endpoint you want to protect. This allows it to monitor and protect them by collecting data and enforcing your security policies. It sends that data to the Elastic Stack for analysis and storage.',
+  }
+);
+
+export const CONFIGURE_STEP1_DESCRIPTION2 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description2',
+  {
+    defaultMessage: 'In the next step, you will deploy the Elastic Agent to your endpoints.',
   }
 );
 
 export const CONFIGURE_STEP2 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2',
   {
-    defaultMessage: 'Deploy Elastic Defend to protect your endpoints',
+    defaultMessage: 'Deploy Elastic Agent to protect your endpoints',
   }
 );
 
 export const CONFIGURE_STEP2_DESCRIPTION1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2.description1',
   {
-    defaultMessage:
-      'Elastic Defend provides organizations with prevention, detection, and response capabilities with deep visibility for EPP, EDR, SIEM, and Security Analytics use cases across Windows, macOS, and Linux operating systems running on both traditional endpoints and public cloud environments.',
+    defaultMessage: 'Deploy the Elastic Agent to each endpoint you want to monitor or protect.',
   }
 );
 
@@ -158,7 +164,7 @@ export const CONFIGURE_STEP3_DESCRIPTION1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description1',
   {
     defaultMessage:
-      'Elastic integrations provide an easy way to connect Elastic to external services and systems, and quickly get insights or take action. They can collect new sources of data, and they often ship with out-of-the-box assets like dashboards, visualizations, and pipelines to extract structured fields out of logs and events.',
+      'Use third-party integrations to import data from common sources and help you gather relevant information in one place. To find integrations for your use case, search for tools and data providers on the Add integrations page.',
   }
 );
 
@@ -172,7 +178,7 @@ export const CONFIGURE_STEP3_BUTTON = i18n.translate(
 export const CONFIGURE_STEP4 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4',
   {
-    defaultMessage: 'Enable prebuilt rules or create your own',
+    defaultMessage: 'Enable prebuilt rules',
   }
 );
 
@@ -180,7 +186,7 @@ export const CONFIGURE_STEP4_DESCRIPTION1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4.description1',
   {
     defaultMessage:
-      'Rules run periodically and search for suspicious events, sequences, machine learning anomalies, and more! When a rule’s criteria are met, a detection alert is created.',
+      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are met.',
   }
 );
 
@@ -209,14 +215,14 @@ export const EXPLORE_STEP1_DESCRIPTION1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description1',
   {
     defaultMessage:
-      'The Alerts page displays all detection alerts following rule configuration from above. From the Alerts page, you can prioritize, triage, investigate alerts, and escalate alerts to a Case. Rules must be enabled for any alerts to be created.',
+      'Visualize, sort, filter, and investigate alerts from across your infrastructure. Examine individual alerts of interest, and discover general patterns in alert volume and severity.',
   }
 );
 
 export const EXPLORE_STEP2 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2',
   {
-    defaultMessage: 'Analyze data dashboards',
+    defaultMessage: 'Analyze data using dashboards',
   }
 );
 
@@ -224,7 +230,7 @@ export const EXPLORE_STEP2_DESCRIPTION1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2.description1',
   {
     defaultMessage:
-      'The Overview dashboard provides a high-level snapshot of alerts and events. It helps you assess overall system health and find anomalies that may require further investigation.',
+      'Use dashboards to visualize data and stay up-to-date with key information. Create your own, or use Elastic’s default dashboards — including alerts, user authentication events, known vulnerabilities, and more.',
   }
 );
 

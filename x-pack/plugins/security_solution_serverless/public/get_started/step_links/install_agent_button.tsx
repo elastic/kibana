@@ -13,10 +13,11 @@
 
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LinkAnchor, useGetLinkProps } from '@kbn/security-solution-navigation/links';
+import { useGetLinkProps } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { EuiButton } from '@elastic/eui';
 
-const EndpointManagementLinkComponent = () => {
+const InstallAgentButtonComponent = () => {
   const getLinkProps = useGetLinkProps();
   const onClick = useCallback((e) => {
     // TODO: telemetry https://github.com/elastic/kibana/issues/163247
@@ -26,21 +27,13 @@ const EndpointManagementLinkComponent = () => {
     onClick,
   });
   return (
-    <FormattedMessage
-      id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2.description2.linkText"
-      defaultMessage="Navigate to {link} to follow a step through installation guide"
-      values={{
-        link: (
-          <LinkAnchor onClick={onLinkClicked} id={SecurityPageName.endpoints}>
-            <FormattedMessage
-              id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2.description2.link"
-              defaultMessage="Endpoint Management"
-            />
-          </LinkAnchor>
-        ),
-      }}
-    />
+    <EuiButton onClick={onLinkClicked} fill>
+      <FormattedMessage
+        id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2.description2.button"
+        defaultMessage="Install Agent"
+      />
+    </EuiButton>
   );
 };
 
-export const EndpointManagementLink = React.memo(EndpointManagementLinkComponent);
+export const InstallAgentButton = React.memo(InstallAgentButtonComponent);

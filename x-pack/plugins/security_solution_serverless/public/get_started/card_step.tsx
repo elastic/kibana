@@ -14,10 +14,13 @@ import {
   EuiText,
   useEuiTheme,
   EuiButtonEmpty,
+  useEuiShadow,
+  useEuiBackgroundColorCSS,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 
+import classnames from 'classnames';
 import type { CardId, OnStepButtonClicked, OnStepClicked, SectionId, StepId } from './types';
 import icon_step from './images/icon_step.svg';
 import icon_cross from './images/icon_cross.svg';
@@ -25,7 +28,12 @@ import { UNDO_MARK_AS_DONE_TITLE, MARK_AS_DONE_TITLE } from './translations';
 import { getStepsByActiveProduct } from './helpers';
 import type { ProductLine } from '../../common/product';
 import { getProductBadges } from './badge';
-import { RIGHT_CONTENT_HEIGHT, RIGHT_CONTENT_WIDTH } from './sections';
+import {
+  LEFT_CONTENT_PANEL_WIDTH,
+  RIGHT_CONTENT_HEIGHT,
+  RIGHT_CONTENT_PANEL_WIDTH,
+  RIGHT_CONTENT_WIDTH,
+} from './sections';
 
 const CardStepComponent: React.FC<{
   activeProducts: Set<ProductLine>;
@@ -47,6 +55,9 @@ const CardStepComponent: React.FC<{
   stepId,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const shadow = useEuiShadow('s');
+  const colorStyles = useEuiBackgroundColorCSS();
+  const cssStyles = [colorStyles.primary];
 
   const expandStep = expandedSteps.has(stepId);
   const steps = useMemo(
@@ -79,6 +90,11 @@ const CardStepComponent: React.FC<{
     [cardId, isDone, onStepButtonClicked, sectionId, stepId]
   );
 
+  const panelClassNames = classnames({
+    'step-panel-collapsed': !expandStep,
+    'step-panel-expanded': expandStep,
+  });
+
   return (
     <EuiPanel
       color="plain"
@@ -86,9 +102,15 @@ const CardStepComponent: React.FC<{
       hasShadow={false}
       borderRadius="none"
       paddingSize="none"
+      className={panelClassNames}
       css={css`
         padding: ${euiTheme.size.base};
         margin: 0 ${euiTheme.size.s} 0;
+
+        &.step-panel-collapsed:hover {
+          ${cssStyles};
+          border-radius: ${euiTheme.border.radius.medium};
+        }
       `}
     >
       <EuiFlexGroup
@@ -136,29 +158,41 @@ const CardStepComponent: React.FC<{
           `}
         >
           <div>
-            <EuiButtonEmpty
-              color="primary"
-              iconType={isDone ? icon_cross : 'checkInCircleFilled'}
-              size="xs"
+            {expandStep && (
+              <EuiButtonEmpty
+                color="primary"
+                iconType={isDone ? icon_cross : 'checkInCircleFilled'}
+                size="xs"
+                css={css`
+                  border-radius: ${euiTheme.border.radius.medium};
+                  border: 1px solid ${euiTheme.colors.lightShade};
+                  .euiIcon {
+                    inline-size: ${euiTheme.size.m};
+                  }
+                `}
+                onClick={handleStepButtonClicked}
+              >
+                {isDone ? UNDO_MARK_AS_DONE_TITLE : MARK_AS_DONE_TITLE}
+              </EuiButtonEmpty>
+            )}
+            <button
+              className="eui-displayInlineBlock"
               css={css`
+                padding: ${euiTheme.size.xs} ${euiTheme.base * 0.375}px;
+                margin-left: ${euiTheme.base * 0.375}px;
                 border-radius: ${euiTheme.border.radius.medium};
-                border: 1px solid ${euiTheme.colors.lightShade};
-                .euiIcon {
-                  inline-size: ${euiTheme.size.m};
+                color: ${euiTheme.colors.darkShade};
+                .step-panel-expanded &:hover,
+                .step-panel-expanded &:active,
+                .step-panel-expanded &:focus {
+                  ${cssStyles};
                 }
               `}
-              onClick={handleStepButtonClicked}
-            >
-              {isDone ? UNDO_MARK_AS_DONE_TITLE : MARK_AS_DONE_TITLE}
-            </EuiButtonEmpty>
-            <EuiIcon
-              size="s"
-              type={expandStep ? 'arrowDown' : 'arrowRight'}
-              css={css`
-                margin-left: ${euiTheme.base * 0.375}px;
-              `}
               onClick={toggleStep}
-            />
+              type="button"
+            >
+              <EuiIcon size="s" type={expandStep ? 'arrowDown' : 'arrowRight'} />
+            </button>
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -170,6 +204,7 @@ const CardStepComponent: React.FC<{
             gutterSize="none"
             css={css`
               margin-top: 20px;
+              margin-left: ${euiTheme.size.l};
             `}
           >
             {description && (
@@ -177,8 +212,7 @@ const CardStepComponent: React.FC<{
                 grow={false}
                 css={css`
                   padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.s};
-                  margin-left: ${euiTheme.size.l};
-                  width: 486px;
+                  width: ${LEFT_CONTENT_PANEL_WIDTH}px;
                 `}
               >
                 <EuiText size="s">
@@ -187,6 +221,10 @@ const CardStepComponent: React.FC<{
                       data-test-subj={`${stepId}-description-${index}`}
                       key={`${stepId}-description-${index}`}
                       className="eui-displayBlock"
+                      css={css`
+                        margin-bottom: ${euiTheme.base * 2}px;
+                        margin-block-end: ${euiTheme.base * 2}px !important;
+                      `}
                     >
                       {desc}
                     </p>
@@ -200,7 +238,7 @@ const CardStepComponent: React.FC<{
                 data-test-subj="split-panel"
                 css={css`
                   padding: 0 6px 0 ${euiTheme.size.l};
-                  width: 510px;
+                  width: ${RIGHT_CONTENT_PANEL_WIDTH}px;
                 `}
               >
                 {splitPanel && (
@@ -210,6 +248,7 @@ const CardStepComponent: React.FC<{
                       width: ${RIGHT_CONTENT_WIDTH}px;
                       border-radius: ${euiTheme.border.radius.medium};
                       overflow: hidden;
+                      box-shadow: ${shadow};
                     `}
                   >
                     {splitPanel}

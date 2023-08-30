@@ -19,6 +19,7 @@ import {
 import type { SecurityProductTypes } from '../../common/config';
 import { ProductSwitch } from './product_switch';
 import { useTogglePanel } from './use_toggle_panel';
+import { ProductLine } from '../../common/product';
 
 const CONTENT_WIDTH = 1150;
 
@@ -43,6 +44,9 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
       expandedCardSteps,
     },
   } = useTogglePanel({ productTypes });
+  const productTier = productTypes.find(
+    (product) => product.product_line === ProductLine.security
+  )?.product_tier;
 
   return (
     <KibanaPageTemplate
@@ -86,7 +90,11 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
           </>
         }
       >
-        <WelcomePanel totalActiveSteps={totalActiveSteps} totalStepsLeft={totalStepsLeft} />
+        <WelcomePanel
+          totalActiveSteps={totalActiveSteps}
+          totalStepsLeft={totalStepsLeft}
+          productTier={productTier}
+        />
       </KibanaPageTemplate.Header>
       <KibanaPageTemplate.Section
         bottomBorder={false}

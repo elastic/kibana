@@ -7,30 +7,18 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink } from '@elastic/eui';
-import { CONFIGURE_STEP1_DESCRIPTION1 } from '../translations';
+import { EuiButton } from '@elastic/eui';
 
 const FleetOverviewLinkComponent = () => (
-  <>
-    <>{CONFIGURE_STEP1_DESCRIPTION1} </>
+  <EuiButton
+    href="https://www.elastic.co/guide/en/fleet/current/fleet-overview.html"
+    target="_blank"
+  >
     <FormattedMessage
       id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description1.linkText"
-      defaultMessage="Go {here} to learn more!"
-      values={{
-        here: (
-          <EuiLink
-            href="https://www.elastic.co/guide/en/fleet/current/fleet-overview.html"
-            target="_blank"
-          >
-            <FormattedMessage
-              id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description1.link"
-              defaultMessage="here"
-            />
-          </EuiLink>
-        ),
-      }}
+      defaultMessage="Go here to learn more!"
     />
-  </>
+  </EuiButton>
 );
 
 export const FleetOverviewLink = React.memo(FleetOverviewLinkComponent);
