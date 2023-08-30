@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { DedotObject, ProfilingESField } from '../../common/elasticsearch';
+import {
+  DedotObject,
+  ProfilingESField,
+} from '@kbn/profiling-data-access-plugin/common/elasticsearch';
 import {
   getAddressFromStackFrameID,
   getFileIDFromStackFrameID,
   StackTrace,
-} from '../../common/profiling';
+} from '@kbn/profiling-data-access-plugin/common/profiling';
 import { runLengthDecodeBase64Url } from '../../common/run_length_encoding';
 
 const BASE64_FRAME_ID_LENGTH = 32;
