@@ -6,18 +6,24 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationFunction, ObservabilityAIAssistantService } from '../types';
 
 export function createService({
   coreStart,
-  securityStart,
   enabled,
+  licenseStart,
+  securityStart,
+  shareStart,
 }: {
   coreStart: CoreStart;
-  securityStart: SecurityPluginStart;
   enabled: boolean;
+  licenseStart: LicensingPluginStart;
+  securityStart: SecurityPluginStart;
+  shareStart: SharePluginStart;
 }): ObservabilityAIAssistantService & { register: (fn: ChatRegistrationFunction) => void } {
   const client = createCallObservabilityAIAssistantAPI(coreStart);
 
@@ -37,5 +43,7 @@ export function createService({
 
     callApi: client,
     getCurrentUser: () => securityStart.authc.getCurrentUser(),
+    getLicense: () => licenseStart.license$,
+    getLicenseManagementLocator: () => shareStart,
   };
 }
