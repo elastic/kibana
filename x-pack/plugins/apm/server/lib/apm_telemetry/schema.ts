@@ -927,7 +927,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         total: {
           docs: {
             count: {
-              ...long,
+              type: 'long',
               _meta: {
                 description: 'Total number of metric documents overall',
               },
@@ -935,7 +935,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           },
           store: {
             size_in_bytes: {
-              ...long,
+              type: 'long',
               _meta: {
                 description:
                   'Size of the metric indicess in byte units overall.',
