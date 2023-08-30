@@ -127,7 +127,7 @@ const sortTableData =
 export const useHostsTable = () => {
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
-  const { parsedDateRange } = useUnifiedSearchContext();
+  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
     services: {
@@ -236,7 +236,7 @@ export const useHostsTable = () => {
         render: (title: HostNodeRow['title']) => (
           <EntryTitle
             title={title}
-            time={parsedDateRange}
+            dateRangeTs={getDateRangeAsTimestamp()}
             onClick={() => reportHostEntryClick(title)}
           />
         ),
@@ -343,7 +343,7 @@ export const useHostsTable = () => {
         width: '120px',
       },
     ],
-    [detailsItemId, parsedDateRange, reportHostEntryClick, setProperties]
+    [detailsItemId, getDateRangeAsTimestamp, reportHostEntryClick, setProperties]
   );
 
   const selection: EuiTableSelectionType<HostNodeRow> = {
