@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-const crypto = require('crypto');
+var crypto = require('crypto');
 
 // The blowfish cipher is only available when node is running with the --openssl-legacy-provider flag
-module.exports = crypto.getCiphers().includes('blowfish');
-
+module.exports = function () {
+  return crypto.getCiphers().includes('blowfish');
+};
