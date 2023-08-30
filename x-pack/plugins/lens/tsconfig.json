@@ -86,6 +86,7 @@
     "@kbn/content-management-utils",
     "@kbn/serverless",
     "@kbn/ebt-tools",
+    "@kbn/visualize-list-client-plugin"
   ],
   "exclude": [
     "target/**/*",

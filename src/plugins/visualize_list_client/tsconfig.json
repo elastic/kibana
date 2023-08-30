@@ -8,7 +8,10 @@
     "public/**/*",
     "../../../typings/**/*"
   ],
-  "kbn_references": [],
+  "kbn_references": [
+    "@kbn/content-management-plugin",
+    "@kbn/content-management-utils"
+  ],
   "exclude": [
     "target/**/*",
   ]

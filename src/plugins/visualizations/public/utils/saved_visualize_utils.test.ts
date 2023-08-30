@@ -324,7 +324,8 @@ describe('saved_visualize_utils', () => {
       await findListItems(
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
-        props.size
+        props.size,
+        jest.fn(async () => mockFindContent())
       );
       expect(mockFindContent.mock.calls).toMatchObject([
         [
@@ -353,7 +354,8 @@ describe('saved_visualize_utils', () => {
       await findListItems(
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
-        props.size
+        props.size,
+        jest.fn(async () => mockFindContent())
       );
       expect(mockFindContent.mock.calls).toMatchObject([
         [
@@ -390,7 +392,8 @@ describe('saved_visualize_utils', () => {
       await findListItems(
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
-        props.size
+        props.size,
+        jest.fn(async () => mockFindContent())
       );
       expect(mockFindContent.mock.calls).toMatchObject([
         [
@@ -412,7 +415,8 @@ describe('saved_visualize_utils', () => {
       await findListItems(
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
-        props.size
+        props.size,
+        jest.fn(async () => mockFindContent())
       );
       expect(mockFindContent.mock.calls).toMatchObject([
         [
@@ -435,6 +439,7 @@ describe('saved_visualize_utils', () => {
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
         props.size,
+        jest.fn(async () => mockFindContent()),
         props.references
       );
       expect(mockFindContent.mock.calls).toMatchObject([
@@ -487,7 +492,8 @@ describe('saved_visualize_utils', () => {
       const items = await findListItems(
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
-        props.size
+        props.size,
+        jest.fn(async () => mockFindContent())
       );
       expect(items).toEqual({
         total: 2,

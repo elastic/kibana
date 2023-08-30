@@ -10,21 +10,10 @@ export { LATEST_VERSION, CONTENT_ID } from './constants';
 export type { LensContentType } from './types';
 
 export type {
+  LensCrudTypes,
   LensSavedObject,
   PartialLensSavedObject,
   LensSavedObjectAttributes,
-  LensGetIn,
-  LensGetOut,
-  LensCreateIn,
-  LensCreateOut,
-  CreateOptions,
-  LensUpdateIn,
-  LensUpdateOut,
-  UpdateOptions,
-  LensDeleteIn,
-  LensDeleteOut,
-  LensSearchIn,
-  LensSearchOut,
   LensSearchQuery,
 } from './latest';
 

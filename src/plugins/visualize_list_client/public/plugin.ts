@@ -9,45 +9,53 @@
 import { MSearchQuery } from '@kbn/content-management-plugin/common';
 import { SOWithMetadata } from '@kbn/content-management-utils';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type {
   VisualizeListClientPluginSetup,
   VisualizeListClientPluginStart,
   VisualizeListClientDeps,
   VisualizationClient,
   MSearchOptions,
+  SerializableAttributes,
 } from './types';
 
 export class VisualizeListClientPlugin
   implements Plugin<VisualizeListClientPluginSetup, VisualizeListClientPluginStart>
 {
-  public setup(core: CoreSetup) {
-    return {};
+  private clients = new Map<string, (contentManagement: ContentManagementPublicStart) => unknown>();
+
+  public setup(core: CoreSetup): VisualizeListClientPluginSetup {
+    return {
+      registerType: (contentId, contentCRUDFactory) => {
+        this.clients.set(contentId, contentCRUDFactory);
+      },
+    };
   }
 
   public start(
     core: CoreStart,
     { contentManagement }: VisualizeListClientDeps
   ): VisualizeListClientPluginStart {
-    const clients = new Map<string, unknown>();
     return {
-      registerType: (contentId, contentCRUD) => {
-        clients.set(contentId, contentCRUD);
-      },
       getClientType: <
         ContentType extends string,
-        Attr extends object,
+        Attr extends SerializableAttributes,
         SearchOptions extends object = object
       >(
         contentId: string
       ) => {
-        const client = clients.get(contentId);
-        return client as VisualizationClient<ContentType, Attr, SearchOptions>;
+        const clientFactory = this.clients.get(contentId) as (
+          contentManagement: ContentManagementPublicStart
+        ) => VisualizationClient<ContentType, Attr, SearchOptions>;
+        return clientFactory(contentManagement);
       },
-      mSearch: async <Attr extends object, SearchOptions extends object = object>(
+      mSearch: async <Attr extends SerializableAttributes, SearchOptions extends object = object>(
         query: MSearchQuery,
         options?: MSearchOptions
       ) => {
-        const contentTypes = Array.from(clients.keys()).map((contentTypeId) => ({ contentTypeId }));
+        const contentTypes = Array.from(this.clients.keys()).map((contentTypeId) => ({
+          contentTypeId,
+        }));
         const res = await contentManagement.client.mSearch<SOWithMetadata<Attr>>({
           contentTypes,
           query,

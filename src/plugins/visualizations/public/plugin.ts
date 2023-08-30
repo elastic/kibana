@@ -59,7 +59,10 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import type { VisualizeListClientPluginStart } from '@kbn/visualize-list-client-plugin/public';
+import type {
+  VisualizeListClientPluginSetup,
+  VisualizeListClientPluginStart,
+} from '@kbn/visualize-list-client-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   ContentManagementPublicSetup,
@@ -116,7 +119,7 @@ import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
 import { ListingViewRegistry } from './types';
 import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
-import { visualizationsClient } from './content_management';
+import { visualizeClientFactory } from './content_management';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -142,6 +145,7 @@ export interface VisualizationsSetupDeps {
   home?: HomePublicPluginSetup;
   share?: SharePluginSetup;
   contentManagement: ContentManagementPublicSetup;
+  visualizeListClient: VisualizeListClientPluginSetup;
 }
 
 export interface VisualizationsStartDeps {
@@ -210,6 +214,7 @@ export class VisualizationsPlugin
       share,
       uiActions,
       contentManagement,
+      visualizeListClient,
     }: VisualizationsSetupDeps
   ): VisualizationsSetup {
     const {
@@ -255,6 +260,8 @@ export class VisualizationsPlugin
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
+
+    visualizeListClient.registerType(CONTENT_ID, visualizeClientFactory);
 
     const start = createStartServicesGetter(core.getStartServices);
     const listingViewRegistry: ListingViewRegistry = new Set();
@@ -337,6 +344,7 @@ export class VisualizationsPlugin
           unifiedSearch: pluginsStart.unifiedSearch,
           serverless: pluginsStart.serverless,
           noDataPage: pluginsStart.noDataPage,
+          visualizeListClient: pluginsStart.visualizeListClient,
         };
 
         params.element.classList.add('visAppWrapper');
@@ -447,8 +455,6 @@ export class VisualizationsPlugin
     setContentManagement(contentManagement);
     setSavedSearch(savedSearch);
     setVisualizeListClient(visualizeListClient);
-
-    visualizeListClient.registerType(CONTENT_ID, visualizationsClient);
 
     if (spaces) {
       setSpaces(spaces);

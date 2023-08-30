@@ -10,7 +10,7 @@ import { SavedObjectReference } from '@kbn/core/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { LensSearchQuery } from '../../common/content_management';
-import { lensClient } from './lens_client';
+import { lensClientFactory } from './lens_client';
 
 export interface Document {
   savedObjectId?: string;
@@ -44,14 +44,17 @@ export interface DocumentLoader {
 export type SavedObjectStore = DocumentLoader & DocumentSaver;
 
 export class SavedObjectIndexStore implements SavedObjectStore {
-  constructor() {}
+  private client;
+  constructor() {
+    this.client = lensClientFactory();
+  }
 
   save = async (vis: Document) => {
     const { savedObjectId, type, references, ...rest } = vis;
     const attributes = rest;
 
     if (savedObjectId) {
-      const result = await lensClient.update({
+      const result = await this.client.update({
         id: savedObjectId,
         data: attributes,
         options: {
@@ -60,7 +63,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
       });
       return { ...vis, savedObjectId: result.item.id };
     } else {
-      const result = await lensClient.create({
+      const result = await this.client.create({
         data: attributes,
         options: {
           references,
@@ -71,7 +74,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   };
 
   async load(savedObjectId: string) {
-    const resolveResult = await lensClient.get(savedObjectId);
+    const resolveResult = await this.client.get(savedObjectId);
 
     if (resolveResult.item.error) {
       throw resolveResult.item.error;
@@ -81,7 +84,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   }
 
   async search(query: SearchQuery, options: LensSearchQuery) {
-    const result = await lensClient.search(query, options);
+    const result = await this.client.search(query, options);
     return result;
   }
 }

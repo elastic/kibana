@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { visualizationsClient } from '../../content_management';
+import { visualizeClientFactory } from '../../content_management';
 
 /** Returns an object matching a given title */
 export async function findObjectByTitle(title: string) {
@@ -16,7 +16,7 @@ export async function findObjectByTitle(title: string) {
 
   // Elastic search will return the most relevant results first, which means exact matches should come
   // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
-  const response = await visualizationsClient.search(
+  const response = await visualizeClientFactory().search(
     {
       limit: 10,
       text: `"${title}"`,

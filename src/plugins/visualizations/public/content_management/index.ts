@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { visualizationsClient } from './visualization_client';
+export { visualizeClientFactory } from './visualization_client';

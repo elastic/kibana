@@ -122,6 +122,7 @@
     "visTypeXy": "src/plugins/vis_types/xy",
     "visualizations": "src/plugins/visualizations",
     "visualizationUiComponents": "packages/kbn-visualization-ui-components",
+    "visualizeListClient": "src/plugins/visualize_list_client",
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "packages/kbn-unified-field-list",
     "unifiedHistogram": "src/plugins/unified_histogram"

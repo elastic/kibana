@@ -22,16 +22,8 @@ import type {
   LensSavedObject,
   PartialLensSavedObject,
   LensContentType,
-  LensGetOut,
-  LensCreateIn,
-  LensCreateOut,
-  CreateOptions,
-  LensUpdateIn,
-  LensUpdateOut,
-  UpdateOptions,
-  LensDeleteOut,
   LensSearchQuery,
-  LensSearchOut,
+  LensCrudTypes,
 } from '../../common/content_management';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
@@ -95,14 +87,14 @@ const SO_TYPE: LensContentType = 'lens';
 export class LensStorage implements ContentStorage<LensSavedObject, PartialLensSavedObject> {
   mSearch: GetMSearchType<LensSavedObject>;
   constructor() {
-    this.mSearch = getMSearch<LensSavedObject, LensSearchOut>({
+    this.mSearch = getMSearch<LensSavedObject, LensCrudTypes['SearchOut']>({
       savedObjectType: SO_TYPE,
       cmServicesDefinition,
       allowedSavedObjectAttributes: ['title', 'description', 'visualizationType', 'state'],
     });
   }
 
-  async get(ctx: StorageContext, id: string): Promise<LensGetOut> {
+  async get(ctx: StorageContext, id: string): Promise<LensCrudTypes['GetOut']> {
     const {
       utils: { getTransforms },
       version: { request: requestVersion },
@@ -118,7 +110,7 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
       outcome,
     } = await soClient.resolve<LensSavedObjectAttributes>(SO_TYPE, id);
 
-    const response: LensGetOut = {
+    const response: LensCrudTypes['GetOut'] = {
       item: savedObjectToLensSavedObject(savedObject, false),
       meta: {
         aliasPurpose,
@@ -128,9 +120,10 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
     };
 
     // Validate DB response and DOWN transform to the request version
-    const { value, error: resultError } = transforms.get.out.result.down<LensGetOut, LensGetOut>(
-      response
-    );
+    const { value, error: resultError } = transforms.get.out.result.down<
+      LensCrudTypes['GetOut'],
+      LensCrudTypes['GetOut']
+    >(response);
 
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
@@ -146,9 +139,9 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
 
   async create(
     ctx: StorageContext,
-    data: LensCreateIn['data'],
-    options: CreateOptions
-  ): Promise<LensCreateOut> {
+    data: LensCrudTypes['CreateIn']['data'],
+    options: LensCrudTypes['CreateOptions']
+  ): Promise<LensCrudTypes['CreateOut']> {
     const {
       utils: { getTransforms },
       version: { request: requestVersion },
@@ -165,8 +158,8 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
     }
 
     const { value: optionsToLatest, error: optionsError } = transforms.create.in.options.up<
-      CreateOptions,
-      CreateOptions
+      LensCrudTypes['CreateOptions'],
+      LensCrudTypes['CreateOptions']
     >(options);
     if (optionsError) {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
@@ -182,8 +175,8 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.create.out.result.down<
-      LensCreateOut,
-      LensCreateOut
+      LensCrudTypes['CreateOut'],
+      LensCrudTypes['CreateOut']
     >({
       item: savedObjectToLensSavedObject(savedObject, false),
     });
@@ -198,9 +191,9 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
   async update(
     ctx: StorageContext,
     id: string,
-    data: LensUpdateIn['data'],
-    options: UpdateOptions
-  ): Promise<LensUpdateOut> {
+    data: LensCrudTypes['UpdateIn']['data'],
+    options: LensCrudTypes['UpdateOptions']
+  ): Promise<LensCrudTypes['UpdateOut']> {
     const {
       utils: { getTransforms },
       version: { request: requestVersion },
@@ -209,16 +202,16 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
-      LensSavedObjectAttributes,
-      LensSavedObjectAttributes
+      Partial<LensCrudTypes['Attributes']>,
+      Partial<LensCrudTypes['Attributes']>
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 
     const { value: optionsToLatest, error: optionsError } = transforms.update.in.options.up<
-      CreateOptions,
-      CreateOptions
+      LensCrudTypes['CreateOptions'],
+      LensCrudTypes['CreateOptions']
     >(options);
     if (optionsError) {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
@@ -227,16 +220,20 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
     // Save data in DB
     const soClient = await savedObjectClientFromRequest(ctx);
 
-    const savedObject = await soClient.create<LensSavedObjectAttributes>(SO_TYPE, dataToLatest, {
-      id,
-      overwrite: true,
-      ...optionsToLatest,
-    });
+    const savedObject = await soClient.create<Partial<LensCrudTypes['Attributes']>>(
+      SO_TYPE,
+      dataToLatest,
+      {
+        id,
+        overwrite: true,
+        ...optionsToLatest,
+      }
+    );
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.update.out.result.down<
-      LensUpdateOut,
-      LensUpdateOut
+      LensCrudTypes['UpdateOut'],
+      LensCrudTypes['UpdateOut']
     >({
       item: savedObjectToLensSavedObject(savedObject, true),
     });
@@ -248,7 +245,7 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
     return value;
   }
 
-  async delete(ctx: StorageContext, id: string): Promise<LensDeleteOut> {
+  async delete(ctx: StorageContext, id: string): Promise<LensCrudTypes['DeleteOut']> {
     const soClient = await savedObjectClientFromRequest(ctx);
     await soClient.delete(SO_TYPE, id);
     return { success: true };
@@ -258,7 +255,7 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
     ctx: StorageContext,
     query: SearchQuery,
     options: LensSearchQuery = {}
-  ): Promise<LensSearchOut> {
+  ): Promise<LensCrudTypes['SearchOut']> {
     const {
       utils: { getTransforms },
       version: { request: requestVersion },
@@ -307,8 +304,8 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
 
     // Validate the response and DOWN transform to the request version
     const { value, error: resultError } = transforms.search.out.result.down<
-      LensSearchOut,
-      LensSearchOut
+      LensCrudTypes['SearchOut'],
+      LensCrudTypes['SearchOut']
     >({
       hits: response.saved_objects.map((so) => savedObjectToLensSavedObject(so, false)),
       pagination: {

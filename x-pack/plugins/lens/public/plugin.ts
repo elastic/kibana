@@ -64,6 +64,7 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { VisualizeListClientPluginSetup } from '@kbn/visualize-list-client-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -93,7 +94,12 @@ import type { HeatmapVisualization as HeatmapVisualizationType } from './visuali
 import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
 import type { TagcloudVisualization as TagcloudVisualizationType } from './visualizations/tagcloud';
 
-import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
+import {
+  APP_ID,
+  DOC_TYPE,
+  getEditPath,
+  NOT_INTERNATIONALIZED_PRODUCT_NAME,
+} from '../common/constants';
 import type { FormatFactory } from '../common/types';
 import type {
   Visualization,
@@ -129,6 +135,7 @@ import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import { lensClientFactory } from './async_services';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -143,6 +150,7 @@ export interface LensPluginSetupDependencies {
   uiActionsEnhanced: AdvancedUiActionsSetup;
   share?: SharePluginSetup;
   contentManagement: ContentManagementPublicSetup;
+  visualizeListClient: VisualizeListClientPluginSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -307,6 +315,7 @@ export class LensPlugin {
       uiActionsEnhanced,
       share,
       contentManagement,
+      visualizeListClient,
     }: LensPluginSetupDependencies
   ) {
     const startServices = createStartServicesGetter(core.getStartServices);
@@ -370,6 +379,8 @@ export class LensPlugin {
         uiSettings: core.uiSettings,
       };
     };
+
+    visualizeListClient.registerType(DOC_TYPE, lensClientFactory);
 
     if (embeddable) {
       embeddable.registerEmbeddableFactory(

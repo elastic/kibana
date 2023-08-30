@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import type { OverlayStart, SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
+import type { OverlayStart, SavedObjectReference } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import {
   extractSearchSourceReferences,
@@ -18,6 +18,7 @@ import {
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { VisualizeListClientPluginStart } from '@kbn/visualize-list-client-plugin/public';
+import { SerializableAttributes } from '@kbn/visualize-list-client-plugin/public/types';
 import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
@@ -32,7 +33,7 @@ import type { TypesStart, BaseVisType } from '../vis_types';
 import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_utils/constants';
-import { visualizationsClient } from '../content_management';
+import { visualizeClientFactory } from '../content_management';
 import { VisualizationSavedObjectAttributes } from '../../common';
 
 export const SAVED_VIS_TYPE = 'visualization';
@@ -62,7 +63,7 @@ export function mapHitSource(
     references,
     updatedAt,
   }: {
-    attributes: SavedObjectAttributes;
+    attributes: SerializableAttributes;
     id: string;
     references: SavedObjectReference[];
     updatedAt?: string;
@@ -240,7 +241,7 @@ export async function getSavedVisualization(
   const {
     item: resp,
     meta: { outcome, aliasTargetId, aliasPurpose },
-  } = await visualizationsClient.get(id);
+  } = await visualizeClientFactory().get(id);
 
   if (!resp.id) {
     throw new SavedObjectNotFound(SAVED_VIS_TYPE, id || '');
@@ -386,7 +387,7 @@ export async function saveVisualization(
     const resp = confirmOverwrite
       ? await saveWithConfirmation(attributes, savedObject, createOpt, services)
       : savedObject.id
-      ? await visualizationsClient.update({
+      ? await visualizeClientFactory().update({
           id: savedObject.id,
           data: {
             ...(extractedRefs.attributes as VisualizationSavedObjectAttributes),
@@ -396,7 +397,7 @@ export async function saveVisualization(
             references: extractedRefs.references,
           },
         })
-      : await visualizationsClient.create({
+      : await visualizeClientFactory().create({
           data: {
             ...(extractedRefs.attributes as VisualizationSavedObjectAttributes),
           },

@@ -28,7 +28,7 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { VisualizeListClientPublicStart } from '@kbn/visualize-list-client-plugin/public';
+import type { VisualizeListClientPluginStart } from '@kbn/visualize-list-client-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { TypesStart } from './vis_types';
@@ -91,4 +91,4 @@ export const [getSavedSearch, setSavedSearch] =
   createGetterSetter<SavedSearchPublicPluginStart>('SavedSearch');
 
 export const [getVisualizeListClient, setVisualizeListClient] =
-  createGetterSetter<VisualizeListClientPublicStart>('SavedObjectsManagement');
+  createGetterSetter<VisualizeListClientPluginStart>('SavedObjectsManagement');

@@ -12,7 +12,7 @@ import type { SavedObjectsCreateOptions, OverlayStart } from '@kbn/core/public';
 import { OVERWRITE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 import type { VisSavedObject } from '../../types';
-import { visualizationsClient } from '../../content_management';
+import { visualizeClientFactory } from '../../content_management';
 import { VisualizationSavedObjectAttributes, VisualizationSavedObject } from '../../../common';
 
 /**
@@ -35,6 +35,7 @@ export async function saveWithConfirmation(
   services: { overlays: OverlayStart }
 ): Promise<{ item: VisualizationSavedObject }> {
   const { overlays } = services;
+  const visualizationsClient = visualizeClientFactory();
   try {
     return await visualizationsClient.create({ data: source, options });
   } catch (err) {

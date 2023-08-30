@@ -8,7 +8,7 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [
-      "contentManagement",
+      "contentManagement"
     ],
     "optionalPlugins": [],
     "requiredBundles": [],

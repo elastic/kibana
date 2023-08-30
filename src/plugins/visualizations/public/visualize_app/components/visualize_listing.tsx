@@ -109,6 +109,7 @@ const useTableListViewProps = (
       overlays,
       toastNotifications,
       visualizeCapabilities,
+      visualizeListClient,
     },
   } = useKibana<VisualizeServices>();
 
@@ -147,6 +148,7 @@ const useTableListViewProps = (
         getTypes(),
         searchTerm,
         listingLimit,
+        visualizeListClient.mSearch,
         references,
         referencesToExclude
       ).then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => {
@@ -160,7 +162,7 @@ const useTableListViewProps = (
         };
       });
     },
-    [listingLimit]
+    [listingLimit, visualizeListClient]
   );
 
   const onContentEditorSave = useCallback(
@@ -176,11 +178,11 @@ const useTableListViewProps = (
             description: args.description ?? '',
             tags: args.tags,
           },
-          { overlays, savedObjectsTagging }
+          { overlays, savedObjectsTagging, visualizeListClient }
         );
       }
     },
-    [overlays, savedObjectsTagging]
+    [overlays, savedObjectsTagging, visualizeListClient]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(

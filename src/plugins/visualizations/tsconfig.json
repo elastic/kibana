@@ -63,7 +63,8 @@
     "@kbn/content-management-table-list-view",
     "@kbn/content-management-utils",
     "@kbn/serverless",
-    "@kbn/no-data-page-plugin"
+    "@kbn/no-data-page-plugin",
+    "@kbn/visualize-list-client-plugin"
   ],
   "exclude": [
     "target/**/*",

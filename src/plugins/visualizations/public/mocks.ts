@@ -62,6 +62,9 @@ const createInstance = async () => {
         register: jest.fn(),
       },
     },
+    visualizeListClient: {
+      registerType: jest.fn(),
+    },
   });
 
   const doStart = () =>
@@ -102,6 +105,10 @@ const createInstance = async () => {
           get: jest.fn(),
           getAll: jest.fn(),
         },
+      },
+      visualizeListClient: {
+        getClientType: jest.fn(),
+        mSearch: jest.fn(),
       },
     });
 

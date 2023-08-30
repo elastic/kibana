@@ -7,17 +7,19 @@
  */
 
 import type { MSearchQuery, SearchQuery } from '@kbn/content-management-plugin/common';
-import type { SavedObjectAttributes } from '@kbn/core/public';
 import {
   ContentManagementCrudTypes,
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { SerializableRecord } from '@kbn/utility-types';
+
+export type SerializableAttributes = SerializableRecord | Record<string, unknown>;
 
 export type GenericVisualizationCrudTypes<
   ContentType extends string,
-  Attr extends SavedObjectAttributes,
+  Attr extends SerializableAttributes,
   SearchOptions extends object
 > = ContentManagementCrudTypes<
   ContentType,
@@ -29,7 +31,7 @@ export type GenericVisualizationCrudTypes<
 
 export interface VisualizationClient<
   ContentType extends string,
-  Attr extends SavedObjectAttributes,
+  Attr extends SerializableAttributes,
   SearchOptions extends object = object
 > {
   get: (
@@ -56,8 +58,18 @@ export interface VisualizationClient<
   ) => Promise<GenericVisualizationCrudTypes<ContentType, Attr, SearchOptions>['SearchOut']>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface VisualizeListClientPluginSetup {}
+export interface VisualizeListClientPluginSetup {
+  registerType: <
+    ContentType extends string,
+    Attr extends SerializableAttributes,
+    SearchOptions extends object = object
+  >(
+    contentID: string,
+    contentCRUDFactory: (
+      contentManagement: ContentManagementPublicStart
+    ) => VisualizationClient<ContentType, Attr, SearchOptions>
+  ) => void;
+}
 
 export interface MSearchOptions {
   types?: string[];
@@ -65,22 +77,14 @@ export interface MSearchOptions {
 }
 
 export interface VisualizeListClientPluginStart {
-  registerType: <
-    ContentType extends string,
-    Attr extends SavedObjectAttributes,
-    SearchOptions extends object = object
-  >(
-    contentID: string,
-    contentCRUD: VisualizationClient<ContentType, Attr, SearchOptions>
-  ) => void;
   getClientType: <
     ContentType extends string,
-    Attr extends SavedObjectAttributes,
+    Attr extends SerializableAttributes,
     SearchOptions extends object = object
   >(
     contentID: string
   ) => VisualizationClient<ContentType, Attr, SearchOptions>;
-  mSearch: <Attr extends SavedObjectAttributes, SearchOptions extends object = object>(
+  mSearch: <Attr extends SerializableAttributes, SearchOptions extends object = object>(
     query: MSearchQuery,
     options?: MSearchOptions
   ) => Promise<GenericVisualizationCrudTypes<string, Attr, SearchOptions>['SearchOut']>;

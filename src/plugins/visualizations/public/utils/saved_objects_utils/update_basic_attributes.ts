@@ -9,12 +9,13 @@
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 
+import { VisualizeListClientPluginStart } from '@kbn/visualize-list-client-plugin/public';
 import { extractReferences } from '../saved_visualization_references';
-import { visualizationsClient } from '../../content_management';
 
 interface UpdateBasicSoAttributesDependencies {
   savedObjectsTagging?: SavedObjectsTaggingApi;
   overlays: OverlayStart;
+  visualizeListClient: VisualizeListClientPluginStart;
 }
 
 export const updateBasicSoAttributes = async (
@@ -27,6 +28,7 @@ export const updateBasicSoAttributes = async (
   },
   dependencies: UpdateBasicSoAttributesDependencies
 ) => {
+  const visualizationsClient = dependencies.visualizeListClient.getClientType(type);
   const so = await visualizationsClient.get(soId);
   const extractedReferences = extractReferences({
     attributes: so.item.attributes,

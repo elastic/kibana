@@ -22,7 +22,7 @@ export function extractReferences({
   attributes,
   references = [],
 }: {
-  attributes: SerializableRecord;
+  attributes: SerializableRecord | Record<string, unknown>;
   references: SavedObjectReference[];
 }) {
   const updatedAttributes = { ...attributes };
