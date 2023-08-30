@@ -273,6 +273,7 @@ export { readListIndexWithValidation as readListIndex };
 // TODO add types and validation
 export const readListPrivileges = async ({ http, signal }: ApiParams): Promise<unknown> =>
   http.fetch<unknown>(LIST_PRIVILEGES_URL, {
+    version: '2023-10-31',
     method: 'GET',
     signal,
   });
