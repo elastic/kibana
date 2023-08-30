@@ -16,11 +16,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { lens, timePicker, dashboard } = getPageObjects([
-    'lens',
-    'timePicker',
-    'dashboard',
-  ]);
+  const { lens, timePicker, dashboard } = getPageObjects(['lens', 'timePicker', 'dashboard']);
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -28,22 +24,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Table', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/table.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/table.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
       await dashboard.gotoDashboardEditMode('Convert to Lens - TSVB - Table');
       await timePicker.setDefaultAbsoluteRange();
     });
-
 
     it('should allow converting a count aggregation', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Basic');
@@ -53,7 +49,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should not allow converting of not valid panel', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Invalid panel');
       expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
-
     });
 
     it('should not allow converting of unsupported aggregations', async () => {
@@ -83,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert last value mode to reduced time range', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Last value mode');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
@@ -100,7 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert static value to the metric dimension', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Static value');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       await retry.try(async () => {
@@ -115,7 +110,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert aggregate by to split row dimension', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Agg by');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       await retry.try(async () => {
@@ -134,7 +129,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert group by field with custom label', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - GroupBy label');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       await retry.try(async () => {
@@ -147,7 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert color ranges', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Color ranges');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       await retry.try(async () => {
@@ -174,7 +169,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should bring the ignore global filters configured at panel level over', async () => {
       const visPanel = await panelActions.getPanelHeading('Table - Ignore global filters panel');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);

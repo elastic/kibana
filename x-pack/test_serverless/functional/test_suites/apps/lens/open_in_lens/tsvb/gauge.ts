@@ -9,11 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { lens, timePicker, dashboard } = getPageObjects([
-    'lens',
-    'timePicker',
-    'dashboard',
-  ]);
+  const { lens, timePicker, dashboard } = getPageObjects(['lens', 'timePicker', 'dashboard']);
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -22,15 +18,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Gauge', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/gauge.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/gauge.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
@@ -45,7 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert to Lens', async () => {
       const visPanel = await panelActions.getPanelHeading('Gauge - Basic');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('mtrVis');
 
       const metricData = await lens.getMetricVisualizationData();
@@ -54,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert metric with params', async () => {
       const visPanel = await panelActions.getPanelHeading('Gauge - Value count');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
         const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
@@ -79,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert color ranges', async () => {
       const visPanel = await panelActions.getPanelHeading('Gauge - Color ranges');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('mtrVis');
 
       await retry.try(async () => {
@@ -110,14 +107,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should bring the ignore global filters configured at series level over', async () => {
       const visPanel = await panelActions.getPanelHeading('Gauge - Ignore global filters series');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('mtrVis');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
 
     it('should bring the ignore global filters configured at panel level over', async () => {
       const visPanel = await panelActions.getPanelHeading('Gauge - Ignore global filters panel');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('mtrVis');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });

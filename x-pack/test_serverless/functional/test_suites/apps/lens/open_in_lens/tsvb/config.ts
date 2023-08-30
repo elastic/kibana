@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createTestConfig } from "../../../../../config.base";
+import { createTestConfig } from '../../../../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'es',

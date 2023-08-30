@@ -25,15 +25,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Dashboard to TSVB to Lens', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/dashboard.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/dashboard.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
@@ -54,7 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
 
       const visPanel = await panelActions.getPanelHeading('My TSVB to Lens viz 1');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -93,7 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
 
       const visPanel = await panelActions.getPanelHeading('My TSVB to Lens viz 2');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {

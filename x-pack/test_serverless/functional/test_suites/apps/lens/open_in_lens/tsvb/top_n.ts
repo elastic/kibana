@@ -9,11 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { lens, timePicker, dashboard } = getPageObjects([
-    'lens',
-    'timePicker',
-    'dashboard',
-  ]);
+  const { lens, timePicker, dashboard } = getPageObjects(['lens', 'timePicker', 'dashboard']);
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -22,17 +18,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
 
-
   describe('Top N', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/top_n.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/top_n.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
@@ -159,14 +155,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should bring the ignore global filters configured at series level over', async () => {
       const visPanel = await panelActions.getPanelHeading('Top N - Ignore global filters series');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
 
     it('should bring the ignore global filters configured at panel level over', async () => {
       const visPanel = await panelActions.getPanelHeading('Top N - Ignore global filters panel');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });

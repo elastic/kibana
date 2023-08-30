@@ -9,11 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { lens, timePicker, dashboard } = getPageObjects([
-    'lens',
-    'timePicker',
-    'dashboard'
-  ]);
+  const { lens, timePicker, dashboard } = getPageObjects(['lens', 'timePicker', 'dashboard']);
 
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -34,8 +30,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Gauge')
-      await timePicker.setDefaultAbsoluteRange()
+      await dashboard.gotoDashboardEditMode('Convert to Lens - Gauge');
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
