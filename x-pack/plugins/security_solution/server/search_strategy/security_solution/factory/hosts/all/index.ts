@@ -17,7 +17,7 @@ import type {
   HostsEdges,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
-import type { HostRiskScore } from '../../../../../../common/search_strategy';
+import { HostRiskScore, RiskQueries } from '../../../../../../common/search_strategy';
 import {
   RiskScoreEntity,
   getHostRiskIndex,
@@ -138,6 +138,7 @@ export async function getHostRiskData(
         defaultIndex: [getHostRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable)],
         filterQuery: buildHostNamesFilter(hostNames),
         riskScoreEntity: RiskScoreEntity.host,
+        factoryQueryType: RiskQueries.hostsRiskScore,
       })
     );
     return hostRiskResponse;

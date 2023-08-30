@@ -121,7 +121,7 @@ export const useUncommonProcesses = ({
 
   useEffect(() => {
     setUncommonProcessesRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: HostUncommonProcessesRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: HostsQueries.uncommonProcesses,

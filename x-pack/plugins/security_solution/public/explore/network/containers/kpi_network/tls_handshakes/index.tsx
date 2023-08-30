@@ -119,7 +119,7 @@ export const useNetworkKpiTlsHandshakes = ({
 
   useEffect(() => {
     setNetworkKpiTlsHandshakesRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkKpiTlsHandshakesRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.tlsHandshakes,

@@ -6,11 +6,13 @@
  */
 
 import type { ManagedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
+import { UsersQueries } from '../../../../../../common/api/search_strategy';
 import { buildManagedUserDetailsQuery } from './query.managed_user_details.dsl';
 
 export const mockOptions: ManagedUserDetailsRequestOptions = {
   defaultIndex: ['logs-*'],
   userName: 'test-user-name',
+  factoryQueryType: UsersQueries.managedDetails,
 };
 
 describe('buildManagedUserDetailsQuery', () => {

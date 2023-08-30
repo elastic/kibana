@@ -133,7 +133,7 @@ export const useNetworkUsers = ({
 
   useEffect(() => {
     setNetworkUsersRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkUsersRequestOptionsInput = {
         ...(prevRequest ?? {}),
         ip,
         defaultIndex,

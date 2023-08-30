@@ -119,7 +119,7 @@ export const useNetworkKpiUniqueFlows = ({
 
   useEffect(() => {
     setNetworkKpiUniqueFlowsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkKpiUniqueFlowsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.uniqueFlows,

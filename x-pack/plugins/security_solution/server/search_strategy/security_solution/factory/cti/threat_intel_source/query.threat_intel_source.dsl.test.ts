@@ -7,8 +7,9 @@
 
 import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
 import { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
+import type { ThreatIntelSourceRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 
-export const mockOptions = {
+export const mockOptions: ThreatIntelSourceRequestOptionsInput = {
   defaultIndex: ['logs-ti_*', 'filebeat-8*'],
   factoryQueryType: CtiQueries.dataSource,
   filterQuery: '',

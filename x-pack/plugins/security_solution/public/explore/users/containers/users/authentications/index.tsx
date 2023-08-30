@@ -129,7 +129,7 @@ export const useUsersKpiAuthentications = ({
 
   useEffect(() => {
     setUsersKpiAuthenticationsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: AuthenticationsKpiRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: UsersQueries.kpiAuthentications,

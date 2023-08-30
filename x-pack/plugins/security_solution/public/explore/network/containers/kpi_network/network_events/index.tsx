@@ -120,7 +120,7 @@ export const useNetworkKpiNetworkEvents = ({
 
   useEffect(() => {
     setNetworkKpiNetworkEventsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkKpiEventsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.networkEvents,

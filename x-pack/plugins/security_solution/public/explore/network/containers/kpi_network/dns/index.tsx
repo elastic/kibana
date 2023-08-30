@@ -116,7 +116,7 @@ export const useNetworkKpiDns = ({
 
   useEffect(() => {
     setNetworkKpiDnsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkKpiDnsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.dns,

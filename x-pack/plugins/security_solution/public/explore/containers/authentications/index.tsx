@@ -123,7 +123,7 @@ export const useAuthentications = ({
 
   useEffect(() => {
     setAuthenticationsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: UserAuthenticationsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: UsersQueries.authentications,

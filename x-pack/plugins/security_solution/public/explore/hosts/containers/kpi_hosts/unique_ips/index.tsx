@@ -127,7 +127,7 @@ export const useHostsKpiUniqueIps = ({
 
   useEffect(() => {
     setHostsKpiUniqueIpsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: KpiUniqueIpsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: HostsKpiQueries.kpiUniqueIps,

@@ -119,7 +119,7 @@ export const useHostsKpiHosts = ({
 
   useEffect(() => {
     setHostsKpiHostsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: KpiHostsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: HostsKpiQueries.kpiHosts,

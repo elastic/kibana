@@ -112,7 +112,7 @@ export const useNetworkDns = ({
 
   useEffect(() => {
     setNetworkDnsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkDnsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         isPtrIncluded,

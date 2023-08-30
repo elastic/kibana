@@ -21,7 +21,7 @@ export enum NetworkDnsFields {
 
 export const networkDnsSchema = requestOptionsPaginatedSchema.extend({
   isPtrIncluded: z.boolean().default(false),
-  stackByField: z.string().nullable().optional(),
+  stackByField: z.string().optional(),
   sort,
   timerange,
   factoryQueryType: z.literal(NetworkQueries.dns),

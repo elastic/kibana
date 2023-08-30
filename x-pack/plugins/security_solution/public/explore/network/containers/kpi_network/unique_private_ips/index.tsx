@@ -133,7 +133,7 @@ export const useNetworkKpiUniquePrivateIps = ({
 
   useEffect(() => {
     setNetworkKpiUniquePrivateIpsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkKpiUniquePrivateIpsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.uniquePrivateIps,

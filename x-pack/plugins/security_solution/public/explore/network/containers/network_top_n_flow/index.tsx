@@ -135,7 +135,7 @@ export const useNetworkTopNFlow = ({
 
   useEffect(() => {
     setTopNFlowRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkTopNFlowRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.topNFlow,

@@ -134,7 +134,7 @@ export const useNetworkHttp = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkHttpRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.http,

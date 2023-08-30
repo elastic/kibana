@@ -130,7 +130,7 @@ export const useAllHost = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: HostsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: HostsQueries.hosts,

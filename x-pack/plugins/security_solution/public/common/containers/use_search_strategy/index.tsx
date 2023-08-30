@@ -26,7 +26,7 @@ import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../../common/constants';
 
 interface UseSearchFunctionParams<QueryType extends FactoryQueryTypes> {
-  request: StrategyRequestType<QueryType>;
+  request: Omit<StrategyRequestType<QueryType>, 'factoryQueryType'>;
   abortSignal: AbortSignal;
 }
 
@@ -35,7 +35,7 @@ type UseSearchFunction<QueryType extends FactoryQueryTypes> = (
 ) => Observable<StrategyResponseType<QueryType>>;
 
 type SearchFunction<QueryType extends FactoryQueryTypes> = (
-  params: StrategyRequestType<QueryType>
+  params: Omit<StrategyRequestType<QueryType>, 'factoryQueryType'>
 ) => void;
 
 const EMPTY_INSPECT = {
@@ -58,7 +58,7 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
 
       const observable = data.search
         .search<StrategyRequestType<QueryType>, StrategyResponseType<QueryType>>(
-          { ...request, factoryQueryType },
+          { ...request, factoryQueryType } as StrategyRequestType<QueryType>,
           {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal,

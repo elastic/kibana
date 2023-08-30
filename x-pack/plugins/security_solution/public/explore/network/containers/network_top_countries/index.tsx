@@ -135,7 +135,7 @@ export const useNetworkTopCountries = ({
 
   useEffect(() => {
     setNetworkTopCountriesRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkTopCountriesRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.topCountries,

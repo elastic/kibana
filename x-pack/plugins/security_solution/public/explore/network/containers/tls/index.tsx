@@ -134,7 +134,7 @@ export const useNetworkTls = ({
 
   useEffect(() => {
     setNetworkTlsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkTlsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.tls,
