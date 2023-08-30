@@ -63,34 +63,35 @@ const retrieveIntegrations = (integrationsPaths: string[]) => {
 export const cli = () => {
   run(
     async () => {
-      const { argv } = yargs(process.argv.slice(2)).coerce('env', (arg: string) =>
-        arg.split(',').reduce((acc, curr) => {
-          const [key, value] = curr.split('=');
-          if (key === 'burn') {
-            acc[key] = parseInt(value, 10);
-          } else {
-            acc[key] = value;
-          }
-          return acc;
-        }, {} as Record<string, string | number>)
-      );
+      const { argv } = yargs(process.argv.slice(2))
+        .coerce('spec', (arg) => (_.isArray(arg) ? [_.last(arg)] : [arg]))
+        .coerce('env', (arg: string) =>
+          arg.split(',').reduce((acc, curr) => {
+            const [key, value] = curr.split('=');
+            if (key === 'burn') {
+              acc[key] = parseInt(value, 10);
+            } else {
+              acc[key] = value;
+            }
+            return acc;
+          }, {} as Record<string, string | number>)
+        );
 
       const isOpen = argv._[0] === 'open';
       const cypressConfigFilePath = require.resolve(
         `../../${_.isArray(argv.configFile) ? _.last(argv.configFile) : argv.configFile}`
       ) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
-      const spec: string | undefined = argv?.spec as string;
       const grepSpecPattern = grep({
         ...cypressConfigFile,
-        specPattern: spec ?? cypressConfigFile.e2e.specPattern,
+        specPattern: argv.spec ?? cypressConfigFile.e2e.specPattern,
         excludeSpecPattern: [],
       }).specPattern;
 
       let files = retrieveIntegrations(
         _.isArray(grepSpecPattern)
           ? grepSpecPattern
-          : globby.sync(spec ? [spec] : cypressConfigFile.e2e.specPattern)
+          : globby.sync(argv.spec ?? cypressConfigFile.e2e.specPattern)
       );
 
       if (argv.changedSpecsOnly) {
