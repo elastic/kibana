@@ -10,5 +10,5 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-alerts-ui-shared'],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-cases-components/setup_tests.ts'],
+  setupFilesAfterEnv: ['<rootDir>/packages/kbn-alerts-ui-shared/setup_tests.ts'],
 };
