@@ -170,6 +170,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -434,6 +438,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -618,6 +626,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
@@ -1055,6 +1067,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
