@@ -9,10 +9,6 @@ import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { AggregatedTransactionsCounts, APMUsage, APMPerService } from './types';
 import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
-const long: { type: 'long' } = { type: 'long' };
-
-const keyword: { type: 'keyword' } = { type: 'keyword' };
-
 const aggregatedTransactionCountSchema: MakeSchemaFrom<
   AggregatedTransactionsCounts,
   true
@@ -356,21 +352,21 @@ const apmPerAgentSchema: Pick<
 
 export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
   service_id: {
-    ...keyword,
+    type: 'keyword',
     _meta: {
       description:
         'Unique identifier that combines the SHA256 hashed representation of the service name and environment',
     },
   },
   num_service_nodes: {
-    ...long,
+    type: 'long',
     _meta: {
       description:
         'Total number of the unique service instances that served the transaction within an hour',
     },
   },
   num_transaction_types: {
-    ...long,
+    type: 'long',
     _meta: {
       description:
         'Total number of the unique transaction types within an hour',
@@ -430,21 +426,21 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
   },
   agent: {
     name: {
-      ...keyword,
+      type: 'keyword',
       _meta: {
         description:
           'The top value of agent name for the service from transaction documents within an hour. Sorted by _score',
       },
     },
     version: {
-      ...keyword,
+      type: 'keyword',
       _meta: {
         description:
           'The top value of agent version for the service from transaction documents within an hour. Sorted by _score',
       },
     },
     activation_method: {
-      ...keyword,
+      type: 'keyword',
       _meta: {
         description:
           'The top value of agent activation method for the service from transaction documents within an hour. Sorted by _score',
@@ -454,14 +450,14 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
   service: {
     language: {
       name: {
-        ...keyword,
+        type: 'keyword',
         _meta: {
           description:
             'The top value of language name for the service from transaction documents within an hour. Sorted by _score',
         },
       },
       version: {
-        ...keyword,
+        type: 'keyword',
         _meta: {
           description:
             'The top value of language version for the service from transaction documents within an hour. Sorted by _score',
@@ -470,14 +466,14 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
     },
     framework: {
       name: {
-        ...keyword,
+        type: 'keyword',
         _meta: {
           description:
             'The top value of service framework name from transaction documents within an hour. Sorted by _score. Example AWS Lambda',
         },
       },
       version: {
-        ...keyword,
+        type: 'keyword',
         _meta: {
           description:
             'The top value of service framework version from transaction documents within an hour. Sorted by _score',
@@ -486,14 +482,14 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
     },
     runtime: {
       name: {
-        ...keyword,
+        type: 'keyword',
         _meta: {
           description:
             'The top value of service runtime name from transaction documents within an hour. Sorted by _score',
         },
       },
       version: {
-        ...keyword,
+        type: 'keyword',
         _meta: {
           description:
             'The top value of service runtime version version from transaction documents within an hour. Sorted by _score',
@@ -535,19 +531,19 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   version: {
     apm_server: {
       major: {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'The major version of the APM server. Example: 7',
         },
       },
       minor: {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'The minor version of the APM server. Example: 17',
         },
       },
       patch: {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'The patch version of the APM server. Example 3',
         },
@@ -556,14 +552,14 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   },
   environments: {
     services_without_environment: {
-      ...long,
+      type: 'long',
       _meta: {
         description:
           'Number of services without an assigned environment within the last day. This is determined by checking the "service.environment" field and counting instances where it is null',
       },
     },
     services_with_multiple_environments: {
-      ...long,
+      type: 'long',
       _meta: {
         description:
           'Number of services with more than one assigned environment within the last day',
@@ -637,14 +633,14 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   counts: {
     transaction: {
       '1d': {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Total number of transaction documents within the last day',
         },
       },
       all: {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of transaction documents overall',
         },
@@ -652,13 +648,13 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     span: {
       '1d': {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of span documents within the last day',
         },
       },
       all: {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of span documents overall',
         },
@@ -666,13 +662,13 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     error: {
       '1d': {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of error documents within the last day',
         },
       },
       all: {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of error documents overall',
         },
@@ -680,13 +676,13 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     metric: {
       '1d': {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of metric documents within the last day',
         },
       },
       all: {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of metric documents overall',
         },
@@ -694,14 +690,14 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     onboarding: {
       '1d': {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Total number of onboarding documents within the last day',
         },
       },
       all: {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of onboarding documents overall',
         },
@@ -709,7 +705,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     agent_configuration: {
       all: {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Total number of apm-agent-configuration documents overall',
@@ -718,7 +714,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     max_transaction_groups_per_service: {
       '1d': {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Total number of distinct transaction groups for the top service for the last 24 hours',
@@ -727,7 +723,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     max_error_groups_per_service: {
       '1d': {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Total number of distinct error groups for the top service for the last 24 hours',
@@ -736,13 +732,13 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     traces: {
       '1d': {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of trace documents within the last day',
         },
       },
       all: {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of trace documents overall',
         },
@@ -750,7 +746,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     services: {
       '1d': {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of unique services within the last day',
         },
@@ -758,7 +754,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     environments: {
       '1d': {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Total number of unique environments within the last day',
@@ -767,7 +763,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     span_destination_service_resource: {
       '1d': {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Total number of unique values of span.destination.service.resource within the last day',
@@ -782,7 +778,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         country_iso_code: {
           rum: {
             '1d': {
-              ...long,
+              type: 'long',
               _meta: {
                 description:
                   'Unique country iso code captured for the agents js-base, rum-js and opentelemetry/webjs within the last day',
@@ -796,7 +792,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       original: {
         all_agents: {
           '1d': {
-            ...long,
+            type: 'long',
             _meta: {
               description:
                 'Unique user agent for all agents within the last day',
@@ -805,7 +801,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         },
         rum: {
           '1d': {
-            ...long,
+            type: 'long',
             _meta: {
               description:
                 'Unique user agent for rum agent within the last day',
@@ -818,7 +814,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       name: {
         all_agents: {
           '1d': {
-            ...long,
+            type: 'long',
             _meta: {
               description:
                 'Unique transaction names for all agents within the last day',
@@ -827,7 +823,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         },
         rum: {
           '1d': {
-            ...long,
+            type: 'long',
             _meta: {
               description:
                 'Unique transaction names for rum agent within the last day',
@@ -841,7 +837,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   retainment: {
     span: {
       ms: {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Represent the time difference in milliseconds between the current date and the date when the span document was recorded',
@@ -850,7 +846,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     transaction: {
       ms: {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Represent the time difference in milliseconds between the current date and the date when the transaction document was recorded',
@@ -859,7 +855,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     error: {
       ms: {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Represent the time difference in milliseconds between the current date and the date when the error document was recorded',
@@ -868,7 +864,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     metric: {
       ms: {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Represent the time difference in milliseconds between the current date and the date when the metric document was recorded',
@@ -877,7 +873,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     onboarding: {
       ms: {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Represent the time difference in milliseconds between the current date and the date when the onboarding document was recorded',
@@ -888,7 +884,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   integrations: {
     ml: {
       all_jobs_count: {
-        ...long,
+        type: 'long',
         _meta: {
           description:
             'Total number of anomaly detection jobs associated with the jobs apm-*, *-high_mean_response_time',
@@ -911,7 +907,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         total: {
           docs: {
             count: {
-              ...long,
+              type: 'long',
               _meta: {
                 description: 'Total number of metric documents overall',
               },
@@ -919,7 +915,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           },
           store: {
             size_in_bytes: {
-              ...long,
+              type: 'long',
               _meta: {
                 description:
                   'Size of the metric indicess in byte units overall.',
@@ -932,7 +928,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     traces: {
       shards: {
         total: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Total number of shards for span and trasnaction indices',
@@ -943,7 +939,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         total: {
           docs: {
             count: {
-              ...long,
+              type: 'long',
               _meta: {
                 description:
                   'Total number of transaction and span documents overall',
@@ -952,7 +948,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           },
           store: {
             size_in_bytes: {
-              ...long,
+              type: 'long',
               _meta: {
                 description: 'Size of the index in byte units overall.',
               },
@@ -963,7 +959,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
     shards: {
       total: {
-        ...long,
+        type: 'long',
         _meta: {
           description: 'Total number of shards overall',
         },
@@ -973,7 +969,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       total: {
         docs: {
           count: {
-            ...long,
+            type: 'long',
             _meta: {
               description: 'Total number of all documents overall',
             },
@@ -981,7 +977,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         },
         store: {
           size_in_bytes: {
-            ...long,
+            type: 'long',
             _meta: {
               description: 'Size of the index in byte units overall.',
             },
@@ -1002,7 +998,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       },
     },
     total: {
-      ...long,
+      type: 'long',
       _meta: {
         description:
           'Total number of service groups retrived from the saved object across all spaces',
@@ -1014,7 +1010,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     aggregated_transactions: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "aggregated_transactions" task',
@@ -1025,7 +1021,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     cloud: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description: 'Execution time in milliseconds for the "cloud" task',
           },
@@ -1035,7 +1031,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     host: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description: 'Execution time in milliseconds for the "host" task',
           },
@@ -1045,7 +1041,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     processor_events: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "processor_events" task',
@@ -1056,7 +1052,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     agent_configuration: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "agent_configuration" task',
@@ -1067,7 +1063,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     services: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "services" task',
@@ -1078,7 +1074,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     versions: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "versions" task',
@@ -1089,7 +1085,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     groupings: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "groupings" task',
@@ -1100,7 +1096,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     integrations: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "integrations" task',
@@ -1111,7 +1107,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     agents: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description: 'Execution time in milliseconds for the "agents" task',
           },
@@ -1121,7 +1117,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     indices_stats: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "indices_stats" task',
@@ -1132,7 +1128,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     cardinality: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "cardinality" task',
@@ -1143,7 +1139,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     environments: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "environments" task',
@@ -1154,7 +1150,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     service_groups: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "service_groups" task',
@@ -1165,7 +1161,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     per_service: {
       took: {
         ms: {
-          ...long,
+          type: 'long',
           _meta: {
             description:
               'Execution time in milliseconds for the "per_service" task',
