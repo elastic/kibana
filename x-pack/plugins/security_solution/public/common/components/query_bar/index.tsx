@@ -59,8 +59,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     displayStyle,
     isDisabled,
   }) => {
-    const { data, fieldFormats } = useKibana().services;
-    // const [dataView, setDataView] = useState([indexPattern] as DataView[]);
+    const { fieldFormats } = useKibana().services;
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
@@ -106,18 +105,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
       },
       [filterManager]
     );
-
-    // useEffect(() => {
-    //   if (Object.hasOwn(indexPattern, 'getName')) {
-    //     setDataView([indexPattern] as DataView[]);
-    //   } else {
-    //     const createDataView = async () => {
-    //       const dv = await data.dataViews.create({ title: indexPattern.title });
-    //       setDataView([dv]);
-    //     };
-    //     createDataView();
-    //   }
-    // }, [data.dataViews, indexPattern]);
 
     const dataView = useMemo(() => {
       if (Object.hasOwn(indexPattern, 'getName')) {
