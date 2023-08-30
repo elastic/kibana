@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import getCaretCoordinates from 'textarea-caret';
 import { Properties } from 'csstype';
 import {
@@ -283,7 +283,18 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
       popupPosition.width,
     ]
   );
-
+  
+  const onFocus = useCallback(() => setListOpen(true), [])
+  const onBlur = useCallback(() => {
+    if (!inputTargetValue && !isListOpen) {
+      editAction(paramsProperty, '', index);
+    }
+  }, [editAction, index, inputTargetValue, isListOpen, paramsProperty])
+  const onClick = useCallback(() => closeList(), [closeList])
+  const onScroll = useCallback(() => {
+    closeList(true);
+  }, [closeList])
+  
   return (
     <EuiFormRow
       error={errors}
@@ -310,17 +321,11 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
             value={inputTargetValue || ''}
             data-test-subj={`${paramsProperty}TextArea`}
             onChange={onChangeWithMessageVariable}
-            onFocus={useCallback(() => setListOpen(true), [])}
+            onFocus={onFocus}
             onKeyDown={textareaOnKeyPress}
-            onBlur={useCallback(() => {
-              if (!inputTargetValue && !isListOpen) {
-                editAction(paramsProperty, '', index);
-              }
-            }, [editAction, index, inputTargetValue, isListOpen, paramsProperty])}
-            onClick={useCallback(() => closeList(), [closeList])}
-            onScroll={useCallback(() => {
-              closeList(true);
-            }, [closeList])}
+            onBlur={onBlur}
+            onClick={onClick}
+            onScroll={onScroll}
           />
         </EuiOutsideClickDetector>
         {matches.length > 0 && isListOpen && (
