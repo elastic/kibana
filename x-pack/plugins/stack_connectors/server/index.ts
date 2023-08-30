@@ -9,6 +9,9 @@ import { StackConnectorsPlugin } from './plugin';
 import { configSchema, ConfigSchema } from './config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    enableExperimental: true,
+  },
   schema: configSchema,
 };
 

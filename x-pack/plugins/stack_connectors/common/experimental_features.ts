@@ -12,7 +12,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  isMustacheAutocompleteOn: true,
+  isMustacheAutocompleteOff: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -35,7 +35,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
     if (!isValidExperimentalValue(value)) {
       throw new InvalidExperimentalValue(`[${value}] is not valid.`);
     }
-
+    // @ts-expect-error ts upgrade v4.7.4
     enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 
