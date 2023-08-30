@@ -78,12 +78,15 @@ export const ActionTypeMenu = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
-    .filter(
-      ([id, details]) =>
-        actionTypeRegistry.has(id) &&
-        details.enabledInConfig === true &&
-        !actionTypeRegistry.get(id).hideInUi
-    )
+    .filter(([id, { enabledInConfig, enabledInLicense, enabled }]) => {
+      const disabledInRegistry = enabledInConfig && enabledInLicense && !enabled;
+      return !(
+        actionTypeRegistry.get(id).hideInUi ||
+        !actionTypeRegistry.has(id) ||
+        !enabledInConfig ||
+        disabledInRegistry
+      );
+    })
     .map(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(id);
       return {

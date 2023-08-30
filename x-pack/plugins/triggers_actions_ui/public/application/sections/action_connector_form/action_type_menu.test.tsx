@@ -166,7 +166,7 @@ describe('connector_add_flyout', () => {
       ).toBeTruthy();
     });
 
-    it(`renders action types as disabled when disabled in the registry`, async () => {
+    it(`doesn't renders action types that are disabled in the registry`, async () => {
       const onActionTypeChange = jest.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type-2',
@@ -204,7 +204,7 @@ describe('connector_add_flyout', () => {
 
       expect(
         wrapper.find('EuiToolTip [data-test-subj="my-action-type-2-card"]').exists()
-      ).toBeTruthy();
+      ).toBeFalsy();
     });
   });
 

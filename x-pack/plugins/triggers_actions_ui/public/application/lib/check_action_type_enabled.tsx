@@ -114,11 +114,7 @@ export function checkActionTypeEnabled(
     return configurationCheckResult;
   }
 
-  if (
-    actionType?.enabledInConfig === true &&
-    actionType?.enabledInLicense === true &&
-    actionType?.enabled === false
-  ) {
+  if (isDisabledInRegistry(actionType)) {
     return registryCheckResult;
   }
 
@@ -133,23 +129,26 @@ export function checkActionFormActionTypeEnabled(
     return getLicenseCheckResult(actionType);
   }
 
-  if (
-    actionType?.enabledInConfig === false &&
-    // do not disable action type if it contains preconfigured connectors (is preconfigured)
-    !preconfiguredConnectors.find(
-      (preconfiguredConnector) => preconfiguredConnector.actionTypeId === actionType.id
-    )
-  ) {
+  const isInPreconfiguredConnectors = preconfiguredConnectors.some(
+    (preconfiguredConnector) => preconfiguredConnector.actionTypeId === actionType.id
+  );
+
+  // do not disable action type if it contains preconfigured connectors (is preconfigured)
+  if (actionType?.enabledInConfig === false && !isInPreconfiguredConnectors) {
     return configurationCheckResult;
   }
 
-  if (
-    actionType?.enabledInConfig === true &&
-    actionType?.enabledInLicense === true &&
-    actionType?.enabled === false
-  ) {
+  if (isDisabledInRegistry(actionType) && !isInPreconfiguredConnectors) {
     return registryCheckResult;
   }
 
   return { isEnabled: true };
+}
+
+function isDisabledInRegistry(actionType?: ActionType): boolean {
+  return (
+    actionType?.enabledInConfig === true &&
+    actionType?.enabledInLicense === true &&
+    actionType?.enabled === false
+  );
 }

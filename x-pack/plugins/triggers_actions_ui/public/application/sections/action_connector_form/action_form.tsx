@@ -296,16 +296,18 @@ export const ActionForm = ({
         actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
       )
       .map(function (item, index) {
-        const actionType = actionTypesIndex[item.id];
+        const { enabledInConfig, enabledInLicense, enabled } = actionTypesIndex[item.id];
         const checkEnabledResult = checkActionFormActionTypeEnabled(
           actionTypesIndex[item.id],
           preconfiguredConnectors
         );
-        // if action type is not enabled in config and not preconfigured, it shouldn't be displayed
-        if (!actionType.enabledInConfig && !checkEnabledResult.isEnabled) {
+
+        const disabledInRegistry = enabledInConfig && enabledInLicense && !enabled;
+        // if action type is not enabled in config or registry and not preconfigured, it shouldn't be displayed
+        if ((!enabledInConfig || disabledInRegistry) && !checkEnabledResult.isEnabled) {
           return null;
         }
-        if (!actionType.enabledInLicense) {
+        if (!enabledInLicense) {
           hasDisabledByLicenseActionTypes = true;
         }
 
