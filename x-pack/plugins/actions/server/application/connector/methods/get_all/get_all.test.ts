@@ -67,7 +67,6 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
-const executionEnqueuer = jest.fn();
 const ephemeralExecutionEnqueuer = jest.fn();
 const bulkExecutionEnqueuer = jest.fn();
 const request = httpServerMock.createKibanaRequest();
@@ -93,7 +92,6 @@ describe('getAll()', () => {
       kibanaIndices,
       inMemoryConnectors: [],
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -149,7 +147,6 @@ describe('getAll()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -294,7 +291,6 @@ describe('getAll()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -398,7 +394,6 @@ describe('getAll()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -504,7 +499,6 @@ describe('getAll()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,

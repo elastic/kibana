@@ -35,7 +35,7 @@ describe('Alert details expandable flyout left panel prevalence', () => {
   beforeEach(() => {
     cleanKibana();
     login();
-    createRule(getNewRule());
+    createRule({ ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } });
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlertExpandableFlyout();
@@ -57,10 +57,12 @@ describe('Alert details expandable flyout left panel prevalence', () => {
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE).should('be.visible');
     cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_TYPE_CELL)
-      .should('contain.text', 'host.name')
+      .should('contain.text', 'host.os.name')
+      .and('contain.text', 'host.name')
       .and('contain.text', 'user.name');
     cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_NAME_CELL)
-      .should('contain.text', 'siem-kibana')
+      .should('contain.text', 'Mac OS X')
+      .and('contain.text', 'siem-kibana')
       .and('contain.text', 'test');
     cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_ALERT_COUNT_CELL).should(
       'contain.text',
@@ -68,7 +70,7 @@ describe('Alert details expandable flyout left panel prevalence', () => {
     );
     cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_DOC_COUNT_CELL).should(
       'contain.text',
-      0
+      '—'
     );
     cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_HOST_PREVALENCE_CELL).should(
       'contain.text',
