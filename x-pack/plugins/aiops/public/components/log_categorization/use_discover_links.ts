@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
 import moment from 'moment';
 
+import rison from '@kbn/rison';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
+
+import type { Category } from '../../../common/api/log_categorization/types';
+
 import type { AiOpsIndexBasedAppState } from '../../application/utils/url_state';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import type { Category } from './use_categorize_request';
 
 export const QUERY_MODE = {
   INCLUDE: 'should',

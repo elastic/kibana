@@ -13,12 +13,12 @@ import { isCompleteResponse } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
 
 import { createCategoryRequest } from '../../../common/api/log_categorization/create_category_request';
-import {
-  processCategoryResults,
-  type Category,
-  type CatResponse,
-  type SparkLinesPerCategory,
-} from '../../../common/api/log_categorization/process_category_results';
+import { processCategoryResults } from '../../../common/api/log_categorization/process_category_results';
+import type {
+  Category,
+  CatResponse,
+  SparkLinesPerCategory,
+} from '../../../common/api/log_categorization/types';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {

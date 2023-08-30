@@ -11,35 +11,7 @@ import { estypes } from '@elastic/elasticsearch';
 
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
-export interface Category {
-  key: string;
-  count: number;
-  examples: string[];
-  sparkline?: Array<{ doc_count: number; key: number; key_as_string: string }>;
-}
-
-export interface CategoriesAgg {
-  categories: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-      hit: { hits: { hits: Array<{ _source: { message: string } }> } };
-      sparkline: {
-        buckets: Array<{ key_as_string: string; key: number; doc_count: number }>;
-      };
-    }>;
-  };
-}
-
-interface CategoriesSampleAgg {
-  sample: CategoriesAgg;
-}
-
-export interface CatResponse {
-  rawResponse: estypes.SearchResponseBody<unknown, CategoriesAgg | CategoriesSampleAgg>;
-}
-
-export type SparkLinesPerCategory = Record<string, Record<number, number>>;
+import type { Category, CategoriesAgg, CatResponse, SparkLinesPerCategory } from './types';
 
 export function processCategoryResults(
   result: CatResponse,
