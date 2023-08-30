@@ -52,7 +52,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
         />
       )}
       {apiKey ? (
-        <EuiPanel color="success" hasShadow>
+        <EuiPanel color="success">
           <EuiStep
             css={css`
               .euiStep__content {
