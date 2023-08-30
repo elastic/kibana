@@ -20,6 +20,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { getSourcererScopeId } from '../../../helpers';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../common/search_strategy';
@@ -67,11 +68,16 @@ export interface UserDetailsProps {
    * timestamp of alert or event
    */
   timestamp: string;
+  /**
+   * Maintain backwards compatibility // TODO remove when possible
+   */
+  scopeId: string;
 }
+
 /**
  * User details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
-export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp }) => {
+export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, scopeId }) => {
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
   const dispatch = useDispatch();
@@ -127,14 +133,16 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
         render: (host: string) => (
           <EuiText grow={false} size="xs">
             <SecurityCellActions
-              mode={CellActionsMode.HOVER_RIGHT}
-              visibleCellActions={5}
-              showActionTooltips
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
               data={{
                 value: host,
                 field: 'host.name',
               }}
+              mode={CellActionsMode.HOVER_RIGHT}
+              triggerId={SecurityCellActionsTrigger.DEFAULT} // TODO use SecurityCellActionsTrigger.DETAILS_FLYOUT when https://github.com/elastic/kibana/issues/155243 is fixed
+              visibleCellActions={5} // TODO use 6 when https://github.com/elastic/kibana/issues/155243 is fixed
+              sourcererScopeId={getSourcererScopeId(scopeId)}
+              metadata={{ scopeId }}
+              showActionTooltips
             >
               {host}
             </SecurityCellActions>
@@ -181,7 +189,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized]
+    [isEntityAnalyticsAuthorized, scopeId]
   );
 
   const relatedHostsCount = useMemo(

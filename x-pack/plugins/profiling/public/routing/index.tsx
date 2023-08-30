@@ -27,6 +27,7 @@ import { AddDataTabs, AddDataView } from '../views/add_data_view';
 import { StackTracesView } from '../views/stack_traces_view';
 import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
+import { DeleteDataView } from '../views/delete_data_view';
 
 const routes = {
   '/': {
@@ -61,6 +62,9 @@ const routes = {
             selectedTab: AddDataTabs.Kubernetes,
           },
         },
+      },
+      '/delete_data_instructions': {
+        element: <DeleteDataView />,
       },
       '/': {
         children: {

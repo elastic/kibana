@@ -77,7 +77,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
 
   protected getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
     if (!error.response?.status) {
-      return 'Unknown API Error';
+      return `Unexpected API Error: ${error.code} - ${error.message}`;
     }
     if (error.response.status === 401) {
       return 'Unauthorized API Error';
@@ -116,6 +116,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
       stream,
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
+
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
     const response = await this.request({
       url: this.url,
