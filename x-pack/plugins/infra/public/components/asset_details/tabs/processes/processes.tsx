@@ -44,6 +44,7 @@ export const Processes = () => {
   const { asset, assetType } = useAssetDetailsRenderPropsContext();
 
   const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');
+  const [searchQueryError, setSearchQueryError] = useState<Error | null>(null);
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
     searchText ? Query.parse(searchText) : Query.MATCH_ALL
   );
@@ -69,22 +70,28 @@ export const Processes = () => {
 
   const debouncedSearchOnChange = useMemo(() => {
     return debounce<(queryText: string) => void>((queryText) => {
-      setUrlState({ processSearch: queryText });
       setSearchText(queryText);
     }, 500);
-  }, [setUrlState]);
+  }, []);
 
   const searchBarOnChange = useCallback(
-    ({ query, queryText }) => {
-      setSearchBarState(query);
-      debouncedSearchOnChange(queryText);
+    ({ query, queryText, error: queryError }) => {
+      if (queryError) {
+        setSearchQueryError(queryError);
+      } else {
+        setUrlState({ processSearch: queryText });
+        setSearchQueryError(null);
+        setSearchBarState(query);
+        debouncedSearchOnChange(queryText);
+      }
     },
-    [debouncedSearchOnChange]
+    [debouncedSearchOnChange, setUrlState]
   );
 
   const clearSearchBar = useCallback(() => {
     setSearchBarState(Query.MATCH_ALL);
     setUrlState({ processSearch: '' });
+    setSearchQueryError(null);
     setSearchText('');
   }, [setUrlState]);
 
@@ -160,6 +167,7 @@ export const Processes = () => {
               isLoading={loading || !response}
               processList={response?.processList ?? []}
               sortBy={sortBy}
+              error={searchQueryError?.message}
               setSortBy={setSortBy}
               clearSearchBar={clearSearchBar}
             />
