@@ -11,6 +11,7 @@
       "alerting",
       "cases",
       "charts",
+      "contentManagement",
       "data",
       "dataViews",
       "dataViewEditor",
