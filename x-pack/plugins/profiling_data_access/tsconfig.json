@@ -15,7 +15,9 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
-    "@kbn/i18n",
-    "@kbn/core-saved-objects-api-server"
+    "@kbn/es-query",
+    "@kbn/es-types",
+    "@kbn/observability-plugin",
+    "@kbn/apm-utils"
   ]
 }
