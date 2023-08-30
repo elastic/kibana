@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export type { Connector, FindConnectorResult } from './connector';
-export type { ConnectorType } from './connector_type';
+import type { TypeOf } from '@kbn/config-schema';
+import { connectorTypesQuerySchemaV1 } from '..';
+
+export type ConnectorTypesRequestQuery = TypeOf<typeof connectorTypesQuerySchemaV1>;

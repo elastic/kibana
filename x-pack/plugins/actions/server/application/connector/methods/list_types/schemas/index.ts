@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export type { Connector, FindConnectorResult } from './connector';
-export type { ConnectorType } from './connector_type';
+export { listTypesParamsSchema } from './list_types_params_schema';

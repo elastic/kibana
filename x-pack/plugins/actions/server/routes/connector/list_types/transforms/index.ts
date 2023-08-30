@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { Connector, FindConnectorResult } from './connector';
-export type { ConnectorType } from './connector_type';
+export { transformListTypesResponse } from './transform_list_types_response/latest';
+export { transformListTypesResponse as transformListTypesResponseV1 } from './transform_list_types_response/v1';

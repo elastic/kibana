@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type { Connector, FindConnectorResult } from './connector';
-export type { ConnectorType } from './connector_type';
+import { schema } from '@kbn/config-schema';
+
+export const listTypesParamsSchema = schema.object({
+  featureId: schema.maybe(schema.string()),
+  includeSystemActionTypes: schema.maybe(schema.boolean()),
+});
