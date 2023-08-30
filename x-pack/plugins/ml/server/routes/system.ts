@@ -285,4 +285,50 @@ export function systemRoutes(
         }
       })
     );
+
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @api {post} /internal/ml/reindex_with_pipeline ES reindex wrapper to reindex with pipeline
+   * @apiName MlReindexWithPipeline
+   */
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/reindex_with_pipeline`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetMlInfo'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              source: schema.object({ index: schema.string() }),
+              dest: schema.object({
+                index: schema.string(),
+                pipeline: schema.string(),
+              }),
+            }),
+          },
+        },
+      },
+      routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
+        try {
+          const result = await client.asCurrentUser.reindex({
+            body: request.body,
+            // Create a task and return task id instead of blocking until complete
+            wait_for_completion: false,
+          });
+
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          return response.customError(wrapError(error));
+        }
+      })
+    );
 }

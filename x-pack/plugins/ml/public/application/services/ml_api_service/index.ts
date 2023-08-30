@@ -778,6 +778,23 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
+    reindexWithPipeline(pipelineName: string, sourceIndex: string, destinationIndex: string) {
+      return httpService.http<any>({
+        path: `${ML_INTERNAL_BASE_PATH}/reindex_with_pipeline`,
+        method: 'POST',
+        body: JSON.stringify({
+          source: {
+            index: sourceIndex,
+          },
+          dest: {
+            index: destinationIndex,
+            pipeline: pipelineName,
+          },
+        }),
+        version: '1',
+      });
+    },
+
     annotations: annotationsApiProvider(httpService),
     dataFrameAnalytics: dataFrameAnalyticsApiProvider(httpService),
     filters: filtersApiProvider(httpService),

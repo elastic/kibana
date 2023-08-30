@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { useMlKibana } from '../../../contexts/kibana';
+import { ReindexWithPipeline } from './reindex_with_pipeline';
 
 const MANAGEMENT_APP_ID = 'management';
 
@@ -33,6 +34,7 @@ interface Props {
   pipelineName: string;
   pipelineCreated: boolean;
   pipelineError?: string;
+  sourceIndex: string;
 }
 
 export const ReviewAndCreatePipeline: FC<Props> = ({
@@ -41,6 +43,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
   pipelineName,
   pipelineCreated,
   pipelineError,
+  sourceIndex,
 }) => {
   const {
     services: {
@@ -197,6 +200,24 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
               ) : null}
             </p>
           </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          {pipelineCreated ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiAccordion
+                id={accordionId}
+                buttonContent={
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.nextStepsLabel"
+                    defaultMessage="Next steps"
+                  />
+                }
+              >
+                <ReindexWithPipeline pipelineName={pipelineName} sourceIndex={sourceIndex} />
+              </EuiAccordion>
+            </>
+          ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow>
           {pipelineCreated ? (
