@@ -5,7 +5,7 @@
 ## SharedGlobalConfig type
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SharedGlobalConfig = RecursiveReadonly<{

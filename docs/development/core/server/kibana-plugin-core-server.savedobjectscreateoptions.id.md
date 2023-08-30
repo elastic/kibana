@@ -6,7 +6,7 @@
 
 (not recommended) Specify an id for the document
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 id?: string;

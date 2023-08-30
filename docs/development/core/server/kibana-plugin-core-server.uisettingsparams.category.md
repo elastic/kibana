@@ -6,7 +6,7 @@
 
 used to group the configured setting in the UI
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 category?: string[];

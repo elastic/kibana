@@ -6,7 +6,7 @@
 
 The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the [IBasePath.serverBasePath](./kibana-plugin-core-public.ibasepath.serverbasepath.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly publicBaseUrl?: string;

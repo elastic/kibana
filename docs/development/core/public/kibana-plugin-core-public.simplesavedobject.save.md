@@ -4,12 +4,12 @@
 
 ## SimpleSavedObject.save() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 save(): Promise<SimpleSavedObject<T>>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SimpleSavedObject&lt;T&gt;&gt;
 

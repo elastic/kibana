@@ -6,7 +6,7 @@
 
 The object ID that will be created or overwritten. If not specified, the `id` field will be used.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 destinationId?: string;

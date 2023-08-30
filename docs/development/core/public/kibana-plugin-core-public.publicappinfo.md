@@ -6,7 +6,7 @@
 
 Public information about a registered [application](./kibana-plugin-core-public.app.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepLinks' | 'searchable'> & {

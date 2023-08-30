@@ -6,7 +6,7 @@
 
 If true, all search contexts associated with the PIT id are successfully closed.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 succeeded: boolean;

@@ -4,7 +4,7 @@
 
 ## GetResponse.\_source property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 _source: T;

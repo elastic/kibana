@@ -4,7 +4,7 @@
 
 ## NodesVersionCompatibility.nodesInfoRequestError property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 nodesInfoRequestError?: Error;

@@ -6,7 +6,7 @@
 
 To respond with HTML page bootstrapping Kibana application without retrieving user-specific information.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 renderAnonymousCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;

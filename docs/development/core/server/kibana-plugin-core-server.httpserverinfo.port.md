@@ -6,7 +6,7 @@
 
 The port the server is listening on
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 port: number;

@@ -6,7 +6,7 @@
 
 Creates a `ScopedHistory` for a subpath of this `ScopedHistory`<!-- -->. Useful for applications that may have sub-apps that do not need access to the containing application's history.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createSubHistory: (basePath: string) => ScopedHistory<HistoryLocationState>;

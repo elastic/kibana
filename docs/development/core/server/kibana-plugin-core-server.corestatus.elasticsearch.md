@@ -4,7 +4,7 @@
 
 ## CoreStatus.elasticsearch property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 elasticsearch: ServiceStatus;

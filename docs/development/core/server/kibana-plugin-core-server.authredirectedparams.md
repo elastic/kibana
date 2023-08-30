@@ -6,7 +6,7 @@
 
 Result of auth redirection.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface AuthRedirectedParams 
@@ -14,7 +14,7 @@ export interface AuthRedirectedParams
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [headers](./kibana-plugin-core-server.authredirectedparams.headers.md) | { location: string; } &amp; ResponseHeaders | Headers to attach for auth redirect. Must include "location" header |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [headers](./kibana-plugin-core-server.authredirectedparams.headers.md) |  | { location: string; } &amp; ResponseHeaders | Headers to attach for auth redirect. Must include "location" header |
 

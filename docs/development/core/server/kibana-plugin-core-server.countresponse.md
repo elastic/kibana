@@ -5,7 +5,7 @@
 ## CountResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface CountResponse 
@@ -13,8 +13,8 @@ export interface CountResponse
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [\_shards](./kibana-plugin-core-server.countresponse._shards.md) | ShardsInfo |  |
-|  [count](./kibana-plugin-core-server.countresponse.count.md) | number |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [\_shards](./kibana-plugin-core-server.countresponse._shards.md) |  | ShardsInfo |  |
+|  [count](./kibana-plugin-core-server.countresponse.count.md) |  | number |  |
 

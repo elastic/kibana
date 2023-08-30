@@ -8,19 +8,19 @@ Return type of the Saved Objects `find()` method.
 
 \*Note\*: this type is different between the Public and Server Saved Objects clients.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown> extends SavedObjectsBatchResponse<T> 
 ```
-<b>Extends:</b> SavedObjectsBatchResponse&lt;T&gt;
+**Extends:** SavedObjectsBatchResponse&lt;T&gt;
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [aggregations?](./kibana-plugin-core-public.savedobjectsfindresponsepublic.aggregations.md) | A | <i>(Optional)</i> |
-|  [page](./kibana-plugin-core-public.savedobjectsfindresponsepublic.page.md) | number |  |
-|  [perPage](./kibana-plugin-core-public.savedobjectsfindresponsepublic.perpage.md) | number |  |
-|  [total](./kibana-plugin-core-public.savedobjectsfindresponsepublic.total.md) | number |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [aggregations?](./kibana-plugin-core-public.savedobjectsfindresponsepublic.aggregations.md) |  | A | _(Optional)_ |
+|  [page](./kibana-plugin-core-public.savedobjectsfindresponsepublic.page.md) |  | number |  |
+|  [perPage](./kibana-plugin-core-public.savedobjectsfindresponsepublic.perpage.md) |  | number |  |
+|  [total](./kibana-plugin-core-public.savedobjectsfindresponsepublic.total.md) |  | number |  |
 

@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isConflictError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isConflictError(error: Error | DecoratedError): boolean;
@@ -16,7 +16,7 @@ static isConflictError(error: Error | DecoratedError): boolean;
 |  --- | --- | --- |
 |  error | Error \| DecoratedError |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

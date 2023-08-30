@@ -6,7 +6,7 @@
 
 User has no credentials. Allows user to access a resource when authRequired is 'optional' Rejects a request when authRequired: true
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 notHandled: () => AuthResult;

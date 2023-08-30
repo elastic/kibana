@@ -6,7 +6,7 @@
 
 A simple informative warning that will be displayed to the user.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportSimpleWarning 
@@ -14,8 +14,8 @@ export interface SavedObjectsImportSimpleWarning
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [message](./kibana-plugin-core-public.savedobjectsimportsimplewarning.message.md) | string | The translated message to display to the user |
-|  [type](./kibana-plugin-core-public.savedobjectsimportsimplewarning.type.md) | 'simple' |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [message](./kibana-plugin-core-public.savedobjectsimportsimplewarning.message.md) |  | string | The translated message to display to the user |
+|  [type](./kibana-plugin-core-public.savedobjectsimportsimplewarning.type.md) |  | 'simple' |  |
 

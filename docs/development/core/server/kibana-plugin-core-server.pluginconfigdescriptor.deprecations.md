@@ -6,7 +6,7 @@
 
 Provider for the  to apply to the plugin configuration.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 deprecations?: ConfigDeprecationProvider;

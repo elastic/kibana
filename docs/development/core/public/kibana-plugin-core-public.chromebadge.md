@@ -5,7 +5,7 @@
 ## ChromeBadge interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ChromeBadge 
@@ -13,9 +13,9 @@ export interface ChromeBadge
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [iconType?](./kibana-plugin-core-public.chromebadge.icontype.md) | IconType | <i>(Optional)</i> |
-|  [text](./kibana-plugin-core-public.chromebadge.text.md) | string |  |
-|  [tooltip](./kibana-plugin-core-public.chromebadge.tooltip.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [iconType?](./kibana-plugin-core-public.chromebadge.icontype.md) |  | IconType | _(Optional)_ |
+|  [text](./kibana-plugin-core-public.chromebadge.text.md) |  | string |  |
+|  [tooltip](./kibana-plugin-core-public.chromebadge.tooltip.md) |  | string |  |
 

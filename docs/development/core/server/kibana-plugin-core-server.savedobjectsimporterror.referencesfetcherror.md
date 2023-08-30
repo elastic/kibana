@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportError.referencesFetchError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static referencesFetchError(objects: SavedObject[]): SavedObjectsImportError;
@@ -16,7 +16,7 @@ static referencesFetchError(objects: SavedObject[]): SavedObjectsImportError;
 |  --- | --- | --- |
 |  objects | SavedObject\[\] |  |
 
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectsImportError
 

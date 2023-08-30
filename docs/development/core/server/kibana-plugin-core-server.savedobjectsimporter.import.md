@@ -6,7 +6,7 @@
 
 Import saved objects from given stream. See the [options](./kibana-plugin-core-server.savedobjectsimportoptions.md) for more detailed information.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
@@ -18,7 +18,7 @@ import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImpor
 |  --- | --- | --- |
 |  { readStream, createNewCopies, namespace, overwrite, } | SavedObjectsImportOptions |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsImportResponse&gt;
 

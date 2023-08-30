@@ -6,7 +6,7 @@
 
 APIs to open and manage fly-out dialogs.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OverlayFlyoutStart 

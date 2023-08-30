@@ -6,7 +6,7 @@
 
 Extend EuiButtonEmpty to provide extra functionality
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 linkType: 'custom';

@@ -6,7 +6,7 @@
 
 Search for objects
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions) => Promise<SavedObjectsFindResponsePublic<T, unknown>>;

@@ -6,7 +6,7 @@
 
 Gets the metadata about all uiSettings, including the type, default value, and user value for each key.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getAll: () => Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;

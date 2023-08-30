@@ -6,7 +6,7 @@
 
 URL to documentation page. i.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`<!-- -->,
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 href: string;

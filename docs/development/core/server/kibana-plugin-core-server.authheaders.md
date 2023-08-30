@@ -6,7 +6,7 @@
 
 Auth Headers map
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type AuthHeaders = Record<string, string | string[]>;

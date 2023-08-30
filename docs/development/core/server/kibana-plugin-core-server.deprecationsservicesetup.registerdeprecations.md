@@ -4,7 +4,7 @@
 
 ## DeprecationsServiceSetup.registerDeprecations property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;

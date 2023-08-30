@@ -6,16 +6,16 @@
 
 See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ICustomClusterClient extends IClusterClient 
 ```
-<b>Extends:</b> IClusterClient
+**Extends:** IClusterClient
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [close](./kibana-plugin-core-server.icustomclusterclient.close.md) | () =&gt; Promise&lt;void&gt; | Closes the cluster client. After that client cannot be used and one should create a new client instance to be able to interact with Elasticsearch API. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [close](./kibana-plugin-core-server.icustomclusterclient.close.md) |  | () =&gt; Promise&lt;void&gt; | Closes the cluster client. After that client cannot be used and one should create a new client instance to be able to interact with Elasticsearch API. |
 

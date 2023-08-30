@@ -5,7 +5,7 @@
 ## ShardsInfo interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ShardsInfo 
@@ -13,10 +13,10 @@ export interface ShardsInfo
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [failed](./kibana-plugin-core-server.shardsinfo.failed.md) | number |  |
-|  [skipped](./kibana-plugin-core-server.shardsinfo.skipped.md) | number |  |
-|  [successful](./kibana-plugin-core-server.shardsinfo.successful.md) | number |  |
-|  [total](./kibana-plugin-core-server.shardsinfo.total.md) | number |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [failed](./kibana-plugin-core-server.shardsinfo.failed.md) |  | number |  |
+|  [skipped](./kibana-plugin-core-server.shardsinfo.skipped.md) |  | number |  |
+|  [successful](./kibana-plugin-core-server.shardsinfo.successful.md) |  | number |  |
+|  [total](./kibana-plugin-core-server.shardsinfo.total.md) |  | number |  |
 

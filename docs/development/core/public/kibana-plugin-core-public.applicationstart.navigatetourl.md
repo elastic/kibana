@@ -12,7 +12,7 @@ If all these criteria are true for the given URL: - (only for absolute URLs) The
 
 Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path. Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 navigateToUrl(url: string): Promise<void>;
@@ -24,7 +24,7 @@ navigateToUrl(url: string): Promise<void>;
 |  --- | --- | --- |
 |  url | string | an absolute URL, an absolute path or a relative path, to navigate to. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;void&gt;
 

@@ -6,7 +6,7 @@
 
 The space(s) that legacy URL aliases matching this type/id exist in
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 spacesWithMatchingAliases?: string[];

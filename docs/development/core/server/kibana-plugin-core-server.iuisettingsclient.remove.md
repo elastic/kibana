@@ -6,7 +6,7 @@
 
 Removes uiSettings value by key.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 remove: (key: string) => Promise<void>;

@@ -6,7 +6,7 @@
 
 To define custom logic after Auth interceptor did make sure a user has access to the requested resource.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerOnPostAuth: (handler: OnPostAuthHandler) => void;

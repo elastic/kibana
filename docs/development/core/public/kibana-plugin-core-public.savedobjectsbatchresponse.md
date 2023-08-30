@@ -5,7 +5,7 @@
 ## SavedObjectsBatchResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsBatchResponse<T = unknown> 
@@ -13,7 +13,7 @@ export interface SavedObjectsBatchResponse<T = unknown>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [savedObjects](./kibana-plugin-core-public.savedobjectsbatchresponse.savedobjects.md) | Array&lt;SimpleSavedObject&lt;T&gt;&gt; |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [savedObjects](./kibana-plugin-core-public.savedobjectsbatchresponse.savedobjects.md) |  | Array&lt;SimpleSavedObject&lt;T&gt;&gt; |  |
 

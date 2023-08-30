@@ -6,7 +6,7 @@
 
 Subresource integrity metadata, which is a cryptographic hash of the resource being fetched. Its value consists of multiple hashes separated by whitespace.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 integrity?: string;

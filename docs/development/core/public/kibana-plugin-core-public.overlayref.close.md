@@ -6,12 +6,12 @@
 
 Closes the referenced overlay if it's still open which in turn will resolve the `onClose` Promise. If the overlay had already been closed this method does nothing.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 close(): Promise<void>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;void&gt;
 

@@ -4,7 +4,7 @@
 
 ## FeatureDeprecationDetails.deprecationType property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 deprecationType?: 'feature' | undefined;

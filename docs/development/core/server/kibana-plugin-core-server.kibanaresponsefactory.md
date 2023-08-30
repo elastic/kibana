@@ -6,7 +6,7 @@
 
 Set of helpers used to create `KibanaResponse` to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 kibanaResponseFactory: {

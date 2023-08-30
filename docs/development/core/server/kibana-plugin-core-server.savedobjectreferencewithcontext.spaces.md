@@ -6,7 +6,7 @@
 
 The space(s) that the referenced object exists in
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 spaces: string[];

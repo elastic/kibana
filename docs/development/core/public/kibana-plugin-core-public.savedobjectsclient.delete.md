@@ -6,8 +6,8 @@
 
 Deletes an object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
-delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => ReturnType<SavedObjectsApi['delete']>;
+delete: (type: string, id: string, options?: SavedObjectsDeleteOptions) => ReturnType<SavedObjectsApi['delete']>;
 ```

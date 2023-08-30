@@ -6,7 +6,7 @@
 
 HTTP message to send to the client
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 body?: ResponseError;

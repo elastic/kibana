@@ -6,12 +6,12 @@
 
 An observable of the forced app switcher state.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getForceAppSwitcherNavigation$(): Observable<boolean>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;boolean&gt;
 

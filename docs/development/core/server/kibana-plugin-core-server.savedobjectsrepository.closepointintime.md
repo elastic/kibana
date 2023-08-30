@@ -8,7 +8,7 @@ Closes a Point In Time (PIT) by ID. This simply proxies the request to ES via th
 
 Only use this API if you have an advanced use case that's not solved by the [SavedObjectsRepository.createPointInTimeFinder()](./kibana-plugin-core-server.savedobjectsrepository.createpointintimefinder.md) method.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
@@ -19,9 +19,9 @@ closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Pro
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  id | string |  |
-|  options | SavedObjectsClosePointInTimeOptions | [SavedObjectsClosePointInTimeOptions](./kibana-plugin-core-server.savedobjectsclosepointintimeoptions.md) |
+|  options | SavedObjectsClosePointInTimeOptions | _(Optional)_ [SavedObjectsClosePointInTimeOptions](./kibana-plugin-core-server.savedobjectsclosepointintimeoptions.md) |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsClosePointInTimeResponse&gt;
 

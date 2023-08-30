@@ -6,7 +6,7 @@
 
 Check whether or not a navlink exists.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 has(id: string): boolean;
@@ -18,7 +18,7 @@ has(id: string): boolean;
 |  --- | --- | --- |
 |  id | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

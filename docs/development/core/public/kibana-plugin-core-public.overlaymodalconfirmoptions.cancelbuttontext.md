@@ -4,7 +4,7 @@
 
 ## OverlayModalConfirmOptions.cancelButtonText property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 cancelButtonText?: string;

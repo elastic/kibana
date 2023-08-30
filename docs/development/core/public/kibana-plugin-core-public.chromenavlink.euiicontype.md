@@ -6,7 +6,7 @@
 
 A EUI iconType that will be used for the app's icon. This icon takes precedence over the `icon` property.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly euiIconType?: string;

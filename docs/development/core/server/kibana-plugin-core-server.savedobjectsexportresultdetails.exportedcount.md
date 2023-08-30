@@ -6,7 +6,7 @@
 
 number of successfully exported objects
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 exportedCount: number;

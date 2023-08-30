@@ -6,7 +6,7 @@
 
 Register a nav control to be presented on the bottom-left side of the chrome header.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerLeft(navControl: ChromeNavControl): void;
@@ -18,7 +18,7 @@ registerLeft(navControl: ChromeNavControl): void;
 |  --- | --- | --- |
 |  navControl | ChromeNavControl |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

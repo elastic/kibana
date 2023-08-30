@@ -6,7 +6,7 @@
 
 HTTP Headers with additional information about response
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 headers?: ResponseHeaders;

@@ -6,7 +6,7 @@
 
 Allows plugins to get access to APIs available in start inside async handlers, such as [App.mount](./kibana-plugin-core-public.app.mount.md)<!-- -->. Promise will not resolve until Core and plugin dependencies have completed `start`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;

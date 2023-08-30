@@ -6,7 +6,7 @@
 
 a flag indicating that value might contain user sensitive data. used by telemetry to mask the value of the setting when sent.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 sensitive?: boolean;

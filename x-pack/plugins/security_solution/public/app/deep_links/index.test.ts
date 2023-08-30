@@ -124,6 +124,7 @@ describe('deepLinks', () => {
   it('should return ueba link when enableExperimental.uebaEnabled === true', () => {
     const deepLinks = getDeepLinks({
       ...mockGlobalState.app.enableExperimental,
+      // @ts-expect-error ts upgrade v4.7.4
       uebaEnabled: true,
     });
     expect(findDeepLink(SecurityPageName.ueba, deepLinks)).toBeTruthy();

@@ -6,7 +6,7 @@
 
 Error message and optional data send to the client in case of error.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ResponseError = string | Error | {

@@ -6,7 +6,7 @@
 
 If Elasticsearch is protected with basic authentication, this setting provides the username that the Kibana server uses to perform its administrative functions. Cannot be used in conjunction with serviceAccountToken.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly username?: string;

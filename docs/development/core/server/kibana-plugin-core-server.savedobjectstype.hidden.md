@@ -8,7 +8,7 @@ Is the type hidden by default. If true, repositories will not have access to thi
 
 See [createInternalRepository](./kibana-plugin-core-server.savedobjectsservicestart.createinternalrepository.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 hidden: boolean;

@@ -6,7 +6,7 @@
 
 Additional options for the RouteValidator class to modify its default behaviour.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface RouteValidatorOptions 
@@ -14,7 +14,7 @@ export interface RouteValidatorOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [unsafe?](./kibana-plugin-core-server.routevalidatoroptions.unsafe.md) | { params?: boolean; query?: boolean; body?: boolean; } | <i>(Optional)</i> Set the <code>unsafe</code> config to avoid running some additional internal \*safe\* validations on top of your custom validation |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [unsafe?](./kibana-plugin-core-server.routevalidatoroptions.unsafe.md) |  | { params?: boolean; query?: boolean; body?: boolean; } | _(Optional)_ Set the <code>unsafe</code> config to avoid running some additional internal \*safe\* validations on top of your custom validation |
 

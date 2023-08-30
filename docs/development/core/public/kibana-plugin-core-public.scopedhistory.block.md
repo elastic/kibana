@@ -6,8 +6,8 @@
 
 Add a block prompt requesting user confirmation when navigating away from the current page.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
-block: (prompt?: string | boolean | TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+block: (prompt?: boolean | string | TransitionPromptHook<HistoryLocationState>) => UnregisterCallback;
 ```

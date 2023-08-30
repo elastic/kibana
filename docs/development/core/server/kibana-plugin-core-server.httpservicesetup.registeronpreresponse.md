@@ -6,7 +6,7 @@
 
 To define custom logic to perform for the server response.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerOnPreResponse: (handler: OnPreResponseHandler) => void;

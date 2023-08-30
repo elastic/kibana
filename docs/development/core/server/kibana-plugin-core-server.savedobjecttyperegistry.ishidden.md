@@ -6,7 +6,7 @@
 
 Returns the `hidden` property for given type, or `false` if the type is not registered.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isHidden(type: string): boolean;
@@ -18,7 +18,7 @@ isHidden(type: string): boolean;
 |  --- | --- | --- |
 |  type | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

@@ -6,7 +6,7 @@
 
 Override the current set of breadcrumbs
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
@@ -18,7 +18,7 @@ setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
 |  --- | --- | --- |
 |  newBreadcrumbs | ChromeBreadcrumb\[\] |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

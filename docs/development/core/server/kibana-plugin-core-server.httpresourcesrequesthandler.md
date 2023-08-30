@@ -6,7 +6,7 @@
 
 Extended version of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) having access to [HttpResourcesServiceToolkit](./kibana-plugin-core-server.httpresourcesservicetoolkit.md) to respond with HTML or JS resources.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext> = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;

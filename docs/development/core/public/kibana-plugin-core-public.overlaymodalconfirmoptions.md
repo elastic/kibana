@@ -5,7 +5,7 @@
 ## OverlayModalConfirmOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OverlayModalConfirmOptions 
@@ -13,15 +13,15 @@ export interface OverlayModalConfirmOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  ["data-test-subj"?](./kibana-plugin-core-public.overlaymodalconfirmoptions._data-test-subj_.md) | string | <i>(Optional)</i> |
-|  [buttonColor?](./kibana-plugin-core-public.overlaymodalconfirmoptions.buttoncolor.md) | EuiConfirmModalProps\['buttonColor'\] | <i>(Optional)</i> |
-|  [cancelButtonText?](./kibana-plugin-core-public.overlaymodalconfirmoptions.cancelbuttontext.md) | string | <i>(Optional)</i> |
-|  [className?](./kibana-plugin-core-public.overlaymodalconfirmoptions.classname.md) | string | <i>(Optional)</i> |
-|  [closeButtonAriaLabel?](./kibana-plugin-core-public.overlaymodalconfirmoptions.closebuttonarialabel.md) | string | <i>(Optional)</i> |
-|  [confirmButtonText?](./kibana-plugin-core-public.overlaymodalconfirmoptions.confirmbuttontext.md) | string | <i>(Optional)</i> |
-|  [defaultFocusedButton?](./kibana-plugin-core-public.overlaymodalconfirmoptions.defaultfocusedbutton.md) | EuiConfirmModalProps\['defaultFocusedButton'\] | <i>(Optional)</i> |
-|  [maxWidth?](./kibana-plugin-core-public.overlaymodalconfirmoptions.maxwidth.md) | boolean \| number \| string | <i>(Optional)</i> Sets the max-width of the modal. Set to <code>true</code> to use the default (<code>euiBreakpoints 'm'</code>), set to <code>false</code> to not restrict the width, set to a number for a custom width in px, set to a string for a custom width in custom measurement. |
-|  [title?](./kibana-plugin-core-public.overlaymodalconfirmoptions.title.md) | string | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  ["data-test-subj"?](./kibana-plugin-core-public.overlaymodalconfirmoptions._data-test-subj_.md) |  | string | _(Optional)_ |
+|  [buttonColor?](./kibana-plugin-core-public.overlaymodalconfirmoptions.buttoncolor.md) |  | EuiConfirmModalProps\['buttonColor'\] | _(Optional)_ |
+|  [cancelButtonText?](./kibana-plugin-core-public.overlaymodalconfirmoptions.cancelbuttontext.md) |  | string | _(Optional)_ |
+|  [className?](./kibana-plugin-core-public.overlaymodalconfirmoptions.classname.md) |  | string | _(Optional)_ |
+|  [closeButtonAriaLabel?](./kibana-plugin-core-public.overlaymodalconfirmoptions.closebuttonarialabel.md) |  | string | _(Optional)_ |
+|  [confirmButtonText?](./kibana-plugin-core-public.overlaymodalconfirmoptions.confirmbuttontext.md) |  | string | _(Optional)_ |
+|  [defaultFocusedButton?](./kibana-plugin-core-public.overlaymodalconfirmoptions.defaultfocusedbutton.md) |  | EuiConfirmModalProps\['defaultFocusedButton'\] | _(Optional)_ |
+|  [maxWidth?](./kibana-plugin-core-public.overlaymodalconfirmoptions.maxwidth.md) |  | boolean \| number \| string | _(Optional)_ Sets the max-width of the modal. Set to <code>true</code> to use the default (<code>euiBreakpoints 'm'</code>), set to <code>false</code> to not restrict the width, set to a number for a custom width in px, set to a string for a custom width in custom measurement. |
+|  [title?](./kibana-plugin-core-public.overlaymodalconfirmoptions.title.md) |  | string | _(Optional)_ |
 

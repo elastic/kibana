@@ -4,7 +4,7 @@
 
 ## Authenticated.type property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 type: AuthResultType.authenticated;

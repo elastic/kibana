@@ -6,7 +6,7 @@
 
 Interval metrics are collected in milliseconds
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly collectionInterval: number;

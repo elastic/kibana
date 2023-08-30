@@ -6,7 +6,7 @@
 
 Define an icon to be used for the category If the category is only 1 item, and no icon is defined, will default to the product icon Defaults to initials if no icon is defined
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 euiIconType?: string;

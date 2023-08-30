@@ -9,7 +9,7 @@
 > Provided for legacy compatibility. Prefer the `request` property instead.
 > 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly req: Request;

@@ -6,7 +6,7 @@
 
 A semver value that is used when upgrading objects between Kibana versions.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 coreMigrationVersion?: string;

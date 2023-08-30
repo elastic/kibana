@@ -6,7 +6,7 @@
 
 Set of HTTP methods changing the state of the server.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';

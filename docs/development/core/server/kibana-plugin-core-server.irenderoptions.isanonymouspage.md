@@ -6,7 +6,7 @@
 
 Set whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata. `false` by default.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isAnonymousPage?: boolean;

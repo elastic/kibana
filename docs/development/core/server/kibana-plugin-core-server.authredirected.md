@@ -5,16 +5,16 @@
 ## AuthRedirected interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface AuthRedirected extends AuthRedirectedParams 
 ```
-<b>Extends:</b> AuthRedirectedParams
+**Extends:** AuthRedirectedParams
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [type](./kibana-plugin-core-server.authredirected.type.md) | AuthResultType.redirected |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [type](./kibana-plugin-core-server.authredirected.type.md) |  | AuthResultType.redirected |  |
 

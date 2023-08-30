@@ -4,7 +4,7 @@
 
 ## NodesVersionCompatibility interface
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface NodesVersionCompatibility 
@@ -12,12 +12,12 @@ export interface NodesVersionCompatibility
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [incompatibleNodes](./kibana-plugin-core-server.nodesversioncompatibility.incompatiblenodes.md) | NodeInfo\[\] |  |
-|  [isCompatible](./kibana-plugin-core-server.nodesversioncompatibility.iscompatible.md) | boolean |  |
-|  [kibanaVersion](./kibana-plugin-core-server.nodesversioncompatibility.kibanaversion.md) | string |  |
-|  [message?](./kibana-plugin-core-server.nodesversioncompatibility.message.md) | string | <i>(Optional)</i> |
-|  [nodesInfoRequestError?](./kibana-plugin-core-server.nodesversioncompatibility.nodesinforequesterror.md) | Error | <i>(Optional)</i> |
-|  [warningNodes](./kibana-plugin-core-server.nodesversioncompatibility.warningnodes.md) | NodeInfo\[\] |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [incompatibleNodes](./kibana-plugin-core-server.nodesversioncompatibility.incompatiblenodes.md) |  | NodeInfo\[\] |  |
+|  [isCompatible](./kibana-plugin-core-server.nodesversioncompatibility.iscompatible.md) |  | boolean |  |
+|  [kibanaVersion](./kibana-plugin-core-server.nodesversioncompatibility.kibanaversion.md) |  | string |  |
+|  [message?](./kibana-plugin-core-server.nodesversioncompatibility.message.md) |  | string | _(Optional)_ |
+|  [nodesInfoRequestError?](./kibana-plugin-core-server.nodesversioncompatibility.nodesinforequesterror.md) |  | Error | _(Optional)_ |
+|  [warningNodes](./kibana-plugin-core-server.nodesversioncompatibility.warningnodes.md) |  | NodeInfo\[\] |  |
 

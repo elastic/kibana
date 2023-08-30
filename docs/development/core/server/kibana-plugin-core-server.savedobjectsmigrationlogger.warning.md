@@ -9,7 +9,7 @@
 > Use `warn` instead.
 > 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 warning: (msg: string) => void;

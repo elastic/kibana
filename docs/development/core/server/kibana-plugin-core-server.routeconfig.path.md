@@ -6,7 +6,7 @@
 
 The endpoint \_within\_ the router path to register the route.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 path: string;

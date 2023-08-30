@@ -6,7 +6,7 @@
 
 Timeout after which PING HTTP request will be aborted and retried.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly pingTimeout: Duration;

@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportRetry.replaceReferences property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 replaceReferences: Array<{

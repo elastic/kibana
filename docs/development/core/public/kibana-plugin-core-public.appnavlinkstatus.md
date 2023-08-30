@@ -6,7 +6,7 @@
 
 Status of the application's navLink.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare enum AppNavLinkStatus 

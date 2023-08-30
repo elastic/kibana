@@ -6,7 +6,7 @@
 
 Hosts that the client will connect to. If sniffing is enabled, this list will be used as seeds to discover the rest of your cluster.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly hosts: string[];

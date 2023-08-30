@@ -6,7 +6,7 @@
 
 The initial status of the application. Defaulting to `accessible`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 status?: AppStatus;

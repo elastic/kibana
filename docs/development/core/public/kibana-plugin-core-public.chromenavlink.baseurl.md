@@ -6,7 +6,7 @@
 
 The base route used to open the root of an application.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly baseUrl: string;

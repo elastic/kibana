@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isSavedObjectsClientError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isSavedObjectsClientError(error: any): error is DecoratedError;
@@ -16,7 +16,7 @@ static isSavedObjectsClientError(error: any): error is DecoratedError;
 |  --- | --- | --- |
 |  error | any |  |
 
-<b>Returns:</b>
+**Returns:**
 
 error is DecoratedError
 

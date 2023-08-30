@@ -4,7 +4,7 @@
 
 ## SavedObject interface
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObject<T = unknown> 
@@ -12,17 +12,17 @@ export interface SavedObject<T = unknown>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [attributes](./kibana-plugin-core-server.savedobject.attributes.md) | T | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
-|  [coreMigrationVersion?](./kibana-plugin-core-server.savedobject.coremigrationversion.md) | string | <i>(Optional)</i> A semver value that is used when upgrading objects between Kibana versions. |
-|  [error?](./kibana-plugin-core-server.savedobject.error.md) | SavedObjectError | <i>(Optional)</i> |
-|  [id](./kibana-plugin-core-server.savedobject.id.md) | string | The ID of this Saved Object, guaranteed to be unique for all objects of the same <code>type</code> |
-|  [migrationVersion?](./kibana-plugin-core-server.savedobject.migrationversion.md) | SavedObjectsMigrationVersion | <i>(Optional)</i> Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
-|  [namespaces?](./kibana-plugin-core-server.savedobject.namespaces.md) | string\[\] | <i>(Optional)</i> Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with <code>namespaceType: 'agnostic'</code>. |
-|  [originId?](./kibana-plugin-core-server.savedobject.originid.md) | string | <i>(Optional)</i> The ID of the saved object this originated from. This is set if this object's <code>id</code> was regenerated; that can happen during migration from a legacy single-namespace type, or during import. It is only set during migration or create operations. This is used during import to ensure that ID regeneration is deterministic, so saved objects will be overwritten if they are imported multiple times into a given space. |
-|  [references](./kibana-plugin-core-server.savedobject.references.md) | SavedObjectReference\[\] | A reference to another saved object. |
-|  [type](./kibana-plugin-core-server.savedobject.type.md) | string | The type of Saved Object. Each plugin can define it's own custom Saved Object types. |
-|  [updated\_at?](./kibana-plugin-core-server.savedobject.updated_at.md) | string | <i>(Optional)</i> Timestamp of the last time this document had been updated. |
-|  [version?](./kibana-plugin-core-server.savedobject.version.md) | string | <i>(Optional)</i> An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [attributes](./kibana-plugin-core-server.savedobject.attributes.md) |  | T | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
+|  [coreMigrationVersion?](./kibana-plugin-core-server.savedobject.coremigrationversion.md) |  | string | _(Optional)_ A semver value that is used when upgrading objects between Kibana versions. |
+|  [error?](./kibana-plugin-core-server.savedobject.error.md) |  | SavedObjectError | _(Optional)_ |
+|  [id](./kibana-plugin-core-server.savedobject.id.md) |  | string | The ID of this Saved Object, guaranteed to be unique for all objects of the same <code>type</code> |
+|  [migrationVersion?](./kibana-plugin-core-server.savedobject.migrationversion.md) |  | SavedObjectsMigrationVersion | _(Optional)_ Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
+|  [namespaces?](./kibana-plugin-core-server.savedobject.namespaces.md) |  | string\[\] | _(Optional)_ Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with <code>namespaceType: 'agnostic'</code>. |
+|  [originId?](./kibana-plugin-core-server.savedobject.originid.md) |  | string | _(Optional)_ The ID of the saved object this originated from. This is set if this object's <code>id</code> was regenerated; that can happen during migration from a legacy single-namespace type, or during import. It is only set during migration or create operations. This is used during import to ensure that ID regeneration is deterministic, so saved objects will be overwritten if they are imported multiple times into a given space. |
+|  [references](./kibana-plugin-core-server.savedobject.references.md) |  | SavedObjectReference\[\] | A reference to another saved object. |
+|  [type](./kibana-plugin-core-server.savedobject.type.md) |  | string | The type of Saved Object. Each plugin can define it's own custom Saved Object types. |
+|  [updated\_at?](./kibana-plugin-core-server.savedobject.updated_at.md) |  | string | _(Optional)_ Timestamp of the last time this document had been updated. |
+|  [version?](./kibana-plugin-core-server.savedobject.version.md) |  | string | _(Optional)_ An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. |
 

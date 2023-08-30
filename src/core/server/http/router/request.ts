@@ -181,6 +181,7 @@ export class KibanaRequest<
   public readonly rewrittenUrl?: URL;
 
   /** @internal */
+  // @ts-expect-error ts upgrade v4.7.4
   protected readonly [requestSymbol]: Request;
 
   constructor(

@@ -6,7 +6,7 @@
 
 The version of Kibana the plugin is compatible with, defaults to "version".
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly kibanaVersion: string;

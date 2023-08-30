@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `KibanaRequest` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);

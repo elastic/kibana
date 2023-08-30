@@ -6,7 +6,7 @@
 
 Raw request sent to Kibana server.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly request: Readonly<Request>;

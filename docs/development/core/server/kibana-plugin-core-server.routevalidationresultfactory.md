@@ -8,7 +8,7 @@ Validation result factory to be used in the custom validation function to return
 
 See [RouteValidationFunction](./kibana-plugin-core-server.routevalidationfunction.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface RouteValidationResultFactory 
@@ -16,8 +16,8 @@ export interface RouteValidationResultFactory
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [badRequest](./kibana-plugin-core-server.routevalidationresultfactory.badrequest.md) | (error: Error \| string, path?: string\[\]) =&gt; { error: RouteValidationError; } |  |
-|  [ok](./kibana-plugin-core-server.routevalidationresultfactory.ok.md) | &lt;T&gt;(value: T) =&gt; { value: T; } |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [badRequest](./kibana-plugin-core-server.routevalidationresultfactory.badrequest.md) |  | (error: Error \| string, path?: string\[\]) =&gt; { error: RouteValidationError; } |  |
+|  [ok](./kibana-plugin-core-server.routevalidationresultfactory.ok.md) |  | &lt;T&gt;(value: T) =&gt; { value: T; } |  |
 

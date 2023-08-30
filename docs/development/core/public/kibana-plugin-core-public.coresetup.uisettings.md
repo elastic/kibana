@@ -6,7 +6,7 @@
 
 [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 uiSettings: IUiSettingsClient;

@@ -44,7 +44,7 @@ Example after converting to a multi-namespace (shareable) type in 8.1:
 ```
 Note: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 convertToMultiNamespaceTypeVersion?: string;

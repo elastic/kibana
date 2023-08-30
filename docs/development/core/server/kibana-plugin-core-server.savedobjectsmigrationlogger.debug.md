@@ -4,7 +4,7 @@
 
 ## SavedObjectsMigrationLogger.debug property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 debug: (msg: string) => void;

@@ -6,7 +6,7 @@
 
 Register an mountable application to the system.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 register<HistoryLocationState = unknown>(app: App<HistoryLocationState>): void;
@@ -18,7 +18,7 @@ register<HistoryLocationState = unknown>(app: App<HistoryLocationState>): void;
 |  --- | --- | --- |
 |  app | App&lt;HistoryLocationState&gt; | an [App](./kibana-plugin-core-public.app.md) |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

@@ -4,7 +4,7 @@
 
 ## IntervalHistogram.min property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 min: number;

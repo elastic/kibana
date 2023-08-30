@@ -4,7 +4,7 @@
 
 ## HttpSetup.externalUrl property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 externalUrl: IExternalUrl;

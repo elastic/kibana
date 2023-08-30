@@ -6,7 +6,7 @@
 
 Type defining the list of configuration properties that will be exposed on the client-side Object properties can either be fully exposed
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ExposedToBrowserDescriptor<T> = {

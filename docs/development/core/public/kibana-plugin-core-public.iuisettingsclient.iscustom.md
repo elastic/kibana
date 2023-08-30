@@ -6,7 +6,7 @@
 
 Returns true if the setting wasn't registered by any plugin, but was either added directly via `set()`<!-- -->, or is an unknown setting found in the uiSettings saved object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isCustom: (key: string) => boolean;

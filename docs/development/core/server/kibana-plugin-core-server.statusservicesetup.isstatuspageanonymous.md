@@ -6,7 +6,7 @@
 
 Whether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is present.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isStatusPageAnonymous: () => boolean;

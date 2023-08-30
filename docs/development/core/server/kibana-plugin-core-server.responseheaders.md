@@ -6,7 +6,7 @@
 
 Http response headers to set.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ResponseHeaders = Record<KnownHeaders, string | string[]> | Record<string, string | string[]>;

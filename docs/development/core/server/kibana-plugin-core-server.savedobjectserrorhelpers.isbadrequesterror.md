@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isBadRequestError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isBadRequestError(error: Error | DecoratedError): boolean;
@@ -16,7 +16,7 @@ static isBadRequestError(error: Error | DecoratedError): boolean;
 |  --- | --- | --- |
 |  error | Error \| DecoratedError |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

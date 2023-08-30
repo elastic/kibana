@@ -6,7 +6,7 @@
 
 Adds a new toast to current array of toast.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 add(toastOrTitle: ToastInput): Toast;
@@ -18,7 +18,7 @@ add(toastOrTitle: ToastInput): Toast;
 |  --- | --- | --- |
 |  toastOrTitle | ToastInput | a [ToastInput](./kibana-plugin-core-public.toastinput.md) |
 
-<b>Returns:</b>
+**Returns:**
 
 Toast
 

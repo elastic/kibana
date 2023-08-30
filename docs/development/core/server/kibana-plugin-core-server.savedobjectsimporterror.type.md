@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportError.type property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly type: string;

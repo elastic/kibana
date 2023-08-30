@@ -4,7 +4,7 @@
 
 ## SavedObjectsClientWrapperOptions.typeRegistry property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 typeRegistry: ISavedObjectTypeRegistry;

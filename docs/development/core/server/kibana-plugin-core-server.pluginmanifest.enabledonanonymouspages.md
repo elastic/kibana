@@ -6,7 +6,7 @@
 
 Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when configured, etc.) Default is false.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly enabledOnAnonymousPages?: boolean;

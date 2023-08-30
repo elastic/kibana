@@ -4,12 +4,12 @@
 
 ## Plugin\_2.stop() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 stop?(): void;
 ```
-<b>Returns:</b>
+**Returns:**
 
 void
 

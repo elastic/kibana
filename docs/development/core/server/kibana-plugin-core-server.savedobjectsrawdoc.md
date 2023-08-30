@@ -6,7 +6,7 @@
 
 A raw document as represented directly in the saved object index.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsRawDoc 
@@ -14,10 +14,10 @@ export interface SavedObjectsRawDoc
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [\_id](./kibana-plugin-core-server.savedobjectsrawdoc._id.md) | string |  |
-|  [\_primary\_term?](./kibana-plugin-core-server.savedobjectsrawdoc._primary_term.md) | number | <i>(Optional)</i> |
-|  [\_seq\_no?](./kibana-plugin-core-server.savedobjectsrawdoc._seq_no.md) | number | <i>(Optional)</i> |
-|  [\_source](./kibana-plugin-core-server.savedobjectsrawdoc._source.md) | SavedObjectsRawDocSource |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [\_id](./kibana-plugin-core-server.savedobjectsrawdoc._id.md) |  | string |  |
+|  [\_primary\_term?](./kibana-plugin-core-server.savedobjectsrawdoc._primary_term.md) |  | number | _(Optional)_ |
+|  [\_seq\_no?](./kibana-plugin-core-server.savedobjectsrawdoc._seq_no.md) |  | number | _(Optional)_ |
+|  [\_source](./kibana-plugin-core-server.savedobjectsrawdoc._source.md) |  | SavedObjectsRawDocSource |  |
 

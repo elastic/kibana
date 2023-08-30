@@ -6,12 +6,12 @@
 
 Get an observable of the current custom help conttent
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;ChromeHelpExtension \| undefined&gt;
 

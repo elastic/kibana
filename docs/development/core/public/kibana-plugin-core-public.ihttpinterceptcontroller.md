@@ -6,7 +6,7 @@
 
 Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-core-public.httpinterceptor.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IHttpInterceptController 
@@ -14,9 +14,9 @@ export interface IHttpInterceptController
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [halted](./kibana-plugin-core-public.ihttpinterceptcontroller.halted.md) | boolean | Whether or not this chain has been halted. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [halted](./kibana-plugin-core-public.ihttpinterceptcontroller.halted.md) |  | boolean | Whether or not this chain has been halted. |
 
 ## Methods
 

@@ -6,7 +6,7 @@
 
 Updates multiple objects in bulk
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
@@ -17,9 +17,9 @@ bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  objects | Array&lt;SavedObjectsBulkUpdateObject&lt;T&gt;&gt; | \[{ type, id, attributes, options: { version, namespace } references }<!-- -->\]  {<!-- -->string<!-- -->} options.version - ensures version matches that of persisted object  {<!-- -->string<!-- -->} \[options.namespace\] |
-|  options | SavedObjectsBulkUpdateOptions |  |
+|  options | SavedObjectsBulkUpdateOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsBulkUpdateResponse&lt;T&gt;&gt;
 

@@ -4,7 +4,7 @@
 
 ## ConfigDeprecationDetails.configPath property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 configPath: string;

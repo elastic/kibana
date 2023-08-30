@@ -6,7 +6,7 @@
 
 Auth specific headers to attach to a response object. Used to send back authentication mechanism related headers to a client when needed.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 responseHeaders?: AuthHeaders;

@@ -4,7 +4,7 @@
 
 ## UiSettingsParams.schema property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 schema: Type<T>;

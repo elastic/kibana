@@ -6,12 +6,12 @@
 
 Resets the document title to it's initial value. (meaning the one present in the title meta at application load.)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 reset(): void;
 ```
-<b>Returns:</b>
+**Returns:**
 
 void
 

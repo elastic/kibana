@@ -5,12 +5,12 @@
 ## SavedObjectsExportError class
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class SavedObjectsExportError extends Error 
 ```
-<b>Extends:</b> Error
+**Extends:** Error
 
 ## Constructors
 
@@ -22,8 +22,8 @@ export declare class SavedObjectsExportError extends Error
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [attributes?](./kibana-plugin-core-server.savedobjectsexporterror.attributes.md) |  | Record&lt;string, any&gt; \| undefined | <i>(Optional)</i> |
-|  [type](./kibana-plugin-core-server.savedobjectsexporterror.type.md) |  | string |  |
+|  [attributes?](./kibana-plugin-core-server.savedobjectsexporterror.attributes.md) | <code>readonly</code> | Record&lt;string, any&gt; \| undefined | _(Optional)_ |
+|  [type](./kibana-plugin-core-server.savedobjectsexporterror.type.md) | <code>readonly</code> | string |  |
 
 ## Methods
 

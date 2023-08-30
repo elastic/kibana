@@ -6,7 +6,7 @@
 
 [SavedObjectsStart](./kibana-plugin-core-public.savedobjectsstart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 savedObjects: SavedObjectsStart;

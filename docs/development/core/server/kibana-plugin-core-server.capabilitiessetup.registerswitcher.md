@@ -8,7 +8,7 @@ Register a [CapabilitiesSwitcher](./kibana-plugin-core-server.capabilitiesswitch
 
 A capabilities switcher can only change the state of existing capabilities. Capabilities added or removed when invoking the switcher will be ignored.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerSwitcher(switcher: CapabilitiesSwitcher): void;
@@ -20,7 +20,7 @@ registerSwitcher(switcher: CapabilitiesSwitcher): void;
 |  --- | --- | --- |
 |  switcher | CapabilitiesSwitcher |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

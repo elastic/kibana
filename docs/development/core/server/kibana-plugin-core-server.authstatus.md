@@ -6,7 +6,7 @@
 
 Status indicating an outcome of the authentication.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare enum AuthStatus 

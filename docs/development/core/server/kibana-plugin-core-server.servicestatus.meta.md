@@ -6,7 +6,7 @@
 
 Any JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained, machine-readable information about the service status. May include status information for underlying features.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 meta?: Meta;

@@ -8,12 +8,12 @@ Collect gathers event loop delays metrics from nodejs perf\_hooks.monitorEventLo
 
 Returns metrics in milliseconds.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 collect(): IntervalHistogram;
 ```
-<b>Returns:</b>
+**Returns:**
 
 IntervalHistogram
 

@@ -10,12 +10,12 @@ This wrapper also allows Core and Plugins to share a single underlying global `H
 
 The [createSubHistory](./kibana-plugin-core-public.scopedhistory.createsubhistory.md) method is particularly useful for applications that contain any number of "sub-apps" which should not have access to the main application's history or basePath.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class ScopedHistory<HistoryLocationState = unknown> implements History<HistoryLocationState> 
 ```
-<b>Implements:</b> History&lt;HistoryLocationState&gt;
+**Implements:** History&lt;HistoryLocationState&gt;
 
 ## Constructors
 
@@ -27,16 +27,16 @@ export declare class ScopedHistory<HistoryLocationState = unknown> implements Hi
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [action](./kibana-plugin-core-public.scopedhistory.action.md) |  | Action | The last action dispatched on the history stack. |
-|  [block](./kibana-plugin-core-public.scopedhistory.block.md) |  | (prompt?: string \| boolean \| TransitionPromptHook&lt;HistoryLocationState&gt; \| undefined) =&gt; UnregisterCallback | Add a block prompt requesting user confirmation when navigating away from the current page. |
+|  [action](./kibana-plugin-core-public.scopedhistory.action.md) | <code>readonly</code> | Action | The last action dispatched on the history stack. |
+|  [block](./kibana-plugin-core-public.scopedhistory.block.md) |  | (prompt?: boolean \| string \| TransitionPromptHook&lt;HistoryLocationState&gt;) =&gt; UnregisterCallback | Add a block prompt requesting user confirmation when navigating away from the current page. |
 |  [createHref](./kibana-plugin-core-public.scopedhistory.createhref.md) |  | (location: LocationDescriptorObject&lt;HistoryLocationState&gt;, { prependBasePath }?: { prependBasePath?: boolean \| undefined; }) =&gt; Href | Creates an href (string) to the location. If <code>prependBasePath</code> is true (default), it will prepend the location's path with the scoped history basePath. |
 |  [createSubHistory](./kibana-plugin-core-public.scopedhistory.createsubhistory.md) |  | (basePath: string) =&gt; ScopedHistory&lt;HistoryLocationState&gt; | Creates a <code>ScopedHistory</code> for a subpath of this <code>ScopedHistory</code>. Useful for applications that may have sub-apps that do not need access to the containing application's history. |
 |  [go](./kibana-plugin-core-public.scopedhistory.go.md) |  | (n: number) =&gt; void | Send the user forward or backwards in the history stack. |
 |  [goBack](./kibana-plugin-core-public.scopedhistory.goback.md) |  | () =&gt; void | Send the user one location back in the history stack. Equivalent to calling [ScopedHistory.go(-1)](./kibana-plugin-core-public.scopedhistory.go.md)<!-- -->. If no more entries are available backwards, this is a no-op. |
 |  [goForward](./kibana-plugin-core-public.scopedhistory.goforward.md) |  | () =&gt; void | Send the user one location forward in the history stack. Equivalent to calling [ScopedHistory.go(1)](./kibana-plugin-core-public.scopedhistory.go.md)<!-- -->. If no more entries are available forwards, this is a no-op. |
-|  [length](./kibana-plugin-core-public.scopedhistory.length.md) |  | number | The number of entries in the history stack, including all entries forwards and backwards from the current location. |
+|  [length](./kibana-plugin-core-public.scopedhistory.length.md) | <code>readonly</code> | number | The number of entries in the history stack, including all entries forwards and backwards from the current location. |
 |  [listen](./kibana-plugin-core-public.scopedhistory.listen.md) |  | (listener: (location: Location&lt;HistoryLocationState&gt;, action: Action) =&gt; void) =&gt; UnregisterCallback | Adds a listener for location updates. |
-|  [location](./kibana-plugin-core-public.scopedhistory.location.md) |  | Location&lt;HistoryLocationState&gt; | The current location of the history stack. |
-|  [push](./kibana-plugin-core-public.scopedhistory.push.md) |  | (pathOrLocation: Path \| LocationDescriptorObject&lt;HistoryLocationState&gt;, state?: HistoryLocationState \| undefined) =&gt; void | Pushes a new location onto the history stack. If there are forward entries in the stack, they will be removed. |
-|  [replace](./kibana-plugin-core-public.scopedhistory.replace.md) |  | (pathOrLocation: Path \| LocationDescriptorObject&lt;HistoryLocationState&gt;, state?: HistoryLocationState \| undefined) =&gt; void | Replaces the current location in the history stack. Does not remove forward or backward entries. |
+|  [location](./kibana-plugin-core-public.scopedhistory.location.md) | <code>readonly</code> | Location&lt;HistoryLocationState&gt; | The current location of the history stack. |
+|  [push](./kibana-plugin-core-public.scopedhistory.push.md) |  | (pathOrLocation: Path \| LocationDescriptorObject&lt;HistoryLocationState&gt;, state?: HistoryLocationState) =&gt; void | Pushes a new location onto the history stack. If there are forward entries in the stack, they will be removed. |
+|  [replace](./kibana-plugin-core-public.scopedhistory.replace.md) |  | (pathOrLocation: Path \| LocationDescriptorObject&lt;HistoryLocationState&gt;, state?: HistoryLocationState) =&gt; void | Replaces the current location in the history stack. Does not remove forward or backward entries. |
 

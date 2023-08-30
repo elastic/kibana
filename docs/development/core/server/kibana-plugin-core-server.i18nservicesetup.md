@@ -5,7 +5,7 @@
 ## I18nServiceSetup interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface I18nServiceSetup 

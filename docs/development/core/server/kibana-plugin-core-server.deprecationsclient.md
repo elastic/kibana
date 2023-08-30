@@ -6,7 +6,7 @@
 
 Server-side client that provides access to fetch all Kibana deprecations
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface DeprecationsClient 
@@ -14,7 +14,7 @@ export interface DeprecationsClient
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [getAllDeprecations](./kibana-plugin-core-server.deprecationsclient.getalldeprecations.md) | () =&gt; Promise&lt;DomainDeprecationDetails\[\]&gt; |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [getAllDeprecations](./kibana-plugin-core-server.deprecationsclient.getalldeprecations.md) |  | () =&gt; Promise&lt;DomainDeprecationDetails\[\]&gt; |  |
 

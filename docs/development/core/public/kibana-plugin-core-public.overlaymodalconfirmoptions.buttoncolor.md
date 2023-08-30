@@ -4,7 +4,7 @@
 
 ## OverlayModalConfirmOptions.buttonColor property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 buttonColor?: EuiConfirmModalProps['buttonColor'];

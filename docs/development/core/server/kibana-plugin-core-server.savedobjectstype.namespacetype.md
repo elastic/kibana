@@ -6,7 +6,7 @@
 
 The [namespace type](./kibana-plugin-core-server.savedobjectsnamespacetype.md) for the type.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 namespaceType: SavedObjectsNamespaceType;

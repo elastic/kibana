@@ -6,7 +6,7 @@
 
 Provides ability to acquire `preboot` [IRouter](./kibana-plugin-core-server.irouter.md) instance for a particular top-level path and register handler functions for any number of nested routes.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerRoutes(path: string, callback: (router: IRouter) => void): void;
@@ -19,7 +19,7 @@ registerRoutes(path: string, callback: (router: IRouter) => void): void;
 |  path | string |  |
 |  callback | (router: IRouter) =&gt; void |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

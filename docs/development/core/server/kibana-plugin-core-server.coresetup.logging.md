@@ -6,7 +6,7 @@
 
 [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 logging: LoggingServiceSetup;

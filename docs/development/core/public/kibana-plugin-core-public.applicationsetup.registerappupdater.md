@@ -8,7 +8,7 @@ Register an application updater that can be used to change the [AppUpdatableFiel
 
 This is meant to be used by plugins that needs to updates the whole list of applications. To only updates a specific application, use the `updater$` property of the registered application instead.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
@@ -20,7 +20,7 @@ registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
 |  --- | --- | --- |
 |  appUpdater$ | Observable&lt;AppUpdater&gt; |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

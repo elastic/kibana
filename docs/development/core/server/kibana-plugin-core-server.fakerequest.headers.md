@@ -6,7 +6,7 @@
 
 Headers used for authentication against Elasticsearch
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 headers: Headers;

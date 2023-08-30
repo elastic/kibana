@@ -6,7 +6,7 @@
 
 Adds a new toast that displays an exception message with a button to open the full stacktrace in a modal.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 addError(error: Error, options: ErrorToastOptions): Toast;
@@ -19,7 +19,7 @@ addError(error: Error, options: ErrorToastOptions): Toast;
 |  error | Error | an <code>Error</code> instance. |
 |  options | ErrorToastOptions | [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) |
 
-<b>Returns:</b>
+**Returns:**
 
 Toast
 

@@ -6,7 +6,7 @@
 
 React Context provider required as the topmost component for any i18n-compatible React tree.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 Context: ({ children }: {

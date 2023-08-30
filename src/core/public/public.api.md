@@ -27,7 +27,7 @@ import { IncomingHttpHeaders } from 'http';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
-import { Logger } from '@kbn/logging';
+import { Logger as Logger_2 } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
@@ -929,7 +929,7 @@ export interface I18nStart {
     }) => JSX.Element;
 }
 
-// Warning: (ae-missing-release-tag) "IAnonymousPaths" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "IAnonymousPaths" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
 export interface IAnonymousPaths {
@@ -1031,7 +1031,7 @@ export interface NavigateToAppOptions {
     state?: unknown;
 }
 
-// Warning: (ae-missing-release-tag) "NavType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "NavType" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export type NavType = 'modern' | 'legacy';
@@ -1198,7 +1198,7 @@ export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepL
 // @public
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
-// Warning: (ae-missing-release-tag) "ResolveDeprecationResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "ResolveDeprecationResponse" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export type ResolveDeprecationResponse = {
@@ -1215,7 +1215,7 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
     saved_object: SimpleSavedObject<T>;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "SavedObject" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
@@ -1245,7 +1245,7 @@ export interface SavedObjectAttributes {
 // @public
 export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
 
-// Warning: (ae-missing-release-tag) "SavedObjectError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "SavedObjectError" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export interface SavedObjectError {
@@ -1359,9 +1359,9 @@ export class SavedObjectsClient {
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
-    delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => ReturnType<SavedObjectsClientContract_2['delete']>;
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract_2" needs to be exported by the entry point index.d.ts
+    delete: (type: string, id: string, options?: SavedObjectsDeleteOptions) => ReturnType<SavedObjectsClientContract_2['delete']>;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions_2" needs to be exported by the entry point index.d.ts
     find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T, unknown>>;
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
     resolve: <T = unknown>(type: string, id: string) => Promise<ResolvedSimpleSavedObject<T>>;
@@ -1612,7 +1612,7 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> {
 export class ScopedHistory<HistoryLocationState = unknown> implements History_2<HistoryLocationState> {
     constructor(parentHistory: History_2<HistoryLocationState>, basePath: string);
     get action(): Action;
-    block: (prompt?: string | boolean | TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+    block: (prompt?: boolean | string | TransitionPromptHook<HistoryLocationState>) => UnregisterCallback;
     createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
     }) => Href;
@@ -1623,8 +1623,8 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History_2<
     get length(): number;
     listen: (listener: (location: Location_2<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
     get location(): Location_2<HistoryLocationState>;
-    push: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
-    replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+    push: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState) => void;
+    replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState) => void;
 }
 
 // @public
@@ -1662,7 +1662,7 @@ export class SimpleSavedObject<T = unknown> {
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
-// Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "Toast" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export type Toast = ToastInputFields & {
@@ -1758,6 +1758,7 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
+// bazel-kibana/packages/kbn-config-schema/src/byte_size_value/index.ts:1:1 - (ae-wrong-input-file-type) Incorrect file type; API Extractor expects to analyze compiler outputs with the .d.ts file extension. Troubleshooting tips: https://api-extractor.com/link/dts-error
 // src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

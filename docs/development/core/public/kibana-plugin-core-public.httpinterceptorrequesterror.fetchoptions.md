@@ -4,7 +4,7 @@
 
 ## HttpInterceptorRequestError.fetchOptions property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 fetchOptions: Readonly<HttpFetchOptionsWithPath>;

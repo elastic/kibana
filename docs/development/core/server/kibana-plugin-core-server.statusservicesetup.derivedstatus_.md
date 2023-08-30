@@ -6,7 +6,7 @@
 
 The status of this plugin as derived from its dependencies.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 derivedStatus$: Observable<ServiceStatus>;

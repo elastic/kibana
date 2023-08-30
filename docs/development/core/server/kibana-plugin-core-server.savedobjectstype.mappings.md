@@ -6,7 +6,7 @@
 
 The [mapping definition](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) for the type.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 mappings: SavedObjectsTypeMappingDefinition;

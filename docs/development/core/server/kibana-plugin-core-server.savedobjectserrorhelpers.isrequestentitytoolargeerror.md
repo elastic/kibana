@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isRequestEntityTooLargeError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isRequestEntityTooLargeError(error: Error | DecoratedError): boolean;
@@ -16,7 +16,7 @@ static isRequestEntityTooLargeError(error: Error | DecoratedError): boolean;
 |  --- | --- | --- |
 |  error | Error \| DecoratedError |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

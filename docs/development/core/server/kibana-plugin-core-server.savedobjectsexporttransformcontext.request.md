@@ -6,7 +6,7 @@
 
 The request that initiated the export request. Can be used to create scoped services or client inside the [transformation](./kibana-plugin-core-server.savedobjectsexporttransform.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 request: KibanaRequest;

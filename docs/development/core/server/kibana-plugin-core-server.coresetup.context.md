@@ -6,7 +6,7 @@
 
 [ContextSetup](./kibana-plugin-core-server.contextsetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 context: ContextSetup;

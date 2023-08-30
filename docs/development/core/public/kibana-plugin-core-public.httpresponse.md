@@ -5,7 +5,7 @@
 ## HttpResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpResponse<TResponseBody = any> 
@@ -13,10 +13,10 @@ export interface HttpResponse<TResponseBody = any>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [body?](./kibana-plugin-core-public.httpresponse.body.md) | TResponseBody | <i>(Optional)</i> Parsed body received, may be undefined if there was an error. |
-|  [fetchOptions](./kibana-plugin-core-public.httpresponse.fetchoptions.md) | Readonly&lt;HttpFetchOptionsWithPath&gt; | The original [HttpFetchOptionsWithPath](./kibana-plugin-core-public.httpfetchoptionswithpath.md) used to send this request. |
-|  [request](./kibana-plugin-core-public.httpresponse.request.md) | Readonly&lt;Request&gt; | Raw request sent to Kibana server. |
-|  [response?](./kibana-plugin-core-public.httpresponse.response.md) | Readonly&lt;Response&gt; | <i>(Optional)</i> Raw response received, may be undefined if there was an error. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [body?](./kibana-plugin-core-public.httpresponse.body.md) | <code>readonly</code> | TResponseBody | _(Optional)_ Parsed body received, may be undefined if there was an error. |
+|  [fetchOptions](./kibana-plugin-core-public.httpresponse.fetchoptions.md) | <code>readonly</code> | Readonly&lt;HttpFetchOptionsWithPath&gt; | The original [HttpFetchOptionsWithPath](./kibana-plugin-core-public.httpfetchoptionswithpath.md) used to send this request. |
+|  [request](./kibana-plugin-core-public.httpresponse.request.md) | <code>readonly</code> | Readonly&lt;Request&gt; | Raw request sent to Kibana server. |
+|  [response?](./kibana-plugin-core-public.httpresponse.response.md) | <code>readonly</code> | Readonly&lt;Response&gt; | _(Optional)_ Raw response received, may be undefined if there was an error. |
 

@@ -52,16 +52,18 @@ export function getSessionIndexTemplate(indexName: string) {
         },
       },
       mappings: {
-        dynamic: 'strict',
+        dynamic: 'strict' as const,
         properties: {
-          usernameHash: { type: 'keyword' },
-          provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
-          idleTimeoutExpiration: { type: 'date' },
-          lifespanExpiration: { type: 'date' },
-          accessAgreementAcknowledged: { type: 'boolean' },
-          content: { type: 'binary' },
+          usernameHash: { type: 'keyword' as const },
+          provider: {
+            properties: { name: { type: 'keyword' as const }, type: { type: 'keyword' as const } },
+          },
+          idleTimeoutExpiration: { type: 'date' as const },
+          lifespanExpiration: { type: 'date' as const },
+          accessAgreementAcknowledged: { type: 'boolean' as const },
+          content: { type: 'binary' as const },
         },
-      } as const,
+      },
     },
   });
 }

@@ -6,7 +6,7 @@
 
 Bypass the default error formatting
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 bypassErrorFormat?: boolean;

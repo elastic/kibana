@@ -6,7 +6,7 @@
 
 If a document with the given `id` already exists, overwrite it's contents (default=false).
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 overwrite?: boolean;

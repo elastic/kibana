@@ -6,7 +6,7 @@
 
 Indicates if capability switchers are supposed to return a default set of capabilities.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 useDefaultCapabilities: boolean;

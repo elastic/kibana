@@ -6,7 +6,7 @@
 
 FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type FatalErrorsStart = FatalErrorsSetup;

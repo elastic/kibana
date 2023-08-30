@@ -6,7 +6,7 @@
 
 Defines per-route timeouts.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 timeout?: {

@@ -6,7 +6,7 @@
 
 [HttpHeadersInit](./kibana-plugin-core-public.httpheadersinit.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 headers?: HttpHeadersInit;

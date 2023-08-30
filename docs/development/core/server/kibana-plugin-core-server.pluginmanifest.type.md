@@ -6,7 +6,7 @@
 
 Type of the plugin, defaults to `standard`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly type: PluginType;

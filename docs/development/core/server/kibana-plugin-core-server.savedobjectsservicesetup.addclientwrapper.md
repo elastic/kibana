@@ -6,7 +6,7 @@
 
 Add a [client wrapper factory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) with the given priority.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;

@@ -6,7 +6,7 @@
 
 The set of valid body.output
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 validBodyOutput: readonly ["data", "stream"]

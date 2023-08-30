@@ -8,7 +8,7 @@ Input type for registering secondary in-app locations for an application.
 
 Deep links must include at least one of `path` or `deepLinks`<!-- -->. A deep link that does not have a `path` represents a topological level in the application's hierarchy, but does not have a destination URL that is user-accessible.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type AppDeepLink = {

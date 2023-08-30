@@ -6,7 +6,7 @@
 
 Create a new handler function pre-wired to context for the plugin.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createHandler(pluginOpaqueId: PluginOpaqueId, handler: RequestHandler): (...rest: HandlerParameters<RequestHandler>) => ShallowPromise<ReturnType<RequestHandler>>;
@@ -19,7 +19,7 @@ createHandler(pluginOpaqueId: PluginOpaqueId, handler: RequestHandler): (...rest
 |  pluginOpaqueId | PluginOpaqueId | The plugin opaque ID for the plugin that registers this handler. |
 |  handler | RequestHandler | Handler function to pass context object to. |
 
-<b>Returns:</b>
+**Returns:**
 
 (...rest: HandlerParameters&lt;RequestHandler&gt;) =&gt; ShallowPromise&lt;ReturnType&lt;RequestHandler&gt;&gt;
 

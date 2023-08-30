@@ -6,7 +6,7 @@
 
 The initial flag to determine if the application is searchable in the global search. Defaulting to `true` if `navLinkStatus` is `visible` or omitted.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 searchable?: boolean;

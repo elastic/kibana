@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.decorateConflictError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static decorateConflictError(error: Error, reason?: string): DecoratedError;
@@ -15,9 +15,9 @@ static decorateConflictError(error: Error, reason?: string): DecoratedError;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  error | Error |  |
-|  reason | string |  |
+|  reason | string | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 DecoratedError
 

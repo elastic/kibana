@@ -5,7 +5,7 @@
 ## SavedObjectsBulkGetObject interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsBulkGetObject 
@@ -13,10 +13,10 @@ export interface SavedObjectsBulkGetObject
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [fields?](./kibana-plugin-core-server.savedobjectsbulkgetobject.fields.md) | string\[\] | <i>(Optional)</i> SavedObject fields to include in the response |
-|  [id](./kibana-plugin-core-server.savedobjectsbulkgetobject.id.md) | string |  |
-|  [namespaces?](./kibana-plugin-core-server.savedobjectsbulkgetobject.namespaces.md) | string\[\] | <i>(Optional)</i> Optional namespace(s) for the object to be retrieved in. If this is defined, it will supersede the namespace ID that is in the top-level options.<!-- -->\* For shareable object types (registered with <code>namespaceType: 'multiple'</code>): this option can be used to specify one or more spaces, including the "All spaces" identifier (<code>'*'</code>). \* For isolated object types (registered with <code>namespaceType: 'single'</code> or <code>namespaceType: 'multiple-isolated'</code>): this option can only be used to specify a single space, and the "All spaces" identifier (<code>'*'</code>) is not allowed. \* For global object types (registered with <code>namespaceType: 'agnostic'</code>): this option cannot be used. |
-|  [type](./kibana-plugin-core-server.savedobjectsbulkgetobject.type.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [fields?](./kibana-plugin-core-server.savedobjectsbulkgetobject.fields.md) |  | string\[\] | _(Optional)_ SavedObject fields to include in the response |
+|  [id](./kibana-plugin-core-server.savedobjectsbulkgetobject.id.md) |  | string |  |
+|  [namespaces?](./kibana-plugin-core-server.savedobjectsbulkgetobject.namespaces.md) |  | string\[\] | <p>_(Optional)_ Optional namespace(s) for the object to be retrieved in. If this is defined, it will supersede the namespace ID that is in the top-level options.</p><p>\* For shareable object types (registered with <code>namespaceType: 'multiple'</code>): this option can be used to specify one or more spaces, including the "All spaces" identifier (<code>'*'</code>). \* For isolated object types (registered with <code>namespaceType: 'single'</code> or <code>namespaceType: 'multiple-isolated'</code>): this option can only be used to specify a single space, and the "All spaces" identifier (<code>'*'</code>) is not allowed. \* For global object types (registered with <code>namespaceType: 'agnostic'</code>): this option cannot be used.</p> |
+|  [type](./kibana-plugin-core-server.savedobjectsbulkgetobject.type.md) |  | string |  |
 

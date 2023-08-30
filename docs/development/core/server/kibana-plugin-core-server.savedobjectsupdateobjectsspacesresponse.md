@@ -6,7 +6,7 @@
 
 The response when objects' spaces are updated.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsUpdateObjectsSpacesResponse 
@@ -14,7 +14,7 @@ export interface SavedObjectsUpdateObjectsSpacesResponse
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [objects](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponse.objects.md) | SavedObjectsUpdateObjectsSpacesResponseObject\[\] |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [objects](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponse.objects.md) |  | SavedObjectsUpdateObjectsSpacesResponseObject\[\] |  |
 

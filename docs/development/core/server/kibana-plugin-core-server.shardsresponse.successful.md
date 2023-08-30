@@ -4,7 +4,7 @@
 
 ## ShardsResponse.successful property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 successful: number;

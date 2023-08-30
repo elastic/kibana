@@ -6,7 +6,7 @@
 
 The redirect mode associated with request, which is a string indicating how redirects for the request will be handled during fetching. A request will follow redirects by default.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 redirect?: RequestRedirect;

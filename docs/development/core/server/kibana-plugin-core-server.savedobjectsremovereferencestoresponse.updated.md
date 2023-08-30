@@ -6,7 +6,7 @@
 
 The number of objects that have been updated by this operation
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 updated: number;

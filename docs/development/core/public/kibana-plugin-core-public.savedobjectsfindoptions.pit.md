@@ -6,7 +6,7 @@
 
 Search against a specific Point In Time (PIT) that you've opened with .
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 pit?: SavedObjectsPitParams;

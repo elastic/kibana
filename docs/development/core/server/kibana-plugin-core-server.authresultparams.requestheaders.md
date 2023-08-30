@@ -6,7 +6,7 @@
 
 Auth specific headers to attach to a request object. Used to perform a request to Elasticsearch on behalf of an authenticated user.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 requestHeaders?: AuthHeaders;

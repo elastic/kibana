@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportResponse.successCount property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 successCount: number;

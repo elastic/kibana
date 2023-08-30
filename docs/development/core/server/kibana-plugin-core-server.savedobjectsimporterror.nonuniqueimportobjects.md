@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportError.nonUniqueImportObjects() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static nonUniqueImportObjects(nonUniqueEntries: string[]): SavedObjectsImportError;
@@ -16,7 +16,7 @@ static nonUniqueImportObjects(nonUniqueEntries: string[]): SavedObjectsImportErr
 |  --- | --- | --- |
 |  nonUniqueEntries | string\[\] |  |
 
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectsImportError
 

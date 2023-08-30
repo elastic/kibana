@@ -6,7 +6,7 @@
 
 A high-level summary of the service status.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 summary: string;

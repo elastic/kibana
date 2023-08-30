@@ -6,7 +6,7 @@
 
 Creates a [serializer](./kibana-plugin-core-server.savedobjectsserializer.md) that is aware of all registered types.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createSerializer: () => SavedObjectsSerializer;

@@ -6,7 +6,7 @@
 
 Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 keepAlive?: string;

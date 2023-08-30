@@ -6,7 +6,7 @@
 
 Overwrite existing documents (defaults to false)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 overwrite?: boolean;

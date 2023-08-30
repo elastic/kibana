@@ -10,7 +10,7 @@ The Deprecation service is consumed by the upgrade assistant to assist with the 
 
 If a deprecated feature can be resolved without manual user intervention. Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the deprecation upon a user trigger.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface DeprecationsServiceSetup 
@@ -79,7 +79,7 @@ export class Plugin() {
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [registerDeprecations](./kibana-plugin-core-server.deprecationsservicesetup.registerdeprecations.md) | (deprecationContext: RegisterDeprecationsConfig) =&gt; void |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [registerDeprecations](./kibana-plugin-core-server.deprecationsservicesetup.registerdeprecations.md) |  | (deprecationContext: RegisterDeprecationsConfig) =&gt; void |  |
 

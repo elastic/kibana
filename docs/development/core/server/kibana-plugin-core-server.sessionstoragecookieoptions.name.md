@@ -6,7 +6,7 @@
 
 Name of the session cookie.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 name: string;

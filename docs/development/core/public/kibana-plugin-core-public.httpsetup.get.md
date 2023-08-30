@@ -6,7 +6,7 @@
 
 Makes an HTTP request with the GET method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get: HttpHandler;

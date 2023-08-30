@@ -4,7 +4,7 @@
 
 ## SavedObject.error property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 error?: SavedObjectError;

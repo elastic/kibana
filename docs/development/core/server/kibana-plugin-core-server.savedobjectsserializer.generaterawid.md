@@ -6,7 +6,7 @@
 
 Given a saved object type and id, generates the compound id that is stored in the raw document.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 generateRawId(namespace: string | undefined, type: string, id: string): string;
@@ -20,7 +20,7 @@ generateRawId(namespace: string | undefined, type: string, id: string): string;
 |  type | string | The saved object type |
 |  id | string | The id of the saved object |
 
-<b>Returns:</b>
+**Returns:**
 
 string
 

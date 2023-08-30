@@ -9,7 +9,7 @@
 > Provided for legacy compatibility. Prefer the `response` property instead.
 > 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly res?: Response;

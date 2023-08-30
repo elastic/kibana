@@ -6,7 +6,7 @@
 
 If `overwrite` is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution).
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 overwrite?: boolean;

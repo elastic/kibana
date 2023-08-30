@@ -6,7 +6,7 @@
 
 Define an interceptor to be executed if a request interceptor throws an error or returns a rejected Promise.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 requestError?(httpErrorRequest: HttpInterceptorRequestError, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
@@ -19,7 +19,7 @@ requestError?(httpErrorRequest: HttpInterceptorRequestError, controller: IHttpIn
 |  httpErrorRequest | HttpInterceptorRequestError | [HttpInterceptorRequestError](./kibana-plugin-core-public.httpinterceptorrequesterror.md) |
 |  controller | IHttpInterceptController | [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md) |
 
-<b>Returns:</b>
+**Returns:**
 
 MaybePromise&lt;Partial&lt;HttpFetchOptionsWithPath&gt;&gt; \| void
 

@@ -6,7 +6,7 @@
 
 Define an interceptor to be executed after a response is received.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 response?(httpResponse: HttpResponse, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
@@ -19,7 +19,7 @@ response?(httpResponse: HttpResponse, controller: IHttpInterceptController): May
 |  httpResponse | HttpResponse | [HttpResponse](./kibana-plugin-core-public.httpresponse.md) |
 |  controller | IHttpInterceptController | [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md) |
 
-<b>Returns:</b>
+**Returns:**
 
 MaybePromise&lt;IHttpResponseInterceptorOverrides&gt; \| void
 

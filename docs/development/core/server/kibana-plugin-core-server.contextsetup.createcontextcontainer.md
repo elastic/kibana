@@ -6,12 +6,12 @@
 
 Creates a new [IContextContainer](./kibana-plugin-core-server.icontextcontainer.md) for a service owner.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createContextContainer(): IContextContainer;
 ```
-<b>Returns:</b>
+**Returns:**
 
 IContextContainer
 

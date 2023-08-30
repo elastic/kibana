@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.createUnsupportedTypeError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static createUnsupportedTypeError(type: string): DecoratedError;
@@ -16,7 +16,7 @@ static createUnsupportedTypeError(type: string): DecoratedError;
 |  --- | --- | --- |
 |  type | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 DecoratedError
 

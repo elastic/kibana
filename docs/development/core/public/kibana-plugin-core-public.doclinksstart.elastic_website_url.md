@@ -4,7 +4,7 @@
 
 ## DocLinksStart.ELASTIC\_WEBSITE\_URL property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly ELASTIC_WEBSITE_URL: string;

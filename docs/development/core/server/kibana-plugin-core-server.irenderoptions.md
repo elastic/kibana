@@ -5,7 +5,7 @@
 ## IRenderOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IRenderOptions 
@@ -13,7 +13,7 @@ export interface IRenderOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [isAnonymousPage?](./kibana-plugin-core-server.irenderoptions.isanonymouspage.md) | boolean | <i>(Optional)</i> Set whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata. <code>false</code> by default. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [isAnonymousPage?](./kibana-plugin-core-server.irenderoptions.isanonymouspage.md) |  | boolean | _(Optional)_ Set whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata. <code>false</code> by default. |
 
