@@ -20,6 +20,8 @@ describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () =
     cleanKibana();
     cy.task('esArchiverLoad', {
       archiveName: 'ransomware_prevention',
+      useCreate: true,
+      docsOnly: true,
     });
   });
 
