@@ -74,7 +74,6 @@ export function RuleDetailsPage() {
   const baseTheme = useChartsBaseTheme();
 
   const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
-
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useFetchRuleTypes({
     filterByRuleTypeIds: filteredRuleTypes,

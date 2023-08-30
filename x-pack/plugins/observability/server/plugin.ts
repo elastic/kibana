@@ -74,7 +74,11 @@ interface PluginStart {
   alerting: PluginStartContract;
 }
 
-const ruleTypes = [SLO_BURN_RATE_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID, ES_QUERY_ID];
+const sloRuleTypes = [
+  SLO_BURN_RATE_RULE_TYPE_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ES_QUERY_ID,
+];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
@@ -198,7 +202,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       category: DEFAULT_APP_CATEGORIES.observability,
       app: [sloFeatureId, 'kibana'],
       catalogue: [sloFeatureId, 'observability'],
-      alerting: ruleTypes,
+      alerting: sloRuleTypes,
       privileges: {
         all: {
           app: [sloFeatureId, 'kibana'],
@@ -210,10 +214,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           alerting: {
             rule: {
-              all: ruleTypes,
+              all: sloRuleTypes,
             },
             alert: {
-              all: ruleTypes,
+              all: sloRuleTypes,
             },
           },
           ui: ['read', 'write'],
@@ -228,10 +232,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           alerting: {
             rule: {
-              read: ruleTypes,
+              read: sloRuleTypes,
             },
             alert: {
-              read: ruleTypes,
+              read: sloRuleTypes,
             },
           },
           ui: ['read'],
