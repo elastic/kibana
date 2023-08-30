@@ -27,6 +27,7 @@ import {
   DefaultSummaryClient,
   DefaultTransformManager,
   DeleteSLO,
+  DeleteSLOInstances,
   FindSLO,
   GetSLO,
   KibanaSavedObjectsSLORepository,
@@ -232,14 +233,13 @@ const deleteSloInstancesRoute = createObservabilityServerRoute({
     tags: ['access:slo_write'],
   },
   params: deleteSloInstancesParamsSchema,
-  handler: async ({ context }) => {
+  handler: async ({ context, params }) => {
     await assertPlatinumLicense(context);
 
-    const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const deleteSloInstances = new DeleteSLOInstances(esClient);
 
-    return null;
+    await deleteSloInstances.execute(params.body);
   },
 });
 
