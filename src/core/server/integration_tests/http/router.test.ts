@@ -578,7 +578,7 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          "500 Server Error - http://127.0.0.1:50107/",
+          "500 Server Error - /",
         ],
         Array [
           [Error: unexpected error],
@@ -620,7 +620,7 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          "500 Server Error - http://127.0.0.1:50113/",
+          "500 Server Error - /",
         ],
         Array [
           [Error: Unauthorized],
@@ -645,7 +645,7 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          "500 Server Error - http://127.0.0.1:50116/",
+          "500 Server Error - /",
         ],
         Array [
           [Error: Unexpected result from Route Handler. Expected KibanaResponse, but given: string.],
@@ -685,7 +685,7 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          "400 Bad Request - http://127.0.0.1:50119/?page=one",
+          "400 Bad Request - /?page=one",
         ],
         Array [
           [Error: [request query.page]: expected value of type [number] but got [string]],
@@ -1165,7 +1165,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - http://127.0.0.1:50185/",
+            "500 Server Error - /",
           ],
           Array [
             [Error: expected 'location' header to be set],
@@ -1574,7 +1574,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - http://127.0.0.1:50239/",
+            "500 Server Error - /",
           ],
           Array [
             [Error: Unexpected Http status code. Expected from 400 to 599, but given: 200],
@@ -1646,7 +1646,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - http://127.0.0.1:50248/",
+            "500 Server Error - /",
           ],
           Array [
             [Error: expected 'location' header to be set],
@@ -1789,7 +1789,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - http://127.0.0.1:50266/",
+            "500 Server Error - /",
           ],
           Array [
             [Error: expected error message to be provided],
@@ -1818,7 +1818,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - http://127.0.0.1:50269/",
+            "500 Server Error - /",
           ],
           Array [
             [Error: expected error message to be provided],
@@ -1846,7 +1846,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - http://127.0.0.1:50272/",
+            "500 Server Error - /",
           ],
           Array [
             [Error: options.statusCode is expected to be set. given options: undefined],
@@ -1874,7 +1874,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - http://127.0.0.1:50275/",
+            "500 Server Error - /",
           ],
           Array [
             [Error: Unexpected Http status code. Expected from 100 to 599, but given: 20.],

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Request, ResponseToolkit } from '@hapi/hapi';
+import type { Request, ResponseToolkit, RequestQuery } from '@hapi/hapi';
 import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
@@ -200,7 +200,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     try {
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
     } catch (e) {
-      this.log.error(`400 Bad Request - ${request.url}`);
+      this.log.error(`400 Bad Request - ${request.path}${toString(request.query)}`);
       this.log.error(e);
       return hapiResponseAdapter.toBadRequest(e.message);
     }
@@ -214,7 +214,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(e)) {
-        this.log.error(`401 Unauthorized - ${request.url}`);
+        this.log.error(`401 Unauthorized - ${request.path}${toString(request.query)}`);
         this.log.error(e);
         return hapiResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
@@ -222,7 +222,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       }
 
       // return a generic 500 to avoid error info / stack trace surfacing
-      this.log.error(`500 Server Error - ${request.url}`);
+      this.log.error(`500 Server Error - ${request.path}${toString(request.query)}`);
       this.log.error(e);
       return hapiResponseAdapter.toInternalError();
     }
@@ -264,3 +264,13 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
 type RequestHandlerEnhanced<P, Q, B, Method extends RouteMethod> = WithoutHeadArgument<
   RequestHandler<P, Q, B, RequestHandlerContextBase, Method>
 >;
+
+function toString(requestQuery?: RequestQuery): string {
+  const entries = Object.entries(requestQuery ?? {});
+
+  if (!entries?.length) {
+    return '';
+  }
+
+  return `?` + entries.map(([key, value]) => `${key}=${value}`).join('&');
+}
