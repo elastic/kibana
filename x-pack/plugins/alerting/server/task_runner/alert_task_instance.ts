@@ -9,14 +9,8 @@ import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import {
-  SanitizedRule,
-  RuleTaskState,
-  ruleParamsSchema,
-  ruleStateSchema,
-  RuleTaskParams,
-  RuleTypeParams,
-} from '../../common';
+import { ruleParamsSchema } from '@kbn/alerting-state-types';
+import { SanitizedRule, RuleTaskState, RuleTaskParams, RuleTypeParams } from '../../common';
 
 export interface AlertTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
@@ -42,15 +36,6 @@ export function taskInstanceToAlertTaskInstance<Params extends RuleTypeParams>(
         );
       }, t.identity)
     ),
-    state: pipe(
-      ruleStateSchema.decode(taskInstance.state),
-      fold((e: t.Errors) => {
-        throw new Error(
-          `Task "${taskInstance.id}" ${
-            alert ? `(underlying Alert "${alert.id}") ` : ''
-          }has invalid state at ${enumerateErrorFields(e)}`
-        );
-      }, t.identity)
-    ),
+    state: taskInstance.state as RuleTaskState,
   };
 }
