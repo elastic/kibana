@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../tags';
 
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 
@@ -25,7 +24,7 @@ import {
 import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 import {
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  DATE_PICKER_END_DATE_POPOVER_BUTTON,
+  GET_DATE_PICKER_END_DATE_POPOVER_BUTTON,
 } from '../../screens/date_picker';
 
 const ABSOLUTE_DATE = {
@@ -35,7 +34,7 @@ const ABSOLUTE_DATE = {
 
 const RULE_ID = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
-describe('URL compatibility', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('URL compatibility', { tags: ['@ess', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login(ROLES.platform_engineer);
     visit(SECURITY_DETECTIONS_URL);
@@ -84,6 +83,10 @@ describe('URL compatibility', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () 
       'title',
       ABSOLUTE_DATE.startTime
     );
-    cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).should('have.attr', 'title', ABSOLUTE_DATE.endTime);
+    cy.get(GET_DATE_PICKER_END_DATE_POPOVER_BUTTON()).should(
+      'have.attr',
+      'title',
+      ABSOLUTE_DATE.endTime
+    );
   });
 });

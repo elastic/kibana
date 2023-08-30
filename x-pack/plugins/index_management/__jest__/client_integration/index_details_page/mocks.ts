@@ -7,10 +7,11 @@
 
 import { Index } from '../../../public';
 
+export const testIndexName = 'test_index';
 export const testIndexMock: Index = {
   health: 'green',
   status: 'open',
-  name: 'test_index',
+  name: testIndexName,
   uuid: 'test1234',
   primary: '1',
   replica: '1',
@@ -27,4 +28,16 @@ export const testIndexMock: Index = {
     managed: false,
   },
   isFollowerIndex: false,
+};
+
+export const testIndexMappings = {
+  mappings: {
+    dynamic: 'false',
+    dynamic_templates: [],
+    properties: {
+      '@timestamp': {
+        type: 'date',
+      },
+    },
+  },
 };
