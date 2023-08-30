@@ -164,10 +164,10 @@ describe('SampleDataInstaller', () => {
           mappings: {
             properties: {
               someField: { type: 'keyword' },
-              settings: {
-                index: {},
-              },
             },
+          },
+          settings: {
+            index: {},
           },
         },
       });
