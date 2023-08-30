@@ -27,10 +27,7 @@ import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 
-import type {
-  Category,
-  SparkLinesPerCategory,
-} from '../../../common/api/log_categorization/process_category_results';
+import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
