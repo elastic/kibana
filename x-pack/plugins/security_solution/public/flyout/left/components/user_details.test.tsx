@@ -21,6 +21,7 @@ import {
   USER_DETAILS_INFO_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID,
 } from './test_ids';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../shared/components/test_ids';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -87,6 +88,7 @@ const timestamp = '2022-07-25T08:20:18.966Z';
 const defaultProps = {
   userName: 'test user',
   timestamp,
+  scopeId: 'scopeId',
 };
 
 const mockUserDetailsResponse = [
@@ -132,7 +134,7 @@ describe('<HostDetails />', () => {
         <UserDetails {...defaultProps} />
       </TestProviders>
     );
-    expect(getByTestId(USER_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID))).toBeInTheDocument();
   });
 
   describe('Host overview', () => {

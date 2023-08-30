@@ -5,12 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageHeader, EuiSpacer, EuiPageHeaderProps } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiSpacer,
+  EuiPageHeaderProps,
+  EuiPageSection,
+  EuiButton,
+} from '@elastic/eui';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+
+import { css } from '@emotion/react';
+import { Index } from '../../../../../../common';
+import { loadIndex } from '../../../../services';
+import { DiscoverLink } from '../../../../lib/discover_link';
 import { Section } from '../../home';
+import { DetailsPageError } from './details_page_error';
+import { ManageIndexButton } from './manage_index_button';
+import { DetailsPageMappings } from './details_page_mappings';
 
 export enum IndexDetailsSection {
   Overview = 'overview',
@@ -59,12 +74,37 @@ export const DetailsPage: React.FunctionComponent<
   },
   history,
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
+  const [index, setIndex] = useState<Index | null>();
+
+  const fetchIndexDetails = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const { data, error: loadingError } = await loadIndex(indexName);
+      setIsLoading(false);
+      setError(loadingError);
+      setIndex(data);
+    } catch (e) {
+      setIsLoading(false);
+      setError(e);
+    }
+  }, [indexName]);
+
+  useEffect(() => {
+    fetchIndexDetails();
+  }, [fetchIndexDetails]);
+
   const onSectionChange = useCallback(
     (newSection: IndexDetailsSection) => {
       return history.push(encodeURI(`/indices/${indexName}/${newSection}`));
     },
     [history, indexName]
   );
+
+  const navigateToAllIndices = useCallback(() => {
+    history.push(`/${Section.Indices}`);
+  }, [history]);
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
     return tabs.map((tab) => ({
@@ -76,19 +116,62 @@ export const DetailsPage: React.FunctionComponent<
     }));
   }, [indexDetailsSection, onSectionChange]);
 
+  if (isLoading && !index) {
+    return (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.idxMgmt.indexDetails.loadingDescription"
+          defaultMessage="Loading index details…"
+        />
+      </SectionLoading>
+    );
+  }
+  if (error || !index) {
+    return <DetailsPageError indexName={indexName} resendRequest={fetchIndexDetails} />;
+  }
+
   return (
     <>
+      <EuiPageSection paddingSize="none">
+        <EuiButton
+          data-test-subj="indexDetailsBackToIndicesButton"
+          color="text"
+          iconType="arrowLeft"
+          onClick={navigateToAllIndices}
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
+            defaultMessage="Back to all indices"
+          />
+        </EuiButton>
+      </EuiPageSection>
+
+      <EuiSpacer size="l" />
+
       <EuiPageHeader
         data-test-subj="indexDetailsHeader"
         pageTitle={indexName}
         bottomBorder
-        rightSideItems={[]}
+        rightSideItems={[
+          <DiscoverLink indexName={indexName} asButton={true} />,
+          <ManageIndexButton
+            indexName={indexName}
+            indexDetails={index}
+            reloadIndexDetails={fetchIndexDetails}
+            navigateToAllIndices={navigateToAllIndices}
+          />,
+        ]}
         tabs={headerTabs}
       />
 
       <EuiSpacer size="l" />
 
-      <div data-test-subj={`indexDetailsContent`}>
+      <div
+        data-test-subj={`indexDetailsContent`}
+        css={css`
+          height: 100%;
+        `}
+      >
         <Routes>
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
@@ -99,8 +182,8 @@ export const DetailsPage: React.FunctionComponent<
             render={() => <div>Documents</div>}
           />
           <Route
-            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Mappings}`}
-            render={() => <div>Mappings</div>}
+            path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Mappings}`}
+            component={DetailsPageMappings}
           />
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Settings}`}

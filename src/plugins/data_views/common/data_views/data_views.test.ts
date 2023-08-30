@@ -115,6 +115,7 @@ describe('IndexPatterns', () => {
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(true),
       getCanSaveAdvancedSettings: () => Promise.resolve(true),
+      scriptedFieldsEnabled: true,
     });
 
     indexPatternsNoAccess = new DataViewsService({
@@ -127,6 +128,7 @@ describe('IndexPatterns', () => {
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(false),
       getCanSaveAdvancedSettings: () => Promise.resolve(false),
+      scriptedFieldsEnabled: true,
     });
   });
 

@@ -86,6 +86,7 @@ export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsContract;
   screenshotMode: ScreenshotModePluginStart;
+  scriptedFieldsEnabled: boolean;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -221,7 +222,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public start(
     { http, theme, uiSettings, chrome, application }: CoreStart,
-    { fieldFormats, indexPatterns, screenshotMode }: SearchServiceStartDependencies
+    {
+      fieldFormats,
+      indexPatterns,
+      screenshotMode,
+      scriptedFieldsEnabled,
+    }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
@@ -250,6 +256,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         }
         return response;
       },
+      scriptedFieldsEnabled,
     };
 
     const config = this.initializerContext.config.get();

@@ -12,7 +12,7 @@ import { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { fetchAll } from './fetch_all';
+import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import {
   DataAvailableFieldsMsg,
   DataDocumentsMsg,
@@ -24,7 +24,9 @@ import {
 import { fetchDocuments } from './fetch_documents';
 import { fetchTextBased } from './fetch_text_based';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import { searchResponseWarningsMock } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
+
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));
@@ -287,5 +289,96 @@ describe('test fetchAll', () => {
         query,
       },
     ]);
+  });
+
+  describe('fetchMoreDocuments', () => {
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const initialRecords = [records[0], records[1]];
+    const moreRecords = [records[2], records[3]];
+
+    const interceptedWarnings = searchResponseWarningsMock.map((warning) => ({
+      originalWarning: warning,
+    }));
+
+    test('should add more records', async () => {
+      const collectDocuments = subjectCollector(subjects.documents$);
+      const collectMain = subjectCollector(subjects.main$);
+      mockFetchDocuments.mockResolvedValue({ records: moreRecords, interceptedWarnings });
+      subjects.documents$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: RecordRawType.DOCUMENT,
+        result: initialRecords,
+      });
+      fetchMoreDocuments(subjects, deps);
+      await waitForNextTick();
+
+      expect(await collectDocuments()).toEqual([
+        { fetchStatus: FetchStatus.UNINITIALIZED },
+        {
+          fetchStatus: FetchStatus.COMPLETE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: initialRecords,
+        },
+        {
+          fetchStatus: FetchStatus.LOADING_MORE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: initialRecords,
+        },
+        {
+          fetchStatus: FetchStatus.COMPLETE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: [...initialRecords, ...moreRecords],
+          interceptedWarnings,
+        },
+      ]);
+      expect(await collectMain()).toEqual([
+        {
+          fetchStatus: FetchStatus.UNINITIALIZED,
+        },
+      ]);
+    });
+
+    test('should handle exceptions', async () => {
+      const collectDocuments = subjectCollector(subjects.documents$);
+      const collectMain = subjectCollector(subjects.main$);
+      mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
+      subjects.documents$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: RecordRawType.DOCUMENT,
+        result: initialRecords,
+      });
+      fetchMoreDocuments(subjects, deps);
+      await waitForNextTick();
+
+      expect(await collectDocuments()).toEqual([
+        { fetchStatus: FetchStatus.UNINITIALIZED },
+        {
+          fetchStatus: FetchStatus.COMPLETE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: initialRecords,
+        },
+        {
+          fetchStatus: FetchStatus.LOADING_MORE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: initialRecords,
+        },
+        {
+          fetchStatus: FetchStatus.COMPLETE,
+          recordRawType: RecordRawType.DOCUMENT,
+          result: initialRecords,
+        },
+      ]);
+      expect(await collectMain()).toEqual([
+        {
+          fetchStatus: FetchStatus.UNINITIALIZED,
+        },
+        {
+          error: {
+            msg: 'This query failed',
+          },
+          fetchStatus: 'error',
+        },
+      ]);
+    });
   });
 });

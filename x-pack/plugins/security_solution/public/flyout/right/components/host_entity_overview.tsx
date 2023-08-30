@@ -13,6 +13,7 @@ import {
   EuiIcon,
   useEuiTheme,
   useEuiFontSize,
+  EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
@@ -23,11 +24,8 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../common/components/first_last_seen/first_last_seen';
-import {
-  buildHostNamesFilter,
-  RiskScoreEntity,
-  RiskSeverity,
-} from '../../../../common/search_strategy';
+import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import { DescriptionListStyled } from '../../../common/components/page';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
@@ -44,7 +42,9 @@ import {
   ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
+  TECHNICAL_PREVIEW_ICON_TEST_ID,
 } from './test_ids';
+import { TECHNICAL_PREVIEW_TITLE, TECHNICAL_PREVIEW_MESSAGE } from './translations';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 
 const HOST_ICON = 'storage';
@@ -146,13 +146,28 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
     return [
       {
-        title: i18n.HOST_RISK_CLASSIFICATION,
+        title: (
+          <>
+            {i18n.HOST_RISK_CLASSIFICATION}
+            <EuiIconTip
+              title={TECHNICAL_PREVIEW_TITLE}
+              size="m"
+              type="iInCircle"
+              content={TECHNICAL_PREVIEW_MESSAGE}
+              position="bottom"
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
+              data-test-subj={TECHNICAL_PREVIEW_ICON_TEST_ID}
+            />
+          </>
+        ),
         description: (
           <>
             {hostRiskData ? (
               <RiskScore severity={hostRiskData.host.risk.calculated_level} />
             ) : (
-              <RiskScore severity={RiskSeverity.unknown} />
+              getEmptyTagValue()
             )}
           </>
         ),

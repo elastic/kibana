@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import classNames from 'classnames';
 import {
   SQLLang,
@@ -20,6 +20,8 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-plugin/common';
 import {
   type LanguageDocumentationSections,
   LanguageDocumentationPopover,
@@ -77,6 +79,7 @@ export interface TextBasedLanguagesEditorProps {
 interface TextBasedEditorDeps {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
+  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -121,7 +124,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions } = kibana.services;
+  const { dataViews, expressions, indexManagementApiService } = kibana.services;
   const [lines, setLines] = useState(1);
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
@@ -134,9 +137,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isWordWrapped, setIsWordWrapped] = useState(true);
   const [editorErrors, setEditorErrors] = useState<MonacoError[]>([]);
   const [editorWarning, setEditorWarning] = useState<MonacoError[]>([]);
+
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
 
+  const policiesRef = useRef<SerializedEnrichPolicy[]>([]);
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
     isCompactFocused,
@@ -385,30 +390,67 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       return indices.map((i) => i.name);
     }, [dataViews]);
 
-  const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] =
-    useMemo(() => {
-      let fieldsSuggestions: string[] = [];
-
-      return async (ctx) => {
-        const pipes = currentCursorContent?.split('|');
-        pipes?.pop();
-        const validContent = pipes?.join('|');
-        if (validContent) {
-          // ES|QL with limit 0 returns only the columns and is more performant
-          const esqlQuery = {
-            esql: `${validContent} | limit 0`,
-          };
-          try {
-            const table = await fetchFieldsFromESQL(esqlQuery, expressions);
-            fieldsSuggestions = table?.columns.map((c) => c.name) ?? [];
-          } catch (e) {
-            // no action yet
-          }
+  const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] = useCallback(
+    async (ctx) => {
+      const pipes = currentCursorContent?.split('|');
+      pipes?.pop();
+      const validContent = pipes?.join('|');
+      if (validContent) {
+        // ES|QL with limit 0 returns only the columns and is more performant
+        const esqlQuery = {
+          esql: `${validContent} | limit 0`,
+        };
+        try {
+          const table = await fetchFieldsFromESQL(esqlQuery, expressions);
+          return table?.columns.map((c) => c.name) || [];
+        } catch (e) {
+          // no action yet
         }
+      }
+      return [];
+    },
+    [expressions]
+  );
 
-        return fieldsSuggestions;
-      };
-    }, [expressions]);
+  const getPoliciesIdentifiers: ESQLCustomAutocompleteCallbacks['getPoliciesIdentifiers'] =
+    useCallback(
+      async (ctx) => {
+        const { data: policies, error } =
+          (await indexManagementApiService?.getAllEnrichPolicies()) || {};
+        policiesRef.current = policies || [];
+        if (error || !policies) {
+          return [];
+        }
+        return policies.map(({ name, sourceIndices }) => ({ name, indices: sourceIndices }));
+      },
+      [indexManagementApiService]
+    );
+
+  const getPolicyFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getPolicyFieldsIdentifiers'] =
+    useCallback(
+      async (ctx) =>
+        policiesRef.current
+          .filter(({ name }) => ctx.userDefinedVariables.policyIdentifiers.includes(name))
+          .flatMap(({ enrichFields }) => enrichFields),
+      []
+    );
+
+  const getPolicyMatchingFieldIdentifiers: ESQLCustomAutocompleteCallbacks['getPolicyMatchingFieldIdentifiers'] =
+    useCallback(
+      async (ctx) => {
+        // try to load the list if none is present yet but
+        // at least one policy is declared in the userDefinedVariables
+        // (this happens if the user pastes an ESQL statement with the policy name in it)
+        if (!policiesRef.current.length && ctx.userDefinedVariables.policyIdentifiers.length) {
+          await getPoliciesIdentifiers(ctx);
+        }
+        const matchingField = policiesRef.current.find(({ name }) =>
+          ctx.userDefinedVariables.policyIdentifiers.includes(name)
+        )?.matchField;
+        return matchingField ? [matchingField] : [];
+      },
+      [getPoliciesIdentifiers]
+    );
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
@@ -622,6 +664,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           ? ESQLLang.getSuggestionProvider?.({
                               getSourceIdentifiers,
                               getFieldsIdentifiers,
+                              getPoliciesIdentifiers,
+                              getPolicyFieldsIdentifiers,
+                              getPolicyMatchingFieldIdentifiers,
                             })
                           : undefined
                       }

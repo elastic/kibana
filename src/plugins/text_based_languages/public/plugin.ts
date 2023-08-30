@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreStart } from '@kbn/core/public';
+import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import { setKibanaServices } from './kibana_services';
 
 interface TextBasedLanguagesPluginStart {
@@ -16,13 +17,20 @@ interface TextBasedLanguagesPluginStart {
   expressions: ExpressionsStart;
 }
 
+interface TextBasedLanguagesPluginSetup {
+  indexManagement: IndexManagementPluginSetup;
+}
+
 export class TextBasedLanguagesPlugin implements Plugin<{}, void> {
-  public setup() {
+  private indexManagement?: IndexManagementPluginSetup;
+
+  public setup(_: CoreSetup, { indexManagement }: TextBasedLanguagesPluginSetup) {
+    this.indexManagement = indexManagement;
     return {};
   }
 
   public start(core: CoreStart, { dataViews, expressions }: TextBasedLanguagesPluginStart): void {
-    setKibanaServices(core, dataViews, expressions);
+    setKibanaServices(core, dataViews, expressions, this.indexManagement);
   }
 
   public stop() {}

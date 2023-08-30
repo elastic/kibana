@@ -88,7 +88,7 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
       defaultMessage: 'Renames an old column to a new one',
     }),
     documentation: {
-      value: buildDocumentation('rename new = old', ['… | rename a = b']),
+      value: buildDocumentation('rename new as old', ['… | rename a as b']),
     },
     sortText: 'B',
   },
@@ -178,6 +178,18 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
       value: buildDocumentation('mv_expand field', [
         'ROW a=[1,2,3], b="b", j=["a","b"] | MV_EXPAND a',
       ]),
+    },
+    sortText: 'B',
+  },
+  {
+    label: 'enrich',
+    insertText: 'enrich',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.enrichDoc', {
+      defaultMessage: 'Enrich table with another table',
+    }),
+    documentation: {
+      value: buildDocumentation('enrich policy', ['... | ENRICH a']),
     },
     sortText: 'B',
   },

@@ -24,6 +24,7 @@ export type LeftPanelTabsType = Array<{
   'data-test-subj': string;
   name: string;
   content: React.ReactElement;
+  visible: boolean;
 }>;
 
 export const tabs: LeftPanelTabsType = [
@@ -32,23 +33,27 @@ export const tabs: LeftPanelTabsType = [
     'data-test-subj': VISUALIZE_TAB_TEST_ID,
     name: VISUALIZE_TAB,
     content: <VisualizeTab />,
+    visible: false,
   },
   {
     id: 'insights',
     'data-test-subj': INSIGHTS_TAB_TEST_ID,
     name: INSIGHTS_TAB,
     content: <InsightsTab />,
+    visible: true,
   },
   {
     id: 'investigation',
     'data-test-subj': INVESTIGATION_TAB_TEST_ID,
     name: INVESTIGATIONS_TAB,
     content: <InvestigationTab />,
+    visible: true,
   },
   {
     id: 'response',
     'data-test-subj': RESPONSE_TAB_TEST_ID,
     name: RESPONSE_TAB,
     content: <ResponseTab />,
+    visible: true,
   },
 ];

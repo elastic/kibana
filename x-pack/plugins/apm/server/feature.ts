@@ -12,11 +12,17 @@ import {
   LicensingPluginSetup,
   LicensingApiRequestHandlerContext,
 } from '@kbn/licensing-plugin/server';
+import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
 import {
   ApmRuleType,
   APM_SERVER_FEATURE_ID,
 } from '../common/rules/apm_rule_types';
-import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '../common/apm_saved_object_constants';
+
+const ruleTypes = [
+  ...Object.values(ApmRuleType),
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+];
 
 export const APM_FEATURE = {
   id: APM_SERVER_FEATURE_ID,
@@ -30,7 +36,7 @@ export const APM_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: Object.values(ApmRuleType),
+  alerting: ruleTypes,
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
@@ -43,10 +49,10 @@ export const APM_FEATURE = {
       },
       alerting: {
         alert: {
-          all: Object.values(ApmRuleType),
+          all: ruleTypes,
         },
         rule: {
-          all: Object.values(ApmRuleType),
+          all: ruleTypes,
         },
       },
       management: {
@@ -64,10 +70,10 @@ export const APM_FEATURE = {
       },
       alerting: {
         alert: {
-          read: Object.values(ApmRuleType),
+          read: ruleTypes,
         },
         rule: {
-          read: Object.values(ApmRuleType),
+          read: ruleTypes,
         },
       },
       management: {

@@ -74,7 +74,7 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-  RuleCustomHighlightedFieldArray,
+  InvestigationFields,
 } from '../../../../common/api/detection_engine/model/rule_schema';
 
 import type {
@@ -204,7 +204,7 @@ export const RuleSchema = t.intersection([
     execution_summary: RuleExecutionSummary,
     alert_suppression: AlertSuppression,
     esql_params: EsqlParams,
-    investigation_fields: RuleCustomHighlightedFieldArray,
+    investigation_fields: InvestigationFields,
   }),
 ]);
 
@@ -292,7 +292,7 @@ export interface ImportDataProps {
   overwrite?: boolean;
   overwriteExceptions?: boolean;
   overwriteActionConnectors?: boolean;
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface ImportRulesResponseError {

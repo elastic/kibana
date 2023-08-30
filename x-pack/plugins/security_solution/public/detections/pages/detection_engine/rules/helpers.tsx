@@ -151,7 +151,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   },
 });
 
-const convertHistoryStartToSize = (relativeTime: string) => {
+export const convertHistoryStartToSize = (relativeTime: string) => {
   if (relativeTime.startsWith('now-')) {
     return relativeTime.substring(4);
   } else {
@@ -238,7 +238,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
-    investigationFields: investigationFields ?? [],
+    investigationFields: investigationFields?.field_names ?? [],
     threat: threat as Threats,
     threatIndicatorPath,
   };

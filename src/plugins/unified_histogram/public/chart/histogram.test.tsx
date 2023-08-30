@@ -71,6 +71,7 @@ function mountComponent(isPlainRecord = false, hasLensSuggestions = false) {
     lensAttributesContext: getMockLensAttributes(),
     onTotalHitsChange: jest.fn(),
     onChartLoad: jest.fn(),
+    withDefaultActions: undefined,
   };
 
   return {
@@ -96,16 +97,18 @@ describe('Histogram', () => {
       attributes: getMockLensAttributes().attributes,
       onLoad: lensProps.onLoad,
     });
-    expect(lensProps).toEqual(originalProps);
+    expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     component.setProps({ request: { ...props.request, searchSessionId: '321' } }).update();
     lensProps = component.find(embeddable).props();
-    expect(lensProps).toEqual(originalProps);
+    expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     await act(async () => {
       props.refetch$.next({ type: 'refetch' });
     });
     component.update();
     lensProps = component.find(embeddable).props();
-    expect(lensProps).toEqual({ ...originalProps, searchSessionId: '321' });
+    expect(lensProps).toMatchObject(
+      expect.objectContaining({ ...originalProps, searchSessionId: '321' })
+    );
   });
 
   it('should execute onLoad correctly', async () => {

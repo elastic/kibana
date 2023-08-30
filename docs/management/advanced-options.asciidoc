@@ -289,7 +289,7 @@ The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
 [[discover:enableESQL]]`discover:enableESQL`::
-experimental[] Allows ESQL queries for search.
+experimental[] Allows ES|QL queries for search.
 
 [[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
 Specifies the maximum number of fields to show in the document column of the *Discover* table.

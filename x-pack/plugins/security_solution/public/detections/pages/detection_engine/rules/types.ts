@@ -36,6 +36,7 @@ import type {
   AlertSuppressionMissingFields,
   EsqlSuppressionDuration,
   EsqlParams,
+  InvestigationFields,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -247,7 +248,7 @@ export interface AboutStepRuleJson {
   timestamp_override?: TimestampOverride;
   timestamp_override_fallback_disabled?: boolean;
   note?: string;
-  investigation_fields?: string[];
+  investigation_fields?: InvestigationFields;
 }
 
 export interface ScheduleStepRuleJson {
