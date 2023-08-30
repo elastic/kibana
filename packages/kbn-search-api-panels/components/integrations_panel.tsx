@@ -24,7 +24,7 @@ import { LEARN_MORE_LABEL } from '../constants';
 import { GithubLink } from './github_link';
 
 export interface IntegrationsPanelProps {
-  docLinks: any;
+  docLinks: { beats: string; connectors: string; logstash: string };
   assetBasePath: string;
 }
 
@@ -61,7 +61,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
             <EuiFlexGroup justifyContent="flexStart">
               <EuiFlexItem>
                 <EuiText size="s">
-                  <EuiLink href={docLinks.logStash} target="_blank">
+                  <EuiLink href={docLinks.logstash} target="_blank">
                     {LEARN_MORE_LABEL}
                   </EuiLink>
                 </EuiText>

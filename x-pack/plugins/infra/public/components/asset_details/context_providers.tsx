@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AssetDetailsStateProvider } from './hooks/use_asset_details_state';
+import { AssetDetailsRenderPropsProvider } from './hooks/use_asset_details_render_props';
 import { DateRangeProvider } from './hooks/use_date_range';
 import { MetadataStateProvider } from './hooks/use_metadata_state';
 import { AssetDetailsProps } from './types';
@@ -17,21 +17,20 @@ export const ContextProviders = ({
 }: { props: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId' | 'metricAlias'> } & {
   children: React.ReactNode;
 }) => {
-  const { asset, dateRange, overrides, onTabsStateChange, assetType = 'host', renderMode } = props;
+  const { asset, dateRange, overrides, assetType = 'host', renderMode } = props;
   return (
     <DateRangeProvider initialDateRange={dateRange}>
       <MetadataStateProvider asset={asset} assetType={assetType}>
-        <AssetDetailsStateProvider
-          state={{
+        <AssetDetailsRenderPropsProvider
+          props={{
             asset,
             assetType,
             overrides,
-            onTabsStateChange,
             renderMode,
           }}
         >
           {children}
-        </AssetDetailsStateProvider>
+        </AssetDetailsRenderPropsProvider>
       </MetadataStateProvider>
     </DateRangeProvider>
   );

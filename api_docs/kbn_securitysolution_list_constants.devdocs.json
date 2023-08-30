@@ -69,6 +69,30 @@
         "references": [
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/blocklist_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/blocklist_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
           },
           {
@@ -97,30 +121,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/blocklist_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/blocklist_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
           },
           {
@@ -146,6 +146,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
@@ -221,19 +225,19 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
           },
           {
             "plugin": "securitySolution",
@@ -261,6 +265,50 @@
         "references": [
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
           },
           {
@@ -321,50 +369,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
           },
           {
@@ -410,6 +414,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
@@ -453,19 +461,19 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
           },
           {
             "plugin": "securitySolution",
@@ -525,26 +533,6 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
           },
           {
@@ -574,6 +562,26 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/host_isolation_exceptions_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client.ts"
           },
           {
             "plugin": "lists",
@@ -618,6 +626,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
@@ -857,6 +869,38 @@
             "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
           },
           {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/trusted_app_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/trusted_app_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
+          },
+          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
           },
@@ -891,38 +935,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/service/api_client.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/trusted_app_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/trusted_app_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
           },
           {
             "plugin": "lists",
@@ -1055,6 +1067,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
