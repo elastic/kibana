@@ -146,7 +146,15 @@ export async function createChatService({
     hasRenderFunction: (name: string) => {
       return !!getFunctions().find((fn) => fn.options.name === name)?.render;
     },
-    chat({ connectorId, messages }: { connectorId: string; messages: Message[] }) {
+    chat({
+      connectorId,
+      messages,
+      function: callFunctions = 'auto',
+    }: {
+      connectorId: string;
+      messages: Message[];
+      function?: 'none' | 'auto';
+    }) {
       const subject = new BehaviorSubject<PendingMessage>({
         message: {
           role: MessageRole.Assistant,
@@ -164,7 +172,10 @@ export async function createChatService({
           body: {
             messages,
             connectorId,
-            functions: functions.map((fn) => pick(fn.options, 'name', 'description', 'parameters')),
+            functions:
+              callFunctions === 'none'
+                ? []
+                : functions.map((fn) => pick(fn.options, 'name', 'description', 'parameters')),
           },
         },
         signal: controller.signal,
