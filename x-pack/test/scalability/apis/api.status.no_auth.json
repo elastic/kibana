@@ -35,8 +35,7 @@
             "method": "GET",
             "path": "/api/status",
             "headers": {
-              "Cookie": "",
-              "Accept-Encoding": "gzip, deflate, br",
+              "Accept-Encoding": "gzip",
               "Content-Type": "application/json; charset=utf-8"
             },
             "statusCode": 200
