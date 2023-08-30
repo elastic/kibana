@@ -171,11 +171,6 @@ export const cli = () => {
         _.pull(fleetServerPorts, fleetServerPort);
       };
 
-      const log = new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      });
-
       await pMap(
         files,
         async (filePath) => {
