@@ -55,6 +55,7 @@ import {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
@@ -135,6 +136,7 @@ export interface ObservabilityPublicPluginsStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
   cloud?: CloudStart;
+  aiops: AiopsPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;

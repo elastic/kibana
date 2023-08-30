@@ -8,7 +8,7 @@
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import {
   EuiFlexGroup,
@@ -27,6 +27,7 @@ import {
   getPaddedAlertTimeRange,
   AlertActiveTimeRangeAnnotation,
 } from '@kbn/observability-alert-details';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../common/threshold_rule/metric_value_formatter';
 import { AlertSummaryField, TopAlert } from '../../..';
@@ -65,8 +66,12 @@ export default function AlertDetailsAppSection({
   ruleLink,
   setAlertSummaryFields,
 }: AppSectionProps) {
-  const { uiSettings, charts } = useKibana().services;
+  const { uiSettings, charts, aiops, data } = useKibana().services;
+  const { EmbeddableChangePointChart } = aiops;
+
   const { euiTheme } = useEuiTheme();
+
+  const [dataView, setDataView] = useState<DataView>();
 
   // TODO Use rule data view
   const derivedIndexPattern = useMemo<DataViewBase>(
@@ -115,6 +120,17 @@ export default function AlertDetailsAppSection({
       },
     ]);
   }, [alert, rule, ruleLink, setAlertSummaryFields]);
+
+  useEffect(() => {
+    const initDataView = async () => {
+      const defaultDataView = await data.dataViews.getDefaultDataView();
+      if (defaultDataView) {
+        setDataView(defaultDataView);
+      }
+    };
+
+    initDataView();
+  }, [data.dataViews]);
 
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="thresholdRuleAppSection">
@@ -173,6 +189,16 @@ export default function AlertDetailsAppSection({
           </EuiPanel>
         </EuiFlexItem>
       ))}
+      <EmbeddableChangePointChart
+        dataViewId={dataView?.id ?? ''}
+        timeRange={{
+          from: moment(alert.start).subtract(15, 'minutes').toISOString(),
+          to: moment(alert.lastUpdated).toISOString(),
+          mode: 'absolute',
+        }}
+        fn="avg"
+        metricField="system.cpu.idle.norm.pct"
+      />
     </EuiFlexGroup>
   ) : null;
 }
