@@ -155,6 +155,7 @@ export class SampleDataInstaller {
 
   private async installDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
     const index = createIndexName(dataset.id, dataIndex.id);
+    const statefulOffering = dataset.settingsForIndex ? { number_of_shards: 1, auto_expand_replicas: '0-1' } : {};
     try {
       if (dataIndex.isDataStream) {
         const request = {
@@ -162,7 +163,7 @@ export class SampleDataInstaller {
           body: {
             template: {
               // these settings are not available in serverless
-              // settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+              settings: statefulOffering,
               mappings: { properties: dataIndex.fields },
             },
             index_patterns: [index],
@@ -181,9 +182,7 @@ export class SampleDataInstaller {
             settings: {
               index: {
                 ...dataIndex.indexSettings,
-                // settings not available in serverless
-                // number_of_shards: 1,
-                // auto_expand_replicas: '0-1',
+                ...statefulOffering,
               },
             },
             mappings: { properties: dataIndex.fields },

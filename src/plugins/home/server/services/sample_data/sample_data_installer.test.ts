@@ -56,6 +56,7 @@ const testDatasets: SampleDatasetSchema[] = [
         preserveDayOfWeekTimeOfDay: true,
       },
     ],
+    settingsForIndex: false,
   },
   {
     id: 'test_tsdb_data_index',
@@ -94,6 +95,7 @@ const testDatasets: SampleDatasetSchema[] = [
         preserveDayOfWeekTimeOfDay: true,
       },
     ],
+    settingsForIndex: false,
   },
 ];
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { Writable } from '@kbn/utility-types';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 
 const idRegExp = /^[a-zA-Z0-9-]+$/;
 const dataIndexSchema = schema.object({
@@ -92,6 +92,9 @@ export const sampleDataSchema = schema.object({
 
   status: schema.maybe(schema.string()),
   statusMsg: schema.maybe(schema.string()),
+
+  // index settings do not work in serverless
+  settingsForIndex: offeringBasedSchema({ traditional: schema.boolean({defaultValue: true}), serverless: schema.boolean({ defaultValue: false })})
 });
 
 export type SampleDatasetSchema = Writable<TypeOf<typeof sampleDataSchema>>;
