@@ -230,7 +230,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
         </EuiToolTip>
       ),
       render: (_, { pValue }) => {
-        if (!pValue) return NOT_AVAILABLE;
+        if (typeof pValue !== 'number') return NOT_AVAILABLE;
         const label = getFailedTransactionsCorrelationImpactLabel(pValue);
         return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
       },
