@@ -32,6 +32,7 @@ import type {
   BulkDeleteRulesRequestParams,
 } from '../../../../../common/routes/rule/apis/bulk_delete';
 import { bulkDeleteRulesRequestParamsSchema } from '../../../../../common/routes/rule/apis/bulk_delete';
+import { RuleAttributes } from '../../../../data/rule/types';
 
 export const bulkDeleteRules = async (
   context: RulesClientContext,
@@ -113,15 +114,17 @@ const bulkDeleteWithOCC = async (
       type: 'rules',
     },
     () =>
-      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
-        filter,
-        type: 'alert',
-        perPage: 100,
-        ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
-      })
+      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
+        {
+          filter,
+          type: 'alert',
+          perPage: 100,
+          ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
+        }
+      )
   );
 
-  const rulesToDelete: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const rulesToDelete: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
   const apiKeyToRuleIdMapping: Record<string, string> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
   const ruleNameToRuleIdMapping: Record<string, string> = {};
