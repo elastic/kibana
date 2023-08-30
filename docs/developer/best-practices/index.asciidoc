@@ -78,7 +78,7 @@ strategies]
 *** Use the `esSearchStrategy` to make raw queries to ES that will
 support async searching and partial results, as well as injecting the
 right advanced settings like whether to include frozen indices or not.
-* {kib-repo}tree/{branch}/src/plugins/embeddable/README.asciidoc[Embeddables]
+* {kib-repo}blob/{branch}/src/plugins/embeddable/README.md[Embeddables]
 ** Rendering maps, visualizations, dashboards in your application
 ** Register new widgets that will can be added to a dashboard or Canvas
 workpad, or rendered in another plugin.
@@ -105,8 +105,8 @@ Eventually we want to guarantee to our plugin developers that their plugins will
 
 Any time you create or change a public API, keep this in mind, and consider potential
 backward compatibility issues. While we have a formal
-{kib-repo}tree/{branch}/src/core/server/saved_objects/migrations/README.md[saved
-object migration system] and are working on adding a formal state migration system, introducing state changes and migrations in a
+saved
+object migration system and are working on adding a formal state migration system, introducing state changes and migrations in a
 minor always comes with a risk. Consider this before making huge and
 risky changes in minors, _especially_ to saved objects.
 

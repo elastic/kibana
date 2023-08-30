@@ -42,6 +42,7 @@ export const PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID =
 /* Entities */
 
 export const ENTITIES_DETAILS_TEST_ID = `${PREFIX}EntitiesDetails` as const;
+export const ENTITIES_DETAILS_NO_DATA_TEST_ID = `${ENTITIES_DETAILS_TEST_ID}NoData` as const;
 export const USER_DETAILS_TEST_ID = `${PREFIX}UsersDetails` as const;
 export const USER_DETAILS_INFO_TEST_ID = 'user-overview';
 export const USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID =
