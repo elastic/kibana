@@ -45,7 +45,7 @@ const rolesToCreate = [secReadCasesAll];
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
-describe('Sourcerer', () => {
+describe('Sourcerer', { tags: ['@brokenInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
@@ -122,7 +122,7 @@ describe('Sourcerer', () => {
       cy.get(SOURCERER.saveButton).should('be.disabled');
     });
 
-    it.skip(
+    it(
       'adds a pattern to the default index and correctly filters out auditbeat-*',
       { tags: '@brokenInServerless' },
       () => {
@@ -139,7 +139,7 @@ describe('Sourcerer', () => {
     );
   });
 });
-describe('Timeline scope', { tags: '@brokenInServerless' }, () => {
+describe('Timeline scope', { tags: ['@brokenInServerless'] }, () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     login();
