@@ -8,7 +8,6 @@ import { map, mergeMap, catchError } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { from, of } from 'rxjs';
-import { isEmpty } from 'lodash';
 import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
@@ -19,6 +18,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { buildAlertFieldsRequest } from '@kbn/alerts-as-data-utils';
 import {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
@@ -30,8 +30,6 @@ import { getSpacesFilter, getAuthzFilter } from '../lib';
 export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
 };
-
-const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
 
 export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrategy';
 
@@ -124,6 +122,17 @@ export const ruleRegistrySearchStrategyProvider = (
                   },
                 }),
           };
+          let fields = request?.fields ?? [];
+          fields.push({ field: 'kibana.alert.*', include_unmapped: false });
+
+          if (siemRequest) {
+            fields.push({ field: 'signal.*', include_unmapped: false });
+            fields = fields.concat(buildAlertFieldsRequest([], false));
+          } else {
+            // only for o11y solutions
+            fields.push({ field: '*', include_unmapped: true });
+          }
+
           const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
           params = {
             allow_no_indices: true,
@@ -131,8 +140,7 @@ export const ruleRegistrySearchStrategyProvider = (
             ignore_unavailable: true,
             body: {
               _source: false,
-              // TODO the fields need to come from the request
-              fields: !isEmpty(request?.fields) ? request?.fields : EMPTY_FIELDS,
+              fields,
               sort,
               size,
               from: request.pagination ? request.pagination.pageIndex * size : 0,
