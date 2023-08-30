@@ -74,15 +74,6 @@ export function registerSetupRoute({
           config: dependencies.config,
         };
 
-        return response.ok({
-          body: {
-            has_setup: true,
-            pre_8_9_1_data: false,
-            has_data: true,
-            unauthorized: false,
-          },
-        });
-
         const state = createDefaultSetupState();
         state.cloud.available = dependencies.setup.cloud.isCloudEnabled;
 
