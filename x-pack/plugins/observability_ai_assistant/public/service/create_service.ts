@@ -9,7 +9,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationFunction, ObservabilityAIAssistantService } from '../types';
-import { createChatService } from './create_chat_service';
 
 export function createService({
   coreStart,
@@ -32,7 +31,8 @@ export function createService({
       registrations.push(fn);
     },
     start: async ({ signal }) => {
-      return await createChatService({ client, signal, registrations });
+      const mod = await import('./create_chat_service');
+      return await mod.createChatService({ client, signal, registrations });
     },
 
     callApi: client,
