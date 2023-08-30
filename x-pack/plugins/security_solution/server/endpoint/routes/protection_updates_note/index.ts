@@ -60,7 +60,7 @@ export function registerProtectionUpdatesNoteRoutes(
         },
       },
       withEndpointAuthz(
-        { all: ['canReadSecuritySolution'] },
+        { all: ['canReadPolicyManagement'] },
         logger,
         getProtectionUpdatesNoteHandler()
       )
