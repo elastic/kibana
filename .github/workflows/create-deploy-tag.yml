@@ -5,22 +5,23 @@
 #   on the main branch only in a verification step.
 #   This is only to prevent accidental creation of the tag on other branches and cannot be used to prevent malicious creation of the tag.
 
-name: Initiate Serverless Deploy
+name: "Serverless: Promote to QA"
 
 on:
   workflow_dispatch:
     inputs:
       commit:
-        description: "The commit to deploy (default: latest commit on main)"
+        description: "Commit to promote (default: latest commit on main)"
 
 concurrency:
   group: ${{ github.workflow }}
 
 jobs:
   create-deploy-tag:
+    # Temporary, we need a way to limit this to a GitHub team instead of specific users
+    if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck"]', github.triggering_actor)
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    permissions: write-all
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -50,11 +51,16 @@ jobs:
         run: |
           git tag ${TAG_NAME} ${COMMIT}
           git push origin "refs/tags/${TAG_NAME}"
-      - if: always()
+      - name: Post Slack message
+        if: always()
         id: slack
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          channel-id: kibana-mission-control
-          slack-message: ${{ job.status == 'success' && format('Created tag `{0}` for commit `{1}`', env.TAG_NAME, env.COMMIT) || 'Creating a deploy tag failed. See https://github.com/elastic/kibana/actions/workflows/create-deploy-tag.yml' }}
+          # Channel ID for #kibana-mission-control
+          channel-id: "C05NJL80DB8"
+          payload: |
+            {
+              "text": "Initiate Serverless Deploy GitHub Workflow: ${{ job.status }}\nWorkflow: https://github.com/elastic/kibana/actions/workflows/create-deploy-tag.yml${{ job.status == 'success' && format('\nTag: `{0}`\nCommit: `{1}`', env.TAG_NAME, env.COMMIT) || '' }}"
+            }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_TAGGER_SLACK_WEBHOOK_URL }}
