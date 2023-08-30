@@ -37,6 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .get(`${INTERNAL_FIND_LISTS_BY_SIZE}`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version header', '1')
           .send()
           .expect(200);
 
@@ -65,6 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .get(`${INTERNAL_FIND_LISTS_BY_SIZE}`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version header', '1')
           .send()
           .expect(200);
 

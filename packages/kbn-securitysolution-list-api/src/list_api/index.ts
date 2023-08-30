@@ -117,6 +117,7 @@ const findListsBySize = async ({
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListsBySizeSchema> => {
   return http.fetch(`${INTERNAL_FIND_LISTS_BY_SIZE}`, {
     method: 'GET',
+    version: '1',
     query: {
       cursor,
       page,
