@@ -71,6 +71,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
         <FormattedMessage id="xpack.observability.rulePage.rulesTabTitle" defaultMessage="Rules" />
       ),
       onClick: () => history.push(RULES_PATH),
+      isSelected: activeTab === RULES_TAB_NAME,
     },
     {
       name: 'logs',
@@ -79,6 +80,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
       ),
       onClick: () => history.push(RULES_LOGS_PATH),
       ['data-test-subj']: 'ruleLogsTab',
+      isSelected: activeTab !== RULES_TAB_NAME,
     },
   ];
 
