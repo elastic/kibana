@@ -122,8 +122,10 @@ export function useTimeline({
         },
         error: reject,
         complete: () => {
-          if (pendingMessageLocal?.error) {
-            notifications.toasts.addError(pendingMessageLocal?.error, {
+          const error = pendingMessageLocal?.error;
+
+          if (error) {
+            notifications.toasts.addError(error, {
               title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
                 defaultMessage: 'Failed to load response from the AI Assistant',
               }),
@@ -190,7 +192,7 @@ export function useTimeline({
                 name,
                 content: JSON.stringify({
                   message: error.toString(),
-                  error: error.body,
+                  error,
                 }),
               },
             })
