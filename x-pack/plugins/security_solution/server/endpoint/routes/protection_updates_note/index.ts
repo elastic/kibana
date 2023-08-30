@@ -6,12 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import {
-  deleteProtectionUpdatesNoteHandler,
-  getProtectionUpdatesNoteHandler,
-  postProtectionUpdatesNoteHandler,
-  putProtectionUpdatesNoteHandler,
-} from './handlers';
+import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
 import {
   GetProtectionUpdatesNoteSchema,
   CreateUpdateProtectionUpdatesNoteSchema,
@@ -63,46 +58,6 @@ export function registerProtectionUpdatesNoteRoutes(
         { all: ['canReadPolicyManagement'] },
         logger,
         getProtectionUpdatesNoteHandler()
-      )
-    );
-
-  router.versioned
-    .put({
-      access: 'public',
-      path: PROTECTION_UPDATES_NOTE_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: CreateUpdateProtectionUpdatesNoteSchema,
-        },
-      },
-      withEndpointAuthz(
-        { all: ['canWritePolicyManagement'] },
-        logger,
-        putProtectionUpdatesNoteHandler()
-      )
-    );
-
-  router.versioned
-    .delete({
-      access: 'public',
-      path: PROTECTION_UPDATES_NOTE_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: GetProtectionUpdatesNoteSchema,
-        },
-      },
-      withEndpointAuthz(
-        { all: ['canWritePolicyManagement'] },
-        logger,
-        deleteProtectionUpdatesNoteHandler()
       )
     );
 }

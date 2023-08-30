@@ -19,12 +19,7 @@ import {
   httpServerMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import {
-  deleteProtectionUpdatesNoteHandler,
-  getProtectionUpdatesNoteHandler,
-  postProtectionUpdatesNoteHandler,
-  putProtectionUpdatesNoteHandler,
-} from './handlers';
+import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 
 const mockedSOSuccessfulFindResponse = {
@@ -191,83 +186,6 @@ describe('test protection updates note handler', () => {
       );
 
       expect(mockResponse.notFound).toBeCalled();
-    });
-
-    it('should update an existing note if one exists', async () => {
-      const protectionUpdatesNoteHandler = putProtectionUpdatesNoteHandler();
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { policyId: 'id' },
-        body: { note: 'note2' },
-      });
-
-      mockSavedObjectClient.find.mockResolvedValueOnce(mockedSOSuccessfulFindResponse);
-
-      mockSavedObjectClient.update.mockResolvedValueOnce(
-        createMockedSOSuccessfulCreateResponse('note2')
-      );
-
-      await protectionUpdatesNoteHandler(
-        requestContextMock.convertContext(
-          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
-        ),
-        mockRequest,
-        mockResponse
-      );
-
-      expect(mockResponse.ok).toBeCalled();
-      expect(mockSavedObjectClient.update).toBeCalledWith(...mockedSOSuccessfulUpdateResponse);
-    });
-
-    it('should return badRequest if no note exists on update', async () => {
-      const protectionUpdatesNoteHandler = putProtectionUpdatesNoteHandler();
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { policyId: 'id' },
-        body: { note: 'note2' },
-      });
-      mockSavedObjectClient.find.mockResolvedValueOnce(mockedSOSuccessfulFindResponseEmpty);
-      await protectionUpdatesNoteHandler(
-        requestContextMock.convertContext(
-          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
-        ),
-        mockRequest,
-        mockResponse
-      );
-
-      expect(mockResponse.badRequest).toBeCalled();
-    });
-
-    it('should delete note', async () => {
-      const protectionUpdatesNoteHandler = deleteProtectionUpdatesNoteHandler();
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { policyId: 'id' },
-      });
-      mockSavedObjectClient.find.mockResolvedValueOnce(mockedSOSuccessfulFindResponse);
-      await protectionUpdatesNoteHandler(
-        requestContextMock.convertContext(
-          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
-        ),
-        mockRequest,
-        mockResponse
-      );
-
-      expect(mockResponse.ok).toBeCalled();
-    });
-
-    it('should return badRequest if no note exists on delete', async () => {
-      const protectionUpdatesNoteHandler = deleteProtectionUpdatesNoteHandler();
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { policyId: 'id' },
-      });
-      mockSavedObjectClient.find.mockResolvedValueOnce(mockedSOSuccessfulFindResponseEmpty);
-      await protectionUpdatesNoteHandler(
-        requestContextMock.convertContext(
-          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
-        ),
-        mockRequest,
-        mockResponse
-      );
-
-      expect(mockResponse.badRequest).toBeCalled();
     });
   });
 });
