@@ -1320,6 +1320,11 @@
   resolved "https://registry.yarnpkg.com/@cbor-extract/cbor-extract-win32-x64/-/cbor-extract-win32-x64-2.0.0.tgz#4d4ad91527a8313c3db1e2167a8821dfae9d6211"
   integrity sha512-XqVuJEnE0jpl/RkuSp04FF2UE73gY52Y4nZaIE6j9GAeSH2cHYU5CCd4TaVMDi2M18ZpZv7XhL/k+nneQzyJpQ==
 
+"@cfworker/json-schema@^1.12.7":
+  version "1.12.7"
+  resolved "https://registry.yarnpkg.com/@cfworker/json-schema/-/json-schema-1.12.7.tgz#064d082a11881f684300bc7e6d3021e9d98f9a59"
+  integrity sha512-KEJUW22arGRQVoS6Ti8SvgXnme6NNMMcGBugdir1hf32ofWUXC8guwrFbepO2+YtqxNBUo5oO0pLYM5d4pyjOg==
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.3.tgz#099139eaec7ebf07a27c1786a3ff64f39464d2ef"
