@@ -94,7 +94,10 @@ export const sampleDataSchema = schema.object({
   statusMsg: schema.maybe(schema.string()),
 
   // index settings do not work in serverless
-  settingsForIndex: offeringBasedSchema({ traditional: schema.boolean({defaultValue: true}), serverless: schema.boolean({ defaultValue: false })})
+  settingsForIndex: offeringBasedSchema({
+    traditional: schema.boolean({ defaultValue: true }),
+    serverless: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type SampleDatasetSchema = Writable<TypeOf<typeof sampleDataSchema>>;
