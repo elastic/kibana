@@ -295,6 +295,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       pagination,
     },
     {
+      enabled: isRefreshOn, // We don't need refreshes on windows focus and reconnects if auto-refresh if off
       refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
       keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
     }
