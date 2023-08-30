@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTitle, useEuiTheme, useEuiShadow } from '@elastic/eui';
+import { EuiTitle, useEuiTheme, useEuiShadow, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
@@ -72,12 +72,16 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
               padding-left: ${euiTheme.size.xs};
             `}
           >
-            <span>{GET_STARTED_PAGE_TITLE}</span>
+            <>
+              <span>{GET_STARTED_PAGE_TITLE}</span>
+              <EuiSpacer size="l" />
+            </>
           </EuiTitle>
         }
         description={
           <>
             <strong className="eui-displayBlock">{GET_STARTED_PAGE_SUBTITLE}</strong>
+            <EuiSpacer size="m" />
             <span className="eui-displayBlock">{GET_STARTED_PAGE_DESCRIPTION}</span>
           </>
         }

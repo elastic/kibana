@@ -105,6 +105,7 @@ const WelcomePanelComponent = ({
     <EuiFlexGroup
       css={css`
         gap: ${euiTheme.size.xl};
+        margin-top: 6px;
       `}
     >
       {headerCards.map((item, index) => {

@@ -11,8 +11,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiBadge,
-  EuiSplitPanel,
-  EuiSpacer,
   EuiText,
   useEuiTheme,
   EuiButtonEmpty,
@@ -27,6 +25,7 @@ import { UNDO_MARK_AS_DONE_TITLE, MARK_AS_DONE_TITLE } from './translations';
 import { getStepsByActiveProduct } from './helpers';
 import type { ProductLine } from '../../common/product';
 import { getProductBadges } from './badge';
+import { RIGHT_CONTENT_HEIGHT, RIGHT_CONTENT_WIDTH } from './sections';
 
 const CardStepComponent: React.FC<{
   activeProducts: Set<ProductLine>;
@@ -81,7 +80,17 @@ const CardStepComponent: React.FC<{
   );
 
   return (
-    <EuiPanel color="plain" grow={false} hasShadow={false} borderRadius="none" paddingSize="l">
+    <EuiPanel
+      color="plain"
+      grow={false}
+      hasShadow={false}
+      borderRadius="none"
+      paddingSize="none"
+      css={css`
+        padding: ${euiTheme.size.base};
+        margin: 0 ${euiTheme.size.s} 0;
+      `}
+    >
       <EuiFlexGroup
         gutterSize="s"
         css={css`
@@ -92,7 +101,7 @@ const CardStepComponent: React.FC<{
           <EuiIcon
             data-test-subj={`${stepId}-icon`}
             type={isDone ? 'checkInCircleFilled' : icon_step}
-            size="m"
+            size="l"
             color={euiTheme.colors.success}
           />
         </EuiFlexItem>
@@ -101,12 +110,20 @@ const CardStepComponent: React.FC<{
             <span
               css={css`
                 padding-right: ${euiTheme.size.m};
+                line-height: ${euiTheme.size.l};
+                vertical-align: middle;
               `}
             >
               {title}
             </span>
             {badges.map((badge) => (
-              <EuiBadge key={`${stepId}-badge-${badge.id}`} color="hollow">
+              <EuiBadge
+                key={`${stepId}-badge-${badge.id}`}
+                color="hollow"
+                css={css`
+                  margin: 0 ${euiTheme.size.s} 0 0;
+                `}
+              >
                 {badge.name}
               </EuiBadge>
             ))}
@@ -147,19 +164,21 @@ const CardStepComponent: React.FC<{
       </EuiFlexGroup>
       {expandStep && hasStepContent && (
         <>
-          <EuiSpacer size="l" />
-          <EuiSplitPanel.Outer
+          <EuiFlexGroup
             direction="row"
             color="plain"
-            grow={false}
-            hasShadow={false}
-            borderRadius="none"
+            gutterSize="none"
+            css={css`
+              margin-top: 20px;
+            `}
           >
             {description && (
-              <EuiSplitPanel.Inner
-                paddingSize="none"
+              <EuiFlexItem
+                grow={false}
                 css={css`
-                  padding-left: ${euiTheme.size.l};
+                  padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.s};
+                  margin-left: ${euiTheme.size.l};
+                  width: 486px;
                 `}
               >
                 <EuiText size="s">
@@ -173,20 +192,32 @@ const CardStepComponent: React.FC<{
                     </p>
                   ))}
                 </EuiText>
-              </EuiSplitPanel.Inner>
+              </EuiFlexItem>
             )}
             {splitPanel && (
-              <EuiSplitPanel.Inner
+              <EuiFlexItem
+                grow={false}
                 data-test-subj="split-panel"
-                paddingSize="none"
                 css={css`
-                  padding-left: ${euiTheme.size.m};
+                  padding: 0 6px 0 ${euiTheme.size.l};
+                  width: 510px;
                 `}
               >
-                {splitPanel}
-              </EuiSplitPanel.Inner>
+                {splitPanel && (
+                  <div
+                    css={css`
+                      height: ${RIGHT_CONTENT_HEIGHT}px;
+                      width: ${RIGHT_CONTENT_WIDTH}px;
+                      border-radius: ${euiTheme.border.radius.medium};
+                      overflow: hidden;
+                    `}
+                  >
+                    {splitPanel}
+                  </div>
+                )}
+              </EuiFlexItem>
             )}
-          </EuiSplitPanel.Outer>
+          </EuiFlexGroup>
         </>
       )}
     </EuiPanel>

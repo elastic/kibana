@@ -70,28 +70,29 @@ const CardItemComponent: React.FC<{
   return cardItem && hasActiveSteps ? (
     <EuiPanel
       hasBorder
-      paddingSize="m"
+      paddingSize="none"
       css={css`
         ${shadow ?? ''};
+        padding: ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
+        margin-bottom: ${euiTheme.size.xs};
+        border-radius: ${euiTheme.size.xs};
       `}
+      data-test-subj={`card-${cardItem.id}`}
+      borderRadius="none"
     >
-      <EuiFlexGroup
-        gutterSize="m"
-        css={css`
-          gap: 14px;
-          padding: ${euiTheme.size.xxs} 10px;
-        `}
-        direction="column"
-      >
+      <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             onClick={toggleCard}
             css={css`
               cursor: pointer;
             `}
+            gutterSize="m"
           >
             <EuiFlexItem grow={false}>
-              {cardItem.icon && <EuiIcon {...cardItem.icon} className="eui-alignMiddle" />}
+              {cardItem.icon && (
+                <EuiIcon {...cardItem.icon} size="xl" className="eui-alignMiddle" />
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <EuiTitle

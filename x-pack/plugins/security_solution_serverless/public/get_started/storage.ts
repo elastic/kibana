@@ -65,11 +65,10 @@ export const getStartedStorage = {
   },
   getAllExpandedCardStepsFromStorage: () => {
     const storageData = storage.get(EXPANDED_CARDS_STORAGE_KEY);
-    debugger;
-    const temp =
-      !storageData || Object.keys(storageData).length === 0 ? defaultExpandedCards : storageData;
-    debugger;
-    return temp;
+
+    return !storageData || Object.keys(storageData).length === 0
+      ? defaultExpandedCards
+      : storageData;
   },
   addExpandedCardStepToStorage: (cardId: CardId, stepId?: StepId) => {
     const activeCards: Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }> =
