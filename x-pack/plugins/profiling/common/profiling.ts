@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { charCodeAt, safeBase64Encoder } from './base64';
-
 export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
