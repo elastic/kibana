@@ -63,6 +63,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       isErrorDisplayed: () => boolean;
       clickErrorReloadButton: () => Promise<void>;
       indexStatsTabExists: () => boolean;
+      isWarningDisplayed: () => boolean;
     };
   };
 }
@@ -179,6 +180,9 @@ export const setup = async (
     },
     isErrorDisplayed: () => {
       return exists('indexDetailsStatsError');
+    },
+    isWarningDisplayed: () => {
+      return exists('indexStatsNotAvailableWarning');
     },
     clickErrorReloadButton: async () => {
       await act(async () => {

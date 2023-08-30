@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState, useCallback, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -24,15 +24,70 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SectionLoading } from '../../../../../shared_imports';
-import { useLoadIndexStats, documentationService } from '../../../../services';
+import { loadIndexStatistics, documentationService } from '../../../../services';
 
-export const DetailsPageStats: FunctionComponent<RouteComponentProps<{ indexName: string }>> = ({
+interface Props {
+  isIndexOpen: boolean;
+}
+
+export const DetailsPageStats: FunctionComponent<
+  RouteComponentProps<{ indexName: string }> & Props
+> = ({
   match: {
     params: { indexName },
   },
+  isIndexOpen,
 }) => {
-  const { data: indexStats, isLoading, error, resendRequest } = useLoadIndexStats(indexName);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
+  const [indexStats, setIndexStats] = useState<IndicesStatsResponse | null>();
+
+  const fetchIndexStats = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const { data, error: loadingError } = await loadIndexStatistics(indexName);
+      setIsLoading(false);
+      setError(loadingError);
+      setIndexStats(data);
+    } catch (e) {
+      setIsLoading(false);
+      setError(e);
+    }
+  }, [indexName]);
+
+  useEffect(() => {
+    if (isIndexOpen) {
+      fetchIndexStats();
+    }
+  }, [fetchIndexStats, isIndexOpen]);
+
+  if (isIndexOpen === false) {
+    return (
+      <EuiPageTemplate.EmptyPrompt
+        data-test-subj="indexStatsNotAvailableWarning"
+        iconType="warning"
+        color="warning"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.idxMgmt.indexDetails.stats.statsNotAvailableTitle"
+              defaultMessage="Index stats not available"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.indexDetails.stats.statsNotAvailableDescription"
+              defaultMessage="To view index stats, verify your index is open."
+            />
+          </p>
+        }
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -64,7 +119,7 @@ export const DetailsPageStats: FunctionComponent<RouteComponentProps<{ indexName
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.idxMgmt.indexDetails.stats.errorDescription"
-                defaultMessage="There was an error loading stats for index {indexName}."
+                defaultMessage="We encountered an error loading the stats for index {indexName}."
                 values={{
                   indexName,
                 }}
@@ -73,7 +128,7 @@ export const DetailsPageStats: FunctionComponent<RouteComponentProps<{ indexName
             <EuiSpacer />
             <EuiButton
               iconSide="right"
-              onClick={resendRequest}
+              onClick={fetchIndexStats}
               iconType="refresh"
               color="danger"
               data-test-subj="reloadIndexStatsButton"

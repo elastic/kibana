@@ -88,6 +88,26 @@ describe('<IndexDetailsPage />', () => {
       );
     });
 
+    it('renders a warning message if an index is not open', async () => {
+      const testIndexMockWithClosedStatus = {
+        ...testIndexMock,
+        status: 'closed',
+      };
+
+      httpRequestsMockHelpers.setLoadIndexDetailsResponse(
+        testIndexName,
+        testIndexMockWithClosedStatus
+      );
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      expect(testBed.actions.stats.isWarningDisplayed()).toBe(true);
+    });
+
     it('hides index stats tab if enableIndexStats===false', async () => {
       await act(async () => {
         testBed = await setup(httpSetup, {

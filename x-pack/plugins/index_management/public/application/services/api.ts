@@ -328,8 +328,8 @@ export function useLoadIndexMappings(indexName: string) {
   });
 }
 
-export function useLoadIndexStats(indexName: string) {
-  return useRequest<IndicesStatsResponse>({
+export function loadIndexStatistics(indexName: string) {
+  return sendRequest<IndicesStatsResponse>({
     path: `${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`,
     method: 'get',
   });

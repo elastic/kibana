@@ -26,7 +26,7 @@ export {
   useLoadNodesPlugins,
   loadIndex,
   useLoadIndexMappings,
-  useLoadIndexStats,
+  loadIndexStatistics,
 } from './api';
 
 export { sortTable } from './sort_table';

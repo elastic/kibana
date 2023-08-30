@@ -20,6 +20,7 @@ import {
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
 import { Index } from '../../../../../../common';
+import { INDEX_OPEN } from '../../../../../../common/constants';
 import { loadIndex } from '../../../../services';
 import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
@@ -207,7 +208,9 @@ export const DetailsPage: React.FunctionComponent<
           {config.enableIndexStats && (
             <Route
               path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Stats}`}
-              component={DetailsPageStats}
+              render={(routerProps: RouteComponentProps<{ indexName: string }>) => (
+                <DetailsPageStats {...routerProps} isIndexOpen={index.status === INDEX_OPEN} />
+              )}
             />
           )}
           <Redirect
