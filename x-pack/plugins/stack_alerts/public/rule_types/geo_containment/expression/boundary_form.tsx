@@ -13,6 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataViewSelect } from './data_view_select';
 import { SingleFieldSelect } from './single_field_select';
+import { QueryInput } from './query_input';
 
 export const BOUNDARY_GEO_FIELD_TYPES = ['geo_shape'];
 
@@ -37,6 +38,7 @@ interface Props {
   setDataViewTitle: (title: string) => void;
   setGeoField: (fieldName: string) => void;
   setNameField: (fieldName: string) => void;
+  setQuery: (query: Query) => void;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
@@ -192,6 +194,23 @@ export const BoundaryForm = (props: Props) => {
                   }
                 }}
                 fields={nameFields}
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              helpText={i18n.translate('xpack.stackAlerts.geoContainment.boundariesFilterHelpText', {
+                defaultMessage: 'Add a filter to narrow boundaries.',
+              })}
+              label={i18n.translate('xpack.stackAlerts.geoContainment.filterLabel', {
+                defaultMessage: 'Filter',
+              })}
+            >
+              <QueryInput
+                dataView={dataView}
+                onChange={(query: Query) => {
+                  props.setQuery(query);
+                }}
+                query={props.ruleParams.boundaryIndexQuery}
               />
             </EuiFormRow>
           </>

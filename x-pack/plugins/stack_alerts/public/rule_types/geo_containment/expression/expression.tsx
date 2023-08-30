@@ -46,6 +46,7 @@ export const GeoContainmentRuleTypeExpression: React.FunctionComponent<
         setDataViewTitle={(title: string) => props.setRuleParams('boundaryIndexTitle', title)}
         setGeoField={(fieldName: string) => props.setRuleParams('boundaryGeoField', fieldName)}
         setNameField={(fieldName: string) => props.setRuleParams('boundaryNameField', fieldName)}
+        setQuery={(query: Query) => props.setRuleParams('boundaryIndexQuery', query)}
         unifiedSearch={props.unifiedSearch}
       />
 

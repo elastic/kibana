@@ -248,9 +248,7 @@ export const EntityForm = (props: Props) => {
             </EuiFormRow>
 
             <EuiFormRow
-              error={entityFieldError}
-              isInvalid={Boolean(entityFieldError)}
-              helpText={i18n.translate('xpack.stackAlerts.geoContainment.filterHelpText', {
+              helpText={i18n.translate('xpack.stackAlerts.geoContainment.entityFilterHelpText', {
                 defaultMessage: 'Add a filter to narrow entities.',
               })}
               label={i18n.translate('xpack.stackAlerts.geoContainment.filterLabel', {
