@@ -11,10 +11,11 @@ import deepEqual from 'fast-deep-equal';
 import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { TimeHistory } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useKibana } from '../../lib/kibana';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
@@ -56,6 +57,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     displayStyle,
     isDisabled,
   }) => {
+    const { fieldFormats } = useKibana().services;
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
@@ -102,7 +104,10 @@ export const QueryBar = memo<QueryBarComponentProps>(
       [filterManager]
     );
 
-    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const indexPatterns = useMemo(
+      () => [new DataView({ ...indexPattern, fieldFormats })],
+      [fieldFormats, indexPattern]
+    );
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
     return (
