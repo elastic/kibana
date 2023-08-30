@@ -161,7 +161,14 @@ describe('SampleDataInstaller', () => {
       expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
         index: 'kibana_sample_data_test_single_data_index',
         body: {
-          mappings: { properties: { someField: { type: 'keyword' } } },
+          mappings: {
+            properties: {
+              someField: { type: 'keyword' },
+              settings: {
+                index: {},
+              },
+            },
+          },
         },
       });
     });
@@ -217,7 +224,6 @@ describe('SampleDataInstaller', () => {
 
     it('throws a SampleDataInstallError when the index creation fails', async () => {
       esClient.asCurrentUser.indices.create.mockImplementation(() => {
-        // eslint-disable-next-line no-throw-literal
         throw {
           message: 'Cannot create index',
           status: 500,
