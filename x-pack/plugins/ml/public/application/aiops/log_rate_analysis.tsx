@@ -16,11 +16,13 @@ import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { MlPageHeader } from '../components/page_header';
+import { useIsServerless } from '../capabilities/serverless';
 
 export const LogRateAnalysisPage: FC = () => {
   const { services } = useMlKibana();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
+  const isServerless = useIsServerless();
 
   return (
     <>
@@ -43,6 +45,7 @@ export const LogRateAnalysisPage: FC = () => {
           stickyHistogram={false}
           dataView={dataView}
           savedSearch={savedSearch}
+          isServerless={isServerless}
           appDependencies={pick(services, [
             'application',
             'data',

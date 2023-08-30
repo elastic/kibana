@@ -10,16 +10,13 @@ import {
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
 } from '../../common/constants/cases';
-import type { MlFeatures } from '../types';
 
-export function registerCasesPersistableState(enabledFeatures: MlFeatures, cases: CasesSetup) {
-  if (enabledFeatures.ad === true) {
-    cases.attachmentFramework.registerPersistableState({
-      id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
-    });
+export function registerCasesPersistableState(cases: CasesSetup) {
+  cases.attachmentFramework.registerPersistableState({
+    id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
+  });
 
-    cases.attachmentFramework.registerPersistableState({
-      id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
-    });
-  }
+  cases.attachmentFramework.registerPersistableState({
+    id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
+  });
 }

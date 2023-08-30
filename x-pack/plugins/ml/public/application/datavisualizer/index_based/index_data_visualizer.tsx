@@ -22,6 +22,7 @@ import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
+import { useIsServerless } from '../../capabilities/serverless';
 
 export const IndexDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
@@ -37,6 +38,7 @@ export const IndexDataVisualizerPage: FC = () => {
       },
     },
   } = useMlKibana();
+  const isServerless = useIsServerless();
   const mlLocator = useMlLocator()!;
   const mlFeaturesDisabled = !isFullLicense();
   getMlNodeCount();
@@ -188,7 +190,10 @@ export const IndexDataVisualizerPage: FC = () => {
               defaultMessage="Data Visualizer"
             />
           </MlPageHeader>
-          <IndexDataVisualizer getAdditionalLinks={getAdditionalLinks} />
+          <IndexDataVisualizer
+            getAdditionalLinks={getAdditionalLinks}
+            isServerless={isServerless}
+          />
         </>
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />

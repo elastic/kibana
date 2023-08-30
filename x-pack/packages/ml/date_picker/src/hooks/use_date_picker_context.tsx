@@ -44,6 +44,7 @@ export interface DatePickerDependencies {
    * Internationalisation service
    */
   i18n: I18nStart;
+  isServerless?: boolean;
 }
 
 /**

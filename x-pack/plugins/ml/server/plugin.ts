@@ -99,8 +99,6 @@ export class MlServerPlugin
     dfa: true,
     nlp: true,
   };
-  private registerMlAlerts: () => void = () => {};
-  private registerCases: () => void = () => {};
   private registerSampleDatasetsIntegration: () => void = () => {};
   private registerKibanaSettings: () => void = () => {};
 
@@ -256,32 +254,28 @@ export class MlServerPlugin
 
     initMlServerLog({ log: this.log });
 
-    this.registerMlAlerts = () => {
-      if (plugins.alerting) {
-        registerMlAlerts(this.enabledFeatures, {
-          alerting: plugins.alerting,
-          logger: this.log,
-          mlSharedServices: sharedServicesProviders,
-          mlServicesProviders: internalServicesProviders,
-        });
-      }
-    };
-    // this should be called in start, but it causes a test to fail.
-    this.registerMlAlerts();
+    if (plugins.alerting) {
+      registerMlAlerts({
+        alerting: plugins.alerting,
+        logger: this.log,
+        mlSharedServices: sharedServicesProviders,
+        mlServicesProviders: internalServicesProviders,
+      });
+    }
 
-    this.registerCases = () => {
-      if (plugins.cases) {
-        registerCasesPersistableState(this.enabledFeatures, plugins.cases);
-      }
-    };
+    if (plugins.cases) {
+      registerCasesPersistableState(plugins.cases);
+    }
 
     this.registerSampleDatasetsIntegration = () => {
+      // called in start once enabledFeatures is available
       if (this.home) {
         registerSampleDataSetLinks(this.enabledFeatures, this.home);
       }
     };
 
     this.registerKibanaSettings = () => {
+      // called in start once enabledFeatures is available
       registerKibanaSettings(this.enabledFeatures, coreSetup);
     };
 
@@ -327,8 +321,6 @@ export class MlServerPlugin
       }
 
       if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
-        // this.registerMlAlerts();
-        this.registerCases();
         this.registerSampleDatasetsIntegration();
         this.registerKibanaSettings();
       }

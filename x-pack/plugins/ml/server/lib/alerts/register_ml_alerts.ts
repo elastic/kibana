@@ -11,7 +11,6 @@ import { registerAnomalyDetectionAlertType } from './register_anomaly_detection_
 import { SharedServices } from '../../shared_services';
 import { registerJobsMonitoringRuleType } from './register_jobs_monitoring_rule_type';
 import { MlServicesProviders } from '../../shared_services/shared_services';
-import { MlFeatures } from '../../types';
 
 export interface RegisterAlertParams {
   alerting: AlertingPlugin['setup'];
@@ -20,9 +19,7 @@ export interface RegisterAlertParams {
   mlServicesProviders: MlServicesProviders;
 }
 
-export function registerMlAlerts(enabledFeatures: MlFeatures, alertParams: RegisterAlertParams) {
-  if (enabledFeatures.ad === true) {
-    registerAnomalyDetectionAlertType(alertParams);
-    registerJobsMonitoringRuleType(alertParams);
-  }
+export function registerMlAlerts(alertParams: RegisterAlertParams) {
+  registerAnomalyDetectionAlertType(alertParams);
+  registerJobsMonitoringRuleType(alertParams);
 }

@@ -20,9 +20,11 @@ import { HelpMenu } from '../components/help_menu';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
 import { MlPageHeader } from '../components/page_header';
+import { useIsServerless } from '../capabilities/serverless';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();
+  const isServerless = useIsServerless();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
@@ -45,6 +47,7 @@ export const ChangePointDetectionPage: FC = () => {
         <ChangePointDetection
           dataView={dataView}
           savedSearch={savedSearch}
+          isServerless={isServerless}
           appDependencies={{
             ...pick(services, [
               'application',

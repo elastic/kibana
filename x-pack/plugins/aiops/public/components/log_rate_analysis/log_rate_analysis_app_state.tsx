@@ -13,7 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
@@ -40,6 +40,8 @@ export interface LogRateAnalysisAppStateProps {
   appDependencies: AiopsAppDependencies;
   /** Option to make main histogram sticky */
   stickyHistogram?: boolean;
+  /** Optional flag to designate whether we're running in a serverless environment */
+  isServerless?: boolean;
 }
 
 export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
@@ -47,6 +49,7 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   savedSearch,
   appDependencies,
   stickyHistogram,
+  isServerless = false,
 }) => {
   if (!dataView) return null;
 
@@ -56,9 +59,10 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
     return <>{warning}</>;
   }
 
-  const datePickerDeps = {
+  const datePickerDeps: DatePickerDependencies = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    isServerless,
   };
 
   return (

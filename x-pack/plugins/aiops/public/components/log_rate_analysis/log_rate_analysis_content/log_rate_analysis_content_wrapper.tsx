@@ -57,6 +57,8 @@ export interface LogRateAnalysisContentWrapperProps {
    * @param d Log rate analysis results data
    */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
+  /** Optional flag to designate whether we're running in a serverless environment */
+  isServerless?: boolean;
 }
 
 export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
@@ -70,6 +72,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
+  isServerless = false,
 }) => {
   if (!dataView) return null;
 

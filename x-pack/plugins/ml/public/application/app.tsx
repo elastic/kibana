@@ -12,7 +12,7 @@ import { pick } from 'lodash';
 
 import type { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -30,6 +30,8 @@ import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import type { PageDependencies } from './routing/router';
+import { isServerless } from './capabilities/serverless';
+import { type MlCapabilities } from '../shared';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -122,9 +124,10 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 
   if (!licenseReady || !mlCapabilities) return null;
 
-  const datePickerDeps = {
+  const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    isServerless: isServerless(coreStart.application.capabilities.ml as MlCapabilities),
   };
 
   const I18nContext = coreStart.i18n.Context;

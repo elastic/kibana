@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MlCapabilities } from '../../shared';
 import { checkPermission, usePermissionCheck } from './check_capabilities';
 
 export function useIsServerless(): boolean {
@@ -15,7 +16,14 @@ export function useIsServerless(): boolean {
 /**
  * @deprecated use {@link useIsServerless} instead.
  */
-export function isServerless() {
+export function isServerless(mlCapabilities?: MlCapabilities) {
+  if (mlCapabilities !== undefined) {
+    return (
+      (mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled) ===
+      false
+    );
+  }
+
   return (
     (checkPermission('isADEnabled') &&
       checkPermission('isDFAEnabled') &&

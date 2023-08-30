@@ -72,6 +72,10 @@ export interface FullTimeRangeSelectorProps {
    * @param value - The time field range response.
    */
   apiPath?: SetFullTimeRangeApiPath;
+  /**
+   * Optional flag to disable the frozen data tier choice.
+   */
+  hideFrozenDataTierChoice?: boolean;
 }
 
 /**
@@ -92,10 +96,12 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     disabled,
     callback,
     apiPath,
+    hideFrozenDataTierChoice = false,
   } = props;
   const {
     http,
     notifications: { toasts },
+    isServerless,
   } = useDatePickerContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
@@ -107,7 +113,9 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         toasts,
         http,
         query,
-        frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE,
+        isServerless || hideFrozenDataTierChoice
+          ? false
+          : frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE,
         apiPath
       );
       if (typeof callback === 'function' && fullTimeRange !== undefined) {
@@ -123,7 +131,18 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         )
       );
     }
-  }, [callback, dataView, frozenDataPreference, http, query, timefilter, toasts, apiPath]);
+  }, [
+    timefilter,
+    dataView,
+    toasts,
+    http,
+    query,
+    isServerless,
+    hideFrozenDataTierChoice,
+    frozenDataPreference,
+    apiPath,
+    callback,
+  ]);
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -210,31 +229,33 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
           />
         </EuiButton>
       </EuiToolTip>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          id={'mlFullTimeRangeSelectorOption'}
-          button={
-            <EuiButtonIcon
-              display="base"
-              size="m"
-              iconType="boxesVertical"
-              aria-label={i18n.translate(
-                'xpack.ml.datePicker.fullTimeRangeSelector.moreOptionsButtonAriaLabel',
-                {
-                  defaultMessage: 'More options',
-                }
-              )}
-              onClick={onButtonClick}
-            />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downRight"
-        >
-          {popoverContent}
-        </EuiPopover>
-      </EuiFlexItem>
+      {hideFrozenDataTierChoice ? null : (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            id={'mlFullTimeRangeSelectorOption'}
+            button={
+              <EuiButtonIcon
+                display="base"
+                size="m"
+                iconType="boxesVertical"
+                aria-label={i18n.translate(
+                  'xpack.ml.datePicker.fullTimeRangeSelector.moreOptionsButtonAriaLabel',
+                  {
+                    defaultMessage: 'More options',
+                  }
+                )}
+                onClick={onButtonClick}
+              />
+            }
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downRight"
+          >
+            {popoverContent}
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

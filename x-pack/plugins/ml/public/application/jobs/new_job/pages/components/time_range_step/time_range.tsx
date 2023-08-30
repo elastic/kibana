@@ -13,6 +13,7 @@ import moment from 'moment';
 import { FullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
 import { useTimefilter, type GetTimeFieldRangeResponse } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
+import { useIsServerless } from '../../../../../capabilities/serverless';
 import { ML_INTERNAL_BASE_PATH } from '../../../../../../../common/constants/app';
 import { WizardNav } from '../wizard_nav';
 import { StepProps, WIZARD_STEPS } from '../step_types';
@@ -33,6 +34,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   const timefilter = useTimefilter();
   const { services } = useMlKibana();
   const dataSourceContext = useDataSource();
+  const isServerless = useIsServerless();
 
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, chartLoader, chartInterval } =
     useContext(JobCreatorContext);
@@ -137,6 +139,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
                 callback={fullTimeRangeCallback}
                 timefilter={timefilter}
                 apiPath={`${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`}
+                hideFrozenDataTierChoice={isServerless}
               />
             </EuiFlexItem>
             <EuiFlexItem />

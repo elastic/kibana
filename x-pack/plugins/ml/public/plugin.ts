@@ -199,7 +199,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
             }
 
-            if (pluginsSetup.triggersActionsUi && mlCapabilities.canUseMlAlerts) {
+            if (
+              pluginsSetup.triggersActionsUi &&
+              mlCapabilities.canUseMlAlerts &&
+              mlCapabilities.canGetJobs
+            ) {
               registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
             }
 

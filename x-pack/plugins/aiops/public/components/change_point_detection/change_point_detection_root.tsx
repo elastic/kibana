@@ -16,7 +16,11 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { DatePickerContextProvider, mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
+import {
+  DatePickerContextProvider,
+  type DatePickerDependencies,
+  mlTimefilterRefresh$,
+} from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import { type Observable } from 'rxjs';
@@ -46,16 +50,20 @@ export interface ChangePointDetectionAppStateProps {
   savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
+  /** Optional flag to designate whether we're running in a serverless environment */
+  isServerless?: boolean;
 }
 
 export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps> = ({
   dataView,
   savedSearch,
   appDependencies,
+  isServerless = false,
 }) => {
-  const datePickerDeps = {
+  const datePickerDeps: DatePickerDependencies = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    isServerless,
   };
 
   const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');
