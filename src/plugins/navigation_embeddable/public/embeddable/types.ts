@@ -82,10 +82,10 @@ export type NavigationEmbeddableOutput = EmbeddableOutput & {
 /**
  *  Navigation embeddable redux state
  */
-// export interface NavigationEmbeddableComponentState {} // TODO: Uncomment this if we end up needing component state
+export type NavigationEmbeddableComponentState = NavigationEmbeddableAttributes;
 
 export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
   NavigationEmbeddableInput,
   NavigationEmbeddableOutput,
-  {} // We currently don't have any component state - TODO: Replace with `NavigationEmbeddableComponentState` if necessary
+  NavigationEmbeddableComponentState
 >;
