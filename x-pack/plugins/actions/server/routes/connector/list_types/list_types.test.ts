@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { connectorTypesRoute } from './connector_types';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { actionsClientMock } from '../mocks';
-import { verifyAccessAndContext } from './verify_access_and_context';
+import { licenseStateMock } from '../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
+import { listTypesRoute } from './list_types';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { actionsClientMock } from '../../../mocks';
 
-jest.mock('./verify_access_and_context', () => ({
+jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
@@ -22,12 +22,12 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-describe('connectorTypesRoute', () => {
+describe('listTypesRoute', () => {
   it('lists action types with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    connectorTypesRoute(router, licenseState);
+    listTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -89,7 +89,7 @@ describe('connectorTypesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    connectorTypesRoute(router, licenseState);
+    listTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -168,7 +168,7 @@ describe('connectorTypesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    connectorTypesRoute(router, licenseState);
+    listTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -211,7 +211,7 @@ describe('connectorTypesRoute', () => {
       throw new Error('OMG');
     });
 
-    connectorTypesRoute(router, licenseState);
+    listTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
