@@ -279,6 +279,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
         'xpack.snapshot_restore.ui.enabled (boolean)',
+        'xpack.stack_connectors.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean)',
