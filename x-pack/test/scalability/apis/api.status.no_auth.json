@@ -17,11 +17,11 @@
       {
         "action": "rampUsersPerSec",
         "minUsersCount": 10,
-        "maxUsersCount": 700,
-        "duration": "138s"
+        "maxUsersCount": 1210,
+        "duration": "80s"
       }
     ],
-    "maxDuration": "6m"
+    "maxDuration": "4m"
   },
   "testData": {
     "esArchives": [],
