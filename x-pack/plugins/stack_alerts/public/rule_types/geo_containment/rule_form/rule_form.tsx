@@ -7,6 +7,9 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import type { Query } from '@kbn/es-query';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { GeoContainmentAlertParams } from '../types';
 import { BoundaryForm } from './boundary_form';
 import { EntityForm } from './entity_form';
 
@@ -14,7 +17,7 @@ export const RuleForm: React.FunctionComponent<
   RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
 > = (props) => {
   function getValidationError(key: string) {
-    return props.errors[key]?.length > 0 && key in props.ruleParams ? props.errors[key][0] : null;
+    return props.errors[key]?.length > 0 && key in props.ruleParams ? (props.errors[key] as string[])[0] : null;
   }
 
   return (
@@ -45,7 +48,7 @@ export const RuleForm: React.FunctionComponent<
         }}
         setDataViewTitle={(title: string) => props.setRuleParams('boundaryIndexTitle', title)}
         setGeoField={(fieldName: string) => props.setRuleParams('boundaryGeoField', fieldName)}
-        setNameField={(fieldName: string) => props.setRuleParams('boundaryNameField', fieldName)}
+        setNameField={(fieldName: string | undefined) => props.setRuleParams('boundaryNameField', fieldName)}
         setQuery={(query: Query) => props.setRuleParams('boundaryIndexQuery', query)}
         unifiedSearch={props.unifiedSearch}
       />

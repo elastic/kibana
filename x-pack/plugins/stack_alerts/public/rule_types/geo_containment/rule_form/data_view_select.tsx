@@ -10,6 +10,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 interface Props {
   data: DataPublicPluginStart;
@@ -29,7 +30,7 @@ export const DataViewSelect = (props: Props) => {
       isDisabled={isLoading}
       isInvalid={props.isInvalid}
       isLoading={isLoading}
-      indexPatternId={props.dataViewId}
+      indexPatternId={props.dataViewId ? props.dataViewId : ''}
       onChange={async (dataViewId?: string) => {
         if (!dataViewId) {
           return;

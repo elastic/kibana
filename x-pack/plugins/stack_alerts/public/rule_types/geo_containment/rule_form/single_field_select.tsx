@@ -33,9 +33,9 @@ function fieldsToOptions(fields?: DataViewField[]): Array<EuiComboBoxOptionOptio
 }
 
 interface Props {
-  isInvalid: boolean;
+  isInvalid?: boolean;
   placeholder: string;
-  value: string | null; // data view field name
+  value: string | null | undefined;
   onChange: (fieldName?: string) => void;
   fields: DataViewField[];
 }

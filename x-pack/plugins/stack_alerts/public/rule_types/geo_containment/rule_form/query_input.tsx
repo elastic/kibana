@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { CoreStart } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { STACK_ALERTS_FEATURE_ID } from '../../../../common/constants';
 
 function validateQuery(query: Query) {

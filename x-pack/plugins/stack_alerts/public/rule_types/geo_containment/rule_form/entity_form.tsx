@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type { GeoContainmentAlertParams } from '../types';
 import { DataViewSelect } from './data_view_select';
 import { SingleFieldSelect } from './single_field_select';
 import { QueryInput } from './query_input';
@@ -149,6 +152,9 @@ export const EntityForm = (props: Props) => {
             data={props.data}
             isInvalid={Boolean(dataViewError)}
             onChange={(dataView: DataView) => {
+              if (!dataView.id) {
+                return;
+              }
               props.setDataViewId(dataView.id);
               props.setDataViewTitle(dataView.title);
 
