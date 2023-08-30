@@ -9,6 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
 import {
   createSLOParamsSchema,
+  deleteSloInstancesParamsSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   findSloDefinitionsParamsSchema,
@@ -225,6 +226,23 @@ const findSLORoute = createObservabilityServerRoute({
   },
 });
 
+const deleteSloInstancesRoute = createObservabilityServerRoute({
+  endpoint: 'POST /api/observability/slos/_delete_instances 2023-10-31',
+  options: {
+    tags: ['access:slo_write'],
+  },
+  params: deleteSloInstancesParamsSchema,
+  handler: async ({ context }) => {
+    await assertPlatinumLicense(context);
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+
+    return null;
+  },
+});
+
 const findSloDefinitionsRoute = createObservabilityServerRoute({
   endpoint: 'GET /internal/observability/slos/_definitions',
   options: {
@@ -351,6 +369,7 @@ const getPreviewData = createObservabilityServerRoute({
 export const sloRouteRepository = {
   ...createSLORoute,
   ...deleteSLORoute,
+  ...deleteSloInstancesRoute,
   ...disableSLORoute,
   ...enableSLORoute,
   ...fetchHistoricalSummary,
