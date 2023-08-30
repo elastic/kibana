@@ -177,7 +177,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('opsgenie');
       await testSubjects.setValue('nameInput', 'Opsgenie test connector');
+      await testSubjects.setValue('secrets.apiKey-input', 'testkey');
       await commonScreenshots.takeScreenshot('opsgenie-connector', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await commonScreenshots.takeScreenshot('opsgenie-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });
