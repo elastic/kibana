@@ -148,6 +148,7 @@ export function RulesPage() {
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <RuleList
+            filterConsumers={observabilityRuleCreationValidConsumers}
             filteredRuleTypes={filteredRuleTypes}
             lastRunOutcomeFilter={stateLastResponse}
             refresh={stateRefresh}

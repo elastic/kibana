@@ -24,6 +24,7 @@ export interface LoadRulesProps {
   ruleStatusesFilter?: RuleStatus[];
   sort?: Sorting;
   kueryNode?: KueryNode;
+  filterConsumers?: string[];
 }
 
 export const rewriteRulesResponseRes = (results: Array<AsApiContract<Rule>>): Rule[] => {
