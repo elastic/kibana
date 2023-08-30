@@ -13,25 +13,28 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 export const PROTECTION_UPDATES_NOTE_QUERY_KEY = 'note';
 
 interface UseProtectionUpdatesNote {
-  policyId: string;
+  packagePolicyId: string;
 }
 
 interface NoteResponse {
   note: string;
 }
 
-export const useGetProtectionUpdatesNote = ({ policyId }: UseProtectionUpdatesNote) => {
+export const useGetProtectionUpdatesNote = ({ packagePolicyId }: UseProtectionUpdatesNote) => {
   const { http } = useKibana().services;
 
   return useQuery<{ data: NoteResponse }, unknown, NoteResponse>(
     [PROTECTION_UPDATES_NOTE_QUERY_KEY],
     () =>
-      http.get(resolvePathVariables(PROTECTION_UPDATES_NOTE_ROUTE, { policy_id: policyId }), {
-        version: '2023-10-31',
-      }),
+      http.get(
+        resolvePathVariables(PROTECTION_UPDATES_NOTE_ROUTE, { package_policy_id: packagePolicyId }),
+        {
+          version: '2023-10-31',
+        }
+      ),
     {
       keepPreviousData: true,
-      enabled: !!policyId,
+      enabled: !!packagePolicyId,
       retry: false,
     }
   );

@@ -14,7 +14,7 @@ import {
 } from './handlers';
 import {
   GetProtectionUpdatesNoteSchema,
-  UpdateProtectionUpdatesNoteSchema,
+  CreateUpdateProtectionUpdatesNoteSchema,
 } from '../../../../common/api/endpoint/protection_updates_note/protection_updates_note_schema';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../common/endpoint/constants';
@@ -36,7 +36,7 @@ export function registerProtectionUpdatesNoteRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: UpdateProtectionUpdatesNoteSchema,
+          request: CreateUpdateProtectionUpdatesNoteSchema,
         },
       },
       withEndpointAuthz(
@@ -76,7 +76,7 @@ export function registerProtectionUpdatesNoteRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: UpdateProtectionUpdatesNoteSchema,
+          request: CreateUpdateProtectionUpdatesNoteSchema,
         },
       },
       withEndpointAuthz(

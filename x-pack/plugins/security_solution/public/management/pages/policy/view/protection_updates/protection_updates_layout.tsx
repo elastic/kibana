@@ -72,10 +72,10 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const [selectedDate, setSelectedDate] = useState<Moment>(today);
 
     const { data: fetchedNote, isLoading: getNoteInProgress } = useGetProtectionUpdatesNote({
-      policyId: _policy.id,
+      packagePolicyId: _policy.id,
     });
     const { isLoading: createNoteInProgress, mutate: createNote } = useCreateProtectionUpdatesNote({
-      policyId: _policy.id,
+      packagePolicyId: _policy.id,
     });
     const [note, setNote] = useState('');
 

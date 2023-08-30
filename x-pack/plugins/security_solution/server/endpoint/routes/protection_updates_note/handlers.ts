@@ -14,14 +14,14 @@ import type { TypeOf } from '@kbn/config-schema';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { protectionUpdatesNoteSavedObjectType } from '../../lib/protection_updates_note/saved_object_mappings';
 import type {
-  UpdateProtectionUpdatesNoteSchema,
+  CreateUpdateProtectionUpdatesNoteSchema,
   GetProtectionUpdatesNoteSchema,
 } from '../../../../common/api/endpoint/protection_updates_note/protection_updates_note_schema';
 
-const findProtectionNote = async (SOClient: SavedObjectsClientContract, policyId: string) => {
+const getProtectionNote = async (SOClient: SavedObjectsClientContract, packagePolicyId: string) => {
   return SOClient.find<{ note: string }>({
     type: protectionUpdatesNoteSavedObjectType,
-    hasReference: { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
+    hasReference: { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: packagePolicyId },
   });
 };
 
@@ -62,16 +62,16 @@ const createProtectionNote = async (
 };
 
 export const postProtectionUpdatesNoteHandler = function (): RequestHandler<
-  TypeOf<typeof UpdateProtectionUpdatesNoteSchema.params>,
+  TypeOf<typeof CreateUpdateProtectionUpdatesNoteSchema.params>,
   undefined,
-  TypeOf<typeof UpdateProtectionUpdatesNoteSchema.body>
+  TypeOf<typeof CreateUpdateProtectionUpdatesNoteSchema.body>
 > {
   return async (context, request, response) => {
     const SOClient = (await context.core).savedObjects.client;
-    const { policy_id: policyId } = request.params;
+    const { package_policy_id: packagePolicyId } = request.params;
     const { note } = request.body;
 
-    const soClientResponse = await findProtectionNote(SOClient, policyId);
+    const soClientResponse = await getProtectionNote(SOClient, packagePolicyId);
 
     if (soClientResponse.saved_objects[0]) {
       const { references } = soClientResponse.saved_objects[0];
@@ -90,7 +90,7 @@ export const postProtectionUpdatesNoteHandler = function (): RequestHandler<
 
     const references: SavedObjectReference[] = [
       {
-        id: policyId,
+        id: packagePolicyId,
         name: 'package_policy',
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       },
@@ -111,9 +111,9 @@ export const getProtectionUpdatesNoteHandler = function (): RequestHandler<
 > {
   return async (context, request, response) => {
     const SOClient = (await context.core).savedObjects.client;
-    const { policy_id: policyId } = request.params;
+    const { package_policy_id: packagePolicyId } = request.params;
 
-    const soClientResponse = await findProtectionNote(SOClient, policyId);
+    const soClientResponse = await getProtectionNote(SOClient, packagePolicyId);
 
     if (!soClientResponse.saved_objects[0] || !soClientResponse.saved_objects[0].attributes) {
       return response.notFound({ body: 'No note found for this policy' });
@@ -126,15 +126,15 @@ export const getProtectionUpdatesNoteHandler = function (): RequestHandler<
 };
 
 export const putProtectionUpdatesNoteHandler = function (): RequestHandler<
-  TypeOf<typeof UpdateProtectionUpdatesNoteSchema.params>,
+  TypeOf<typeof CreateUpdateProtectionUpdatesNoteSchema.params>,
   undefined,
-  TypeOf<typeof UpdateProtectionUpdatesNoteSchema.body>
+  TypeOf<typeof CreateUpdateProtectionUpdatesNoteSchema.body>
 > {
   return async (context, request, response) => {
     const SOClient = (await context.core).savedObjects.client;
-    const { policy_id: policyId } = request.params;
+    const { package_policy_id: packagePolicyId } = request.params;
 
-    const soClientResponse = await findProtectionNote(SOClient, policyId);
+    const soClientResponse = await getProtectionNote(SOClient, packagePolicyId);
 
     if (!soClientResponse.saved_objects[0] || !soClientResponse.saved_objects[0].attributes) {
       return response.badRequest({ body: 'No note found for this policy' });
@@ -162,9 +162,9 @@ export const deleteProtectionUpdatesNoteHandler = function (): RequestHandler<
 > {
   return async (context, request, response) => {
     const SOClient = (await context.core).savedObjects.client;
-    const { policy_id: policyId } = request.params;
+    const { package_policy_id: packagePolicyId } = request.params;
 
-    const soClientResponse = await findProtectionNote(SOClient, policyId);
+    const soClientResponse = await getProtectionNote(SOClient, packagePolicyId);
     if (!soClientResponse.saved_objects[0]) {
       return response.badRequest({ body: 'No note found for this policy' });
     }

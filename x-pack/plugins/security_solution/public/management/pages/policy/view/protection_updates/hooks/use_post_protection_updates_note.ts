@@ -12,14 +12,14 @@ import { resolvePathVariables } from '../../../../../../common/utils/resolve_pat
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../../../../common/endpoint/constants';
 
 interface UseProtectionUpdatesNote {
-  policyId: string;
+  packagePolicyId: string;
 }
 
 interface NoteResponse {
   note: string;
 }
 
-export const useCreateProtectionUpdatesNote = ({ policyId }: UseProtectionUpdatesNote) => {
+export const useCreateProtectionUpdatesNote = ({ packagePolicyId }: UseProtectionUpdatesNote) => {
   const { http } = useKibana().services;
   const queryClient = useQueryClient();
 
@@ -29,10 +29,13 @@ export const useCreateProtectionUpdatesNote = ({ policyId }: UseProtectionUpdate
     NoteResponse
   >(
     (payload) =>
-      http.post(resolvePathVariables(PROTECTION_UPDATES_NOTE_ROUTE, { policy_id: policyId }), {
-        version: '2023-10-31',
-        body: JSON.stringify(payload),
-      }),
+      http.post(
+        resolvePathVariables(PROTECTION_UPDATES_NOTE_ROUTE, { policy_id: packagePolicyId }),
+        {
+          version: '2023-10-31',
+          body: JSON.stringify(payload),
+        }
+      ),
     {
       onSuccess: () => {
         queryClient.invalidateQueries([PROTECTION_UPDATES_NOTE_QUERY_KEY]);
