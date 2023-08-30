@@ -918,8 +918,12 @@ export class SearchSource {
     };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
-    // For testing shard failure messages in UI, uncomment the next block and switch to `kibana*` data view
-    // body.query = {
+    // For testing shard failure messages in the UI, follow these steps:
+    // 1. Add all three sample data sets (flights, ecommerce, logs) to Kibana.
+    // 2. Create a data view using the index pattern `kibana*`.
+    // 3. Uncomment the lines below, navigate to Discover,
+    //    and switch to the data view created in step 2.
+    // body.query.bool.must.push({
     //   error_query: {
     //     indices: [
     //       {
@@ -930,7 +934,7 @@ export class SearchSource {
     //       },
     //     ],
     //   },
-    // };
+    // });
 
     if (highlightAll && body.query) {
       body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
