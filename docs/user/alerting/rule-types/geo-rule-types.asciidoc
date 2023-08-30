@@ -20,8 +20,7 @@ than the current time minus the amount of the interval. If data older than
 [float]
 === Actions
 
-A rule can be triggered either when a containment condition is met or when an entity
-is no longer contained.
+A rule can be triggered either when a containment condition is met or when an entity is no longer contained.
 
 [role="screenshot"]
 image::user/alerting/images/alert-types-tracking-containment-action-options.png[Action frequency options for an action,width=75%]
