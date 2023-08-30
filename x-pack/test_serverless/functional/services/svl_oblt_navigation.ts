@@ -22,13 +22,5 @@ export function SvlObltNavigationServiceProvider({
         await testSubjects.existOrFail('obltOnboardingHomeTitle', { timeout: 2000 });
       });
     },
-    async navigateToLandingWithData() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('landingPage');
-        await testSubjects.existOrFail('breadcrumb-deepLinkId-discover:log-explorer', {
-          timeout: 2000,
-        });
-      });
-    },
   };
 }
