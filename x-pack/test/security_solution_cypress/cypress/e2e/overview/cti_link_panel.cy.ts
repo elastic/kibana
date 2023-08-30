@@ -32,7 +32,7 @@ describe('CTI Link Panel', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('enabled threat intel module', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'threat_indicator');
+      cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
     });
 
     beforeEach(() => {
