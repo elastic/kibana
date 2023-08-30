@@ -20,7 +20,6 @@ import {
 } from '@kbn/search-response-warnings';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
 import { DataLoadingState, DiscoverGrid } from '../../components/discover_grid/discover_grid';
@@ -157,7 +156,6 @@ export function ContextAppContent({
           sort={sort}
           useNewFieldsApi={useNewFieldsApi}
           dataTestSubj="contextDocTable"
-          DocViewer={UnifiedDocViewer}
         />
       )}
       {!isLegacy && (

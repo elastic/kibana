@@ -42,9 +42,6 @@ const mountComponent = (props: TableRowProps) => {
             }
           },
         },
-        unifiedDocViewer: {
-          getDocViews: () => [],
-        },
       }}
     >
       <table>
@@ -81,7 +78,6 @@ describe('Doc table row component', () => {
     useNewFieldsApi: true,
     filterManager: mockFilterManager,
     addBasePath: (path: string) => path,
-    DocViewer: () => <></>,
   } as unknown as TableRowProps;
 
   it('should render __document__ column', () => {

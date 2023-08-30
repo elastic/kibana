@@ -29,7 +29,6 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
 } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -236,7 +235,6 @@ function DiscoverDocumentsComponent({
             onSort={!isTextBasedQuery ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
-            DocViewer={UnifiedDocViewer}
           />
         </>
       )}
