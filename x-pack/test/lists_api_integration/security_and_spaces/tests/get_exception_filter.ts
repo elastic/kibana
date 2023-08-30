@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${INTERNAL_EXCEPTION_FILTER}`)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version header', '1')
+          .set('elastic-api-version', '1')
           .send(getExceptionFilterFromExceptionItemsSchemaMock())
           .expect(200);
 
@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${INTERNAL_EXCEPTION_FILTER}`)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version header', '1')
+          .set('elastic-api-version', '1')
           .send(getExceptionFilterFromExceptionIdsSchemaMock())
           .expect(200);
 
