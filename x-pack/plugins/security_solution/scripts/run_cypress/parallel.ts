@@ -14,8 +14,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
-import minimatch from 'minimatch';
 import path from 'path';
+import grep from '@cypress/grep/src/plugin';
 
 import {
   EsVersion,
@@ -35,19 +35,17 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
-import { parseTestFileConfig } from './utils';
+import { isSkipped, parseTestFileConfig } from './utils';
 
 /**
  * Retrieve test files using a glob pattern.
  * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
  */
-const retrieveIntegrations = (
-  /** Pattern passed to globby to find spec files. */ specPattern: string[]
-) => {
-  const integrationsPaths = globby.sync(specPattern);
+const retrieveIntegrations = (integrationsPaths: string[]) => {
+  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath));
 
   if (process.env.RUN_ALL_TESTS === 'true') {
-    return integrationsPaths;
+    return nonSkippedSpecs;
   } else {
     // The number of instances of this job were created
     const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
@@ -58,13 +56,13 @@ const retrieveIntegrations = (
       ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
       : 0;
 
-    const integrationsPathsForChunk: string[] = [];
+    const nonSkippedSpecsForChunk: string[] = [];
 
-    for (let i = chunkIndex; i < integrationsPaths.length; i += chunksTotal) {
-      integrationsPathsForChunk.push(integrationsPaths[i]);
+    for (let i = chunkIndex; i < nonSkippedSpecs.length; i += chunksTotal) {
+      nonSkippedSpecsForChunk.push(nonSkippedSpecs[i]);
     }
 
-    return integrationsPathsForChunk;
+    return nonSkippedSpecsForChunk;
   }
 };
 
@@ -89,30 +87,41 @@ export const cli = () => {
       ) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
       const spec: string | undefined = argv?.spec as string;
-      let files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
+      const grepSpecPattern = grep({
+        ...cypressConfigFile,
+        specPattern: spec ?? cypressConfigFile.e2e.specPattern,
+        excludeSpecPattern: [],
+      }).specPattern;
+
+      let files = retrieveIntegrations(
+        _.isArray(grepSpecPattern)
+          ? grepSpecPattern
+          : globby.sync(spec ? [spec] : cypressConfigFile.e2e.specPattern)
+      );
 
       if (argv.changedSpecsOnly) {
-        const basePath = process.cwd().split('kibana/')[1];
-        files = findChangedFiles('main', false)
-          .filter(
-            minimatch.filter(path.join(basePath, cypressConfigFile?.e2e?.specPattern), {
-              matchBase: true,
-            })
-          )
-          .map((filePath: string) => filePath.replace(basePath, '.'));
-
-        if (!files?.length) {
-          // eslint-disable-next-line no-process-exit
-          return process.exit(0);
-        }
+        files = (findChangedFiles('main', false) as string[]).reduce((acc, itemPath) => {
+          const existing = files.find((grepFilePath) => grepFilePath.includes(itemPath));
+          if (existing) {
+            acc.push(existing);
+          }
+          return acc;
+        }, [] as string[]);
 
         // to avoid running too many tests, we limit the number of files to 3
         // we may extend this in the future
         files = files.slice(0, 3);
       }
 
+      const log = new ToolingLog({
+        level: 'info',
+        writeTo: process.stdout,
+      });
+
       if (!files?.length) {
-        throw new Error('No files found');
+        log.info('No tests found');
+        // eslint-disable-next-line no-process-exit
+        return process.exit(0);
       }
 
       const esPorts: number[] = [9200, 9220];
@@ -167,11 +176,6 @@ export const cli = () => {
         _.pull(kibanaPorts, kibanaPort);
         _.pull(fleetServerPorts, fleetServerPort);
       };
-
-      const log = new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      });
 
       const hostRealIp = getLocalhostRealIp();
 

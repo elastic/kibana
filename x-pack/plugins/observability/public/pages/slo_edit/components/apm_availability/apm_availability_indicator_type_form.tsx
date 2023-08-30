@@ -12,10 +12,12 @@ import { useFormContext } from 'react-hook-form';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
+import { GroupByFieldSelector } from '../common/group_by_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
+  const index = watch('indicator.params.index');
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -118,6 +120,8 @@ export function ApmAvailabilityIndicatorTypeForm() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <GroupByFieldSelector index={index} />
 
       <DataPreviewChart />
     </EuiFlexGroup>

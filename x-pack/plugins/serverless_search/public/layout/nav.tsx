@@ -16,6 +16,14 @@ import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
+// Hiding this until page is in a better space
+const _connectorItem = {
+  link: 'serverlessConnectors',
+  title: i18n.translate('xpack.serverlessSearch.nav.connectors', {
+    defaultMessage: 'Connectors',
+  }),
+};
+
 const navigationTree: NavigationTreeDefinition = {
   body: [
     { type: 'recentlyAccessed' },
@@ -72,12 +80,6 @@ const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Alerts',
               }),
             },
-            {
-              link: 'serverlessConnectors',
-              title: i18n.translate('xpack.serverlessSearch.nav.connectors', {
-                defaultMessage: 'Connectors',
-              }),
-            },
           ],
         },
         {
@@ -97,13 +99,6 @@ const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Pipelines',
               }),
               link: 'management:ingest_pipelines',
-            },
-            {
-              id: 'content_indexing_api',
-              link: 'serverlessIndexingApi',
-              title: i18n.translate('xpack.serverlessSearch.nav.content.indexingApi', {
-                defaultMessage: 'Indexing API',
-              }),
             },
           ],
         },

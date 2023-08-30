@@ -88,6 +88,7 @@ const timestamp = '2022-07-25T08:20:18.966Z';
 const defaultProps = {
   userName: 'test user',
   timestamp,
+  scopeId: 'scopeId',
 };
 
 const mockUserDetailsResponse = [
