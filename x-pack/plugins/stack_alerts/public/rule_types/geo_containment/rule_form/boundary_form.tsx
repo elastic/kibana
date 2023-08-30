@@ -184,7 +184,7 @@ export const BoundaryForm = (props: Props) => {
               })}
             >
               <SingleFieldSelect
-                placeholder={i18n.translate('xpack.stackAlerts.geoContainment.selectGeoLabel', {
+                placeholder={i18n.translate('xpack.stackAlerts.geoContainment.selectBoundaryNameLabel', {
                   defaultMessage: 'Select name field',
                 })}
                 value={props.ruleParams.boundaryNameField}
