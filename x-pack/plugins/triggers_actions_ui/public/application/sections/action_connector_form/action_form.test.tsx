@@ -299,6 +299,15 @@ describe('action_form', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
       },
+      {
+        id: '.disabled-in-registry',
+        name: 'Disabled in registry',
+        enabled: false,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
     ]);
 
     const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';

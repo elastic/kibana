@@ -292,6 +292,7 @@ export class ActionTypeRegistry {
   public validateEnabledConnectorTypes() {
     if (this.enabledConnectorTypes !== DEFAULT_ENABLED_CONNECTOR_TYPES) {
       this.enabledConnectorTypes.forEach((connectorType) => {
+        // Throws error if action type doesn't exist
         this.get(connectorType);
       });
     }

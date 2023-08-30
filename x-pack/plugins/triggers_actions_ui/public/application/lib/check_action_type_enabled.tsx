@@ -85,6 +85,24 @@ const configurationCheckResult = {
   ),
 };
 
+const registryCheckResult = {
+  isEnabled: false,
+  message: i18n.translate(
+    'xpack.triggersActionsUI.checkActionTypeEnabled.actionTypeDisabledByRegistryMessage',
+    { defaultMessage: 'This connector is disabled in the registry.' }
+  ),
+  messageCard: (
+    <EuiCard
+      title={i18n.translate(
+        'xpack.triggersActionsUI.licenseCheck.actionTypeDisabledByRegistryMessageTitle',
+        { defaultMessage: 'This feature is disabled in the registry.' }
+      )}
+      description=""
+      className="actCheckActionTypeEnabled__disabledActionWarningCard"
+    />
+  ),
+};
+
 export function checkActionTypeEnabled(
   actionType?: ActionType
 ): IsEnabledResult | IsDisabledResult {
@@ -94,6 +112,10 @@ export function checkActionTypeEnabled(
 
   if (actionType?.enabledInConfig === false) {
     return configurationCheckResult;
+  }
+
+  if (actionType?.enabled === false) {
+    return registryCheckResult;
   }
 
   return { isEnabled: true };
@@ -115,6 +137,10 @@ export function checkActionFormActionTypeEnabled(
     )
   ) {
     return configurationCheckResult;
+  }
+
+  if (actionType?.enabled === false) {
+    return registryCheckResult;
   }
 
   return { isEnabled: true };
