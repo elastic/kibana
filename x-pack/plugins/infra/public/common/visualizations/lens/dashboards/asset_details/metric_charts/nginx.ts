@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { hostLensFormulas } from '../../../../constants';
-import { XY_OVERRIDES } from '../../constants';
 import type { XYConfig } from './types';
 
 export const nginxRequestRate: XYConfig = {
@@ -23,9 +22,6 @@ export const nginxRequestRate: XYConfig = {
     },
   ],
   dataViewOrigin: 'metrics',
-  overrides: {
-    axisLeft: XY_OVERRIDES.axisLeft,
-  },
 };
 
 export const nginxActiveConnections: XYConfig = {
@@ -41,9 +37,6 @@ export const nginxActiveConnections: XYConfig = {
     },
   ],
   dataViewOrigin: 'metrics',
-  overrides: {
-    axisLeft: XY_OVERRIDES.axisLeft,
-  },
 };
 
 export const nginxRequestsPerConnection: XYConfig = {
