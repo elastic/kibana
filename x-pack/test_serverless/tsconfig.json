@@ -46,6 +46,7 @@
     "@kbn/test-subj-selector",
     "@kbn/reporting-plugin",
     "@kbn/core-http-common",
+    "@kbn/std",
     "@kbn/data-views-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/rison",
@@ -54,6 +55,8 @@
     "@kbn/security-api-integration-helpers",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-plugin",
+    "@kbn/dev-utils",
     "@kbn/bfetch-plugin",
+    "@kbn/rison",
   ]
 }

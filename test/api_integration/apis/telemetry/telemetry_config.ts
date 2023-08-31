@@ -46,6 +46,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
               optIn: null, // the config.js for this FTR sets it to `false`, we are bound to ask again.
               sendUsageFrom: 'server',
               telemetryNotifyUserAboutOptInDefault: false, // it's not opted-in by default (that's what this flag is about)
+              labels: {},
             });
         });
 
@@ -69,6 +70,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
               optIn: true,
               sendUsageFrom: 'server',
               telemetryNotifyUserAboutOptInDefault: false,
+              labels: {},
             });
         });
 
@@ -92,6 +94,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
               optIn: false,
               sendUsageFrom: 'server',
               telemetryNotifyUserAboutOptInDefault: false,
+              labels: {},
             });
         });
 
@@ -136,6 +139,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
                 optIn: true,
                 sendUsageFrom: 'server',
                 telemetryNotifyUserAboutOptInDefault: false,
+                labels: {},
               });
           });
 
@@ -158,6 +162,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
                 optIn: null,
                 sendUsageFrom: 'server',
                 telemetryNotifyUserAboutOptInDefault: false,
+                labels: {},
               });
           });
         });
