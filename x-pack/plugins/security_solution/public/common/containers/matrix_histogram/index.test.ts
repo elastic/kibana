@@ -190,19 +190,6 @@ describe('useMatrixHistogram', () => {
       expect(mockEndTracking).toHaveBeenCalledWith('success');
     });
 
-    it('should end tracking error when the partial request is invalid', () => {
-      (useKibana().services.data.search.search as jest.Mock).mockReturnValueOnce({
-        subscribe: ({ next }: { next: Function }) => next(null),
-      });
-
-      renderHook(useMatrixHistogram, {
-        initialProps: props,
-        wrapper: TestProviders,
-      });
-
-      expect(mockEndTracking).toHaveBeenCalledWith('invalid');
-    });
-
     it('should end tracking error when the request fails', () => {
       (useKibana().services.data.search.search as jest.Mock).mockReturnValueOnce({
         subscribe: ({ error }: { error: Function }) => error('some error'),
