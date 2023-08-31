@@ -11,7 +11,6 @@ xpack.serverless.observability.enabled: true
 
 ## Configure plugins
 xpack.infra.logs.app_target: discover
-xpack.discoverLogExplorer.featureFlags.deepLinkVisible: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/observability/landing
