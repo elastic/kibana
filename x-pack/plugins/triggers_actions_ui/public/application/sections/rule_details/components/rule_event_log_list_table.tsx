@@ -95,7 +95,6 @@ export interface RuleEventLogListCommonProps {
   hasAllSpaceSwitch?: boolean;
   filteredRuleTypes?: string[];
   setHeaderActions?: (components?: React.ReactNode[]) => void;
-  onRuleNameClick?: (ruleId: string) => void;
   getRuleDetailsRoute?: (ruleId: string) => string;
 }
 
@@ -118,7 +117,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     hasAllSpaceSwitch = false,
     setHeaderActions,
     filteredRuleTypes,
-    onRuleNameClick,
     getRuleDetailsRoute,
   } = props;
 
@@ -631,7 +629,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
           onFlyoutOpen={onFlyoutOpen}
-          onRuleNameClick={onRuleNameClick}
           setVisibleColumns={setVisibleColumns}
           setSortingColumns={setSortingColumns}
           getRuleDetailsRoute={getRuleDetailsRoute}
