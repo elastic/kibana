@@ -171,5 +171,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('webhook-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
+
+    it('generative ai connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('gen-ai');
+      await testSubjects.setValue('nameInput', 'OpenAI test connector');
+      await testSubjects.setValue('secrets.apiKey-input', 'testkey');
+      await commonScreenshots.takeScreenshot('gen-ai-connector', screenshotDirectories, 1920, 1200);
+      const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
+      await flyOutCancelButton.click();
+    });
   });
 }
