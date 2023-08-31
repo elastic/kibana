@@ -95,7 +95,7 @@ image::images/elser.png[An example of the new ELSER UI]
 
 [discrete]
 ==== Cross-cluster API keys
-The API keys page in {kib} (under **Management > Security > API keys**) has been redesigned, in order to enable you to easily create and manage cross-cluster API keys. You can now select the type of key that you want to create and easily find or filter through the existing API keys you have access to using the tagged list view.
+The API keys page in {kib} (under **Management > Security > API keys**) has been redesigned to enable you to create and manage cross-cluster API keys more easily. You can now select the type of key that you want to create and find or filter through the existing API keys you have access to using the tagged list view.
 
 [role="screenshot"]
 image::images/api-keys.png[A screenshot of the new API keys redesign]
