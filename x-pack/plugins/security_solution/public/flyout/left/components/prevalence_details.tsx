@@ -8,16 +8,21 @@
 import React, { useState } from 'react';
 import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
 import {
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useLicense } from '../../../common/hooks/use_license';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
@@ -68,11 +73,15 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
     field: 'field',
     name: PREVALENCE_TABLE_FIELD_COLUMN_TITLE,
     'data-test-subj': PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
+    render: (field: string) => <EuiText size="xs">{field}</EuiText>,
+    width: '55%',
   },
   {
     field: 'value',
     name: PREVALENCE_TABLE_VALUE_COLUMN_TITLE,
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
+    render: (value: string) => <EuiText size="xs">{value}</EuiText>,
+    width: '55%',
   },
   {
     name: (
@@ -158,10 +167,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
     render: (hostPrevalence: number) => (
-      <>
-        {Math.round(hostPrevalence * 100)}
-        {'%'}
-      </>
+      <EuiText size="xs">{`${Math.round(hostPrevalence * 100)}%`}</EuiText>
     ),
     width: '10%',
   },
@@ -177,10 +183,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
     render: (userPrevalence: number) => (
-      <>
-        {Math.round(userPrevalence * 100)}
-        {'%'}
-      </>
+      <EuiText size="xs">{`${Math.round(userPrevalence * 100)}%`}</EuiText>
     ),
     width: '10%',
   },
@@ -192,6 +195,8 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
 export const PrevalenceDetails: React.FC = () => {
   const { browserFields, dataFormattedForFieldBrowser, eventId, investigationFields } =
     useLeftPanelContext();
+
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
 
   const [start, setStart] = useState(DEFAULT_FROM);
   const [end, setEnd] = useState(DEFAULT_TO);
@@ -235,8 +240,31 @@ export const PrevalenceDetails: React.FC = () => {
     );
   }
 
+  const upsell = (
+    <>
+      <EuiCallOut data-test-subj={`${PREVALENCE_DETAILS_TABLE_TEST_ID}UpSell`}>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.documentDetails.prevalenceTableAlertUpsell"
+          defaultMessage="Preview of a {subscription} feature showing host and user prevalence."
+          values={{
+            subscription: (
+              <EuiLink href="https://www.elastic.co/pricing/" target="_blank">
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.documentDetails.prevalenceTableAlertUpsellLink"
+                  defaultMessage="Platinum"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiCallOut>
+      <EuiSpacer size="s" />
+    </>
+  );
+
   return (
     <>
+      {!isPlatinumPlus && upsell}
       <EuiPanel>
         <EuiSuperDatePicker
           start={start}
