@@ -80,9 +80,10 @@ export const ActionTypeMenu = ({
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(([id, { enabledInConfig, enabledInLicense, enabled }]) => {
       const disabledInRegistry = enabledInConfig && enabledInLicense && !enabled;
+
       return !(
-        actionTypeRegistry.get(id).hideInUi ||
         !actionTypeRegistry.has(id) ||
+        actionTypeRegistry.get(id).hideInUi ||
         !enabledInConfig ||
         disabledInRegistry
       );
