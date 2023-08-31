@@ -13,9 +13,7 @@ export function isValidIndexName(name: string) {
   const indexPatternInvalid =
     byteLength > 255 || // name can't be greater than 255 bytes
     name !== name.toLowerCase() || // name should be lowercase
-    name === '.' ||
-    name === '..' || // name can't be . or ..
-    name.match(/^[-_+]/) !== null || // name can't start with these chars
+    name.match(/^[-_+.]/) !== null || // name can't start with these chars
     name.match(reg) !== null || // name can't contain these chars
     name.length === 0; // name can't be empty
 

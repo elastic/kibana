@@ -24,14 +24,16 @@ describe('create index utilities', () => {
     it('returns error for ..', () => {
       expect(isValidIndexName('..')).toBe(false);
     });
-    it('returns error if name starts with -, _, or +', () => {
+    it('returns error if name starts with -, _,., or +', () => {
       expect(isValidIndexName('-index')).toBe(false);
       expect(isValidIndexName('_index')).toBe(false);
       expect(isValidIndexName('+index')).toBe(false);
+      expect(isValidIndexName('.index')).toBe(false);
 
       expect(isValidIndexName('index-name')).toBe(true);
       expect(isValidIndexName('index_name')).toBe(true);
       expect(isValidIndexName('index+name')).toBe(true);
+      expect(isValidIndexName('index.name')).toBe(true);
     });
     it('returns error if name contains spaces', () => {
       expect(isValidIndexName('index name')).toBe(false);
