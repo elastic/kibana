@@ -75,6 +75,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
             title={conversation.value?.conversation.title ?? EMPTY_CONVERSATION_TITLE}
             messages={displayedMessages}
             conversationId={conversationId}
+            startedFrom="appTopNavbar"
             onClose={() => {
               setIsOpen(() => false);
             }}
