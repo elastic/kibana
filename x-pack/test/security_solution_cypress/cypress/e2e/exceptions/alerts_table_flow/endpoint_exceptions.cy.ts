@@ -19,10 +19,7 @@ import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { createRule } from '../../../tasks/api_calls/rules';
-import {
-  waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
-} from '../../../tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   addExceptionEntryFieldValueAndSelectSuggestion,
@@ -40,7 +37,7 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../screens/exceptions';
-import { goToEndpointExceptionsTab } from '../../../tasks/rule_details';
+import { goToEndpointExceptionsTab, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
 // See https://github.com/elastic/kibana/issues/163967
 describe.skip(

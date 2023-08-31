@@ -108,11 +108,10 @@ import {
   goToScheduleStepTab,
   importSavedQuery,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../tasks/edit_rule';
 import { login, visit, visitSecurityDetectionRulesPage } from '../../../tasks/login';
-import { enablesRule, getDetails } from '../../../tasks/rule_details';
+import { enablesRule, getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
