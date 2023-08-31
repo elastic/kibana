@@ -5,12 +5,96 @@ Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
-| {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
+Previous versions: {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
-//NOTE: The notable-highlights tagged regions are re-used in the
-//Installation and Upgrade Guide
+[discrete]
+=== Alerting
 
-// tag::notable-highlights[]
+[discrete]
+==== Webhook connector improvement
+The <<webhook-action-type,Webhook connector>> now supports client certification. You can now use the webhook connector for secured integration with third parties, beyond basic authentication (using usernames and passwords or tokens). 
 
-// end::notable-highlights[]
+[role="screenshot"]
+image::images/webhook-connector.png[A screenshot displaying the new SSL authentication option in the UI, width=70%]
+
+[discrete]
+=== Dashboard
+
+[discrete]
+==== Multivalue filtering using tooltip actions
+Multivalue filtering using tooltip actions is already enabled for XY charts, and we are now enabling it for heat maps and partition charts. You can now filter these by multiple values at the same time, making it easier to find the insights you're looking for in your data.
+
+For example, you can filter a heat map by both region and country. You can also filter a partition chart by both product and date.
+
+To use multivalue filtering, right-click on the chart to show the tooltip menu. Then select the values you want to filter by, and click on *Filter X Series*. We will continue to add support for multivalue filtering for other types of charts in the future.
+
+[role="screenshot"]
+image::images/multivalue-filtering.png[An example of multivalue filtering on a partition chart, width=70%]
+
+[discrete]
+==== Access dashboards' metadata from the listing page
+Easily view and edit dashboards’ title, description, and tags from the listing page.
+
+[role="screenshot"]
+image::images/dashboards-metadata.png[An example of the listing page displaying metadata, width=70%]
+
+[discrete]
+==== Reduce duplicate toasts in dashboards and discover
+In previous versions of {kib}, Dashboards and Discover queries had the potential to create multiple duplicate toast notifications when a query generated multiple errors. Now new toasts that are identical to a toast already on your screen are combined into a single toast. Additionally, these toasts that represent more than one message, are displayed on a counter badge so the magnitude of errors is still visible.
+
+[discrete]
+=== Machine learning
+
+[discrete]
+==== Explain log rate dips
+preview:[] Previously, you could detect and analyze log rate spikes using our log rate analysis functionality, and now you have the ability to do the same for dips. Log rate analysis helps you explain log rate dips and spikes by identifying field-value pairs that display a statistically significant deviation (decrease for dips and increase for spikes) in the selected time range, compared to their baseline occurrence. Using log rate analysis can help you move from simply detecting changes to correlating events and identifying root causes in just a few clicks. 
+
+[role="screenshot"]
+image::images/log-rate-analysis.png[An example of log rate analysis on dips in data]
+
+[discrete]
+==== Add Change Point Detection charts to dashboards and cases
+preview:[] Continuing the integration of Machine Learning deeper into Elastic tools and workflows, you can now easily attach Change Point Detection charts to **Dashboards** and **Cases** with just a few clicks. Starting from **Machine Learning > AIOps Labs> Change Point Detection**, select the charts that you want to embed, then select the **Attach charts** option using the ellipsis at the top right, and finally select the dashboard or case that you want the selected charts to be added in.  
+
+Additional AIOps enhancements include a validation mechanism when you perform log pattern analysis in AIOps Labs and in Discover. This verifies that the selected field is suitable for analysis and if not, the UI displays the reason(s) why.
+
+[role="screenshot"]
+image::images/change-point-detection.png[An example of a change point detection chart]
+
+[discrete]
+==== Data frame analytics model deployment workflow
+You can now create an inference ingest pipeline straight from the Trained Models view for your {dfanalytics} models, by selecting the new **Deploy model** option in the **Actions** column. The pipeline will use this model to perform inference on your incoming data and it will index the results according to your configuration.
+
+[role="screenshot"]
+image::images/trained-models.png[A screenshot of the trained models UI]
+
+[discrete]
+==== Data comparison view
+preview:[] A new **Data Comparison** view has been added under the **Data Visualizer** menu, to help you detect data drift. Choose a ‘reference’ and a ‘comparison’ time range on the UI and run the data comparison to see if there is a significant change of values, and for which numerical and categorical fields. The UI gives you a measure of how strong the change appears to be (the p-value) for each field and a side-by-side visual comparison of the reference and comparison distributions. By expanding each field in the results list, you can see the details of the distribution of values for the reference and comparison windows. 
+
+[role="screenshot"]
+image::images/data-comparison.png[An example of the data comparison view]
+
+[discrete]
+==== ELSER test user interface
+preview:[] Elastic machine learning introduced AI search out of the box with the release of Elastic Learned Sparse EncodeR in 8.8. Now you have the option to easily test ELSER on the user interface. From the Trained Models view select the **Test model** option from the **Actions** column menu.
+
+[role="screenshot"]
+image::images/elser.png[An example of the new ELSER UI]
+
+[discrete]
+=== Platform security
+
+[discrete]
+==== Cross-cluster API keys
+The API keys page in {kib} (under **Management > Security > API keys**) has been redesigned to enable you to create and manage cross-cluster API keys more easily. You can now select the type of key that you want to create and find or filter through the existing API keys you have access to using the tagged list view.
+
+[role="screenshot"]
+image::images/api-keys.png[A screenshot of the new API keys redesign]
+
+[discrete]
+==== Transparent unobtrusive security 
+User profiles now display the role(s) assigned so that your Elastic access always makes sense. The default idle session timeout has also been increased to ensure a smoother user experience and to not interrupt users during their workflows. The new default is 3 days (from 8 hours previously) and only applies to new instances. You can continue configuring the `session.idleTimeout` setting to the value that works best for your organization.
+
+[role="screenshot"]
+image::images/roles.png[An example displaying the roles assigned to a fake user]
