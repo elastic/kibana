@@ -9,11 +9,15 @@ import { EuiBreadcrumb } from '@elastic/eui';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { useEffect } from 'react';
-import { logExplorerAppTitle } from '../../common/translations';
+import {
+  betaBadgeDescription,
+  betaBadgeTitle,
+  logExplorerAppTitle,
+} from '../../common/translations';
 
 export const useBreadcrumbs = (
   breadcrumbs: EuiBreadcrumb[],
-  chromeService?: ChromeStart,
+  chromeService: ChromeStart,
   serverlessService?: ServerlessPluginStart
 ) => {
   useEffect(() => {
@@ -23,7 +27,7 @@ export const useBreadcrumbs = (
 
 export function setBreadcrumbs(
   breadcrumbs: EuiBreadcrumb[],
-  chromeService?: ChromeStart,
+  chromeService: ChromeStart,
   serverlessService?: ServerlessPluginStart
 ) {
   if (serverlessService) {
@@ -36,6 +40,10 @@ export function setBreadcrumbs(
       ...breadcrumbs,
     ]);
   }
+  chromeService.setBadge({
+    text: betaBadgeTitle,
+    tooltip: betaBadgeDescription,
+  });
 }
 
 export const noBreadcrumbs: EuiBreadcrumb[] = [];
