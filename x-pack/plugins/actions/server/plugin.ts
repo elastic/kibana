@@ -375,7 +375,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       getActionsConfigurationUtilities: () => actionsConfigUtils,
       setEnabledConnectorTypes: (actionTypes) => {
-        if (actionTypes === null || (actionTypes.length > 0 && actionTypes[0] === '*')) {
+        const [all] = DEFAULT_ENABLED_CONNECTOR_TYPES;
+        if (actionTypes === null || (actionTypes.length > 0 && actionTypes[0] === all)) {
           actionTypeRegistry.setEnabledConnectorTypes(DEFAULT_ENABLED_CONNECTOR_TYPES);
         } else {
           actionTypeRegistry.setEnabledConnectorTypes(new Set(actionTypes));
