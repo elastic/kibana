@@ -48,7 +48,7 @@ export const useIndexData = (
   query: TransformConfigQuery,
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
   timeRangeMs?: TimeRangeMs,
-  populatedFields?: Set<string> | null
+  populatedFields?: string[]
 ): UseIndexDataReturnType => {
   const { analytics } = useAppDependencies();
 
@@ -103,7 +103,8 @@ export const useIndexData = (
     },
     // Check whether fetching should be enabled
     // If populatedFields are not provided, make own request to calculate
-    !!populatedFields && !(dataView.timeFieldName !== undefined && timeRangeMs === undefined)
+    !Array.isArray(populatedFields) &&
+      !(dataView.timeFieldName !== undefined && timeRangeMs === undefined)
   );
 
   useEffect(() => {
@@ -130,8 +131,8 @@ export const useIndexData = (
   }, [dataViewFieldsData, dataViewFieldsError, dataViewFieldsIsError, dataViewFieldsIsLoading]);
 
   const dataViewFields = useMemo(() => {
-    if (populatedFields) {
-      return [...populatedFields];
+    if (Array.isArray(populatedFields)) {
+      return populatedFields;
     }
 
     if (dataViewFieldsData) {
