@@ -10,6 +10,7 @@ import { type Observable, firstValueFrom } from 'rxjs';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { RequestHandler } from '@kbn/core-http-server';
+import { labelsSchema } from '../config/telemetry_labels';
 import type { TelemetryConfigType } from '../config';
 import { v2 } from '../../common/types';
 import {
@@ -70,6 +71,7 @@ export function registerTelemetryConfigRoutes({
       optIn,
       sendUsageFrom,
       telemetryNotifyUserAboutOptInDefault,
+      labels: config.labels,
     };
 
     return res.ok({ body });
@@ -83,6 +85,7 @@ export function registerTelemetryConfigRoutes({
           optIn: schema.oneOf([schema.boolean(), schema.literal(null)]),
           sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')]),
           telemetryNotifyUserAboutOptInDefault: schema.boolean(),
+          labels: labelsSchema,
         }),
       },
     },
@@ -90,7 +93,11 @@ export function registerTelemetryConfigRoutes({
 
   // Register the internal versioned API
   router.versioned
-    .get({ access: 'internal', path: FetchTelemetryConfigRoute })
+    .get({
+      access: 'internal',
+      path: FetchTelemetryConfigRoute,
+      options: { authRequired: 'optional' },
+    })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
     .addVersion({ version: '1', validate: v2Validations }, v2Handler)
     .addVersion({ version: '2', validate: v2Validations }, v2Handler);
