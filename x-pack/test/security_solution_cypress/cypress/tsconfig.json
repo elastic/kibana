@@ -45,5 +45,6 @@
     "@kbn/security-solution-plugin",
     "@kbn/dev-utils",
     "@kbn/expandable-flyout",
+    "@kbn/config-schema",
   ]
 }
