@@ -402,6 +402,14 @@ export function resolveEsArgs(
 
     args.forEach((arg) => {
       const [key, ...value] = arg.split('=');
+
+      // Guide the user to use SSL flag instead of manual setup
+      if (key === 'xpack.security.enabled' && value?.[0] === 'true') {
+        throw createCliError(
+          'Use the --ssl flag to automatically enable and set up the security plugin.'
+        );
+      }
+
       esArgs.set(key.trim(), value.join('=').trim());
     });
   }
