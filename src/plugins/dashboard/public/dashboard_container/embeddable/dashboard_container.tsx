@@ -425,14 +425,18 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.dispatch.setExpandedPanelId(newId);
   };
 
-  public openOverlay = (ref: OverlayRef) => {
+  public openOverlay = (ref: OverlayRef, options?: { focusPanelId?: string }) => {
     this.clearOverlays();
     this.dispatch.setHasOverlays(true);
     this.overlayRef = ref;
+    if (options?.focusPanelId) {
+      this.setFocusPanelId(options?.focusPanelId);
+    }
   };
 
   public clearOverlays = () => {
     this.dispatch.setHasOverlays(false);
+    this.dispatch.setFocusPanelId(undefined);
     this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
   };

@@ -108,9 +108,6 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
     const rootEmbeddable = embeddable.getRoot();
     const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
 
-    // set focus panel id
-    if (rootEmbeddable.setFocusPanelId) rootEmbeddable.setFocusPanelId(embeddable.id);
-
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings: core.uiSettings,
     });
@@ -129,7 +126,6 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
             commonlyUsedRanges={this.commonlyUsedRanges}
             onClose={() => {
               if (overlayTracker) overlayTracker.clearOverlays();
-              if (rootEmbeddable.setFocusPanelId) rootEmbeddable.setFocusPanelId(undefined);
               handle.close();
             }}
             onEdit={onEdit}
@@ -142,13 +138,12 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
         'data-test-subj': 'customizePanel',
         onClose: (overlayRef) => {
           if (overlayTracker) overlayTracker.clearOverlays();
-          if (rootEmbeddable.setFocusPanelId) rootEmbeddable.setFocusPanelId(undefined);
           overlayRef.close();
         },
         maxWidth: true,
         type: 'push',
       }
     );
-    overlayTracker?.openOverlay(handle);
+    overlayTracker?.openOverlay(handle, { focusPanelId: embeddable.id });
   }
 }
