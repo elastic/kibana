@@ -39,7 +39,8 @@ export function rangeMatch(rule: ColorMapping.RuleRange, value: number) {
   );
 }
 
-export const SPECIAL_RULE_MATCHES = new Map([
+// TODO: move in some data/table related package
+export const SPECIAL_TOKENS_STRING_CONVERTION = new Map([
   ['__other__', 'Other'],
   ['', '(empty)'],
 ]);

@@ -8,10 +8,9 @@
 
 import { Datum, PartitionLayer } from '@elastic/charts';
 import {
-  ColorMapping,
   PaletteRegistry,
   getColorFactory,
-  SPECIAL_RULE_MATCHES,
+  SPECIAL_TOKENS_STRING_CONVERTION,
   getPalette,
   availablePalettes,
   NeutralPalette,
@@ -21,48 +20,14 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 
-import { isMultiFieldKey } from '@kbn/data-plugin/common';
+import { getColorCategories } from '@kbn/chart-expressions-common';
+import { Color } from '@kbn/coloring/src/shared_components/color_mapping/color/color_handling';
 import { getDistinctSeries } from '..';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';
-import { getPartitionFillColor } from './get_color_from_mappings';
-
-// TODO: export to a reusable function
-export const MULTI_FIELD_VALUES_SEPARATOR = ' › ';
-
-/**
- * Get the stringified version of all the categories that needs to be colored in the chart.
- * Multifield keys will return as array of string and simple fields (numeric, string) will be returned as a plain unformatted string.
- */
-export function getColorCategories(
-  rows: DatatableRow[],
-  accessor?: string
-): Array<string | string[]> {
-  return accessor
-    ? rows.reduce<{ keys: Set<string>; array: Array<string | string[]> }>(
-        (acc, r) => {
-          const value = r[accessor];
-          if (value === undefined) {
-            return acc;
-          }
-          // The categories needs to be stringified in their unformatted version.
-          // We can't distinguish between a number and a string from a text input and the match should
-          // work with both numeric field values and string values.
-          const key = (isMultiFieldKey(value) ? [...value.keys] : [value]).map(String);
-          const stringifiedKeys = key.join(',');
-          if (!acc.keys.has(stringifiedKeys)) {
-            acc.keys.add(stringifiedKeys);
-
-            acc.array.push(key.length === 1 ? key[0] : key);
-          }
-          return acc;
-        },
-        { keys: new Set(), array: [] }
-      ).array
-    : [];
-}
+import { getPartitionFillColor } from '../colors/color_mapping_accessors';
 
 // This is particularly useful in case of a text based languages where
 // it's no possible to use a missingBucketLabel
@@ -108,25 +73,14 @@ export const getLayers = (
 
   const distinctSeries = getDistinctSeries(rows, columns);
 
-  // the mosaic configures the main categories in the second column, instead of the first
-  // as it happens in all the other partition types.
-  // Independentely from the bucket aggregation used, the categories will always be casted
-  // as string to make it nicely working with a text input field, avoiding a field
-  const splitCategories =
-    chartType === ChartTypes.MOSAIC && columns.length === 2
-      ? getColorCategories(rows, columns[1]?.id)
-      : getColorCategories(rows, columns[0]?.id);
-
-  const colorMappingModel: ColorMapping.Config = JSON.parse(visParams.colorMapping);
-
-  const getColorFromMappings = getColorFactory(
-    colorMappingModel,
-    getPalette(availablePalettes, NeutralPalette),
+  // return a fn only if color mapping is available in visParams
+  const getColorFromMappingFn = getColorFromMappingFactory(
+    chartType,
+    columns,
+    rows,
     isDarkMode,
-    { type: 'categories', categories: splitCategories, specialHandling: SPECIAL_RULE_MATCHES }
+    visParams.colorMapping
   );
-
-  const canUseColorMappings = true;
 
   return columns.map((col, layerIndex) => {
     return {
@@ -141,8 +95,9 @@ export const getLayers = (
         ? sortPredicateSaveSourceOrder()
         : sortPredicateForType,
       shape: {
-        fillColor: canUseColorMappings
-          ? getPartitionFillColor(chartType, layerIndex, columns.length, getColorFromMappings)
+        // this applies color mapping only if visParams.colorMapping is available
+        fillColor: getColorFromMappingFn
+          ? getPartitionFillColor(chartType, layerIndex, columns.length, getColorFromMappingFn)
           : (key, sortIndex, node) =>
               getColor(
                 chartType,
@@ -166,3 +121,38 @@ export const getLayers = (
     };
   });
 };
+
+/**
+ * If colorMapping is available, returns a function that accept a string or an array of strings (used in case of multi-field-key)
+ * and returns a color specified in the provided mapping
+ */
+function getColorFromMappingFactory(
+  chartType: ChartTypes,
+  columns: Array<Partial<BucketColumns>>,
+  rows: DatatableRow[],
+  isDarkMode: boolean,
+  colorMapping?: string
+): undefined | ((category: string | string[]) => Color) {
+  if (!colorMapping) {
+    // return undefined, we will use the legacy color mapping instead
+    return undefined;
+  }
+  // the mosaic configures the main categories in the second column, instead of the first
+  // as it happens in all the other partition types.
+  // Independentely from the bucket aggregation used, the categories will always be casted
+  // as string to make it nicely working with a text input field, avoiding a field
+  const categories =
+    chartType === ChartTypes.MOSAIC && columns.length === 2
+      ? getColorCategories(rows, columns[1]?.id)
+      : getColorCategories(rows, columns[0]?.id);
+  return getColorFactory(
+    JSON.parse(colorMapping),
+    getPalette(availablePalettes, NeutralPalette),
+    isDarkMode,
+    {
+      type: 'categories',
+      categories,
+      specialTokens: SPECIAL_TOKENS_STRING_CONVERTION,
+    }
+  );
+}

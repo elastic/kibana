@@ -61,7 +61,7 @@ interface VisCommonParams {
   maxLegendLines: number;
   legendSize?: LegendSize;
   ariaLabel?: string;
-  colorMapping: string; // JSON stringified object of the color mapping
+  colorMapping?: string; // JSON stringified object of the color mapping
 }
 
 interface VisCommonConfig extends VisCommonParams {

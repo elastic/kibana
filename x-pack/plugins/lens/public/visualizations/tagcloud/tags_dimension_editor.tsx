@@ -11,19 +11,27 @@ import {
   CategoricalColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
   ColorMapping,
-  SPECIAL_RULE_MATCHES,
   getPaletteColors,
   EUIPalette,
   IKEAPalette,
   NeutralPalette,
   PastelPalette,
   TableauPalette,
+  SPECIAL_TOKENS_STRING_CONVERTION,
+  PaletteOutput,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiColorPaletteDisplay, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiColorPaletteDisplay,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+} from '@elastic/eui';
 import { getColorCategories } from '@kbn/expression-xy-plugin/public';
 import { useState, MutableRefObject, useCallback } from 'react';
 import { PalettePicker } from '@kbn/coloring/src/shared_components/coloring/palette_picker';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import type { TagcloudState } from './types';
 import { PalettePanelContainer } from '../../shared_components';
 import { FramePublicAPI } from '../../types';
@@ -45,7 +53,13 @@ export function TagsDimensionEditor({
   isDarkMode,
   paletteService,
 }: Props) {
+  const { inputValue: localState, handleInputChange: setLocalState } =
+    useDebouncedValue<TagcloudState>({
+      value: state,
+      onChange: setState,
+    });
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [useNewColorMapping, setUseNewColorMapping] = useState(state.colorMapping ? true : false);
   // TODO: move the available palette elsewhere
   const availablePalettes = new Map<string, ColorMapping.CategoricalPalette>([
     [EUIPalette.id, EUIPalette],
@@ -59,18 +73,29 @@ export function TagsDimensionEditor({
   const splitCategories = getColorCategories(table?.rows ?? [], state.tagAccessor);
 
   const setColorMapping = useCallback(
-    (updatedColorMap: ColorMapping.Config) => {
-      setState({
-        ...state,
-        colorMapping: { ...updatedColorMap },
+    (colorMapping?: ColorMapping.Config) => {
+      setLocalState({
+        ...localState,
+        colorMapping,
       });
     },
-    [state, setState]
+    [localState, setLocalState]
   );
 
-  const canUseColorMapping = true;
+  const setPalette = useCallback(
+    (palette: PaletteOutput) => {
+      setLocalState({
+        ...localState,
+        palette,
+        colorMapping: undefined,
+      });
+    },
+    [localState, setLocalState]
+  );
 
-  return canUseColorMapping ? (
+  const canUseColorMapping = state.colorMapping;
+
+  return (
     <EuiFlexGroup
       alignItems="center"
       gutterSize="s"
@@ -111,34 +136,49 @@ export function TagsDimensionEditor({
           title={i18n.translate('xpack.lens.table.colorByTermsPanelTitle', {
             defaultMessage: 'Color assignments',
           })}
-          isTechPreview={true}
         >
           <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
-            <CategoricalColorMapping
-              isDarkMode={isDarkMode}
-              model={state.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
-              onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-              palettes={availablePalettes}
-              data={{
-                type: 'categories',
-                categories: splitCategories,
-                specialHandling: SPECIAL_RULE_MATCHES,
-              }}
-            />
+            <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
+              <EuiFlexItem>
+                <EuiSwitch
+                  label="Use new color mapping (tech preview)"
+                  compressed
+                  checked={useNewColorMapping}
+                  onChange={(e) => {
+                    setColorMapping(
+                      e.target.checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined
+                    );
+                    setUseNewColorMapping(e.target.checked);
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {canUseColorMapping || useNewColorMapping ? (
+                  <CategoricalColorMapping
+                    isDarkMode={isDarkMode}
+                    model={state.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
+                    onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
+                    palettes={availablePalettes}
+                    data={{
+                      type: 'categories',
+                      categories: splitCategories,
+                      specialTokens: SPECIAL_TOKENS_STRING_CONVERTION,
+                    }}
+                  />
+                ) : (
+                  <PalettePicker
+                    palettes={paletteService}
+                    activePalette={state.palette}
+                    setPalette={(newPalette) => {
+                      setPalette(newPalette);
+                    }}
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </div>
         </PalettePanelContainer>
       </EuiFlexItem>
     </EuiFlexGroup>
-  ) : (
-    <PalettePicker
-      palettes={paletteService}
-      activePalette={state.palette}
-      setPalette={(newPalette) => {
-        setState({
-          ...state,
-          palette: newPalette,
-        });
-      }}
-    />
   );
 }

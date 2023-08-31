@@ -9,6 +9,7 @@
 import React from 'react';
 import { EuiComboBox, EuiFlexItem } from '@elastic/eui';
 import { ColorMapping } from '../../config';
+// TODO: move this outside or configurable
 export const MULTI_FIELD_VALUES_SEPARATOR = ' › ';
 
 export const Match: React.FC<{
@@ -21,8 +22,8 @@ export const Match: React.FC<{
     | ColorMapping.RuleRegExp;
   updateValue: (values: Array<string | string[]>) => void;
   options: Array<string | string[]>;
-  specialHandling: Map<unknown, string>;
-}> = ({ rule, updateValue, editable, options, specialHandling }) => {
+  specialTokens: Map<unknown, string>;
+}> = ({ rule, updateValue, editable, options, specialTokens }) => {
   const selectedOptions =
     rule.type === 'auto'
       ? []
@@ -32,7 +33,7 @@ export const Match: React.FC<{
           const ruleValues = Array.isArray(value) ? value : [value];
           return {
             label: ruleValues
-              .map((v) => specialHandling.get(v) ?? v)
+              .map((v) => specialTokens.get(v) ?? v)
               .join(MULTI_FIELD_VALUES_SEPARATOR),
             value,
           };
@@ -41,7 +42,7 @@ export const Match: React.FC<{
   const convertedOptions = options.map((value) => {
     const ruleValues = Array.isArray(value) ? value : [value];
     return {
-      label: ruleValues.map((v) => specialHandling.get(v) ?? v).join(MULTI_FIELD_VALUES_SEPARATOR),
+      label: ruleValues.map((v) => specialTokens.get(v) ?? v).join(MULTI_FIELD_VALUES_SEPARATOR),
       value,
     };
   });

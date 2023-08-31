@@ -7,7 +7,7 @@
 
 import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
-import { DEFAULT_COLOR_MAPPING_CONFIG, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type {
@@ -199,7 +199,7 @@ const generateCommonArguments = (
       layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
     palette: generatePaletteAstArguments(paletteService, state.palette),
     addTooltip: true,
-    colorMapping: JSON.stringify(layer.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG),
+    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
   };
 };
 

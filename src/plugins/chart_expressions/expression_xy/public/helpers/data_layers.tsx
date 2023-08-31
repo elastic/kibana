@@ -23,14 +23,10 @@ import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import {
-  ColorMapping,
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  PaletteRegistry,
-  SeriesLayer,
-} from '@kbn/coloring';
+import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { getPalette, availablePalettes, NeutralPalette } from '@kbn/coloring';
-import { SPECIAL_RULE_MATCHES } from '@kbn/coloring/src/shared_components/color_mapping/color/rule_matching';
+import { SPECIAL_TOKENS_STRING_CONVERTION } from '@kbn/coloring/src/shared_components/color_mapping/color/rule_matching';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
@@ -40,8 +36,7 @@ import { ColorAssignments } from './color_assignment';
 import { GroupsConfiguration } from './axes_configuration';
 import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
 import { getFormat } from './format';
-import { getColorSeriesAccessorFn } from './color/color_mapping';
-import { getColorCategories } from './color/categories';
+import { getColorSeriesAccessorFn } from './color/color_mapping_accessor';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
@@ -490,30 +485,17 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     );
   };
 
-  const splitCategories = getColorCategories(
-    table.rows,
-    splitColumnIds.length > 0 ? splitColumnIds[0] : undefined
-  );
-
-  const colorMappingModel: ColorMapping.Config = layer.colorMapping
-    ? JSON.parse(layer.colorMapping)
-    : { ...DEFAULT_COLOR_MAPPING_CONFIG };
-
-  // TODO: to be replaced by a check for new chart vs existing charts
-  // if no colorMapping, check if is new chart, if so, add, if not use old
-
-  const canUseColorMapping = layer.colorMapping ? true : false;
-  const colorFn: SeriesColorAccessorFn =
-    // for the MVP just apply color mapping if we have a breakdown by configured
-    canUseColorMapping && splitColumnIds.length > 0
+  const colorAccessorFn: SeriesColorAccessorFn =
+    // if colorMapping exist then we can apply it, if not let's use the legacy coloring method
+    layer.colorMapping && splitColumnIds.length > 0
       ? getColorSeriesAccessorFn(
-          colorMappingModel,
+          JSON.parse(layer.colorMapping), // the color mapping is at this point just a strinfigied JSON
           getPalette(availablePalettes, NeutralPalette),
           isDarkMode,
           {
             type: 'categories',
-            categories: splitCategories,
-            specialHandling: SPECIAL_RULE_MATCHES,
+            categories: getColorCategories(table.rows, splitColumnIds[0]),
+            specialTokens: SPECIAL_TOKENS_STRING_CONVERTION,
           },
           splitColumnIds[0]
         )
@@ -550,7 +532,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       formatter?.id === 'bytes' && scaleType === ScaleType.Linear
         ? ScaleType.LinearBinary
         : scaleType,
-    color: colorFn,
+    color: colorAccessorFn,
     groupId: yAxis?.groupId,
     enableHistogramMode,
     stackMode,

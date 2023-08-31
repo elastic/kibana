@@ -42,3 +42,9 @@ export class MultiFieldKey {
 export function isMultiFieldKey(field: unknown): field is MultiFieldKey {
   return field instanceof MultiFieldKey;
 }
+
+/**
+ * Multi-field key separator used in Visualizations (Lens, AggBased, TSVB).
+ * This differs from the separator used in the toString method of the MultiFieldKey
+ */
+export const MULTI_FIELD_KEY_SEPARATOR = ' › ';

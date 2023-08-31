@@ -91,7 +91,6 @@ export function HeatmapDimensionEditor(
               title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
                 defaultMessage: 'Color',
               })}
-              isTechPreview={false}
             >
               {activePalette && (
                 <CustomizablePalette

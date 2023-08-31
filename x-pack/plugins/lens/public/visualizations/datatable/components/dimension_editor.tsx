@@ -256,7 +256,6 @@ export function TableDimensionEditor(
                     title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
                       defaultMessage: 'Color',
                     })}
-                    isTechPreview={false}
                   >
                     <CustomizablePalette
                       palettes={props.paletteService}

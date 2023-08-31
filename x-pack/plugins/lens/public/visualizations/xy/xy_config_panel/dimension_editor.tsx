@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSwitch,
   htmlIdGenerator,
 } from '@elastic/eui';
 import {
@@ -30,7 +31,8 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   getPaletteColors,
   CategoricalColorMapping,
-  SPECIAL_RULE_MATCHES,
+  PaletteOutput,
+  SPECIAL_TOKENS_STRING_CONVERTION,
 } from '@kbn/coloring';
 
 import { getColorCategories } from '@kbn/expression-xy-plugin/public';
@@ -72,8 +74,10 @@ export function DataDimensionEditor(
   const { state, layerId, accessor, darkMode } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index] as XYDataLayerConfig;
+  const canUseColorMapping = layer.colorMapping ? true : false;
 
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [useNewColorMapping, setUseNewColorMapping] = useState(canUseColorMapping);
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: props.state,
@@ -106,8 +110,14 @@ export function DataDimensionEditor(
   );
 
   const setColorMapping = useCallback(
-    (colorMapping: ColorMapping.Config) => {
+    (colorMapping?: ColorMapping.Config) => {
       setLocalState(updateLayer(localState, { ...layer, colorMapping }, index));
+    },
+    [index, localState, layer, setLocalState]
+  );
+  const setPalette = useCallback(
+    (palette: PaletteOutput) => {
+      setLocalState(updateLayer(localState, { ...layer, palette }, index));
     },
     [index, localState, layer, setLocalState]
   );
@@ -153,9 +163,8 @@ export function DataDimensionEditor(
   const { splitAccessor } = layer;
   const splitCategories = getColorCategories(table?.rows ?? [], splitAccessor);
 
-  const canUseColorMapping = layer.colorMapping ? true : false;
   if (props.groupId === 'breakdown' && !layer.collapseFn) {
-    return canUseColorMapping ? (
+    return (
       <EuiFlexGroup
         alignItems="center"
         gutterSize="s"
@@ -194,34 +203,52 @@ export function DataDimensionEditor(
             isOpen={isPaletteOpen}
             handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
             title={i18n.translate('xpack.lens.table.colorByTermsPanelTitle', {
-              defaultMessage: 'Color assignments',
+              defaultMessage: 'Color',
             })}
-            isTechPreview={true}
           >
             <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
-              <CategoricalColorMapping
-                isDarkMode={darkMode}
-                model={layer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
-                onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-                palettes={availablePalettes}
-                data={{
-                  type: 'categories',
-                  categories: splitCategories,
-                  specialHandling: SPECIAL_RULE_MATCHES,
-                }}
-              />
+              <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
+                <EuiFlexItem>
+                  <EuiSwitch
+                    label="Use new color mapping (tech preview)"
+                    compressed
+                    checked={useNewColorMapping}
+                    onChange={(e) => {
+                      setColorMapping(
+                        e.target.checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined
+                      );
+                      setUseNewColorMapping(e.target.checked);
+                    }}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {canUseColorMapping || useNewColorMapping ? (
+                    <CategoricalColorMapping
+                      isDarkMode={darkMode}
+                      model={layer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
+                      onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
+                      palettes={availablePalettes}
+                      data={{
+                        type: 'categories',
+                        categories: splitCategories,
+                        specialTokens: SPECIAL_TOKENS_STRING_CONVERTION,
+                      }}
+                    />
+                  ) : (
+                    <PalettePicker
+                      palettes={props.paletteService}
+                      activePalette={localLayer?.palette}
+                      setPalette={(newPalette) => {
+                        setPalette(newPalette);
+                      }}
+                    />
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </div>
           </PalettePanelContainer>
         </EuiFlexItem>
       </EuiFlexGroup>
-    ) : (
-      <PalettePicker
-        palettes={props.paletteService}
-        activePalette={localLayer?.palette}
-        setPalette={(newPalette) => {
-          props.setState(updateLayer(localState, { ...localLayer, palette: newPalette }, index));
-        }}
-      />
     );
   }
 

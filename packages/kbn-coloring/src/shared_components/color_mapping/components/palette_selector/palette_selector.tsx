@@ -181,14 +181,14 @@ export function PaletteSelector({
                 {
                   id: `categorical`,
                   label: 'Categorical',
-                  iconType: 'spaces',
                 },
                 {
                   id: `gradient`,
-                  label: 'gradient',
-                  iconType: 'heatmap',
+                  label: 'Gradient',
                 },
               ]}
+              isFullWidth
+              buttonSize="compressed"
               idSelected={colorMode.type}
               onChange={(id) => {
                 const hasChanges = model.assignments.some((a) => a.touched);
@@ -202,7 +202,6 @@ export function PaletteSelector({
                   updateColorMode(id as 'gradient' | 'categorical', false);
                 }
               }}
-              isIconOnly
             />
           </EuiFormRow>
         </EuiFlexItem>

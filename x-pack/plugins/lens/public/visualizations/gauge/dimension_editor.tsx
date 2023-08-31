@@ -162,7 +162,6 @@ export function GaugeDimensionEditor(
                   title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
                     defaultMessage: 'Color',
                   })}
-                  isTechPreview={false}
                 >
                   <CustomizablePalette
                     palettes={props.paletteService}

@@ -99,6 +99,7 @@ export const getTagcloudVisualization = ({
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         ...DEFAULT_STATE,
+        colorMapping: { ...DEFAULT_COLOR_MAPPING_CONFIG },
       }
     );
   },
@@ -198,7 +199,7 @@ export const getTagcloudVisualization = ({
                 ),
           ]).toAst(),
           showLabel: state.showLabel,
-          colorMapping: JSON.stringify(state.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG),
+          colorMapping: state.colorMapping ? JSON.stringify(state.colorMapping) : undefined,
         }).toAst(),
       ],
     };
@@ -237,7 +238,7 @@ export const getTagcloudVisualization = ({
                 ),
           ]).toAst(),
           showLabel: false,
-          colorMapping: JSON.stringify(state.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG),
+          colorMapping: state.colorMapping ? JSON.stringify(state.colorMapping) : undefined,
         }).toAst(),
       ],
     };

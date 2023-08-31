@@ -75,7 +75,7 @@ export function Assignment({
           index={index}
           rule={assignment.rule}
           options={data.type === 'categories' ? data.categories : []}
-          specialHandling={data.type === 'categories' ? data.specialHandling : new Map()}
+          specialTokens={data.type === 'categories' ? data.specialTokens : new Map()}
           updateValue={(values: Array<string | string[]>) => {
             dispatch(
               updateAssignmentRule({

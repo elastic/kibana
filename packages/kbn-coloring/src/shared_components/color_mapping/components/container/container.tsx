@@ -73,32 +73,29 @@ export function Container(props: {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
-      <PaletteSelector
-        palettes={props.palettes}
-        getPaletteFn={getPaletteFn}
-        isDarkMode={props.isDarkMode}
-      />
-
       <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormLabel>Assignments</EuiFormLabel>
-          </EuiFlexItem>
-          <EuiFlexItem style={{ alignItems: 'flex-end' }}>
-            <EuiSwitch
-              label="Auto assign"
-              checked={autoAssignmentMode}
-              compressed
-              onChange={() => {
-                if (autoAssignmentMode) {
-                  dispatch(assignStatically(assignments));
-                } else {
-                  dispatch(assignAutomatically());
-                }
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <PaletteSelector
+          palettes={props.palettes}
+          getPaletteFn={getPaletteFn}
+          isDarkMode={props.isDarkMode}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormLabel>Assignments</EuiFormLabel>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiSwitch
+          label="Auto assign categories to colors"
+          checked={autoAssignmentMode}
+          compressed
+          onChange={() => {
+            if (autoAssignmentMode) {
+              dispatch(assignStatically(assignments));
+            } else {
+              dispatch(assignAutomatically());
+            }
+          }}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>

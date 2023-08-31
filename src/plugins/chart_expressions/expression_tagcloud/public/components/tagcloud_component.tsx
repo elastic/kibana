@@ -16,18 +16,18 @@ import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import {
   PaletteRegistry,
   PaletteOutput,
-  ColorMapping,
   getColorFactory,
-  SPECIAL_RULE_MATCHES,
   getPalette,
   availablePalettes,
   NeutralPalette,
+  SPECIAL_TOKENS_STRING_CONVERTION,
 } from '@kbn/coloring';
 import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
+import { Color } from '@kbn/coloring/src/shared_components/color_mapping/color/color_handling';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
@@ -116,16 +116,13 @@ export const TagCloudChart = ({
     const maxValue = Math.max(...metrics);
     const minValue = Math.min(...metrics);
 
-    const colorMappingModel: ColorMapping.Config = JSON.parse(colorMapping);
-    const splitCategories = getColorCategories(visData.rows, tagColumn);
-    const getColorFromMappings = getColorFactory(
-      colorMappingModel,
-      getPalette(availablePalettes, NeutralPalette),
+    const colorFromMappingFn = getColorFromMappingFactory(
+      tagColumn,
+      visData.rows,
       isDarkMode,
-      { type: 'categories', categories: splitCategories, specialHandling: SPECIAL_RULE_MATCHES }
+      colorMapping
     );
-    // TODO: configure this only for new
-    const canUseColorMapping = true;
+    console.log(`has color mappaing`, colorMapping, colorFromMappingFn);
 
     return visData.rows.map((row) => {
       const tag = tagColumn === undefined ? 'all' : row[tagColumn];
@@ -137,8 +134,8 @@ export const TagCloudChart = ({
           tag === 'all' || visData.rows.length <= 1
             ? 1
             : calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
-        color: canUseColorMapping
-          ? getColorFromMappings(category)
+        color: colorFromMappingFn
+          ? colorFromMappingFn(category)
           : getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)',
       };
     });
@@ -308,25 +305,28 @@ export const TagCloudChart = ({
 // eslint-disable-next-line import/no-default-export
 export { TagCloudChart as default };
 
-// TODO: export to a reusable function
-export const MULTI_FIELD_VALUES_SEPARATOR = ' › ';
-export function getColorCategories(rows: DatatableRow[], accessor?: string) {
-  return accessor
-    ? rows.reduce<{ keys: Set<string>; array: Array<string | string[]> }>(
-        (acc, r) => {
-          const value = r[accessor];
-          if (value === undefined) {
-            return acc;
-          }
-          const key = (isMultiFieldKey(value) ? [...value.keys] : [value]).map(String);
-          const stringifiedKeys = key.join(',');
-          if (!acc.keys.has(stringifiedKeys)) {
-            acc.keys.add(stringifiedKeys);
-            acc.array.push(key.length === 1 ? key[0] : key);
-          }
-          return acc;
-        },
-        { keys: new Set(), array: [] }
-      ).array
-    : [];
+/**
+ * If colorMapping is available, returns a function that accept a string or an array of strings (used in case of multi-field-key)
+ * and returns a color specified in the provided mapping
+ */
+function getColorFromMappingFactory(
+  tagColumn: string | undefined,
+  rows: DatatableRow[],
+  isDarkMode: boolean,
+  colorMapping?: string
+): undefined | ((category: string | string[]) => Color) {
+  if (!colorMapping) {
+    // return undefined, we will use the legacy color mapping instead
+    return undefined;
+  }
+  return getColorFactory(
+    JSON.parse(colorMapping),
+    getPalette(availablePalettes, NeutralPalette),
+    isDarkMode,
+    {
+      type: 'categories',
+      categories: getColorCategories(rows, tagColumn),
+      specialTokens: SPECIAL_TOKENS_STRING_CONVERTION,
+    }
+  );
 }

@@ -20,7 +20,7 @@ export type ColorMappingInputData =
       type: 'categories';
       /** an ORDERED array of categories rendered in the visualization  */
       categories: Array<string | string[]>;
-      specialHandling: Map<string, string>;
+      specialTokens: Map<string, string>;
     }
   | {
       type: 'ranges';

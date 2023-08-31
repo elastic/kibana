@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, PaletteRegistry } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
@@ -63,6 +63,7 @@ function newLayerState(layerId: string): PieLayerState {
     legendDisplay: LegendDisplay.DEFAULT,
     nestedLegend: false,
     layerType: LayerTypes.DATA,
+    colorMapping: { ...DEFAULT_COLOR_MAPPING_CONFIG },
   };
 }
 

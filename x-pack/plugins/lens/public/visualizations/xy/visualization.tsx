@@ -9,7 +9,7 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry } from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
@@ -25,7 +25,10 @@ import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { isEqual } from 'lodash';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { getPaletteColors } from '@kbn/coloring/src/shared_components/color_mapping/config/default_color_mapping';
+import {
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  getPaletteColors,
+} from '@kbn/coloring/src/shared_components/color_mapping/config/default_color_mapping';
 import useObservable from 'react-use/lib/useObservable';
 import { generateId } from '../../id_generator';
 import {
@@ -278,6 +281,7 @@ export const getXyVisualization = ({
             seriesType: defaultSeriesType,
             showGridlines: false,
             layerType: LayerTypes.DATA,
+            colorMapping: { ...DEFAULT_COLOR_MAPPING_CONFIG },
           },
         ],
       }
