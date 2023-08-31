@@ -211,13 +211,10 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
    * the "date" query / parser should be used when the options list is built on a field of type date.
    */
   date: {
-    buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => ({
+    buildAggregation: ({ fieldName, sort }: OptionsListRequestBody) => ({
       suggestions: {
         terms: {
           field: fieldName,
-          ...(searchString && searchString.length > 0
-            ? { include: `${getEscapedRegexQuery(searchString)}.*` }
-            : {}),
           shard_size: 10,
           order: getSortType(sort),
         },
@@ -226,9 +223,8 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
     parse: (rawEsResult) => ({
       suggestions: get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          console.log({ suggestion });
           acc.push({
-            value: suggestion.key_as_string,
+            value: suggestion.key,
             docCount: suggestion.doc_count,
           });
           return acc;
