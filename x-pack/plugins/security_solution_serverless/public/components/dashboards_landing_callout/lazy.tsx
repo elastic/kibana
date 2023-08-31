@@ -5,14 +5,12 @@
  * 2.0.
  */
 import React, { lazy, Suspense } from 'react';
-import { EuiLoadingLogo } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 const DashboardsLandingCalloutLazy = lazy(() => import('./dashboard_landing_callout'));
 
-const centerLogoStyle = { display: 'flex', margin: 'auto' };
-
 export const DashboardsLandingCallout = () => (
-  <Suspense fallback={<EuiLoadingLogo logo="logoSecurity" size="xl" style={centerLogoStyle} />}>
+  <Suspense fallback={<EuiLoadingSpinner size="s" />}>
     <DashboardsLandingCalloutLazy />
   </Suspense>
 );
