@@ -45,6 +45,7 @@ const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 const dataPlugin = dataPluginMock.createStartContract();
 const dataViewsMock = {
   dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+  getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
 } as DataViewsServerPluginStart;
 const ruleType: UntypedNormalizedRuleType = {
   id: 'test',

@@ -11,18 +11,22 @@ import '@testing-library/jest-dom';
 import { coreMock } from '@kbn/core/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
-import { ThemDarkModeToggle } from './theme_darkmode_toggle';
+import { ThemeDarkModeToggle } from './theme_darkmode_toggle';
 
-describe('ThemDarkModeToggle', () => {
-  const mockUseUpdateUserProfile = jest.fn();
-  const mockGetSpaceDarkModeValue = jest.fn();
+const mockUseUpdateUserProfile = jest.fn();
 
+jest.mock('@kbn/user-profile-components', () => {
+  const original = jest.requireActual('@kbn/user-profile-components');
+  return {
+    ...original,
+    useUpdateUserProfile: () => mockUseUpdateUserProfile(),
+  };
+});
+
+describe('ThemeDarkModeToggle', () => {
   it('renders correctly and toggles dark mode', () => {
-    const security = {
-      ...securityMock.createStart(),
-      hooks: { useUpdateUserProfile: mockUseUpdateUserProfile },
-    };
-    const { uiSettings } = coreMock.createStart();
+    const security = securityMock.createStart();
+    const core = coreMock.createStart();
 
     const mockUpdate = jest.fn();
     mockUseUpdateUserProfile.mockReturnValue({
@@ -31,10 +35,8 @@ describe('ThemDarkModeToggle', () => {
       update: mockUpdate,
     });
 
-    mockGetSpaceDarkModeValue.mockReturnValue(false);
-
     const { getByTestId, rerender } = render(
-      <ThemDarkModeToggle security={security} uiSettingsClient={uiSettings} />
+      <ThemeDarkModeToggle core={core} security={security} />
     );
 
     const toggleSwitch = getByTestId('darkModeToggleSwitch');
@@ -49,7 +51,7 @@ describe('ThemDarkModeToggle', () => {
     });
 
     // Rerender the component to apply the new props
-    rerender(<ThemDarkModeToggle security={security} uiSettingsClient={uiSettings} />);
+    rerender(<ThemeDarkModeToggle core={core} security={security} />);
 
     fireEvent.click(toggleSwitch);
     expect(mockUpdate).toHaveBeenLastCalledWith({ userSettings: { darkMode: 'light' } });

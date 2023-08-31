@@ -100,6 +100,8 @@ export class RuleRegistryPlugin
 
     this.security = plugins.security;
 
+    const dataStreamAdapter = plugins.alerting.getDataStreamAdapter();
+
     this.ruleDataService = new RuleDataService({
       logger,
       kibanaVersion,
@@ -112,6 +114,7 @@ export class RuleRegistryPlugin
       },
       frameworkAlerts: plugins.alerting.frameworkAlerts,
       pluginStop$: this.pluginStop$,
+      dataStreamAdapter,
     });
 
     this.ruleDataService.initializeService();
@@ -119,7 +122,6 @@ export class RuleRegistryPlugin
     core.getStartServices().then(([_, depsStart]) => {
       const ruleRegistrySearchStrategy = ruleRegistrySearchStrategyProvider(
         depsStart.data,
-        this.ruleDataService!,
         depsStart.alerting,
         logger,
         plugins.security,

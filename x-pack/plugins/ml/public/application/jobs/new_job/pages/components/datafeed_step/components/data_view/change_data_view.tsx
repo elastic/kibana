@@ -55,10 +55,9 @@ interface Props {
 export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   const {
     services: {
-      http,
-      uiSettings,
       data: { dataViews },
-      savedObjectsManagement,
+      contentManagement,
+      uiSettings,
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
@@ -168,15 +167,10 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                         defaultMessage: 'Data view',
                       }
                     ),
-                    defaultSearchField: 'name',
                   },
                 ]}
                 fixedPageSize={fixedPageSize}
-                services={{
-                  uiSettings,
-                  http,
-                  savedObjectsManagement,
-                }}
+                services={{ contentClient: contentManagement.client, uiSettings }}
               />
             </>
           )}

@@ -6,77 +6,41 @@
  */
 
 import React from 'react';
-import useAsync from 'react-use/lib/useAsync';
-import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
+
+import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
-import { HostFlyout, useHostFlyoutUrlState } from '../../hooks/use_host_flyout_url_state';
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
 import { orderedFlyoutTabs } from './tabs';
-import { useLogViewReference } from '../../hooks/use_log_view_reference';
-import { useMetricsDataViewContext } from '../../hooks/use_data_view';
+import { useAssetDetailsUrlState } from '../../../../../components/asset_details/hooks/use_asset_details_url_state';
 
 export interface Props {
   node: HostNodeRow;
   closeFlyout: () => void;
 }
 
-const NODE_TYPE = 'host' as InventoryItemType;
+export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
+  const { source } = useSourceContext();
+  const { parsedDateRange } = useUnifiedSearchContext();
+  const [urlState] = useAssetDetailsUrlState();
 
-export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
-  const { searchCriteria } = useUnifiedSearchContext();
-  const { dataView } = useMetricsDataViewContext();
-  const { logViewReference, loading, getLogsDataView } = useLogViewReference({
-    id: 'hosts-flyout-logs-view',
-  });
-
-  const { value: logsDataView } = useAsync(
-    () => getLogsDataView(logViewReference),
-    [logViewReference]
-  );
-
-  const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
-
-  return (
+  return source ? (
     <AssetDetails
-      node={node}
-      nodeType={NODE_TYPE}
-      dateRange={searchCriteria.dateRange}
-      activeTabId={hostFlyoutState?.tabId}
+      asset={{ id: name, name }}
+      assetType="host"
+      dateRange={urlState?.dateRange ?? parsedDateRange}
       overrides={{
-        overview: {
-          logsDataView,
-          metricsDataView: dataView,
-        },
         metadata: {
-          query: hostFlyoutState?.metadataSearch,
           showActionsColumn: true,
         },
-        processes: {
-          query: hostFlyoutState?.processSearch,
-        },
-        logs: {
-          query: hostFlyoutState?.logsSearch,
-          logView: {
-            reference: logViewReference,
-            loading,
-          },
-        },
       }}
-      onTabsStateChange={(state) =>
-        setHostFlyoutState({
-          metadataSearch: state.metadata?.query,
-          processSearch: state.processes?.query,
-          logsSearch: state.logs?.query,
-          tabId: state.activeTabId as HostFlyout['tabId'],
-        })
-      }
       tabs={orderedFlyoutTabs}
       links={['apmServices', 'nodeDetails']}
       renderMode={{
-        showInFlyout: true,
+        mode: 'flyout',
         closeFlyout,
       }}
+      metricAlias={source.configuration.metricAlias}
     />
-  );
+  ) : null;
 };

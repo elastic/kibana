@@ -21,17 +21,19 @@ import { useHistory } from 'react-router-dom';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useAutoAbortedHttpClient } from '../hooks/use_auto_aborted_http_client';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
-import { NoDataTabs } from '../views/no_data_view';
+import { AddDataTabs } from '../views/add_data_view';
 import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { LicensePrompt } from './license_prompt';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
+import { useProfilingSetupStatus } from './contexts/profiling_setup_status/use_profiling_setup_status';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
   const {
     start: { core },
     services: { fetchHasSetup, postSetupResources },
   } = useProfilingDependencies();
+  const { setProfilingSetupStatus } = useProfilingSetupStatus();
   const license = useLicenseContext();
   const router = useProfilingRouter();
   const history = useHistory();
@@ -46,6 +48,10 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     },
     [fetchHasSetup]
   );
+
+  if (status === AsyncStatus.Settled) {
+    setProfilingSetupStatus(data);
+  }
 
   const http = useAutoAbortedHttpClient([]);
 
@@ -79,7 +85,10 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   }
 
   const displaySetupScreen =
-    (status === AsyncStatus.Settled && data?.has_setup !== true) || !!error;
+    (status === AsyncStatus.Settled &&
+      data?.has_setup !== true &&
+      data?.pre_8_9_1_data === false) ||
+    !!error;
 
   if (displaySetupScreen) {
     return (
@@ -89,7 +98,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
           docsLink: `${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-get-started.html`,
           logo: 'logoObservability',
           pageTitle: i18n.translate('xpack.profiling.noDataConfig.pageTitle', {
-            defaultMessage: 'Universal Profiling (now in Beta)',
+            defaultMessage: 'Universal Profiling',
           }),
           action: {
             elasticAgent: {
@@ -133,19 +142,6 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                           }}
                         />
                       </li>
-                      <li>
-                        {i18n.translate('xpack.profiling.noDataConfig.action.legalBetaTerms', {
-                          defaultMessage: `By using this feature, you acknowledge that you have read and agree to `,
-                        })}
-                        <EuiLink
-                          target="_blank"
-                          href={`https://www.elastic.co/agreements/beta-release-terms`}
-                        >
-                          {i18n.translate('xpack.profiling.noDataConfig.betaTerms.linkLabel', {
-                            defaultMessage: 'Elastic Beta Release Terms',
-                          })}
-                        </EuiLink>
-                      </li>
                     </ul>
                   </EuiText>
                   <EuiText size={'xs'} />
@@ -170,7 +166,9 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                         notifications.toasts.addError(err, {
                           title: i18n.translate(
                             'xpack.profiling.checkSetup.setupFailureToastTitle',
-                            { defaultMessage: 'Failed to complete setup' }
+                            {
+                              defaultMessage: 'Failed to complete setup',
+                            }
                           ),
                           toastMessage: message,
                         });
@@ -204,23 +202,31 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
-  const displayAddDataInstructions =
-    status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false;
-
   const displayUi =
     // Display UI if there's data or if the user is opening the add data instruction page.
     // does not use profiling router because that breaks as at this point the route might not have all required params
-    data?.has_data === true || history.location.pathname === '/add-data-instructions';
+    (data?.has_data === true && data?.pre_8_9_1_data === false) ||
+    history.location.pathname === '/add-data-instructions' ||
+    history.location.pathname === '/delete_data_instructions';
 
   if (displayUi) {
     return children;
   }
 
-  if (displayAddDataInstructions) {
+  if (data?.pre_8_9_1_data === true) {
+    // If the cluster still has data pre 8.9.1 version, redirect to deleting instructions
+    router.push('/delete_data_instructions', {
+      path: {},
+      query: {},
+    });
+    return null;
+  }
+
+  if (status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false) {
     // when there's no data redirect the user to the add data instructions page
     router.push('/add-data-instructions', {
       path: {},
-      query: { selectedTab: NoDataTabs.Kubernetes },
+      query: { selectedTab: AddDataTabs.Kubernetes },
     });
     return null;
   }

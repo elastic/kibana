@@ -35,6 +35,7 @@ import { ModelItem } from './models_list';
 export function useModelActions({
   onTestAction,
   onModelsDeleteRequest,
+  onModelDeployRequest,
   onLoading,
   isLoading,
   fetchModels,
@@ -43,6 +44,7 @@ export function useModelActions({
   isLoading: boolean;
   onTestAction: (model: ModelItem) => void;
   onModelsDeleteRequest: (models: ModelItem[]) => void;
+  onModelDeployRequest: (model: ModelItem) => void;
   onLoading: (isLoading: boolean) => void;
   fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
@@ -52,6 +54,7 @@ export function useModelActions({
       application: { navigateToUrl, capabilities },
       overlays,
       theme,
+      i18n: i18nStart,
       docLinks,
       mlServices: { mlApiServices },
     },
@@ -91,14 +94,19 @@ export function useModelActions({
   }, [mlApiServices]);
 
   const getUserConfirmation = useMemo(
-    () => getUserConfirmationProvider(overlays, theme),
-    [overlays, theme]
+    () => getUserConfirmationProvider(overlays, theme, i18nStart),
+    [i18nStart, overlays, theme]
   );
 
   const getUserInputModelDeploymentParams = useMemo(
     () =>
-      getUserInputModelDeploymentParamsProvider(overlays, theme.theme$, startModelDeploymentDocUrl),
-    [overlays, theme.theme$, startModelDeploymentDocUrl]
+      getUserInputModelDeploymentParamsProvider(
+        overlays,
+        theme,
+        i18nStart,
+        startModelDeploymentDocUrl
+      ),
+    [overlays, theme, i18nStart, startModelDeploymentDocUrl]
   );
 
   const isBuiltInModel = useCallback(
@@ -430,6 +438,58 @@ export function useModelActions({
               }
             >
               <>
+                {i18n.translate('xpack.ml.trainedModels.modelsList.deployModelActionLabel', {
+                  defaultMessage: 'Deploy model',
+                })}
+              </>
+            </EuiToolTip>
+          );
+        },
+        description: i18n.translate('xpack.ml.trainedModels.modelsList.deployModelActionLabel', {
+          defaultMessage: 'Deploy model',
+        }),
+        'data-test-subj': 'mlModelsTableRowDeployAction',
+        icon: 'continuityAbove',
+        type: 'icon',
+        isPrimary: false,
+        onClick: (model) => {
+          onModelDeployRequest(model);
+        },
+        available: (item) => {
+          const isDfaTrainedModel =
+            item.metadata?.analytics_config !== undefined ||
+            item.inference_config?.regression !== undefined ||
+            item.inference_config?.classification !== undefined;
+
+          return (
+            isDfaTrainedModel &&
+            !isBuiltInModel(item) &&
+            !item.putModelConfig &&
+            canManageIngestPipelines
+          );
+        },
+        enabled: (item) => {
+          return item.state !== MODEL_STATE.STARTED;
+        },
+      },
+      {
+        name: (model) => {
+          const hasDeployments = model.state === MODEL_STATE.STARTED;
+          return (
+            <EuiToolTip
+              position="left"
+              content={
+                hasDeployments
+                  ? i18n.translate(
+                      'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                      {
+                        defaultMessage: 'Model has started deployments',
+                      }
+                    )
+                  : null
+              }
+            >
+              <>
                 {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
                   defaultMessage: 'Delete model',
                 })}
@@ -492,6 +552,7 @@ export function useModelActions({
       displayErrorToast,
       getUserConfirmation,
       onModelsDeleteRequest,
+      onModelDeployRequest,
       canDeleteTrainedModels,
       isBuiltInModel,
       onTestAction,

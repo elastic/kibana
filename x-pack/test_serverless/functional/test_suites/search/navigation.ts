@@ -74,5 +74,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await expect(await browser.getCurrentUrl()).contain('/app/discover');
     });
+
+    it('does not show cases in sidebar navigation', async () => {
+      await svlSearchLandingPage.assertSvlSearchSideNavExists();
+
+      expect(await testSubjects.missingOrFail('cases'));
+    });
+
+    it('does not navigate to cases app', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
+
+      expect(await browser.getCurrentUrl()).not.contain('/app/management/cases');
+      await testSubjects.missingOrFail('cases-all-title');
+    });
   });
 }

@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('loads a landing page with product cards', async function () {
         await retry.waitFor(
           'Elasticsearch product card visible',
-          async () => await testSubjects.exists('elasticsearchProductCard')
+          async () => await testSubjects.exists('enterpriseSearchElasticsearchProductCard')
         );
         await retry.waitFor(
           'Search Applications product card visible',
@@ -59,13 +59,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Content', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/content');
+        await common.navigateToApp('enterprise_search/content/search_indices');
       });
 
-      it('loads a setup guide', async function () {
+      it('loads the indices page', async function () {
         await retry.waitFor(
-          'setup guide visible',
-          async () => await testSubjects.exists('setupGuide')
+          'create index button visible',
+          async () => await testSubjects.exists('entSearchContent-searchIndices-createButton')
         );
         await a11y.testAppSnapshot();
       });

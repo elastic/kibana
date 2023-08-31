@@ -16,6 +16,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
 import {
   EmbeddableStart,
@@ -141,6 +142,8 @@ const createInstance = (setupPlugins: Partial<EmbeddableSetupDependencies> = {})
       savedObjectsManagement:
         savedObjectsManagementMock as unknown as SavedObjectsManagementPluginStart,
       usageCollection: { reportUiCounter: jest.fn() },
+      contentManagement:
+        startPlugins.contentManagement || contentManagementMock.createStartContract(),
     });
   return {
     plugin,
@@ -167,5 +170,6 @@ export const setStubKibanaServices = () => {
     inspector: inspectorPluginMock.createStartContract(),
     savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
     usageCollection: { reportUiCounter: jest.fn() },
+    contentManagement: contentManagementMock.createStartContract(),
   });
 };

@@ -51,6 +51,7 @@ export function createSplitPoint(
       row: splitPointRowIndex,
       column: table.columns.findIndex((column) => column.id === accessor),
       value: table.rows[splitPointRowIndex][accessor],
+      table,
     };
   }
 }

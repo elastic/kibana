@@ -17,12 +17,12 @@ import {
 } from '@elastic/eui';
 import React, { lazy, Suspense, useState } from 'react';
 
+import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
+import { SpaceCopyResultDetails } from './space_result_details';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import type { SpacesDataEntry } from '../../types';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
-import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
-import { SpaceCopyResultDetails } from './space_result_details';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>

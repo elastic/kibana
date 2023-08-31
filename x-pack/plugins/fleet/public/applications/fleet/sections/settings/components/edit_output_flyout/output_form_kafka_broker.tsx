@@ -27,14 +27,18 @@ export const OutputFormKafkaBroker: React.FunctionComponent<{ inputs: OutputForm
     []
   );
 
-  const kafkaBrokerChannelBufferSizeOptions = useMemo(
-    () =>
-      Array.from({ length: 4 }, (_, i) => Math.pow(2, i + 7)).map((buffer) => ({
-        text: buffer,
-        label: `${buffer}`,
-      })),
-    []
-  );
+  const getAckReliabilityLabel = (value: number) => {
+    switch (value) {
+      case kafkaAcknowledgeReliabilityLevel.DoNotWait:
+        return 'No response';
+      case kafkaAcknowledgeReliabilityLevel.Replica:
+        return 'Wait for all replicas to commit';
+      default:
+      case kafkaAcknowledgeReliabilityLevel.Commit:
+        return 'Wait for local commit';
+    }
+  };
+
   const kafkaBrokerAckReliabilityOptions = useMemo(
     () =>
       (
@@ -44,7 +48,7 @@ export const OutputFormKafkaBroker: React.FunctionComponent<{ inputs: OutputForm
       ).map((key) => {
         return {
           text: kafkaAcknowledgeReliabilityLevel[key],
-          label: kafkaAcknowledgeReliabilityLevel[key],
+          label: getAckReliabilityLabel(kafkaAcknowledgeReliabilityLevel[key]),
         };
       }),
     []
@@ -115,28 +119,6 @@ export const OutputFormKafkaBroker: React.FunctionComponent<{ inputs: OutputForm
         fullWidth
         label={
           <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaBrokerChannelBufferSizeInputLabel"
-            defaultMessage="Channel buffer size"
-          />
-        }
-        helpText={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaBrokerChannelBufferSizeInputHelpText"
-            defaultMessage="Define the number of messages buffered in output pipeline."
-          />
-        }
-      >
-        <EuiSelect
-          fullWidth
-          data-test-subj="settingsOutputsFlyout.kafkaBrokerChannelBufferSizeInput"
-          {...inputs.kafkaBrokerChannelBufferSizeInput.props}
-          options={kafkaBrokerChannelBufferSizeOptions}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={
-          <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.kafkaBrokerAckReliabilityInputLabel"
             defaultMessage="ACK Reliability"
           />
@@ -144,7 +126,7 @@ export const OutputFormKafkaBroker: React.FunctionComponent<{ inputs: OutputForm
         helpText={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.kafkaBrokerAckReliabilityInputHelpText"
-            defaultMessage="Define the number of messages buffered in output pipeline."
+            defaultMessage="Reliability level required from the broker."
           />
         }
       >

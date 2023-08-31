@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export type { LogRateAnalysisType } from './constants';
-
 /**
  * PLUGIN_ID is used as a unique identifier for the aiops plugin
  */

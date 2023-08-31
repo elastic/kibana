@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const diskWriteThroughput: FormulaConfig = {
+export const diskWriteThroughput: FormulaValueConfig = {
   label: 'Disk Write Throughput',
-  value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+  value: "counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes: *')",
   format: {
     id: 'bytes',
     params: {

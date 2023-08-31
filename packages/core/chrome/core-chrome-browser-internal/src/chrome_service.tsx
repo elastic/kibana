@@ -79,6 +79,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation = new ProjectNavigationService();
+  private mutationObserver: MutationObserver | undefined;
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -114,6 +115,53 @@ export class ChromeService {
     );
   }
 
+  private setIsVisible = (isVisible: boolean) => this.isForceHidden$.next(!isVisible);
+
+  /**
+   * Some EUI component can be toggled in Full screen (e.g. the EuiDataGrid). When they are toggled in full
+   * screen we want to hide the chrome, and when they are toggled back to normal we want to show the chrome.
+   */
+  private handleEuiFullScreenChanges = () => {
+    const { body } = document;
+    // HTML class names that are added to the body when Eui components are toggled in full screen
+    const classesOnBodyWhenEuiFullScreen = ['euiDataGrid__restrictBody'];
+
+    let isChromeHiddenForEuiFullScreen = false;
+    let isChromeVisible = false;
+
+    this.isVisible$.pipe(takeUntil(this.stop$)).subscribe((isVisible) => {
+      isChromeVisible = isVisible;
+    });
+
+    const onBodyClassesChange = () => {
+      const { className } = body;
+      if (
+        classesOnBodyWhenEuiFullScreen.some((name) => className.includes(name)) &&
+        isChromeVisible
+      ) {
+        isChromeHiddenForEuiFullScreen = true;
+        this.setIsVisible(false);
+      } else if (
+        classesOnBodyWhenEuiFullScreen.every((name) => !className.includes(name)) &&
+        !isChromeVisible &&
+        isChromeHiddenForEuiFullScreen
+      ) {
+        isChromeHiddenForEuiFullScreen = false;
+        this.setIsVisible(true);
+      }
+    };
+
+    this.mutationObserver = new MutationObserver((mutationList) => {
+      mutationList.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          onBodyClassesChange();
+        }
+      });
+    });
+
+    this.mutationObserver.observe(body, { attributes: true });
+  };
+
   public setup({ analytics }: SetupDeps) {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
@@ -128,6 +176,7 @@ export class ChromeService {
     customBranding,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
+    this.handleEuiFullScreenChanges();
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
@@ -225,6 +274,11 @@ export class ChromeService {
       projectNavigation.setProjectHome(homeHref);
     };
 
+    const setProjectsUrl = (projectsUrl: string) => {
+      validateChromeStyle();
+      projectNavigation.setProjectsUrl(projectsUrl);
+    };
+
     const isIE = () => {
       const ua = window.navigator.userAgent;
       const msie = ua.indexOf('MSIE '); // IE 10 or older
@@ -317,6 +371,7 @@ export class ChromeService {
                 loadingCount$={http.getLoadingCount$()}
                 headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
                 homeHref$={projectNavigation.getProjectHome$()}
+                projectsUrl$={projectNavigation.getProjectsUrl$()}
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
@@ -373,7 +428,7 @@ export class ChromeService {
 
       getIsVisible$: () => this.isVisible$,
 
-      setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
+      setIsVisible: this.setIsVisible.bind(this),
 
       getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
 
@@ -444,6 +499,7 @@ export class ChromeService {
       getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
       project: {
         setHome: setProjectHome,
+        setProjectsUrl,
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
@@ -456,5 +512,6 @@ export class ChromeService {
     this.navLinks.stop();
     this.projectNavigation.stop();
     this.stop$.next();
+    this.mutationObserver?.disconnect();
   }
 }

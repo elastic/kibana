@@ -17,10 +17,19 @@ export interface LogFilesState {
   namespace: string;
 }
 
-type ObservabilityOnboardingFlowState = LogFilesState | undefined;
+export interface SystemLogsState {
+  namespace: string;
+}
+
+export type ObservabilityOnboardingType = 'logFiles' | 'systemLogs';
+
+type ObservabilityOnboardingFlowState =
+  | LogFilesState
+  | SystemLogsState
+  | undefined;
 
 export interface ObservabilityOnboardingFlow {
-  type: 'logFiles';
+  type: ObservabilityOnboardingType;
   state: ObservabilityOnboardingFlowState;
   progress: Record<
     string,
