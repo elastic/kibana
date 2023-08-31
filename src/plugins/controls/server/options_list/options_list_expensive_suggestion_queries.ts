@@ -9,6 +9,7 @@
 import { get } from 'lodash';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
+import { FieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
   OptionsListRequestBody,
   OptionsListSuggestions,
@@ -230,80 +231,26 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
     },
   },
   /**
-   * The "date" query / parser should be used whenever the field is built on some type of string field,
-   * regardless of if it is keyword only, keyword+text, or some nested keyword/keyword+text field.
+   * the "date" query / parser should be used when the options list is built on a field of type date.
    */
   date: {
-    buildRuntimeFieldMapping: ({ fieldSpec, fieldName }: OptionsListRequestBody) => ({
-      [`${fieldName}_formatted`]: {
-        type: 'keyword',
-        script: {
-          source: `
-            ZonedDateTime timestamp = doc['${fieldName}'].value;
-            ${
-              fieldSpec?.format
-                ? `DateTimeFormatter dtf = DateTimeFormatter.ofPattern("${fieldSpec?.format}");
-            emit(timestamp.format(dtf));
-            `
-                : `
-            emit(timestamp.format(DateTimeFormatter.ISO_INSTANT));
-            `
-            }
-          `,
-        },
-      },
-    }),
-    buildAggregation: ({
-      fieldName,
-      searchString = '',
-      sort,
-      size,
-      searchTechnique,
-    }: OptionsListRequestBody) => {
-      let dateQuery: any = {
+    buildAggregation: ({ fieldName, sort, size }: OptionsListRequestBody) => {
+      const dateQuery: any = {
         suggestions: {
           terms: {
             size,
-            field: `${fieldName}_formatted`,
+            field: fieldName,
             shard_size: 10,
             order: getSortType(sort),
-          },
-          aggs: {
-            timestamp: {
-              top_hits: {
-                size: 1,
-                _source: {
-                  includes: [fieldName],
-                },
-              },
-            },
           },
         },
         unique_terms: {
           cardinality: {
-            field: `${fieldName}`,
+            field: fieldName,
           },
         },
       };
 
-      if (searchString && searchString.length > 0) {
-        dateQuery = {
-          filteredSuggestions: {
-            filter: {
-              [(searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE) as string]: {
-                [`${fieldName}_formatted`]: {
-                  value:
-                    searchTechnique === 'wildcard'
-                      ? `*${getEscapedWildcardQuery(searchString)}*`
-                      : searchString,
-                  case_insensitive: true,
-                },
-              },
-            },
-            aggs: { ...dateQuery },
-          },
-        };
-      }
       return dateQuery;
     },
 
@@ -313,12 +260,8 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
 
       const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          console.log(JSON.stringify(suggestion, null, 2));
           acc.push({
-            // value: suggestion.key,
-            // label: suggestion.key_as_string,
-            value: suggestion.timestamp.hits.hits[0]._source[request.fieldName],
-            label: suggestion.key,
+            value: suggestion.key,
             docCount: suggestion.doc_count,
           });
           return acc;
