@@ -21,8 +21,8 @@ import { StacktracesLocatorDefinition } from './locators/stacktraces_locator';
 import { TopNFunctionsLocatorDefinition } from './locators/topn_functions_locator';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
-import { HELLO_WORLD } from './embeddables/hello_world';
-import { HelloWorldFactory } from './embeddables/hello_world_factory';
+import { EMBEDDABLE_FLAMEGRAPH } from './embeddables/flamegraph/embeddable_flamegraph';
+import { EmbeddableFlamegraphFactory } from './embeddables/flamegraph/embeddable_flamegraph_factory';
 
 export type ProfilingPluginSetup = ReturnType<ProfilingPlugin['setup']>;
 export type ProfilingPluginStart = void;
@@ -132,7 +132,10 @@ export class ProfilingPlugin implements Plugin {
       },
     });
 
-    pluginsSetup.embeddable.registerEmbeddableFactory(HELLO_WORLD, new HelloWorldFactory());
+    pluginsSetup.embeddable.registerEmbeddableFactory(
+      EMBEDDABLE_FLAMEGRAPH,
+      new EmbeddableFlamegraphFactory()
+    );
 
     return {
       locators: {

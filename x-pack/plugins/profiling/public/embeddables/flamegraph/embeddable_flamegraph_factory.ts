@@ -10,23 +10,25 @@ import {
   EmbeddableFactoryDefinition,
 } from '@kbn/embeddable-plugin/public';
 import { ElasticFlameGraph } from '@kbn/profiling-data-access-plugin/common/flamegraph';
-import { HelloWorld, HELLO_WORLD } from './hello_world';
+import { EmbeddableFlamegraph, EMBEDDABLE_FLAMEGRAPH } from './embeddable_flamegraph';
 
-interface HelloWorldInput {
+interface EmbeddableFlamegraphInput {
   data?: ElasticFlameGraph;
 }
 
-export type HelloWorldEmbeddableInput = HelloWorldInput & EmbeddableInput;
+export type EmbeddableFlamegraphEmbeddableInput = EmbeddableFlamegraphInput & EmbeddableInput;
 
-export class HelloWorldFactory implements EmbeddableFactoryDefinition<HelloWorldEmbeddableInput> {
-  readonly type = HELLO_WORLD;
+export class EmbeddableFlamegraphFactory
+  implements EmbeddableFactoryDefinition<EmbeddableFlamegraphEmbeddableInput>
+{
+  readonly type = EMBEDDABLE_FLAMEGRAPH;
 
   async isEditable() {
     return false;
   }
 
-  async create(input: HelloWorldEmbeddableInput, parent?: IContainer) {
-    return new HelloWorld(input, {}, parent);
+  async create(input: EmbeddableFlamegraphEmbeddableInput, parent?: IContainer) {
+    return new EmbeddableFlamegraph(input, {}, parent);
   }
 
   getDisplayName() {
