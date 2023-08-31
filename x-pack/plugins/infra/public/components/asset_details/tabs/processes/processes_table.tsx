@@ -217,23 +217,27 @@ interface ProcessesTableErrorProps {
   error: string;
 }
 
-const ProcessesTableError = ({ error }: ProcessesTableErrorProps) => (
-  <EuiTableRow>
-    <EuiTableRowCell
-      data-test-subj="infraAssetDetailsProcessesSearchInputError"
-      style={{
-        paddingTop: '8px',
-        paddingBottom: '8px',
-      }}
-      align="center"
-      colSpan={columns.length + 1}
-      mobileOptions={{ width: '100%' }}
-      textOnly={true}
-    >
-      <EuiIcon type="minusInCircle" color="danger" /> {error}
-    </EuiTableRowCell>
-  </EuiTableRow>
-);
+const ProcessesTableError = ({ error }: ProcessesTableErrorProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiTableRow>
+      <EuiTableRowCell
+        data-test-subj="infraAssetDetailsProcessesSearchInputError"
+        style={{
+          paddingTop: `${euiTheme.size.s}`,
+          paddingBottom: `${euiTheme.size.s}`,
+        }}
+        align="center"
+        colSpan={columns.length + 1}
+        mobileOptions={{ width: '100%' }}
+        textOnly={true}
+      >
+        <EuiIcon type="minusInCircle" color="danger" /> {error}
+      </EuiTableRowCell>
+    </EuiTableRow>
+  );
+};
 
 interface TableBodyProps {
   items: Process[];
