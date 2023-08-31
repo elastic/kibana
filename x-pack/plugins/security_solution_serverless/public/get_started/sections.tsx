@@ -30,11 +30,6 @@ import analyzeDataUsingDashboards from './images/analyze_data_using_dashboards.p
 import { AddElasticRulesButton } from './step_links/add_elastic_rules_button';
 import { DashboardButton } from './step_links/dashboard_button';
 
-export const LEFT_CONTENT_PANEL_WIDTH = 486;
-export const RIGHT_CONTENT_PANEL_WIDTH = 510;
-export const RIGHT_CONTENT_HEIGHT = 270;
-export const RIGHT_CONTENT_WIDTH = 480;
-
 export const introductionSteps = [
   {
     id: IntroductionSteps.getToKnowElasticSecurity,

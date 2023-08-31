@@ -46,6 +46,7 @@ export const getStartedStorage = {
       storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
     return allFinishedSteps;
   },
+
   addFinishedStepToStorage: (cardId: CardId, stepId: StepId) => {
     const finishedSteps: Record<CardId, StepId[]> = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
     const card: StepId[] = finishedSteps[cardId] ?? [];
@@ -69,6 +70,18 @@ export const getStartedStorage = {
     return !storageData || Object.keys(storageData).length === 0
       ? defaultExpandedCards
       : storageData;
+  },
+  resetAllExpandedCardStepsToStorage: () => {
+    const activeCards: Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }> =
+      getStartedStorage.getAllExpandedCardStepsFromStorage();
+
+    storage.set(
+      EXPANDED_CARDS_STORAGE_KEY,
+      Object.entries(activeCards).reduce((acc, [cardId, card]) => {
+        acc[cardId as CardId] = { ...card, expandedSteps: [] };
+        return acc;
+      }, {} as Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>)
+    );
   },
   addExpandedCardStepToStorage: (cardId: CardId, stepId?: StepId) => {
     const activeCards: Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }> =

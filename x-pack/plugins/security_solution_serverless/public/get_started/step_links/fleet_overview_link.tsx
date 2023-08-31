@@ -13,6 +13,7 @@ const FleetOverviewLinkComponent = () => (
   <EuiButton
     href="https://www.elastic.co/guide/en/fleet/current/fleet-overview.html"
     target="_blank"
+    fill
   >
     <FormattedMessage
       id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description1.linkText"

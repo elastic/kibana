@@ -84,7 +84,14 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
         }
         description={
           <>
-            <strong className="eui-displayBlock">{GET_STARTED_PAGE_SUBTITLE}</strong>
+            <strong
+              css={css`
+                font-size: ${euiTheme.base * 1.37}px;
+              `}
+              className="eui-displayBlock"
+            >
+              {GET_STARTED_PAGE_SUBTITLE}
+            </strong>
             <EuiSpacer size="m" />
             <span className="eui-displayBlock">{GET_STARTED_PAGE_DESCRIPTION}</span>
           </>

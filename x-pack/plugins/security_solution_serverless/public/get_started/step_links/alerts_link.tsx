@@ -6,11 +6,10 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useGetLinkProps } from '@kbn/security-solution-navigation/links';
+import { LinkButton, useGetLinkProps } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 import React, { useCallback } from 'react';
-import { EuiButton } from '@elastic/eui';
 
 const AlertsButtonComponent = () => {
   const getLinkProps = useGetLinkProps();
@@ -22,12 +21,12 @@ const AlertsButtonComponent = () => {
     onClick,
   });
   return (
-    <EuiButton onClick={onLinkClicked} fill>
+    <LinkButton onClick={onLinkClicked} id={SecurityPageName.alerts} fill>
       <FormattedMessage
         id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.button"
         defaultMessage="View alerts"
       />
-    </EuiButton>
+    </LinkButton>
   );
 };
 

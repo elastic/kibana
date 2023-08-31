@@ -13,6 +13,27 @@ export const WELCOME_PANEL_PROJECT_CREATED_TITLE = i18n.translate(
   }
 );
 
+export const WELCOME_PANEL_PROJECT_CREATED_CHANGE_PLAN_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.welcomePanel.projectCreated.changePlan.title',
+  {
+    defaultMessage: `Change plan`,
+  }
+);
+
+export const PRODUCT_TIER_ESSENTIAL = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.welcomePanel.productTier.essential',
+  {
+    defaultMessage: `Essential`,
+  }
+);
+
+export const PRODUCT_TIER_COMPLETE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.welcomePanel.productTier.complete',
+  {
+    defaultMessage: `Complete`,
+  }
+);
+
 export const WELCOME_PANEL_INVITE_YOUR_TEAM_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.welcomePanel.inviteYourTeam.title',
   {

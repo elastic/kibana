@@ -13,9 +13,8 @@
 
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useGetLinkProps } from '@kbn/security-solution-navigation/links';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { EuiButton } from '@elastic/eui';
+import { LinkButton, useGetLinkProps } from '@kbn/security-solution-navigation/links';
+import { ExternalPageName } from '../../navigation/links/constants';
 
 const InstallAgentButtonComponent = () => {
   const getLinkProps = useGetLinkProps();
@@ -23,16 +22,16 @@ const InstallAgentButtonComponent = () => {
     // TODO: telemetry https://github.com/elastic/kibana/issues/163247
   }, []);
   const { onClick: onLinkClicked } = getLinkProps({
-    id: SecurityPageName.endpoints,
+    id: ExternalPageName.fleetAgents,
     onClick,
   });
   return (
-    <EuiButton onClick={onLinkClicked} fill>
+    <LinkButton onClick={onLinkClicked} fill id={ExternalPageName.fleetAgents}>
       <FormattedMessage
         id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2.description2.button"
         defaultMessage="Install Agent"
       />
-    </EuiButton>
+    </LinkButton>
   );
 };
 

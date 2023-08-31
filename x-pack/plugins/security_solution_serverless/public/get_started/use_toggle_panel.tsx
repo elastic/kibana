@@ -23,6 +23,7 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     getAllFinishedStepsFromStorage,
     getActiveProductsFromStorage,
     toggleActiveProductsInStorage,
+    resetAllExpandedCardStepsToStorage,
     addFinishedStepToStorage,
     removeFinishedStepFromStorage,
     addExpandedCardStepToStorage,
@@ -79,17 +80,25 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
         payload: { stepId, cardId, isStepExpanded: isExpanded },
       });
       if (isExpanded) {
+        // It allows Only One step open at a time
         dispatch({
           type: GetStartedPageActions.AddFinishedStep,
           payload: { stepId, cardId, sectionId },
         });
         addFinishedStepToStorage(cardId, stepId);
+
+        resetAllExpandedCardStepsToStorage();
         addExpandedCardStepToStorage(cardId, stepId);
       } else {
         removeExpandedCardStepFromStorage(cardId, stepId);
       }
     },
-    [addExpandedCardStepToStorage, addFinishedStepToStorage, removeExpandedCardStepFromStorage]
+    [
+      addExpandedCardStepToStorage,
+      addFinishedStepToStorage,
+      removeExpandedCardStepFromStorage,
+      resetAllExpandedCardStepsToStorage,
+    ]
   );
 
   const onCardClicked: OnCardClicked = useCallback(

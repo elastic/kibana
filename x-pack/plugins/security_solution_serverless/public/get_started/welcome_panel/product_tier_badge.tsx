@@ -6,34 +6,28 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ProductTier } from '../../../common/product';
+import { PRODUCT_TIER_ESSENTIAL, PRODUCT_TIER_COMPLETE } from './translations';
 
-const ProductTierBadgeComponent = ({ productTier }: { productTier: ProductTier | undefined }) =>
-  productTier ? (
+const ProductTierBadgeComponent = ({ productTier }: { productTier: ProductTier | undefined }) => {
+  const { euiTheme } = useEuiTheme();
+  return productTier ? (
     <EuiBadge
       color="warning"
+      className="eui-alignMiddle"
       css={css`
-        font-size: 14px;
+        font-size: ${euiTheme.size.m};
+        line-height: ${euiTheme.size.m};
       `}
     >
       <strong>
-        {productTier === ProductTier.essentials && (
-          <FormattedMessage
-            id="xpack.securitySolutionServerless.getStarted.welcomePanel.projectCreated.product.tier.essential"
-            defaultMessage="Essential"
-          />
-        )}
-        {productTier === ProductTier.complete && (
-          <FormattedMessage
-            id="xpack.securitySolutionServerless.getStarted.welcomePanel.projectCreated.product.tier.complete"
-            defaultMessage="Complete"
-          />
-        )}
+        {productTier === ProductTier.essentials && PRODUCT_TIER_ESSENTIAL}
+        {productTier === ProductTier.complete && PRODUCT_TIER_COMPLETE}
       </strong>
     </EuiBadge>
   ) : null;
+};
 
 export const ProductTierBadge = React.memo(ProductTierBadgeComponent);

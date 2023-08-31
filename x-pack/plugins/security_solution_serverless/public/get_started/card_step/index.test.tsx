@@ -6,10 +6,10 @@
  */
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { CardStep } from './card_step';
-import type { StepId } from './types';
-import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
-import { ProductLine } from '../../common/product';
+import { CardStep } from '.';
+import type { StepId } from '../types';
+import { GetSetUpCardId, IntroductionSteps, SectionId } from '../types';
+import { ProductLine } from '../../../common/product';
 
 describe('CardStepComponent', () => {
   const step = {

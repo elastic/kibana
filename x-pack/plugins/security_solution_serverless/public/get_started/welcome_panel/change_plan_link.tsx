@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import {
@@ -20,6 +19,7 @@ import {
 import { css } from '@emotion/react';
 import type { ProductTier } from '../../../common/product';
 import { ProductTierBadge } from './product_tier_badge';
+import { WELCOME_PANEL_PROJECT_CREATED_CHANGE_PLAN_TITLE } from './translations';
 
 const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | undefined }) => {
   const { euiTheme } = useEuiTheme();
@@ -40,16 +40,14 @@ const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | u
           >
             <ProductTierBadge productTier={productTier} />
             <LinkAnchor
+              className="eui-alignMiddle"
               id={SecurityPageName.projectSettings}
               css={css`
                 color: ${euiTheme.colors.primaryText};
                 padding-left: ${euiTheme.size.m};
               `}
             >
-              <FormattedMessage
-                id="xpack.securitySolutionServerless.getStarted.welcomePanel.projectCreated.changePlan.title"
-                defaultMessage="Change plan"
-              />
+              {WELCOME_PANEL_PROJECT_CREATED_CHANGE_PLAN_TITLE}
               <EuiIcon type="arrowRight" />
             </LinkAnchor>
           </div>

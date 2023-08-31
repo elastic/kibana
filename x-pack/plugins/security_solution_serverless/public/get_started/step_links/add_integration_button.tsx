@@ -7,8 +7,8 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { EuiButton } from '@elastic/eui';
 import { useNavigation } from '@kbn/security-solution-navigation';
+import { LinkButton } from '@kbn/security-solution-navigation/links';
 
 const AddIntegrationButtonComponent = () => {
   const { getAppUrl, navigateTo } = useNavigation();
@@ -23,12 +23,12 @@ const AddIntegrationButtonComponent = () => {
     [navigateTo, integrationsUrl]
   );
   return (
-    <EuiButton onClick={onClick} fill>
+    <LinkButton onClick={onClick} fill id="integrations" path="/browse/security">
       <FormattedMessage
         id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description2.button"
         defaultMessage="Add integrations"
       />
-    </EuiButton>
+    </LinkButton>
   );
 };
 

@@ -7,9 +7,8 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { useGetLinkProps } from '@kbn/security-solution-navigation/links';
+import { LinkButton, useGetLinkProps } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { EuiButton } from '@elastic/eui';
 
 const AddElasticRulesButtonComponent = () => {
   const getLinkProps = useGetLinkProps();
@@ -18,15 +17,16 @@ const AddElasticRulesButtonComponent = () => {
   }, []);
   const { onClick: onLinkClicked } = getLinkProps({
     id: SecurityPageName.rules,
+    path: '/management',
     onClick,
   });
   return (
-    <EuiButton onClick={onLinkClicked}>
+    <LinkButton onClick={onLinkClicked} id={SecurityPageName.rules} path="/management" fill>
       <FormattedMessage
         id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4.description2.button"
         defaultMessage="Add Elastic rules"
       />
-    </EuiButton>
+    </LinkButton>
   );
 };
 

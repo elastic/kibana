@@ -83,8 +83,11 @@ export interface ActiveCard {
   stepsLeft: number;
   activeStepIds: StepId[] | undefined;
 }
-
-export type ExpandedCardSteps = Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>;
+export interface ExpandedCardStep {
+  isExpanded: boolean;
+  expandedSteps: StepId[];
+}
+export type ExpandedCardSteps = Record<CardId, ExpandedCardStep>;
 export interface TogglePanelReducer {
   activeProducts: Set<ProductLine>;
   activeSections: ActiveSections | null;
