@@ -15,7 +15,7 @@ import {
 import { txtChooseDestinationDashboard } from './i18n';
 import { Config as DrilldownConfig } from '../../types';
 
-const DashboardDrilldownOptions = withSuspense(LazyDashboardDrilldownOptionsComponent, null);
+const DashboardDrilldownOptions = withSuspense(DashboardDrilldownOptionsComponent, null);
 
 export interface DashboardDrilldownConfigProps {
   dashboards: Array<EuiComboBoxOptionOption<string>>;
