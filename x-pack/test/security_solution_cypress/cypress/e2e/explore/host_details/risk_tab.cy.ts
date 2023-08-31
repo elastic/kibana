@@ -9,6 +9,7 @@ import { login, visitHostDetailsPage } from '../../../tasks/login';
 
 import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
+import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -28,10 +29,22 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
 
   it('renders risk tab and alerts table', () => {
     visitHostDetailsPage('Host-fwarau82er');
-    cy.get('[data-test-subj="navigation-hostRisk"]').click();
+    navigateToHostRiskDetailTab();
     waitForTableToLoad();
 
     cy.get(ALERTS_COUNT).should('have.text', '1 alert');
     cy.get(ALERT_GRID_CELL).contains('Endpoint Security');
+  });
+
+  it('shows risk information overlay when button is clicked', () => {
+    visitHostDetailsPage('siem-kibana');
+    navigateToHostRiskDetailTab();
+    waitForTableToLoad();
+
+    cy.get('[data-test-subj="open-risk-information-flyout-trigger"]').click();
+
+    cy.get('[data-test-subj="open-risk-information-flyout"] .euiFlyoutHeader').contains(
+      'How is host risk calculated?'
+    );
   });
 });
