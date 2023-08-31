@@ -12,13 +12,13 @@ import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 // @ts-expect-error unused variable
 const createConversationSubFeature: SubFeatureConfig = {
   name: i18n.translate(
-    'xpack.securitySolution.featureRegistry.assistant.createConversationSubFeatureName',
+    'securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureName',
     {
       defaultMessage: 'Create Conversations',
     }
   ),
   description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.assistant.description',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.assistant.description',
     { defaultMessage: 'Create custom conversations.' }
   ),
   privilegeGroups: [
@@ -29,7 +29,7 @@ const createConversationSubFeature: SubFeatureConfig = {
           api: [],
           id: 'create_conversation',
           name: i18n.translate(
-            'xpack.securitySolution.featureRegistry.assistant.createConversationSubFeatureDetails',
+            'securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureDetails',
             {
               defaultMessage: 'Create conversations',
             }
@@ -50,7 +50,19 @@ export enum AssistantSubFeatureId {
   createConversation = 'createConversationSubFeature',
 }
 
-// Defines all the ordered Security Assistant subFeatures available
+/**
+ * Sub-features that will always be available for Security Assistant
+ * regardless of the product type.
+ */
+export const getAssistantBaseKibanaSubFeatureIds = (): AssistantSubFeatureId[] => [
+  // This is a sample sub-feature that can be used for future implementations
+  // AssistantSubFeatureId.createConversation,
+];
+
+/**
+ * Defines all the Security Assistant subFeatures available.
+ * The order of the subFeatures is the order they will be displayed
+ */
 export const assistantSubFeaturesMap = Object.freeze(
   new Map<AssistantSubFeatureId, SubFeatureConfig>([
     // This is a sample sub-feature that can be used for future implementations
