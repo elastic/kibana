@@ -10,7 +10,9 @@
   ],
   "kbn_references": [
     "@kbn/content-management-plugin",
-    "@kbn/content-management-utils"
+    "@kbn/content-management-utils",
+    "@kbn/core",
+    "@kbn/utility-types"
   ],
   "exclude": [
     "target/**/*",
