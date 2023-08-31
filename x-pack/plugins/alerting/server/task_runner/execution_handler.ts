@@ -10,7 +10,11 @@ import { Logger } from '@kbn/core/server';
 import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
-import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
+import {
+  ExecuteOptions as EnqueueExecutionOptions,
+  ExecutionResponse,
+  ExecutionResponseType,
+} from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
@@ -47,6 +51,18 @@ enum Reasons {
   MUTED = 'muted',
   THROTTLED = 'throttled',
   ACTION_GROUP_NOT_CHANGED = 'actionGroupHasNotChanged',
+}
+
+interface LogAction {
+  id: string;
+  typeId: string;
+  alertId?: string;
+  alertGroup?: string;
+  alertSummary?: {
+    new: number;
+    ongoing: number;
+    recovered: number;
+  };
 }
 
 export interface RunResult {
@@ -176,8 +192,9 @@ export class ExecutionHandler<
         },
       } = this;
 
-      const logActions = [];
+      const logActions: Record<string, LogAction> = {};
       const bulkActions: EnqueueExecutionOptions[] = [];
+      let bulkActionsResponse: ExecutionResponse[] = [];
 
       this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
@@ -262,7 +279,7 @@ export class ExecutionHandler<
             throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
           }
 
-          logActions.push({
+          logActions[action.id] = {
             id: action.id,
             typeId: action.actionTypeId,
             alertSummary: {
@@ -270,7 +287,7 @@ export class ExecutionHandler<
               ongoing: summarizedAlerts.ongoing.count,
               recovered: summarizedAlerts.recovered.count,
             },
-          });
+          };
         } else {
           const ruleUrl = this.buildRuleUrl(spaceId);
           const actionToRun = {
@@ -307,12 +324,12 @@ export class ExecutionHandler<
             bulkActions,
           });
 
-          logActions.push({
+          logActions[action.id] = {
             id: action.id,
             typeId: action.actionTypeId,
             alertId: alert.getId(),
             alertGroup: action.group,
-          });
+          };
 
           if (!this.isRecoveredAlert(actionGroup)) {
             if (isActionOnInterval(action)) {
@@ -331,48 +348,39 @@ export class ExecutionHandler<
 
       if (!!bulkActions.length) {
         for (const c of chunk(bulkActions, CHUNK_SIZE)) {
-          try {
-            await this.actionsClient!.bulkEnqueueExecution(c);
-          } catch (error) {
-            if (
-              error.message ===
-              'Unable to execute actions because the maximum number of queued actions has been reached.'
-            ) {
-              ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
-              this.setBulkActionsStatus(logger, ruleRunMetricsStore, c);
-            } else {
-              throw error;
-            }
+          const response = await this.actionsClient!.bulkEnqueueExecution(c);
+          bulkActionsResponse = bulkActionsResponse.concat(response);
+        }
+      }
+
+      if (!!bulkActionsResponse.length) {
+        for (const r of bulkActionsResponse) {
+          if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
+            ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
+            ruleRunMetricsStore.decrementNumberOfTriggeredActions();
+            ruleRunMetricsStore.decrementNumberOfTriggeredActionsByConnectorType(r.actionTypeId);
+            ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+              actionTypeId: r.actionTypeId,
+              status: ActionsCompletion.PARTIAL,
+            });
+
+            logger.debug(
+              `Rule "${this.rule.id}" skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
+            );
+
+            delete logActions[r.id];
           }
         }
       }
 
-      if (!!logActions.length) {
-        for (const action of logActions) {
+      const logActionsValues = Object.values(logActions);
+      if (!!logActionsValues.length) {
+        for (const action of logActionsValues) {
           alertingEventLogger.logAction(action);
         }
       }
     }
     return { throttledSummaryActions };
-  }
-
-  private setBulkActionsStatus(
-    logger: Logger,
-    ruleRunMetricsStore: RuleRunMetricsStore,
-    actions: EnqueueExecutionOptions[]
-  ) {
-    for (const action of actions) {
-      ruleRunMetricsStore.decrementNumberOfTriggeredActions();
-      ruleRunMetricsStore.decrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
-      ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-        actionTypeId: action.actionTypeId,
-        status: ActionsCompletion.PARTIAL,
-      });
-
-      logger.debug(
-        `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of queued actions has been reached.`
-      );
-    }
   }
 
   private logNumberOfFilteredAlerts({

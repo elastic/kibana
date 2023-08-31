@@ -57,13 +57,24 @@ export type BulkExecutionEnqueuer<T> = (
   actionsToExectute: ExecuteOptions[]
 ) => Promise<T>;
 
+export enum ExecutionResponseType {
+  SUCCESS = 'success',
+  QUEUED_ACTIONS_LIMIT_ERROR = 'queuedActionsLimitError',
+}
+
+export interface ExecutionResponse {
+  id: string;
+  actionTypeId: string;
+  response: ExecutionResponseType;
+}
+
 export function createBulkExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
   isESOCanEncrypt,
   inMemoryConnectors,
   configurationUtilities,
-}: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<void> {
+}: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<ExecutionResponse[]> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     actionsToExecute: ExecuteOptions[]
@@ -74,15 +85,16 @@ export function createBulkExecutionEnqueuerFunction({
       );
     }
 
-    if (
-      await hasReachedTheQueuedActionsLimit(
-        taskManager,
-        configurationUtilities,
-        actionsToExecute.length
-      )
-    ) {
-      throw new Error(
-        `Unable to execute actions because the maximum number of queued actions has been reached.`
+    const { hasReachedLimit, numberOverLimit } = await hasReachedTheQueuedActionsLimit(
+      taskManager,
+      configurationUtilities,
+      actionsToExecute.length
+    );
+    let actionsOverLimit: ExecuteOptions[] = [];
+    if (hasReachedLimit) {
+      actionsOverLimit = actionsToExecute.splice(
+        actionsToExecute.length - numberOverLimit,
+        numberOverLimit
       );
     }
 
@@ -160,6 +172,20 @@ export function createBulkExecutionEnqueuerFunction({
       };
     });
     await taskManager.bulkSchedule(taskInstances);
+
+    return actionsToExecute
+      .map((a) => ({
+        id: a.id,
+        actionTypeId: a.actionTypeId,
+        response: ExecutionResponseType.SUCCESS,
+      }))
+      .concat(
+        actionsOverLimit.map((a) => ({
+          id: a.id,
+          actionTypeId: a.actionTypeId,
+          response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+        }))
+      );
   };
 }
 
@@ -226,7 +252,12 @@ export async function hasReachedTheQueuedActionsLimit(
       },
     },
   });
-  return tasks.length + numberOfActions >= limit;
+  const numberOfTasks = tasks.length + numberOfActions;
+  const hasReachedLimit = numberOfTasks >= limit;
+  return {
+    hasReachedLimit,
+    numberOverLimit: hasReachedLimit ? numberOfTasks - limit : 0,
+  };
 }
 
 function validateCanActionBeUsed(action: InMemoryConnector | RawAction) {

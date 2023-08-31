@@ -55,6 +55,7 @@ import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
   BulkExecutionEnqueuer,
+  ExecutionResponse,
 } from '../create_execute_function';
 import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
@@ -114,7 +115,7 @@ export interface ConstructorOptions {
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
-  bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse[]>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
@@ -139,7 +140,7 @@ export interface ActionsClientContext {
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
-  bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse[]>;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
@@ -766,7 +767,9 @@ export class ActionsClient {
     });
   }
 
-  public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {
+  public async bulkEnqueueExecution(
+    options: EnqueueExecutionOptions[]
+  ): Promise<ExecutionResponse[]> {
     const sources: Array<ActionExecutionSource<unknown>> = [];
     options.forEach((option) => {
       if (option.source) {

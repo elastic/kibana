@@ -34,6 +34,7 @@ import sinon from 'sinon';
 import { mockAAD } from './fixtures';
 import { schema } from '@kbn/config-schema';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
+import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -137,6 +138,12 @@ const defaultExecutionParams = {
   alertsClient,
 };
 
+const defaultExecutionResponse = {
+  actionTypeId: 'test',
+  id: '1',
+  response: ExecutionResponseType.SUCCESS,
+};
+
 let ruleRunMetricsStore: RuleRunMetricsStore;
 let clock: sinon.SinonFakeTimers;
 type ActiveActionGroup = 'default' | 'other-group';
@@ -223,6 +230,7 @@ describe('Execution Handler', () => {
       renderActionParameterTemplatesDefault
     );
     ruleRunMetricsStore = new RuleRunMetricsStore();
+    actionsClient.bulkEnqueueExecution.mockResolvedValue([defaultExecutionResponse]);
   });
   beforeAll(() => {
     clock = sinon.useFakeTimers();
@@ -518,6 +526,18 @@ describe('Execution Handler', () => {
   });
 
   test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
+      {
+        actionTypeId: 'test2',
+        id: '1',
+        response: ExecutionResponseType.SUCCESS,
+      },
+      {
+        actionTypeId: 'test2',
+        id: '2',
+        response: ExecutionResponseType.SUCCESS,
+      },
+    ]);
     const actions = [
       {
         id: '1',
@@ -577,6 +597,24 @@ describe('Execution Handler', () => {
   });
 
   test('Skips triggering actions for a specific action type when it reaches the limit for that specific action type', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
+      defaultExecutionResponse,
+      {
+        actionTypeId: 'test-action-type-id',
+        id: '2',
+        response: ExecutionResponseType.SUCCESS,
+      },
+      {
+        actionTypeId: 'another-action-type-id',
+        id: '4',
+        response: ExecutionResponseType.SUCCESS,
+      },
+      {
+        actionTypeId: 'another-action-type-id',
+        id: '5',
+        response: ExecutionResponseType.SUCCESS,
+      },
+    ]);
     const actions = [
       ...defaultExecutionParams.rule.actions,
       {
@@ -657,16 +695,28 @@ describe('Execution Handler', () => {
   });
 
   test('Stops triggering actions when the number of total queued actions is reached the number of max queued actions', async () => {
-    actionsClient.bulkEnqueueExecution.mockImplementationOnce(() => {
-      throw new Error(
-        'Unable to execute actions because the maximum number of queued actions has been reached.'
-      );
-    });
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
+      {
+        actionTypeId: 'test',
+        id: '1',
+        response: ExecutionResponseType.SUCCESS,
+      },
+      {
+        actionTypeId: 'test',
+        id: '2',
+        response: ExecutionResponseType.SUCCESS,
+      },
+      {
+        actionTypeId: 'test',
+        id: '3',
+        response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+      },
+    ]);
     const actions = [
       {
         id: '1',
         group: 'default',
-        actionTypeId: 'test2',
+        actionTypeId: 'test',
         params: {
           foo: true,
           contextVal: 'My other {{context.value}} goes here',
@@ -676,7 +726,7 @@ describe('Execution Handler', () => {
       {
         id: '2',
         group: 'default',
-        actionTypeId: 'test2',
+        actionTypeId: 'test',
         params: {
           foo: true,
           contextVal: 'My other {{context.value}} goes here',
@@ -686,7 +736,7 @@ describe('Execution Handler', () => {
       {
         id: '3',
         group: 'default',
-        actionTypeId: 'test3',
+        actionTypeId: 'test',
         params: {
           foo: true,
           contextVal: '{{context.value}} goes here',
@@ -705,10 +755,10 @@ describe('Execution Handler', () => {
     );
     await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
-    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
+    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(2);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(3);
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(3);
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
   });
 
@@ -913,6 +963,13 @@ describe('Execution Handler', () => {
   });
 
   test('triggers summary actions (per rule run)', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
+      {
+        actionTypeId: 'testActionTypeId',
+        id: '1',
+        response: ExecutionResponseType.SUCCESS,
+      },
+    ]);
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,
@@ -1032,6 +1089,13 @@ describe('Execution Handler', () => {
   });
 
   test('triggers summary actions (custom interval)', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
+      {
+        actionTypeId: 'testActionTypeId',
+        id: '1',
+        response: ExecutionResponseType.SUCCESS,
+      },
+    ]);
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,
@@ -1269,6 +1333,14 @@ describe('Execution Handler', () => {
   });
 
   test('schedules alerts with multiple recovered actions', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
+      defaultExecutionResponse,
+      {
+        actionTypeId: 'test',
+        id: '2',
+        response: ExecutionResponseType.SUCCESS,
+      },
+    ]);
     const actions = [
       {
         id: '1',
@@ -1374,6 +1446,13 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule actions for the summarized alerts that are filtered out (for each alert)', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
+      {
+        actionTypeId: 'testActionTypeId',
+        id: '1',
+        response: ExecutionResponseType.SUCCESS,
+      },
+    ]);
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 0,
@@ -1437,6 +1516,13 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule actions for the summarized alerts that are filtered out (summary of alerts onThrottleInterval)', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
+      {
+        actionTypeId: 'testActionTypeId',
+        id: '1',
+        response: ExecutionResponseType.SUCCESS,
+      },
+    ]);
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 0,
@@ -1497,6 +1583,13 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule actions for the for-each type alerts that are filtered out', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
+      {
+        actionTypeId: 'testActionTypeId',
+        id: '1',
+        response: ExecutionResponseType.SUCCESS,
+      },
+    ]);
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,

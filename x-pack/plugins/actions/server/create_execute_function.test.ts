@@ -967,6 +967,51 @@ describe('bulkExecute()', () => {
 
     expect(mockedActionTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
   });
+
+  test('returns queuedActionsLimitError response when the max number of queued actions has been reached', async () => {
+    mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc, doc] });
+    mockActionsConfig.getMaxQueued.mockReturnValueOnce(2);
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [],
+    });
+    expect(
+      await executeFn(savedObjectsClient, [
+        {
+          id: '123',
+          params: { baz: false },
+          spaceId: 'default',
+          executionId: '123abc',
+          apiKey: null,
+          source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'mock-action',
+        },
+      ])
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "actionTypeId": "mock-action",
+          "id": "123",
+          "response": "queuedActionsLimitError",
+        },
+      ]
+    `);
+    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [],
+      ]
+    `);
+  });
 });
 
 describe('hasReachedTheQueuedActionsLimit()', () => {
@@ -974,22 +1019,29 @@ describe('hasReachedTheQueuedActionsLimit()', () => {
     mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc, doc, doc] });
     mockActionsConfig.getMaxQueued.mockReturnValueOnce(2);
 
-    expect(await hasReachedTheQueuedActionsLimit(mockTaskManager, mockActionsConfig, 1)).toBe(true);
+    expect(await hasReachedTheQueuedActionsLimit(mockTaskManager, mockActionsConfig, 1)).toEqual({
+      hasReachedLimit: true,
+      numberOverLimit: 2,
+    });
   });
 
   test('returns true if the number of queued actions is equal the config limit', async () => {
     mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc, doc] });
     mockActionsConfig.getMaxQueued.mockReturnValueOnce(3);
 
-    expect(await hasReachedTheQueuedActionsLimit(mockTaskManager, mockActionsConfig, 1)).toBe(true);
+    expect(await hasReachedTheQueuedActionsLimit(mockTaskManager, mockActionsConfig, 1)).toEqual({
+      hasReachedLimit: true,
+      numberOverLimit: 0,
+    });
   });
 
   test('returns false if the number of queued actions is less than the config limit', async () => {
     mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc] });
     mockActionsConfig.getMaxQueued.mockReturnValueOnce(3);
 
-    expect(await hasReachedTheQueuedActionsLimit(mockTaskManager, mockActionsConfig, 1)).toBe(
-      false
-    );
+    expect(await hasReachedTheQueuedActionsLimit(mockTaskManager, mockActionsConfig, 1)).toEqual({
+      hasReachedLimit: false,
+      numberOverLimit: 0,
+    });
   });
 });
