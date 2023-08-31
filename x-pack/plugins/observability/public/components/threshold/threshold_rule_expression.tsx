@@ -22,7 +22,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { ISearchSource } from '@kbn/data-plugin/common';
+import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewBase } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
@@ -41,7 +41,6 @@ import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionChart } from './components/expression_chart';
 import { ExpressionRow } from './components/expression_row';
-import { RuleFlyoutKueryBar } from '../rule_kql_filter/kuery_bar';
 import { MetricsExplorerGroupBy } from './components/group_by';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
 
@@ -63,7 +62,15 @@ export const defaultExpression = {
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
-  const { data, dataViews, dataViewEditor, docLinks } = useKibana().services;
+  const {
+    data,
+    dataViews,
+    dataViewEditor,
+    docLinks,
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+  } = useKibana().services;
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
@@ -189,10 +196,10 @@ export default function Expressions(props: Props) {
   );
 
   const onFilterChange = useCallback(
-    (filter: any) => {
-      setRuleParams('filterQuery', filter);
+    ({ query }: { query?: Query }) => {
+      setRuleParams('searchConfiguration', { ...ruleParams.searchConfiguration, query });
     },
-    [setRuleParams]
+    [setRuleParams, ruleParams.searchConfiguration]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -259,19 +266,6 @@ export default function Expressions(props: Props) {
     }
   }, [metadata, setRuleParams, timeSize, timeUnit]);
 
-  const preFillAlertFilter = useCallback(() => {
-    const md = metadata;
-    if (md && md.currentOptions?.filterQuery) {
-      setRuleParams('filterQuery', md.currentOptions.filterQuery);
-    } else if (md && md.currentOptions?.groupBy && md.series) {
-      const { groupBy } = md.currentOptions;
-      const filter = Array.isArray(groupBy)
-        ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
-        : `${groupBy}: "${md.series.id}"`;
-      setRuleParams('filterQuery', filter);
-    }
-  }, [metadata, setRuleParams]);
-
   const preFillAlertGroupBy = useCallback(() => {
     const md = metadata;
     if (md && md.currentOptions?.groupBy && !md.series) {
@@ -285,10 +279,6 @@ export default function Expressions(props: Props) {
       setTimeUnit(ruleParams.criteria[0].timeUnit);
     } else {
       preFillAlertCriteria();
-    }
-
-    if (!ruleParams.filterQuery) {
-      preFillAlertFilter();
     }
 
     if (!ruleParams.groupBy) {
@@ -358,7 +348,7 @@ export default function Expressions(props: Props) {
   }
 
   const placeHolder = i18n.translate(
-    'xpack.observability.threshold.rule.homePage.toolbar.kqlSearchFieldPlaceholder',
+    'xpack.observability.threshold.rule.alertFlyout.searchBar.placeholder',
     {
       defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
     }
@@ -399,12 +389,26 @@ export default function Expressions(props: Props) {
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <RuleFlyoutKueryBar
+      <SearchBar
+        appName={i18n.translate(
+          'xpack.observability.threshold.rule.alertFlyout.searchBar.appName',
+          {
+            defaultMessage: 'Threshold rule',
+          }
+        )}
+        iconType="search"
         placeholder={placeHolder}
-        derivedIndexPattern={derivedIndexPattern}
-        onChange={debouncedOnFilterChange}
-        onSubmit={onFilterChange}
-        value={ruleParams.filterQuery}
+        indexPatterns={dataView ? [dataView] : undefined}
+        showQueryInput={true}
+        showQueryMenu={false}
+        showFilterBar={false}
+        showDatePicker={false}
+        showSubmitButton={false}
+        displayStyle="inPage"
+        onQueryChange={debouncedOnFilterChange}
+        onQuerySubmit={onFilterChange}
+        dataTestSubj="thresholdRuleUnifiedSearchBar"
+        query={ruleParams.searchConfiguration?.query as Query}
       />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
@@ -447,7 +451,7 @@ export default function Expressions(props: Props) {
                 <ExpressionChart
                   expression={e}
                   derivedIndexPattern={derivedIndexPattern}
-                  filterQuery={ruleParams.filterQuery}
+                  filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
                   groupBy={ruleParams.groupBy}
                   timeFieldName={dataView?.timeFieldName}
                 />

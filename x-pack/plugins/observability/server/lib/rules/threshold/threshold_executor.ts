@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES, ALERT_REASON } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
   AlertInstanceState as AlertState,
@@ -43,11 +44,19 @@ import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
+export const searchConfigurationSchema = schema.object({
+  query: schema.object({
+    query: schema.oneOf([schema.string(), schema.recordOf(schema.string(), schema.any())]),
+    language: schema.string(),
+  }),
+});
+export type SearchConfigurationType = TypeOf<typeof searchConfigurationSchema>;
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
   lastRunTimestamp?: number;
   missingGroups?: Array<string | MissingGroupsRecord>;
   groupBy?: string | string[];
+  searchConfiguration?: SearchConfigurationType;
 };
 export type MetricThresholdAlertState = AlertState; // no specific instance state used
 
@@ -156,10 +165,13 @@ export const createMetricThresholdExecutor = ({
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
     const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
     const compositeSize = config.thresholdRule.groupByPageSize;
-    const filterQueryIsSame = isEqual(state.filterQuery, params.filterQuery);
+    const queryIsSame = isEqual(
+      state.searchConfiguration?.query.query,
+      params.searchConfiguration!.query.query
+    );
     const groupByIsSame = isEqual(state.groupBy, params.groupBy);
     const previousMissingGroups =
-      alertOnGroupDisappear && filterQueryIsSame && groupByIsSame && state.missingGroups
+      alertOnGroupDisappear && queryIsSame && groupByIsSame && state.missingGroups
         ? state.missingGroups
         : [];
 
@@ -356,7 +368,7 @@ export const createMetricThresholdExecutor = ({
         lastRunTimestamp: startedAt.valueOf(),
         missingGroups: [...nextMissingGroups],
         groupBy: params.groupBy,
-        filterQuery: params.filterQuery,
+        searchConfiguration: params.searchConfiguration,
       },
     };
   };
