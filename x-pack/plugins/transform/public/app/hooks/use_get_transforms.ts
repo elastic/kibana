@@ -39,7 +39,7 @@ interface UseGetTransformsOptions {
   enabled?: boolean;
 }
 
-export const useGetTransforms = ({ enabled }: UseGetTransformsOptions) => {
+export const useGetTransforms = ({ enabled }: UseGetTransformsOptions = {}) => {
   const { http } = useAppDependencies();
 
   const { data = getInitialData(), ...rest } = useQuery<UseGetTransformsResponse, IHttpFetchError>(
