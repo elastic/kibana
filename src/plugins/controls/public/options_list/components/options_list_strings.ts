@@ -228,10 +228,14 @@ export const OptionsListStrings = {
           }),
       },
       _key: {
-        getSortByLabel: () =>
-          i18n.translate('controls.optionsList.popover.sortBy.alphabetical', {
-            defaultMessage: 'Alphabetically',
-          }),
+        getSortByLabel: (type?: string) =>
+          type === 'date'
+            ? i18n.translate('controls.optionsList.popover.sortBy.date', {
+                defaultMessage: 'By date',
+              })
+            : i18n.translate('controls.optionsList.popover.sortBy.alphabetical', {
+                defaultMessage: 'Alphabetically',
+              }),
       },
     },
     sortOrder: {
