@@ -222,7 +222,6 @@ components:
       $ref: '#/components/schemas/Queries'
       nullable: true
 
-
     KueryOrUndefined:
       type: string
       nullable: true
