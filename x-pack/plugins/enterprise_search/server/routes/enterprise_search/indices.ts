@@ -44,6 +44,7 @@ import { startMlModelDownload } from '../../lib/ml/start_ml_model_download';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
+import { getIndexPipelineParameters } from '../../lib/pipelines/get_index_pipeline';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { revertCustomPipeline } from '../../lib/pipelines/revert_custom_pipeline';
@@ -349,6 +350,26 @@ export function registerIndexRoutes({
           ...defaultPipeline,
           ...customPipelines,
         },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipeline_parameters',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+      const body = await getIndexPipelineParameters(indexName, client);
+      return response.ok({
+        body,
         headers: { 'content-type': 'application/json' },
       });
     })
