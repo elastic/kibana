@@ -44,7 +44,7 @@ function importData(
 export function fileUploadRoutes(
   coreSetup: CoreSetup<StartDeps, unknown>,
   logger: Logger,
-  getIsServerless: () => boolean
+  isServerless: () => boolean
 ) {
   const router = coreSetup.http.createRouter();
 
@@ -301,7 +301,7 @@ export function fileUploadRoutes(
       },
       async (context, request, response) => {
         try {
-          const settings = getIsServerless() ? {} : { number_of_shards: 1 };
+          const settings = isServerless() ? {} : { number_of_shards: 1 };
 
           return response.ok({
             body: settings,
