@@ -1421,7 +1421,7 @@
     "cypress-multi-reporters": "^1.6.3",
     "cypress-react-selector": "^3.0.0",
     "cypress-real-events": "^1.8.1",
-    "cypress-recurse": "^1.35.2",
+    "cypress-recurse": "^1.35.1",
     "date-fns": "^2.29.3",
     "debug": "^2.6.9",
     "delete-empty": "^2.0.0",
