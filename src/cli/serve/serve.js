@@ -15,12 +15,10 @@ import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
+import {bootstrap} from "../../../packages/core/root/core-root-server-internal";
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
-const KIBANA_DEV_SERVICE_ACCOUNT_TOKEN =
-  process.env.TEST_KIBANA_SERVICE_ACCOUNT_TOKEN ||
-  'AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA';
 
 function canRequire(path) {
   try {
@@ -45,6 +43,21 @@ const getBootstrapScript = (isDev) => {
     const { bootstrap } = require('@kbn/core/server');
     return bootstrap;
   }
+};
+
+const setServerlessKibanaDevServiceAccountIfPossible = (set, opts) => {
+  if (!opts.dev || !opts.serverless || process.env.isDevCliChild === 'true') {
+    return;
+  }
+
+  const DEV_UTILS_PATH = '@kbn/dev-utils';
+
+  if (!canRequire(DEV_UTILS_PATH)) {
+    return;
+  }
+
+  const { kibanaDevServiceAccount } = require(DEV_UTILS_PATH);
+  set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
 };
 
 function pathCollector() {
@@ -72,7 +85,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   if (opts.dev) {
     if (opts.serverless) {
-      set('elasticsearch.serviceAccountToken', KIBANA_DEV_SERVICE_ACCOUNT_TOKEN);
+      setServerlessKibanaDevServiceAccountIfPossible(set, opts);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
