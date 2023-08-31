@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "exception-list-agnostic:1",
-    "index": ".kibana",
+    "index": ".kibana_security_solution",
     "source": {
       "type": "exception-list-agnostic",
       "exception-list-agnostic": {
@@ -25,7 +25,7 @@
         "tie_breaker_id": "77fd1909-6786-428a-a671-30229a719c1f",
         "type": "endpoint",
         "updated_by": "user_name"
-      }
+        }
     }
   }
 }
@@ -34,7 +34,7 @@
   "type": "doc",
   "value": {
     "id": "exception-list-agnostic:2",
-    "index": ".kibana",
+    "index": ".kibana_security_solution",
     "source": {
       "type": "exception-list-agnostic",
       "exception-list-agnostic": {
