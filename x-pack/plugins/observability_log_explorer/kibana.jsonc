@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-log-explorer-plugin",
+  "owner": "@elastic/infra-monitoring-ui",
+  "description": "This plugin exposes and registers observability log consumption features.",
+  "plugin": {
+    "id": "observabilityLogExplorer",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "observabilityLogExplorer"
+    ],
+    "requiredPlugins": [
+      "data",
+      "logExplorer",
+      "observabilityShared"
+    ],
+    "optionalPlugins": [
+      "serverless"
+    ],
+    "requiredBundles": []
+  }
+}
