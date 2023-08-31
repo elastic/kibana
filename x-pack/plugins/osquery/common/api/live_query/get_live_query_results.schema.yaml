@@ -1,23 +1,23 @@
 openapi: 3.0.0
 info:
-  title: Find Live Query Results Schema
+  title: Get Live Query Results Schema
   version: 8.9.0
 components:
   parameters:
-    FindLiveQueryRequestResultsQueryParameter:
+    GetLiveQueryRequestResultsQueryParameter:
       name: query
       in: query
       required: true
       schema:
-        $ref: '#/components/schemas/FindLiveQueryResultsRequestQuery'
-    FindLiveQueryRequestResultsParameter:
+        $ref: '#/components/schemas/GetLiveQueryResultsRequestQuery'
+    GetLiveQueryRequestResultsParameter:
       name: query
       in: path
       required: true
       schema:
-        $ref: '#/components/schemas/FindLiveQueryResultsRequestParams'
+        $ref: '#/components/schemas/GetLiveQueryResultsRequestParams'
   schemas:
-    FindLiveQueryResultsRequestQuery:
+    GetLiveQueryResultsRequestQuery:
       type: object
       properties:
         kuery:
@@ -30,7 +30,7 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
         sortOrder:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
-    FindLiveQueryResultsRequestParams:
+    GetLiveQueryResultsRequestParams:
       type: object
       properties:
         id:

@@ -34,25 +34,25 @@ paths:
     get:
       summary: Get live query details
       parameters:
-        - $ref: './find_live_query_details.schema.yaml#/components/parameters/FindLiveQueryDetailsRequestQueryParameter'
-        - $ref: './find_live_query_details.schema.yaml#/components/parameters/FindLiveQueryDetailsRequestParameter'
+        - $ref: './get_live_query_details.schema.yaml#/components/parameters/GetLiveQueryDetailsRequestQueryParameter'
+        - $ref: './get_live_query_details.schema.yaml#/components/parameters/GetLiveQueryDetailsRequestParameter'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './find_live_query_details.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: './get_live_query_details.schema.yaml#/components/schemas/SuccessResponse'
   /api/osquery/live_queries/{id}/results/{actionId}:
       get:
         summary: Get live query results
         parameters:
-          - $ref: './find_live_query_results.schema.yaml#/components/parameters/FindLiveQueryRequestResultsQueryParameter'
-          - $ref: './find_live_query_results.schema.yaml#/components/parameters/FindLiveQueryRequestResultsParameter'
+          - $ref: './get_live_query_results.schema.yaml#/components/parameters/GetLiveQueryRequestResultsQueryParameter'
+          - $ref: './get_live_query_results.schema.yaml#/components/parameters/GetLiveQueryRequestResultsParameter'
         responses:
           '200':
             description: OK
             content:
               application/json:
                 schema:
-                  $ref: './find_live_query_details.schema.yaml#/components/schemas/SuccessResponse'
+                  $ref: './get_live_query_results.schema.yaml#/components/schemas/SuccessResponse'
