@@ -22,6 +22,7 @@ export const CreateIndexButton = ({ loadIndices }: { loadIndices: () => void }) 
         onClick={() => setCreateIndexModalOpen(true)}
         key="createIndexButton"
         data-test-subj="createIndexButton"
+        data-telemetry-id="idxMgmt-indexList-createIndexButton"
       >
         <FormattedMessage
           id="xpack.idxMgmt.indexTable.createIndexButton"

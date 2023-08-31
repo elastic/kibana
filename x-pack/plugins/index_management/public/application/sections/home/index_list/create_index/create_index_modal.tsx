@@ -127,7 +127,11 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal} disabled={isSaving}>
+        <EuiButtonEmpty
+          onClick={closeModal}
+          disabled={isSaving}
+          data-telemetry-id="idxMgmt-indexList-createIndex-cancelButton"
+        >
           <FormattedMessage
             id="xpack.idxMgmt.createIndex.modal.cancelButton"
             defaultMessage="Cancel"
@@ -139,6 +143,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
           type="submit"
           onClick={onSave}
           form="createIndexModalForm"
+          data-telemetry-id="idxMgmt-indexList-createIndex-saveButton"
         >
           <FormattedMessage id="xpack.idxMgmt.createIndex.modal.saveButton" defaultMessage="Save" />
         </EuiButton>
