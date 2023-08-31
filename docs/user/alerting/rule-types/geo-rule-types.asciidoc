@@ -10,7 +10,7 @@ To create a tracking containment rule, the following requirements must be presen
 
 - *Entities index*: An index containing a `geo_point` or `geo_shape` field, `date` field, and entity identifier. An entity identifier is a `keyword`, `number`, or `ip` field that identifies the entity. Entity data is expected to be updating so that there are entity movements to alert upon.
 - *Boundaries index*: An index containing `geo_shape` data.
-Boundaries data is expected to be static (not updating). Boundaries are collected once when the rule is created and anytime after when the rule is re-enabled after disablement.
+Boundaries data is expected to be static (not updating). Boundaries are collected once when the rule is created and anytime after when boundary configuration is modified.
 
 Entity locations are queried to determine if they are contained within any monitored boundaries.
 Entity data should be somewhat "real time", meaning the dates of new documents aren’t older
