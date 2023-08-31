@@ -56,9 +56,7 @@ describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
     );
 
     // Create exception list not used by any rules
-    createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
-      'exceptionListResponse'
-    );
+    createExceptionList(getExceptionList1(), getExceptionList1().list_id);
     login();
     visitWithoutDateRange(EXCEPTIONS_URL);
   });
