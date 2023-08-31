@@ -7,3 +7,8 @@ operator:
     auth_type: "token"
     token_source: "file"
     token_names: [ "kibana-dev" ]
+  - usernames: [ "elastic/fleet-server" ]
+    realm_type: "_service_account"
+    auth_type: "token"
+    token_source: "file"
+    token_names: [ "fleet-server" ]

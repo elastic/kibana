@@ -133,12 +133,12 @@ export const getFTRConfig = ({
       }
 
       if (hasFleetServerArgs) {
-        vars.kbnTestServer.serverArgs.push(
-          `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
-        );
-        vars.kbnTestServer.serverArgs.push(
-          `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
-        );
+        // vars.kbnTestServer.serverArgs.push(
+        //   `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
+        // );
+        // vars.kbnTestServer.serverArgs.push(
+        //   `--xpack.fleet.agents.elasticsearch.host=https://${hostRealIp}:${esPort}`
+        // );
 
         if (vars.serverless) {
           vars.kbnTestServer.serverArgs.push(`--xpack.fleet.internal.fleetServerStandalone=false`);

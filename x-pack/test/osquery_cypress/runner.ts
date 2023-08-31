@@ -55,7 +55,7 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
 export async function startOsqueryCypress(context: FtrProviderContext) {
   const config = context.getService('config');
 
-  await setupFleetAgent(context);
+  // await setupFleetAgent(context);
 
   return {
     FORCE_COLOR: '1',

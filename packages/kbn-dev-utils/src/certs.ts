@@ -22,3 +22,7 @@ export const KBN_KEY_PATH = resolve(__dirname, '../certs/kibana.key');
 export const KBN_CERT_PATH = resolve(__dirname, '../certs/kibana.crt');
 export const KBN_P12_PATH = resolve(__dirname, '../certs/kibana.p12');
 export const KBN_P12_PASSWORD = 'storepass';
+export const FLEET_SERVER_KEY_PATH = resolve(__dirname, '../certs/fleet-server.key');
+export const FLEET_SERVER_CERT_PATH = resolve(__dirname, '../certs/fleet-server.crt');
+export const FLEET_SERVER_P12_PATH = resolve(__dirname, '../certs/fleet-server.p12');
+export const FLEET_SERVER_P12_PASSWORD = 'storepass';

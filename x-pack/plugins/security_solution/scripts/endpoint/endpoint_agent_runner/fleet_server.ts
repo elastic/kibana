@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CA_CERT_PATH, ES_CERT_PATH, KBN_CERT_PATH, FLEET_SERVER_CERT_PATH, FLEET_SERVER_KEY_PATH } from '@kbn/dev-utils';
 import type {
   AgentPolicy,
   CreateAgentPolicyResponse,
@@ -59,7 +60,7 @@ export const runFleetServerIfNeeded = async (): Promise<
 
   try {
     fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
-    const serviceToken = await generateFleetServiceToken();
+    const serviceToken = 'AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6cWtqR1hSS2FRSzIyb01McFg3aTQwdw'; // await generateFleetServiceToken();
 
     if (isKibanaOnLocalhost) {
       await configureFleetIfNeeded();
@@ -189,6 +190,58 @@ export const startFleetServerWithDocker = async ({
   }
 
   try {
+    // const dockerArgs = [
+    //   'run',
+
+    //   '--restart',
+    //   'no',
+
+    //   '--add-host',
+    //   'host.docker.internal:host-gateway',
+
+    //   '--rm',
+
+    //   '--detach',
+
+    //   '--name',
+    //   containerName,
+
+    //   // The container's hostname will appear in Fleet when the agent enrolls
+    //   '--hostname',
+    //   containerName,
+
+    //   '--volume',
+    //   `${CA_CERT_PATH}:/ca.crt`,
+
+    //   '--env',
+    //   'FLEET_SERVER_ENABLE=1',
+
+    //   '--env',
+    //   `FLEET_SERVER_ELASTICSEARCH_HOST=${esUrlWithRealIp}`,
+
+    //   '--env',
+    //   `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
+
+    //   '--env',
+    //   'ELASTICSEARCH_HOSTS=https://host.docker.internal:9200',
+
+    //   '--env',
+    //   `FLEET_SERVER_ELASTICSEARCH_CA=/ca.crt`,
+
+    //   '--env',
+    //   'ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
+
+    //   '--env',
+    //   'ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',
+
+    //   '--env',
+    //   `FLEET_SERVER_POLICY=${policyId}`,
+
+    //   '--publish',
+    //   `${fleetServerPort}:8220`,
+
+    //   `docker.elastic.co/observability-ci/fleet-server:latest`,
+    // ];
     const dockerArgs = [
       'run',
 
@@ -198,25 +251,94 @@ export const startFleetServerWithDocker = async ({
       '--add-host',
       'host.docker.internal:host-gateway',
 
-      '--rm',
+      //   '--network',
+      // 'elastic',
+
+      // '--rm',
 
       '--detach',
 
-      '--name',
-      containerName,
+      // '--name',
+      // containerName,
 
       // The container's hostname will appear in Fleet when the agent enrolls
       '--hostname',
       containerName,
 
+      '--volume',
+      `${CA_CERT_PATH}:/ca.crt`,
+
+      '--volume',
+      `${KBN_CERT_PATH}:/kibana.crt`,
+
+      '--volume',
+      `${ES_CERT_PATH}:/elasticsearch.crt`,
+
+      '--volume',
+      `${FLEET_SERVER_CERT_PATH}:/fleet-server.crt`,
+
+      '--volume',
+      `${FLEET_SERVER_KEY_PATH}:/fleet-server.key`,
+
+      // `--env`,
+      // `KIBANA_FLEET_CA=/elasticsearch.crt`,
+
+      // `--env`,
+      // `KIBANA_CA=/elasticsearch.crt`,
+
+      // `--env`,
+      // `FLEET_CA=/kibana.crt`,
+
       '--env',
       'FLEET_SERVER_ENABLE=1',
 
       '--env',
-      `FLEET_SERVER_ELASTICSEARCH_HOST=${esUrlWithRealIp}`,
+      // `FLEET_SERVER_ELASTICSEARCH_HOST=${esUrlWithRealIp}`,
+      `FLEET_SERVER_ELASTICSEARCH_HOST=https://host.docker.internal:9200`,
+
+      '--env',
+      'FLEET_URL=https://localhost:8220',
 
       '--env',
       `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
+
+      '--env',
+      'FLEET_SERVER_ELASTICSEARCH_INSECURE=1',
+
+      // '--env',
+      // 'FLEET_SERVER_INSECURE_HTTP=1',
+
+      '--env',
+      'FLEET_INSECURE=1',
+
+      '--env',
+      'ES_HOST=https://host.docker.internal:9200',
+
+      '--env',
+      'KIBANA_FLEET_SETUP=true',
+
+      '--env',
+      'ELASTICSEARCH_HOST=https://host.docker.internal:9200',
+
+      '--env',
+      'FLEET_SERVER_ELASTICSEARCH_HOSTS=https://host.docker.internal:9200',
+
+      // '--env',
+      // `ELASTICSEARCH_CA=/elasticsearch.crt`,
+
+      // '--env',
+      // 'FLEET_SERVER_ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
+
+      // '--env',
+      // 'FLEET_SERVER_CERT=/fleet-server.crt',
+
+      // '--env',
+      // 'FLEET_SERVER_CERT_KEY=/fleet-server.key',
+
+      // '--env',
+      // 'FLEET_SERVER_ELASTICSEARCH_CA=/elasticsearch.crt',
+      // '--env',
+      // 'FLEET_SERVER_ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',
 
       '--env',
       `FLEET_SERVER_POLICY=${policyId}`,
@@ -224,8 +346,10 @@ export const startFleetServerWithDocker = async ({
       '--publish',
       `${fleetServerPort}:8220`,
 
-      `docker.elastic.co/beats/elastic-agent:${version}`,
+      `docker.elastic.co/beats/elastic-agent:8.10.0-SNAPSHOT`,
     ];
+
+    console.error(`docker arguments:\n${dockerArgs.join(' ')}`);
 
     await execa('docker', ['kill', containerName])
       .then(() => {
@@ -239,7 +363,7 @@ export const startFleetServerWithDocker = async ({
 (This is ok if one was not running already)`);
       });
 
-    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:${fleetServerPort}`);
+    // await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:${fleetServerPort}`);
 
     log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 

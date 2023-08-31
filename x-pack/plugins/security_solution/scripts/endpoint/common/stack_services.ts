@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Fs from 'fs';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
@@ -181,7 +183,13 @@ export const createKbnClient = ({
     log.verbose(`Creating Kibana client with URL: ${kbnUrl}`);
   }
 
-  return new KbnClient({ log, url: kbnUrl });
+  return new KbnClient({
+    log,
+    url: kbnUrl,
+    ...(kbnUrl.includes('https')
+      ? { certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)] }
+      : {}),
+  });
 };
 
 /**

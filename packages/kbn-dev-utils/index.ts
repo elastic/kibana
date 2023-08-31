@@ -18,6 +18,10 @@ export {
   KBN_CERT_PATH,
   KBN_P12_PATH,
   KBN_P12_PASSWORD,
+  FLEET_SERVER_KEY_PATH,
+  FLEET_SERVER_CERT_PATH,
+  FLEET_SERVER_P12_PATH,
+  FLEET_SERVER_P12_PASSWORD,
 } from './src/certs';
 export * from './src/dev_service_account';
 export * from './src/axios';
