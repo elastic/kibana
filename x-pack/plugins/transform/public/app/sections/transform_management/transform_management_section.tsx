@@ -24,8 +24,13 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { needsReauthorization } from '../../common/reauthorization_utils';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 
-import { useDocumentationLinks } from '../../hooks';
-import { useDeleteTransforms, useTransformCapabilities, useGetTransforms } from '../../hooks';
+import {
+  useDocumentationLinks,
+  useDeleteTransforms,
+  useTransformCapabilities,
+  useGetTransforms,
+  useGetTransformNodes,
+} from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 import { ToastNotificationText } from '../../components/toast_notification_text';
@@ -40,9 +45,10 @@ import {
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
 
-const ErrorMessageCallout: FC<{ errorMessage: IHttpFetchError<unknown> | null }> = ({
-  errorMessage,
-}) => {
+const ErrorMessageCallout: FC<{
+  text: JSX.Element;
+  errorMessage: IHttpFetchError<unknown> | null;
+}> = ({ text, errorMessage }) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -50,10 +56,7 @@ const ErrorMessageCallout: FC<{ errorMessage: IHttpFetchError<unknown> | null }>
         size="s"
         title={
           <>
-            <FormattedMessage
-              id="xpack.transform.list.errorPromptTitle"
-              defaultMessage="An error occurred getting the transform list."
-            />{' '}
+            {text}{' '}
             {errorMessage !== null && (
               <ToastNotificationText inline={true} forceModal={true} text={errorMessage} />
             )}
@@ -72,11 +75,20 @@ export const TransformManagement: FC = () => {
   const deleteTransforms = useDeleteTransforms();
 
   const {
-    isInitialLoading,
+    isInitialLoading: transformNodesInitialLoading,
+    error: transformNodesErrorMessage,
+    data: transformNodesData = 0,
+  } = useGetTransformNodes();
+  const transformNodes = transformNodesErrorMessage === null ? transformNodesData : 0;
+
+  const {
+    isInitialLoading: transformsInitialLoading,
     isLoading: transformsLoading,
-    error: errorMessage,
-    data: { transforms, transformNodes, transformIdsWithoutConfig },
-  } = useGetTransforms();
+    error: transformsErrorMessage,
+    data: { transforms, transformIdsWithoutConfig },
+  } = useGetTransforms({ enabled: !transformNodesInitialLoading && transformNodes > 0 });
+
+  const isInitialLoading = transformNodesInitialLoading || transformsInitialLoading;
 
   const { canStartStopTransform } = useTransformCapabilities();
 
@@ -181,7 +193,28 @@ export const TransformManagement: FC = () => {
           <>
             {unauthorizedTransformsWarning}
 
-            {errorMessage !== null && <ErrorMessageCallout errorMessage={errorMessage} />}
+            {transformNodesErrorMessage !== null && (
+              <ErrorMessageCallout
+                text={
+                  <FormattedMessage
+                    id="xpack.transform.list.transformNodesErrorPromptTitle"
+                    defaultMessage="An error occurred getting the number of transform nodes."
+                  />
+                }
+                errorMessage={transformNodesErrorMessage}
+              />
+            )}
+            {transformsErrorMessage !== null && (
+              <ErrorMessageCallout
+                text={
+                  <FormattedMessage
+                    id="xpack.transform.list.transformListErrorPromptTitle"
+                    defaultMessage="An error occurred getting the transform list."
+                  />
+                }
+                errorMessage={transformsErrorMessage}
+              />
+            )}
             <EuiSpacer size="s" />
 
             <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />

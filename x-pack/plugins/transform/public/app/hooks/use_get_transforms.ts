@@ -10,10 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { isDefined } from '@kbn/ml-is-defined';
 
-import type {
-  GetTransformNodesResponseSchema,
-  GetTransformsResponseSchema,
-} from '../../../common/api_schemas/transforms';
+import type { GetTransformsResponseSchema } from '../../../common/api_schemas/transforms';
 import type { GetTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
 import {
   addInternalBasePath,
@@ -31,32 +28,24 @@ interface UseGetTransformsResponse {
   transforms: TransformListRow[];
   transformIds: string[];
   transformIdsWithoutConfig?: string[];
-  transformNodes: number;
 }
 
 const getInitialData = (): UseGetTransformsResponse => ({
   transforms: [],
   transformIds: [],
-  transformNodes: 0,
 });
 
-export const useGetTransforms = () => {
+interface UseGetTransformsOptions {
+  enabled?: boolean;
+}
+
+export const useGetTransforms = ({ enabled }: UseGetTransformsOptions) => {
   const { http } = useAppDependencies();
 
   const { data = getInitialData(), ...rest } = useQuery<UseGetTransformsResponse, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS],
     async ({ signal }) => {
       const update = getInitialData();
-
-      const transformNodes = await http.get<GetTransformNodesResponseSchema>(
-        addInternalBasePath('transforms/_nodes'),
-        {
-          version: '1',
-          signal,
-        }
-      );
-
-      update.transformNodes = transformNodes.count;
 
       const transformConfigs = await http.get<GetTransformsResponseSchema>(
         addInternalBasePath('transforms'),
@@ -111,11 +100,13 @@ export const useGetTransforms = () => {
         });
         return reducedtableRows;
       }, [] as TransformListRow[]);
+
       update.transformIds = update.transforms.map(({ id }) => id);
 
       return update;
     },
     {
+      enabled,
       refetchInterval: DEFAULT_REFRESH_INTERVAL_MS,
     }
   );
