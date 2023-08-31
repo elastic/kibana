@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lazyLoadModules } from '../lazy_load_bundle';
 import type { IImporter, ImportFactoryOptions } from '../importer';
 import type { HasImportPermission, FindFileStructureResponse } from '../../common/types';
@@ -22,6 +23,7 @@ export interface FileUploadStartApi {
   checkIndexExists: typeof checkIndexExists;
   getTimeFieldRange: typeof getTimeFieldRange;
   analyzeFile: typeof analyzeFile;
+  getDefaultIndexSettings: typeof getDefaultIndexSettings;
 }
 
 export interface GetTimeFieldRangeResponse {
@@ -106,5 +108,14 @@ export async function getTimeFieldRange(index: string, query: unknown, timeField
     method: 'POST',
     version: '1',
     body,
+  });
+}
+
+export async function getDefaultIndexSettings() {
+  const fileUploadModules = await lazyLoadModules();
+  return await fileUploadModules.getHttp().fetch<IndicesIndexSettings>({
+    path: `/internal/file_upload/default_index_settings`,
+    method: 'GET',
+    version: '1',
   });
 }

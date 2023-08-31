@@ -27,6 +27,7 @@ export class ServerlessObservabilityPlugin
 
   public setup(_coreSetup: CoreSetup, pluginsSetup: SetupDependencies) {
     pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: false, nlp: false });
+    pluginsSetup.fileUpload.setIsServerless(true);
     return {};
   }
 

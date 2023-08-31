@@ -61,6 +61,7 @@ export class SecuritySolutionServerlessPlugin
     }
 
     pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
+    pluginsSetup.fileUpload.setIsServerless(true);
 
     this.cspmUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,

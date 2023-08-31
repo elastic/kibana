@@ -8,6 +8,7 @@
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { EnterpriseSearchPluginStart } from '@kbn/enterprise-search-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { FileUploadSetup } from '@kbn/file-upload-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}
@@ -20,4 +21,5 @@ export interface StartDependencies {
 }
 export interface SetupDependencies {
   ml: MlPluginSetup;
+  fileUpload: FileUploadSetup;
 }

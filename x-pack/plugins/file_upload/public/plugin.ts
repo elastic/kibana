@@ -16,6 +16,7 @@ import {
   checkIndexExists,
   getTimeFieldRange,
   analyzeFile,
+  getDefaultIndexSettings,
 } from './api';
 import { setStartServices } from './kibana_services';
 import { getMaxBytes, getMaxBytesFormatted } from './importer/get_max_bytes';
@@ -52,6 +53,7 @@ export class FileUploadPlugin
       checkIndexExists,
       getTimeFieldRange,
       analyzeFile,
+      getDefaultIndexSettings,
     };
   }
 }

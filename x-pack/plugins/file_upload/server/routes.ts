@@ -41,7 +41,11 @@ function importData(
 /**
  * Routes for the file upload.
  */
-export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger) {
+export function fileUploadRoutes(
+  coreSetup: CoreSetup<StartDeps, unknown>,
+  logger: Logger,
+  getIsServerless: () => boolean
+) {
   const router = coreSetup.http.createRouter();
 
   router.versioned
@@ -268,6 +272,44 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
 
           return response.ok({
             body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/time_field_range Get time field range
+   * @apiName GetTimeFieldRange
+   * @apiDescription Returns the time range for the given index and query using the specified time range.
+   *
+   * @apiSchema (body) getTimeFieldRangeSchema
+   *
+   * @apiSuccess {Object} start start of time range with epoch and string properties.
+   * @apiSuccess {Object} end end of time range with epoch and string properties.
+   */
+  router.versioned
+    .get({
+      path: '/internal/file_upload/default_index_settings',
+      access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      async (context, request, response) => {
+        try {
+          const settings = getIsServerless() ? {} : { number_of_shards: 1 };
+
+          return response.ok({
+            body: settings,
           });
         } catch (e) {
           return response.customError(wrapError(e));

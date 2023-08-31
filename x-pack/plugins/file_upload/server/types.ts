@@ -15,3 +15,8 @@ export interface StartDeps {
 export interface SetupDeps {
   usageCollection: UsageCollectionSetup;
 }
+
+export interface FileUploadSetup {
+  setIsServerless: (isServerless: boolean) => void;
+}
+export type FileUploadStart = void;

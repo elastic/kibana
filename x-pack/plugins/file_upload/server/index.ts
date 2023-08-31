@@ -10,3 +10,5 @@ import { FileUploadPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new FileUploadPlugin(initializerContext);
+
+export type { FileUploadSetup, FileUploadStart } from './types';

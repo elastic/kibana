@@ -12,17 +12,20 @@ import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
 import { MAX_FILE_SIZE, UI_SETTING_MAX_FILE_SIZE } from '../common/constants';
 import { setupCapabilities } from './capabilities';
-import { StartDeps, SetupDeps } from './types';
+import { StartDeps, SetupDeps, FileUploadSetup, FileUploadStart } from './types';
 
-export class FileUploadPlugin implements Plugin {
+export class FileUploadPlugin
+  implements Plugin<FileUploadSetup, FileUploadStart, SetupDeps, StartDeps>
+{
   private readonly _logger: Logger;
+  private isServerless: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this._logger = initializerContext.logger.get();
   }
 
   setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
-    fileUploadRoutes(coreSetup, this._logger);
+    fileUploadRoutes(coreSetup, this._logger, () => this.isServerless);
 
     setupCapabilities(coreSetup);
 
@@ -49,6 +52,14 @@ export class FileUploadPlugin implements Plugin {
     });
 
     initFileUploadTelemetry(coreSetup, plugins.usageCollection);
+
+    const setIsServerless = (isServerless: boolean) => {
+      this.isServerless = isServerless;
+    };
+
+    return {
+      setIsServerless,
+    };
   }
 
   start(core: CoreStart) {}

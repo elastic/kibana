@@ -37,7 +37,7 @@ import {
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
-const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
+// const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
 const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };
 
 const DEFAULT_STATE = {
@@ -86,12 +86,14 @@ export class ImportView extends Component {
 
   componentDidMount() {
     this.loadDataViewNames();
+    this.loadDefaultIndexSettings();
   }
 
   clickReset = () => {
     const state = getDefaultState(this.state, this.props.results, this.props.capabilities);
     this.setState(state, () => {
       this.loadDataViewNames();
+      this.loadDefaultIndexSettings();
     });
   };
 
@@ -423,6 +425,18 @@ export class ImportView extends Component {
     }
   }
 
+  async loadDefaultIndexSettings() {
+    try {
+      if (this.state.indexSettingsString === '') {
+        const settings = await this.props.fileUpload.getDefaultIndexSettings();
+        const indexSettingsString = JSON.stringify(settings, null, 2);
+        this.setState({ indexSettingsString });
+      }
+    } catch (error) {
+      console.error('failed to load default index settings', error);
+    }
+  }
+
   render() {
     const {
       index,
@@ -670,11 +684,6 @@ async function createKibanaDataView(dataViewName, dataViewsContract, timeFieldNa
 }
 
 function getDefaultState(state, results, capabilities) {
-  const indexSettingsString =
-    state.indexSettingsString === ''
-      ? JSON.stringify(DEFAULT_INDEX_SETTINGS, null, 2)
-      : state.indexSettingsString;
-
   const combinedFields = state.combinedFields.length
     ? state.combinedFields
     : getDefaultCombinedFields(results);
@@ -702,7 +711,6 @@ function getDefaultState(state, results, capabilities) {
 
   return {
     ...DEFAULT_STATE,
-    indexSettingsString,
     mappingsString,
     pipelineString,
     timeFieldName,
