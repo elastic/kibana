@@ -105,7 +105,7 @@ describe('expression params validation', () => {
     };
     expect(validateExpression(initialParams).errors.boundaryIndexTitle.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.boundaryIndexTitle[0]).toBe(
-      'Boundary data view title is required.'
+      'Boundary data view is required.'
     );
   });
 
