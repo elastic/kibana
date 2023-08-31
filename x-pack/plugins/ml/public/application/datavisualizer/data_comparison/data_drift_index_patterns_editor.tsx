@@ -175,8 +175,11 @@ export function DataDriftIndexPatternsEditor({
     let dataView;
 
     if (!foundDataViewId) {
-      const modifiedDataViewName =
-        dataViewName === '' ? `${indicesName}-${timeFieldName}` : dataViewName;
+      const defaultDataViewName =
+        dataViewMsg === undefined
+          ? indicesName
+          : `${indicesName}${timeFieldName ? '-' + timeFieldName : ''}`;
+      const modifiedDataViewName = dataViewName === '' ? defaultDataViewName : dataViewName;
       if (canEditDataView && createAdHocDV === false) {
         dataView = await dataViews.createAndSave({
           title: indicesName,
@@ -207,7 +210,7 @@ export function DataDriftIndexPatternsEditor({
 
   const firstSetOfSteps = [
     {
-      title: 'Pick index pattern for reference data indices',
+      title: 'Pick index pattern for reference data',
       children: (
         <EuiFlexItem grow={false}>
           <DataViewEditor
@@ -215,7 +218,7 @@ export function DataDriftIndexPatternsEditor({
             label={
               <FormattedMessage
                 id="xpack.ml.dataDrift.indexPatternsEditor.referenceData"
-                defaultMessage="Index pattern for reference data indices"
+                defaultMessage="Index pattern for reference data"
               />
             }
             dataViewEditorService={referenceDataViewEditorService}
@@ -226,7 +229,7 @@ export function DataDriftIndexPatternsEditor({
       ),
     },
     {
-      title: 'Pick index pattern for comparison data indices',
+      title: 'Pick index pattern for comparison data',
       children: (
         <EuiFlexItem grow={false}>
           <DataViewEditor
@@ -234,7 +237,7 @@ export function DataDriftIndexPatternsEditor({
             label={
               <FormattedMessage
                 id="xpack.ml.dataDrift.indexPatternsEditor.comparisonData"
-                defaultMessage="Index pattern for comparison data indices"
+                defaultMessage="Index pattern for comparison data"
               />
             }
             dataViewEditorService={productionDataViewEditorService}
@@ -250,8 +253,8 @@ export function DataDriftIndexPatternsEditor({
         <EuiFlexGroup direction="column">
           {combinedTimeFieldOptions.length > 0 ? (
             <EuiFormRow
-              label={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.timeField', {
-                defaultMessage: 'Time field',
+              label={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.timestampField', {
+                defaultMessage: 'Timestamp field',
               })}
               fullWidth
               color={'disabled'}
@@ -323,17 +326,17 @@ export function DataDriftIndexPatternsEditor({
                     disabled={!productionIndexPattern || !referenceIndexPattern}
                     onClick={createDataViewAndRedirectToDataComparisonPage.bind(null, true)}
                     iconType="visTagCloud"
-                    data-test-subj="analyzeDataDriftButton"
+                    data-test-subj="compareDataButton"
                     aria-label={i18n.translate(
-                      'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftWithoutSavingLabel',
+                      'xpack.ml.dataDrift.indexPatternsEditor.compareDataWithoutSavingLabel',
                       {
                         defaultMessage: 'Analyze data drift without saving',
                       }
                     )}
                   >
                     <FormattedMessage
-                      id="xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftWithoutSavingLabel"
-                      defaultMessage="Analyze data drift without saving"
+                      id="xpack.ml.dataDrift.indexPatternsEditor.compareDataWithoutSavingLabel"
+                      defaultMessage="Compare without saving"
                     />
                   </EuiButton>
                 </EuiFlexItem>
@@ -345,17 +348,17 @@ export function DataDriftIndexPatternsEditor({
                   fill
                   onClick={createDataViewAndRedirectToDataComparisonPage.bind(null, false)}
                   iconType="visTagCloud"
-                  data-test-subj="analyzeDataDriftButton"
+                  data-test-subj="compareDataButton"
                   aria-label={i18n.translate(
-                    'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel',
+                    'xpack.ml.dataDrift.indexPatternsEditor.compareDataLabel',
                     {
-                      defaultMessage: 'Analyze data drift',
+                      defaultMessage: 'Compare',
                     }
                   )}
                 >
                   <FormattedMessage
-                    id="xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel"
-                    defaultMessage="Analyze data drift"
+                    id="xpack.ml.dataDrift.indexPatternsEditor.compareDataLabel"
+                    defaultMessage="Compare"
                   />
                 </EuiButton>
               </EuiFlexItem>
