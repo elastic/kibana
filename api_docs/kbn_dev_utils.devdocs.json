@@ -471,6 +471,34 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.kibanaDevServiceAccount",
+        "type": "Object",
+        "tags": [],
+        "label": "kibanaDevServiceAccount",
+        "description": [
+          "\n`kibana-dev` service account token for connecting to ESS\nSee packages/kbn-es/src/ess_resources/README.md"
+        ],
+        "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.kibanaDevServiceAccount.token",
+            "type": "string",
+            "tags": [],
+            "label": "token",
+            "description": [],
+            "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }
