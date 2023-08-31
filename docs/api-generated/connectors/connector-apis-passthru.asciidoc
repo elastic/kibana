@@ -1348,6 +1348,9 @@ Any modifications made to this file will be overwritten.
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_xmatters">config_properties_xmatters</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_xmatters">secrets_properties_xmatters</a></span>  </div>
+<div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.gen-ai</div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
