@@ -167,20 +167,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should navigate to the details page when clicking on a rule in event logs tab', async () => {
         await observability.alerts.rulesPage.clickLogsTab();
         await observability.alerts.rulesPage.clickOnRuleInEventLogs();
-
-        await retry.waitFor(
-          'Rule details to be visible',
-          async () => await testSubjects.exists('ruleDetails')
-        );
+        await testSubjects.existOrFail('ruleDetails');
       });
 
       it('shows the rule event log when navigating by URL', async () => {
         await observability.alerts.common.navigateToRulesLogsPage();
-
-        await retry.waitFor(
-          'The rule event log to be visible',
-          async () => await testSubjects.exists('ruleEventLogListTable')
-        );
+        await testSubjects.existOrFail('ruleEventLogListTable');
       });
     });
 
