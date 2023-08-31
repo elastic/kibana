@@ -206,7 +206,7 @@ components:
       nullable: true
 
 
-    FilterQueryOrUndefined:
+    KueryOrUndefined:
       type: string
       nullable: true
 

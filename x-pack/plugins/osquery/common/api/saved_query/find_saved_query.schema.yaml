@@ -1,21 +1,19 @@
 openapi: 3.0.0
 info:
-  title: Find Live Queries Schema
+  title: Find Saved Queries Schema
   version: 8.9.0
 components:
   parameters:
-    FindLiveQueryRequestQueryParameter:
+    FindSavedQueryRequestQueryParameter:
       name: query
       in: query
       required: true
       schema:
-        $ref: '#/components/schemas/FindLiveQueryRequestQuery'
+        $ref: '#/components/schemas/FindSavedQueryRequestQuery'
   schemas:
-    FindLiveQueryRequestQuery:
+    FindSavedQueryRequestQuery:
       type: object
       properties:
-        kuery:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
         page:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
         pageSize:
