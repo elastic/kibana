@@ -21,7 +21,6 @@ interface TextAreaHeightSelectorProps {
   isLoading: boolean;
 }
 
-
 const TextAreaHeightSelector = ({
   dataTestSubj,
   disabled = false,
