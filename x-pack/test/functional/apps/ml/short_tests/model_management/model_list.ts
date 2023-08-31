@@ -17,7 +17,9 @@ export default function ({ getService }: FtrProviderContext) {
     id: model.name,
   }));
 
-  describe('trained models', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/165083
+  // Failing: See https://github.com/elastic/kibana/issues/165084
+  describe.skip('trained models', function () {
     // 'Created at' will be different on each run,
     // so we will just assert that the value is in the expected timestamp format.
     const builtInModelData = {

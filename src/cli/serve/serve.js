@@ -15,7 +15,6 @@ import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
-import { kibanaDevServiceAccount } from '@kbn/dev-utils';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
@@ -45,6 +44,23 @@ const getBootstrapScript = (isDev) => {
   }
 };
 
+const setServerlessKibanaDevServiceAccountIfPossible = (set, opts) => {
+  if (!opts.dev || !opts.serverless || process.env.isDevCliChild === 'true') {
+    return;
+  }
+
+  const DEV_UTILS_PATH = '@kbn/dev-utils';
+
+  if (!canRequire(DEV_UTILS_PATH)) {
+    return;
+  }
+
+  // need dynamic require to exclude it from production build
+  // eslint-disable-next-line import/no-dynamic-require
+  const { kibanaDevServiceAccount } = require(DEV_UTILS_PATH);
+  set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
+};
+
 function pathCollector() {
   const paths = [];
   return function (path) {
@@ -70,7 +86,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   if (opts.dev) {
     if (opts.serverless) {
-      set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
+      setServerlessKibanaDevServiceAccountIfPossible(set, opts);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
@@ -103,7 +119,6 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('server.ssl.truststore.path');
       ensureNotDefined('server.ssl.certificateAuthorities');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
-
       const elasticsearchHosts = (
         (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
           'https://localhost:9200',
