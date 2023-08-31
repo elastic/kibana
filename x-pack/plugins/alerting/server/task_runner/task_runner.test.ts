@@ -237,6 +237,8 @@ describe('Task Runner', () => {
     logger.get.mockImplementation(() => logger);
 
     ruleType.executor.mockResolvedValue({ state: {} });
+
+    actionsClient.bulkEnqueueExecution.mockResolvedValue([]);
   });
 
   test('successfully executes the task', async () => {
@@ -2962,7 +2964,7 @@ describe('Task Runner', () => {
       status: 'warning',
       errorReason: `maxExecutableActions`,
       logAlert: 4,
-      logAction: 5,
+      logAction: 3,
     });
   });
 
