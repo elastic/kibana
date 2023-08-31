@@ -624,10 +624,10 @@ function getPatternFiringRuleWithSummaryAction(
 
   return {
     enabled: true,
-    name: 'pattern-firing-rule',
+    name: 'pattern-firing-faad-rule',
     schedule: { interval: '1m' },
     tags: ['tag-A', 'tag-B'],
-    rule_type_id: 'test.patternFiringAad',
+    rule_type_id: 'test.patternFiringFaad',
     consumer: 'alertsFixture',
     params: {
       pattern,
