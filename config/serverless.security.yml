@@ -3,6 +3,7 @@
 ## Disable plugins
 enterpriseSearch.enabled: false
 xpack.apm.enabled: false
+xpack.infra.enabled: false
 xpack.observability.enabled: false
 xpack.uptime.enabled: false
 

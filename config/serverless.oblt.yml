@@ -3,6 +3,7 @@
 ## Disable plugins
 enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
+xpack.infra.enabled: false
 xpack.securitySolution.enabled: false
 
 ## Enable the Serverless Observability plugin
