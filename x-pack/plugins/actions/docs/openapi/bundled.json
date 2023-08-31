@@ -455,6 +455,9 @@
                     "$ref": "#/components/schemas/update_connector_request_opsgenie"
                   },
                   {
+                    "$ref": "#/components/schemas/update_connector_request_pagerduty"
+                  },
+                  {
                     "$ref": "#/components/schemas/update_connector_request_resilient"
                   },
                   {
@@ -1837,13 +1840,28 @@
         "title": "Connector request properties for a PagerDuty connector",
         "description": "Defines properties for connectors when type is `.pagerduty`.",
         "type": "object",
-        "additionalProperties": true
+        "properties": {
+          "apiUrl": {
+            "description": "The PagerDuty event URL.",
+            "type": "string",
+            "nullable": true,
+            "example": "https://events.pagerduty.com/v2/enqueue"
+          }
+        }
       },
       "secrets_properties_pagerduty": {
         "title": "Connector secrets properties for a PagerDuty connector",
         "description": "Defines secrets for connectors when type is `.pagerduty`.",
         "type": "object",
-        "additionalProperties": true
+        "required": [
+          "routingKey"
+        ],
+        "properties": {
+          "routingKey": {
+            "description": "A 32 character PagerDuty Integration Key for an integration on a service.\n",
+            "type": "string"
+          }
+        }
       },
       "create_connector_request_pagerduty": {
         "title": "Create PagerDuty connector request",
@@ -3709,6 +3727,27 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_opsgenie"
+          }
+        }
+      },
+      "update_connector_request_pagerduty": {
+        "title": "Update PagerDuty connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_pagerduty"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_pagerduty"
           }
         }
       },

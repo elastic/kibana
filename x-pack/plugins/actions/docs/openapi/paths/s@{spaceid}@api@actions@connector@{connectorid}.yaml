@@ -164,7 +164,7 @@ put:
             - $ref: '../components/schemas/update_connector_request_index.yaml'  
             - $ref: '../components/schemas/update_connector_request_jira.yaml'
             - $ref: '../components/schemas/update_connector_request_opsgenie.yaml'
-#            - $ref: '../components/schemas/update_connector_request_pagerduty.yaml' 
+            - $ref: '../components/schemas/update_connector_request_pagerduty.yaml' 
             - $ref: '../components/schemas/update_connector_request_resilient.yaml'
             - $ref: '../components/schemas/update_connector_request_serverlog.yaml'
             - $ref: '../components/schemas/update_connector_request_servicenow.yaml'
