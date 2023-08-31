@@ -85,7 +85,7 @@ export const createActionHandler = async (
     pack_id: params.pack_id,
     pack_name: packSO?.attributes?.name,
     pack_prebuilt: params.pack_id
-      ? !!some(packSO?.references, ['type', 'osquery-pack-asset'])
+      ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
@@ -141,7 +141,7 @@ export const createActionHandler = async (
   if (actionsComponentTemplateExists) {
     await esClientInternal.bulk({
       refresh: 'wait_for',
-      body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
+      operations: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
     });
   }
 
