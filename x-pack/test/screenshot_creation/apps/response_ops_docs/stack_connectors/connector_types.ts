@@ -177,6 +177,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('pagerduty');
       await testSubjects.setValue('nameInput', 'PagerDuty test connector');
+      await testSubjects.setValue('pagerdutyApiUrlInput', 'https://dev-test.pagerduty.com/');
+      await testSubjects.setValue('pagerdutyRoutingKeyInput', 'testkey');
       await commonScreenshots.takeScreenshot('pagerduty-connector', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
