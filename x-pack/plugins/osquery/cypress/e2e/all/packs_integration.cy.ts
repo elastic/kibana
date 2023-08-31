@@ -55,6 +55,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.visit(FLEET_AGENT_POLICIES);
         cy.contains(AGENT_POLICY_NAME).click();
         cy.contains('Add integration').click();
+        cy.getBySel('epmList.searchBar').type('osquery');
         cy.contains(integration).click();
         addIntegration(AGENT_POLICY_NAME);
         cy.contains('Add Elastic Agent later').click();
