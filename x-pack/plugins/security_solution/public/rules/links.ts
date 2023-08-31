@@ -36,6 +36,7 @@ export const links: LinkItem = {
   path: RULES_LANDING_PATH,
   hideTimeline: true,
   skipUrlState: true,
+  globalNavPosition: 2,
   capabilities: [`${SERVER_APP_ID}.show`],
   links: [
     {

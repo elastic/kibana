@@ -12,11 +12,10 @@ Previous versions: {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8
 
 [discrete]
 ==== Webhook connector improvement
-The Webhook connector now supports client certification. You can now use the webhook connector for secured integration with 3rd parties, beyond basic authentication (using usernames and passwords or tokens). 
+The <<webhook-action-type,Webhook connector>> now supports client certification. You can now use the webhook connector for secured integration with third parties, beyond basic authentication (using usernames and passwords or tokens). 
 
 [role="screenshot"]
 image::images/webhook-connector.png[A screenshot displaying the new SSL authentication option in the UI, width=70%]
-
 [discrete]
 === Dashboard
 
@@ -26,14 +25,14 @@ Multivalue filtering using tooltip actions is already enabled for XY charts, and
 
 For example, you can filter a heat map by both region and country. You can also filter a partition chart by both product and date.
 
-To use multivalue filtering, right click on the chart to show the tooltip menu. Then select the values you want to filter by, and click on *Filter X Series*. We will continue to add support for multivalue filtering for other types of charts in the future.
+To use multivalue filtering, right-click on the chart to show the tooltip menu. Then select the values you want to filter by, and click on *Filter X Series*. We will continue to add support for multivalue filtering for other types of charts in the future.
 
 [role="screenshot"]
 image::images/multivalue-filtering.png[An example of multivalue filtering on a partition chart, width=70%]
 
 [discrete]
 ==== Access dashboards' metadata from the listing page
-Easily view and edit dashboards’ title, description and tags from the listing page.
+Easily view and edit dashboards’ title, description, and tags from the listing page.
 
 [role="screenshot"]
 image::images/dashboards-metadata.png[An example of the listing page displaying metadata, width=70%]
@@ -56,14 +55,14 @@ image::images/log-rate-analysis.png[An example of log rate analysis on dips in d
 ==== Add Change Point Detection charts to dashboards and cases
 preview:[] Continuing the integration of Machine Learning deeper into Elastic tools and workflows, you can now easily attach Change Point Detection charts to **Dashboards** and **Cases** with just a few clicks. Starting from **Machine Learning > AIOps Labs> Change Point Detection**, select the charts that you want to embed, then select the **Attach charts** option using the ellipsis at the top right, and finally select the dashboard or case that you want the selected charts to be added in.  
 
-Additional AIOps enhancements include a validation mechanism when you perform log pattern analysis in ML Labs and in Discover. This verifies that the selected field is suitable for analysis and if not, the UI displays the reason(s) why.
+Additional AIOps enhancements include a validation mechanism when you perform log pattern analysis in AIOps Labs and in Discover. This verifies that the selected field is suitable for analysis and if not, the UI displays the reason(s) why.
 
 [role="screenshot"]
 image::images/change-point-detection.png[An example of a change point detection chart]
 
 [discrete]
 ==== Data frame analytics model deployment workflow
-You can now create an inference ingest pipeline straight from the Trained Models view for your Data Frame Analytics models, by selecting the new **Deploy model** option in the **Actions** column. The pipeline will use this model to perform inference on your incoming data and it will index the results according to your configuration.
+You can now create an inference ingest pipeline straight from the Trained Models view for your {dfanalytics} models, by selecting the new **Deploy model** option in the **Actions** column. The pipeline will use this model to perform inference on your incoming data and it will index the results according to your configuration.
 
 [role="screenshot"]
 image::images/trained-models.png[A screenshot of the trained models UI]
@@ -77,7 +76,7 @@ image::images/data-comparison.png[An example of the data comparison view]
 
 [discrete]
 ==== ELSER test user interface
-preview:[] Elastic machine learning introduced AI search out of the box with the release of Elastic Learned Sparse Encoder in 8.8. Now you have the option to easily test ELSER on the user interface. From the Trained Models view select the **Test model** option from the **Actions** colum menu.
+preview:[] Elastic machine learning introduced AI search out of the box with the release of Elastic Learned Sparse EncodeR in 8.8. Now you have the option to easily test ELSER on the user interface. From the Trained Models view select the **Test model** option from the **Actions** column menu.
 
 [role="screenshot"]
 image::images/elser.png[An example of the new ELSER UI]
@@ -87,7 +86,7 @@ image::images/elser.png[An example of the new ELSER UI]
 
 [discrete]
 ==== Cross-cluster API keys
-The API keys page in {kib} (under **Management > Security > API keys**) has been redesigned, in order to enable you to easily create and manage cross-cluster API keys. You can now select the type of key that you want to create and easily find or filter through the existing API keys you have access to using the tagged list view.
+The API keys page in {kib} (under **Management > Security > API keys**) has been redesigned to enable you to create and manage cross-cluster API keys more easily. You can now select the type of key that you want to create and find or filter through the existing API keys you have access to using the tagged list view.
 
 [role="screenshot"]
 image::images/api-keys.png[A screenshot of the new API keys redesign]
