@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { last } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { last } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { Subscription } from 'rxjs';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
+import { useKibana } from '../../hooks/use_kibana';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { useConversation } from '../../hooks/use_conversation';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
@@ -30,7 +30,7 @@ import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { InsightBase } from './insight_base';
 
 function ChatContent({
-  title,
+  title: defaultTitle,
   initialMessages,
   connectorId,
 }: {
@@ -46,12 +46,16 @@ function ChatContent({
 
   const [conversationId, setConversationId] = useState<string>();
 
-  const { displayedMessages, setDisplayedMessages, save, saveTitle } = useConversation({
-    conversationId,
-    connectorId,
-    chatService,
-  });
+  const { conversation, displayedMessages, setDisplayedMessages, save, saveTitle } =
+    useConversation({
+      conversationId,
+      connectorId,
+      chatService,
+    });
 
+  const conversationTitle = conversationId
+    ? conversation.value?.conversation.title || ''
+    : defaultTitle;
   const reloadReply = useCallback(() => {
     setLoading(true);
 
@@ -153,13 +157,14 @@ function ChatContent({
         }
       />
       <ChatFlyout
-        title={title}
+        title={conversationTitle}
         isOpen={isOpen}
         onClose={() => {
           setIsOpen(() => false);
         }}
         messages={displayedMessages}
         conversationId={conversationId}
+        startedFrom="contextualInsight"
         onChatComplete={(nextMessages) => {
           save(nextMessages)
             .then((nextConversation) => {
