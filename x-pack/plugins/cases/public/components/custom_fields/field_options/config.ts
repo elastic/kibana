@@ -6,7 +6,7 @@
  */
 
 import * as i18n from './translations';
-import type { CustomFieldTypesUI } from '../type';
+import type { CustomFieldTypesUI } from '../types';
 
 export interface Options {
   id: string;

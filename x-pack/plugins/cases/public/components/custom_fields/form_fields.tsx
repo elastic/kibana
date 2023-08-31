@@ -5,24 +5,55 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { CustomFieldTypesUI } from './type';
+import type { CustomFieldTypesUI } from './types';
 import { FieldTypeSelector } from './field_type/field_type_selector';
-import { FieldOptionsSelector } from './field_options/field_options_selector';
-import { TextAreaHeightSelector } from './text_area_height/text_area_height_selector';
 import { customFieldTypes } from './schema';
+import { builderMap } from './builder';
 
 const FormFieldsComponent: React.FC = () => {
-  const [selectedType, setSelectedType] = useState<string>(customFieldTypes[0]);
+  const [selectedType, setSelectedType] = useState<CustomFieldTypesUI>(customFieldTypes[0]);
   const handleTypeChange = useCallback(
     (val: CustomFieldTypesUI) => {
       setSelectedType(val);
     },
     [setSelectedType]
   );
+
+  const builtCustomFields: React.ReactNode[] = useMemo(() => {
+    if (!customFieldTypes) {
+      return [];
+    }
+
+    let customFieldBuilder: { build: () => React.ReactNode[] } | null = null;
+
+    return customFieldTypes.reduce<React.ReactNode[]>((temp, customFieldType) => {
+      const builder = builderMap[customFieldType];
+
+      if (builder == null) {
+        return [];
+      }
+
+      if (customFieldType === selectedType) {
+        customFieldBuilder = builder({
+          customFieldType,
+        });
+      }
+
+      return customFieldBuilder ? [...customFieldBuilder.build()] : [];
+    }, []);
+  }, [selectedType]);
+
+  const renderCustomField = (customField: React.ReactNode) => {
+    if (!customField) {
+      return null;
+    }
+
+    return Object.values(customField).map((item) => item);
+  };
 
   return (
     <>
@@ -43,27 +74,7 @@ const FormFieldsComponent: React.FC = () => {
           handleChange: handleTypeChange,
         }}
       />
-      {selectedType && selectedType === 'Textarea' ? (
-        <UseField
-          path="textAreaHeight"
-          component={TextAreaHeightSelector}
-          componentProps={{
-            dataTestSubj: 'textAreaHeight',
-            idAria: 'textAreaHeight',
-            euiFieldProps: { defaultValue: '2' },
-          }}
-        />
-      ) : null}
-      {selectedType && (
-        <UseField
-          path="fieldOptions"
-          component={FieldOptionsSelector}
-          componentProps={{
-            dataTestSubj: 'fieldOptions',
-            selectedType,
-          }}
-        />
-      )}
+      {builtCustomFields.map((customField) => renderCustomField(customField))}
     </>
   );
 };

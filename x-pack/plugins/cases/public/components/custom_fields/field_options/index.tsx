@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import type { EuiCheckboxGroupOption } from '@elastic/eui';
 import { EuiCheckboxGroup } from '@elastic/eui';
-import type { CustomFieldTypesUI } from '../type';
+import type { CustomFieldTypesUI } from '../types';
 import { getConfig } from './config';
 
 interface FieldOptionsProps {

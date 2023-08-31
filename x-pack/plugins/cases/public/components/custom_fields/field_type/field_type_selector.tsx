@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { CustomFieldTypesUI } from '../type';
+import type { CustomFieldTypesUI } from '../types';
 import { FieldTypeDropdown } from './field_type_dropdown';
 
 interface FieldTypeSelectorProps {

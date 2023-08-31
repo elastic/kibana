@@ -33,7 +33,7 @@ const CustomFieldsComponent: React.FC<Props> = ({ disabled, isLoading, handleAdd
           <p>{i18n.DESCRIPTION}</p>
         </>
       }
-      data-test-subj="case-closure-options-form-group"
+      data-test-subj="case-custom-fields-form-group"
     >
       <EuiEmptyPrompt
         color="subdued"

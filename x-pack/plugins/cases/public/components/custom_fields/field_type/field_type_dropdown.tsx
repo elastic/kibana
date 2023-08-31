@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiSuperSelect, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { CustomFieldTypesUI } from '../type';
+import type { CustomFieldTypesUI } from '../types';
 
 interface Props {
   customFieldTypes: CustomFieldTypesUI[];

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextAreaHeight } from '.';
+import { TextAreaHeight } from './text_area_height';
+import type { CustomFieldBuilder } from './types';
+import { createCommonCustomFieldBuilder } from './common';
 
 interface TextAreaHeightSelectorProps {
   dataTestSubj: string;
@@ -17,25 +19,20 @@ interface TextAreaHeightSelectorProps {
   field: FieldHook<string>;
   idAria: string;
   isLoading: boolean;
-  // handleTextAreaHeightChange: (newValue: string) => void;
 }
 
-export const TextAreaHeightSelector = ({
+
+const TextAreaHeightSelector = ({
   dataTestSubj,
   disabled = false,
   field,
   idAria,
   isLoading = false,
-}: // handleTextAreaHeightChange,
-TextAreaHeightSelectorProps) => {
+}: TextAreaHeightSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const onChange = useCallback(
-    (val: string) => {
-      field.setValue(val);
-      // handleChange(val);
-    },
-    [field]
-  );
+  const onChange = (val: string) => {
+    field.setValue(val);
+  };
 
   return (
     <EuiFormRow
@@ -53,4 +50,18 @@ TextAreaHeightSelectorProps) => {
   );
 };
 
-TextAreaHeightSelector.displayName = 'TextAreaHeightSelector';
+export const createTextAreaCustomFieldBuilder: CustomFieldBuilder = ({ customFieldType }) => ({
+  build: () => {
+    const commonBuilder = createCommonCustomFieldBuilder({
+      customFieldType,
+      component: TextAreaHeightSelector,
+      componentProps: {
+        dataTestSubj: 'textAreaHeight',
+        idAria: 'textAreaHeight',
+        euiFieldProps: { defaultValue: '2' },
+      },
+    });
+
+    return commonBuilder.build();
+  },
+});
