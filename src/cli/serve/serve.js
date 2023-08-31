@@ -15,7 +15,6 @@ import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
-import {bootstrap} from "../../../packages/core/root/core-root-server-internal";
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
@@ -56,6 +55,8 @@ const setServerlessKibanaDevServiceAccountIfPossible = (set, opts) => {
     return;
   }
 
+  // need dynamic require to exclude it from production build
+  // eslint-disable-next-line import/no-dynamic-require
   const { kibanaDevServiceAccount } = require(DEV_UTILS_PATH);
   set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
 };
