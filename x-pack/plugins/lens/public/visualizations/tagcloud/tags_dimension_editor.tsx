@@ -12,13 +12,9 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   ColorMapping,
   getPaletteColors,
-  EUIPalette,
-  IKEAPalette,
-  NeutralPalette,
-  PastelPalette,
-  TableauPalette,
   SPECIAL_TOKENS_STRING_CONVERTION,
   PaletteOutput,
+  AVAILABLE_PALETTES,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import {
@@ -60,14 +56,7 @@ export function TagsDimensionEditor({
     });
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [useNewColorMapping, setUseNewColorMapping] = useState(state.colorMapping ? true : false);
-  // TODO: move the available palette elsewhere
-  const availablePalettes = new Map<string, ColorMapping.CategoricalPalette>([
-    [EUIPalette.id, EUIPalette],
-    [TableauPalette.id, TableauPalette],
-    [IKEAPalette.id, IKEAPalette],
-    [PastelPalette.id, PastelPalette],
-    [NeutralPalette.id, NeutralPalette],
-  ]);
+
   const colors = getPaletteColors(false, state.colorMapping);
   const table = frame.activeData?.[state.layerId];
   const splitCategories = getColorCategories(table?.rows ?? [], state.tagAccessor);
@@ -158,7 +147,7 @@ export function TagsDimensionEditor({
                     isDarkMode={isDarkMode}
                     model={state.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
                     onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-                    palettes={availablePalettes}
+                    palettes={AVAILABLE_PALETTES}
                     data={{
                       type: 'categories',
                       categories: splitCategories,

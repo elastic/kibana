@@ -70,14 +70,6 @@ export const NeutralPalette: ColorMapping.CategoricalPalette = {
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 2;
 
-export const availablePalettes = new Map<string, ColorMapping.CategoricalPalette>([
-  [EUIPalette.id, EUIPalette],
-  [TableauPalette.id, TableauPalette],
-  [IKEAPalette.id, IKEAPalette],
-  [PastelPalette.id, PastelPalette],
-  [NeutralPalette.id, NeutralPalette],
-]);
-
 export function getPalette(
   palettes: Map<string, ColorMapping.CategoricalPalette>,
   defaultPalette: ColorMapping.CategoricalPalette

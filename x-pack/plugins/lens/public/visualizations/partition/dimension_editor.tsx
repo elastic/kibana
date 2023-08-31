@@ -14,12 +14,8 @@ import {
   PaletteRegistry,
   getPaletteColors,
   ColorMapping,
-  EUIPalette,
-  IKEAPalette,
-  NeutralPalette,
-  PastelPalette,
-  TableauPalette,
   SPECIAL_TOKENS_STRING_CONVERTION,
+  AVAILABLE_PALETTES,
 } from '@kbn/coloring';
 import { ColorPicker, useDebouncedValue } from '@kbn/visualization-ui-components';
 import {
@@ -127,14 +123,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         })
     : undefined;
 
-  // TODO: move the available palette elsewhere
-  const availablePalettes = new Map<string, ColorMapping.CategoricalPalette>([
-    [EUIPalette.id, EUIPalette],
-    [TableauPalette.id, TableauPalette],
-    [IKEAPalette.id, IKEAPalette],
-    [PastelPalette.id, PastelPalette],
-    [NeutralPalette.id, NeutralPalette],
-  ]);
   const colors = getPaletteColors(false, currentLayer.colorMapping);
   const table = props.frame.activeData?.[currentLayer.layerId];
   const splitCategories = getColorCategories(table?.rows ?? [], props.accessor);
@@ -204,7 +192,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         isDarkMode={props.isDarkMode}
                         model={currentLayer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
                         onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-                        palettes={availablePalettes}
+                        palettes={AVAILABLE_PALETTES}
                         data={{
                           type: 'categories',
                           categories: splitCategories,

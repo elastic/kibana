@@ -9,6 +9,7 @@
 export { CategoricalColorMapping } from './categorical_color_mapping';
 export type { ColorMappingInputData } from './categorical_color_mapping';
 export type { ColorMapping } from './config';
+export * from './palettes/available_palettes';
 export * from './palettes/default_palettes';
 export * from './color/color_handling';
 export { SPECIAL_TOKENS_STRING_CONVERTION } from './color/rule_matching';

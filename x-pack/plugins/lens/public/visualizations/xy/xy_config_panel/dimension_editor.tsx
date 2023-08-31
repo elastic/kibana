@@ -23,16 +23,12 @@ import {
 import {
   PaletteRegistry,
   ColorMapping,
-  EUIPalette,
-  IKEAPalette,
-  NeutralPalette,
-  PastelPalette,
-  TableauPalette,
   DEFAULT_COLOR_MAPPING_CONFIG,
   getPaletteColors,
   CategoricalColorMapping,
   PaletteOutput,
   SPECIAL_TOKENS_STRING_CONVERTION,
+  AVAILABLE_PALETTES,
 } from '@kbn/coloring';
 
 import { getColorCategories } from '@kbn/expression-xy-plugin/public';
@@ -147,15 +143,6 @@ export function DataDimensionEditor(
     ).color;
   }, [props.frame, props.paletteService, state.layers, accessor, props.formatFactory, layer]);
 
-  // TODO: move the available palette elsewhere
-  const availablePalettes = new Map<string, ColorMapping.CategoricalPalette>([
-    [EUIPalette.id, EUIPalette],
-    [TableauPalette.id, TableauPalette],
-    [IKEAPalette.id, IKEAPalette],
-    [PastelPalette.id, PastelPalette],
-    [NeutralPalette.id, NeutralPalette],
-  ]);
-
   const localLayer: XYDataLayerConfig = layer;
 
   const colors = getPaletteColors(props.darkMode, layer.colorMapping);
@@ -227,7 +214,7 @@ export function DataDimensionEditor(
                       isDarkMode={darkMode}
                       model={layer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
                       onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-                      palettes={availablePalettes}
+                      palettes={AVAILABLE_PALETTES}
                       data={{
                         type: 'categories',
                         categories: splitCategories,

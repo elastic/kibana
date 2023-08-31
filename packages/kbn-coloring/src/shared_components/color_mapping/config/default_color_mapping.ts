@@ -7,7 +7,8 @@
  */
 
 import { ColorMapping } from '.';
-import { NeutralPalette, availablePalettes, getPalette } from '../palettes/default_palettes';
+import { AVAILABLE_PALETTES } from '../palettes/available_palettes';
+import { NeutralPalette, getPalette } from '../palettes/default_palettes';
 
 export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
   assignmentMode: 'auto',
@@ -36,6 +37,6 @@ export function getPaletteColors(
   colorMappings?: ColorMapping.Config
 ): string[] {
   const colorMappingModel = colorMappings ?? { ...DEFAULT_COLOR_MAPPING_CONFIG };
-  const palette = getPalette(availablePalettes, NeutralPalette)(colorMappingModel.paletteId);
+  const palette = getPalette(AVAILABLE_PALETTES, NeutralPalette)(colorMappingModel.paletteId);
   return Array.from({ length: palette.colorCount }, (d, i) => palette.getColor(i, isDarkMode));
 }
