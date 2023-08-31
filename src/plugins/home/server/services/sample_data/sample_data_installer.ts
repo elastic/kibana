@@ -153,12 +153,20 @@ export class SampleDataInstaller {
     }
   }
 
+  serializeIndexSettings(isServerless: boolean, indexSettings: Record<string, any> | undefined) {
+    if (!isServerless || !indexSettings) return indexSettings;
+  
+    const { number_of_shards, auto_expand_replicas, ...rest } = indexSettings.entries();
+    return rest;
+  }
+
   private async installDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
     const index = createIndexName(dataset.id, dataIndex.id);
     // these settings are not available in serverless
-    const indexSettings = dataset.withIndexSettings
-      ? { number_of_shards: 1, auto_expand_replicas: '0-1' }
-      : {};
+    const isServerless = dataset.withIndexSettings === false
+
+    const indexSettings = isServerless
+      ? {} : { number_of_shards: 1, auto_expand_replicas: '0-1' }
 
     try {
       if (dataIndex.isDataStream) {
@@ -184,7 +192,7 @@ export class SampleDataInstaller {
           body: {
             settings: {
               index: {
-                ...dataIndex.indexSettings,
+                ...this.serializeIndexSettings(isServerless, dataIndex.indexSettings),
                 ...indexSettings,
               },
             },
