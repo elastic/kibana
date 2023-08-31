@@ -252,8 +252,27 @@ Specifies configuration details that are specific to the type of preconfigured c
 The type of preconfigured connector.
 For example: `.email`, `.index`, `.opsgenie`, `.server-log`, `.resilient`, `.slack`, and `.webhook`.
 
+`xpack.actions.preconfigured.<connector-id>.config`::
+The configuration details, which are specific to the type of preconfigured connector.
+
+`xpack.actions.preconfigured.<connector-id>.config.apiUrl`::
+A configuration URL that varies by connector:
++
+--
+* For a <<pagerduty-action-type,PagerDuty connector>>, specifies the PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`.
+
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
+--
+
 `xpack.actions.preconfigured.<connector-id>.name`::
 The name of the preconfigured connector.
+
+
+`xpack.actions.preconfigured.<connector-id>.secrets`::
+Sensitive configuration details, such as username, password, and keys, which are specific to the connector type.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.routingKey`::
+For a <<pagerduty-action-type,PagerDuty connector>>, specifies the 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
 [float]
 [[alert-settings]]

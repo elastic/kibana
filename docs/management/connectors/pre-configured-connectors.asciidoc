@@ -83,8 +83,29 @@ configuration.
 [float]
 === Examples
 
+* <<preconfigured-pagerduty-configuration>>
 * <<preconfigured-server-log-configuration>>
 * <<preconfigured-webhook-configuration>>
+
+[float]
+[[preconfigured-pagerduty-configuration]]
+==== PagerDuty connectors
+
+The following example creates a <<pagerduty-action-type,PagerDuty connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-pagerduty:
+    name: preconfigured-pagerduty-connector-type
+    actionTypeId: .pagerduty
+    config:
+      apiUrl: https://test.host <1>
+    secrets:
+      routingKey: testroutingkey <2>
+--
+<1> The PagerDuty event URL.
+<2> A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
 [float]
 [[preconfigured-server-log-configuration]]

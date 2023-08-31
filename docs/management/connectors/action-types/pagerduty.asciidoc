@@ -3,6 +3,10 @@
 ++++
 <titleabbrev>PagerDuty</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can manage PagerDuty alerts.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
 The PagerDuty connector uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API] to trigger, acknowledge, and resolve PagerDuty alerts.
 
@@ -25,34 +29,6 @@ PagerDuty connectors have the following configuration properties:
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 Integration Key::   A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
-
-[float]
-[[preconfigured-pagerduty-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by
-adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-For example:
-
-[source,text]
---
-xpack.actions.preconfigured:
-  my-pagerduty:
-    name: preconfigured-pagerduty-connector-type
-    actionTypeId: .pagerduty
-    config:
-      apiUrl: https://test.host
-    secrets:
-      routingKey: testroutingkey
---
-
-Config defines information for the connector type.
-
-`apiURL`:: A URL string that corresponds to *API URL*.
-
-Secrets defines sensitive information for the connector type.
-
-`routingKey`:: A string that corresponds to *Integration Key*.
 
 [float]
 [[pagerduty-action-configuration]]
