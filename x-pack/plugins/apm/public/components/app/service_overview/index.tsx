@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -16,7 +16,10 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { css } from '@emotion/react';
 import {
   isOpenTelemetryAgentName,
   isRumAgentName,
@@ -41,6 +44,7 @@ import { ServiceOverviewInstancesChartAndTable } from './service_overview_instan
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { SloCallout } from '../../shared/slo_callout';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { ApmPluginStartDeps } from '../../../plugin';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -51,6 +55,8 @@ export function ServiceOverview() {
   const router = useApmRouter();
   const { serviceName, fallbackToTransactions, agentName, serverlessType } =
     useApmServiceContext();
+  const { embeddable: embeddablePlugin } =
+    useKibana<ApmPluginStartDeps>().services;
 
   const {
     query,
@@ -87,6 +93,33 @@ export function ServiceOverview() {
     false
   );
 
+  const [embeddable, setEmbeddable] = useState<any>();
+  const embeddableRoot: React.RefObject<HTMLDivElement> =
+    useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    async function createEmbeddable() {
+      const fac = embeddablePlugin?.getEmbeddableFactory('HELLO_WORLD');
+      const input = { id: 'profling', rangeFrom: start, rangeTo: end };
+      const embeddableObject = await fac?.create(input);
+      setEmbeddable(embeddableObject);
+    }
+    createEmbeddable();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (embeddableRoot.current && embeddable) {
+      embeddable.render(embeddableRoot.current);
+    }
+  }, [embeddable, embeddableRoot]);
+
+  useEffect(() => {
+    if (embeddable) {
+      embeddable.updateInput({ rangeFrom: start, rangeTo: end });
+      embeddable.reload();
+    }
+  }, [embeddable, end, start]);
+
   return (
     <AnnotationsContextProvider
       serviceName={serviceName}
@@ -105,6 +138,17 @@ export function ServiceOverview() {
         />
       )}
       <EuiSpacer />
+      <div
+        css={css`
+          width: 100%;
+          height: 500px;
+          display: flex;
+          flex: 1 1 100%;
+          z-index: 1;
+          min-height: 0;
+        `}
+        ref={embeddableRoot}
+      />
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           {fallbackToTransactions && (

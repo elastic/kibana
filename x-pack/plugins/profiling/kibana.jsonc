@@ -23,7 +23,8 @@
       "observabilityShared",
       "observabilityAIAssistant",
       "unifiedSearch",
-      "share"
+      "share",
+      "embeddable"
     ],
     "requiredBundles": [
       "kibanaReact",
