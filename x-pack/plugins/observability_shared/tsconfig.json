@@ -32,6 +32,7 @@
     "@kbn/rison",
     "@kbn/kibana-utils-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/profiling-data-access-plugin"
   ],
   "exclude": ["target/**/*"]
 }

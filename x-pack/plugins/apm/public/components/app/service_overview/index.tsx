@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React from 'react';
 
 import {
   EuiFlexGroup,
@@ -16,35 +16,31 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { css } from '@emotion/react';
 import {
   isOpenTelemetryAgentName,
   isRumAgentName,
   isServerlessAgent,
 } from '../../../../common/agent_name';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { LatencyChart } from '../../shared/charts/latency_chart';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
 import { TransactionColdstartRateChart } from '../../shared/charts/transaction_coldstart_rate_chart';
+import { SloCallout } from '../../shared/slo_callout';
 import { TransactionsTable } from '../../shared/transactions_table';
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
-import { SloCallout } from '../../shared/slo_callout';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
-import { ApmPluginStartDeps } from '../../../plugin';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -55,8 +51,6 @@ export function ServiceOverview() {
   const router = useApmRouter();
   const { serviceName, fallbackToTransactions, agentName, serverlessType } =
     useApmServiceContext();
-  const { embeddable: embeddablePlugin } =
-    useKibana<ApmPluginStartDeps>().services;
 
   const {
     query,
@@ -93,33 +87,6 @@ export function ServiceOverview() {
     false
   );
 
-  const [embeddable, setEmbeddable] = useState<any>();
-  const embeddableRoot: React.RefObject<HTMLDivElement> =
-    useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    async function createEmbeddable() {
-      const fac = embeddablePlugin?.getEmbeddableFactory('HELLO_WORLD');
-      const input = { id: 'profling', rangeFrom: start, rangeTo: end };
-      const embeddableObject = await fac?.create(input);
-      setEmbeddable(embeddableObject);
-    }
-    createEmbeddable();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
-      embeddable.render(embeddableRoot.current);
-    }
-  }, [embeddable, embeddableRoot]);
-
-  useEffect(() => {
-    if (embeddable) {
-      embeddable.updateInput({ rangeFrom: start, rangeTo: end });
-      embeddable.reload();
-    }
-  }, [embeddable, end, start]);
-
   return (
     <AnnotationsContextProvider
       serviceName={serviceName}
@@ -138,17 +105,6 @@ export function ServiceOverview() {
         />
       )}
       <EuiSpacer />
-      <div
-        css={css`
-          width: 100%;
-          height: 500px;
-          display: flex;
-          flex: 1 1 100%;
-          z-index: 1;
-          min-height: 0;
-        `}
-        ref={embeddableRoot}
-      />
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           {fallbackToTransactions && (

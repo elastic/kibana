@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel } from '@elastic/eui';
 import { Embeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { EmbeddableFlamegraph } from './embeddable_flamegraph';
 import { HelloWorldEmbeddableInput } from './hello_world_factory';
 
 export const HELLO_WORLD = 'HELLO_WORLD';
@@ -18,14 +18,7 @@ export class HelloWorld extends Embeddable<HelloWorldEmbeddableInput, Embeddable
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
-    render(
-      <EuiPanel>
-        <div>caue 123</div>
-        {this.input.rangeFrom}
-        {this.input.rangeTo}
-      </EuiPanel>,
-      domNode
-    );
+    render(<EmbeddableFlamegraph data={this.input.data} />, domNode);
   }
 
   public destroy() {

@@ -7,11 +7,32 @@
 
 import { EuiPanel } from '@elastic/eui';
 import React from 'react';
+import { ElasticFlameGraph } from '@kbn/profiling-data-access-plugin/common/flamegraph';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { FlameGraph } from '../components/flamegraph';
 
-export function EmbeddableFlamegraph() {
+interface Props {
+  data?: ElasticFlameGraph;
+}
+
+export function EmbeddableFlamegraph({ data }: Props) {
   return (
     <EuiPanel>
-      <div>caue 1234444444</div>
+      <EuiFlexGroup direction="column" style={{ height: '100%' }}>
+        <EuiFlexItem>
+          {data && (
+            <FlameGraph
+              primaryFlamegraph={data}
+              showInformationWindow={false}
+              id="embddable_profiling"
+              toggleShowInformationWindow={() => {}}
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {/* <div style={{ height: '100%' }}>
+      </div> */}
     </EuiPanel>
   );
 }

@@ -10,7 +10,7 @@ import { RegisterServicesParams } from '../register_services';
 import { withProfilingSpan } from '../../utils/with_profiling_span';
 import { searchStackTraces } from '../search_stack_traces';
 import { createCalleeTree } from '../../../common/callee';
-import { createBaseFlameGraph } from '../../../common/flamegraph';
+import { createBaseFlameGraph, createFlameGraph } from '../../../common/flamegraph';
 
 interface FetchFlamechartParams {
   esClient: ElasticsearchClient;
@@ -45,9 +45,9 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
         samplingRate
       );
 
-      const fg = createBaseFlameGraph(tree, samplingRate, totalSeconds);
+      const baseFlamegraph = createBaseFlameGraph(tree, samplingRate, totalSeconds);
 
-      return fg;
+      return createFlameGraph(baseFlamegraph);
     });
 
     return flamegraph;

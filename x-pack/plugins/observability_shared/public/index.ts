@@ -77,3 +77,5 @@ export {
   casesFeatureId,
   sloFeatureId,
 } from '../common';
+
+export { EmbeddableFlamegraph } from './components/profiling/embeddables/embeddable_flamegraph';

@@ -61,6 +61,10 @@ import {
   CustomIntegrationsPluginSetup,
   CustomIntegrationsPluginStart,
 } from '@kbn/custom-integrations-plugin/server';
+import {
+  ProfilingDataAccessPluginSetup,
+  ProfilingDataAccessPluginStart,
+} from '@kbn/profiling-data-access-plugin/server';
 import { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -91,6 +95,7 @@ export interface APMPluginSetupDependencies {
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
+  profilingDataAccess: ProfilingDataAccessPluginSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -116,4 +121,5 @@ export interface APMPluginStartDependencies {
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;
   customIntegrations?: CustomIntegrationsPluginStart;
+  profilingDataAccess: ProfilingDataAccessPluginStart;
 }

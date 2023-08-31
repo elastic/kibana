@@ -9,11 +9,11 @@ import {
   EmbeddableInput,
   EmbeddableFactoryDefinition,
 } from '@kbn/embeddable-plugin/public';
+import { ElasticFlameGraph } from '@kbn/profiling-data-access-plugin/common/flamegraph';
 import { HelloWorld, HELLO_WORLD } from './hello_world';
 
 interface HelloWorldInput {
-  rangeFrom: string;
-  rangeTo: string;
+  data?: ElasticFlameGraph;
 }
 
 export type HelloWorldEmbeddableInput = HelloWorldInput & EmbeddableInput;
