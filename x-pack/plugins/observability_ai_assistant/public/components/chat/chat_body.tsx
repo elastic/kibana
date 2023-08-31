@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useEffect, useRef } from 'react';
+import { last } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,22 +16,25 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import React, { useEffect, useRef } from 'react';
-import { last } from 'lodash';
 import type { Message } from '../../../common/types';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { useTimeline } from '../../hooks/use_timeline';
+import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
+import { ExperimentalFeatureBanner } from './experimental_feature_banner';
+import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
+import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 
 const containerClassName = css`
   max-height: 100%;
-  max-width: 800px;
+  max-width: ${1200 - 250}px; // page template max width - conversation list width.
 `;
 
 const timelineClassName = css`
@@ -40,6 +45,11 @@ const loadingSpinnerContainerClassName = css`
   align-self: center;
 `;
 
+const incorrectLicenseContainer = css`
+  height: 100%;
+  padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingMedium};
+`;
+
 export function ChatBody({
   title,
   loading,
@@ -47,7 +57,9 @@ export function ChatBody({
   connectors,
   knowledgeBase,
   connectorsManagementHref,
+  conversationId,
   currentUser,
+  startedFrom,
   onChatUpdate,
   onChatComplete,
   onSaveTitle,
@@ -60,10 +72,14 @@ export function ChatBody({
   connectorsManagementHref: string;
   conversationId?: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  startedFrom?: StartedFrom;
   onChatUpdate: (messages: Message[]) => void;
   onChatComplete: (messages: Message[]) => void;
   onSaveTitle: (title: string) => void;
 }) {
+  const license = useLicense();
+  const hasCorrectLicense = license?.hasAtLeast('enterprise');
+
   const chatService = useObservabilityAIAssistantChatService();
 
   const timeline = useTimeline({
@@ -71,6 +87,7 @@ export function ChatBody({
     connectors,
     currentUser,
     chatService,
+    startedFrom,
     onChatUpdate,
     onChatComplete,
   });
@@ -126,7 +143,24 @@ export function ChatBody({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timelineContainerRef.current]);
 
-  if (connectors.loading || knowledgeBase.status.loading) {
+  if (!hasCorrectLicense && !conversationId) {
+    footer = (
+      <>
+        <EuiFlexItem grow className={incorrectLicenseContainer}>
+          <IncorrectLicensePanel />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHorizontalRule margin="none" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+            <ChatPromptEditor loading={isLoading} disabled onSubmit={timeline.onSubmit} />
+            <EuiSpacer size="s" />
+          </EuiPanel>
+        </EuiFlexItem>
+      </>
+    );
+  } else if (connectors.loading || knowledgeBase.status.loading) {
     footer = (
       <EuiFlexItem className={loadingSpinnerContainerClassName}>
         <EuiLoadingSpinner />
@@ -162,7 +196,7 @@ export function ChatBody({
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
               loading={isLoading}
-              disabled={!connectors.selectedConnector}
+              disabled={!connectors.selectedConnector || !hasCorrectLicense}
               onSubmit={timeline.onSubmit}
             />
             <EuiSpacer size="s" />
@@ -175,11 +209,15 @@ export function ChatBody({
   return (
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
       <EuiFlexItem grow={false}>
+        <ExperimentalFeatureBanner />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <ChatHeader
-          title={title}
           connectors={connectors}
           knowledgeBase={knowledgeBase}
+          licenseInvalid={!hasCorrectLicense && !conversationId}
           loading={loading}
+          title={title}
           onSaveTitle={onSaveTitle}
         />
       </EuiFlexItem>

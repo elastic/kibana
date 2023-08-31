@@ -42,6 +42,7 @@ import { PROMPT_CONTEXTS } from '../assistant/content/prompt_contexts';
 import { BASE_SECURITY_QUICK_PROMPTS } from '../assistant/content/quick_prompts';
 import { BASE_SECURITY_SYSTEM_PROMPTS } from '../assistant/content/prompts/system';
 import { useAnonymizationStore } from '../assistant/use_anonymization_store';
+import { useAssistantAvailability } from '../assistant/use_assistant_availability';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -70,6 +71,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
     upselling,
   } = services;
 
+  const assistantAvailability = useAssistantAvailability();
   const { conversations, setConversations } = useConversationStore();
   const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
     useAnonymizationStore();
@@ -96,6 +98,8 @@ const StartAppComponent: FC<StartAppComponent> = ({
                 <AssistantProvider
                   actionTypeRegistry={actionTypeRegistry}
                   augmentMessageCodeBlocks={augmentMessageCodeBlocks}
+                  assistantAvailability={assistantAvailability}
+                  assistantLangChain={false}
                   assistantTelemetry={assistantTelemetry}
                   defaultAllow={defaultAllow}
                   defaultAllowReplacement={defaultAllowReplacement}

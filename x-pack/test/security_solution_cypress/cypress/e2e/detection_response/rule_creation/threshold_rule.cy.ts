@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getIndexPatterns, getNewThresholdRule } from '../../../objects/rule';
 
@@ -45,7 +43,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { getDetails } from '../../../tasks/rule_details';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
@@ -55,13 +53,12 @@ import {
   fillScheduleRuleAndContinue,
   selectThresholdRuleType,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Detection rules, threshold', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Detection rules, threshold', { tags: ['@ess', '@brokenInServerless'] }, () => {
   const rule = getNewThresholdRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');

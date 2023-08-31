@@ -19,6 +19,7 @@ export {
   KBN_P12_PATH,
   KBN_P12_PASSWORD,
 } from './src/certs';
+export * from './src/dev_service_account';
 export * from './src/axios';
 export * from './src/plugin_list';
 export * from './src/streams';

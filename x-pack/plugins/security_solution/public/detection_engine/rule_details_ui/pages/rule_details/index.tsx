@@ -19,10 +19,9 @@ import {
   EuiWindowEvent,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { i18n as i18nTranslate } from '@kbn/i18n';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { noop, omit } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
@@ -112,13 +111,14 @@ import {
   RuleStatusFailedCallOut,
   ruleStatusI18n,
 } from '../../../../detections/components/rules/rule_execution_status';
-import { ExecutionEventsTable, useRuleExecutionSettings } from '../../../rule_monitoring';
+import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 
-import * as detectionI18n from '../../../../detections/pages/detection_engine/translations';
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 import { RuleDetailsContextProvider } from './rule_details_context';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
@@ -131,7 +131,6 @@ import { AlertsTableFilterGroup } from '../../../../detections/components/alerts
 import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
-import type { NavTab } from '../../../../common/components/navigation/types';
 import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
@@ -141,6 +140,9 @@ import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+// eslint-disable-next-line no-restricted-imports
+import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
+import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -157,22 +159,6 @@ const StyledFullHeightContainer = styled.div`
 const StyledMinHeightTabContainer = styled.div`
   min-height: 800px;
 `;
-
-export enum RuleDetailTabs {
-  alerts = 'alerts',
-  exceptions = 'rule_exceptions',
-  endpointExceptions = 'endpoint_exceptions',
-  executionResults = 'execution_results',
-  executionEvents = 'execution_events',
-}
-
-export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
-  [RuleDetailTabs.alerts]: detectionI18n.ALERT,
-  [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
-  [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
-  [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
-  [RuleDetailTabs.executionEvents]: i18n.EXECUTION_EVENTS_TAB,
-};
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
@@ -256,43 +242,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     await startMlJobs(rule?.machine_learning_job_id);
   }, [rule, startMlJobs]);
 
-  const ruleDetailTabs = useMemo(
-    (): Record<RuleDetailTabs, NavTab> => ({
-      [RuleDetailTabs.alerts]: {
-        id: RuleDetailTabs.alerts,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.alerts],
-        disabled: false,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.alerts}`,
-      },
-      [RuleDetailTabs.exceptions]: {
-        id: RuleDetailTabs.exceptions,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.exceptions],
-        disabled: rule == null,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.exceptions}`,
-      },
-      [RuleDetailTabs.endpointExceptions]: {
-        id: RuleDetailTabs.endpointExceptions,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.endpointExceptions],
-        disabled: rule == null,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.endpointExceptions}`,
-      },
-      [RuleDetailTabs.executionResults]: {
-        id: RuleDetailTabs.executionResults,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionResults],
-        disabled: !isExistingRule,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionResults}`,
-      },
-      [RuleDetailTabs.executionEvents]: {
-        id: RuleDetailTabs.executionEvents,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionEvents],
-        disabled: !isExistingRule,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`,
-      },
-    }),
-    [isExistingRule, rule, ruleId]
-  );
-
-  const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
+  const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, hasIndexRead });
 
   const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
     useBoolState();
@@ -371,74 +321,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
   }, [maybeRule]);
 
-  useEffect(() => {
-    if (rule) {
-      const outcome = rule.outcome;
-      if (spacesApi && outcome === 'aliasMatch') {
-        // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
-        const path = `rules/id/${rule.id}${window.location.search}${window.location.hash}`;
-        spacesApi.ui.redirectLegacyUrl({
-          path,
-          aliasPurpose: rule.alias_purpose,
-          objectNoun: i18nTranslate.translate(
-            'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
-            { defaultMessage: 'rule' }
-          ),
-        });
-      }
-    }
-  }, [rule, spacesApi]);
-
-  const getLegacyUrlConflictCallout = useMemo(() => {
-    if (rule?.alias_target_id != null && spacesApi && rule.outcome === 'conflict') {
-      const aliasTargetId = rule.alias_target_id;
-      // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
-      // callout with a warning for the user, and provide a way for them to navigate to the other rule.
-      const otherRulePath = `rules/id/${aliasTargetId}${window.location.search}${window.location.hash}`;
-      return (
-        <>
-          <EuiSpacer />
-          {spacesApi.ui.components.getLegacyUrlConflict({
-            objectNoun: i18nTranslate.translate(
-              'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
-              {
-                defaultMessage: 'rule',
-              }
-            ),
-            currentObjectId: rule.id,
-            otherObjectId: aliasTargetId,
-            otherObjectPath: otherRulePath,
-          })}
-        </>
-      );
-    }
-    return null;
-  }, [rule, spacesApi]);
-
-  const ruleExecutionSettings = useRuleExecutionSettings();
-
-  useEffect(() => {
-    const hiddenTabs = [];
-
-    if (!hasIndexRead) {
-      hiddenTabs.push(RuleDetailTabs.alerts);
-    }
-    if (!ruleExecutionSettings.extendedLogging.isEnabled) {
-      hiddenTabs.push(RuleDetailTabs.executionEvents);
-    }
-    if (rule != null) {
-      const hasEndpointList = (rule.exceptions_list ?? []).some(
-        (list) => list.type === ExceptionListTypeEnum.ENDPOINT
-      );
-      if (!hasEndpointList) {
-        hiddenTabs.push(RuleDetailTabs.endpointExceptions);
-      }
-    }
-
-    const tabs = omit<Record<RuleDetailTabs, NavTab>>(hiddenTabs, ruleDetailTabs);
-
-    setTabs(tabs);
-  }, [hasIndexRead, rule, ruleDetailTabs, ruleExecutionSettings]);
+  useLegacyUrlRedirect({ rule, spacesApi });
 
   const showUpdating = useMemo(
     () => isLoadingIndexPattern || isAlertsLoading || loading,
@@ -527,7 +410,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         ) : (
           <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
             <EuiButtonIcon
-              data-test-subj="refreshButton"
+              data-test-subj="ruleLastExecutionStatusRefreshButton"
               color="primary"
               onClick={refreshRule}
               iconType="refresh"
@@ -769,7 +652,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexGroup>
               </HeaderPage>
               {ruleError}
-              {getLegacyUrlConflictCallout}
+              <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
               <EuiSpacer />
               <EuiFlexGroup>
                 <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>

@@ -50,13 +50,15 @@ export {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SAVED_OBJECT_TYPES,
   CASE_COMMENT_SAVED_OBJECT,
+  CASES_CONNECTORS_CAPABILITY,
+  GET_CONNECTORS_CONFIGURE_API_TAG,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';
 export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
 export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
 export { StatusAll } from './ui/types';
-export { createUICapabilities } from './utils/capabilities';
-export { getApiTags } from './utils/api_tags';
+export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
+export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
 export type { SingleCaseMetricsResponse, CasesMetricsResponse } from './types/api';

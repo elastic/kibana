@@ -37,7 +37,7 @@ import {
   LIST_ITEM_URL,
   LIST_PRIVILEGES_URL,
   LIST_URL,
-  FIND_LISTS_BY_SIZE,
+  INTERNAL_FIND_LISTS_BY_SIZE,
 } from '@kbn/securitysolution-list-constants';
 import { toError, toPromise } from '../fp_utils';
 
@@ -115,8 +115,9 @@ const findListsBySize = async ({
   per_page,
   signal,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListsBySizeSchema> => {
-  return http.fetch(`${FIND_LISTS_BY_SIZE}`, {
+  return http.fetch(`${INTERNAL_FIND_LISTS_BY_SIZE}`, {
     method: 'GET',
+    version: '1',
     query: {
       cursor,
       page,
@@ -272,6 +273,7 @@ export { readListIndexWithValidation as readListIndex };
 // TODO add types and validation
 export const readListPrivileges = async ({ http, signal }: ApiParams): Promise<unknown> =>
   http.fetch<unknown>(LIST_PRIVILEGES_URL, {
+    version: '2023-10-31',
     method: 'GET',
     signal,
   });
