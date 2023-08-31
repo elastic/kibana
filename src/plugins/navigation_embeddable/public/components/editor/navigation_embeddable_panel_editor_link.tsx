@@ -24,6 +24,7 @@ import {
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { NavigationLinkInfo } from '../../embeddable/types';
+import { validateUrl } from '../external_link/external_link_tools';
 import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
 import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
 import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
@@ -42,27 +43,36 @@ export const NavigationEmbeddablePanelEditorLink = ({
   parentDashboard?: DashboardContainer;
   dragHandleProps?: DraggableProvidedDragHandleProps;
 }) => {
-  const [dashboardError, setDashboardError] = useState<Error | undefined>();
+  const [destinationError, setDestinationError] = useState<Error | undefined>();
   const parentDashboardTitle = parentDashboard?.select((state) => state.explicitInput.title);
   const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
 
   const { value: linkLabel, loading: linkLabelLoading } = useAsync(async () => {
+    if (!link.destination) {
+      setDestinationError(DashboardLinkStrings.getDashboardErrorLabel());
+      return;
+    }
+
     if (link.type === DASHBOARD_LINK_TYPE) {
       if (parentDashboardId === link.destination) {
         return link.label || parentDashboardTitle;
       } else {
         const dashboard = await fetchDashboard(link.destination)
           .then((result) => {
-            setDashboardError(undefined);
+            setDestinationError(undefined);
             return result;
           })
-          .catch((error) => setDashboardError(error));
+          .catch((error) => setDestinationError(error));
         return (
           link.label ||
           (dashboard ? dashboard.attributes.title : DashboardLinkStrings.getDashboardErrorLabel())
         );
       }
     } else {
+      const { valid, message } = validateUrl(link.destination);
+      if (!valid && message) {
+        setDestinationError(new Error(message));
+      }
       return link.label || link.destination;
     }
   }, [link]);
@@ -72,10 +82,10 @@ export const NavigationEmbeddablePanelEditorLink = ({
       <EuiFlexGroup tabIndex={0} gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon
-            type={dashboardError ? 'warning' : NavigationLinkInfo[link.type].icon}
-            color={dashboardError ? 'warning' : 'text'}
+            type={destinationError ? 'warning' : NavigationLinkInfo[link.type].icon}
+            color={destinationError ? 'warning' : 'text'}
             aria-label={
-              dashboardError
+              destinationError
                 ? NavEmbeddableStrings.editor.panelEditor.getBrokenDashboardLinkAriaLabel()
                 : NavigationLinkInfo[link.type].type
             }
@@ -102,24 +112,28 @@ export const NavigationEmbeddablePanelEditorLink = ({
     );
 
     return () =>
-      dashboardError ? (
+      destinationError ? (
         <EuiToolTip
-          content={dashboardError.message}
-          title={DashboardLinkStrings.getDashboardErrorLabel()}
+          content={destinationError.message}
+          title={
+            link.type === DASHBOARD_LINK_TYPE
+              ? DashboardLinkStrings.getDashboardErrorLabel()
+              : undefined // the messages thrown by an invalid URL are clear enough without an extra title
+          }
         >
           {labelText}
         </EuiToolTip>
       ) : (
         labelText
       );
-  }, [linkLabel, linkLabelLoading, dashboardError, link.label, link.type]);
+  }, [linkLabel, linkLabelLoading, destinationError, link.label, link.type]);
 
   return (
     <EuiPanel
       hasBorder
       hasShadow={false}
-      color={dashboardError ? 'warning' : 'plain'}
-      className={`navEmbeddableLinkPanel ${dashboardError ? 'linkError' : ''}`}
+      color={destinationError ? 'warning' : 'plain'}
+      className={`navEmbeddableLinkPanel ${destinationError ? 'linkError' : ''}`}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>

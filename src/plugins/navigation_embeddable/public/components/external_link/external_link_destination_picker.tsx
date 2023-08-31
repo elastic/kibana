@@ -11,12 +11,9 @@ import useUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useState } from 'react';
 
 import { EuiFieldText } from '@elastic/eui';
-import { urlDrilldownValidateUrl } from '@kbn/ui-actions-enhanced-plugin/public';
 
 import { ExternalLinkStrings } from './external_link_strings';
-import { coreServices } from '../../services/kibana_services';
-
-class DisallowedUrlError extends Error {}
+import { validateUrl } from './external_link_tools';
 
 export const ExternalLinkDestinationPicker = ({
   onDestinationPicked,
@@ -33,38 +30,13 @@ export const ExternalLinkDestinationPicker = ({
   const [validUrl, setValidUrl] = useState<boolean>(true);
   const [currentUrl, setCurrentUrl] = useState<string>(initialSelection ?? '');
 
-  const validateUrl = useCallback(
-    (url: string) => {
-      try {
-        const allowedUrl = coreServices.http.externalUrl.validateUrl(url);
-        if (allowedUrl === null) {
-          throw new DisallowedUrlError();
-        }
-        const validatedUrl = urlDrilldownValidateUrl(url);
-        if (validatedUrl.isValid) {
-          setDestinationError(undefined);
-          return true;
-        } else {
-          throw new Error();
-        }
-      } catch (error) {
-        setDestinationError(
-          error instanceof DisallowedUrlError
-            ? ExternalLinkStrings.getDisallowedUrlError()
-            : ExternalLinkStrings.getUrlFormatError()
-        );
-        return false;
-      }
-    },
-    [setDestinationError]
-  );
-
   useMount(() => {
     if (initialSelection) {
-      const isValid = validateUrl(initialSelection);
+      const { valid, message } = validateUrl(initialSelection);
 
-      if (!isValid) {
+      if (!valid) {
         setValidUrl(false);
+        setDestinationError(message);
         onDestinationPicked(undefined); // prevent re-saving an invalid link
       } else {
         onDestinationPicked(initialSelection);
@@ -96,12 +68,14 @@ export const ExternalLinkDestinationPicker = ({
             return;
           }
 
-          const isValid = validateUrl(url);
-          setValidUrl(isValid);
-          if (isValid) {
+          const { valid, message } = validateUrl(url);
+          setValidUrl(valid);
+          if (valid) {
             onDestinationPicked(url);
+            setDestinationError(undefined);
           } else {
             onDestinationPicked(undefined);
+            setDestinationError(message);
           }
         }}
       />

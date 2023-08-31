@@ -16,11 +16,7 @@ import {
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '.';
-import {
-  EXTERNAL_LINK_SUPPORTED_PROTOCOLS,
-  NAV_HORIZONTAL_LAYOUT,
-  NAV_VERTICAL_LAYOUT,
-} from './constants';
+import { NAV_HORIZONTAL_LAYOUT, NAV_VERTICAL_LAYOUT } from './constants';
 
 const baseNavigationEmbeddableLinkSchema = {
   id: schema.string(),
@@ -47,7 +43,7 @@ const dashboardLinkSchema = schema.object({
 const externalLinkSchema = schema.object({
   ...baseNavigationEmbeddableLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
-  destination: schema.uri({ scheme: EXTERNAL_LINK_SUPPORTED_PROTOCOLS }),
+  destination: schema.string(),
   options: schema.maybe(
     schema.object(
       {

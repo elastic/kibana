@@ -149,6 +149,14 @@ export const DashboardLinkComponent = ({
       color="text"
       {...onClickProps}
       id={`dashboardLink--${link.id}`}
+      showToolTip={Boolean(error)}
+      toolTipProps={{
+        title: tooltipTitle,
+        content: tooltipMessage,
+        position: layout === NAV_VERTICAL_LAYOUT ? 'right' : 'bottom',
+        repositionOnScroll: true,
+        delay: 'long',
+      }}
       iconType={error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
       isDisabled={Boolean(error) || loadingOnClickProps}
@@ -157,21 +165,7 @@ export const DashboardLinkComponent = ({
         dashboardLinkError: Boolean(error),
         'dashboardLinkError--noLabel': !link.label,
       })}
-      label={
-        <EuiToolTip
-          delay="long"
-          display="block"
-          repositionOnScroll
-          title={tooltipTitle}
-          content={tooltipMessage}
-          position={layout === NAV_VERTICAL_LAYOUT ? 'right' : 'bottom'}
-        >
-          {/* Setting `title=""` so that the native browser tooltip is disabled */}
-          <div className="eui-textTruncate" title="">
-            {linkLabel}
-          </div>
-        </EuiToolTip>
-      }
+      label={linkLabel}
     />
   );
 };
