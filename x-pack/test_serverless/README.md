@@ -133,3 +133,21 @@ node scripts/functional_tests_server.js --config test_serverless/api_integration
 
 node scripts/functional_test_runner.js --config test_serverless/api_integration/test_suites/search/config.ts
 ```
+
+## Skipping tests for MKI run
+The tests that are listed in the the regular `config.ts` generally should work in both Kibana CI and MKI. However some tests might not work properly against MKI projects by design.
+Tag the tests with `skipMKI` to be excluded for MKI run. It works only for the `describe` block:
+```
+describe("my test suite", async function() {
+    this.tags(['skipMKI']);
+    ...
+});
+```
+
+If you are running tests against MKI locally, make sure to add `--exclude-tag=skipMKI` to your FTR command.
+
+## Run tests on MKI
+There is no need to start servers locally, you just need to create MKI project and copy urls for Elasticsearch and Kibana. Make sure to update urls with username/password and port 443 for Elasticsearch. FTR has no control over MKI and can't update your projects so make sure your `config.ts` does not specify any custom arguments for Kibana or Elasticsearch. Otherwise, it will be ignored. You can run the tests from the `x-pack` directory:
+```
+TEST_CLOUD=1 TEST_ES_URL=<es_hostname> TEST_KIBANA_URL=<kibana_hostname> node scripts/functional_test_runner --config test_serverless/api_integration/test_suites/search/config.ts
+```
