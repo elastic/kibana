@@ -23,14 +23,15 @@ export function extractReferences({
   const { links } = attributes;
   const extractedReferences: Reference[] = [];
   links.forEach((link) => {
-    if (link.type === DASHBOARD_LINK_TYPE) {
+    if (link.type === DASHBOARD_LINK_TYPE && link.destination) {
       const refName = `link_${link.id}_dashboard`;
+      link.destinationRefName = refName;
       extractedReferences.push({
         name: refName,
         type: 'dashboard',
         id: link.destination,
       });
-      link.destination = refName;
+      delete link.destination;
     }
   });
 
@@ -64,9 +65,10 @@ export function injectReferences({
 
   const { links } = attributes;
   links.forEach((link) => {
-    if (link.type === DASHBOARD_LINK_TYPE) {
-      const reference = findReference(link.destination, references);
+    if (link.type === DASHBOARD_LINK_TYPE && link.destinationRefName) {
+      const reference = findReference(link.destinationRefName, references);
       link.destination = reference.id;
+      delete link.destinationRefName;
     }
   });
 

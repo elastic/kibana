@@ -52,7 +52,7 @@ test('Should update state with refNames with by-value embeddable state', () => {
           {
             type: 'dashboardLink',
             id: 'fc7b8c70-2eb9-40b2-936d-457d1721a438',
-            destination: 'link_fc7b8c70-2eb9-40b2-936d-457d1721a438_dashboard',
+            destinationRefName: 'link_fc7b8c70-2eb9-40b2-936d-457d1721a438_dashboard',
             order: 0,
           },
         ],

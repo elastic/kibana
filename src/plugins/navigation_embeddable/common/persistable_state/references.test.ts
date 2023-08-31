@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  DASHBOARD_LINK_TYPE,
-  EXTERNAL_LINK_TYPE,
-  type NavigationLinkType,
-} from '../content_management';
+import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../content_management';
 import { extractReferences, injectReferences } from './references';
 
 describe('extractReferences', () => {
@@ -32,19 +28,19 @@ describe('extractReferences', () => {
       links: [
         {
           id: 'fb1b3fc7-6e12-4542-bcf5-c61ad77241c5',
-          type: DASHBOARD_LINK_TYPE as NavigationLinkType,
+          type: DASHBOARD_LINK_TYPE as typeof DASHBOARD_LINK_TYPE,
           destination: '19e149f0-e95e-404b-b6f8-fc751317c6be',
           order: 0,
         },
         {
           id: '4d5cd000-5632-4d3a-ad41-11d7800ff2aa',
-          type: EXTERNAL_LINK_TYPE as NavigationLinkType,
+          type: EXTERNAL_LINK_TYPE as typeof EXTERNAL_LINK_TYPE,
           destination: 'https://example.com',
           order: 1,
         },
         {
           id: '1409fabb-1d2b-49c2-a2dc-705bd8fabd0c',
-          type: DASHBOARD_LINK_TYPE as NavigationLinkType,
+          type: DASHBOARD_LINK_TYPE as typeof DASHBOARD_LINK_TYPE,
           destination: '39555f99-a3b8-4210-b1ef-fa0fa86fa3da',
           order: 2,
         },
@@ -57,7 +53,7 @@ describe('extractReferences', () => {
           {
             id: 'fb1b3fc7-6e12-4542-bcf5-c61ad77241c5',
             type: 'dashboardLink',
-            destination: 'link_fb1b3fc7-6e12-4542-bcf5-c61ad77241c5_dashboard',
+            destinationRefName: 'link_fb1b3fc7-6e12-4542-bcf5-c61ad77241c5_dashboard',
             order: 0,
           },
           {
@@ -69,7 +65,7 @@ describe('extractReferences', () => {
           {
             id: '1409fabb-1d2b-49c2-a2dc-705bd8fabd0c',
             type: 'dashboardLink',
-            destination: 'link_1409fabb-1d2b-49c2-a2dc-705bd8fabd0c_dashboard',
+            destinationRefName: 'link_1409fabb-1d2b-49c2-a2dc-705bd8fabd0c_dashboard',
             order: 2,
           },
         ],
@@ -108,20 +104,20 @@ describe('injectReferences', () => {
       links: [
         {
           id: 'fb1b3fc7-6e12-4542-bcf5-c61ad77241c5',
-          type: DASHBOARD_LINK_TYPE as NavigationLinkType,
-          destination: 'link_fb1b3fc7-6e12-4542-bcf5-c61ad77241c5_dashboard',
+          type: DASHBOARD_LINK_TYPE as typeof DASHBOARD_LINK_TYPE,
+          destinationRefName: 'link_fb1b3fc7-6e12-4542-bcf5-c61ad77241c5_dashboard',
           order: 0,
         },
         {
           id: '4d5cd000-5632-4d3a-ad41-11d7800ff2aa',
-          type: EXTERNAL_LINK_TYPE as NavigationLinkType,
+          type: EXTERNAL_LINK_TYPE as typeof EXTERNAL_LINK_TYPE,
           destination: 'https://example.com',
           order: 1,
         },
         {
           id: '1409fabb-1d2b-49c2-a2dc-705bd8fabd0c',
-          type: DASHBOARD_LINK_TYPE as NavigationLinkType,
-          destination: 'link_1409fabb-1d2b-49c2-a2dc-705bd8fabd0c_dashboard',
+          type: DASHBOARD_LINK_TYPE as typeof DASHBOARD_LINK_TYPE,
+          destinationRefName: 'link_1409fabb-1d2b-49c2-a2dc-705bd8fabd0c_dashboard',
           order: 2,
         },
       ],
