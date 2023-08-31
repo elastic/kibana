@@ -7,13 +7,15 @@
 
 import { SLO_RESOURCES_VERSION } from '../constants';
 
-export const getSLOSummarySettingsTemplate = (name: string) => ({
+export const getSLOSummarySettingsTemplate = (name: string, isServerless: boolean = false) => ({
   name,
   template: {
-    settings: {
-      auto_expand_replicas: '0-1',
-      hidden: true,
-    },
+    ...(!isServerless && {
+      settings: {
+        auto_expand_replicas: '0-1',
+        hidden: true,
+      },
+    }),
   },
   _meta: {
     description: 'SLO summary settings template',

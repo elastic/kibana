@@ -272,7 +272,11 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
       const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
 
-      const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
+      const sloResourceInstaller = new DefaultResourceInstaller(
+        esInternalClient,
+        this.logger,
+        config
+      );
       const sloSummaryInstaller = new DefaultSummaryTransformInstaller(
         esInternalClient,
         this.logger

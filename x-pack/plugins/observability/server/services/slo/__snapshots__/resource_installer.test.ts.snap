@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resourceInstaller when the common resources are not installed yet uses empty settings for index templates on serverless 1`] = `
+Array [
+  Object {
+    "_meta": Object {
+      "description": "Settings for SLO rollup data",
+      "managed": true,
+      "managed_by": "observability",
+      "version": 2,
+    },
+    "name": ".slo-observability.sli-settings",
+    "template": Object {},
+  },
+]
+`;
+
+exports[`resourceInstaller when the common resources are not installed yet uses empty settings for index templates on serverless 2`] = `
+Array [
+  Object {
+    "_meta": Object {
+      "description": "SLO summary settings template",
+      "managed": true,
+      "managed_by": "observability",
+      "version": 2,
+    },
+    "name": ".slo-observability.summary-settings",
+    "template": Object {},
+  },
+]
+`;

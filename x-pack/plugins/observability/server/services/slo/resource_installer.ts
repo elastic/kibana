@@ -11,6 +11,7 @@ import type {
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ObservabilityConfig } from '../..';
 import { getSLOMappingsTemplate } from '../../assets/component_templates/slo_mappings_template';
 import { getSLOSettingsTemplate } from '../../assets/component_templates/slo_settings_template';
 import { getSLOSummaryMappingsTemplate } from '../../assets/component_templates/slo_summary_mappings_template';
@@ -43,7 +44,11 @@ export interface ResourceInstaller {
 }
 
 export class DefaultResourceInstaller implements ResourceInstaller {
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger: Logger,
+    private config: ObservabilityConfig
+  ) {}
 
   public async ensureCommonResourcesInstalled(): Promise<void> {
     const alreadyInstalled = await this.areResourcesAlreadyInstalled();
@@ -53,6 +58,8 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       return;
     }
 
+    const isServerless = this.config.serverless.enabled;
+
     try {
       this.logger.info('Installing SLO shared resources');
       await Promise.all([
@@ -60,13 +67,13 @@ export class DefaultResourceInstaller implements ResourceInstaller {
           getSLOMappingsTemplate(SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME)
         ),
         this.createOrUpdateComponentTemplate(
-          getSLOSettingsTemplate(SLO_COMPONENT_TEMPLATE_SETTINGS_NAME)
+          getSLOSettingsTemplate(SLO_COMPONENT_TEMPLATE_SETTINGS_NAME, isServerless)
         ),
         this.createOrUpdateComponentTemplate(
           getSLOSummaryMappingsTemplate(SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME)
         ),
         this.createOrUpdateComponentTemplate(
-          getSLOSummarySettingsTemplate(SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME)
+          getSLOSummarySettingsTemplate(SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME, isServerless)
         ),
       ]);
 

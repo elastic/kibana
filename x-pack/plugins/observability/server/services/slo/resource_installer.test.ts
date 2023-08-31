@@ -7,6 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { ObservabilityConfig } from '../..';
 import {
   SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
@@ -20,12 +21,19 @@ import {
 } from '../../assets/constants';
 import { DefaultResourceInstaller } from './resource_installer';
 
+const traditionalConfig: Partial<ObservabilityConfig> = { serverless: { enabled: false } };
+const serverlessConfig: Partial<ObservabilityConfig> = { serverless: { enabled: true } };
+
 describe('resourceInstaller', () => {
   describe('when the common resources are not installed yet', () => {
     it('installs the common resources', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
       mockClusterClient.indices.getIndexTemplate.mockResponseOnce({ index_templates: [] });
-      const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+      const installer = new DefaultResourceInstaller(
+        mockClusterClient,
+        loggerMock.create(),
+        traditionalConfig as ObservabilityConfig
+      );
 
       await installer.ensureCommonResourcesInstalled();
 
@@ -66,6 +74,22 @@ describe('resourceInstaller', () => {
         expect.objectContaining({ id: SLO_SUMMARY_INGEST_PIPELINE_NAME })
       );
     });
+
+    it('uses empty settings for index templates on serverless', async () => {
+      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      mockClusterClient.indices.getIndexTemplate.mockResponseOnce({ index_templates: [] });
+      const installer = new DefaultResourceInstaller(
+        mockClusterClient,
+        loggerMock.create(),
+        serverlessConfig as ObservabilityConfig
+      );
+
+      await installer.ensureCommonResourcesInstalled();
+
+      // calls 1 and 3 correspond to the index settings
+      expect(mockClusterClient.cluster.putComponentTemplate.mock.calls[1]).toMatchSnapshot();
+      expect(mockClusterClient.cluster.putComponentTemplate.mock.calls[3]).toMatchSnapshot();
+    });
   });
 
   describe('when the common resources are already installed', () => {
@@ -103,7 +127,11 @@ describe('resourceInstaller', () => {
         // @ts-ignore _meta not typed properly
         [SLO_SUMMARY_INGEST_PIPELINE_NAME]: { _meta: { version: SLO_RESOURCES_VERSION } },
       });
-      const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+      const installer = new DefaultResourceInstaller(
+        mockClusterClient,
+        loggerMock.create(),
+        traditionalConfig as ObservabilityConfig
+      );
 
       await installer.ensureCommonResourcesInstalled();
 
