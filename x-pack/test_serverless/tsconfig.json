@@ -50,6 +50,8 @@
     "@kbn/security-api-integration-helpers",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-plugin",
+    "@kbn/dev-utils",
     "@kbn/bfetch-plugin",
+    "@kbn/rison",
   ]
 }

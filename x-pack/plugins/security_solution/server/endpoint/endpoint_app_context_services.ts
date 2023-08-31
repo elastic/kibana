@@ -22,7 +22,6 @@ import type {
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
-import type { AppFeatures } from '../lib/app_features';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -48,6 +47,7 @@ import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ActionCreateService } from './services/actions/create/types';
+import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -75,7 +75,7 @@ export interface EndpointAppContextServiceStartContract {
   actionCreateService: ActionCreateService | undefined;
   cloud: CloudSetup;
   esClient: ElasticsearchClient;
-  appFeatures: AppFeatures;
+  appFeaturesService: AppFeaturesService;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
@@ -114,7 +114,7 @@ export class EndpointAppContextService {
         featureUsageService,
         endpointMetadataService,
         esClient,
-        appFeatures,
+        appFeaturesService,
         savedObjectsClient,
       } = dependencies;
 
@@ -128,7 +128,7 @@ export class EndpointAppContextService {
           licenseService,
           exceptionListsClient,
           cloud,
-          appFeatures
+          appFeaturesService
         )
       );
 
@@ -146,7 +146,7 @@ export class EndpointAppContextService {
           endpointMetadataService,
           cloud,
           esClient,
-          appFeatures
+          appFeaturesService
         )
       );
 
