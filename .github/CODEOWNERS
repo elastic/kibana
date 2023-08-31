@@ -544,6 +544,7 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 src/plugins/presentation_util @elastic/kibana-presentation
+x-pack/plugins/profiling_data_access @elastic/profiling-ui
 x-pack/plugins/profiling @elastic/profiling-ui
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 packages/kbn-react-field @elastic/kibana-data-discovery
