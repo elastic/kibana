@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { ErrorType } from '@kbn/ml-error-utils';
 import { type MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isDefined } from '@kbn/ml-is-defined';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -25,7 +26,7 @@ import {
   updateDeploymentParamsSchema,
   createIngestPipelineSchema,
 } from './schemas/inference_schema';
-import { TrainedModelConfigResponse } from '../../common/types/trained_models';
+import { PipelineDefinition, TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
@@ -100,13 +101,13 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
                   ...Object.values(modelDeploymentsMap).flat(),
                 ])
               );
+              const modelsClient = modelsProvider(client);
 
-              const modelsManager = modelsProvider(client);
               const modelsPipelinesAndIndices = await Promise.all(
                 modelIdsAndAliases.map(async (modelIdAndAlias) => {
                   return {
                     modelIdAndAlias,
-                    result: await modelsManager.getModelsPipelinesAndIndicesMap(modelIdAndAlias),
+                    result: await modelsClient.getModelsPipelinesAndIndicesMap(modelIdAndAlias),
                   };
                 })
               );
@@ -114,22 +115,34 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
               for (const model of result) {
                 const modelAliases = model.metadata?.model_aliases ?? [];
                 const modelMap = modelsPipelinesAndIndices.find(
-                  (d) =>
-                    d.modelIdAndAlias === model.model_id ||
-                    modelAliases.find((alias) => alias === d.modelIdAndAlias)
+                  (d) => d.modelIdAndAlias === model.model_id
                 )?.result;
-                if (modelMap) {
-                  const pipelinesResponse = modelMap.ingestPipelines;
-                  model.pipelines = {
-                    ...(pipelinesResponse.get(model.model_id) ?? {}),
-                    ...(model.metadata?.model_aliases ?? []).reduce((acc, alias) => {
-                      return Object.assign(acc, pipelinesResponse.get(alias) ?? {});
-                    }, {}),
-                    ...(modelDeploymentsMap[model.model_id] ?? []).reduce((acc, deploymentId) => {
-                      return Object.assign(acc, pipelinesResponse.get(deploymentId) ?? {});
-                    }, {}),
-                  };
 
+                const allRelatedModels = modelsPipelinesAndIndices
+                  .filter(
+                    (m) =>
+                      [
+                        model.model_id,
+                        ...modelAliases,
+                        ...(modelDeploymentsMap[model.model_id] ?? []),
+                      ].findIndex((alias) => alias === m.modelIdAndAlias) > -1
+                  )
+                  .map((r) => r?.result)
+                  .filter(isDefined);
+                const ingestPipelinesFromModelAliases = allRelatedModels
+                  .map((r) => r?.ingestPipelines)
+                  .filter(isDefined) as Array<Map<string, Record<string, PipelineDefinition>>>;
+
+                model.pipelines = ingestPipelinesFromModelAliases.reduce<
+                  Record<string, PipelineDefinition>
+                >((allPipelines, pipelineDefinitions) => {
+                  for (const [, value] of pipelineDefinitions?.entries()) {
+                    allPipelines = { ...allPipelines, ...(value ?? {}) };
+                  }
+                  return allPipelines;
+                }, {});
+
+                if (modelMap) {
                   model.indices = modelMap.indices;
                 }
               }

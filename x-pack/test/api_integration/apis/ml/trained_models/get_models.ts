@@ -47,8 +47,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.length).to.eql(6);
 
       const sampleModel = body.find((v: any) => v.model_id === 'dfa_regression_model_n_0');
+
       // @todo: verify why is this originally 2
-      expect(Object.keys(sampleModel.pipelines).length).to.eql(1);
+      expect(Object.keys(sampleModel.pipelines).length).to.eql(2);
     });
 
     it('returns models without pipeline in case user does not have required permission', async () => {
