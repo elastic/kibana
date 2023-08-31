@@ -37,7 +37,16 @@
     "@kbn/alerting-plugin",
     "@kbn/features-plugin",
     "@kbn/react-kibana-context-theme",
-    "@kbn/i18n-react"
+    "@kbn/lens-embeddable-utils",
+    "@kbn/i18n-react",
+    "@kbn/field-formats-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/es-query",
+    "@kbn/rule-registry-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/share-plugin"
   ],
   "exclude": ["target/**/*"]
 }

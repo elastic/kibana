@@ -171,9 +171,16 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return timelineSelectorsVisible.every((visible) => !visible);
     },
 
-    async openInvenotrySwitcher() {
+    async openInventorySwitcher() {
       await testSubjects.click('openInventorySwitcher');
-      return await testSubjects.find('goToHost');
+      return await testSubjects.find('goToHost1');
+    },
+
+    async toggleInventorySwitcher() {
+      await testSubjects.click('openInventorySwitcher');
+      await testSubjects.find('goToHost');
+      await testSubjects.click('openInventorySwitcher');
+      return await testSubjects.missingOrFail('goToHost');
     },
 
     async goToHost() {

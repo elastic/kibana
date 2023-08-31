@@ -39,15 +39,25 @@ export type NavigationEmbeddableCrudTypes = ContentManagementCrudTypes<
 export type NavigationLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
 
 export type NavigationLinkOptions = DashboardDrilldownOptions | UrlDrilldownOptions;
-
-export interface NavigationEmbeddableLink {
+interface BaseNavigationEmbeddableLink {
   id: string;
-  type: NavigationLinkType;
-  destination: string;
   label?: string;
   order: number;
   options?: NavigationLinkOptions;
+  destination?: string;
 }
+
+interface DashboardLink extends BaseNavigationEmbeddableLink {
+  type: typeof DASHBOARD_LINK_TYPE;
+  destinationRefName?: string;
+}
+
+interface ExternalLink extends BaseNavigationEmbeddableLink {
+  type: typeof EXTERNAL_LINK_TYPE;
+  destination: string;
+}
+
+export type NavigationEmbeddableLink = DashboardLink | ExternalLink;
 
 export type NavigationLayoutType = typeof NAV_HORIZONTAL_LAYOUT | typeof NAV_VERTICAL_LAYOUT;
 

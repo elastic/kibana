@@ -23,7 +23,8 @@
     "@kbn/ui-actions-enhanced-plugin",
     "@kbn/es-query",
     "@kbn/share-plugin",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types"
   ],
   "exclude": ["target/**/*"]
 }

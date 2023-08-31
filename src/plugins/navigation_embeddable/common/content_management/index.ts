@@ -25,6 +25,7 @@ export {
   DASHBOARD_LINK_TYPE,
   NAV_VERTICAL_LAYOUT,
   NAV_HORIZONTAL_LAYOUT,
+  EXTERNAL_LINK_SUPPORTED_PROTOCOLS,
 } from './latest';
 
 export * as NavigationEmbeddableV1 from './v1';

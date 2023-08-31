@@ -24,6 +24,7 @@ import {
 } from '../../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../../types';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from './translations';
+import { useDataQualityContext } from '../../../data_quality_context';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -56,6 +57,7 @@ const CalloutSummaryComponent: React.FC<Props> = ({
   patternDocsCount,
   sizeInBytes,
 }) => {
+  const { isILMAvailable } = useDataQualityContext();
   const markdownComments: string[] = useMemo(
     () =>
       getMarkdownComments({
@@ -64,6 +66,7 @@ const CalloutSummaryComponent: React.FC<Props> = ({
         formatNumber,
         ilmPhase,
         indexName,
+        isILMAvailable,
         partitionedFieldMetadata,
         pattern,
         patternDocsCount,
@@ -75,6 +78,7 @@ const CalloutSummaryComponent: React.FC<Props> = ({
       formatNumber,
       ilmPhase,
       indexName,
+      isILMAvailable,
       partitionedFieldMetadata,
       pattern,
       patternDocsCount,

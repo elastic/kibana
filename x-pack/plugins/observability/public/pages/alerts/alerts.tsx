@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 
 import { useKibana } from '../../utils/kibana_react';
 import { useHasData } from '../../hooks/use_has_data';
@@ -32,6 +33,7 @@ import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -41,6 +43,7 @@ const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 
 function InternalAlertsPage() {
+  const kibanaServices = useKibana().services;
   const {
     charts,
     data: {
@@ -56,11 +59,13 @@ function InternalAlertsPage() {
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
     },
-  } = useKibana().services;
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  } = kibanaServices;
+  const { ObservabilityPageTemplate } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
+
+  const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const onBrushEnd: BrushEndListener = (brushEvent) => {
     const { x } = brushEvent as XYBrushEvent;
@@ -124,7 +129,7 @@ function InternalAlertsPage() {
     try {
       const response = await loadRuleAggregations({
         http,
-        typesFilter: observabilityRuleTypeRegistry.list(),
+        typesFilter: filteredRuleTypes,
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;
@@ -178,6 +183,9 @@ function InternalAlertsPage() {
       >
         <HeaderMenu />
         <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem>
+            <MaintenanceWindowCallout kibanaServices={kibanaServices} />
+          </EuiFlexItem>
           <EuiFlexItem>
             <ObservabilityAlertSearchBar
               {...alertSearchBarStateProps}

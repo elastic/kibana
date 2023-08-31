@@ -15,6 +15,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatBody } from './chat_body';
 
 const containerClassName = css`
@@ -30,27 +31,30 @@ export function ChatFlyout({
   messages,
   conversationId,
   isOpen,
+  startedFrom,
   onClose,
   onChatUpdate,
   onChatComplete,
+  onChatTitleSave,
 }: {
   title: string;
   messages: Message[];
   conversationId?: string;
   isOpen: boolean;
+  startedFrom: StartedFrom;
   onClose: () => void;
-  onChatUpdate?: (messages: Message[]) => void;
-  onChatComplete?: (messages: Message[]) => void;
+  onChatUpdate: (messages: Message[]) => void;
+  onChatComplete: (messages: Message[]) => void;
+  onChatTitleSave: (title: string) => void;
 }) {
-  const connectors = useGenAIConnectors();
-
-  const currentUser = useCurrentUser();
-
+  const { euiTheme } = useEuiTheme();
   const {
     services: { http },
   } = useKibana();
 
-  const { euiTheme } = useEuiTheme();
+  const currentUser = useCurrentUser();
+
+  const connectors = useGenAIConnectors();
 
   const router = useObservabilityAIAssistantRouter();
 
@@ -92,12 +96,14 @@ export function ChatFlyout({
         </EuiFlexItem>
         <EuiFlexItem grow className={bodyClassName}>
           <ChatBody
+            loading={false}
             connectors={connectors}
             title={title}
             messages={messages}
             currentUser={currentUser}
             connectorsManagementHref={getConnectorsManagementHref(http)}
             knowledgeBase={knowledgeBase}
+            startedFrom={startedFrom}
             onChatUpdate={(nextMessages) => {
               if (onChatUpdate) {
                 onChatUpdate(nextMessages);
@@ -107,6 +113,9 @@ export function ChatFlyout({
               if (onChatComplete) {
                 onChatComplete(nextMessages);
               }
+            }}
+            onSaveTitle={(newTitle) => {
+              onChatTitleSave(newTitle);
             }}
           />
         </EuiFlexItem>

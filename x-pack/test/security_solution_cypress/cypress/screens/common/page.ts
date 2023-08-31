@@ -10,3 +10,7 @@ export const PAGE_TITLE = '[data-test-subj="header-page-title"]';
 export const NOT_FOUND = '[data-test-subj="notFoundPage"]';
 
 export const LOADING_SPINNER = '.euiLoadingSpinner';
+
+export const PAGE_CONTENT = '[data-test-subj="pageContainer"]';
+
+export const PAGE_CONTENT_SPINNER = `${PAGE_CONTENT} ${LOADING_SPINNER}`;

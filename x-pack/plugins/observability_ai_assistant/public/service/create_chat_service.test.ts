@@ -156,6 +156,26 @@ describe('createChatService', () => {
       });
     });
 
+    it('propagates content errors', async () => {
+      respondWithChunks({
+        chunks: [
+          `data: {"error":{"message":"The server had an error while processing your request. Sorry about that!","type":"server_error","param":null,"code":null}}`,
+        ],
+      });
+
+      const response$ = chat();
+
+      const value = await lastValueFrom(response$);
+
+      expect(value).toEqual({
+        aborted: false,
+        error: expect.any(Error),
+        message: {
+          role: 'assistant',
+        },
+      });
+    });
+
     it('cancels a running http request when aborted', async () => {
       clientSpy.mockImplementationOnce((endpoint: string, options: HttpFetchOptions) => {
         options.signal?.addEventListener('abort', () => {
@@ -189,6 +209,33 @@ describe('createChatService', () => {
           role: 'assistant',
         },
         aborted: true,
+      });
+    });
+
+    it('propagates an error if finish_reason == length', async () => {
+      respondWithChunks({
+        chunks: [
+          'data: {"id":"chatcmpl-7mna2SFmEAqdCTX5arxueoErLjmt1","object":"chat.completion.chunk","created":1691864686,"model":"gpt-4-0613","choices":[{"index":0,"delta":{"content":"roaming"},"finish_reason":null}]}\n',
+          'data: {"id":"chatcmpl-7mna2SFmEAqdCTX5arxueoErLjmt1","object":"chat.completion.chunk","created":1691864686,"model":"gpt-4-0613","choices":[{"index":0,"delta":{"content":" deer"},"finish_reason":null}]}\n',
+          'data: {"id":"chatcmpl-7mna2SFmEAqdCTX5arxueoErLjmt1","object":"chat.completion.chunk","created":1691864686,"model":"gpt-4-0613","choices":[{"index":0,"delta":{},"finish_reason":"length"}]}\n',
+        ],
+      });
+      const response$ = chat();
+
+      const value = await lastValueFrom(response$);
+
+      expect(value).toEqual({
+        aborted: false,
+        error: expect.any(Error),
+        message: {
+          role: 'assistant',
+          content: 'roaming deer',
+          function_call: {
+            name: '',
+            arguments: '',
+            trigger: 'assistant',
+          },
+        },
       });
     });
   });

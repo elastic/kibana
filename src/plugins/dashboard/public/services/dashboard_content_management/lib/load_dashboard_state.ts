@@ -20,10 +20,12 @@ import {
   type DashboardOptions,
   convertSavedPanelsToPanelMap,
 } from '../../../../common';
+import { migrateDashboardInput } from './migrate_dashboard_input';
+import { convertNumberToDashboardVersion } from './dashboard_versioning';
 import { DashboardCrudTypes } from '../../../../common/content_management';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
-import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
+import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -133,6 +135,7 @@ export const loadDashboardState = async ({
     optionsJSON,
     panelsJSON,
     timeFrom,
+    version,
     timeTo,
     title,
   } = attributes;
@@ -151,11 +154,8 @@ export const loadDashboardState = async ({
   const options: DashboardOptions = optionsJSON ? JSON.parse(optionsJSON) : undefined;
   const panels = convertSavedPanelsToPanelMap(panelsJSON ? JSON.parse(panelsJSON) : []);
 
-  return {
-    resolveMeta,
-    dashboardFound: true,
-    dashboardId: savedObjectId,
-    dashboardInput: {
+  const { dashboardInput, anyMigrationRun } = migrateDashboardInput(
+    {
       ...DEFAULT_DASHBOARD_INPUT,
       ...options,
 
@@ -175,6 +175,17 @@ export const loadDashboardState = async ({
       controlGroupInput:
         attributes.controlGroupInput &&
         rawControlGroupAttributesToControlGroupInput(attributes.controlGroupInput),
+
+      version: convertNumberToDashboardVersion(version),
     },
+    embeddable
+  );
+
+  return {
+    resolveMeta,
+    dashboardInput,
+    anyMigrationRun,
+    dashboardFound: true,
+    dashboardId: savedObjectId,
   };
 };

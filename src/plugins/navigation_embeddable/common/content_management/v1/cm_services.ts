@@ -16,32 +16,46 @@ import {
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '.';
-import { NAV_HORIZONTAL_LAYOUT, NAV_VERTICAL_LAYOUT } from './constants';
+import {
+  EXTERNAL_LINK_SUPPORTED_PROTOCOLS,
+  NAV_HORIZONTAL_LAYOUT,
+  NAV_VERTICAL_LAYOUT,
+} from './constants';
 
-const navigationEmbeddableLinkSchema = schema.object({
+const baseNavigationEmbeddableLinkSchema = {
   id: schema.string(),
-  type: schema.oneOf([schema.literal(DASHBOARD_LINK_TYPE), schema.literal(EXTERNAL_LINK_TYPE)]),
-  destination: schema.string(),
   label: schema.maybe(schema.string()),
   order: schema.number(),
+};
+
+const dashboardLinkSchema = schema.object({
+  ...baseNavigationEmbeddableLinkSchema,
+  destinationRefName: schema.string(),
+  type: schema.literal(DASHBOARD_LINK_TYPE),
   options: schema.maybe(
-    schema.oneOf([
-      schema.object(
-        {
-          openInNewTab: schema.boolean(),
-          useCurrentFilters: schema.boolean(),
-          useCurrentDateRange: schema.boolean(),
-        },
-        { unknowns: 'forbid' }
-      ),
-      schema.object(
-        {
-          openInNewTab: schema.boolean(),
-          encodeUrl: schema.boolean(),
-        },
-        { unknowns: 'forbid' }
-      ),
-    ])
+    schema.object(
+      {
+        openInNewTab: schema.boolean(),
+        useCurrentFilters: schema.boolean(),
+        useCurrentDateRange: schema.boolean(),
+      },
+      { unknowns: 'forbid' }
+    )
+  ),
+});
+
+const externalLinkSchema = schema.object({
+  ...baseNavigationEmbeddableLinkSchema,
+  type: schema.literal(EXTERNAL_LINK_TYPE),
+  destination: schema.uri({ scheme: EXTERNAL_LINK_SUPPORTED_PROTOCOLS }),
+  options: schema.maybe(
+    schema.object(
+      {
+        openInNewTab: schema.boolean(),
+        encodeUrl: schema.boolean(),
+      },
+      { unknowns: 'forbid' }
+    )
   ),
 });
 
@@ -49,7 +63,7 @@ const navigationEmbeddableAttributesSchema = schema.object(
   {
     title: schema.string(),
     description: schema.maybe(schema.string()),
-    links: schema.maybe(schema.arrayOf(navigationEmbeddableLinkSchema)),
+    links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema])),
     layout: schema.maybe(
       schema.oneOf([schema.literal(NAV_HORIZONTAL_LAYOUT), schema.literal(NAV_VERTICAL_LAYOUT)])
     ),
