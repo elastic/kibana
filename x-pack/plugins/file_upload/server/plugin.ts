@@ -18,16 +18,15 @@ import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
 import { MAX_FILE_SIZE, UI_SETTING_MAX_FILE_SIZE } from '../common/constants';
 import { setupCapabilities } from './capabilities';
-import type { StartDeps, SetupDeps, FileUploadSetup, FileUploadStart } from './types';
+import type { StartDeps, SetupDeps } from './types';
 
-export class FileUploadPlugin
-  implements Plugin<FileUploadSetup, FileUploadStart, SetupDeps, StartDeps>
-{
+export class FileUploadPlugin implements Plugin {
   private readonly _logger: Logger;
   private isServerless: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this._logger = initializerContext.logger.get();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
@@ -58,14 +57,6 @@ export class FileUploadPlugin
     });
 
     initFileUploadTelemetry(coreSetup, plugins.usageCollection);
-
-    const setIsServerless = (isServerless: boolean) => {
-      this.isServerless = isServerless;
-    };
-
-    return {
-      setIsServerless,
-    };
   }
 
   start(core: CoreStart) {}

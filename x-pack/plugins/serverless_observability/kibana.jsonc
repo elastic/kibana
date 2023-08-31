@@ -16,15 +16,14 @@
       "observability"
     ],
     "requiredPlugins": [
-      "cloud",
       "data",
-      "fileUpload",
+      "serverless",
+      "observability",
+      "observabilityShared",
       "kibanaReact",
       "management",
       "ml",
-      "observability",
-      "observabilityShared",
-      "serverless"
+      "cloud"
     ],
     "optionalPlugins": [],
     "requiredBundles": []

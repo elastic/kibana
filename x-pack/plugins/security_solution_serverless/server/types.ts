@@ -18,7 +18,6 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { FileUploadSetup } from '@kbn/file-upload-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 
 import type { ProductTier } from '../common/product';
@@ -38,7 +37,6 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
   cloudSetup: CloudSetup;
-  fileUpload: FileUploadSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {

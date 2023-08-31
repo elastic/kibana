@@ -12,16 +12,15 @@
       "securitySolutionServerless",
     ],
     "requiredPlugins": [
-      "cloud",
-      "fileUpload",
-      "fleet",
       "kibanaReact",
       "management",
       "ml",
       "security",
       "securitySolution",
       "serverless",
-      "taskManager"
+      "taskManager",
+      "cloud",
+      "fleet"
     ],
     "optionalPlugins": [
       "securitySolutionEss"

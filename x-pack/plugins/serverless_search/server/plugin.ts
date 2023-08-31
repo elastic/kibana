@@ -74,7 +74,6 @@ export class ServerlessSearchPlugin
     });
 
     pluginsSetup.ml.setFeaturesEnabled({ ad: false, dfa: false, nlp: false });
-    pluginsSetup.fileUpload.setIsServerless(true);
     return {};
   }
 
