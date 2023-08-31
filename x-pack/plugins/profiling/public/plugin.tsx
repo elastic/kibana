@@ -16,12 +16,12 @@ import { i18n } from '@kbn/i18n';
 import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
 import type { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
+import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
 import { FlamegraphLocatorDefinition } from './locators/flamegraph_locator';
 import { StacktracesLocatorDefinition } from './locators/stacktraces_locator';
 import { TopNFunctionsLocatorDefinition } from './locators/topn_functions_locator';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
-import { EMBEDDABLE_FLAMEGRAPH } from './embeddables/flamegraph/embeddable_flamegraph';
 import { EmbeddableFlamegraphFactory } from './embeddables/flamegraph/embeddable_flamegraph_factory';
 
 export type ProfilingPluginSetup = ReturnType<ProfilingPlugin['setup']>;

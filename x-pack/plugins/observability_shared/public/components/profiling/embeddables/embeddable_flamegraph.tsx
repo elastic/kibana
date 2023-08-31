@@ -10,6 +10,7 @@ import { ElasticFlameGraph } from '@kbn/profiling-data-access-plugin/common/flam
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilitySharedStart } from '../../../plugin';
+import { EMBEDDABLE_FLAMEGRAPH } from '.';
 
 interface Props {
   data?: ElasticFlameGraph;
@@ -19,9 +20,10 @@ export function EmbeddableFlamegraph({ data }: Props) {
   const { embeddable: embeddablePlugin } = useKibana<ObservabilitySharedStart>().services;
   const [embeddable, setEmbeddable] = useState<any>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     async function createEmbeddable() {
-      const fac = embeddablePlugin?.getEmbeddableFactory('HELLO_WORLD');
+      const fac = embeddablePlugin?.getEmbeddableFactory(EMBEDDABLE_FLAMEGRAPH);
       const input = { id: 'profling', data };
       const embeddableObject = await fac?.create(input);
       setEmbeddable(embeddableObject);

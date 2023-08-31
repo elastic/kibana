@@ -8,10 +8,9 @@ import { Embeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
 import { EmbeddableFlamegraphEmbeddableInput } from './embeddable_flamegraph_factory';
 import { FlameGraph } from '../../components/flamegraph';
-
-export const EMBEDDABLE_FLAMEGRAPH = 'EMBEDDABLE_FLAMEGRAPH';
 
 export class EmbeddableFlamegraph extends Embeddable<
   EmbeddableFlamegraphEmbeddableInput,
