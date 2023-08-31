@@ -71,7 +71,7 @@ image::images/change-point-detection.png[An example of a change point detection 
 
 [discrete]
 ==== Data frame analytics model deployment workflow
-You can now create an inference ingest pipeline straight from the Trained Models view for your Data Frame Analytics models, by selecting the new **Deploy model** option in the **Actions** column. The pipeline will use this model to perform inference on your incoming data and it will index the results according to your configuration.
+You can now create an inference ingest pipeline straight from the Trained Models view for your {dfanalytics} models, by selecting the new **Deploy model** option in the **Actions** column. The pipeline will use this model to perform inference on your incoming data and it will index the results according to your configuration.
 
 [role="screenshot"]
 image::images/trained-models.png[A screenshot of the trained models UI]
