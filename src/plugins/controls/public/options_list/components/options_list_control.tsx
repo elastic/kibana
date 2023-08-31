@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiFilterButton, EuiFilterGroup, EuiInputPopover } from '@elastic/eui';
 
+import useMount from 'react-use/lib/useMount';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListPopover } from './options_list_popover';
@@ -21,6 +22,7 @@ import { useOptionsList } from '../embeddable/options_list_embeddable';
 import './options_list.scss';
 import { ControlError } from '../../control_group/component/control_error_component';
 import { MIN_POPOVER_WIDTH } from '../../constants';
+import { pluginServices } from '../../services';
 
 export const OptionsListControl = ({
   typeaheadSubject,
@@ -29,12 +31,19 @@ export const OptionsListControl = ({
   typeaheadSubject: Subject<string>;
   loadMoreSubject: Subject<number>;
 }) => {
+  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
+  const resizeRef = useRef(null);
   const optionsList = useOptionsList();
+  const {
+    dataViews: { get: getDataViewById },
+  } = pluginServices.getServices();
+  const dimensions = useResizeObserver(resizeRef.current);
 
   const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
   const validSelections = optionsList.select((state) => state.componentState.validSelections);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
 
   const id = optionsList.select((state) => state.explicitInput.id);
   const exclude = optionsList.select((state) => state.explicitInput.exclude);
@@ -46,6 +55,23 @@ export const OptionsListControl = ({
   const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
 
   const loading = optionsList.select((state) => state.output.loading);
+  const dataViewId = optionsList.select((state) => state.output.dataViewId);
+
+  /**
+   * derive field formatter from fieldSpec and dataViewId
+   */
+  useMount(() => {
+    (async () => {
+      if (!dataViewId || !fieldSpec) return;
+      // dataViews are cached, and should always be available without having to hit ES.
+      const dataView = await getDataViewById(dataViewId);
+      setFieldFormatter(
+        () =>
+          dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
+          ((toFormat: string) => toFormat)
+      );
+    })();
+  });
 
   useEffect(() => {
     return () => {
@@ -108,11 +134,17 @@ export const OptionsListControl = ({
           ) : (
             <>
               {validSelections && (
-                <span>{validSelections.join(OptionsListStrings.control.getSeparator())}</span>
+                <span>
+                  {validSelections
+                    .map((value) => fieldFormatter(value))
+                    .join(OptionsListStrings.control.getSeparator())}
+                </span>
               )}
               {invalidSelections && (
                 <span className="optionsList__filterInvalid">
-                  {invalidSelections.join(OptionsListStrings.control.getSeparator())}
+                  {invalidSelections
+                    .map((value) => fieldFormatter(value))
+                    .join(OptionsListStrings.control.getSeparator())}
                 </span>
               )}
             </>
@@ -120,7 +152,7 @@ export const OptionsListControl = ({
         </>
       ),
     };
-  }, [exclude, existsSelected, validSelections, invalidSelections]);
+  }, [exclude, existsSelected, validSelections, invalidSelections, fieldFormatter]);
 
   const button = (
     <EuiFilterButton

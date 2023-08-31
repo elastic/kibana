@@ -52,7 +52,7 @@ export const setupOptionsListSuggestionsRoute = (
                 allowExpensiveQueries: schema.boolean(),
                 searchString: schema.maybe(schema.string()),
                 selectedOptions: schema.maybe(
-                  schema.arrayOf(schema.oneOf([schema.string(), schema.number()])) // TODO: cast value to number instead
+                  schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))
                 ),
               },
               { unknowns: 'allow' }

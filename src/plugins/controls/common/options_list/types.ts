@@ -32,7 +32,7 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   exclude?: boolean;
 }
 
-export type OptionsListSuggestions = Array<{ value: string; label?: string; docCount?: number }>;
+export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
@@ -84,7 +84,7 @@ export interface OptionsListRequestBody {
   allowExpensiveQueries: boolean;
   sort?: OptionsListSortingType;
   filters?: Array<{ bool: BoolQuery }>;
-  selectedOptions?: string[];
+  selectedOptions?: Array<string | number>;
   runPastTimeout?: boolean;
   searchString?: string;
   fieldSpec?: FieldSpec;

@@ -12,11 +12,13 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiHighlight, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
+import useMount from 'react-use/lib/useMount';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
+import { pluginServices } from '../../services';
 
 interface OptionsListPopoverSuggestionsProps {
   showOnlySelected: boolean;
@@ -28,11 +30,15 @@ export const OptionsListPopoverSuggestions = ({
   loadMoreSuggestions,
 }: OptionsListPopoverSuggestionsProps) => {
   const optionsList = useOptionsList();
+  const {
+    dataViews: { get: getDataViewById },
+  } = pluginServices.getServices();
 
   const searchString = optionsList.select((state) => state.componentState.searchString);
   const availableOptions = optionsList.select((state) => state.componentState.availableOptions);
   const totalCardinality = optionsList.select((state) => state.componentState.totalCardinality);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
 
   const sort = optionsList.select((state) => state.explicitInput.sort);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
@@ -40,6 +46,26 @@ export const OptionsListPopoverSuggestions = ({
   const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
   const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
   const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
+
+  const dataViewId = optionsList.select((state) => state.output.dataViewId);
+
+  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
+
+  /**
+   * derive field formatter from fieldSpec and dataViewId
+   */
+  useMount(() => {
+    (async () => {
+      if (!dataViewId || !fieldSpec) return;
+      // dataViews are cached, and should always be available without having to hit ES.
+      const dataView = await getDataViewById(dataViewId);
+      setFieldFormatter(
+        () =>
+          dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
+          ((toFormat: string) => toFormat)
+      );
+    })();
+  });
 
   const isLoading = optionsList.select((state) => state.output.loading) ?? false;
 
@@ -84,9 +110,10 @@ export const OptionsListPopoverSuggestions = ({
         // this means that `showOnlySelected` is true, and doc count is not known when this is the case
         suggestion = { value: suggestion };
       }
+
       return {
         key: suggestion.value,
-        label: suggestion.label ?? suggestion.value,
+        label: fieldFormatter(suggestion.value) ?? suggestion.value,
         checked: selectedOptionsSet?.has(suggestion.value) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
@@ -124,6 +151,7 @@ export const OptionsListPopoverSuggestions = ({
     invalidSelectionsSet,
     existsSelectableOption,
     canLoadMoreSuggestions,
+    fieldFormatter,
   ]);
 
   const loadMoreOptions = useCallback(() => {

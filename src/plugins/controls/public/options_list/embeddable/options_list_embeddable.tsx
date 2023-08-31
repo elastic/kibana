@@ -255,7 +255,9 @@ export class OptionsListEmbeddable
     if (this.dataView && (!this.field || this.field.name !== fieldName)) {
       const field = this.dataView.getFieldByName(fieldName);
       if (field) {
-        this.field = field.toSpec();
+        this.field = field.toSpec({
+          getFormatterForField: this.dataView.getFormatterForField.bind(this.dataView),
+        });
         this.dispatch.setField(this.field);
       } else {
         this.dispatch.setErrorMessage(
@@ -398,7 +400,6 @@ export class OptionsListEmbeddable
       }
     }
 
-    console.log({ newFilter });
     if (!newFilter) return [];
 
     newFilter.meta.key = field?.name;
