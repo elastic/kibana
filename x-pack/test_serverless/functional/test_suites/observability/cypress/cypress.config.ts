@@ -6,13 +6,14 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-import { kbnTestConfig } from '@kbn/test';
+import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+
 import Url from 'url';
 
 const kibanaUrlWithoutAuth = Url.format({
-  protocol: kbnTestConfig.getUrlParts().protocol,
-  hostname: kbnTestConfig.getUrlParts().hostname,
-  port: kbnTestConfig.getUrlParts().port,
+  protocol: 'https',
+  hostname: kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).hostname,
+  port: kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).port,
 });
 
 export default defineCypressConfig({
@@ -40,8 +41,8 @@ export default defineCypressConfig({
     specPattern: './e2e/**/*.cy.ts',
   },
   env: {
-    username: kbnTestConfig.getUrlParts().username,
-    password: kbnTestConfig.getUrlParts().password,
+    username: kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username,
+    password: kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password,
     kibanaUrlWithoutAuth,
   },
 });

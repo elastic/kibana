@@ -12,7 +12,7 @@ import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 import { ListClient } from '../../services/lists/list_client';
 import type { ListsPluginRouter } from '../../types';
 import { deleteListIndexResponse } from '../../../common/api';
-import { buildSiemResponse, removeLegacyTemplatesIfExist } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 /**
@@ -66,11 +66,17 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
         // ensure data streams deleted if exist
         await deleteDataStreams(lists, listDataStreamExists, listItemDataStreamExists);
 
-        // ensure indices deleted if exist and were not migrated
-        await deleteIndices(lists, listIndexExists, listItemIndexExists);
+        // we need to call this section only if any of these indices exist
+        // to delete indices, ILM policies and legacy templates
+        // ILM policies and legacy templates do not exist on serverless,
+        // so by checking if any of index exists we ensure it is stateful
+        if (listIndexExists || listItemIndexExists) {
+          await deleteIndices(lists, listIndexExists, listItemIndexExists);
+          await lists.deleteLegacyListTemplateIfExists();
+          await lists.deleteLegacyListItemTemplateIfExists();
+        }
 
         await deleteIndexTemplates(lists);
-        await removeLegacyTemplatesIfExist(lists);
 
         const [validated, errors] = validate({ acknowledged: true }, deleteListIndexResponse);
         if (errors != null) {

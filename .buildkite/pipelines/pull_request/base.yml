@@ -110,19 +110,20 @@ steps:
     artifact_paths:
       - "target/kibana-security-solution/**/*"
 
-  - command: .buildkite/scripts/steps/functional/security_serverless_defend_workflows.sh
-    label: 'Serverless Security Defend Workflows Cypress Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 40
-    soft_fail: true
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-    artifact_paths:
-      - "target/kibana-security-solution/**/*"
+  # status_exception: Native role management is not enabled in this Elasticsearch instance
+  # - command: .buildkite/scripts/steps/functional/security_serverless_defend_workflows.sh
+  #   label: 'Serverless Security Defend Workflows Cypress Tests'
+  #   agents:
+  #     queue: n2-4-spot
+  #   depends_on: build
+  #   timeout_in_minutes: 40
+  #   soft_fail: true
+  #   retry:
+  #     automatic:
+  #       - exit_status: '*'
+  #         limit: 1
+  #   artifact_paths:
+  #     - "target/kibana-security-solution/**/*"
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Security Investigations Cypress Tests'
