@@ -94,7 +94,7 @@ export class TimePickerPageObject extends FtrService {
   async setCommonlyUsedTime(option: CommonlyUsed | string) {
     await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
     await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
-    await this.testSubjects.exists('`superDatePickerCommonlyUsed_${option}`', { timeout: 5000 });
+    await this.testSubjects.exists(`superDatePickerCommonlyUsed_${option}`, { timeout: 5000 });
     await this.testSubjects.click(`superDatePickerCommonlyUsed_${option}`);
   }
 
