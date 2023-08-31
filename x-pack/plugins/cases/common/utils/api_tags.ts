@@ -14,7 +14,13 @@ import { HttpApiTagOperation } from '../constants/types';
 import type { Owner } from '../constants/types';
 import { constructFilesHttpOperationTag } from '../files';
 
-export const getApiTags = (owner: Owner) => {
+export interface CasesApiTags {
+  all: readonly string[];
+  read: readonly string[];
+  delete: readonly string[];
+}
+
+export const getApiTags = (owner: Owner): CasesApiTags => {
   const create = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Create);
   const deleteTag = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Delete);
   const read = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Read);

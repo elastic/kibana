@@ -18,6 +18,9 @@ import { getConfigFromFiles } from '@kbn/config';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
+const KIBANA_DEV_SERVICE_ACCOUNT_TOKEN =
+  process.env.TEST_KIBANA_SERVICE_ACCOUNT_TOKEN ||
+  'AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA';
 
 function canRequire(path) {
   try {
@@ -68,6 +71,10 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   delete extraCliOptions.env;
 
   if (opts.dev) {
+    if (opts.serverless) {
+      set('elasticsearch.serviceAccountToken', KIBANA_DEV_SERVICE_ACCOUNT_TOKEN);
+    }
+
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
       if (!has('elasticsearch.username')) {
         set('elasticsearch.username', 'kibana_system');
@@ -98,7 +105,6 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('server.ssl.truststore.path');
       ensureNotDefined('server.ssl.certificateAuthorities');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
-
       const elasticsearchHosts = (
         (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
           'https://localhost:9200',

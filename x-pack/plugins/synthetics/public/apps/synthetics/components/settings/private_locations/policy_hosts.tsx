@@ -34,7 +34,7 @@ export const PolicyHostsField = ({
 }) => {
   const { data } = useSelector(selectAgentPolicies);
 
-  const policyHostsOptions = data?.items.map((item) => {
+  const policyHostsOptions = data?.map((item) => {
     const hasLocation = privateLocations.find((location) => location.agentPolicyId === item.id);
     return {
       disabled: Boolean(hasLocation),

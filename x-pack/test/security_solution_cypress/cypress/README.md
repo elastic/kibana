@@ -21,6 +21,8 @@ If you are still having doubts, questions or queries, please feel free to ping o
 
 [**Test data**](#test-data)
 
+[**Serverless**](#serverless)
+
 [**Development Best Practices**](#development-best-practices)
 
 [**Test Artifacts**](#test-artifacts)
@@ -38,17 +40,9 @@ of data for your test, [**Running the tests**](#running-the-tests) to know how t
 
 Please, before opening a PR with the new test, please make sure that the test fails. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
-Note that we use tags in order to select which tests we want to execute:
+Note that we use tags in order to select which tests we want to execute: @serverless, @ess and @brokenInServerless
 
-```typescript
-export const tag = {
-  SERVERLESS: '@serverless',
-  ESS: '@ess',
-  BROKEN_IN_SERVERLESS: '@brokenInServerless',
-};
-```
-
-Please, before opening a PR with the new test, make sure that the test fails. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
+Please, before opening a PR with a new test, make sure that the test fails. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
 ## Running the tests
 
@@ -184,9 +178,62 @@ Note that the command will create the folder if it does not exist.
 
 Task [cypress/support/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/cypress/support/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
 
+## Serverless
+
+Note that we use tags in order to select which tests we want to execute, if you want a test to be executed on serverless you need to add @serverless tag to it.
+
+
+### Running the serverless tests locally
+
+Run the tests with the following yarn scripts from `x-pack/test/security_solution_cypress`:
+
+| Script Name | Description |
+| ----------- | ----------- |
+| cypress:open:serverless | Opens the Cypress UI with all tests in the `e2e` directory. This also runs a mocked serverless environment. The kibana instance will reload when you make code changes. This is the recommended way to debug and develop tests. |
+| cypress:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e` directory excluding `investigations` and `explore` directories in headless mode |
+| cypress:investigations:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode |
+| cypress:explore:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode |
+
+Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
+
+### PLIs
+When running serverless Cypress tests, the following PLIs are set by default:
+
+```
+      { product_line: 'security', product_tier: 'complete' },
+      { product_line: 'endpoint', product_tier: 'complete' },
+      { product_line: 'cloud', product_tier: 'complete' },
+```
+
+With the above configuration we'll be able to cover most of the scenarios, but there are some cases were we might want to use a different configuration. In that case, we just need to pass to the header of the test, which is the configuration we want for it.
+
+```typescript
+describe(
+  'Entity Analytics Dashboard in Serverless',
+  {
+    tags: '@serverless',
+    env: {
+      ftrConfig: {
+        productTypes: [
+          { product_line: 'security', product_tier: 'essentials' },
+          { product_line: 'endpoint', product_tier: 'essentials' },
+        ],
+      },
+    },
+  },
+```
+
+Per the way we set the environment during the execution process on CI, the above configuration is going to be valid when the test is executed on headless mode.
+
+For test developing or test debugging purposes, you need to modify the configuration but without committing and pushing the changes in `x-pack/test/security_solution_cypress/serverless_config.ts`.
+
 ## Development Best Practices
 
 Below you will a set of best practices that should be followed when writing Cypress tests.
+
+### For serverless
+Reuse just those tests that have the SAME exact behaviour and steps. Take the necessity of adding a conditional to the test to make it pass in order to, perform a different set of steps, setup, or assertions, as a signal for the need of a serverless 
+specific test.
 
 ### Avoid forced actions
 
