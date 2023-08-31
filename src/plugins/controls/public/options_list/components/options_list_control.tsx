@@ -20,6 +20,7 @@ import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 import './options_list.scss';
 import { ControlError } from '../../control_group/component/control_error_component';
+import { MIN_POPOVER_WIDTH } from '../../constants';
 
 export const OptionsListControl = ({
   typeaheadSubject,
@@ -155,9 +156,9 @@ export const OptionsListControl = ({
         input={button}
         hasArrow={false}
         repositionOnScroll
-        panelMinWidth={300}
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
+        panelMinWidth={MIN_POPOVER_WIDTH}
         className="optionsList__inputButtonOverride"
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
         closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
