@@ -68,7 +68,7 @@ export const NeutralPalette: ColorMapping.CategoricalPalette = {
   },
 };
 
-export const DEFAULT_NEUTRAL_PALETTE_INDEX = 2;
+export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
 
 export function getPalette(
   palettes: Map<string, ColorMapping.CategoricalPalette>,

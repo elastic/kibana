@@ -9,8 +9,8 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { scaleSequential } from 'd3-scale';
-import { interpolateHsl, piecewise } from 'd3-interpolate';
-import { changeAlpha, getValidColor } from '../../color/color_math';
+import { interpolateLab, piecewise } from 'd3-interpolate';
+import { changeAlpha, getValidColor, combineColors } from '../../color/color_math';
 
 import { ColorMapping } from '../../config';
 import { ColorSwatch } from '../color_picker/color_swatch';
@@ -38,13 +38,16 @@ export function Gradient({
     colorMode.type === 'gradient'
       ? colorMode.steps.length === 1
         ? [
-            changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 0.3),
-            changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 1),
-          ].sort(() => (colorMode.sort === 'asc' ? 1 : -1))
+            getColor(colorMode.steps[0], getPaletteFn, isDarkMode),
+            combineColors(
+              changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 0.3),
+              isDarkMode ? 'black' : 'white'
+            ),
+          ].sort(() => (colorMode.sort === 'asc' ? -1 : 1))
         : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode))
       : [];
 
-  const gradientColorScale = scaleSequential(piecewise(interpolateHsl, gradientColorSteps));
+  const gradientColorScale = scaleSequential(piecewise(interpolateLab, gradientColorSteps));
   const gradientCSSBackground =
     colorMode.type === 'gradient'
       ? colorMode.steps.length === 1
@@ -178,9 +181,8 @@ function AddStop({
     <EuiButtonEmpty
       iconType="plusInCircleFilled"
       disabled={colorMode.steps.length >= 3}
-      style={{ opacity: 0.3, width: 16, height: 16, paddingLeft: 12 }}
+      style={{ color: '#696F7D', width: 16, height: 16, paddingLeft: 12 }}
       className="colorMappingGradientAddStop"
-      color="text"
       size="s"
       onClick={() => {
         dispatch(

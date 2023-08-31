@@ -124,7 +124,7 @@ export function Container(props: {
                     index={i}
                     total={assignments.length - 1}
                     colorMode={colorMode}
-                    canPickColor={!autoAssignmentMode}
+                    canPickColor={!autoAssignmentMode && colorMode.type !== 'gradient'}
                     palette={palette}
                     isDarkMode={props.isDarkMode}
                     getPaletteFn={getPaletteFn}

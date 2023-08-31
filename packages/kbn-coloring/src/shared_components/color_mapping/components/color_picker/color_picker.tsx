@@ -68,16 +68,19 @@ export function ColorPicker({
         />
       )}
       {deleteStep ? (
-        <EuiButton
-          iconType="trash"
-          onClick={() => {
-            close();
-            deleteStep();
-          }}
-          aria-label="Delete color"
-        >
-          Remove from gradient
-        </EuiButton>
+        <>
+          <EuiSpacer size="m" />
+          <EuiButton
+            iconType="trash"
+            onClick={() => {
+              close();
+              deleteStep();
+            }}
+            aria-label="Delete color"
+          >
+            Remove from gradient
+          </EuiButton>
+        </>
       ) : null}
     </div>
   );

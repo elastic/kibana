@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-const schemeGreys = ['#f7f7f7', '#d9d9d9', '#bdbdbd', '#969696', '#737373', '#525252', '#252525'];
-export const NEUTRAL_COLOR_LIGHT = schemeGreys.slice(1, 6);
-export const NEUTRAL_COLOR_DARK = schemeGreys.slice(1, 6);
+const schemeGreys = ['#F2F4FB', '#D4D9E5', '#98A2B3', '#696F7D', '#353642'];
+export const NEUTRAL_COLOR_LIGHT = schemeGreys.slice();
+export const NEUTRAL_COLOR_DARK = schemeGreys.slice().reverse();

@@ -184,7 +184,7 @@ export function PaletteSelector({
                 },
                 {
                   id: `gradient`,
-                  label: 'Gradient',
+                  label: 'Sequential',
                 },
               ]}
               isFullWidth

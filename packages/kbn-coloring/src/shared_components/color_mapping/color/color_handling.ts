@@ -9,7 +9,7 @@
 import { scaleSequential } from 'd3-scale';
 import { interpolateLab, piecewise } from 'd3-interpolate';
 import { ColorMapping } from '../config';
-import { changeAlpha } from './color_math';
+import { changeAlpha, combineColors } from './color_math';
 import { generateAutoAssignmentsForCategories } from '../config/assignment_from_categories';
 import { getPalette } from '../palette';
 import { ColorMappingInputData } from '../categorical_color_mapping';
@@ -36,9 +36,11 @@ export function getAssignmentColor(
       const steps =
         colorMode.steps.length === 1
           ? [
-              // TODO: change lumisonity instead of alpha
-              changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 1),
-              changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 0.3),
+              getColor(colorMode.steps[0], getPaletteFn, isDarkMode),
+              combineColors(
+                changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 0.3),
+                isDarkMode ? 'black' : 'white'
+              ),
             ]
           : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode));
       steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));

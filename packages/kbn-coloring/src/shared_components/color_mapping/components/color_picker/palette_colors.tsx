@@ -68,7 +68,7 @@ export function PaletteColors({
 
       <EuiFlexItem>
         <EuiText size="s">
-          <strong>Neutral</strong>
+          <strong>Greys (theme aware)</strong>
         </EuiText>
         <EuiFlexGroup
           direction="row"
