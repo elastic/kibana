@@ -324,7 +324,7 @@ export class SavedSearchEmbeddable
     const useTextBased = this.isTextBasedSearch(savedSearch);
 
     try {
-      // Request SQL data
+      // Request text based data
       if (useTextBased && query) {
         const result = await fetchTextBased(
           savedSearch.searchSource.getField('query')!,

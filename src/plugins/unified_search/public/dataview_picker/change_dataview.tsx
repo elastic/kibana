@@ -340,7 +340,7 @@ export function ChangeDataView({
             data-test-subj="select-text-based-language-panel"
           >
             {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
-              defaultMessage: 'Try ES | QL',
+              defaultMessage: 'Try ES|QL',
             })}
             <EuiBadge color="hollow">
               {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTechPreviewLabel', {
