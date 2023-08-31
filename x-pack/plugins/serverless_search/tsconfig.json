@@ -33,6 +33,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/search-api-panels",
     "@kbn/core-lifecycle-browser",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
   ]
 }
