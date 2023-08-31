@@ -491,4 +491,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
     this.setHighlightPanelId(undefined);
   };
+
+  public setFocusPanelId = (id: string | undefined) => {
+    this.dispatch.setFocusPanelId(id);
+  };
 }

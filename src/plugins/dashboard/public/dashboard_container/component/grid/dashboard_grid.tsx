@@ -30,6 +30,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
   const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
+  const focusPanelId = dashboard.select((state) => state.componentState.focusPanelId);
   const animatePanelTransforms = dashboard.select(
     (state) => state.componentState.animatePanelTransforms
   );
@@ -127,8 +128,8 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       breakpoints={breakpoints}
       onDragStop={onLayoutChange}
       onResizeStop={onLayoutChange}
-      isResizable={!expandedPanelId}
-      isDraggable={!expandedPanelId}
+      isResizable={!expandedPanelId && !focusPanelId}
+      isDraggable={!expandedPanelId && !focusPanelId}
       rowHeight={DASHBOARD_GRID_HEIGHT}
       margin={useMargins ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE] : [0, 0]}
       draggableHandle={'.embPanel--dragHandle'}

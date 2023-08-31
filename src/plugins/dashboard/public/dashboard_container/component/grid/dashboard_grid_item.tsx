@@ -51,6 +51,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     const container = useDashboardContainer();
     const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
     const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
+    const focusPanelId = container.select((state) => state.componentState.focusPanelId);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
@@ -74,7 +75,12 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
 
     return (
       <div
-        style={{ ...style, zIndex: focusedPanelId === id ? 2 : 'auto' }}
+        style={{
+          ...style,
+          zIndex: focusedPanelId === id ? 2 : 'auto',
+          pointerEvents: focusPanelId && focusPanelId !== id ? 'none' : 'auto',
+          opacity: focusPanelId && focusPanelId !== id ? '.25' : '1',
+        }}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
         id={`panel-${id}`}
@@ -140,11 +146,16 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
   const {
     settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
+  const container = useDashboardContainer();
+  const focusPanelId = container.select((state) => state.componentState.focusPanelId);
 
   const dashboard = useDashboardContainer();
 
   const isPrintMode = dashboard.select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
-  const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');
+  const isEnabled =
+    !isPrintMode &&
+    isProjectEnabledInLabs('labs:dashboard:deferBelowFold') &&
+    (!focusPanelId || focusPanelId === props.id);
 
   return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
 });

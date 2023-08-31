@@ -42,6 +42,7 @@ export interface DashboardPublicState {
   lastSavedId?: string;
   scrollToPanelId?: string;
   highlightPanelId?: string;
+  focusPanelId?: string;
 }
 
 export interface DashboardRenderPerformanceStats {
