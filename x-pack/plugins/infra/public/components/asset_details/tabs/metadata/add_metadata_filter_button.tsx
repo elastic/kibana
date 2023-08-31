@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { useMetricsDataViewContext } from '../../../../pages/metrics/hosts/hooks/use_data_view';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
 import { buildMetadataFilter } from './build_metadata_filter';
+import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
 
 interface AddMetadataFilterButtonProps {
   item: {

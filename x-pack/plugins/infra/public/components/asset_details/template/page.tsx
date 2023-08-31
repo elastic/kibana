@@ -12,13 +12,13 @@ import React from 'react';
 import { useKibanaHeader } from '../../../hooks/use_kibana_header';
 import { InfraLoadingPanel } from '../../loading';
 import { Content } from '../content/content';
-import { useAssetDetailsStateContext } from '../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
 import { usePageHeader } from '../hooks/use_page_header';
 import type { ContentTemplateProps } from '../types';
 
 export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps) => {
-  const { asset, loading } = useAssetDetailsStateContext();
-  const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
+  const { asset, loading } = useAssetDetailsRenderPropsContext();
+  const { rightSideItems, tabEntries, breadcrumbs } = usePageHeader(tabs, links);
   const { headerHeight } = useKibanaHeader();
 
   return loading ? (
@@ -49,6 +49,7 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
           pageTitle={asset.name}
           tabs={tabEntries}
           rightSideItems={rightSideItems}
+          breadcrumbs={breadcrumbs}
         />
         <EuiPageTemplate.Section grow>
           <Content />

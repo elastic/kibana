@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiPageBody, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
@@ -39,7 +39,7 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
             defaultMessage="Select data view or saved search"
           />
         </MlPageHeader>
-        <EuiPageContent hasShadow={false} hasBorder={true}>
+        <EuiPanel hasShadow={false} hasBorder>
           <SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
@@ -75,7 +75,7 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
               uiSettings,
             }}
           />
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </div>
   );

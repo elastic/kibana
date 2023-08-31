@@ -91,7 +91,7 @@ export const HighlightedFields: FC = () => {
 
   const highlightedFields = useHighlightedFields({
     dataFormattedForFieldBrowser,
-    investigationFields: maybeRule?.investigation_fields ?? [],
+    investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
   });
   const items = useMemo(
     () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId),
@@ -111,7 +111,7 @@ export const HighlightedFields: FC = () => {
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
         <EuiPanel hasBorder hasShadow={false}>
-          <EuiInMemoryTable items={items} columns={columns} compressed tableLayout="auto" />
+          <EuiInMemoryTable items={items} columns={columns} compressed />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
