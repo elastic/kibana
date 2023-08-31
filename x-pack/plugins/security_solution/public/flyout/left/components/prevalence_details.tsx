@@ -86,14 +86,14 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     name: PREVALENCE_TABLE_FIELD_COLUMN_TITLE,
     'data-test-subj': PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
     render: (field: string) => <EuiText size="xs">{field}</EuiText>,
-    width: '55%',
+    width: '20%',
   },
   {
     field: 'value',
     name: PREVALENCE_TABLE_VALUE_COLUMN_TITLE,
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
     render: (value: string) => <EuiText size="xs">{value}</EuiText>,
-    width: '55%',
+    width: '20%',
   },
   {
     name: (

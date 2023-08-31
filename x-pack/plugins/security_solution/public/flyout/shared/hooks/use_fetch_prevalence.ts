@@ -11,6 +11,9 @@ import { useQuery } from '@tanstack/react-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { createFetchData } from '../utils/fetch_data';
 import { useKibana } from '../../../common/lib/kibana';
+import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
+import { isActiveTimeline } from '../../../helpers';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';
 
@@ -99,7 +102,10 @@ export const useFetchPrevalence = ({
     },
   } = useKibana();
 
-  const searchRequest = buildSearchRequest(highlightedFieldsFilters, from, to);
+  // retrieves '.alerts-security.alerts-default' and 'logs-*' indices
+  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(SourcererScopeName.default));
+
+  const searchRequest = buildSearchRequest(highlightedFieldsFilters, from, to, selectedPatterns);
 
   const { data, isLoading, isError } = useQuery(
     [QUERY_KEY, highlightedFieldsFilters, from, to],
@@ -120,7 +126,8 @@ export const useFetchPrevalence = ({
 const buildSearchRequest = (
   highlightedFieldsFilters: Record<string, QueryDslQueryContainer>,
   from: string,
-  to: string
+  to: string,
+  selectedPatterns: string[]
 ): IEsSearchRequest => {
   const query = buildEsQuery(
     undefined,
@@ -146,14 +153,16 @@ const buildSearchRequest = (
     ]
   );
 
-  return buildAggregationSearchRequest(query, highlightedFieldsFilters);
+  return buildAggregationSearchRequest(query, highlightedFieldsFilters, selectedPatterns);
 };
 
 const buildAggregationSearchRequest = (
   query: QueryDslQueryContainer,
-  highlightedFieldsFilters: Record<string, QueryDslQueryContainer>
+  highlightedFieldsFilters: Record<string, QueryDslQueryContainer>,
+  selectedPatterns: string[]
 ): IEsSearchRequest => ({
   params: {
+    index: selectedPatterns,
     body: {
       query,
       aggs: {

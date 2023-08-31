@@ -56,6 +56,10 @@ const panelContextValue = {
 describe('PrevalenceDetails', () => {
   const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 
+  beforeEach(() => {
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+  });
+
   it('should render the table with all columns if license is platinum', () => {
     const field1 = 'field1';
     const field2 = 'field2';
@@ -81,7 +85,6 @@ describe('PrevalenceDetails', () => {
         },
       ],
     });
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
     const { getByTestId, getAllByTestId, queryByTestId } = render(
       <TestProviders>
@@ -168,7 +171,6 @@ describe('PrevalenceDetails', () => {
       error: false,
       data: [],
     });
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
     const { getByTestId } = render(
       <LeftPanelContext.Provider value={panelContextValue}>
@@ -185,7 +187,6 @@ describe('PrevalenceDetails', () => {
       error: true,
       data: [],
     });
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
     const { getByTestId } = render(
       <LeftPanelContext.Provider value={panelContextValue}>
@@ -206,7 +207,6 @@ describe('PrevalenceDetails', () => {
       error: true,
       data: [],
     });
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
     const { getByTestId } = render(
       <LeftPanelContext.Provider value={contextValue}>
@@ -227,7 +227,6 @@ describe('PrevalenceDetails', () => {
       error: true,
       data: [],
     });
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
     const { getByTestId } = render(
       <LeftPanelContext.Provider value={contextValue}>
@@ -248,7 +247,6 @@ describe('PrevalenceDetails', () => {
       error: true,
       data: [],
     });
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
     const { getByTestId } = render(
       <LeftPanelContext.Provider value={contextValue}>
