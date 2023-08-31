@@ -94,11 +94,7 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
 
   return (
     <>
-      {!inline && (
-        <>
-          <pre>{previewText}</pre>{' '}
-        </>
-      )}
+      {!inline && <pre>{previewText}</pre>}
       <EuiButtonEmpty
         onClick={openModal}
         css={inline ? { blockSize: 0 } : {}}
