@@ -19,6 +19,7 @@ import {
   AlertInstanceState,
   RuleAlertData,
   WithoutReservedActionGroups,
+  DataStreamAdapter,
 } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import {
@@ -54,6 +55,7 @@ const CHUNK_SIZE = 10000;
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   kibanaVersion: string;
+  dataStreamAdapter: DataStreamAdapter;
 }
 
 export class AlertsClient<
@@ -78,6 +80,8 @@ export class AlertsClient<
   private fetchedAlerts: {
     indices: Record<string, string>;
     data: Record<string, Alert & AlertData>;
+    seqNo: Record<string, number | undefined>;
+    primaryTerm: Record<string, number | undefined>;
   };
 
   private rule: AlertRule = {};
@@ -86,6 +90,7 @@ export class AlertsClient<
   private indexTemplateAndPattern: IIndexPatternString;
 
   private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
+  private _isUsingDataStreams: boolean;
 
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<
@@ -100,9 +105,10 @@ export class AlertsClient<
         ? this.options.namespace
         : DEFAULT_NAMESPACE_STRING,
     });
-    this.fetchedAlerts = { indices: {}, data: {} };
+    this.fetchedAlerts = { indices: {}, data: {}, seqNo: {}, primaryTerm: {} };
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
     this.ruleType = options.ruleType;
+    this._isUsingDataStreams = this.options.dataStreamAdapter.isUsingDataStreams();
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
@@ -131,6 +137,7 @@ export class AlertsClient<
     const queryByUuid = async (uuids: string[]) => {
       const result = await this.search({
         size: uuids.length,
+        seq_no_primary_term: true,
         query: {
           bool: {
             filter: [
@@ -166,6 +173,8 @@ export class AlertsClient<
 
         // Keep track of index so we can update the correct document
         this.fetchedAlerts.indices[alertUuid] = hit._index;
+        this.fetchedAlerts.seqNo[alertUuid] = hit._seq_no;
+        this.fetchedAlerts.primaryTerm[alertUuid] = hit._primary_term;
       }
     } catch (err) {
       this.options.logger.error(`Error searching for tracked alerts by UUID - ${err.message}`);
@@ -174,11 +183,15 @@ export class AlertsClient<
 
   public async search(queryBody: SearchRequest['body']): Promise<SearchResult<AlertData>> {
     const esClient = await this.options.elasticsearchClientPromise;
+    const index = this.isUsingDataStreams()
+      ? this.indexTemplateAndPattern.alias
+      : this.indexTemplateAndPattern.pattern;
     const {
       hits: { hits, total },
     } = await esClient.search<Alert & AlertData>({
-      index: this.indexTemplateAndPattern.pattern,
+      index,
       body: queryBody,
+      ignore_unavailable: true,
     });
 
     return { hits, total };
@@ -366,34 +379,31 @@ export class AlertsClient<
 
     const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex];
     if (alertsToIndex.length > 0) {
+      const bulkBody = flatMap(
+        [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert: Alert & AlertData) => [
+          getBulkMeta(
+            alert.kibana.alert.uuid,
+            this.fetchedAlerts.indices[alert.kibana.alert.uuid],
+            this.fetchedAlerts.seqNo[alert.kibana.alert.uuid],
+            this.fetchedAlerts.primaryTerm[alert.kibana.alert.uuid],
+            this.isUsingDataStreams()
+          ),
+          alert,
+        ])
+      );
+
       try {
         const response = await esClient.bulk({
           refresh: 'wait_for',
           index: this.indexTemplateAndPattern.alias,
-          require_alias: true,
-          body: flatMap(
-            [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert: Alert & AlertData) => [
-              {
-                index: {
-                  _id: alert.kibana.alert.uuid,
-                  // If we know the concrete index for this alert, specify it
-                  ...(this.fetchedAlerts.indices[alert.kibana.alert.uuid]
-                    ? {
-                        _index: this.fetchedAlerts.indices[alert.kibana.alert.uuid],
-                        require_alias: false,
-                      }
-                    : {}),
-                },
-              },
-              alert,
-            ])
-          ),
+          require_alias: !this.isUsingDataStreams(),
+          body: bulkBody,
         });
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {
           const errorsInResponse = (response.items ?? [])
-            .map((item) => (item && item.index && item.index.error ? item.index.error : null))
+            .map((item) => item?.index?.error || item?.create?.error)
             .filter((item) => item != null);
 
           this.options.logger.error(
@@ -407,6 +417,33 @@ export class AlertsClient<
           `Error writing ${alertsToIndex.length} alerts to ${this.indexTemplateAndPattern.alias} - ${err.message}`
         );
       }
+    }
+
+    function getBulkMeta(
+      uuid: string,
+      index: string | undefined,
+      seqNo: number | undefined,
+      primaryTerm: number | undefined,
+      isUsingDataStreams: boolean
+    ) {
+      if (index && seqNo != null && primaryTerm != null) {
+        return {
+          index: {
+            _id: uuid,
+            _index: index,
+            if_seq_no: seqNo,
+            if_primary_term: primaryTerm,
+            require_alias: false,
+          },
+        };
+      }
+
+      return {
+        create: {
+          _id: uuid,
+          ...(isUsingDataStreams ? {} : { require_alias: true }),
+        },
+      };
     }
   }
 
@@ -505,5 +542,9 @@ export class AlertsClient<
         }));
       },
     };
+  }
+
+  public isUsingDataStreams(): boolean {
+    return this._isUsingDataStreams;
   }
 }
