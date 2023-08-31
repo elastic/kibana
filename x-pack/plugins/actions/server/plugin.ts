@@ -43,7 +43,7 @@ import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/ser
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client/actions_client';
-import { ActionTypeRegistry } from './action_type_registry';
+import { ActionTypeRegistry, DEFAULT_ENABLED_CONNECTOR_TYPES } from './action_type_registry';
 import {
   createEphemeralExecutionEnqueuerFunction,
   createBulkExecutionEnqueuerFunction,
@@ -128,7 +128,7 @@ export interface PluginSetupContract {
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
-  setEnabledConnectorTypes: (actionTypes: string[]) => void;
+  setEnabledConnectorTypes: (actionTypes: string[] | null) => void;
 }
 
 export interface PluginStartContract {
@@ -375,7 +375,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       getActionsConfigurationUtilities: () => actionsConfigUtils,
       setEnabledConnectorTypes: (actionTypes) => {
-        actionTypeRegistry.setEnabledConnectorTypes(new Set(actionTypes));
+        if (actionTypes === null || (actionTypes.length > 0 && actionTypes[0] === '*')) {
+          actionTypeRegistry.setEnabledConnectorTypes(DEFAULT_ENABLED_CONNECTOR_TYPES);
+        } else {
+          actionTypeRegistry.setEnabledConnectorTypes(new Set(actionTypes));
+        }
       },
     };
   }
