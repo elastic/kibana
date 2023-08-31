@@ -53,8 +53,15 @@ export const projectSettingsNavCategories: ProjectLinkCategory[] = [
     linkIds: [
       ExternalPageName.cloudUsersAndRoles,
       ExternalPageName.cloudBilling,
-      ExternalPageName.integrationsSecurity,
       SecurityPageName.entityAnalyticsManagement,
+    ],
+  },
+  {
+    type: LinkCategoryType.separator,
+    linkIds: [
+      ExternalPageName.integrationsSecurity,
+      ExternalPageName.maps,
+      ExternalPageName.visualize,
     ],
   },
   {
@@ -180,5 +187,17 @@ export const projectSettingsNavLinks: ProjectNavigationLink[] = [
   {
     id: ExternalPageName.managementSettings,
     title: i18n.MANAGEMENT_SETTINGS_TITLE,
+  },
+  {
+    id: ExternalPageName.maps,
+    title: i18n.MAPS_TITLE,
+    description: i18n.MAPS_DESCRIPTION,
+    landingIcon: IconGraphLazy,
+  },
+  {
+    id: ExternalPageName.visualize,
+    title: i18n.VISUALIZE_TITLE,
+    description: i18n.VISUALIZE_DESCRIPTION,
+    landingIcon: IconGraphLazy,
   },
 ];
