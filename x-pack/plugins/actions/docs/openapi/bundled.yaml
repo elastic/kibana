@@ -243,7 +243,6 @@ paths:
               description: The properties vary depending on the connector type.
               oneOf:
                 - $ref: '#/components/schemas/update_connector_request_cases_webhook'
-                - $ref: '#/components/schemas/create_connector_request_d3security'
                 - $ref: '#/components/schemas/update_connector_request_index'
                 - $ref: '#/components/schemas/update_connector_request_jira'
                 - $ref: '#/components/schemas/update_connector_request_opsgenie'
@@ -254,7 +253,6 @@ paths:
                 - $ref: '#/components/schemas/update_connector_request_slack_api'
                 - $ref: '#/components/schemas/update_connector_request_slack_webhook'
                 - $ref: '#/components/schemas/update_connector_request_swimlane'
-                - $ref: '#/components/schemas/update_connector_request_torq'
             examples:
               updateIndexConnectorRequest:
                 $ref: '#/components/examples/update_index_connector_request'
@@ -2789,21 +2787,6 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_swimlane'
-    update_connector_request_torq:
-      title: Update Torq connector request
-      type: object
-      required:
-        - config
-        - name
-        - secrets
-      properties:
-        config:
-          $ref: '#/components/schemas/config_properties_torq'
-        name:
-          type: string
-          description: The display name for the connector.
-        secrets:
-          $ref: '#/components/schemas/secrets_properties_torq'
     connector_types:
       title: Connector types
       type: string
