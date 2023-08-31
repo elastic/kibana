@@ -16,9 +16,41 @@ import { SearchBar } from '@kbn/unified-search-plugin/public';
 import type { QueryBarComponentProps } from '.';
 import { QueryBar } from '.';
 
+import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields } from '@kbn/data-views-plugin/common/mocks';
+import { useKibana } from '../../lib/kibana';
+
+const getMockIndexPattern = () => ({
+  ...createStubDataView({
+    spec: {
+      id: '1234',
+      title: 'logstash-*',
+      fields: ((): DataViewFieldMap => {
+        const fieldMap: DataViewFieldMap = Object.create(null);
+        for (const field of fields) {
+          fieldMap[field.name] = { ...field };
+        }
+        return fieldMap;
+      })(),
+    },
+  }),
+});
+
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
+jest.mock('../../lib/kibana');
 
 describe('QueryBar ', () => {
+  (useKibana as jest.Mock).mockReturnValue({
+    services: {
+      data: {
+        dataViews: {
+          create: jest.fn().mockResolvedValue(getMockIndexPattern()),
+          clearInstanceCache: jest.fn(),
+        },
+      },
+    },
+  });
   const mockOnChangeQuery = jest.fn();
   const mockOnSubmitQuery = jest.fn();
   const mockOnSavedQuery = jest.fn();
@@ -52,10 +84,10 @@ describe('QueryBar ', () => {
     mockOnSavedQuery.mockClear();
   });
 
-  test('check if we format the appropriate props to QueryBar', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <QueryBar
+  test('check if we format the appropriate props to QueryBar', async () => {
+    await act(async () => {
+      const wrapper = await getWrapper(
+        <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
           hideSavedQuery={false}
@@ -68,317 +100,26 @@ describe('QueryBar ', () => {
           onSubmitQuery={mockOnSubmitQuery}
           onSavedQuery={mockOnSavedQuery}
         />
-      </TestProviders>
-    );
-    const {
-      customSubmitButton,
-      timeHistory,
-      onClearSavedQuery,
-      onFiltersUpdated,
-      onQueryChange,
-      onQuerySubmit,
-      onSaved,
-      onSavedQueryUpdated,
-      ...searchBarProps
-    } = wrapper.find(SearchBar).props();
+      );
 
-    expect(searchBarProps).toMatchInlineSnapshot(`
-      Object {
-        "dataTestSubj": undefined,
-        "dateRangeFrom": "now/d",
-        "dateRangeTo": "now/d",
-        "displayStyle": undefined,
-        "filters": Array [],
-        "indexPatterns": Array [
-          DataView {
-            "allowNoIndex": false,
-            "deleteFieldFormat": [Function],
-            "fieldAttrs": Object {},
-            "fieldFormatMap": Object {},
-            "fieldFormats": Object {},
-            "fields": FldList [
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "@timestamp",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "date",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "@version",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "agent.ephemeral_id",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "agent.hostname",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "agent.id",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "agent.test1",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "agent.test2",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "agent.test3",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "agent.test4",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "agent.test5",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "agent.test6",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "agent.test7",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "agent.test8",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "host.name",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": false,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "nestedField.firstAttributes",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": false,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": undefined,
-                "lang": undefined,
-                "name": "nestedField.secondAttributes",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
-            ],
-            "flattenHit": [Function],
-            "getFieldAttrs": [Function],
-            "getIndexPattern": [Function],
-            "getName": [Function],
-            "getOriginalSavedObjectBody": [Function],
-            "id": undefined,
-            "matchedIndices": Array [],
-            "metaFields": Array [],
-            "name": "",
-            "namespaces": Array [],
-            "originalSavedObjectBody": Object {},
-            "resetOriginalSavedObjectBody": [Function],
-            "runtimeFieldMap": Object {},
-            "setFieldFormat": [Function],
-            "setIndexPattern": [Function],
-            "shortDotsEnable": false,
-            "sourceFilters": Array [],
-            "timeFieldName": undefined,
-            "title": "filebeat-*,auditbeat-*,packetbeat-*",
-            "type": undefined,
-            "typeMeta": undefined,
-            "version": undefined,
-          },
-        ],
-        "isDisabled": undefined,
-        "isLoading": false,
-        "isRefreshPaused": true,
-        "query": Object {
-          "language": "kuery",
-          "query": "here: query",
-        },
-        "refreshInterval": undefined,
-        "savedQuery": undefined,
-        "showAutoRefreshOnly": false,
-        "showDatePicker": false,
-        "showFilterBar": true,
-        "showQueryInput": true,
-        "showSaveQuery": true,
-        "showSubmitButton": false,
-      }
-    `);
+      await waitFor(() => {
+        wrapper.update();
+        const {
+          customSubmitButton,
+          timeHistory,
+          onClearSavedQuery,
+          onFiltersUpdated,
+          onQueryChange,
+          onQuerySubmit,
+          onSaved,
+          onSavedQueryUpdated,
+          ...searchBarProps
+        } = wrapper.find(SearchBar).props();
+        expect((searchBarProps?.indexPatterns ?? [{ id: 'unknown' }])[0].id).toEqual(
+          getMockIndexPattern().id
+        );
+      });
+    });
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/132659
@@ -467,7 +208,6 @@ describe('QueryBar ', () => {
         const onSubmitQueryRef = searchBarProps.onQuerySubmit;
         const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
         wrapper.setProps({ onSavedQuery: jest.fn() });
-        wrapper.update();
 
         expect(onSavedQueryRef).not.toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
         expect(onChangedQueryRef).toEqual(wrapper.find(SearchBar).props().onQueryChange);
