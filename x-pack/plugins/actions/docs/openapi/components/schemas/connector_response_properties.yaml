@@ -17,6 +17,7 @@ oneOf:
   - $ref: 'connector_response_properties_swimlane.yaml'
   - $ref: 'connector_response_properties_teams.yaml'
   - $ref: 'connector_response_properties_tines.yaml'
+  - $ref: 'connector_response_properties_torq.yaml'
   - $ref: 'connector_response_properties_webhook.yaml'
   - $ref: 'connector_response_properties_xmatters.yaml'
 discriminator:

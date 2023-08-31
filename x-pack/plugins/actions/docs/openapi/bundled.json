@@ -109,6 +109,9 @@
                     "$ref": "#/components/schemas/create_connector_request_tines"
                   },
                   {
+                    "$ref": "#/components/schemas/create_connector_request_torq"
+                  },
+                  {
                     "$ref": "#/components/schemas/create_connector_request_webhook"
                   },
                   {
@@ -370,6 +373,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/create_connector_request_tines"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_torq"
                   },
                   {
                     "$ref": "#/components/schemas/create_connector_request_webhook"
@@ -2605,6 +2611,50 @@
           }
         }
       },
+      "config_properties_torq": {
+        "title": "Connector request properties for a Torq connector",
+        "description": "Defines properties for connectors when type is `.torq`.",
+        "type": "object",
+        "additionalProperties": true
+      },
+      "secrets_properties_torq": {
+        "title": "Connector secrets properties for a Torq connector",
+        "description": "Defines secrets for connectors when type is `.torq`.",
+        "type": "object",
+        "additionalProperties": true
+      },
+      "create_connector_request_torq": {
+        "title": "Create Torq connector request",
+        "description": "The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.\n",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_torq"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".torq"
+            ],
+            "example": ".torq"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector.",
+            "example": "my-connector"
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_torq"
+          }
+        }
+      },
       "config_properties_webhook": {
         "title": "Connector request properties for a Webhook connector",
         "description": "Defines properties for connectors when type is `.webhook`.",
@@ -3481,6 +3531,50 @@
           }
         }
       },
+      "connector_response_properties_torq": {
+        "title": "Connector response properties for a Torq connector",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_torq"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".torq"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the connector."
+          },
+          "is_deprecated": {
+            "$ref": "#/components/schemas/is_deprecated"
+          },
+          "is_missing_secrets": {
+            "$ref": "#/components/schemas/is_missing_secrets"
+          },
+          "is_preconfigured": {
+            "$ref": "#/components/schemas/is_preconfigured"
+          },
+          "is_system_action": {
+            "$ref": "#/components/schemas/is_system_action"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          }
+        }
+      },
       "connector_response_properties_webhook": {
         "title": "Connector response properties for a Webhook connector",
         "type": "object",
@@ -3620,6 +3714,9 @@
           },
           {
             "$ref": "#/components/schemas/connector_response_properties_tines"
+          },
+          {
+            "$ref": "#/components/schemas/connector_response_properties_torq"
           },
           {
             "$ref": "#/components/schemas/connector_response_properties_webhook"
