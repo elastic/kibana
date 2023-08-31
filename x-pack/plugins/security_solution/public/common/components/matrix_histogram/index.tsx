@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
+import { isString } from 'lodash/fp';
 import * as i18n from './translations';
 import { HeaderSection } from '../header_section';
 import { Panel } from '../panel';
@@ -66,6 +67,7 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     scopeId?: string;
     title: string | GetTitle;
     hideQueryToggle?: boolean;
+    applyGlobalQueriesAndFilters?: boolean;
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -117,6 +119,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   yTickFormatter,
   skip,
   hideQueryToggle = false,
+  applyGlobalQueriesAndFilters = true,
 }) => {
   const visualizationId = `${id}-embeddable`;
   const dispatch = useDispatch();
@@ -258,9 +261,20 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
   const extraVisualizationOptions = useMemo(
-    () => ({ dnsIsPtrIncluded: isPtrIncluded ?? false }),
-    [isPtrIncluded]
+    () => ({
+      dnsIsPtrIncluded: isPtrIncluded ?? false,
+      filters: filterQuery
+        ? [
+            {
+              query: isString(filterQuery) ? JSON.parse(filterQuery) : filterQuery,
+              meta: {},
+            },
+          ]
+        : undefined,
+    }),
+    [isPtrIncluded, filterQuery]
   );
+
   if (hideHistogram) {
     return null;
   }
@@ -329,6 +343,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
           {toggleStatus ? (
             isChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
+                applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                 data-test-subj="embeddable-matrix-histogram"
                 extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}
