@@ -110,6 +110,7 @@ const getResponseActionListTableColumns = ({
           return (
             <EuiToolTip content={UX_MESSAGES.triggeredByRule} anchorClassName="eui-textTruncate">
               <SecuritySolutionLinkAnchor
+                title={undefined}
                 data-test-subj="ruleName"
                 deepLinkId={SecurityPageName.rules}
                 path={getRuleDetailsUrl(ruleId)}
@@ -129,11 +130,13 @@ const getResponseActionListTableColumns = ({
           <StyledFacetButton
             icon={
               <EuiAvatar
+                title={undefined}
                 name={createdBy}
                 data-test-subj={getTestId('column-user-avatar')}
                 size="s"
               />
             }
+            title={undefined}
           >
             <EuiToolTip content={createdBy} anchorClassName="eui-textTruncate">
               <EuiText

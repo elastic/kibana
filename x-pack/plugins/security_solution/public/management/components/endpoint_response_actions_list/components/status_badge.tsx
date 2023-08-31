@@ -18,7 +18,7 @@ export const StatusBadge = memo(
     status: string;
   }) => {
     return (
-      <EuiBadge data-test-subj={dataTestSubj} color={color}>
+      <EuiBadge data-test-subj={dataTestSubj} color={color} title={undefined}>
         {status}
       </EuiBadge>
     );
