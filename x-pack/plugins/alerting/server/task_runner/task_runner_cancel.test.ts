@@ -191,6 +191,8 @@ describe('Task Runner Cancel', () => {
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
     (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
     logger.get.mockImplementation(() => logger);
+
+    actionsClient.bulkEnqueueExecution.mockResolvedValue([]);
   });
 
   test('updates rule saved object execution status and writes to event log entry when task is cancelled mid-execution', async () => {
