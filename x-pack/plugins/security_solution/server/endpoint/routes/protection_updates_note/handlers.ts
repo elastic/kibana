@@ -116,7 +116,7 @@ export const getProtectionUpdatesNoteHandler = function (): RequestHandler<
     const soClientResponse = await getProtectionNote(SOClient, packagePolicyId);
 
     if (!soClientResponse.saved_objects[0] || !soClientResponse.saved_objects[0].attributes) {
-      return response.notFound({ body: 'No note found for this policy' });
+      return response.notFound({ body: { message: 'No note found for this policy' } });
     }
 
     const { attributes } = soClientResponse.saved_objects[0];

@@ -11,7 +11,7 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 import { resolvePathVariables } from '../../../../../../common/utils/resolve_path_variables';
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../../../../common/endpoint/constants';
 
-interface UseProtectionUpdatesNote {
+interface ProtectionUpdatesNoteParams {
   packagePolicyId: string;
 }
 
@@ -19,7 +19,9 @@ interface NoteResponse {
   note: string;
 }
 
-export const useCreateProtectionUpdatesNote = ({ packagePolicyId }: UseProtectionUpdatesNote) => {
+export const useCreateProtectionUpdatesNote = ({
+  packagePolicyId,
+}: ProtectionUpdatesNoteParams) => {
   const { http } = useKibana().services;
   const queryClient = useQueryClient();
 
