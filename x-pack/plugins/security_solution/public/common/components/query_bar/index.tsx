@@ -39,6 +39,9 @@ export interface QueryBarComponentProps {
   isDisabled?: boolean;
 }
 
+export const isDataView = (obj: unknown): obj is DataView =>
+  obj != null && typeof obj === 'object' && Object.hasOwn(obj, 'getName');
+
 export const QueryBar = memo<QueryBarComponentProps>(
   ({
     dateRangeFrom,
@@ -107,8 +110,8 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const dataView = useMemo(() => {
-      if (Object.hasOwn(indexPattern, 'getName')) {
-        return [indexPattern] as DataView[];
+      if (isDataView(indexPattern)) {
+        return [indexPattern];
       }
       const dv = new DataView({
         spec: {
