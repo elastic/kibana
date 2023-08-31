@@ -40,7 +40,8 @@ describe('Sourcerer', () => {
     cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
-  describe('permissions', { tags: '@ess' }, () => {
+
+  describe('permissions', { tags: ['@ess', '@brokenInServerless'] }, () => {
     before(() => {
       createUsersAndRoles(usersToCreate, rolesToCreate);
     });
