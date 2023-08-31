@@ -85,7 +85,7 @@ image::images/data-comparison.png[An example of the data comparison view]
 
 [discrete]
 ==== ELSER test user interface
-preview:[] Elastic machine learning introduced AI search out of the box with the release of Elastic Learned Sparse Encoder in 8.8. Now you have the option to easily test ELSER on the user interface. From the Trained Models view select the **Test model** option from the **Actions** colum menu.
+preview:[] Elastic machine learning introduced AI search out of the box with the release of Elastic Learned Sparse EncodeR in 8.8. Now you have the option to easily test ELSER on the user interface. From the Trained Models view select the **Test model** option from the **Actions** column menu.
 
 [role="screenshot"]
 image::images/elser.png[An example of the new ELSER UI]
