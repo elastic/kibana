@@ -32,6 +32,9 @@ export const SecurityPagePath = {
 export enum ExternalPageName {
   // Osquery
   osquery = 'osquery:',
+  // Analytics
+  maps = 'maps:',
+  visualize = 'visualize:',
   // Machine Learning
   // Ref: packages/default-nav/ml/default_navigation.ts
   mlOverview = 'ml:overview',
