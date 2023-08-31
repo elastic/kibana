@@ -41,6 +41,7 @@
     "@kbn/cloud-security-posture-plugin",
     "@kbn/fleet-plugin",
     "@kbn/core-elasticsearch-server",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/file-upload-plugin"
   ]
 }
