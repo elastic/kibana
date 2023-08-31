@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
@@ -31,6 +32,7 @@ import {
 import { getFieldByType } from '../../../../../common/inventory_models';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { ProcessesExplanationMessage } from '../../components/processes_explanation';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
@@ -130,6 +132,11 @@ export const Processes = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        {loading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          !error && (response?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
+        )}
         <EuiFlexItem grow={false}>
           <EuiSearchBar
             query={searchBarState}
