@@ -92,14 +92,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     type: 'datatable',
     inputTypes: ['kibana_context', 'null'],
     help: i18n.translate('data.search.esql.help', {
-      defaultMessage: 'Queries Elasticsearch using ESQL.',
+      defaultMessage: 'Queries Elasticsearch using ES|QL.',
     }),
     args: {
       query: {
         aliases: ['_', 'q'],
         types: ['string'],
         help: i18n.translate('data.search.esql.query.help', {
-          defaultMessage: 'An ESQL query.',
+          defaultMessage: 'An ES|QL query.',
         }),
       },
       timezone: {

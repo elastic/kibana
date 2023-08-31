@@ -17,11 +17,8 @@ migrations.algorithm: zdt
 # A longer migration time is acceptable due to the ZDT algorithm.
 migrations.batchSize: 250
 
-# temporarily allow to run the migration on UI nodes
-# until the controller is able to spawn the migrator job/pod
 migrations.zdt:
   metaPickupSyncDelaySec: 5
-  runOnRoles: ['ui']
 
 # Ess plugins
 xpack.securitySolutionEss.enabled: false

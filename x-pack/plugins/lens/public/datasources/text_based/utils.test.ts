@@ -69,7 +69,7 @@ describe('Text based languages utils', () => {
 
     it('should return the index pattern for es|ql query', () => {
       const indexPattern = getIndexPatternFromTextBasedQuery({
-        sql: 'from foo | keep bytes, memory ',
+        esql: 'from foo | keep bytes, memory ',
       });
 
       expect(indexPattern).toBe('foo');
