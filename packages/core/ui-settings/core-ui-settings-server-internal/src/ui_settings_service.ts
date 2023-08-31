@@ -95,7 +95,9 @@ export class UiSettingsService
     return {
       register: this.register,
       registerGlobal: this.registerGlobal,
-      setAllowlist: this.setAllowlist,
+      setAllowlist: (keys) => {
+        this.allowlist = keys;
+      },
     };
   }
 
@@ -153,19 +155,16 @@ export class UiSettingsService
     });
   };
 
-  private setAllowlist = (keys: string[]) => {
-    this.allowlist = keys;
-  };
-
   private applyAllowlist(keys: string[]) {
+    const keySet = new Set(keys);
     for (const [key, definition] of this.uiSettingsDefaults) {
-      if (!keys.includes(key)) {
+      if (!keySet.has(key)) {
         definition.readonly = true;
         definition.readonlyMode = 'strict';
       }
     }
     for (const [key, definition] of this.uiSettingsGlobalDefaults) {
-      if (!keys.includes(key)) {
+      if (!keySet.has(key)) {
         definition.readonly = true;
         definition.readonlyMode = 'strict';
       }
