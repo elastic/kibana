@@ -108,9 +108,7 @@ export const updateIndexMappings = async ({
   totalFieldsLimit,
   concreteIndices,
 }: UpdateIndexMappingsOpts) => {
-  logger.debug(
-    `Updating underlying mappings for ${concreteIndices.length} indices / data streams.`
-  );
+  logger.info(`Updating underlying mappings for ${concreteIndices.length} indices / data streams.`);
 
   // Update total field limit setting of found indices
   // Other index setting changes are not updated at this time

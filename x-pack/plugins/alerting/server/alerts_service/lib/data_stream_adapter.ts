@@ -150,7 +150,7 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
       }))
     );
 
-    logger.debug(
+    logger.info(
       `Found ${concreteIndices.length} concrete indices for ${
         indexPatterns.name
       } - ${JSON.stringify(concreteIndices)}`
