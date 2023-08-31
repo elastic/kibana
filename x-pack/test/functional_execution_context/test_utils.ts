@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Fs from 'fs/promises';
 import Path from 'path';
+import JSON5 from 'json5';
+import Fs from 'fs/promises';
 import { isEqualWith } from 'lodash';
 import type { Ecs, KibanaExecutionContext } from '@kbn/core/server';
-import type { RetryService } from '@kbn/ftr-common-functional-services';
-import { concatMap, defer, filter, firstValueFrom, ReplaySubject, scan, timeout } from 'rxjs';
 
 export const logFilePath = Path.resolve(__dirname, './kibana.log');
 export const ANY = Symbol('any');
-
-let logstream$: ReplaySubject<Ecs> | undefined;
 
 export function getExecutionContextFromLogRecord(record: Ecs | undefined): KibanaExecutionContext {
   if (record?.log?.logger !== 'execution_context' || !record?.message) {
@@ -37,95 +34,41 @@ export function isExecutionContextLog(
   }
 }
 
-// to avoid splitting log record containing \n symbol
-const endOfLine = /(?<=})\s*\n/;
-export async function assertLogContains({
-  description,
+/**
+ * Checks the provided log records against the provided predicate
+ */
+export function assertLogContains({
+  logs,
   predicate,
-  retry,
+  description,
 }: {
-  description: string;
+  logs: Ecs[];
   predicate: (record: Ecs) => boolean;
-  retry: RetryService;
-}): Promise<void> {
-  // logs are written to disk asynchronously. I sacrificed performance to reduce flakiness.
-  await retry.waitFor(description, async () => {
-    if (!logstream$) {
-      logstream$ = getLogstream$();
-    }
-    try {
-      await firstValueFrom(logstream$.pipe(filter(predicate), timeout(5_000)));
-      return true;
-    } catch (err) {
-      return false;
-    }
-  });
+  description: string;
+}) {
+  if (!logs.some(predicate)) {
+    throw new Error(`Unable to find log entries: ${description}`);
+  }
 }
 
 /**
- * Creates an observable that continuously tails the log file.
+ * Reads the log file and parses the JSON objects that it contains.
  */
-function getLogstream$(): ReplaySubject<Ecs> {
-  const stream$ = new ReplaySubject<Ecs>();
-
-  defer(async function* () {
-    const fd = await Fs.open(logFilePath, 'rs');
-    while (!stream$.isStopped) {
-      const { bytesRead, buffer } = await fd.read();
-      if (bytesRead) {
-        yield buffer.toString('utf8', 0, bytesRead);
-      }
-    }
-    await fd.close();
-  })
-    .pipe(
-      scan<string, { buffer: string; records: Ecs[] }>(
-        ({ buffer }, chunk) => {
-          const logString = buffer.concat(chunk);
-          const lines = logString.split(endOfLine);
-          const lastLine = lines.pop();
-          const records = lines.map((s) => JSON.parse(s));
-
-          let leftover = '';
-          if (lastLine) {
-            try {
-              const validRecord = JSON.parse(lastLine);
-              records.push(validRecord);
-            } catch (err) {
-              leftover = lastLine;
-            }
-          }
-
-          return { buffer: leftover, records };
-        },
-        {
-          records: [], // The ECS entries in the logs
-          buffer: '', // Accumulated leftovers from the previous operation
-        }
-      ),
-      concatMap(({ records }) => records)
-    )
-    .subscribe(stream$);
-
-  // let the content start flowing
-  stream$.subscribe();
-
-  return stream$;
-}
-
-export function closeLogstream() {
-  logstream$?.complete();
-  logstream$ = undefined;
+export async function readLogFile(): Promise<Ecs[]> {
+  await forceSyncLogFile();
+  const logFileContent = await Fs.readFile(logFilePath, 'utf-8');
+  return logFileContent
+    .split('\n')
+    .filter(Boolean)
+    .map<Ecs>((str) => JSON5.parse(str));
 }
 
 /**
  * Truncates the log file to avoid tests looking at the logs from previous executions.
  */
 export async function clearLogFile() {
-  closeLogstream();
   await Fs.writeFile(logFilePath, '', 'utf8');
   await forceSyncLogFile();
-  logstream$ = getLogstream$();
 }
 
 /**
