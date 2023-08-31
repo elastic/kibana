@@ -98,6 +98,6 @@ describe('queryString', () => {
   });
 
   it('converts a RequestQuery to the appropriate string', () => {
-    expect(queryString({ a: true, b: 'foo'})).toEqual('?a=true&b=foo');
-  })
+    expect(queryString({ a: true, b: 'foo' })).toEqual('?a=true&b=foo');
+  });
 });
