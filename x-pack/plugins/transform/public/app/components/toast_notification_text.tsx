@@ -47,13 +47,15 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
   if (
     !forceModal &&
     typeof text === 'object' &&
+    text !== null &&
     typeof text.message === 'string' &&
     text.message.length <= MAX_SIMPLE_MESSAGE_LENGTH
   ) {
     return text.message;
   }
 
-  const unformattedText = typeof text === 'object' && text.message ? text.message : text;
+  const unformattedText =
+    typeof text === 'object' && text !== null && text.message ? text.message : text;
   const formattedText =
     typeof unformattedText === 'object' ? JSON.stringify(text, null, 2) : unformattedText;
   const textLength = previewTextLength ?? 140;
