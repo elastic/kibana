@@ -6,11 +6,9 @@
  */
 import { RulesClientContext } from '../../../../rules_client/types';
 import { RuleDomain } from '../../types';
-import { parseDuration } from '../../../../../common/parse_duration';
+import { parseDuration, convertDurationToFrequency } from '../../../../../common/parse_duration';
 import { GetScheduleFrequencyResult } from './types';
 import { getSchemaFrequencyResultSchema } from './schema';
-
-const MS_PER_MINUTE = 60 * 1000;
 
 export interface SchedulesIntervalAggregationResult {
   schedule_intervals: {
@@ -22,23 +20,19 @@ export interface SchedulesIntervalAggregationResult {
 }
 
 const convertIntervalToFrequency = (context: RulesClientContext, schedule: string) => {
-  let scheduleInterval = 0;
+  let scheduleFrequency = 0;
 
   try {
     // Normalize the interval (period) in terms of minutes
-    scheduleInterval = parseDuration(schedule) / MS_PER_MINUTE;
+    const scheduleIntervalDuration = parseDuration(schedule);
+    scheduleFrequency = convertDurationToFrequency(scheduleIntervalDuration);
   } catch (e) {
     context.logger.warn(
       `Failed to parse rule schedule interval for schedule frequency calculation: ${e.message}`
     );
-    return 0;
   }
 
-  if (scheduleInterval === 0) {
-    return scheduleInterval;
-  }
-
-  return 1 / scheduleInterval;
+  return scheduleFrequency;
 };
 
 export const getScheduleFrequency = async (

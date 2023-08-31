@@ -7,7 +7,11 @@
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import { formatDuration, parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
+import {
+  formatDuration,
+  parseDuration,
+  convertDurationToFrequency,
+} from '@kbn/alerting-plugin/common/parse_duration';
 import {
   RuleTypeModel,
   Rule,
@@ -19,10 +23,17 @@ import {
 } from '../../../types';
 import { InitialRule } from './rule_reducer';
 
-export function validateBaseProperties(
-  ruleObject: InitialRule,
-  config: TriggersActionsUiConfig
-): ValidationResult {
+export function validateBaseProperties({
+  ruleObject,
+  initialRuleObject,
+  config,
+  remainingSchedulesPerMin,
+}: {
+  ruleObject: InitialRule;
+  initialRuleObject?: Rule;
+  config: TriggersActionsUiConfig;
+  remainingSchedulesPerMin?: number;
+}): ValidationResult {
   const validationResult = { errors: {} };
   const errors = {
     name: new Array<string>(),
@@ -55,6 +66,30 @@ export function validateBaseProperties(
             minimum: formatDuration(config.minimumScheduleInterval.value, true),
           },
         })
+      );
+    }
+  } else if (typeof remainingSchedulesPerMin === 'number') {
+    const newRuleSchedulesPerMin = convertDurationToFrequency(
+      parseDuration(ruleObject.schedule.interval)
+    );
+    const initialRuleSchedulesPerMin = initialRuleObject
+      ? convertDurationToFrequency(parseDuration(initialRuleObject.schedule.interval))
+      : 0;
+
+    const newRemainingSchedulesPerMin = remainingSchedulesPerMin + initialRuleSchedulesPerMin;
+
+    if (newRemainingSchedulesPerMin < newRuleSchedulesPerMin) {
+      errors['schedule.interval'].push(
+        i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleForm.error.scheduledPerMinCircuitBreak',
+          {
+            defaultMessage: `Interval ({ruleSchedulesPerMin}/minute) exceeds the remaining allowable rules scheduled per min limit ({remainingSchedulesPerMin}/minute)`,
+            values: {
+              remainingSchedulesPerMin: newRemainingSchedulesPerMin,
+              ruleSchedulesPerMin: newRuleSchedulesPerMin,
+            },
+          }
+        )
       );
     }
   }
@@ -103,15 +138,28 @@ export function validateBaseProperties(
   return validationResult;
 }
 
-export function getRuleErrors(
-  rule: Rule,
-  ruleTypeModel: RuleTypeModel | null,
-  config: TriggersActionsUiConfig
-) {
+export function getRuleErrors({
+  rule,
+  initialRule,
+  ruleTypeModel,
+  config,
+  remainingSchedulesPerMin,
+}: {
+  rule: Rule;
+  initialRule?: Rule;
+  ruleTypeModel: RuleTypeModel | null;
+  config: TriggersActionsUiConfig;
+  remainingSchedulesPerMin?: number;
+}) {
   const ruleParamsErrors: IErrorObject = ruleTypeModel
     ? ruleTypeModel.validate(rule.params).errors
     : [];
-  const ruleBaseErrors = validateBaseProperties(rule, config).errors as IErrorObject;
+  const ruleBaseErrors = validateBaseProperties({
+    ruleObject: rule,
+    initialRuleObject: initialRule,
+    config,
+    remainingSchedulesPerMin,
+  }).errors as IErrorObject;
   const ruleErrors = {
     ...ruleParamsErrors,
     ...ruleBaseErrors,
