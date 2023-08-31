@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { queryString, Router, type RouterOptions } from './router';
+import { Router, type RouterOptions } from './router';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { schema } from '@kbn/config-schema';
 
@@ -85,19 +85,5 @@ describe('Router', () => {
       const [route] = router.getRoutes();
       expect(route.options).toEqual({});
     });
-  });
-});
-
-describe('queryString', () => {
-  it('returns empty string if the provided RequestQuery is undefined', () => {
-    expect(queryString()).toEqual('');
-  });
-
-  it('returns empty string if there are no query parameters', () => {
-    expect(queryString({})).toEqual('');
-  });
-
-  it('converts a RequestQuery to the appropriate string', () => {
-    expect(queryString({ a: true, b: 'foo' })).toEqual('?a=true&b=foo');
   });
 });
