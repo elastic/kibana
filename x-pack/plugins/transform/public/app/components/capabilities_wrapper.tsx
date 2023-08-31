@@ -7,12 +7,7 @@
 
 import React, { type FC } from 'react';
 
-import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiPageTemplate, EuiEmptyPrompt } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -33,7 +28,7 @@ export const NotAuthorizedSection = ({ title, message }: Props) => (
 const MissingCapabilities: FC = () => (
   <EuiFlexGroup justifyContent="spaceAround">
     <EuiFlexItem grow={false}>
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageTemplate.EmptyPrompt color="danger">
         <NotAuthorizedSection
           title={
             <FormattedMessage
@@ -48,7 +43,7 @@ const MissingCapabilities: FC = () => (
             />
           }
         />
-      </EuiPageContent>
+      </EuiPageTemplate.EmptyPrompt>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
