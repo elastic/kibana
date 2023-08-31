@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import progress from '../images/progress.svg';
 import invite from '../images/invite.svg';
 import type { HeaderSection } from './types';
@@ -22,6 +22,7 @@ import { useKibana } from '../../common/services';
 import { getCloudUrl } from '../../navigation/links/util';
 import type { ProductTier } from '../../../common/product';
 import { ChangePlanLink } from './change_plan_link';
+import { Spacer } from './spacer';
 
 export const useWelcomePanel = ({
   productTier,
@@ -65,9 +66,9 @@ export const useWelcomePanel = ({
         id: 'inviteYourTeam',
         footer: (
           <>
-            <EuiSpacer size="l" />
-            <EuiFlexGroup justifyContent="flexStart">
-              <EuiFlexItem grow={false}>
+            <Spacer />
+            <EuiFlexGroup justifyContent="flexStart" component="span">
+              <EuiFlexItem grow={false} component="span">
                 <EuiButton
                   iconType="plusInCircle"
                   href={getCloudUrl('organization', cloud)}

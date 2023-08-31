@@ -9,7 +9,6 @@ import React from 'react';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import {
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -20,6 +19,7 @@ import { css } from '@emotion/react';
 import type { ProductTier } from '../../../common/product';
 import { ProductTierBadge } from './product_tier_badge';
 import { WELCOME_PANEL_PROJECT_CREATED_CHANGE_PLAN_TITLE } from './translations';
+import { Spacer } from './spacer';
 
 const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | undefined }) => {
   const { euiTheme } = useEuiTheme();
@@ -28,17 +28,7 @@ const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | u
   return productTier ? (
     <>
       {/* <div> cannot appear as a descendant of <p>, EuiSpacer is a div */}
-      <span
-        css={css`
-          padding: ${euiTheme.size.l} 0 00;
-          width: 100%;
-          height: 1px;
-          display: inline-block;
-          &::before {
-            content: ' ';
-          }
-        `}
-      />
+      <Spacer />
       <EuiFlexGroup
         justifyContent="flexEnd"
         component="span"
