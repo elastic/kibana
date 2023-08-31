@@ -28,9 +28,10 @@ import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_det
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
 
-describe('CTI Enrichment', { tags: ['@ess', '@serverless'] }, () => {
+describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
+    // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
     cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
     cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
     login();

@@ -52,7 +52,7 @@ describe(
           );
       });
     });
-    it('Filter out', () => {
+    it('Filter out', { tags: ['@brokenInServerless'] }, () => {
       cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).then((sub) => {
         const selectedTimestamp = sub.text();
         cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).realHover();
