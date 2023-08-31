@@ -60,11 +60,7 @@ import type { LicenseService } from '../../../../../common/license';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
-  &.euiDescriptionList--column .euiDescriptionList__title {
-    width: 30%;
-  }
-  &.euiDescriptionList--column .euiDescriptionList__description {
-    width: 70%;
+  .euiDescriptionList__description {
     overflow-wrap: anywhere;
   }
 `;
@@ -155,6 +151,7 @@ export const StepRuleDescriptionComponent = <T,>({
           <DescriptionListContainer
             data-test-subj="singleSplitStepRuleDescriptionList"
             type="column"
+            columnWidths={[3, 7]}
             listItems={listItems}
           />
         )}
