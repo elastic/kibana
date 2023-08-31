@@ -75,80 +75,78 @@ export const MonitorDetailsPanel = ({
       titleLeftAlign
       hasBorder={hasBorder}
     >
-      <WrapperStyle>
-        <EuiSpacer size="s" />
-        <EuiDescriptionList type="column" compressed align="left">
-          {!hideEnabled && (
-            <>
-              <TitleLabel>{ENABLED_LABEL}</TitleLabel>
-              <DescriptionLabel>
-                {monitor && (
-                  <MonitorEnabled
-                    initialLoading={loading}
-                    configId={configId}
-                    monitor={monitor}
-                    reloadPage={() => {
-                      dispatch(getMonitorAction.get({ monitorId: configId }));
-                    }}
-                  />
-                )}
-              </DescriptionLabel>
-            </>
+      <EuiSpacer size="s" />
+      <EuiDescriptionList type="column" compressed align="left">
+        {!hideEnabled && (
+          <>
+            <TitleLabel>{ENABLED_LABEL}</TitleLabel>
+            <DescriptionLabel>
+              {monitor && (
+                <MonitorEnabled
+                  initialLoading={loading}
+                  configId={configId}
+                  monitor={monitor}
+                  reloadPage={() => {
+                    dispatch(getMonitorAction.get({ monitorId: configId }));
+                  }}
+                />
+              )}
+            </DescriptionLabel>
+          </>
+        )}
+        <TitleLabel>{URL_LABEL}</TitleLabel>
+        <DescriptionLabel style={{ wordBreak: 'break-all' }}>
+          {url ? (
+            <EuiLink data-test-subj="syntheticsMonitorDetailsPanelLink" href={url} external>
+              {url}
+            </EuiLink>
+          ) : (
+            <EuiText color="subdued" size="s">
+              {UN_AVAILABLE_LABEL}
+            </EuiText>
           )}
-          <TitleLabel>{URL_LABEL}</TitleLabel>
-          <DescriptionLabel style={{ wordBreak: 'break-all' }}>
-            {url ? (
-              <EuiLink data-test-subj="syntheticsMonitorDetailsPanelLink" href={url} external>
-                {url}
-              </EuiLink>
-            ) : (
-              <EuiText color="subdued" size="s">
-                {UN_AVAILABLE_LABEL}
-              </EuiText>
-            )}
-          </DescriptionLabel>
-          <TitleLabel>{LAST_RUN_LABEL}</TitleLabel>
-          <DescriptionLabel>
-            {latestPing?.timestamp ? (
-              <Time timestamp={latestPing?.timestamp} />
-            ) : (
-              <EuiText color="subdued">--</EuiText>
-            )}
-          </DescriptionLabel>
-          <TitleLabel>{LAST_MODIFIED_LABEL}</TitleLabel>
-          <DescriptionLabel>
-            <Time timestamp={monitor.updated_at} />
-          </DescriptionLabel>
-          {monitor[ConfigKey.PROJECT_ID] && (
-            <>
-              <TitleLabel>{PROJECT_ID_LABEL}</TitleLabel>
-              <DescriptionLabel>{monitor[ConfigKey.PROJECT_ID]}</DescriptionLabel>
-            </>
+        </DescriptionLabel>
+        <TitleLabel>{LAST_RUN_LABEL}</TitleLabel>
+        <DescriptionLabel>
+          {latestPing?.timestamp ? (
+            <Time timestamp={latestPing?.timestamp} />
+          ) : (
+            <EuiText color="subdued">--</EuiText>
           )}
-          <TitleLabel>{MONITOR_ID_ITEM_TEXT}</TitleLabel>
-          <DescriptionLabel>{monitor.id}</DescriptionLabel>
-          <TitleLabel>{MONITOR_TYPE_LABEL}</TitleLabel>
-          <DescriptionLabel>
-            <MonitorTypeBadge monitor={monitor} />
-          </DescriptionLabel>
-          <TitleLabel>{FREQUENCY_LABEL}</TitleLabel>
-          <DescriptionLabel>{frequencyStr(monitor[ConfigKey.SCHEDULE])}</DescriptionLabel>
+        </DescriptionLabel>
+        <TitleLabel>{LAST_MODIFIED_LABEL}</TitleLabel>
+        <DescriptionLabel>
+          <Time timestamp={monitor.updated_at} />
+        </DescriptionLabel>
+        {monitor[ConfigKey.PROJECT_ID] && (
+          <>
+            <TitleLabel>{PROJECT_ID_LABEL}</TitleLabel>
+            <DescriptionLabel>{monitor[ConfigKey.PROJECT_ID]}</DescriptionLabel>
+          </>
+        )}
+        <TitleLabel>{MONITOR_ID_ITEM_TEXT}</TitleLabel>
+        <DescriptionLabel>{monitor.id}</DescriptionLabel>
+        <TitleLabel>{MONITOR_TYPE_LABEL}</TitleLabel>
+        <DescriptionLabel>
+          <MonitorTypeBadge monitor={monitor} />
+        </DescriptionLabel>
+        <TitleLabel>{FREQUENCY_LABEL}</TitleLabel>
+        <DescriptionLabel>{frequencyStr(monitor[ConfigKey.SCHEDULE])}</DescriptionLabel>
 
-          {!hideLocations && (
-            <>
-              <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
-              <DescriptionLabel>
-                <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
-              </DescriptionLabel>
-            </>
-          )}
+        {!hideLocations && (
+          <>
+            <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
+            <DescriptionLabel>
+              <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
+            </DescriptionLabel>
+          </>
+        )}
 
-          <TitleLabel>{TAGS_LABEL}</TitleLabel>
-          <DescriptionLabel>
-            <TagsBadges tags={monitor[ConfigKey.TAGS]} />
-          </DescriptionLabel>
-        </EuiDescriptionList>
-      </WrapperStyle>
+        <TitleLabel>{TAGS_LABEL}</TitleLabel>
+        <DescriptionLabel>
+          <TagsBadges tags={monitor[ConfigKey.TAGS]} />
+        </DescriptionLabel>
+      </EuiDescriptionList>
     </PanelWithTitle>
   );
 };
@@ -212,13 +210,6 @@ const Time = ({ timestamp }: { timestamp?: string }) => {
 
   return timestamp ? <time dateTime={timestamp}>{dateTimeFormatted}</time> : null;
 };
-
-export const WrapperStyle = euiStyled.div`
-  .euiDescriptionList.euiDescriptionList--column > *,
-  .euiDescriptionList.euiDescriptionList--responsiveColumn > * {
-    margin-top: ${({ theme }) => theme.eui.euiSizeS};
-  }
-`;
 
 const FREQUENCY_LABEL = i18n.translate('xpack.synthetics.management.monitorList.frequency', {
   defaultMessage: 'Frequency',

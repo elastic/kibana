@@ -36,7 +36,6 @@ const customDescriptionListCss = css`
     > .euiDescriptionList__title,
     > .euiDescriptionList__description {
       font-weight: ${(props) => props.theme.eui.euiFontWeightRegular};
-      margin-top: ${(props) => props.theme.eui.euiSizeS};
     }
   }
 `;
