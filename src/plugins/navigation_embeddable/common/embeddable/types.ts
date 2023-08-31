@@ -6,16 +6,9 @@
  * Side Public License, v 1.
  */
 
-/**
- * Link types
- */
-export const DASHBOARD_LINK_TYPE = 'dashboardLink';
-export const EXTERNAL_LINK_TYPE = 'externalLink';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 
-/**
- * Layout options
- */
-export const NAV_HORIZONTAL_LAYOUT = 'horizontal';
-export const NAV_VERTICAL_LAYOUT = 'vertical';
-
-export const EXTERNAL_LINK_SUPPORTED_PROTOCOLS = ['http', 'https', 'mailto'];
+export type NavigationEmbeddablePersistableState = EmbeddableStateWithType & {
+  attributes: SerializableRecord;
+};

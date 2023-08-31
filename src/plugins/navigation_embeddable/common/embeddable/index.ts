@@ -6,16 +6,5 @@
  * Side Public License, v 1.
  */
 
-/**
- * Link types
- */
-export const DASHBOARD_LINK_TYPE = 'dashboardLink';
-export const EXTERNAL_LINK_TYPE = 'externalLink';
-
-/**
- * Layout options
- */
-export const NAV_HORIZONTAL_LAYOUT = 'horizontal';
-export const NAV_VERTICAL_LAYOUT = 'vertical';
-
-export const EXTERNAL_LINK_SUPPORTED_PROTOCOLS = ['http', 'https', 'mailto'];
+export { inject } from './inject';
+export { extract } from './extract';

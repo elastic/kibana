@@ -12,7 +12,6 @@ import {
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { NavigationEmbeddableByReferenceInput, NavigationEmbeddableInput } from './types';
@@ -20,6 +19,7 @@ import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import type { NavigationEmbeddable } from './navigation_embeddable';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
+import { extract, inject } from '../../common/embeddable';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -40,15 +40,6 @@ export class NavigationEmbeddableFactoryDefinition
     type: CONTENT_ID,
     getIconForSavedObject: () => APP_ICON,
   };
-
-  // TODO create<Inject|Extract> functions
-  // public inject: EmbeddablePersistableStateService['inject'];
-  // public extract: EmbeddablePersistableStateService['extract'];
-
-  constructor(persistableStateService: EmbeddablePersistableStateService) {
-    // this.inject = createInject(this.persistableStateService);
-    // this.extract = createExtract(this.persistableStateService);
-  }
 
   public async isEditable() {
     await untilPluginStartServicesReady();
@@ -116,4 +107,8 @@ export class NavigationEmbeddableFactoryDefinition
   public getIconType() {
     return 'link';
   }
+
+  inject = inject;
+
+  extract = extract;
 }

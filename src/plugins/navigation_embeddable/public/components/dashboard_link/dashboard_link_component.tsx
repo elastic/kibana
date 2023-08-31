@@ -42,7 +42,7 @@ export const DashboardLinkComponent = ({
 
   const { loading: loadingDestinationDashboard, value: destinationDashboard } =
     useAsync(async () => {
-      if (link.id !== parentDashboardId) {
+      if (link.id !== parentDashboardId && link.destination) {
         /**
          * only fetch the dashboard if it's not the current dashboard - if it is the current dashboard,
          * use `dashboardContainer` and its corresponding state (title, description, etc.) instead.
