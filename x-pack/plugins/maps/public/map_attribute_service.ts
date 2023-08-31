@@ -13,7 +13,7 @@ import type { MapAttributes } from '../common/content_management';
 import { MAP_EMBEDDABLE_NAME, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getCoreOverlays, getEmbeddableService } from './kibana_services';
 import { extractReferences, injectReferences } from '../common/migrations/references';
-import { mapsClient, checkForDuplicateTitle } from './content_management';
+import { mapsClientFactory, checkForDuplicateTitle } from './content_management';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
 export interface SharingSavedObjectProps {
@@ -65,8 +65,12 @@ export function getMapAttributeService(): MapAttributeService {
       const {
         item: { id },
       } = await (savedObjectId
-        ? mapsClient.update({ id: savedObjectId, data: updatedAttributes, options: { references } })
-        : mapsClient.create({ data: updatedAttributes, options: { references } }));
+        ? mapsClientFactory().update({
+            id: savedObjectId,
+            data: updatedAttributes,
+            options: { references },
+          })
+        : mapsClientFactory().create({ data: updatedAttributes, options: { references } }));
       return { id };
     },
     unwrapMethod: async (
@@ -78,7 +82,7 @@ export function getMapAttributeService(): MapAttributeService {
       const {
         item: savedObject,
         meta: { outcome, aliasPurpose, aliasTargetId },
-      } = await mapsClient.get(savedObjectId);
+      } = await mapsClientFactory().get(savedObjectId);
 
       if (savedObject.error) {
         throw savedObject.error;

@@ -30,7 +30,8 @@
       "savedObjects",
       "share",
       "presentationUtil",
-      "contentManagement"
+      "contentManagement",
+      "visualizeListClient"
     ],
     "optionalPlugins": [
       "cloud",

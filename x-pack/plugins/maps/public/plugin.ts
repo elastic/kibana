@@ -47,6 +47,10 @@ import type {
 } from '@kbn/content-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
+import type {
+  VisualizeListClientPluginSetup,
+  VisualizeListClientPluginStart,
+} from '@kbn/visualize-list-client-plugin/public';
 import {
   createRegionMapFn,
   GEOHASH_GRID,
@@ -83,6 +87,7 @@ import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_
 
 import { setupLensChoroplethChart } from './lens';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { mapsClientFactory } from './content_management';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -98,6 +103,7 @@ export interface MapsPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   screenshotMode?: ScreenshotModePluginSetup;
   contentManagement: ContentManagementPublicSetup;
+  visualizeListClient: VisualizeListClientPluginSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -123,6 +129,7 @@ export interface MapsPluginStartDependencies {
   screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
   serverless?: ServerlessPluginStart;
+  visualizeListClient: VisualizeListClientPluginStart;
 }
 
 /**
@@ -189,6 +196,7 @@ export class MapsPlugin
     }
     plugins.visualizations.registerAlias(getMapsVisTypeAlias());
     plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+    plugins.visualizeListClient.registerType(MAP_SAVED_OBJECT_TYPE, mapsClientFactory);
 
     core.application.register({
       id: APP_ID,

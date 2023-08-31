@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchQuery } from '@kbn/content-management-plugin/common';
+import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import { DOC_TYPE } from '../../common/constants';

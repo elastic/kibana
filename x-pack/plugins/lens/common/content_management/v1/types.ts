@@ -5,19 +5,6 @@
  * 2.0.
  */
 
-// import {
-//   GetIn,
-//   CreateIn,
-//   SearchIn,
-//   UpdateIn,
-//   DeleteIn,
-//   DeleteResult,
-//   SearchResult,
-//   GetResult,
-//   CreateResult,
-//   UpdateResult,
-// } from '@kbn/content-management-plugin/common';
-
 import type {
   ContentManagementCrudTypes,
   SavedObjectCreateOptions,
