@@ -106,7 +106,7 @@ export interface FleetActionRequest extends CommonFleetActionResultDocFields {
   start_time?: string;
   timeout?: number;
   type: string;
-  user_id: string;
+  user_id: string | undefined;
 
   // allow other fields that are not mapped
   [k: string]: unknown;

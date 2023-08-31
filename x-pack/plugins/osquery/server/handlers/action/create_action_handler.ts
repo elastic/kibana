@@ -124,7 +124,7 @@ export const createActionHandler = async (
           type: 'INPUT_ACTION',
           input_type: 'osquery',
           agents: query.agents,
-          user_id: metadata?.currentUser || '',
+          user_id: metadata?.currentUser,
           data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
         })
       )
