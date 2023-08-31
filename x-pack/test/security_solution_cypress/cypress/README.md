@@ -225,7 +225,7 @@ describe(
 
 Per the way we set the environment during the execution process on CI, the above configuration is going to be valid when the test is executed on headless mode.
 
-For test developing or test debugging purposes, you need to modify the configuration but without the changes in `x-pack/test/security_solution_cypress/serverless_config.ts` 
+For test developing or test debugging purposes, you need to modify the configuration but without committing and pushing the changes in `x-pack/test/security_solution_cypress/serverless_config.ts`.
 
 ## Development Best Practices
 
