@@ -36,7 +36,6 @@ interface EventLogListCellRendererProps {
   ruleId?: string;
   spaceIds?: string[];
   useExecutionStatus?: boolean;
-  onRuleNameClick?: (ruleId: string) => void;
 }
 
 export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) => {
@@ -48,7 +47,6 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
     ruleId,
     spaceIds,
     useExecutionStatus = true,
-    onRuleNameClick,
   } = props;
   const spacesData = useSpacesData();
   const { http } = useKibana().services;
@@ -86,21 +84,15 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
     return ruleRoute;
   }, [ruleId, ruleOnDifferentSpace, history, activeSpace, http, spaceIds]);
 
-  const onRuleNameClickInternal = useCallback(() => {
-    if (!ruleId) {
-      return;
-    }
-    if (onRuleNameClick) {
-      onRuleNameClick(ruleId);
-      return;
-    }
+  const onClickRuleName = useCallback(() => {
+    if (!ruleId) return;
     if (ruleOnDifferentSpace) {
       const newUrl = window.location.href.replace(window.location.pathname, ruleNamePathname);
       window.open(newUrl, '_blank');
       return;
     }
     history.push(ruleNamePathname);
-  }, [ruleNamePathname, history, ruleOnDifferentSpace, ruleId, onRuleNameClick]);
+  }, [ruleNamePathname, history, ruleOnDifferentSpace, ruleId]);
 
   if (typeof value === 'undefined') {
     return null;
@@ -121,7 +113,7 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
 
   if (columnId === 'rule_name' && ruleId) {
     return (
-      <EuiLink onClick={onRuleNameClickInternal} data-href={ruleNamePathname}>
+      <EuiLink onClick={onClickRuleName} data-href={ruleNamePathname}>
         {value}
       </EuiLink>
     );
