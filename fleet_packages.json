@@ -30,7 +30,7 @@
   },
   {
     "name": "elastic_agent",
-    "version": "1.11.0"
+    "version": "1.11.2"
   },
   {
     "name": "endpoint",
@@ -58,6 +58,6 @@
   },
   {
     "name": "security_detection_engine",
-    "version": "8.9.4"
+    "version": "8.10.1"
   }
 ]
