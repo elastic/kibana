@@ -23,6 +23,7 @@ import { STACK_ALERTS_FEATURE_ID } from '../../../../common/constants';
 
 function validateQuery(query: Query) {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     query.language === 'kuery' ? fromKueryExpression(query.query) : luceneStringToDsl(query.query);
   } catch (err) {
     return false;

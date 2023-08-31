@@ -62,11 +62,11 @@ export const BoundaryForm = (props: Props) => {
     setDataViewNotFound(false);
     props.data.indexPatterns
       .get(props.ruleParams.boundaryIndexId)
-      .then((dataView) => {
+      .then((nextDataView) => {
         if (!ignore) {
-          setDataView(dataView);
-          setGeoFields(getGeoFields(dataView.fields));
-          setNameFields(getNameFields(dataView.fields));
+          setDataView(nextDataView);
+          setGeoFields(getGeoFields(nextDataView.fields));
+          setNameFields(getNameFields(nextDataView.fields));
           setIsLoading(false);
         }
       })
@@ -80,7 +80,7 @@ export const BoundaryForm = (props: Props) => {
     return () => {
       ignore = true;
     };
-  }, [props.ruleParams.boundaryIndexId]);
+  }, [props.ruleParams.boundaryIndexId, dataView?.id, props.data.indexPatterns]);
 
   function getDataViewError() {
     const validationError = props.getValidationError('boundaryIndexTitle');
@@ -136,16 +136,16 @@ export const BoundaryForm = (props: Props) => {
             dataViewId={props.ruleParams.boundaryIndexId}
             data={props.data}
             isInvalid={Boolean(dataViewError)}
-            onChange={(dataView: DataView) => {
-              if (!dataView.id) {
+            onChange={(nextDataView: DataView) => {
+              if (!nextDataView.id) {
                 return;
               }
-              props.setDataViewId(dataView.id);
-              props.setDataViewTitle(dataView.title);
+              props.setDataViewId(nextDataView.id);
+              props.setDataViewTitle(nextDataView.title);
 
-              const geoFields = getGeoFields(dataView.fields);
-              if (geoFields.length) {
-                props.setGeoField(geoFields[0].name);
+              const nextGeoFields = getGeoFields(nextDataView.fields);
+              if (nextGeoFields.length) {
+                props.setGeoField(nextGeoFields[0].name);
               } else if ('boundaryGeoField' in props.ruleParams) {
                 props.setGeoField('');
               }
