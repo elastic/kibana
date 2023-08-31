@@ -94,7 +94,7 @@ export const links: LinkItem = {
       description: i18n.translate(
         'xpack.securitySolution.appLinks.coverageOverviewDashboardDescription',
         {
-          defaultMessage: 'Review and maintain your protections MITRE ATT&CK® coverage',
+          defaultMessage: 'Review and maintain your protections MITRE ATT&CK® coverage.',
         }
       ),
       path: COVERAGE_OVERVIEW_PATH,
