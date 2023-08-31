@@ -25,7 +25,6 @@ import { MetadataHeader } from './metadata_header';
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
   metadataLoading: boolean;
-  isCompactView: boolean;
 }
 
 export interface MetadataData {
@@ -63,11 +62,7 @@ const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   },
 ];
 
-export const MetadataSummaryList = ({
-  metadata,
-  metadataLoading,
-  isCompactView,
-}: MetadataSummaryProps) => {
+export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSummaryProps) => {
   const { showTab } = useTabSwitcherContext();
 
   const onClick = () => {
@@ -77,10 +72,54 @@ export const MetadataSummaryList = ({
   return (
     <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
       <EuiFlexGroup alignItems="flexStart">
-        {(isCompactView
-          ? metadataData(metadata?.info)
-          : [...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)]
-        ).map(
+        {[...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)].map(
+          (metadataValue) =>
+            metadataValue && (
+              <EuiFlexItem key={metadataValue.field}>
+                <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
+                  <MetadataHeader metadataValue={metadataValue} />
+                  <EuiDescriptionListDescription>
+                    {metadataLoading ? (
+                      <EuiLoadingSpinner />
+                    ) : (
+                      <ExpandableContent values={metadataValue.value ?? NOT_AVAILABLE_LABEL} />
+                    )}
+                  </EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              </EuiFlexItem>
+            )
+        )}
+      </EuiFlexGroup>
+      <EuiFlexItem grow={false} key="metadata-link">
+        <EuiButtonEmpty
+          data-test-subj="infraAssetDetailsMetadataShowAllButton"
+          onClick={onClick}
+          size="xs"
+          flush="both"
+          iconSide="right"
+          iconType="sortRight"
+        >
+          <FormattedMessage
+            id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
+            defaultMessage="Show all"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export const MetadataSummaryListCompact = ({ metadata, metadataLoading }: MetadataSummaryProps) => {
+  const { showTab } = useTabSwitcherContext();
+
+  const onClick = () => {
+    showTab(FlyoutTabIds.METADATA);
+  };
+
+  return (
+    <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
+      <EuiFlexGroup alignItems="flexStart">
+        {metadataData(metadata?.info).map(
           (metadataValue) =>
             metadataValue && (
               <EuiFlexItem key={metadataValue.field}>

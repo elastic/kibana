@@ -28,12 +28,13 @@ import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
 
 type BrushEndArgs = Parameters<NonNullable<LensEmbeddableInput['onBrushEnd']>>[0];
 
-interface Props {
+interface CompactProps {
   nodeName: string;
   timeRange: TimeRange;
   metricsDataView?: DataView;
   logsDataView?: DataView;
-  isCompactView: boolean;
+}
+interface Props extends CompactProps {
   showNginxStubstatus: boolean;
   showNginxAccess: boolean;
 }
@@ -44,7 +45,6 @@ export const MetricsGrid = React.memo(
     metricsDataView,
     logsDataView,
     timeRange,
-    isCompactView,
     showNginxStubstatus,
     showNginxAccess,
   }: Props) => {
@@ -97,34 +97,29 @@ export const MetricsGrid = React.memo(
             gutterSize="s"
             data-test-subj="infraAssetDetailsMetricsChartGrid"
           >
-            {(isCompactView
-              ? assetDetailsDashboards.host.hostMetricCharts
-              : [
-                  ...assetDetailsDashboards.host.hostMetricChartsFullPage,
-                  // ...nginxStubstatusCharts,
-                  // ...nginxAccessCharts,
-                ]
-            ).map(({ dataViewOrigin, id, layers, title, overrides }, index) => (
-              <EuiFlexItem key={index} grow={false}>
-                <LensChart
-                  id={`infraAssetDetailsMetricsChart${id}`}
-                  borderRadius="m"
-                  dataView={getDataView(dataViewOrigin)}
-                  dateRange={timeRange}
-                  height={METRIC_CHART_HEIGHT}
-                  visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG}
-                  layers={layers}
-                  filters={getFilters(dataViewOrigin)}
-                  title={title}
-                  overrides={overrides}
-                  visualizationType="lnsXY"
-                  onBrushEnd={handleBrushEnd}
-                />
-              </EuiFlexItem>
-            ))}
+            {[...assetDetailsDashboards.host.hostMetricChartsFullPage].map(
+              ({ dataViewOrigin, id, layers, title, overrides }, index) => (
+                <EuiFlexItem key={index} grow={false}>
+                  <LensChart
+                    id={`infraAssetDetailsMetricsChart${id}`}
+                    borderRadius="m"
+                    dataView={getDataView(dataViewOrigin)}
+                    dateRange={timeRange}
+                    height={METRIC_CHART_HEIGHT}
+                    visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG}
+                    layers={layers}
+                    filters={getFilters(dataViewOrigin)}
+                    title={title}
+                    overrides={overrides}
+                    visualizationType="lnsXY"
+                    onBrushEnd={handleBrushEnd}
+                  />
+                </EuiFlexItem>
+              )
+            )}
           </EuiFlexGrid>
         </EuiFlexItem>
-        {!isCompactView && shouldShowNginxSection && (
+        {shouldShowNginxSection && (
           <>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
@@ -167,6 +162,80 @@ export const MetricsGrid = React.memo(
             </EuiFlexItem>
           </>
         )}
+      </EuiFlexGroup>
+    );
+  }
+);
+
+export const MetricsGridCompact = React.memo(
+  ({ nodeName, metricsDataView, logsDataView, timeRange }: CompactProps) => {
+    const { setDateRange } = useDateRangeProviderContext();
+    const getDataView = useCallback(
+      (dataViewOrigin: DataViewOrigin) => {
+        return dataViewOrigin === 'metrics' ? metricsDataView : logsDataView;
+      },
+      [logsDataView, metricsDataView]
+    );
+
+    const getFilters = useCallback(
+      (dataViewOrigin: DataViewOrigin) => {
+        return [
+          buildCombinedHostsFilter({
+            field: 'host.name',
+            values: [nodeName],
+            dataView: getDataView(dataViewOrigin),
+          }),
+        ];
+      },
+      [getDataView, nodeName]
+    );
+
+    const handleBrushEnd = useCallback(
+      ({ range, preventDefault }: BrushEndArgs) => {
+        setDateRange({
+          from: new Date(range[0]).toISOString(),
+          to: new Date(range[1]).toISOString(),
+        });
+
+        preventDefault();
+      },
+      [setDateRange]
+    );
+
+    return (
+      <EuiFlexGroup gutterSize="m" direction="column">
+        <EuiFlexItem grow={false}>
+          <MetricsSectionTitle />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="s" />
+          <EuiFlexGrid
+            columns={2}
+            gutterSize="s"
+            data-test-subj="infraAssetDetailsMetricsChartGrid"
+          >
+            {assetDetailsDashboards.host.hostMetricCharts.map(
+              ({ dataViewOrigin, id, layers, title, overrides }, index) => (
+                <EuiFlexItem key={index} grow={false}>
+                  <LensChart
+                    id={`infraAssetDetailsMetricsChart${id}`}
+                    borderRadius="m"
+                    dataView={getDataView(dataViewOrigin)}
+                    dateRange={timeRange}
+                    height={METRIC_CHART_HEIGHT}
+                    visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG}
+                    layers={layers}
+                    filters={getFilters(dataViewOrigin)}
+                    title={title}
+                    overrides={overrides}
+                    visualizationType="lnsXY"
+                    onBrushEnd={handleBrushEnd}
+                  />
+                </EuiFlexItem>
+              )
+            )}
+          </EuiFlexGrid>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
