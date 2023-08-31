@@ -5,8 +5,7 @@ Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
-| {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
+Previous versions: {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 [discrete]
 === Alerting
@@ -17,13 +16,6 @@ The Webhook connector now supports client certification. You can now use the web
 
 [role="screenshot"]
 image::images/webhook-connector.png[A screenshot displaying the new SSL authentication option in the UI, width=70%]
-
-[discrete]
-==== Conditional actions
-When creating an observability alerting rule, you define conditions that must be met to trigger an. Now you can also add conditions that affect the actions associated with an alert. For example, you might choose to send notifications only if the alert is received between defined hours.
-
-[role="screenshot"]
-image::images/conditional-actions.png[An example of the UI for triggering an action and alert, width=70%]
 
 [discrete]
 === Dashboard
