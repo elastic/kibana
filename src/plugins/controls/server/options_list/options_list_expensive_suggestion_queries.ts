@@ -9,7 +9,6 @@
 import { get } from 'lodash';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
-import { FieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
   OptionsListRequestBody,
   OptionsListSuggestions,
