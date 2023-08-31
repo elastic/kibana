@@ -26,10 +26,10 @@ import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { Section } from '../../home';
 import { DetailsPageError } from './details_page_error';
-import { OverviewTab } from './tabs';
 import { ManageIndexButton } from './manage_index_button';
 import { DetailsPageStats } from './details_page_stats';
 import { DetailsPageMappings } from './details_page_mappings';
+import { DetailsPageOverview } from './details_page_overview';
 
 export enum IndexDetailsSection {
   Overview = 'overview',
@@ -188,7 +188,7 @@ export const DetailsPage: React.FunctionComponent<
         <Routes>
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
-            render={() => <OverviewTab indexDetails={index} />}
+            render={() => <DetailsPageOverview indexDetails={index} />}
           />
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Documents}`}

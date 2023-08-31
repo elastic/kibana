@@ -24,8 +24,8 @@ import {
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
 } from '@kbn/search-api-panels';
-import type { Index } from '../../../../../../../../common';
-import { useAppContext } from '../../../../../../app_context';
+import type { Index } from '../../../../../../../common';
+import { useAppContext } from '../../../../../app_context';
 import { languageDefinitions, curlDefinition } from './languages';
 
 const unknownLabel = i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.unknownLabel', {
@@ -36,7 +36,7 @@ interface Props {
   indexDetails: Index;
 }
 
-export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) => {
+export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetails }) => {
   const {
     name,
     status,

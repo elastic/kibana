@@ -46,9 +46,11 @@ export interface IndexDetailsPageTestBed extends TestBed {
     };
     clickBackToIndicesButton: () => Promise<void>;
     discoverLinkExists: () => boolean;
-    indexStatsContentExists: () => boolean;
-    indexDetailsContentExists: () => boolean;
-    addDocCodeBlockExists: () => boolean;
+    overview: {
+      indexStatsContentExists: () => boolean;
+      indexDetailsContentExists: () => boolean;
+      addDocCodeBlockExists: () => boolean;
+    };
     contextMenu: {
       clickManageIndexButton: () => Promise<void>;
       isOpened: () => boolean;
@@ -108,6 +110,17 @@ export const setup = async (
     return find('indexDetailsContent').text();
   };
 
+  const clickBackToIndicesButton = async () => {
+    await act(async () => {
+      find('indexDetailsBackToIndicesButton').simulate('click');
+    });
+    component.update();
+  };
+
+  const discoverLinkExists = () => {
+    return exists('discoverButtonLink');
+  };
+
   const mappings = {
     getCodeBlockContent: () => {
       return find('indexDetailsMappingsCodeBlock').text();
@@ -126,27 +139,16 @@ export const setup = async (
     },
   };
 
-  const clickBackToIndicesButton = async () => {
-    await act(async () => {
-      find('indexDetailsBackToIndicesButton').simulate('click');
-    });
-    component.update();
-  };
-
-  const discoverLinkExists = () => {
-    return exists('discoverButtonLink');
-  };
-
-  const indexStatsContentExists = () => {
-    return exists('overviewTabIndexStats');
-  };
-
-  const indexDetailsContentExists = () => {
-    return exists('overviewTabIndexDetails');
-  };
-
-  const addDocCodeBlockExists = () => {
-    return exists('codeBlockControlsPanel');
+  const overview = {
+    indexStatsContentExists: () => {
+      return exists('overviewTabIndexStats');
+    },
+    indexDetailsContentExists: () => {
+      return exists('overviewTabIndexDetails');
+    },
+    addDocCodeBlockExists: () => {
+      return exists('codeBlockControlsPanel');
+    },
   };
 
   const contextMenu = {
@@ -216,9 +218,7 @@ export const setup = async (
       mappings,
       clickBackToIndicesButton,
       discoverLinkExists,
-      indexStatsContentExists,
-      indexDetailsContentExists,
-      addDocCodeBlockExists,
+      overview,
       contextMenu,
       errorSection,
       stats,
