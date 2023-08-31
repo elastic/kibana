@@ -8,17 +8,25 @@
 import { v4 as uuidv4 } from 'uuid';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
 import {
   asNotificationExecutionSource,
   asSavedObjectExecutionSource,
 } from './lib/action_execution_source';
+import { actionsConfigMock } from './actions_config.mock';
 
 const mockTaskManager = taskManagerMock.createStart();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const mockActionsConfig = actionsConfigMock.create();
+const doc = {} as ConcreteTaskInstance;
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  mockTaskManager.fetch.mockResolvedValue({ docs: [] });
+  mockActionsConfig.getMaxQueued.mockReturnValue(10);
+});
 
 describe('bulkExecute()', () => {
   test.each([
@@ -42,6 +50,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
 
       internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
@@ -154,6 +163,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
 
       internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
@@ -278,6 +288,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
 
       internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
@@ -426,6 +437,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
       await expect(
         executeFn(internalSavedObjectsRepository, [
@@ -468,6 +480,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
       mockedConnectorTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
         throw new Error('Fail');
@@ -521,6 +534,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
       await expect(
         executeFn(internalSavedObjectsRepository, [
@@ -538,6 +552,60 @@ describe('bulkExecute()', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"not-in-allowlist actions cannot be scheduled for unsecured actions execution"`
       );
+    }
+  );
+
+  test.each([
+    [true, false],
+    [false, true],
+  ])(
+    'returns queuedActionsLimitError response when the max number of queued actions has been reached: %s, isSystemAction: %s',
+    async (isPreconfigured, isSystemAction) => {
+      mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc, doc] });
+      mockActionsConfig.getMaxQueued.mockReturnValueOnce(2);
+      const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
+        taskManager: mockTaskManager,
+        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        inMemoryConnectors: [
+          {
+            id: '123',
+            actionTypeId: '.email',
+            config: {},
+            isPreconfigured,
+            isDeprecated: false,
+            isSystemAction,
+            name: 'x',
+            secrets: {},
+          },
+        ],
+        configurationUtilities: mockActionsConfig,
+      });
+
+      internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [],
+      });
+      expect(
+        await executeFn(internalSavedObjectsRepository, [
+          {
+            id: '123',
+            params: { baz: false },
+            source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
+          },
+        ])
+      ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "123",
+          "response": "queuedActionsLimitError",
+        },
+      ]
+    `);
+      expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [],
+      ]
+    `);
     }
   );
 });

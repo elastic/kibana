@@ -477,6 +477,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           taskManager: plugins.taskManager,
           connectorTypeRegistry: actionTypeRegistry!,
           inMemoryConnectors: this.inMemoryConnectors,
+          configurationUtilities: actionsConfigUtils,
         }),
       });
     };

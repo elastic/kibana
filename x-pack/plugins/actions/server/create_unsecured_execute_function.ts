@@ -14,6 +14,12 @@ import {
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
+import {
+  ExecutionResponse as ActionExecutionResponse,
+  ExecutionResponseType,
+  hasReachedTheQueuedActionsLimit,
+} from './create_execute_function';
+import { ActionsConfigurationUtilities } from './actions_config';
 
 // This allowlist should only contain connector types that don't require API keys for
 // execution.
@@ -22,12 +28,15 @@ interface CreateBulkUnsecuredExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   connectorTypeRegistry: ConnectorTypeRegistryContract;
   inMemoryConnectors: InMemoryConnector[];
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 export interface ExecuteOptions
   extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects'> {
   id: string;
 }
+
+export type ExecutionResponse = Pick<ActionExecutionResponse, 'id' | 'response'>;
 
 interface ActionTaskParams
   extends Pick<ActionExecutorOptions, 'actionId' | 'params' | 'relatedSavedObjects'> {
@@ -43,11 +52,25 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
   taskManager,
   connectorTypeRegistry,
   inMemoryConnectors,
-}: CreateBulkUnsecuredExecuteFunctionOptions): BulkUnsecuredExecutionEnqueuer<void> {
+  configurationUtilities,
+}: CreateBulkUnsecuredExecuteFunctionOptions): BulkUnsecuredExecutionEnqueuer<ExecutionResponse[]> {
   return async function execute(
     internalSavedObjectsRepository: ISavedObjectsRepository,
     actionsToExecute: ExecuteOptions[]
   ) {
+    const { hasReachedLimit, numberOverLimit } = await hasReachedTheQueuedActionsLimit(
+      taskManager,
+      configurationUtilities,
+      actionsToExecute.length
+    );
+    let actionsOverLimit: ExecuteOptions[] = [];
+    if (hasReachedLimit) {
+      actionsOverLimit = actionsToExecute.splice(
+        actionsToExecute.length - numberOverLimit,
+        numberOverLimit
+      );
+    }
+
     const connectorTypeIds: Record<string, string> = {};
     const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
 
@@ -131,6 +154,18 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
       };
     });
     await taskManager.bulkSchedule(taskInstances);
+
+    return actionsToExecute
+      .map((a) => ({
+        id: a.id,
+        response: ExecutionResponseType.SUCCESS,
+      }))
+      .concat(
+        actionsOverLimit.map((a) => ({
+          id: a.id,
+          response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+        }))
+      );
   };
 }
 

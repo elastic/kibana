@@ -6,10 +6,10 @@
  */
 
 import { ISavedObjectsRepository } from '@kbn/core/server';
-import { ExecutionResponse as ActionExecutionResponse } from '../create_execute_function';
 import {
   BulkUnsecuredExecutionEnqueuer,
   ExecuteOptions,
+  ExecutionResponse,
 } from '../create_unsecured_execute_function';
 import { asNotificationExecutionSource } from '../lib';
 
@@ -22,8 +22,6 @@ const ALLOWED_REQUESTER_IDS = [
   // For functional testing
   'functional_tester',
 ];
-
-export type ExecutionResponse = Pick<ActionExecutionResponse, 'id' | 'response'>;
 
 export interface UnsecuredActionsClientOpts {
   internalSavedObjectsRepository: ISavedObjectsRepository;
