@@ -36,7 +36,7 @@ import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../../screens/alerts';
 import { getLocalstorageEntryAsObject } from '../../../helpers/common';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 
-describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('Basic functions', () => {
     beforeEach(() => {
       cleanKibana();
