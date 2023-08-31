@@ -366,7 +366,7 @@ export const createLifecycleExecutor =
                 },
               },
           // if index provided, must be an update, so wrap in a { doc: {} }
-          ...(indexName ? { doc: event } : event),
+          indexName ? { doc: event } : event,
         ]),
         refresh: 'wait_for',
       });
