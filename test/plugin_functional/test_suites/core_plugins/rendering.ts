@@ -23,7 +23,7 @@ declare global {
 }
 
 const EXPOSED_CONFIG_SETTINGS_ERROR =
-  'Actual config settings exposed to the browser do not match what is expected; this assertion fails if extra settings are present and/or expected settings are missing';
+  'Actual config settings exposed to the browser do not match list defined in test; this assertion fails if extra settings are present and/or expected settings are missing';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const appsMenu = getService('appsMenu');
@@ -83,6 +83,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // what types of config settings can be exposed to the browser.
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
+        'console.autocompleteDefinitions.endpointsAvailability (alternatives)',
         'console.ui.enabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
         'unifiedSearch.autocomplete.querySuggestions.enabled (boolean)',
@@ -103,9 +104,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.management.refreshTimeout (duration)',
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
+        'data_views.scriptedFieldsEnabled (any)', // It's a boolean (any because schema.conditional)
         'dev_tools.deeplinks.navLinkStatus (string)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
+        'enterpriseSearch.ui.enabled (boolean)',
         'home.disableWelcomeScreen (boolean)',
         'management.deeplinks.navLinkStatus (string)',
         'map.emsFileApiUrl (string)',
@@ -142,6 +145,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',
         'newsfeed.service.urlRoot (string)',
+        'no_data_page.analyticsNoDataPageFlavor (any)', // It's a string (any because schema.conditional)
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
         'telemetry.banner (boolean)',
@@ -196,6 +200,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
         'xpack.cases.markdownPlugins.lens (boolean)',
+        'xpack.cases.stack.enabled (boolean)',
         'xpack.ccr.ui.enabled (boolean)',
         'xpack.cloud.base_url (string)',
         'xpack.cloud.cname (string)',
@@ -219,6 +224,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.organization_url (string)',
         'xpack.cloud.billing_url (string)',
         'xpack.cloud.profile_url (string)',
+        'xpack.cloud.performance_url (string)',
+        'xpack.cloud.users_and_roles_url (string)',
+        'xpack.cloud.projects_url (any)', // It's a string (any because schema.conditional)
+        // can't be used to infer urls or customer id from the outside
+        'xpack.cloud.serverless.project_id (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
@@ -232,7 +242,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.index_management.enableIndexActions (boolean)',
+        'xpack.index_management.enableIndexActions (any)',
+        'xpack.index_management.enableLegacyTemplates (any)',
+        'xpack.index_management.dev.enableIndexDetailsPage (boolean)',
+        'xpack.index_management.enableIndexStats (any)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
          * xpack.infra.logs is conditional and will resolve to an object of properties
@@ -267,19 +280,23 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
         'xpack.snapshot_restore.ui.enabled (boolean)',
+        'xpack.stack_connectors.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
-        'xpack.observability.aiAssistant.enabled (boolean)',
-        'xpack.observability.aiAssistant.feedback.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
         'xpack.observability.unsafe.thresholdRule.enabled (boolean)',
         'xpack.observability_onboarding.ui.enabled (boolean)',
+        /**
+         * xpack.discoverLogExplorer.featureFlags is conditional and will never resolve if used in non-serverless environment
+         */
+        'xpack.discoverLogExplorer.featureFlags.deepLinkVisible (any)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's

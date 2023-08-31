@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", ".storybook/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*",
+    ".storybook/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/charts-plugin",
@@ -55,8 +61,19 @@
     "@kbn/unified-field-list",
     "@kbn/core-saved-objects-api-server",
     "@kbn/cell-actions",
+    "@kbn/shared-ux-utility",
+    "@kbn/core-application-browser",
+    "@kbn/core-saved-objects-server",
+    "@kbn/discover-utils",
+    "@kbn/field-types",
+    "@kbn/search-response-warnings",
+    "@kbn/content-management-plugin",
+    "@kbn/serverless",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-render",
+    "@kbn/no-data-page-plugin"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

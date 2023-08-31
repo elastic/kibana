@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "task:data_enhanced_search_sessions_monitor",
-    "index": ".kibana_task_manager_$KIBANA_PACKAGE_VERSION_001",
+    "index": ".kibana_task_manager",
     "source": {
       "references": [],
       "task": {

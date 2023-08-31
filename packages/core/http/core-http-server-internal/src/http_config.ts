@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
@@ -167,7 +167,11 @@ const configSchema = schema.object(
         },
       }
     ),
-    restrictInternalApis: schema.boolean({ defaultValue: false }), // allow access to internal routes by default to prevent breaking changes in current offerings
+    // allow access to internal routes by default to prevent breaking changes in current offerings
+    restrictInternalApis: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+    }),
+
     versioned: schema.object({
       /**
        * Which handler resolution algo to use: "newest" or "oldest".
@@ -316,7 +320,8 @@ export class HttpConfig implements IHttpConfig {
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
 
-    this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
+    // default to `false` to prevent breaking changes in current offerings
+    this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
   }

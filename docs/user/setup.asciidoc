@@ -21,6 +21,10 @@ Windows. Since Kibana runs on Node.js, we include the necessary Node.js
 binaries for these platforms. Running Kibana against a separately maintained
 version of Node.js is not supported.
 
+To support certain older Linux platforms (most notably CentOS7/RHEL7), {kib}
+for Linux ships with a custom build of Node.js with glibc 2.17 support. For
+details, see <<custom-nodejs-builds>>.
+
 [float]
 [[elasticsearch-version]]
 == Elasticsearch version

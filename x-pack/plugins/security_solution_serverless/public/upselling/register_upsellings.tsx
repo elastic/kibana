@@ -4,38 +4,57 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { lazy } from 'react';
-import { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type {
-  UpsellingService,
+  MessageUpsellings,
   PageUpsellings,
   SectionUpsellings,
+  UpsellingMessageId,
   UpsellingSectionId,
-} from '@kbn/security-solution-plugin/public';
+} from '@kbn/security-solution-upselling/service/types';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import React from 'react';
+import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
+import { AppFeatureKey } from '@kbn/security-solution-features/keys';
+import type { AppFeatureKeyType } from '@kbn/security-solution-features';
+import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
-
-const GenericUpsellingPageLazy = lazy(() => import('./pages/generic_upselling_page'));
-const GenericUpsellingSectionLazy = lazy(() => import('./pages/generic_upselling_section'));
+import {
+  EntityAnalyticsUpsellingLazy,
+  OsqueryResponseActionsUpsellingSectionLazy,
+  ThreatIntelligencePaywallLazy,
+} from './lazy_upselling';
+import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
+import type { Services } from '../common/services';
+import { withServicesProvider } from '../common/services';
 
 interface UpsellingsConfig {
-  pli: AppFeatureKey;
+  pli: AppFeatureKeyType;
   component: React.ComponentType;
+}
+
+interface UpsellingsMessageConfig {
+  pli: AppFeatureKeyType;
+  message: string;
+  id: UpsellingMessageId;
 }
 
 type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
 type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
+type UpsellingMessages = UpsellingsMessageConfig[];
 
 export const registerUpsellings = (
   upselling: UpsellingService,
-  productTypes: SecurityProductTypes
+  productTypes: SecurityProductTypes,
+  services: Services
 ) => {
   const enabledPLIsSet = new Set(getProductAppFeatures(productTypes));
 
   const upsellingPagesToRegister = upsellingPages.reduce<PageUpsellings>(
     (pageUpsellings, { pageName, pli, component }) => {
       if (!enabledPLIsSet.has(pli)) {
-        pageUpsellings[pageName] = component;
+        pageUpsellings[pageName] = withServicesProvider(component, services);
       }
       return pageUpsellings;
     },
@@ -52,24 +71,68 @@ export const registerUpsellings = (
     {}
   );
 
-  upselling.registerPages(upsellingPagesToRegister);
-  upselling.registerSections(upsellingSectionsToRegister);
+  const upsellingMessagesToRegister = upsellingMessages.reduce<MessageUpsellings>(
+    (messagesUpsellings, { id, pli, message }) => {
+      if (!enabledPLIsSet.has(pli)) {
+        messagesUpsellings[id] = message;
+      }
+      return messagesUpsellings;
+    },
+    {}
+  );
+
+  upselling.setPages(upsellingPagesToRegister);
+  upselling.setSections(upsellingSectionsToRegister);
+  upselling.setMessages(upsellingMessagesToRegister);
 };
 
 // Upsellings for entire pages, linked to a SecurityPageName
 export const upsellingPages: UpsellingPages = [
+  // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
     pageName: SecurityPageName.entityAnalytics,
     pli: AppFeatureKey.advancedInsights,
-    component: () => <GenericUpsellingPageLazy requiredPLI={AppFeatureKey.advancedInsights} />,
+    component: () => (
+      <EntityAnalyticsUpsellingLazy
+        requiredProduct={getProductTypeByPLI(AppFeatureKey.advancedInsights) ?? undefined}
+      />
+    ),
+  },
+  {
+    pageName: SecurityPageName.threatIntelligence,
+    pli: AppFeatureKey.threatIntelligence,
+    component: () => (
+      <ThreatIntelligencePaywallLazy requiredPLI={AppFeatureKey.threatIntelligence} />
+    ),
   },
 ];
 
 // Upsellings for sections, linked by arbitrary ids
 export const upsellingSections: UpsellingSections = [
+  // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
-    id: 'entity_analytics_panel',
-    pli: AppFeatureKey.advancedInsights,
-    component: () => <GenericUpsellingSectionLazy requiredPLI={AppFeatureKey.advancedInsights} />,
+    id: 'osquery_automated_response_actions',
+    pli: AppFeatureKey.osqueryAutomatedResponseActions,
+    component: () => (
+      <OsqueryResponseActionsUpsellingSectionLazy
+        requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
+      />
+    ),
+  },
+  {
+    id: 'endpointPolicyProtections',
+    pli: AppFeatureKey.endpointPolicyProtections,
+    component: EndpointPolicyProtectionsLazy,
+  },
+];
+
+// Upsellings for sections, linked by arbitrary ids
+export const upsellingMessages: UpsellingMessages = [
+  {
+    id: 'investigation_guide',
+    pli: AppFeatureKey.investigationGuide,
+    message: UPGRADE_INVESTIGATION_GUIDE(
+      getProductTypeByPLI(AppFeatureKey.investigationGuide) ?? ''
+    ),
   },
 ];

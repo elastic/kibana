@@ -128,6 +128,7 @@ import {
 import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
 import type { FilesClientFactory } from './services/files/types';
 import { PolicyWatcher } from './services/agent_policy_watch';
+import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -232,6 +233,10 @@ export interface FleetStartContract {
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
   createFleetActionsClient: (packageName: string) => FleetActionsClientInterface;
+  /*
+  Function exported to allow creating unique ids for saved object tags
+   */
+  getPackageSpecTagId: (spaceId: string, pkgName: string, tagName: string) => string;
 }
 
 export class FleetPlugin
@@ -591,10 +596,11 @@ export class FleetPlugin
       createFleetActionsClient(packageName: string) {
         return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      getPackageSpecTagId,
     };
   }
 
-  public async stop() {
+  public stop() {
     appContextService.stop();
     this.policyWatcher?.stop();
     licenseService.stop();

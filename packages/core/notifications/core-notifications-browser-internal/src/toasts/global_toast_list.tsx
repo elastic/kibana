@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Toast } from '@kbn/core-notifications-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
+import { deduplicateToasts, ToastWithRichTitle } from './deduplicate_toasts';
 
 interface Props {
   toasts$: Observable<Toast[]>;
@@ -20,31 +21,41 @@ interface Props {
 }
 
 interface State {
-  toasts: Toast[];
+  toasts: ToastWithRichTitle[];
+  idToToasts: Record<string, Toast[]>;
 }
 
-const convertToEui = (toast: Toast): EuiToast => ({
+const convertToEui = (toast: ToastWithRichTitle): EuiToast => ({
   ...toast,
-  title: typeof toast.title === 'function' ? <MountWrapper mount={toast.title} /> : toast.title,
-  text: typeof toast.text === 'function' ? <MountWrapper mount={toast.text} /> : toast.text,
+  title: toast.title instanceof Function ? <MountWrapper mount={toast.title} /> : toast.title,
+  text: toast.text instanceof Function ? <MountWrapper mount={toast.text} /> : toast.text,
 });
 
 export class GlobalToastList extends React.Component<Props, State> {
   public state: State = {
     toasts: [],
+    idToToasts: {},
   };
 
   private subscription?: Subscription;
 
   public componentDidMount() {
-    this.subscription = this.props.toasts$.subscribe((toasts) => {
-      this.setState({ toasts });
+    this.subscription = this.props.toasts$.subscribe((redundantToastList) => {
+      const { toasts, idToToasts } = deduplicateToasts(redundantToastList);
+      this.setState({ toasts, idToToasts });
     });
   }
 
   public componentWillUnmount() {
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+  }
+
+  private closeToastsRepresentedById(id: string) {
+    const representedToasts = this.state.idToToasts[id];
+    if (representedToasts) {
+      representedToasts.forEach((toast) => this.props.dismissToast(toast.id));
     }
   }
 
@@ -56,7 +67,7 @@ export class GlobalToastList extends React.Component<Props, State> {
         })}
         data-test-subj="globalToastList"
         toasts={this.state.toasts.map(convertToEui)}
-        dismissToast={({ id }) => this.props.dismissToast(id)}
+        dismissToast={({ id }) => this.closeToastsRepresentedById(id)}
         /**
          * This prop is overridden by the individual toasts that are added.
          * Use `Infinity` here so that it's obvious a timeout hasn't been

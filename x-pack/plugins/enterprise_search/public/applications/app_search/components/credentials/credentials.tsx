@@ -16,8 +16,7 @@ import {
   EuiButtonIcon,
   EuiSpacer,
   EuiButton,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageHeader,
   EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -85,31 +84,27 @@ export const Credentials: React.FC = () => {
         </EuiCopy>
       </EuiPanel>
       <EuiSpacer size="xxl" />
-      <EuiPageContentHeader responsive={false}>
-        <EuiPageContentHeaderSection>
-          <EuiTitle size="m">
-            <h2>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.apiKeys', {
-                defaultMessage: 'API keys',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-        <EuiPageContentHeaderSection>
-          {!dataLoading && (
-            <EuiButton
-              color="primary"
-              data-test-subj="CreateAPIKeyButton"
-              fill
-              onClick={() => showCredentialsForm()}
-            >
-              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.createKey', {
-                defaultMessage: 'Create key',
-              })}
-            </EuiButton>
-          )}
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
+      <EuiPageHeader responsive={false}>
+        <EuiTitle size="m">
+          <h2>
+            {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.apiKeys', {
+              defaultMessage: 'API keys',
+            })}
+          </h2>
+        </EuiTitle>
+        {!dataLoading && (
+          <EuiButton
+            color="primary"
+            data-test-subj="CreateAPIKeyButton"
+            fill
+            onClick={() => showCredentialsForm()}
+          >
+            {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.createKey', {
+              defaultMessage: 'Create key',
+            })}
+          </EuiButton>
+        )}
+      </EuiPageHeader>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder>
         <EuiSkeletonText lines={3} isLoading={!!dataLoading}>

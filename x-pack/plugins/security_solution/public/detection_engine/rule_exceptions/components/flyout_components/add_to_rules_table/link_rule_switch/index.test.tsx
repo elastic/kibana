@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { getRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
 import { LinkRuleSwitch } from '.';
 

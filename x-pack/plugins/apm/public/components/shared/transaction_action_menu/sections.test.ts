@@ -62,6 +62,9 @@ describe('Transaction action menu', () => {
         apmRouter,
         infraLocators,
         infraLinksAvailable: false,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
       })
     ).toEqual([
       [
@@ -124,6 +127,9 @@ describe('Transaction action menu', () => {
         apmRouter,
         infraLocators,
         infraLinksAvailable: true,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
       })
     ).toEqual([
       [
@@ -205,6 +211,9 @@ describe('Transaction action menu', () => {
         apmRouter,
         infraLocators,
         infraLinksAvailable: true,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
       })
     ).toEqual([
       [

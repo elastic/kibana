@@ -154,6 +154,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
               value={jobPrefix}
               onChange={({ target: { value } }) => setJobPrefix(value)}
               isInvalid={!!validationResult.jobPrefix}
+              data-test-subj="mlJobRecognizerWizardInputJobIdPrefix"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -210,6 +211,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             />
           }
           paddingSize="l"
+          data-test-subj="mlJobWizardToggleAdvancedSection"
         >
           <EuiDescribedFormGroup
             title={
@@ -227,7 +229,10 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
               />
             }
           >
-            <EuiFormRow describedByIds={['ml_aria_label_new_job_dedicated_index']}>
+            <EuiFormRow
+              describedByIds={['ml_aria_label_new_job_dedicated_index']}
+              data-test-subj="mlJobWizardAdvancedSection"
+            >
               <EuiSwitch
                 id="useDedicatedIndex"
                 name="useDedicatedIndex"

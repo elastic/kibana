@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fold, Either, mapLeft } from 'fp-ts/lib/Either';
+import { Either, isLeft, mapLeft } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fromEither, TaskEither } from 'fp-ts/lib/TaskEither';
 import * as t from 'io-ts';
@@ -16,28 +16,27 @@ import { formatErrors } from '../format_errors';
 export const validate = <T extends t.Mixed>(
   obj: object,
   schema: T
-): [t.TypeOf<T> | null, string | null] => {
+): [t.TypeOf<T>, null] | [null, string] => {
   const decoded = schema.decode(obj);
   const checked = exactCheck(obj, decoded);
-  const left = (errors: t.Errors): [T | null, string | null] => [
-    null,
-    formatErrors(errors).join(','),
-  ];
-  const right = (output: T): [T | null, string | null] => [output, null];
-  return pipe(checked, fold(left, right));
+
+  if (isLeft(checked)) {
+    return [null, formatErrors(checked.left).join(',')];
+  } else {
+    return [checked.right, null];
+  }
 };
 
 export const validateNonExact = <T extends t.Mixed>(
   obj: unknown,
   schema: T
-): [t.TypeOf<T> | null, string | null] => {
+): [t.TypeOf<T>, null] | [null, string] => {
   const decoded = schema.decode(obj);
-  const left = (errors: t.Errors): [T | null, string | null] => [
-    null,
-    formatErrors(errors).join(','),
-  ];
-  const right = (output: T): [T | null, string | null] => [output, null];
-  return pipe(decoded, fold(left, right));
+  if (isLeft(decoded)) {
+    return [null, formatErrors(decoded.left).join(',')];
+  } else {
+    return [decoded.right, null];
+  }
 };
 
 export const validateEither = <T extends t.Mixed, A extends unknown>(

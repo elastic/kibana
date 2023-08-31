@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RESPONSE_ACTION_TYPES } from '../../../common/detection_engine/rule_response_actions/schemas';
+import { RESPONSE_ACTION_TYPES } from '../../../common/api/detection_engine/model/rule_response_actions';
 
 export const getActionDetails = (actionTypeId: string) => {
   switch (actionTypeId) {

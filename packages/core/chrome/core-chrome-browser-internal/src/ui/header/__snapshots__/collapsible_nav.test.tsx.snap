@@ -162,7 +162,7 @@ Array [
       >
         <div>
           <div
-            class=" emotion-euiAccordion__children"
+            class="euiAccordion__children emotion-euiAccordion__children"
           >
             <div
               class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
@@ -287,7 +287,7 @@ Array [
         >
           <div>
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiAccordion__children emotion-euiAccordion__children"
             >
               <div
                 class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
@@ -419,7 +419,7 @@ Array [
         >
           <div>
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiAccordion__children emotion-euiAccordion__children"
             >
               <div
                 class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
@@ -534,7 +534,7 @@ Array [
         >
           <div>
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiAccordion__children emotion-euiAccordion__children"
             >
               <div
                 class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
@@ -632,7 +632,7 @@ Array [
         >
           <div>
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiAccordion__children emotion-euiAccordion__children"
             >
               <div
                 class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"

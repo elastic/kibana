@@ -118,7 +118,7 @@ function updateColumnArgs(
 ) {
   args.columns = [...bucketsColumnArgs];
   // add first column from each group, then add second column for each group, ...
-  transposedColumnGroups[0].forEach((_, index) => {
+  transposedColumnGroups[0]?.forEach((_, index) => {
     transposedColumnGroups.forEach((transposedColumnGroup) => {
       args.columns.push(transposedColumnGroup[index]);
     });

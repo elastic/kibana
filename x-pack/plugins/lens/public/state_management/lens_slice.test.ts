@@ -10,10 +10,8 @@ import type { Query } from '@kbn/es-query';
 import {
   switchDatasource,
   switchAndCleanDatasource,
-  updateStateFromSuggestion,
   switchVisualization,
   setState,
-  updateState,
   updateDatasourceState,
   updateVisualizationState,
   removeOrClearLayer,
@@ -103,12 +101,6 @@ describe('lensSlice', () => {
       });
     });
 
-    it('updateState: updates state with updater', () => {
-      const customUpdater = jest.fn((state) => ({ ...state, query: customQuery }));
-      store.dispatch(updateState({ updater: customUpdater }));
-      const changedState = store.getState().lens;
-      expect(changedState).toEqual({ ...defaultState, query: customQuery });
-    });
     it('should update the corresponding visualization state on update', () => {
       const newVisState = {};
       store.dispatch(
@@ -120,25 +112,12 @@ describe('lensSlice', () => {
 
       expect(store.getState().lens.visualization.state).toEqual(newVisState);
     });
-    it('should update the datasource state with passed in reducer', () => {
-      const datasourceUpdater = jest.fn(() => ({ changed: true }));
-      store.dispatch(
-        updateDatasourceState({
-          datasourceId: 'testDatasource',
-          updater: datasourceUpdater,
-        })
-      );
-      expect(store.getState().lens.datasourceStates.testDatasource.state).toStrictEqual({
-        changed: true,
-      });
-      expect(datasourceUpdater).toHaveBeenCalledTimes(1);
-    });
     it('should update the layer state with passed in reducer', () => {
       const newDatasourceState = {};
       store.dispatch(
         updateDatasourceState({
           datasourceId: 'testDatasource',
-          updater: newDatasourceState,
+          newDatasourceState,
         })
       );
       expect(store.getState().lens.datasourceStates.testDatasource.state).toStrictEqual(
@@ -269,28 +248,6 @@ describe('lensSlice', () => {
         expect(customStore.getState().lens.datasourceStates.testDatasource2.state).toStrictEqual(
           {}
         );
-      });
-    });
-
-    describe('update the state from the suggestion', () => {
-      it('should switch active datasource and initialize new state', () => {
-        store.dispatch(
-          updateStateFromSuggestion({
-            newDatasourceId: 'testDatasource2',
-            visualizationId: 'testVis',
-            visualizationState: ['col1', 'col2'],
-            datasourceState: {},
-            dataViews: { indexPatterns: {} } as DataViewsState,
-          })
-        );
-        expect(store.getState().lens.activeDatasourceId).toEqual('testDatasource2');
-        expect(store.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(false);
-        expect(store.getState().lens.datasourceStates.testDatasource2.state).toStrictEqual({});
-        expect(store.getState().lens.visualization).toStrictEqual({
-          activeId: 'testVis',
-          state: ['col1', 'col2'],
-        });
-        expect(store.getState().lens.dataViews).toEqual({ indexPatterns: {} });
       });
     });
 

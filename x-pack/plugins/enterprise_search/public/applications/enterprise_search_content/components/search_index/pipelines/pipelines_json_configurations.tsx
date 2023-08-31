@@ -62,7 +62,7 @@ export const PipelinesJSONConfigurations: React.FC = () => {
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations.ingestionPipelines.docLink',
               {
-                defaultMessage: 'Learn more about how Enterprise Search uses ingest pipelines',
+                defaultMessage: 'Learn more about how Search uses ingest pipelines',
               }
             )}
           </EuiLink>

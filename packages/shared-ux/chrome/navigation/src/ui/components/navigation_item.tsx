@@ -9,6 +9,7 @@
 import React, { Fragment, ReactElement, ReactNode, useEffect, useMemo } from 'react';
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import { useNavigation as useNavigationServices } from '../../services';
 import type { ChromeProjectNavigationNodeEnhanced, NodeProps } from '../types';
 import { useInitNavNode } from '../hooks';
 import { useNavigation } from './navigation';
@@ -18,7 +19,6 @@ export interface Props<
   Id extends string = string,
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
-  element?: string;
   unstyled?: boolean;
 }
 
@@ -31,13 +31,13 @@ function NavigationItemComp<
   Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
+  const { cloudLinks } = useNavigationServices();
   const navigationContext = useNavigation();
   const navNodeRef = React.useRef<ChromeProjectNavigationNodeEnhanced | null>(null);
 
-  const { element, children, node } = useMemo(() => {
-    const { element: _element, children: _children, ...rest } = props;
+  const { children, node } = useMemo(() => {
+    const { children: _children, ...rest } = props;
     return {
-      element: _element,
       children: _children,
       node: rest,
     };
@@ -51,7 +51,7 @@ function NavigationItemComp<
       typeof children === 'function' ? () => children(navNodeRef.current) : () => children;
   }
 
-  const { navNode } = useInitNavNode({ ...node, children, renderItem });
+  const { navNode } = useInitNavNode({ ...node, children, renderItem }, { cloudLinks });
 
   useEffect(() => {
     navNodeRef.current = navNode;
@@ -68,9 +68,7 @@ function NavigationItemComp<
     return <>{children}</>;
   }
 
-  const Element = element || Fragment;
-
-  return <Element>{navNode.title}</Element>;
+  return <Fragment>{navNode.title}</Fragment>;
 }
 
 export const NavigationItem = React.memo(NavigationItemComp) as typeof NavigationItemComp;

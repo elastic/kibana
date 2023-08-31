@@ -7,7 +7,6 @@
 
 import type { ElementRef } from 'react';
 import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
-import type { PluggableList } from 'unified';
 import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
@@ -20,8 +19,6 @@ interface MarkdownEditorProps {
   editorId: string;
   height?: number;
   onChange: (content: string) => void;
-  parsingPlugins?: PluggableList;
-  processingPlugins?: PluggableList;
   disabledUiPlugins?: string[] | undefined;
   value: string;
 }

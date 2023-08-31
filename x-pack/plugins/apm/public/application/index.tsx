@@ -56,6 +56,7 @@ export const renderApp = ({
     unifiedSearch: pluginsStart.unifiedSearch,
     lens: pluginsStart.lens,
     uiActions: pluginsStart.uiActions,
+    observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
   };
 
   // render APM feedback link in global help menu

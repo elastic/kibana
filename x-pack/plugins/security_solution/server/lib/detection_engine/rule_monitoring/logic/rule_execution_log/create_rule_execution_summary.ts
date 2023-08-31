@@ -7,12 +7,12 @@
 
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 
-import type { RuleExecutionSummary } from '../../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionSummary } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   ruleLastRunOutcomeToExecutionStatus,
   ruleExecutionStatusToNumber,
   RuleExecutionStatus,
-} from '../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../common/api/detection_engine/rule_monitoring';
 
 import type { RuleParams } from '../../../rule_schema';
 

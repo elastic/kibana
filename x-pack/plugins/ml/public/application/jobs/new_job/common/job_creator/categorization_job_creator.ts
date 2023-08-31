@@ -14,8 +14,19 @@ import {
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import {
+  type CategorizationAnalyzer,
+  type CategoryFieldExample,
+  type FieldExampleCheck,
+  VALIDATION_RESULT,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
+} from '@kbn/ml-category-validator';
 import { JobCreator } from './job_creator';
-import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
+import type {
+  Job,
+  Datafeed,
+  Detector,
+} from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import {
   JOB_TYPE,
@@ -23,13 +34,7 @@ import {
   DEFAULT_BUCKET_SPAN,
   DEFAULT_RARE_BUCKET_SPAN,
 } from '../../../../../../common/constants/new_job';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/categorization_job';
-import {
-  CategorizationAnalyzer,
-  CategoryFieldExample,
-  FieldExampleCheck,
-  VALIDATION_RESULT,
-} from '../../../../../../common/types/categories';
+
 import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader } from '../results_loader';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
@@ -121,11 +126,16 @@ export class CategorizationJobCreator extends JobCreator {
   public async loadCategorizationFieldExamples() {
     const { examples, sampleSize, overallValidStatus, validationChecks } =
       await this._examplesLoader.loadExamples();
-    this._categoryFieldExamples = examples;
+    const categoryFieldExamples = examples ?? [];
+    this._categoryFieldExamples = categoryFieldExamples;
     this._validationChecks = validationChecks;
     this._overallValidStatus = overallValidStatus;
 
-    this._ccsVersionFailure = this._checkCcsFailure(examples, overallValidStatus, validationChecks);
+    this._ccsVersionFailure = this._checkCcsFailure(
+      categoryFieldExamples,
+      overallValidStatus,
+      validationChecks
+    );
     if (this._ccsVersionFailure === true) {
       // if the data view contains a cross-cluster search, one of the clusters may
       // be on a version which doesn't support the fields API (e.g. 6.8)
@@ -137,7 +147,7 @@ export class CategorizationJobCreator extends JobCreator {
     this._wizardInitialized$.next(true);
 
     return {
-      examples,
+      examples: categoryFieldExamples,
       sampleSize,
       overallValidStatus,
       validationChecks,

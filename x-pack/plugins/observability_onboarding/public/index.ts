@@ -5,17 +5,38 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import {
+  ApplicationStart,
+  HttpStart,
+  PluginInitializer,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import {
   ObservabilityOnboardingPlugin,
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginStart,
 } from './plugin';
 
+export interface ConfigSchema {
+  ui: {
+    enabled: boolean;
+  };
+  serverless: {
+    enabled: boolean;
+  };
+}
+
+export interface ObservabilityOnboardingAppServices {
+  application: ApplicationStart;
+  http: HttpStart;
+  config: ConfigSchema;
+}
+
 export const plugin: PluginInitializer<
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginStart
-> = (ctx: PluginInitializerContext) => new ObservabilityOnboardingPlugin(ctx);
+> = (ctx: PluginInitializerContext<ConfigSchema>) =>
+  new ObservabilityOnboardingPlugin(ctx);
 
 export type {
   ObservabilityOnboardingPluginSetup,

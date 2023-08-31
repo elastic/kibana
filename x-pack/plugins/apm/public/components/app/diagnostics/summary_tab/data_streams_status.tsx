@@ -22,12 +22,12 @@ export function DataStreamsStatus() {
   const router = useApmRouter();
   const { query } = useApmParams('/diagnostics/*');
   const isLoading = status === FETCH_STATUS.LOADING;
-  const tabStatus = getDataStreamTabStatus(diagnosticsBundle);
+  const isOk = getIsDataStreamTabOk(diagnosticsBundle);
 
   return (
     <TabStatus
       isLoading={isLoading}
-      isOk={tabStatus}
+      isOk={isOk}
       data-test-subj="dataStreamsStatus"
     >
       Data streams
@@ -41,9 +41,9 @@ export function DataStreamsStatus() {
   );
 }
 
-export function getDataStreamTabStatus(diagnosticsBundle?: DiagnosticsBundle) {
+export function getIsDataStreamTabOk(diagnosticsBundle?: DiagnosticsBundle) {
   if (!diagnosticsBundle) {
-    return false;
+    return true;
   }
 
   return diagnosticsBundle.dataStreams.every((ds) => {

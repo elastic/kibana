@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText, EuiSkeletonText } from '@elastic/eui';
+import { EuiText, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -56,15 +56,11 @@ export function Readme({
       ) : (
         <EuiText>
           {/* simulates a long page of text loading */}
-          <p>
-            <EuiSkeletonText lines={5} />
-          </p>
-          <p>
-            <EuiSkeletonText lines={6} />
-          </p>
-          <p>
-            <EuiSkeletonText lines={4} />
-          </p>
+          <EuiSkeletonText lines={5} />
+          <EuiSpacer size="m" />
+          <EuiSkeletonText lines={6} />
+          <EuiSpacer size="m" />
+          <EuiSkeletonText lines={4} />
         </EuiText>
       )}
     </Fragment>

@@ -76,10 +76,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   alertsPageChartsEnabled: true,
   alertTypeEnabled: false,
-  /**
-   * Enables the new security flyout over the current alert details flyout
-   */
-  securityFlyoutEnabled: false,
 
   /*
    * Enables new Set of filters on the Alerts page.
@@ -94,15 +90,6 @@ export const allowedExperimentalValues = Object.freeze({
   newUserDetailsFlyout: false,
 
   /**
-   * Enables Protections/Detections Coverage Overview page (Epic link https://github.com/elastic/security-team/issues/2905)
-   *
-   * This flag aims to facilitate the development process as the feature may not make it to 8.9 release.
-   *
-   * The flag doesn't have to be documented and has to be removed after the feature is ready to release.
-   */
-  detectionsCoverageOverview: false,
-
-  /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
    */
   riskScoringPersistence: false,
@@ -111,6 +98,17 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Entity Analytics HTTP endpoints
    */
   riskScoringRoutesEnabled: false,
+  /*
+   *
+   * Enables Discover embedded within timeline
+   *
+   * */
+  discoverInTimeline: false,
+
+  /**
+   * Enables Protection Updates tab in the Endpoint Policy Details page
+   */
+  protectionUpdatesEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

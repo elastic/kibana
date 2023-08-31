@@ -45,8 +45,8 @@ import {
   DataSourceType,
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
@@ -485,6 +485,7 @@ export const formatAboutStepData = (
   const {
     author,
     falsePositives,
+    investigationFields,
     references,
     riskScore,
     severity,
@@ -501,6 +502,7 @@ export const formatAboutStepData = (
 
   const detectionExceptionLists =
     exceptionsList != null ? exceptionsList.filter((list) => list.type !== 'endpoint') : [];
+  const isinvestigationFieldsEmpty = investigationFields.every((item) => isEmpty(item.trim()));
 
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
@@ -524,6 +526,9 @@ export const formatAboutStepData = (
       : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
+    investigation_fields: isinvestigationFieldsEmpty
+      ? undefined
+      : { field_names: investigationFields },
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.isMappingChecked
       ? riskScore.mapping.filter((m) => m.field != null && m.field !== '')

@@ -8,6 +8,7 @@
 
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
+import { OPTIONS_LIST_CONTROL } from '../../../common';
 import { ControlOutput } from '../../types';
 import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../services';
@@ -15,6 +16,7 @@ import { DeleteControlAction } from './delete_control_action';
 import { OptionsListEmbeddableInput } from '../../options_list';
 import { controlGroupInputBuilder } from '../external_api/control_group_input_builder';
 import { ControlGroupContainer } from '../embeddable/control_group_container';
+import { OptionsListEmbeddableFactory } from '../../options_list/embeddable/options_list_embeddable_factory';
 import { OptionsListEmbeddable } from '../../options_list/embeddable/options_list_embeddable';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 
@@ -22,6 +24,12 @@ let container: ControlGroupContainer;
 let embeddable: OptionsListEmbeddable;
 
 beforeAll(async () => {
+  pluginServices.getServices().controls.getControlFactory = jest
+    .fn()
+    .mockImplementation((type: string) => {
+      if (type === OPTIONS_LIST_CONTROL) return new OptionsListEmbeddableFactory();
+    });
+
   const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
   controlGroupInputBuilder.addOptionsListControl(controlGroupInput, {
     dataViewId: 'test-data-view',
@@ -34,6 +42,7 @@ beforeAll(async () => {
   await container.untilInitialized();
 
   embeddable = container.getChild(container.getChildIds()[0]);
+  expect(embeddable.type).toBe(OPTIONS_LIST_CONTROL);
 });
 
 test('Action is incompatible with Error Embeddables', async () => {

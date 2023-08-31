@@ -148,12 +148,7 @@ describe('LensEditConfigurationFlyout', () => {
         "activeData": Object {},
         "dataViews": Object {
           "indexPatternRefs": Array [],
-          "indexPatterns": Object {
-            "index1": Object {
-              "id": "index1",
-              "isPersisted": [Function],
-            },
-          },
+          "indexPatterns": Object {},
         },
         "datasourceLayers": Object {
           "a": Object {
@@ -207,12 +202,7 @@ describe('LensEditConfigurationFlyout', () => {
                   "activeData": Object {},
                   "dataViews": Object {
                     "indexPatternRefs": Array [],
-                    "indexPatterns": Object {
-                      "index1": Object {
-                        "id": "index1",
-                        "isPersisted": [Function],
-                      },
-                    },
+                    "indexPatterns": Object {},
                   },
                   "datasourceLayers": Object {
                     "a": Object {
@@ -257,12 +247,7 @@ describe('LensEditConfigurationFlyout', () => {
                   "activeData": Object {},
                   "dataViews": Object {
                     "indexPatternRefs": Array [],
-                    "indexPatterns": Object {
-                      "index1": Object {
-                        "id": "index1",
-                        "isPersisted": [Function],
-                      },
-                    },
+                    "indexPatterns": Object {},
                   },
                   "datasourceLayers": Object {
                     "a": Object {

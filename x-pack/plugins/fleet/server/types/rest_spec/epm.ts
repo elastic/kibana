@@ -37,7 +37,7 @@ export const GetInstalledPackagesRequestSchema = {
     ),
     nameQuery: schema.maybe(schema.string()),
     searchAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
-    perPage: schema.number({ defaultValue: 30 }),
+    perPage: schema.number({ defaultValue: 15 }),
     sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
       defaultValue: 'asc',
     }),
@@ -192,6 +192,25 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
 
 export const InstallPackageByUploadRequestSchema = {
   body: schema.buffer(),
+};
+
+export const CreateCustomIntegrationRequestSchema = {
+  body: schema.object({
+    integrationName: schema.string(),
+    datasets: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        type: schema.oneOf([
+          schema.literal('logs'),
+          schema.literal('metrics'),
+          schema.literal('traces'),
+          schema.literal('synthetics'),
+          schema.literal('profiling'),
+        ]),
+      })
+    ),
+    force: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const DeletePackageRequestSchema = {

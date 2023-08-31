@@ -12,7 +12,6 @@ import {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
@@ -26,25 +25,10 @@ import { AlertingConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';
 import { AlertingPluginsStart } from '../plugin';
 import { InvalidatePendingApiKey } from '../types';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 const TASK_TYPE = 'alerts_invalidate_api_keys';
 export const TASK_ID = `Alerts-${TASK_TYPE}`;
-
-const stateSchemaByVersion = {
-  1: {
-    up: (state: Record<string, unknown>) => ({
-      runs: state.runs || 0,
-      total_invalidated: state.total_invalidated || 0,
-    }),
-    schema: schema.object({
-      runs: schema.number(),
-      total_invalidated: schema.number(),
-    }),
-  },
-};
-
-const latestSchema = stateSchemaByVersion[1].schema;
-type LatestTaskStateSchema = TypeOf<typeof latestSchema>;
 
 const invalidateAPIKeys = async (
   params: InvalidateAPIKeysParams,
@@ -82,17 +66,13 @@ export async function scheduleApiKeyInvalidatorTask(
 ) {
   const interval = config.invalidateApiKeysTask.interval;
   try {
-    const state: LatestTaskStateSchema = {
-      runs: 0,
-      total_invalidated: 0,
-    };
     await taskManager.ensureScheduled({
       id: TASK_ID,
       taskType: TASK_TYPE,
       schedule: {
         interval,
       },
-      state,
+      state: emptyState,
       params: {},
     });
   } catch (e) {

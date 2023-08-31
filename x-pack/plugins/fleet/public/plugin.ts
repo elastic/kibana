@@ -49,6 +49,8 @@ import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
 import { calculateAuthz, calculatePackagePrivilegesFromCapabilities } from '../common/authz';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
@@ -79,6 +81,7 @@ import { setCustomIntegrations, setCustomIntegrationsStart } from './services/cu
 
 import type { RequestError } from './hooks';
 import { sendGetBulkAssets } from './hooks';
+import { fleetDeepLinks } from './deep_links';
 
 // We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
@@ -114,6 +117,7 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  dashboard: DashboardStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   navigation: NavigationPublicPluginStart;
@@ -127,6 +131,7 @@ export interface FleetStartDeps {
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
   storage: Storage;
   share: SharePluginStart;
+  dashboard: DashboardStart;
   cloud?: CloudSetup & CloudStart;
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
@@ -211,6 +216,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       order: 9020,
       euiIconType: 'logoElastic',
       appRoute: '/app/fleet',
+      deepLinks: fleetDeepLinks,
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
         const cloud =

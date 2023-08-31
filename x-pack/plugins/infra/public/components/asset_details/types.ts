@@ -5,29 +5,17 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { TimeRange } from '@kbn/es-query';
+import { Search } from 'history';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
-import type { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
 
-export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
-type HostMetrics = Record<InfraAssetMetricType, number | null>;
-
-interface HostMetadata {
-  os?: string | null;
-  ip?: string | null;
-  servicesOnHost?: number | null;
-  title: { name: string; cloudProvider?: CloudProvider | null };
+export interface Asset {
   id: string;
+  name?: string;
 }
-export type HostNodeRow = HostMetadata &
-  HostMetrics & {
-    name: string;
-  };
 
 export enum FlyoutTabIds {
   OVERVIEW = 'overview',
-  METRICS = 'metrics',
   METADATA = 'metadata',
   PROCESSES = 'processes',
   ANOMALIES = 'anomalies',
@@ -39,51 +27,29 @@ export enum FlyoutTabIds {
 
 export type TabIds = `${FlyoutTabIds}`;
 
-export interface StringDateRange {
-  from: string;
-  to: string;
-  mode?: 'absolute' | 'relative' | undefined;
-}
-
-export interface TabState {
-  overview?: {
-    dateRange: StringDateRange;
-    dataView?: DataView;
-  };
+export interface OverridableTabState {
   metadata?: {
-    query?: string;
     showActionsColumn?: boolean;
-  };
-  processes?: {
-    query?: string;
   };
   anomalies?: {
     onClose?: () => void;
   };
-  metrics?: {
-    accountId?: string;
-    region?: string;
-    customMetrics?: SnapshotCustomMetricInput[];
-  };
   alertRule?: {
     onCreateRuleClick?: () => void;
   };
-  logs?: {
-    query?: string;
-    logView?: {
-      reference?: LogViewReference | null;
-      loading?: boolean;
-    };
-  };
 }
 
+export interface TabState extends OverridableTabState {
+  activeTabId?: TabIds;
+  dateRange?: TimeRange;
+}
 export interface FlyoutProps {
   closeFlyout: () => void;
-  showInFlyout: true;
+  mode: 'flyout';
 }
 
 export interface FullPageProps {
-  showInFlyout: false;
+  mode: 'page';
 }
 
 export type RenderMode = FlyoutProps | FullPageProps;
@@ -91,25 +57,33 @@ export type RenderMode = FlyoutProps | FullPageProps;
 export interface Tab {
   id: FlyoutTabIds;
   name: string;
-  'data-test-subj': string;
 }
 
 export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
 
 export interface AssetDetailsProps {
-  node: HostNodeRow;
-  nodeType: InventoryItemType;
-  currentTimeRange: {
-    interval: string;
-    from: number;
-    to: number;
-  };
+  asset: Asset;
+  assetType: InventoryItemType;
+  dateRange: TimeRange;
   tabs: Tab[];
-  activeTabId?: TabIds;
-  overrides?: TabState;
-  renderMode?: RenderMode;
-  onTabsStateChange?: TabsStateChangeFn;
+  overrides?: OverridableTabState;
+  renderMode: RenderMode;
   links?: LinkOptions[];
+  // This is temporary. Once we start using the asset details in other plugins,
+  // It will have to retrieve the metricAlias internally rather than receive it via props
+  metricAlias: string;
 }
 
-export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;
+export type TabsStateChangeFn = (state: TabState) => void;
+
+export interface ContentTemplateProps {
+  header: Pick<AssetDetailsProps, 'tabs' | 'links'>;
+}
+
+export interface RouteState {
+  originAppId: string;
+  originPathname?: string;
+  originSearch?: Search;
+}
+
+export type DataViewOrigin = 'logs' | 'metrics';

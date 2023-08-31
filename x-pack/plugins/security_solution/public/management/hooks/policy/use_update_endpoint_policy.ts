@@ -18,13 +18,12 @@ interface UpdateParams {
   policy: PolicyData;
 }
 
-type UseUpdateEndpointPolicyOptions = UseMutationOptions<
-  UpdatePolicyResponse,
-  IHttpFetchError,
-  UpdateParams
+export type UseUpdateEndpointPolicyOptions = Omit<
+  UseMutationOptions<UpdatePolicyResponse, IHttpFetchError, UpdateParams>,
+  'mutationFn'
 >;
 
-type UseUpdateEndpointPolicyResult = UseMutationResult<
+export type UseUpdateEndpointPolicyResult = UseMutationResult<
   UpdatePolicyResponse,
   IHttpFetchError,
   UpdateParams

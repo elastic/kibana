@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { APM_TEST_PASSWORD } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
@@ -12,6 +11,7 @@ import {
   LogLevel,
 } from '@kbn/apm-synthtrace';
 import url from 'url';
+import { kbnTestConfig } from '@kbn/test';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function bootstrapApmSynthtrace(
@@ -37,7 +37,7 @@ export function getApmSynthtraceKibanaClient(kibanaServerUrl: string) {
   const kibanaServerUrlWithAuth = url
     .format({
       ...url.parse(kibanaServerUrl),
-      auth: `elastic:${APM_TEST_PASSWORD}`,
+      auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
     })
     .slice(0, -1);
 

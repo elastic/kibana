@@ -244,6 +244,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const isPaginationVisible =
     (showSwimlane || isLoading) &&
     swimlaneLimit !== undefined &&
+    swimlaneLimit > (perPage ?? 5) &&
     onPaginationChange &&
     fromPage &&
     perPage;

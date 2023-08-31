@@ -9,8 +9,8 @@ import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-type
 import { invariant } from '../../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionEditType } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import type { RuleAlertType } from '../../../rule_schema';
 import { isIndexPatternsBulkEditAction } from './utils';
 import { throwDryRunError } from './dry_run';

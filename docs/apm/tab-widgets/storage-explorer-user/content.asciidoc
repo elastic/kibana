@@ -3,6 +3,10 @@
 |====
 |Type |Privilege |Purpose
 
+|Cluster
+|`monitor`
+|Monitor the disk space used by APM indices
+
 |Index
 |`monitor` on `apm-*`
 |Monitor access to `apm-*` for storage explorer
@@ -13,6 +17,10 @@
 [options="header"]
 |====
 |Type |Privilege |Purpose
+
+|Cluster
+|`monitor`
+|Monitor the disk space used by APM data streams
 
 |Index
 |`monitor` on `logs-apm*`

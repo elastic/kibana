@@ -12,6 +12,7 @@ import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/publ
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import { noop } from 'lodash/fp';
 import { Conversation, Prompt } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
@@ -21,12 +22,16 @@ import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_sys
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
 import { UseAssistantContext } from '../../../assistant_context';
 import { ConversationSelectorSettings } from '../conversation_selector_settings';
-import { getDefaultSystemPromptFromConversation } from './helpers';
+import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
+import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
+import { getGenAiConfig } from '../../../connectorland/helpers';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   allSystemPrompts: Prompt[];
   conversationSettings: UseAssistantContext['conversations'];
+  defaultConnectorId?: string;
+  defaultProvider?: OpenAiProviderType;
   http: HttpSetup;
   onSelectedConversationChange: (conversation?: Conversation) => void;
   selectedConversation: Conversation | undefined;
@@ -43,6 +48,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
   ({
     actionTypeRegistry,
     allSystemPrompts,
+    defaultConnectorId,
+    defaultProvider,
     selectedConversation,
     onSelectedConversationChange,
     conversationSettings,
@@ -50,13 +57,15 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     setUpdatedConversationSettings,
     isDisabled = false,
   }) => {
-    // Defaults
     const defaultSystemPrompt = useMemo(() => {
-      return (
-        allSystemPrompts.find((systemPrompt) => systemPrompt.isNewConversationDefault) ??
-        allSystemPrompts[0]
-      );
+      return getDefaultSystemPrompt({ allSystemPrompts, conversation: undefined });
     }, [allSystemPrompts]);
+
+    const selectedSystemPrompt = useMemo(() => {
+      return getDefaultSystemPrompt({ allSystemPrompts, conversation: selectedConversation });
+    }, [allSystemPrompts, selectedConversation]);
+
+    const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
 
     // Conversation callbacks
     // When top level conversation selection changes
@@ -68,8 +77,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               id: c ?? '',
               messages: [],
               apiConfig: {
-                connectorId: undefined,
-                provider: undefined,
+                connectorId: defaultConnectorId,
+                provider: defaultProvider,
                 defaultSystemPromptId: defaultSystemPrompt?.id,
               },
             }
@@ -86,7 +95,13 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
 
         onSelectedConversationChange(newSelectedConversation);
       },
-      [defaultSystemPrompt?.id, onSelectedConversationChange, setUpdatedConversationSettings]
+      [
+        defaultConnectorId,
+        defaultProvider,
+        defaultSystemPrompt?.id,
+        onSelectedConversationChange,
+        setUpdatedConversationSettings,
+      ]
     );
 
     const onConversationDeleted = useCallback(
@@ -102,18 +117,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       [setUpdatedConversationSettings]
     );
 
-    const selectedSystemPrompt = useMemo(
-      () =>
-        getDefaultSystemPromptFromConversation({
-          allSystemPrompts,
-          conversation: selectedConversation,
-          defaultSystemPrompt,
-        }),
-      [allSystemPrompts, defaultSystemPrompt, selectedConversation]
-    );
-
     const handleOnSystemPromptSelectionChange = useCallback(
-      (systemPromptId?: string) => {
+      (systemPromptId?: string | undefined) => {
         if (selectedConversation != null) {
           setUpdatedConversationSettings((prev) => ({
             ...prev,
@@ -130,10 +135,13 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       [selectedConversation, setUpdatedConversationSettings]
     );
 
-    const selectedConnectorId = useMemo(
-      () => selectedConversation?.apiConfig.connectorId,
-      [selectedConversation?.apiConfig.connectorId]
-    );
+    const selectedConnector = useMemo(() => {
+      const selectedConnectorId = selectedConversation?.apiConfig.connectorId;
+      if (areConnectorsFetched) {
+        return connectors?.find((c) => c.id === selectedConnectorId);
+      }
+      return undefined;
+    }, [areConnectorsFetched, connectors, selectedConversation?.apiConfig.connectorId]);
 
     const selectedProvider = useMemo(
       () => selectedConversation?.apiConfig.provider,
@@ -141,16 +149,19 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     );
 
     const handleOnConnectorSelectionChange = useCallback(
-      (connectorId: string, provider: OpenAiProviderType) => {
+      (connector) => {
         if (selectedConversation != null) {
+          const config = getGenAiConfig(connector);
+
           setUpdatedConversationSettings((prev) => ({
             ...prev,
             [selectedConversation.id]: {
               ...selectedConversation,
               apiConfig: {
                 ...selectedConversation.apiConfig,
-                connectorId,
-                provider,
+                connectorId: connector?.id,
+                provider: config?.apiProvider,
+                model: config?.defaultModel,
               },
             },
           }));
@@ -159,10 +170,11 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       [selectedConversation, setUpdatedConversationSettings]
     );
 
-    const selectedModel = useMemo(
-      () => selectedConversation?.apiConfig.model,
-      [selectedConversation?.apiConfig.model]
-    );
+    const selectedModel = useMemo(() => {
+      const connectorModel = getGenAiConfig(selectedConnector)?.defaultModel;
+      // Prefer conversation configuration over connector default
+      return selectedConversation?.apiConfig.model ?? connectorModel;
+    }, [selectedConnector, selectedConversation?.apiConfig.model]);
 
     const handleOnModelSelectionChange = useCallback(
       (model?: string) => {
@@ -215,6 +227,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
             showTitles={true}
+            isSettingsModalVisible={true}
+            setIsSettingsModalVisible={noop} // noop, already in settings
           />
         </EuiFormRow>
 
@@ -241,23 +255,24 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             isDisabled={selectedConversation == null}
             onConnectorModalVisibilityChange={() => {}}
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
-            selectedConnectorId={selectedConnectorId}
+            selectedConnectorId={selectedConnector?.id}
           />
         </EuiFormRow>
 
-        {selectedProvider === OpenAiProviderType.OpenAi && (
-          <EuiFormRow
-            data-test-subj="model-field"
-            display="rowCompressed"
-            label={i18nModel.MODEL_TITLE}
-            helpText={i18nModel.HELP_LABEL}
-          >
-            <ModelSelector
-              onModelSelectionChange={handleOnModelSelectionChange}
-              selectedModel={selectedModel}
-            />
-          </EuiFormRow>
-        )}
+        {selectedConnector?.isPreconfigured === false &&
+          selectedProvider === OpenAiProviderType.OpenAi && (
+            <EuiFormRow
+              data-test-subj="model-field"
+              display="rowCompressed"
+              label={i18nModel.MODEL_TITLE}
+              helpText={i18nModel.HELP_LABEL}
+            >
+              <ModelSelector
+                onModelSelectionChange={handleOnModelSelectionChange}
+                selectedModel={selectedModel}
+              />
+            </EuiFormRow>
+          )}
       </>
     );
   }

@@ -9,9 +9,9 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { syncEditedMonitor } from './edit_monitor';
 import { SavedObject, SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
 import {
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitor,
-  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -79,7 +79,7 @@ describe('syncEditedMonitor', () => {
     attributes: { name: editedMonitor.name, locations: [] } as any,
     type: 'synthetics-monitor',
     references: [],
-  } as SavedObject<EncryptedSyntheticsMonitor>;
+  } as SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
   const syntheticsService = new SyntheticsService(serverMock);
 
@@ -92,7 +92,7 @@ describe('syncEditedMonitor', () => {
       normalizedMonitor: editedMonitor,
       previousMonitor,
       decryptedPreviousMonitor:
-        previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecrets>,
+        previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
       routeContext: {
         syntheticsMonitorClient,
         server: serverMock,

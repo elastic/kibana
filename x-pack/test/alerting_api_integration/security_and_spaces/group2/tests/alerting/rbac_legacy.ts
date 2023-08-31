@@ -85,7 +85,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         let alertUtils: AlertUtils;
 
-        before(async () => {
+        before(() => {
           alertUtils = new AlertUtils({
             user,
             space,

@@ -148,7 +148,7 @@ async function validateLogstashOutputNotUsedInAPMPolicy(
   }
 }
 
-async function findPoliciesWithFleetServer(
+async function findPoliciesWithFleetServerOrSynthetics(
   soClient: SavedObjectsClientContract,
   outputId?: string,
   isDefault?: boolean
@@ -159,23 +159,24 @@ async function findPoliciesWithFleetServer(
     ? await getAgentPoliciesPerOutput(soClient, outputId, isDefault)
     : (await agentPolicyService.list(soClient, { withPackagePolicies: true }))?.items;
 
-  if (agentPolicies) {
-    const policiesWithFleetServer = agentPolicies.filter((policy) =>
-      agentPolicyService.hasFleetServerIntegration(policy)
-    );
-    return policiesWithFleetServer;
-  }
-  return [];
+  const policiesWithFleetServer =
+    agentPolicies?.filter((policy) => agentPolicyService.hasFleetServerIntegration(policy)) || [];
+  const policiesWithSynthetics =
+    agentPolicies?.filter((policy) => agentPolicyService.hasSyntheticsIntegration(policy)) || [];
+  return { policiesWithFleetServer, policiesWithSynthetics };
 }
 
-function validateOutputNotUsedInFleetServerPolicy(
+function validateOutputNotUsedInPolicy(
   agentPolicies: AgentPolicy[],
-  dataOutputType: OutputType['Logstash'] | OutputType['Kafka']
+  dataOutputType: OutputType['Logstash'] | OutputType['Kafka'],
+  integrationName: string
 ) {
-  // Validate no policy with fleet server use that policy
+  // Validate no policy with this integration uses that output
   for (const agentPolicy of agentPolicies) {
     throw new OutputInvalidError(
-      `${_.capitalize(dataOutputType)} output cannot be used with Fleet Server integration in ${
+      `${_.capitalize(
+        dataOutputType
+      )} output cannot be used with ${integrationName} integration in ${
         agentPolicy.name
       }. Please create a new ElasticSearch output.`
     );
@@ -192,44 +193,46 @@ async function validateTypeChanges(
   fromPreconfiguration: boolean
 ) {
   const mergedIsDefault = data.is_default ?? originalOutput.is_default;
-  const fleetServerPolicies = await findPoliciesWithFleetServer(soClient, id, mergedIsDefault);
+  const { policiesWithFleetServer, policiesWithSynthetics } =
+    await findPoliciesWithFleetServerOrSynthetics(soClient, id, mergedIsDefault);
 
   if (data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
     await validateLogstashOutputNotUsedInAPMPolicy(soClient, id, mergedIsDefault);
   }
-  // prevent changing an ES output to logstash or kafka if it's used by fleet server policies
+  // prevent changing an ES output to logstash or kafka if it's used by fleet server or synthetics policies
   if (
     originalOutput.type === outputType.Elasticsearch &&
     (data?.type === outputType.Logstash || data?.type === outputType.Kafka)
   ) {
     // Validate no policy with fleet server use that policy
-    validateOutputNotUsedInFleetServerPolicy(fleetServerPolicies, data.type);
+    validateOutputNotUsedInPolicy(policiesWithFleetServer, data.type, 'Fleet Server');
+    validateOutputNotUsedInPolicy(policiesWithSynthetics, data.type, 'Synthetics');
   }
-  await updateFleetServerPoliciesDataOutputId(
+  await updateAgentPoliciesDataOutputId(
     soClient,
     esClient,
     data,
     mergedIsDefault,
     defaultDataOutputId,
-    fleetServerPolicies,
+    _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics]),
     fromPreconfiguration
   );
 }
 
-async function updateFleetServerPoliciesDataOutputId(
+async function updateAgentPoliciesDataOutputId(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   data: Nullable<Partial<OutputSOAttributes>>,
   isDefault: boolean,
   defaultDataOutputId: string | null,
-  fleetServerPolicies: AgentPolicy[],
+  agentPolicies: AgentPolicy[],
   fromPreconfiguration: boolean
 ) {
   // if a logstash output is updated to become default
   // if fleet server policies don't have data_output_id
   // update them to use the default output
   if ((data?.type === outputType.Logstash || data?.type === outputType.Kafka) && isDefault) {
-    for (const policy of fleetServerPolicies) {
+    for (const policy of agentPolicies) {
       if (!policy.data_output_id) {
         await agentPolicyService.update(
           soClient,
@@ -407,28 +410,29 @@ class OutputService {
     const data: OutputSOAttributes = { ...omit(output, 'ssl') };
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
-    if (output.type === outputType.Logstash) {
+    if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
       await validateLogstashOutputNotUsedInAPMPolicy(soClient, undefined, data.is_default);
       if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
         throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
-          'Logstash output needs encrypted saved object api key to be set'
+          `${output.type} output needs encrypted saved object api key to be set`
         );
       }
     }
-    const fleetServerPolicies = await findPoliciesWithFleetServer(soClient);
-    await updateFleetServerPoliciesDataOutputId(
+    const { policiesWithFleetServer, policiesWithSynthetics } =
+      await findPoliciesWithFleetServerOrSynthetics(soClient);
+    await updateAgentPoliciesDataOutputId(
       soClient,
       esClient,
       data,
       data.is_default,
       defaultDataOutputId,
-      fleetServerPolicies,
+      _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics]),
       options?.fromPreconfiguration ?? false
     );
 
     // ensure only default output exists
     if (data.is_default) {
-      if (defaultDataOutputId) {
+      if (defaultDataOutputId && defaultDataOutputId !== options?.id) {
         await this._updateDefaultOutput(
           soClient,
           defaultDataOutputId,
@@ -439,7 +443,7 @@ class OutputService {
     }
     if (data.is_default_monitoring) {
       const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
-      if (defaultMonitoringOutputId) {
+      if (defaultMonitoringOutputId && defaultMonitoringOutputId !== options?.id) {
         await this._updateDefaultOutput(
           soClient,
           defaultMonitoringOutputId,
@@ -489,7 +493,7 @@ class OutputService {
         data.compression_level = 4;
       }
       if (!output.client_id) {
-        data.client_id = 'Elastic Agent';
+        data.client_id = 'Elastic';
       }
       if (output.username && output.password && !output.sasl?.mechanism) {
         data.sasl = {
@@ -515,11 +519,9 @@ class OutputService {
       if (!output.broker_timeout) {
         data.broker_timeout = 10;
       }
-      if (!output.broker_ack_reliability) {
-        data.broker_ack_reliability = kafkaAcknowledgeReliabilityLevel.Commit;
-      }
-      if (!output.broker_buffer_size) {
-        data.broker_buffer_size = 256;
+      if (output.required_acks === null || output.required_acks === undefined) {
+        // required_acks can be 0
+        data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
     }
 
@@ -708,6 +710,7 @@ class OutputService {
       target.key = null;
       target.compression = null;
       target.compression_level = null;
+      target.connection_type = null;
       target.client_id = null;
       target.auth_type = null;
       target.username = null;
@@ -721,8 +724,8 @@ class OutputService {
       target.headers = null;
       target.timeout = null;
       target.broker_timeout = null;
-      target.broker_ack_reliability = null;
-      target.broker_buffer_size = null;
+      target.required_acks = null;
+      target.ssl = null;
     };
 
     // If the output type changed
@@ -761,8 +764,13 @@ class OutputService {
         ) {
           updateData.compression_level = 4;
         }
+        if (data.compression && data.compression !== kafkaCompressionType.Gzip) {
+          // Clear compression level if compression is not gzip
+          updateData.compression_level = null;
+        }
+
         if (!data.client_id) {
-          updateData.client_id = 'Elastic Agent';
+          updateData.client_id = 'Elastic';
         }
         if (data.username && data.password && !data.sasl?.mechanism) {
           updateData.sasl = {
@@ -788,11 +796,9 @@ class OutputService {
         if (!data.broker_timeout) {
           updateData.broker_timeout = 10;
         }
-        if (!data.broker_ack_reliability) {
-          updateData.broker_ack_reliability = kafkaAcknowledgeReliabilityLevel.Commit;
-        }
-        if (!data.broker_buffer_size) {
-          updateData.broker_buffer_size = 256;
+        if (updateData.required_acks === null || updateData.required_acks === undefined) {
+          // required_acks can be 0
+          updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
         }
       }
     }
@@ -802,6 +808,21 @@ class OutputService {
     } else if (data.ssl === null) {
       // Explicitly set to null to allow to delete the field
       updateData.ssl = null;
+    }
+
+    if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
+      if (!data.password) {
+        updateData.password = null;
+      }
+      if (!data.username) {
+        updateData.username = null;
+      }
+      if (!data.ssl) {
+        updateData.ssl = null;
+      }
+      if (!data.sasl) {
+        updateData.sasl = null;
+      }
     }
 
     // ensure only default output exists

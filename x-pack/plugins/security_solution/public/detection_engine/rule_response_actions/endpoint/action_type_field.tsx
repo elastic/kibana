@@ -90,7 +90,7 @@ const ActionTypeFieldComponent = ({
               i18n.translate(
                 'xpack.securitySolution.responseActions.endpoint.validations.commandIsRequiredErrorMessage',
                 {
-                  defaultMessage: 'A command is required.',
+                  defaultMessage: 'Action is a required field.',
                 }
               )
             ),

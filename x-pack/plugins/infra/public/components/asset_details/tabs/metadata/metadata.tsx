@@ -5,49 +5,40 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
-import { useMetadata } from '../../hooks/use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
 import { Table } from './table';
 import { getAllFields } from './utils';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { MetadataExplanationMessage } from '../../components/metadata_explanation';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
   setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
 }
 
-export interface MetadataProps {
-  currentTimeRange: MetricsTimeInput;
-  nodeName: string;
-  nodeType: InventoryItemType;
-  showActionsColumn?: boolean;
-  search?: string;
-  onSearchChange?: (query: string) => void;
-}
-
-export const Metadata = ({
-  nodeName,
-  currentTimeRange,
-  nodeType,
-  search,
-  showActionsColumn = false,
-  onSearchChange,
-}: MetadataProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId } = useSourceContext();
+export const Metadata = () => {
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const { overrides } = useAssetDetailsRenderPropsContext();
   const {
+    metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-    metadata,
-  } = useMetadata(nodeName, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
+  } = useMetadataStateProviderContext();
+  const { showActionsColumn = false } = overrides?.metadata ?? {};
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
+
+  const onSearchChange = useCallback(
+    (newQuery: string) => {
+      setUrlState({ metadataSearch: newQuery });
+    },
+    [setUrlState]
+  );
 
   if (fetchMetadataError) {
     return (
@@ -57,7 +48,7 @@ export const Metadata = ({
         })}
         color="danger"
         iconType="error"
-        data-test-subj="infraMetadataErrorCallout"
+        data-test-subj="infraAssetDetailsMetadataErrorCallout"
       >
         <FormattedMessage
           id="xpack.infra.metadataEmbeddable.errorMessage"
@@ -80,13 +71,17 @@ export const Metadata = ({
   }
 
   return (
-    <Table
-      search={search}
-      onSearchChange={onSearchChange}
-      showActionsColumn={showActionsColumn}
-      rows={fields}
-      loading={metadataLoading}
-    />
+    <>
+      <MetadataExplanationMessage />
+      <EuiHorizontalRule margin="m" />
+      <Table
+        search={urlState?.metadataSearch}
+        onSearchChange={onSearchChange}
+        showActionsColumn={showActionsColumn}
+        rows={fields}
+        loading={metadataLoading}
+      />
+    </>
   );
 };
 

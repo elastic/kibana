@@ -8,9 +8,13 @@
 import { isEmpty } from 'lodash/fp';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { ConfigurationPatchRequest, ConfigurationRequest } from '../../../common/types/api';
-import type { Configuration, Configurations } from '../../../common/types/domain';
+import type {
+  ActionConnector,
+  ActionTypeConnector,
+  Configuration,
+  Configurations,
+} from '../../../common/types/domain';
 import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
-import type { ActionConnector, ActionTypeConnector } from '../../../common/api';
 import { getCaseConfigurationDetailsUrl } from '../../../common/api';
 import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';

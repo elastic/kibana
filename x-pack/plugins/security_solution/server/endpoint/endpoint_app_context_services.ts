@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
 import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -42,6 +42,7 @@ import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ActionCreateService } from './services/actions/create/types';
+import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -68,6 +69,8 @@ export interface EndpointAppContextServiceStartContract {
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ActionCreateService | undefined;
   cloud: CloudSetup;
+  esClient: ElasticsearchClient;
+  appFeaturesService: AppFeaturesService;
 }
 
 /**
@@ -104,6 +107,8 @@ export class EndpointAppContextService {
         exceptionListsClient,
         featureUsageService,
         endpointMetadataService,
+        esClient,
+        appFeaturesService,
       } = dependencies;
 
       registerIngestCallback(
@@ -115,7 +120,8 @@ export class EndpointAppContextService {
           alerting,
           licenseService,
           exceptionListsClient,
-          cloud
+          cloud,
+          appFeaturesService
         )
       );
 
@@ -131,7 +137,9 @@ export class EndpointAppContextService {
           licenseService,
           featureUsageService,
           endpointMetadataService,
-          cloud
+          cloud,
+          esClient,
+          appFeaturesService
         )
       );
 

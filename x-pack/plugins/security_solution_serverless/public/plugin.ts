@@ -16,8 +16,10 @@ import type {
   ServerlessSecurityPublicConfig,
 } from './types';
 import { registerUpsellings } from './upselling';
-import { createServices } from './common/services';
-import { setServerlessNavigation } from './navigation';
+import { createServices } from './common/services/create_services';
+import { configureNavigation } from './navigation';
+import { setRoutes } from './pages/routes';
+import { projectAppLinksSwitcher } from './navigation/links/app_links';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -38,7 +40,8 @@ export class SecuritySolutionServerlessPlugin
     _core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
-    registerUpsellings(setupDeps.securitySolution.upselling, this.config.productTypes);
+    setupDeps.securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
+
     return {};
   }
 
@@ -51,9 +54,13 @@ export class SecuritySolutionServerlessPlugin
 
     const services = createServices(core, startDeps);
 
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
+    registerUpsellings(securitySolution.getUpselling(), this.config.productTypes, services);
 
-    setServerlessNavigation(services);
+    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
+    securitySolution.setIsILMAvailable(false);
+
+    configureNavigation(services, this.config);
+    setRoutes(services);
 
     return {};
   }

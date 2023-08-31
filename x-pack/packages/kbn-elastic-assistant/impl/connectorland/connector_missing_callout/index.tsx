@@ -12,47 +12,67 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { CONVERSATIONS_TAB } from '../../assistant/settings/assistant_settings';
+import { ConnectorButton } from '../connector_button';
+
+interface Props {
+  isConnectorConfigured: boolean;
+  isSettingsModalVisible: boolean;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
 /**
  * Error callout to be displayed when there is no connector configured for a conversation. Includes deep-link
- * to conversation settings to quickly resolve.
+ * to conversation settings to quickly resolve. Falls back to <ConnectorButton /> connector if privileges aren't met.
  *
  * TODO: Add 'quick fix' button to just pick a connector
  * TODO: Add setting for 'default connector' so we can auto-resolve and not even show this
  */
-export const ConnectorMissingCallout: React.FC = React.memo(() => {
-  const { isSettingsModalVisible, setIsSettingsModalVisible, setSelectedSettingsTab } =
-    useAssistantContext();
+export const ConnectorMissingCallout: React.FC<Props> = React.memo(
+  ({ isConnectorConfigured, isSettingsModalVisible, setIsSettingsModalVisible }) => {
+    const { assistantAvailability, setSelectedSettingsTab } = useAssistantContext();
 
-  const onConversationSettingsClicked = useCallback(() => {
-    if (!isSettingsModalVisible) {
-      setIsSettingsModalVisible(true);
-      setSelectedSettingsTab(CONVERSATIONS_TAB);
-    }
-  }, [isSettingsModalVisible, setIsSettingsModalVisible, setSelectedSettingsTab]);
+    const onConversationSettingsClicked = useCallback(() => {
+      if (!isSettingsModalVisible) {
+        setIsSettingsModalVisible(true);
+        setSelectedSettingsTab(CONVERSATIONS_TAB);
+      }
+    }, [isSettingsModalVisible, setIsSettingsModalVisible, setSelectedSettingsTab]);
 
-  return (
-    <EuiCallOut
-      color="danger"
-      iconType="controlsVertical"
-      size="m"
-      title={i18n.MISSING_CONNECTOR_CALLOUT_TITLE}
-    >
-      <p>
-        {' '}
-        <FormattedMessage
-          defaultMessage="Select a connector from the {link} to continue"
-          id="xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutDescription"
-          values={{
-            link: (
-              <EuiLink onClick={onConversationSettingsClicked}>
-                {i18n.MISSING_CONNECTOR_CONVERSATION_SETTINGS_LINK}
-              </EuiLink>
-            ),
-          }}
-        />
-      </p>
-    </EuiCallOut>
-  );
-});
+    // Show missing callout if user has all privileges or read privileges and at least 1 connector configured
+    const showMissingCallout =
+      assistantAvailability.hasConnectorsAllPrivilege ||
+      (assistantAvailability.hasConnectorsReadPrivilege && isConnectorConfigured);
+
+    return (
+      <>
+        {showMissingCallout ? (
+          <EuiCallOut
+            data-test-subj="connectorMissingCallout"
+            color="danger"
+            iconType="controlsVertical"
+            size="m"
+            title={i18n.MISSING_CONNECTOR_CALLOUT_TITLE}
+          >
+            <p>
+              {' '}
+              <FormattedMessage
+                defaultMessage="Select a connector above or from the {link} to continue"
+                id="xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutDescription"
+                values={{
+                  link: (
+                    <EuiLink onClick={onConversationSettingsClicked}>
+                      {i18n.MISSING_CONNECTOR_CONVERSATION_SETTINGS_LINK}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiCallOut>
+        ) : (
+          <ConnectorButton />
+        )}
+      </>
+    );
+  }
+);
 ConnectorMissingCallout.displayName = 'ConnectorMissingCallout';

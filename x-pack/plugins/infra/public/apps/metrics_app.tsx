@@ -71,7 +71,7 @@ const MetricsApp: React.FC<{
         storage={storage}
         theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
-        observabilityCopilot={plugins.observability.getCoPilotService()}
+        observabilityAIAssistant={plugins.observabilityAIAssistant}
       >
         <SourceProvider sourceId="default">
           <Router history={history}>

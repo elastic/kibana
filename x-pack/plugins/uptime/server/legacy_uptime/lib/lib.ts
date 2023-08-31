@@ -10,6 +10,7 @@ import {
   SavedObjectsClientContract,
   KibanaRequest,
   CoreRequestHandlerContext,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -18,9 +19,12 @@ import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
+import semver from 'semver/preload';
+import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../constants/settings';
+import { DynamicSettingsAttributes } from '../../runtime_types/settings';
+import { settingsObjectId, umDynamicSettings } from './saved_objects/uptime_settings';
 import { API_URLS } from '../../../common/constants';
 import { UptimeServerSetup } from './adapters';
-import { savedObjectsAdapter } from './saved_objects/saved_objects';
 
 export type { UMServerLibs } from '../uptime_server';
 
@@ -49,6 +53,7 @@ export class UptimeEsClient {
   uiSettings?: CoreRequestHandlerContext['uiSettings'];
   savedObjectsClient: SavedObjectsClientContract;
   isLegacyAlert?: boolean;
+  stackVersion?: string;
 
   constructor(
     savedObjectsClient: SavedObjectsClientContract,
@@ -58,17 +63,17 @@ export class UptimeEsClient {
       uiSettings?: CoreRequestHandlerContext['uiSettings'];
       request?: KibanaRequest;
       heartbeatIndices?: string;
-      isLegacyAlert?: boolean;
+      stackVersion?: string;
     }
   ) {
     const {
-      isLegacyAlert,
+      stackVersion,
       isDev = false,
       uiSettings,
       request,
       heartbeatIndices = '',
     } = options ?? {};
-    this.isLegacyAlert = isLegacyAlert;
+    this.stackVersion = stackVersion;
     this.uiSettings = uiSettings;
     this.baseESClient = esClient;
     this.savedObjectsClient = savedObjectsClient;
@@ -202,19 +207,44 @@ export class UptimeEsClient {
     // if isLegacyAlert appends synthetics-* if it's not already there
     let indices = '';
     let syntheticsIndexRemoved = false;
+    let settingsChangedByUser = true;
+    let settings: DynamicSettingsAttributes = DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
     if (this.heartbeatIndices) {
       indices = this.heartbeatIndices;
     } else {
-      const settings = await savedObjectsAdapter.getUptimeDynamicSettings(this.savedObjectsClient);
+      try {
+        const obj = await this.savedObjectsClient.get<DynamicSettingsAttributes>(
+          umDynamicSettings.name,
+          settingsObjectId
+        );
+        settings = obj.attributes;
+      } catch (getErr) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+          settingsChangedByUser = false;
+        }
+      }
+
       indices = settings?.heartbeatIndices || '';
       syntheticsIndexRemoved = settings.syntheticsIndexRemoved ?? false;
     }
-    if (this.isLegacyAlert && !indices.includes('synthetics-') && syntheticsIndexRemoved) {
+    if (indices.includes('synthetics-')) {
+      return indices;
+    }
+    const appendSyntheticsIndex = shouldAppendSyntheticsIndex(this.stackVersion);
+
+    if (appendSyntheticsIndex && (syntheticsIndexRemoved || !settingsChangedByUser)) {
       indices = indices + ',synthetics-*';
     }
     return indices;
   }
 }
+
+export const shouldAppendSyntheticsIndex = (stackVersion?: string) => {
+  if (!stackVersion) {
+    return false;
+  }
+  return semver.lt(stackVersion, '8.10.0');
+};
 
 export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
   return params;

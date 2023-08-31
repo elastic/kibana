@@ -55,7 +55,7 @@ function getSliAndBurnRate(name: string, burnRates: GetSLOBurnRatesResponse['bur
 
 export function BurnRates({ slo, isAutoRefreshing }: Props) {
   const { isLoading, data } = useFetchSloBurnRates({
-    sloId: slo.id,
+    slo,
     shouldRefetch: isAutoRefreshing,
     windows: WINDOWS,
   });

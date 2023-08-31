@@ -8,7 +8,7 @@
 /* eslint-disable complexity */
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
-import type { RuleUpdateProps } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleUpdateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { transformRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 
 import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
@@ -45,6 +45,7 @@ export const updateRules = async ({
       ruleId: existingRule.params.ruleId,
       falsePositives: ruleUpdate.false_positives ?? [],
       from: ruleUpdate.from ?? 'now-6m',
+      investigationFields: ruleUpdate.investigation_fields,
       // Unlike the create route, immutable comes from the existing rule here
       immutable: existingRule.params.immutable,
       license: ruleUpdate.license,

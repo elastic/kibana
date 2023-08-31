@@ -23,35 +23,39 @@ describe('threshold expression', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]')).toMatchInlineSnapshot(`
-    <EuiSelect
-      data-test-subj="comparatorOptionsComboBox"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "text": "Is above",
-            "value": ">",
-          },
-          Object {
-            "text": "Is above or equals",
-            "value": ">=",
-          },
-          Object {
-            "text": "Is below",
-            "value": "<",
-          },
-          Object {
-            "text": "Is below or equals",
-            "value": "<=",
-          },
-          Object {
-            "text": "Is between",
-            "value": "between",
-          },
-        ]
-      }
-      value="between"
-    />
+      <EuiSelect
+        data-test-subj="comparatorOptionsComboBox"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "Is above",
+              "value": ">",
+            },
+            Object {
+              "text": "Is above or equals",
+              "value": ">=",
+            },
+            Object {
+              "text": "Is below",
+              "value": "<",
+            },
+            Object {
+              "text": "Is below or equals",
+              "value": "<=",
+            },
+            Object {
+              "text": "Is between",
+              "value": "between",
+            },
+            Object {
+              "text": "Not between",
+              "value": "notBetween",
+            },
+          ]
+        }
+        value="between"
+      />
     `);
   });
 
@@ -154,13 +158,13 @@ describe('threshold expression', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="alertThresholdInput"]')).toMatchInlineSnapshot(`
-    <EuiFieldNumber
-      data-test-subj="alertThresholdInput"
-      isInvalid={false}
-      min={0}
-      onChange={[Function]}
-      value={0}
-    />
-    `);
+          <EuiFieldNumber
+            data-test-subj="alertThresholdInput"
+            isInvalid={false}
+            min={0}
+            onChange={[Function]}
+            value={0}
+          />
+        `);
   });
 });

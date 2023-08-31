@@ -21,6 +21,7 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./ilm'));
     loadTestFile(require.resolve('./install_bundled'));
     loadTestFile(require.resolve('./install_by_upload'));
+    loadTestFile(require.resolve('./install_custom'));
     loadTestFile(require.resolve('./install_endpoint'));
     loadTestFile(require.resolve('./install_overrides'));
     loadTestFile(require.resolve('./install_prerelease'));

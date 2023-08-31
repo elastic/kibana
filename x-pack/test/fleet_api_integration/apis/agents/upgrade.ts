@@ -21,8 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/161557
-  describe.skip('fleet_upgrade_agent', () => {
+  describe('fleet_upgrade_agent', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
@@ -619,7 +618,7 @@ export default function (providerContext: FtrProviderContext) {
           const intervalId = setInterval(async () => {
             if (attempts > 4) {
               clearInterval(intervalId);
-              reject('action timed out');
+              reject(new Error('action timed out'));
             }
             ++attempts;
             const {

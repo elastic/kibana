@@ -6,7 +6,7 @@
  */
 
 import { TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';

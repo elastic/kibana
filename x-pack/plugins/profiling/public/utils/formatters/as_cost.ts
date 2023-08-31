@@ -8,5 +8,5 @@
 import { asNumber } from './as_number';
 
 export function asCost(value: number, unit: string = '$') {
-  return `${asNumber(value)}${unit}`;
+  return `${unit}${asNumber(value)}`;
 }

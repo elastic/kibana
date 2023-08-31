@@ -15,6 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const managementMenu = getService('managementMenu');
 
   describe('security', function () {
+    this.tags('upgradeAssistant');
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });

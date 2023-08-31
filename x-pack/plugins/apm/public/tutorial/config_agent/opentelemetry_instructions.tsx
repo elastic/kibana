@@ -13,6 +13,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiBasicTableColumn,
+  EuiButtonIcon,
+  copyToClipboard,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ValuesType } from 'utility-types';
@@ -57,6 +59,7 @@ export function OpenTelemetryInstructions({
   const columns: Array<EuiBasicTableColumn<ValuesType<typeof items>>> = [
     {
       field: 'setting',
+      width: '23%',
       name: i18n.translate(
         'xpack.apm.tutorial.config_otel.column.configSettings',
         {
@@ -66,6 +69,7 @@ export function OpenTelemetryInstructions({
     },
     {
       field: 'value',
+      width: '55%',
       name: i18n.translate(
         'xpack.apm.tutorial.config_otel.column.configValue',
         {
@@ -73,9 +77,24 @@ export function OpenTelemetryInstructions({
         }
       ),
       render: (_, { value }) => (
-        <EuiText size="s" color="accent">
-          {value}
-        </EuiText>
+        <>
+          <EuiText size="s" color="accent">
+            {value}
+          </EuiText>
+          {value && (
+            <EuiButtonIcon
+              aria-label={i18n.translate(
+                'xpack.apm.tutorial.config_otel.column.value.copyIconText',
+                {
+                  defaultMessage: 'Copy to clipboard',
+                }
+              )}
+              color="text"
+              iconType="copy"
+              onClick={() => copyToClipboard(value)}
+            />
+          )}
+        </>
       ),
     },
     {

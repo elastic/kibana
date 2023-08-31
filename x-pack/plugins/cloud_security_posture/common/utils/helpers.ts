@@ -12,13 +12,22 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
   PackagePolicyInput,
+  UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP,
+  GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP,
 } from '../constants';
-import type { BenchmarkId, Score } from '../types';
+import type {
+  BenchmarkId,
+  Score,
+  BaseCspSetupStatus,
+  AwsCredentialsType,
+  GcpCredentialsType,
+} from '../types';
 
 /**
  * @example
@@ -83,4 +92,71 @@ export const calculatePostureScore = (passed: number, failed: number): Score => 
   if (total === 0) return total;
 
   return roundScore(passed / (passed + failed));
+};
+
+export const getStatusForIndexName = (indexName: string, status?: BaseCspSetupStatus) => {
+  if (status) {
+    const indexDetail = status.indicesDetails.find(
+      (details) => details.index.indexOf(indexName) !== -1
+    );
+
+    if (indexDetail) {
+      return indexDetail.status;
+    }
+  }
+
+  return 'unknown';
+};
+
+export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePackagePolicy) => {
+  const enabledInput = packagePolicy.inputs.find((i) => i.enabled);
+  const awsCredentialType: AwsCredentialsType | undefined =
+    enabledInput?.streams?.[0].vars?.['aws.credentials.type']?.value;
+  const gcpCredentialType: GcpCredentialsType | undefined =
+    enabledInput?.streams?.[0].vars?.['gcp.credentials.type']?.value;
+
+  if (awsCredentialType || gcpCredentialType) {
+    let credsToKeep: string[] = [' '];
+    let credFields: string[] = [' '];
+    if (awsCredentialType) {
+      credsToKeep = AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP[awsCredentialType];
+      credFields = Object.values(AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
+    } else if (gcpCredentialType) {
+      credsToKeep = GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP[gcpCredentialType];
+      credFields = Object.values(GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
+    }
+
+    if (credsToKeep) {
+      // we need to return a copy of the policy with the unused
+      // credentials set to undefined
+      return {
+        ...packagePolicy,
+        inputs: packagePolicy.inputs.map((input) => {
+          if (input.enabled) {
+            return {
+              ...input,
+              streams: input.streams.map((stream) => {
+                const vars = stream.vars;
+                for (const field in vars) {
+                  if (!credsToKeep.includes(field) && credFields.includes(field)) {
+                    vars[field].value = undefined;
+                  }
+                }
+
+                return {
+                  ...stream,
+                  vars,
+                };
+              }),
+            };
+          }
+
+          return input;
+        }),
+      };
+    }
+  }
+
+  // nothing to do, return unmutated policy
+  return packagePolicy;
 };

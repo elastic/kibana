@@ -86,9 +86,14 @@ describe('ui settings global client', () => {
       const { uiSettingsClient, savedObjectsClient } = setup();
       await uiSettingsClient.set('settingA', 'cde');
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
-        settingA: 'cde',
-      });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        {
+          settingA: 'cde',
+        },
+        { refresh: false }
+      );
     });
   });
 

@@ -6,12 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
 // Connector schema
-export const GenAiConfigSchema = schema.object({
-  apiProvider: schema.string(),
-  apiUrl: schema.string(),
-});
+export const GenAiConfigSchema = schema.oneOf([
+  schema.object({
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
+    apiUrl: schema.string(),
+  }),
+  schema.object({
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
+    apiUrl: schema.string(),
+    defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
+  }),
+]);
 
 export const GenAiSecretsSchema = schema.object({ apiKey: schema.string() });
 
@@ -20,26 +28,42 @@ export const GenAiRunActionParamsSchema = schema.object({
   body: schema.string(),
 });
 
+// Execute action schema
+export const GenAiStreamActionParamsSchema = schema.object({
+  body: schema.string(),
+  stream: schema.boolean({ defaultValue: false }),
+});
+
+export const GenAiStreamingResponseSchema = schema.any();
 export const GenAiRunActionResponseSchema = schema.object(
   {
     id: schema.string(),
     object: schema.string(),
     created: schema.number(),
     model: schema.string(),
-    usage: schema.object({
-      prompt_tokens: schema.number(),
-      completion_tokens: schema.number(),
-      total_tokens: schema.number(),
-    }),
+    usage: schema.object(
+      {
+        prompt_tokens: schema.number(),
+        completion_tokens: schema.number(),
+        total_tokens: schema.number(),
+      },
+      { unknowns: 'ignore' }
+    ),
     choices: schema.arrayOf(
-      schema.object({
-        message: schema.object({
-          role: schema.string(),
-          content: schema.string(),
-        }),
-        finish_reason: schema.string(),
-        index: schema.number(),
-      })
+      schema.object(
+        {
+          message: schema.object(
+            {
+              role: schema.string(),
+              content: schema.string(),
+            },
+            { unknowns: 'ignore' }
+          ),
+          finish_reason: schema.string(),
+          index: schema.number(),
+        },
+        { unknowns: 'ignore' }
+      )
     ),
   },
   { unknowns: 'ignore' }

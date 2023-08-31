@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ENTITIES_NO_DATA_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.entitiesNoDataMessage',
+  {
+    defaultMessage: 'No user or host data available',
+  }
+);
+
 export const ANALYZER_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.flyout.analyzerErrorMessage',
   {
@@ -21,8 +28,15 @@ export const SESSION_VIEW_ERROR_MESSAGE = i18n.translate(
   }
 );
 
-export const USERS_TITLE = i18n.translate('xpack.securitySolution.flyout.entities.usersTitle', {
-  defaultMessage: 'Users',
+export const CORRELATIONS_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.correlationsErrorMessage',
+  {
+    defaultMessage: 'No correlations data available',
+  }
+);
+
+export const USER_TITLE = i18n.translate('xpack.securitySolution.flyout.entities.userTitle', {
+  defaultMessage: 'User',
 });
 
 export const USERS_INFO_TITLE = i18n.translate(
@@ -60,8 +74,8 @@ export const RELATED_ENTITIES_IP_COLUMN_TITLE = i18n.translate(
   }
 );
 
-export const HOSTS_TITLE = i18n.translate('xpack.securitySolution.flyout.entities.hostsTitle', {
-  defaultMessage: 'Hosts',
+export const HOST_TITLE = i18n.translate('xpack.securitySolution.flyout.entities.hostTitle', {
+  defaultMessage: 'Host',
 });
 
 export const HOSTS_INFO_TITLE = i18n.translate(
@@ -92,45 +106,52 @@ export const PREVALENCE_ERROR_MESSAGE = i18n.translate(
   }
 );
 
-export const PREVALENCE_TABLE_TYPE_COLUMN_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.prevalenceTableTypeColumnTitle',
+export const PREVALENCE_NO_DATA_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceNoDataMessage',
   {
-    defaultMessage: 'Type',
+    defaultMessage: 'No prevalence data available',
   }
 );
 
-export const PREVALENCE_TABLE_NAME_COLUMN_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.prevalenceTableNameColumnTitle',
+export const PREVALENCE_TABLE_FIELD_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTableFieldColumnTitle',
   {
-    defaultMessage: 'Name',
+    defaultMessage: 'Field',
+  }
+);
+
+export const PREVALENCE_TABLE_VALUE_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTableValueColumnTitle',
+  {
+    defaultMessage: 'Value',
   }
 );
 
 export const PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.prevalenceTableAlertCountColumnTitle',
   {
-    defaultMessage: 'Alert count',
+    defaultMessage: 'Alert',
   }
 );
 
 export const PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.prevalenceTableDocCountColumnTitle',
   {
-    defaultMessage: 'Doc count',
+    defaultMessage: 'Document',
   }
 );
 
-export const PREVALENCE_TABLE_HOST_PREVALENCE_COLUMN_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.prevalenceTableHostPrevalenceColumnTitle',
+export const PREVALENCE_TABLE_COUNT_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTableCountColumnTitle',
   {
-    defaultMessage: 'Host prevalence',
+    defaultMessage: 'count',
   }
 );
 
-export const PREVALENCE_TABLE_USER_PREVALENCE_COLUMN_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.prevalenceTableUserPrevalenceColumnTitle',
+export const PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTablePrevalenceColumnTitle',
   {
-    defaultMessage: 'User prevalence',
+    defaultMessage: 'prevalence',
   }
 );
 
@@ -184,26 +205,9 @@ export const CORRELATIONS_CASE_NAME_COLUMN_TITLE = i18n.translate(
   }
 );
 
-export const ANCESTRY_ALERTS_HEADING = (count: number) =>
-  i18n.translate('xpack.securitySolution.flyout.correlations.ancestryAlertsHeading', {
-    defaultMessage: '{count, plural, one {# alert} other {# alerts}} related by ancestry',
-    values: { count },
-  });
-
-export const SOURCE_ALERTS_HEADING = (count: number) =>
-  i18n.translate('xpack.securitySolution.flyout.correlations.sourceAlertsHeading', {
-    defaultMessage: '{count, plural, one {# alert} other {# alerts}} related by source event',
-    values: { count },
-  });
-
-export const SESSION_ALERTS_HEADING = (count: number) =>
-  i18n.translate('xpack.securitySolution.flyout.correlations.sessionAlertsHeading', {
-    defaultMessage: '{count, plural, one {# alert} other {# alerts}} related by session',
-    values: { count },
-  });
-
-export const RELATED_CASES_HEADING = (count: number) =>
-  i18n.translate('xpack.securitySolution.flyout.correlations.relatedCasesHeading', {
-    defaultMessage: '{count} related {count, plural, one {case} other {cases}}',
-    values: { count },
-  });
+export const CORRELATIONS_DETAILS_TABLE_FILTER = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.correlationsDetailsTableFilter',
+  {
+    defaultMessage: 'Correlations Details Table Alert IDs',
+  }
+);

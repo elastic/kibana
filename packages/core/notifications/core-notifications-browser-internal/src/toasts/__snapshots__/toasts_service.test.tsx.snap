@@ -3,7 +3,7 @@
 exports[`#start() renders the GlobalToastList into the targetDomElement param 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [Function],
@@ -33,7 +33,7 @@ Array [
           }
         }
       />
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div
       test="target-dom-element"
     />,
