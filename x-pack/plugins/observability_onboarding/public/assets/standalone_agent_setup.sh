@@ -61,6 +61,7 @@ updateStepProgress() {
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
+    --header "x-elastic-internal-origin: Kibana" \
     --data "{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}" \
     --output /dev/null \
     --no-progress-meter
@@ -148,6 +149,7 @@ downloadElasticAgentConfig() {
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
+    --header "x-elastic-internal-origin: Kibana" \
     --no-progress-meter \
     --output ${cfg}
 
