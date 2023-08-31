@@ -51,8 +51,8 @@ export async function loadAction({
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
-  await begin(name);
-  process.exit(666); // Trez Exit Expression
+  begin(name);
+  // process.exit(666); // Trez Exit Expression
   // await createPromiseFromStreams([
   //   // This used to be  const recordStream = concatStreamProviders()...
   //   bothFiles$(inputDir, prioritizeMappings(await readDirectory(inputDir))),
