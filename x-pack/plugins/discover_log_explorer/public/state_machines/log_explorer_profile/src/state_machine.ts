@@ -7,7 +7,7 @@
 
 import { IToasts } from '@kbn/core/public';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { actions, createMachine, interpret, InterpreterFrom } from 'xstate';
+import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
 import { isDatasetSelection } from '../../../utils/dataset_selection';
 import { createAndSetDataView } from './data_view_service';
 import { DEFAULT_CONTEXT } from './defaults';
@@ -15,18 +15,26 @@ import {
   createCreateDataViewFailedNotifier,
   createDatasetSelectionRestoreFailedNotifier,
 } from './notifications';
-import type {
+import {
+  ControlPanelRT,
   LogExplorerProfileContext,
   LogExplorerProfileEvent,
-  LogExplorerProfileTypestate,
+  LogExplorerProfileTypeState,
 } from './types';
-import { initializeFromUrl, listenUrlChange } from './url_state_storage_service';
+import {
+  initializeControlPanels,
+  initializeFromUrl,
+  listenUrlChange,
+  subscribeControlGroup,
+  updateControlPanels,
+  updateStateContainer,
+} from './url_state_storage_service';
 
 export const createPureLogExplorerProfileStateMachine = (
   initialContext: LogExplorerProfileContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCAFQ1AMwEs8wA6AVwDtrWAXagQz2oC9IAYgDaABgC6iUDlSxqnVMykgsiALQAmAMz0AHAE5dAFi0B2AKwAaEAE9EARi3n6+gGxHjZ8wF9v1tJi4BMRkFDR09Gzy3Lx8bFAAYhQAtgCqhHiCEIoMbABuqADWDAHY+EQk5FS0uRwx-PFJqGkZCPmoAMZcCsxi4n3KMnI9yqoI9qai9KZaokauuhbWdggaGrrT5vqmruauGj5+IKVBFaHVEVGcPA3MiSnpmSQUhPT43ZREyfQn5SFV4Vq0RucTuTRaeDazAKXR6fQGSBAQ2iilG6nsGns0127lEB0WBlErmWiDWGws2xxB18-nQZWClTCNUidRB8QAIt0uAA1ahgADuWRyLIKxR+dNO-yZl1ZsQ5XN5AqhMO61EU8Ikg1kKKUiLGjlM9HMGlcRIxogsWi0JIQ82cpnsunMxn0JtEWnWNOOEr+jIuQOucrunPYPL5gueRDeeA+X3FgV950BLOBQagIbDSvasLVvQkCOk2pGesQzjM9lEGN0WkWWlchl0NvM9n09Hsew0+n0ojmztdXt+DKTzKu9QEEEiEDoglSpHZAEEACoYAD6C8X84AyhhFyvt8gMABhRcASQA8gA5AtIou5tEIetTesY5vmC0mfTW2yILz0Vz2fZXEfdxdHbIwBx9IcARHWV+EgSdp3XLcdz3DAD2Pc8LxXDAACUcLPHDr2RYtQDGBZWzWXFTAsUwPy-FYjDceh3XdTsjCJDwwIghMoOlAMx3gxgcAgVVgwVcMhWYWpRRKSCzmgmVUzgichJEzgxNDRV+WVTpVXVfNNURYi7xLBAHQ2f8rS2UR9A-QwbU7Q0PDtD1tH2bQtG4+l5L4lNA2UphhNE9NxIFQRI1ed52E+QhvkHHz-T8gSVKC9SQs08MdJzfT+kMwthhM0jEEmLFtFEcw7VsrQu0bb9xkMFxu20EwLB7HtPK9ZhUAgOBlHiqV-S1ArUVMzR1jbcyljq7R6HmZyvC8yU-WTFhRxBSAhp1e81EdKYJkdKaVgxDQXAWo5+uWmClNBe5mkeTaSJURBP2Yt9TFAg4bXsCsXBAlrDlpHiEuTNa0wzLSHsKp6EFA6YtH+m06ymOYjA0SZqytK0TUWxMFP49aIEhkaioQGsNnMLQK3htYyUpr7vtmpr4a8Nr3Rx3jEtBgLqCnMAid1EmTFcI1KfdVGaerexEdNeg0crGZ2xA9t2eBq7-PHQK1PlDKBX5+8KzmZjqO2PFzFo6r6J-IC-1cSmjBbDjQIq3xfCAA */
-  createMachine<LogExplorerProfileContext, LogExplorerProfileEvent, LogExplorerProfileTypestate>(
+  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCAFQ1AMwEs8wA6AVwDtrWAXagQz2oC9IAYgDaABgC6iUDlSxqnVMykgsiAIwAOAMz0NorVoDsAVi0a1x0QE4ATADYANCACe6zfVMbjeu-rWi7DQAWAF8QpzRMXAJiMgoaOno2eW5ePjYoADEKAFsAVUI8QQhFBjYAN1QAawZI7HwiEnIqWjKOVP4M7NR8woQK1ABjLgVmMXFx5Rk5UeVVBEsNekMrQK0bYKC7fztHF3VDII8vDTXDNUNtu2MwiPR6mKb41qT2nk7mLNyCopIKQno+BGlCIOXodWijTiLUSyU473Sn26vTw-WYlWGo3GkyQIGmKUUc0Qi2Wq20GyCWx2e1cCHM9CCXmuekMokO2y0txAEIasWaCTaKQRGQAIiMuAA1ahgADuxVKr0qNXB90hfOesLeaVF4qlsrRGJG1EU2IkU1kBKUuPmdhsTlpxjUR00Nis+g0NjUVis3i5PMe0IFryF2s+YvYkulcr+REBeGBoJVUV5Txhgvhoag4cj+oGmONYwkOOkFtm1uJdv2CDUFzsHkOjpshhsWguahsftVKcDLzhHURUAAwop2BQ8KQuMwwHhYPKp4rqrUuwH+b2tR8hyOxxOpzODUMjSai2bcfiy6B5qZjAyjIzDOYbNYm-bEFYDPRrJZNJpvI+NJ3kxXDV037DJh2YUdUHHSdp1nGMASBdgQUIMF-ShVdNRDDdwMg6Dd1gfd8yPCYTxLGYCyJBYtGvIJbw0e92yfQwXwQIJvXoN9jCsIIAiMV1XQAh50OA4MM34SB6AgcVYDAdgAGVpzAQZRiSCA6EEPJSBFABBAAVDAAH0dN07S5IwXSDLM5AMEHXSAEkAHkADlizxUsKPLatrCOZt720LRRFdIIbErWlmzUZZjEMaLNHMbRzkEtVUyDPsEQkqSIxk+TFOUgtVPU4zTPMyyMGs2zHKcgyACUMDk3SHJqgzMm0uzkDyGrXLPDyL3UbzlibDR-MC7iQpY8xDF0LjqNsIx6LURLuwwkC0ogSTpNkhS6FyxQmBwDKdQjPU5RKecBmVND1TTUT+3S9bsq2lTGD2o0w11KNCMPQsSMkU93MJTz21Megm18QJLnbRkaVfNQdFWURggMKKtnvBagKu1K0luzKNpyx7ns4V7DqjQR4LjBMUKTITLpS9cBFWjKuCyzalLx-bCZzGUPqxY8frIy1KPbdxLC0WxaLY8WghY20lmuBtRB41tHw7cJuWXYT0dpiTBi3KCAHEKCe2AmFYTWIEEOynLs+ztOQOyAC1DMHZzdKqhzkAM3XXc0gztNIOzOr+q0eurQGPEZCwBqbIJLhY-xWQ4rRGUpa5PXWVH1ZprC6fobWILHfXUEN-KwA0rS9IwEUjL07SDIlOyMAAdQD8j-uDmHLg4wLG3sN0rCdWPqKWGtKW9Aw+9tdPqbXLOtZ1vAC6L6g1JLzTjMd53Xfd0htKc0q5Ob-mAYMHRtiCYxAlOMwgn7qsazsCb9DsWjH3htRdkn5Lp7E7Pc9whecCNk9Nmm485QR3LBOcbQlRLkAhnL+N1Vq-3zgbABu1gE4W3DBPceZPqml5m5FuQcVBuBsNeYw4djCR0ODHW+noJqUN8GfeGoh9AGA-j2TC39Z6gPnigwB+MwJz3ATOEmhB-hkyQomC6n9OEIJznPf+-D0FCKwQRHB3NvrmkIQLUO5DzCUPvFHGhtIYb+HoLaOwWhdjGG8CYfQYQVbMFQBAOAyhpEcLAFow+wcAC0UMEA+OvN6YJITQmchVu4paxsMbiQgF488xDWKhTcPQow3Fz4rBhi2dhUSYkDmRD8eJ3VEkDV0IcKw4VAotkCCxbiH5r7aECI6YI2hQgRLVlPWRwp2ZHSKa3RJKwrAeD7jWfwidgqrFqUceijpWQ-m-PfHJIk8mCJ4cI+Av1tGeXsDLXwFhyGGGoosSWVZGRDMCByYKVwmxWCWRrGecTNneIGZSegFg7H8SbCYfxZ8T6nBhlct+Ny7B3Mzlw+md1mbbSIV1fp8wVg2DeVFSwnzornxYuQiKbYEUGBbIcUF8CVprWxvdFmeUl50D6UQ+YwRRBIo+bYL56KqwpzeTWUhpg-zUXCXcWBnTlqYwhSSqFrMXpZjerKKlAsthDLfNsUWdgKnXysCxQ5EVtjeFMOPDJbTeVUxkQK2J8ieGKKlZ5BF9KUWMrRf4qw2gGRsU0MyGGXhbntL5Qa66RKkF6z4dE02Zrg4+iWIcRk6xvQsI0G+WOfUbA8W0BcEaFhdWqw9R4r1grjV-z9RSzxTyEnzDfmY9JrZmyWPPtHWOnprzaFMEClOrSCVdMzT63hhdUFALFRgsBqjA2JNpZa4aIUbWxzfkMzQjIPTNjjefZWYQgA */
+  createMachine<LogExplorerProfileContext, LogExplorerProfileEvent, LogExplorerProfileTypeState>(
     {
       context: initialContext,
       predictableActionArguments: true,
@@ -53,7 +61,7 @@ export const createPureLogExplorerProfileStateMachine = (
           invoke: {
             src: 'createDataView',
             onDone: {
-              target: 'initialized',
+              target: 'initializingControlPanels',
             },
             onError: {
               target: 'initialized',
@@ -61,33 +69,113 @@ export const createPureLogExplorerProfileStateMachine = (
             },
           },
         },
+        initializingControlPanels: {
+          invoke: {
+            src: 'initializeControlPanels',
+            onDone: {
+              target: 'initializingStateContainer',
+              actions: ['storeControlPanels'],
+            },
+            onError: {
+              target: 'initializingStateContainer',
+            },
+          },
+        },
+        initializingStateContainer: {
+          invoke: {
+            src: 'updateStateContainer',
+            onDone: {
+              target: 'initialized',
+            },
+            onError: {
+              target: 'initialized',
+            },
+          },
+        },
         initialized: {
-          initial: 'idle',
+          type: 'parallel',
           states: {
-            idle: {
-              invoke: {
-                src: 'listenUrlChange',
-              },
-              on: {
-                UPDATE_DATASET_SELECTION: {
-                  target: 'updatingDataView',
-                  actions: ['storeDatasetSelection'],
+            datasetSelection: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  invoke: {
+                    src: 'listenUrlChange',
+                  },
+                  on: {
+                    UPDATE_DATASET_SELECTION: {
+                      target: 'updatingDataView',
+                      actions: ['storeDatasetSelection'],
+                    },
+                    DATASET_SELECTION_RESTORE_FAILURE: {
+                      target: 'updatingDataView',
+                      actions: ['notifyDatasetSelectionRestoreFailed'],
+                    },
+                  },
                 },
-                DATASET_SELECTION_RESTORE_FAILURE: {
-                  target: 'updatingDataView',
-                  actions: ['notifyDatasetSelectionRestoreFailed'],
+                updatingDataView: {
+                  invoke: {
+                    src: 'createDataView',
+                    onDone: {
+                      target: 'updatingStateContainer',
+                    },
+                    onError: {
+                      target: 'updatingStateContainer',
+                      actions: ['notifyCreateDataViewFailed'],
+                    },
+                  },
+                },
+                updatingStateContainer: {
+                  invoke: {
+                    src: 'updateStateContainer',
+                    onDone: {
+                      target: 'idle',
+                      actions: ['notifyDataViewUpdate'],
+                    },
+                    onError: {
+                      target: 'idle',
+                      actions: ['notifyCreateDataViewFailed'],
+                    },
+                  },
                 },
               },
             },
-            updatingDataView: {
-              invoke: {
-                src: 'createDataView',
-                onDone: {
-                  target: 'idle',
+            controlGroups: {
+              initial: 'uninitialized',
+              states: {
+                uninitialized: {
+                  on: {
+                    INITIALIZE_CONTROL_GROUP_API: {
+                      target: 'idle',
+                      cond: 'controlGroupAPIExists',
+                      actions: ['storeControlGroupAPI'],
+                    },
+                  },
                 },
-                onError: {
-                  target: 'idle',
-                  actions: ['notifyCreateDataViewFailed'],
+                idle: {
+                  invoke: {
+                    src: 'subscribeControlGroup',
+                  },
+                  on: {
+                    DATA_VIEW_UPDATED: {
+                      target: 'updatingControlPanels',
+                    },
+                    UPDATE_CONTROL_PANELS: {
+                      target: 'updatingControlPanels',
+                    },
+                  },
+                },
+                updatingControlPanels: {
+                  invoke: {
+                    src: 'updateControlPanels',
+                    onDone: {
+                      target: 'idle',
+                      actions: ['storeControlPanels'],
+                    },
+                    onError: {
+                      target: 'idle',
+                    },
+                  },
                 },
               },
             },
@@ -104,6 +192,26 @@ export const createPureLogExplorerProfileStateMachine = (
               }
             : {}
         ),
+        storeControlGroupAPI: actions.assign((_context, event) =>
+          'controlGroupAPI' in event
+            ? {
+                controlGroupAPI: event.controlGroupAPI,
+              }
+            : {}
+        ),
+        storeControlPanels: actions.assign((_context, event) =>
+          'data' in event && ControlPanelRT.is(event.data)
+            ? {
+                controlPanels: event.data,
+              }
+            : {}
+        ),
+        notifyDataViewUpdate: raise('DATA_VIEW_UPDATED'),
+      },
+      guards: {
+        controlGroupAPIExists: (_context, event) => {
+          return 'controlGroupAPI' in event && event.controlGroupAPI != null;
+        },
       },
     }
   );
@@ -127,7 +235,11 @@ export const createLogExplorerProfileStateMachine = ({
     services: {
       createDataView: createAndSetDataView({ stateContainer }),
       initializeFromUrl: initializeFromUrl({ stateContainer }),
+      initializeControlPanels: initializeControlPanels({ stateContainer }),
       listenUrlChange: listenUrlChange({ stateContainer }),
+      subscribeControlGroup: subscribeControlGroup({ stateContainer }),
+      updateControlPanels: updateControlPanels({ stateContainer }),
+      updateStateContainer: updateStateContainer({ stateContainer }),
     },
   });
 

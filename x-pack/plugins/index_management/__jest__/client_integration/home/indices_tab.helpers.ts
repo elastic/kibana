@@ -30,7 +30,9 @@ const testBedConfig: AsyncTestBedConfig = {
 
 export interface IndicesTestBed extends TestBed<TestSubjects> {
   actions: {
-    selectIndexDetailsTab: (tab: 'settings' | 'mappings' | 'stats' | 'edit_settings') => void;
+    selectIndexDetailsTab: (
+      tab: 'settings' | 'mappings' | 'stats' | 'edit_settings'
+    ) => Promise<void>;
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;

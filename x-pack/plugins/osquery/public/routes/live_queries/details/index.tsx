@@ -10,16 +10,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import styled from 'styled-components';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
 
-const StyledTableWrapper = styled(EuiFlexItem)`
-  padding-left: 10px;
-`;
+const tableWrapperCss = {
+  paddingLeft: '10px',
+};
 
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
@@ -60,7 +59,7 @@ const LiveQueryDetailsPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      <StyledTableWrapper>
+      <EuiFlexItem css={tableWrapperCss}>
         <PackQueriesStatusTable
           actionId={actionId}
           data={data?.queries}
@@ -69,7 +68,7 @@ const LiveQueryDetailsPageComponent = () => {
           agentIds={data?.agents}
           showResultsHeader
         />
-      </StyledTableWrapper>
+      </EuiFlexItem>
     </WithHeaderLayout>
   );
 };

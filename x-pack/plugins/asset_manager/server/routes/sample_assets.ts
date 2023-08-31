@@ -103,38 +103,38 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
     async (context, req, res) => {
       const esClient = await getEsClientFromContext(context);
 
-      const sampleDataIndices = await esClient.indices.get({
-        index: 'assets-*-sample_data',
+      const sampleDataStreams = await esClient.indices.getDataStream({
+        name: 'assets-*-sample_data',
         expand_wildcards: 'all',
       });
 
-      const deletedIndices: string[] = [];
+      const deletedDataStreams: string[] = [];
       let errorWhileDeleting: string | null = null;
-      const indicesToDelete = Object.keys(sampleDataIndices);
+      const dataStreamsToDelete = sampleDataStreams.data_streams.map((ds) => ds.name);
 
-      for (let i = 0; i < indicesToDelete.length; i++) {
-        const index = indicesToDelete[i];
+      for (let i = 0; i < dataStreamsToDelete.length; i++) {
+        const dsName = dataStreamsToDelete[i];
         try {
-          await esClient.indices.delete({ index });
-          deletedIndices.push(index);
+          await esClient.indices.deleteDataStream({ name: dsName });
+          deletedDataStreams.push(dsName);
         } catch (error: any) {
           errorWhileDeleting =
             typeof error.message === 'string'
               ? error.message
-              : `Unknown error occurred while deleting indices, at index ${index}`;
+              : `Unknown error occurred while deleting sample data streams, at data stream name: ${dsName}`;
           break;
         }
       }
 
-      if (deletedIndices.length === indicesToDelete.length) {
-        return res.ok({ body: { deleted: deletedIndices } });
+      if (!errorWhileDeleting && deletedDataStreams.length === dataStreamsToDelete.length) {
+        return res.ok({ body: { deleted: deletedDataStreams } });
       } else {
         return res.custom({
           statusCode: 500,
           body: {
-            message: ['Not all matching indices were deleted', errorWhileDeleting].join(' - '),
-            deleted: deletedIndices,
-            matching: indicesToDelete,
+            message: ['Not all found data streams were deleted', errorWhileDeleting].join(' - '),
+            deleted: deletedDataStreams,
+            matching: dataStreamsToDelete,
           },
         });
       }

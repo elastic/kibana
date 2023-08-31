@@ -192,29 +192,26 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
-          customSelector: 'button[title="agent.type"]',
-        },
-        {
-          type: 'click',
-          selector: 'fieldAutocompleteComboBox',
-        },
-        {
-          type: 'click',
-          customSelector: 'button[title="agent.type"]',
+          customSelector: 'button[title="@timestamp"]',
         },
         {
           type: 'click',
           selector: 'valuesAutocompleteMatch',
         },
         {
+          type: 'input',
+          selector: 'valuesAutocompleteMatch',
+          value: '1234',
+        },
+        {
           type: 'click',
-          customSelector: 'button[title="endpoint"]',
+          selector: 'eventFilters-form-description-input',
         },
       ],
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.typeIS endpoint',
+          value: 'AND @timestampIS 1234',
         },
       ],
     },
@@ -331,7 +328,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            ' OSIS WindowsAND file.hash.*is one of A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+            ' OSIS WindowsAND file.hash.*is one of a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
         },
       ],
     },
@@ -361,12 +358,12 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
-          selector: 'blocklist-form-file.path',
+          selector: 'blocklist-form-file.path.caseless',
         },
         {
           type: 'click',
           customSelector:
-            '[data-test-subj="blocklist-form-values-input-A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476"] > span > button',
+            '[data-test-subj="blocklist-form-values-input-a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476"] > span > button',
         },
         {
           type: 'input',
@@ -382,7 +379,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            'OSIS WindowsAND file.pathis one of\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+            'OSIS WindowsAND file.path.caselessis one of\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
         },
         {
           selector: 'blocklistPage-card-header-title',

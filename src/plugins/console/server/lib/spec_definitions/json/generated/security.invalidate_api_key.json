@@ -1,11 +1,21 @@
 {
   "security.invalidate_api_key": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "DELETE"
     ],
     "patterns": [
       "_security/api_key"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-invalidate-api-key.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-invalidate-api-key.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/session-view-plugin",
-  "owner": "@elastic/sec-cloudnative-integrations",
+  "owner": "@elastic/kibana-cloud-security-posture",
   "plugin": {
     "id": "sessionView",
     "server": true,

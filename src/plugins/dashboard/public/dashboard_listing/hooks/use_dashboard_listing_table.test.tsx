@@ -105,6 +105,22 @@ describe('useDashboardListingTable', () => {
     expect(result.current.unsavedDashboardIds).toEqual([]);
   });
 
+  test('should not render the create dashboard button when showCreateDashboardButton is false', () => {
+    const initialFilter = 'myFilter';
+    const { result } = renderHook(() =>
+      useDashboardListingTable({
+        getDashboardUrl,
+        goToDashboard,
+        initialFilter,
+        urlStateEnabled: false,
+        showCreateDashboardButton: false,
+      })
+    );
+
+    const tableListViewTableProps = result.current.tableListViewTableProps;
+    expect(tableListViewTableProps.createItem).toBeUndefined();
+  });
+
   test('should return the correct tableListViewTableProps', () => {
     const initialFilter = 'myFilter';
     const { result } = renderHook(() =>
@@ -136,6 +152,11 @@ describe('useDashboardListingTable', () => {
       setPageDataTestSubject: expect.any(Function),
       title: 'Dashboard List',
       urlStateEnabled: false,
+      contentEditor: {
+        onSave: expect.any(Function),
+        isReadonly: false,
+        customValidators: expect.any(Object),
+      },
     };
 
     expect(tableListViewTableProps).toEqual(expectedProps);

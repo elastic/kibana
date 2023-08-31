@@ -10,7 +10,6 @@ import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
@@ -37,7 +36,6 @@ import { inputsSelectors } from '../../../common/store';
 import { combineQueries } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useKibana } from '../../../common/lib/kibana';
@@ -48,13 +46,12 @@ import { eventsViewerSelector } from '../../../common/components/events_viewer/s
 import type { State } from '../../../common/store';
 import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
+import { getAlertsDefaultModel } from './default_config';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
 // Highlight rows with building block alerts
 const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
-
-const storage = new Storage(localStorage);
 
 interface GridContainerProps {
   hideLastPage: boolean;
@@ -154,7 +151,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       graphEventId, // If truthy, the graph viewer (Resolver) is showing
       sessionViewConfig,
       viewMode: tableView = eventsDefaultModel.viewMode,
-    } = eventsDefaultModel,
+      columns,
+    } = getAlertsDefaultModel(license),
   } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const combinedQuery = useMemo(() => {
@@ -210,9 +208,10 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     return undefined;
   }, [isEventRenderedView]);
 
-  const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
-  const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
-  const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns(license);
+  const alertColumns = useMemo(
+    () => (columns.length ? columns : getColumns(license)),
+    [columns, license]
+  );
 
   const finalBrowserFields = useMemo(
     () => (isEventRenderedView ? {} : browserFields),

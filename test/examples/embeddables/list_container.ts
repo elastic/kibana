@@ -22,13 +22,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('list containers render', async () => {
       await retry.try(async () => {
         const title = await testSubjects.getVisibleText('listContainerTitle');
-        expect(title).to.be('Todo list');
-
-        const titles = await testSubjects.getVisibleTextAll('todoEmbeddableTitle');
-        expect(titles).to.eql(['Take out the trash', 'Vaccum the floor']);
+        expect(title).to.be('Hello world list');
 
         const text = await testSubjects.getVisibleTextAll('helloWorldEmbeddable');
-        expect(text).to.eql(['HELLO WORLD!']);
+        expect(text).to.eql(['HELLO WORLD!', 'HELLO WORLD!']);
       });
     });
   });

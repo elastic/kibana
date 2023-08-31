@@ -7,6 +7,12 @@
 import { useContext } from 'react';
 import { ObservabilityAIAssistantContext } from '../context/observability_ai_assistant_provider';
 
+export function useObservabilityAIAssistantOptional() {
+  const services = useContext(ObservabilityAIAssistantContext);
+
+  return services;
+}
+
 export function useObservabilityAIAssistant() {
   const services = useContext(ObservabilityAIAssistantContext);
 

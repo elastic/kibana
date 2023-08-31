@@ -55,7 +55,6 @@
     "@kbn/core-doc-links-browser",
     "@kbn/usage-collection-plugin",
     "@kbn/core-application-browser",
-    "@kbn/telemetry-plugin",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/features-plugin",
@@ -73,6 +72,7 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/actions-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/observability-ai-assistant-plugin",
   ],
   "exclude": [
     "target/**/*",

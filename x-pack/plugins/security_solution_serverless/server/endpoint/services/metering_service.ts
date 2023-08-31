@@ -7,28 +7,46 @@
 
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-// import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
 
+import { ProductLine, ProductTier } from '../../../common/product';
+
 import type { UsageRecord, MeteringCallbackInput } from '../../types';
+import type { ServerlessSecurityConfig } from '../../config';
 
 // 1 hour
 const SAMPLE_PERIOD_SECONDS = 3600;
-// const THRESHOLD_MINUTES = 30;
+const THRESHOLD_MINUTES = 30;
 
 export class EndpointMeteringService {
-  public async getUsageRecords({
+  private type: ProductLine.endpoint | `${ProductLine.cloud}_${ProductLine.endpoint}` | undefined;
+  private tier: ProductTier | undefined;
+
+  public getUsageRecords = async ({
     taskId,
     cloudSetup,
     esClient,
     abortController,
     lastSuccessfulReport,
-  }: MeteringCallbackInput): Promise<UsageRecord[]> {
+    config,
+  }: MeteringCallbackInput): Promise<UsageRecord[]> => {
+    this.setType(config);
+    if (!this.type) {
+      return [];
+    }
+
+    this.setTier(config);
+
     const heartbeatsResponse = await this.getHeartbeatsSince(
       esClient,
       abortController,
       lastSuccessfulReport
     );
+
+    if (!heartbeatsResponse?.hits?.hits) {
+      return [];
+    }
 
     return heartbeatsResponse.hits.hits.reduce((acc, { _source }) => {
       if (!_source) {
@@ -45,50 +63,30 @@ export class EndpointMeteringService {
 
       return [...acc, record];
     }, [] as UsageRecord[]);
-  }
+  };
 
   private async getHeartbeatsSince(
     esClient: ElasticsearchClient,
     abortController: AbortController,
     since?: Date
   ): Promise<SearchResponse<EndpointHeartbeat, Record<string, AggregationsAggregate>>> {
-    const timestamp = new Date().toISOString();
-    return {
-      hits: {
-        hits: [
-          {
-            _source: {
-              '@timestamp': timestamp,
-              agent: {
-                id: '123',
-              },
-              event: {
-                ingested: timestamp,
-              },
+    const thresholdDate = new Date(Date.now() - THRESHOLD_MINUTES * 60 * 1000);
+    const searchFrom = since && since > thresholdDate ? since : thresholdDate;
+
+    return esClient.search<EndpointHeartbeat>(
+      {
+        index: ENDPOINT_HEARTBEAT_INDEX,
+        sort: 'event.ingested',
+        query: {
+          range: {
+            'event.ingested': {
+              gt: searchFrom.toISOString(),
             },
           },
-        ],
+        },
       },
-    } as SearchResponse<EndpointHeartbeat, Record<string, AggregationsAggregate>>;
-
-    // TODO: enable when heartbeat index is ready
-    // const thresholdDate = new Date(Date.now() - THRESHOLD_MINUTES * 60 * 1000);
-    // const searchFrom = since && since > thresholdDate ? since : thresholdDate;
-
-    // return esClient.search<EndpointHeartbeat>(
-    //   {
-    //     index: ENDPOINT_HEARTBEAT_INDEX,
-    //     sort: 'event.ingested',
-    //     query: {
-    //       range: {
-    //         'event.ingested': {
-    //           gt: searchFrom.toISOString(),
-    //         },
-    //       },
-    //     },
-    //   },
-    //   { signal: abortController.signal }
-    // );
+      { signal: abortController.signal, ignore: [404] }
+    );
   }
 
   private buildMeteringRecord({
@@ -108,21 +106,65 @@ export class EndpointMeteringService {
     timestamp.setMilliseconds(0);
 
     return {
+      // keep endpoint instead of this.type as id prefix so
+      // we don't double count in the event of add-on changes
       id: `endpoint-${agentId}-${timestamp}`,
       usage_timestamp: timestampStr,
       creation_timestamp: timestampStr,
       usage: {
-        type: 'security_solution_endpoint',
-        // TODO: get actual sub_type
-        sub_type: 'essential',
+        // type postfix is used to determine the PLI to bill
+        type: `security_solution_${this.type}`,
         period_seconds: SAMPLE_PERIOD_SECONDS,
         quantity: 1,
       },
       source: {
         id: taskId,
         instance_group_id: projectId,
+        metadata: {
+          tier: this.tier,
+        },
       },
     };
+  }
+
+  private setType(config: ServerlessSecurityConfig) {
+    if (this.type) {
+      return;
+    }
+
+    let hasCloudAddOn = false;
+    let hasEndpointAddOn = false;
+    config.productTypes.forEach((productType) => {
+      if (productType.product_line === ProductLine.cloud) {
+        hasCloudAddOn = true;
+      }
+      if (productType.product_line === ProductLine.endpoint) {
+        hasEndpointAddOn = true;
+      }
+    });
+
+    if (hasEndpointAddOn) {
+      this.type = ProductLine.endpoint;
+      return;
+    }
+    if (hasCloudAddOn) {
+      this.type = `${ProductLine.cloud}_${ProductLine.endpoint}`;
+    }
+  }
+
+  private setTier(config: ServerlessSecurityConfig) {
+    if (this.tier) {
+      return;
+    }
+
+    const product = config.productTypes.find(
+      (productType) =>
+        // tiers are always matching so either is fine
+        productType.product_line === ProductLine.endpoint ||
+        productType.product_line === ProductLine.cloud
+    );
+    // default essentials is safe since we only reach tier if add-on exists
+    this.tier = product?.product_tier || ProductTier.essentials;
   }
 }
 

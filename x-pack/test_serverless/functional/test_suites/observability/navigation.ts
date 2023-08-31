@@ -69,8 +69,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await expectNoPageReload();
     });
 
-    // FLAKY/BUG?: https://github.com/elastic/kibana/issues/162781
-    it.skip('active sidenav section is auto opened on load', async () => {
+    it('active sidenav section is auto opened on load', async () => {
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
       await browser.refresh();
@@ -85,6 +84,23 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.search.hideSearch();
 
       await expect(await browser.getCurrentUrl()).contain('/app/discover#/p/log-explorer');
+    });
+
+    it('shows cases in sidebar navigation', async () => {
+      await svlCommonNavigation.expectExists();
+
+      await svlCommonNavigation.sidenav.expectLinkExists({
+        deepLinkId: 'observability-overview:cases',
+      });
+    });
+
+    it('navigates to cases app', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:cases',
+      });
+      expect(await browser.getCurrentUrl()).contain('/app/observability/cases');
     });
   });
 }

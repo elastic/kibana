@@ -4,33 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 } from 'uuid';
-import React from 'react';
-import type { Node } from 'unist';
+import {
+  EuiMarkdownFormat,
+  EuiSpacer,
+  EuiText,
+  getDefaultEuiMarkdownParsingPlugins,
+  getDefaultEuiMarkdownProcessingPlugins,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { Parent, Text } from 'mdast';
-import ReactMarkdown from 'react-markdown';
-import { EuiText } from '@elastic/eui';
+import classNames from 'classnames';
+import type { Code, InlineCode, Parent, Text } from 'mdast';
+import React, { useMemo } from 'react';
+import type { Node } from 'unist';
+import { v4 } from 'uuid';
 
 interface Props {
   content: string;
   loading: boolean;
 }
 
+const ANIMATION_TIME = 1;
+
 const cursorCss = css`
   @keyframes blink {
     0% {
-      opacity: 1;
-    }
-    50% {
       opacity: 0;
     }
-    100% {
+    50% {
       opacity: 1;
+    }
+    100% {
+      opacity: 0;
     }
   }
 
-  animation: blink 1s infinite;
+  animation: blink ${ANIMATION_TIME}s infinite;
   width: 10px;
   height: 16px;
   vertical-align: middle;
@@ -38,9 +46,9 @@ const cursorCss = css`
   background: rgba(0, 0, 0, 0.25);
 `;
 
-const cursor = <span className={cursorCss} />;
+const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
 
-const CURSOR = `{{${v4()}}`;
+const CURSOR = `{{${v4()}}}`;
 
 const loadingCursorPlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
@@ -51,11 +59,11 @@ const loadingCursorPlugin = () => {
       });
     }
 
-    if (node.type !== 'text') {
+    if (node.type !== 'text' && node.type !== 'inlineCode' && node.type !== 'code') {
       return;
     }
 
-    const textNode = node as Text;
+    const textNode = node as Text | InlineCode | Code;
 
     const indexOfCursor = textNode.value.indexOf(CURSOR);
     if (indexOfCursor === -1) {
@@ -68,9 +76,6 @@ const loadingCursorPlugin = () => {
     parent!.children.splice(indexOfNode + 1, 0, {
       type: 'cursor' as Text['type'],
       value: CURSOR,
-      data: {
-        hName: 'cursor',
-      },
     });
   };
 
@@ -79,19 +84,71 @@ const loadingCursorPlugin = () => {
   };
 };
 
-export function MessageText(props: Props) {
+export function MessageText({ loading, content }: Props) {
+  const containerClassName = css`
+    overflow-wrap: break-word;
+  `;
+
+  const { parsingPluginList, processingPluginList } = useMemo(() => {
+    const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
+    const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+
+    const { components } = processingPlugins[1][1];
+
+    processingPlugins[1][1].components = {
+      ...components,
+      cursor: Cursor,
+      table: (props) => (
+        <>
+          <div className="euiBasicTable">
+            {' '}
+            <table className="euiTable" {...props} />
+          </div>
+          <EuiSpacer size="m" />
+        </>
+      ),
+      th: (props) => {
+        const { children, ...rest } = props;
+        return (
+          <th className="euiTableHeaderCell" {...rest}>
+            <span className="euiTableCellContent">
+              <span className="euiTableCellContent__text" title={children}>
+                {children}
+              </span>
+            </span>
+          </th>
+        );
+      },
+      tr: (props) => <tr className="euiTableRow" {...props} />,
+      td: (props) => {
+        const { children, ...rest } = props;
+        return (
+          <td className="euiTableRowCell" {...rest}>
+            <div className="euiTableCellContent euiTableCellContent--truncateText">
+              <span className="euiTableCellContent__text" title={children}>
+                {children}
+              </span>
+            </div>
+          </td>
+        );
+      },
+    };
+
+    return {
+      parsingPluginList: [loadingCursorPlugin, ...parsingPlugins],
+      processingPluginList: processingPlugins,
+    };
+  }, []);
+
   return (
-    <EuiText size="s">
-      <ReactMarkdown
-        plugins={[loadingCursorPlugin]}
-        components={
-          {
-            cursor: () => cursor,
-          } as Record<string, any>
-        }
+    <EuiText size="s" className={containerClassName}>
+      <EuiMarkdownFormat
+        textSize="s"
+        parsingPluginList={parsingPluginList}
+        processingPluginList={processingPluginList}
       >
-        {`${props.content}${props.loading ? CURSOR : ''}`}
-      </ReactMarkdown>
+        {`${content}${loading ? CURSOR : ''}`}
+      </EuiMarkdownFormat>
     </EuiText>
   );
 }

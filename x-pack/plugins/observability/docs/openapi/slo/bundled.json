@@ -266,6 +266,15 @@
           },
           {
             "$ref": "#/components/parameters/slo_id"
+          },
+          {
+            "name": "instanceId",
+            "in": "query",
+            "description": "the specific instanceId used by the summary calculation",
+            "schema": {
+              "type": "string"
+            },
+            "example": "host-abcde"
           }
         ],
         "responses": {
@@ -789,7 +798,9 @@
             "nullable": false,
             "required": [
               "index",
-              "timestampField"
+              "timestampField",
+              "good",
+              "total"
             ],
             "properties": {
               "index": {
@@ -1255,6 +1266,12 @@
       "error_budget": {
         "title": "Error budget",
         "type": "object",
+        "required": [
+          "initial",
+          "consumed",
+          "remaining",
+          "isEstimated"
+        ],
         "properties": {
           "initial": {
             "type": "number",
@@ -1282,6 +1299,11 @@
         "title": "Summary",
         "type": "object",
         "description": "The SLO computed data",
+        "required": [
+          "status",
+          "sliValue",
+          "errorBudget"
+        ],
         "properties": {
           "status": {
             "$ref": "#/components/schemas/summary_status"
@@ -1298,6 +1320,23 @@
       "slo_response": {
         "title": "SLO response",
         "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "indicator",
+          "timeWindow",
+          "budgetingMethod",
+          "objective",
+          "settings",
+          "revision",
+          "summary",
+          "enabled",
+          "groupBy",
+          "instanceId",
+          "createdAt",
+          "updatedAt"
+        ],
         "properties": {
           "id": {
             "description": "The identifier of the SLO.",
@@ -1367,6 +1406,16 @@
             "description": "Indicate if the SLO is enabled",
             "type": "boolean",
             "example": true
+          },
+          "groupBy": {
+            "description": "optional group by field to use to generate an SLO per distinct value",
+            "type": "string",
+            "example": "some.field"
+          },
+          "instanceId": {
+            "description": "the value derived from the groupBy field, if present, otherwise '*'",
+            "type": "string",
+            "example": "host-abcde"
           },
           "createdAt": {
             "description": "The creation date",
@@ -1553,6 +1602,11 @@
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
+          },
+          "groupBy": {
+            "description": "optional group by field to use to generate an SLO per distinct value",
+            "type": "string",
+            "example": "some.field"
           }
         }
       },

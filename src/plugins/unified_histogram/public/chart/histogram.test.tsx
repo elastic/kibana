@@ -70,6 +70,7 @@ function mountComponent() {
     lensAttributesContext: getMockLensAttributes(),
     onTotalHitsChange: jest.fn(),
     onChartLoad: jest.fn(),
+    withDefaultActions: undefined,
   };
 
   return {
@@ -95,16 +96,18 @@ describe('Histogram', () => {
       attributes: getMockLensAttributes().attributes,
       onLoad: lensProps.onLoad,
     });
-    expect(lensProps).toEqual(originalProps);
+    expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     component.setProps({ request: { ...props.request, searchSessionId: '321' } }).update();
     lensProps = component.find(embeddable).props();
-    expect(lensProps).toEqual(originalProps);
+    expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     await act(async () => {
       props.refetch$.next({ type: 'refetch' });
     });
     component.update();
     lensProps = component.find(embeddable).props();
-    expect(lensProps).toEqual({ ...originalProps, searchSessionId: '321' });
+    expect(lensProps).toMatchObject(
+      expect.objectContaining({ ...originalProps, searchSessionId: '321' })
+    );
   });
 
   it('should execute onLoad correctly', async () => {
@@ -207,6 +210,7 @@ describe('Histogram', () => {
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     const onLoad = component.find(embeddable).props().onLoad;
     const adapters = createDefaultInspectorAdapters();
+    adapters.tables.tables.unifiedHistogram = { meta: { statistics: { totalCount: 100 } } } as any;
     const rawResponse = {
       _shards: {
         total: 1,
@@ -215,14 +219,21 @@ describe('Histogram', () => {
         failed: 1,
         failures: [],
       },
+      hits: {
+        total: 100,
+        max_score: null,
+        hits: [],
+      },
     };
     jest
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
-    onLoad(false, adapters);
+    act(() => {
+      onLoad(false, adapters);
+    });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
-      UnifiedHistogramFetchStatus.error,
-      undefined
+      UnifiedHistogramFetchStatus.complete,
+      100
     );
     expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
   });

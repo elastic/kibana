@@ -10,6 +10,12 @@ get:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: ../components/parameters/space_id.yaml
     - $ref: ../components/parameters/slo_id.yaml
+    - name: instanceId
+      in: query
+      description: the specific instanceId used by the summary calculation
+      schema:
+        type: string
+      example: 'host-abcde'
   responses:
     '200':
       description: Successful request

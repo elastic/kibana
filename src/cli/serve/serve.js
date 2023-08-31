@@ -15,6 +15,7 @@ import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
+import { kibanaDevServiceAccount } from '@kbn/dev-utils';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
@@ -55,11 +56,11 @@ function pathCollector() {
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
+export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
-  const merge = _.partial(_.merge, rawConfig);
+
   if (opts.oss) {
     delete rawConfig.xpack;
   }
@@ -68,6 +69,10 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   delete extraCliOptions.env;
 
   if (opts.dev) {
+    if (opts.serverless) {
+      set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
+    }
+
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
       if (!has('elasticsearch.username')) {
         set('elasticsearch.username', 'kibana_system');
@@ -135,8 +140,8 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
-  merge(extraCliOptions);
-  merge(readKeystore());
+  _.mergeWith(rawConfig, extraCliOptions, mergeAndReplaceArrays);
+  _.merge(rawConfig, readKeystore());
 
   return rawConfig;
 }
@@ -256,4 +261,16 @@ export default function (program) {
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });
   });
+}
+
+function mergeAndReplaceArrays(objValue, srcValue) {
+  if (typeof srcValue === 'undefined') {
+    return objValue;
+  } else if (Array.isArray(srcValue)) {
+    // do not merge arrays, use new value instead
+    return srcValue;
+  } else {
+    // default to default merging
+    return undefined;
+  }
 }

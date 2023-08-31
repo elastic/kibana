@@ -8,9 +8,9 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback } from '../../customizations';
@@ -27,30 +27,31 @@ export interface DiscoverContainerInternalProps {
   overrideServices: Partial<DiscoverServices>;
   getDiscoverServices: () => Promise<DiscoverServices>;
   scopedHistory: ScopedHistory;
-  customize: CustomizationCallback;
+  customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
+  isLoading?: boolean;
 }
 
-const DiscoverContainerWrapper = euiStyled(EuiFlexGroup)`
+const discoverContainerWrapperCss = css`
   width: 100%;
   height: 100%;
 
   // override the embedded discover page height
   // to fit in the container
   .dscPage {
-    height: 100%
-}
+    height: 100%;
+  }
 `;
 
 export const DiscoverContainerInternal = ({
   overrideServices,
   scopedHistory,
-  customize,
+  customizationCallbacks,
   isDev,
   getDiscoverServices,
+  isLoading = false,
 }: DiscoverContainerInternalProps) => {
   const [discoverServices, setDiscoverServices] = useState<DiscoverServices | undefined>();
-  const customizationCallbacks = useMemo(() => [customize], [customize]);
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
@@ -68,16 +69,19 @@ export const DiscoverContainerInternal = ({
     return { ...discoverServices, ...overrideServices };
   }, [discoverServices, overrideServices]);
 
-  if (!initialized || !services) {
+  if (!initialized || !services || isLoading) {
     return (
-      <DiscoverContainerWrapper>
+      <EuiFlexGroup css={discoverContainerWrapperCss}>
         <LoadingIndicator type="spinner" />
-      </DiscoverContainerWrapper>
+      </EuiFlexGroup>
     );
   }
 
   return (
-    <DiscoverContainerWrapper data-test-subj="data-container-internal-wrapper">
+    <EuiFlexGroup
+      css={discoverContainerWrapperCss}
+      data-test-subj="discover-container-internal-wrapper"
+    >
       <EuiFlexItem>
         <KibanaContextProvider services={services}>
           <DiscoverMainRoute
@@ -87,7 +91,7 @@ export const DiscoverContainerInternal = ({
           />
         </KibanaContextProvider>
       </EuiFlexItem>
-    </DiscoverContainerWrapper>
+    </EuiFlexGroup>
   );
 };
 

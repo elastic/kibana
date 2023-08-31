@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
   Conversation,
   ConversationCreateRequest,
@@ -23,7 +24,6 @@ export const messageRt: t.Type<Message> = t.type({
       role: t.union([
         t.literal(MessageRole.System),
         t.literal(MessageRole.Assistant),
-        t.literal(MessageRole.Event),
         t.literal(MessageRole.Function),
         t.literal(MessageRole.User),
         t.literal(MessageRole.Elastic),
@@ -32,6 +32,7 @@ export const messageRt: t.Type<Message> = t.type({
     t.partial({
       content: t.string,
       name: t.string,
+      event: t.string,
       function_call: t.intersection([
         t.type({
           name: t.string,
@@ -42,7 +43,7 @@ export const messageRt: t.Type<Message> = t.type({
           ]),
         }),
         t.partial({
-          args: serializeableRt,
+          arguments: serializeableRt,
           data: serializeableRt,
         }),
       ]),
@@ -58,6 +59,7 @@ export const baseConversationRt: t.Type<ConversationRequestBase> = t.type({
   messages: t.array(messageRt),
   labels: t.record(t.string, t.string),
   numeric_labels: t.record(t.string, t.number),
+  public: toBooleanRt,
 });
 
 export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([

@@ -40,12 +40,13 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
     findById: jest.fn(),
     findAllByIds: jest.fn(),
     deleteById: jest.fn(),
+    search: jest.fn(),
   };
 };
 
 const createSummaryClientMock = (): jest.Mocked<SummaryClient> => {
   return {
-    fetchSummary: jest.fn(),
+    computeSummary: jest.fn(),
   };
 };
 

@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { AGENT_STATUSES, getColorForAgentStatus } from './services/agent_status';
 import type { ActionAgentStatus } from './types';
 
-const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`
-  &.osquery-action-agent-status-bar {
-    border: none;
-    border-radius: 0;
-    &:after {
-      border: none;
-    }
-  }
-`;
+const euiColorPaletteDisplayCss = {
+  border: 'none',
+  borderRadius: 0,
+  '&:after': {
+    border: 'none',
+  },
+};
 
 export const AgentStatusBar: React.FC<{
   agentStatus: { [k in ActionAgentStatus]: number };
@@ -39,11 +36,5 @@ export const AgentStatusBar: React.FC<{
     }, [] as Array<{ stop: number; color: string }>);
   }, [agentStatus]);
 
-  return (
-    <StyledEuiColorPaletteDisplay
-      className="osquery-action-agent-status-bar"
-      size="s"
-      palette={palette}
-    />
-  );
+  return <EuiColorPaletteDisplay css={euiColorPaletteDisplayCss} size="s" palette={palette} />;
 };

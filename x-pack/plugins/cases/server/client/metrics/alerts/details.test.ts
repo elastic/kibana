@@ -13,7 +13,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AlertDetails } from './details';
 import { mockAlertsService } from '../test_utils/alerts';
 import type { SingleCaseBaseHandlerCommonOptions } from '../types';
-import { CaseMetricsFeature } from '../../../../common/api/metrics/case';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 
 describe('AlertDetails', () => {
   let client: CasesClientMock;

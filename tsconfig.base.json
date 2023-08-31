@@ -66,6 +66,8 @@
       "@kbn/analytics-shippers-gainsight/*": ["packages/analytics/shippers/gainsight/*"],
       "@kbn/apm-config-loader": ["packages/kbn-apm-config-loader"],
       "@kbn/apm-config-loader/*": ["packages/kbn-apm-config-loader/*"],
+      "@kbn/apm-data-access-plugin": ["x-pack/plugins/apm_data_access"],
+      "@kbn/apm-data-access-plugin/*": ["x-pack/plugins/apm_data_access/*"],
       "@kbn/apm-plugin": ["x-pack/plugins/apm"],
       "@kbn/apm-plugin/*": ["x-pack/plugins/apm/*"],
       "@kbn/apm-synthtrace": ["packages/kbn-apm-synthtrace"],
@@ -672,6 +674,8 @@
       "@kbn/ecs-data-quality-dashboard-plugin/*": ["x-pack/plugins/ecs_data_quality_dashboard/*"],
       "@kbn/elastic-assistant": ["x-pack/packages/kbn-elastic-assistant"],
       "@kbn/elastic-assistant/*": ["x-pack/packages/kbn-elastic-assistant/*"],
+      "@kbn/elastic-assistant-plugin": ["x-pack/plugins/elastic_assistant"],
+      "@kbn/elastic-assistant-plugin/*": ["x-pack/plugins/elastic_assistant/*"],
       "@kbn/elasticsearch-client-plugin": ["test/plugin_functional/plugins/elasticsearch_client_plugin"],
       "@kbn/elasticsearch-client-plugin/*": ["test/plugin_functional/plugins/elasticsearch_client_plugin/*"],
       "@kbn/elasticsearch-client-xpack-plugin": ["x-pack/test/plugin_api_integration/plugins/elasticsearch_client"],
@@ -914,6 +918,8 @@
       "@kbn/kubernetes-security-plugin/*": ["x-pack/plugins/kubernetes_security/*"],
       "@kbn/language-documentation-popover": ["packages/kbn-language-documentation-popover"],
       "@kbn/language-documentation-popover/*": ["packages/kbn-language-documentation-popover/*"],
+      "@kbn/lens-embeddable-utils": ["packages/kbn-lens-embeddable-utils"],
+      "@kbn/lens-embeddable-utils/*": ["packages/kbn-lens-embeddable-utils/*"],
       "@kbn/lens-plugin": ["x-pack/plugins/lens"],
       "@kbn/lens-plugin/*": ["x-pack/plugins/lens/*"],
       "@kbn/license-api-guard-plugin": ["x-pack/plugins/license_api_guard"],
@@ -948,6 +954,8 @@
       "@kbn/management-cards-navigation/*": ["packages/kbn-management/cards_navigation/*"],
       "@kbn/management-plugin": ["src/plugins/management"],
       "@kbn/management-plugin/*": ["src/plugins/management/*"],
+      "@kbn/management-settings-section-registry": ["packages/kbn-management/settings/section_registry"],
+      "@kbn/management-settings-section-registry/*": ["packages/kbn-management/settings/section_registry/*"],
       "@kbn/management-storybook-config": ["packages/kbn-management/storybook/config"],
       "@kbn/management-storybook-config/*": ["packages/kbn-management/storybook/config/*"],
       "@kbn/management-test-plugin": ["test/plugin_functional/plugins/management_test_plugin"],
@@ -1022,6 +1030,8 @@
       "@kbn/newsfeed-plugin/*": ["src/plugins/newsfeed/*"],
       "@kbn/newsfeed-test-plugin": ["test/common/plugins/newsfeed"],
       "@kbn/newsfeed-test-plugin/*": ["test/common/plugins/newsfeed/*"],
+      "@kbn/no-data-page-plugin": ["src/plugins/no_data_page"],
+      "@kbn/no-data-page-plugin/*": ["src/plugins/no_data_page/*"],
       "@kbn/notifications-plugin": ["x-pack/plugins/notifications"],
       "@kbn/notifications-plugin/*": ["x-pack/plugins/notifications/*"],
       "@kbn/object-versioning": ["packages/kbn-object-versioning"],
@@ -1112,8 +1122,6 @@
       "@kbn/reporting-common/*": ["packages/kbn-reporting/common/*"],
       "@kbn/reporting-example-plugin": ["x-pack/examples/reporting_example"],
       "@kbn/reporting-example-plugin/*": ["x-pack/examples/reporting_example/*"],
-      "@kbn/reporting-export-types-plugin": ["x-pack/plugins/reporting_export_types"],
-      "@kbn/reporting-export-types-plugin/*": ["x-pack/plugins/reporting_export_types/*"],
       "@kbn/reporting-plugin": ["x-pack/plugins/reporting"],
       "@kbn/reporting-plugin/*": ["x-pack/plugins/reporting/*"],
       "@kbn/resolver-test-plugin": ["x-pack/test/plugin_functional/plugins/resolver_test"],
@@ -1172,8 +1180,12 @@
       "@kbn/screenshotting-example-plugin/*": ["x-pack/examples/screenshotting_example/*"],
       "@kbn/screenshotting-plugin": ["x-pack/plugins/screenshotting"],
       "@kbn/screenshotting-plugin/*": ["x-pack/plugins/screenshotting/*"],
+      "@kbn/search-api-panels": ["packages/kbn-search-api-panels"],
+      "@kbn/search-api-panels/*": ["packages/kbn-search-api-panels/*"],
       "@kbn/search-examples-plugin": ["examples/search_examples"],
       "@kbn/search-examples-plugin/*": ["examples/search_examples/*"],
+      "@kbn/search-response-warnings": ["packages/kbn-search-response-warnings"],
+      "@kbn/search-response-warnings/*": ["packages/kbn-search-response-warnings/*"],
       "@kbn/searchprofiler-plugin": ["x-pack/plugins/searchprofiler"],
       "@kbn/searchprofiler-plugin/*": ["x-pack/plugins/searchprofiler/*"],
       "@kbn/security-api-integration-helpers": ["x-pack/test/security_api_integration/packages/helpers"],
@@ -1194,6 +1206,8 @@
       "@kbn/security-solution-side-nav/*": ["x-pack/packages/security-solution/side_nav/*"],
       "@kbn/security-solution-storybook-config": ["x-pack/packages/security-solution/storybook/config"],
       "@kbn/security-solution-storybook-config/*": ["x-pack/packages/security-solution/storybook/config/*"],
+      "@kbn/security-solution-upselling": ["x-pack/packages/security-solution/upselling"],
+      "@kbn/security-solution-upselling/*": ["x-pack/packages/security-solution/upselling/*"],
       "@kbn/security-test-endpoints-plugin": ["x-pack/test/security_functional/plugins/test_endpoints"],
       "@kbn/security-test-endpoints-plugin/*": ["x-pack/test/security_functional/plugins/test_endpoints/*"],
       "@kbn/securitysolution-autocomplete": ["packages/kbn-securitysolution-autocomplete"],
@@ -1498,6 +1512,8 @@
       "@kbn/usage-collection-plugin/*": ["src/plugins/usage_collection/*"],
       "@kbn/usage-collection-test-plugin": ["test/plugin_functional/plugins/usage_collection"],
       "@kbn/usage-collection-test-plugin/*": ["test/plugin_functional/plugins/usage_collection/*"],
+      "@kbn/use-tracked-promise": ["packages/kbn-use-tracked-promise"],
+      "@kbn/use-tracked-promise/*": ["packages/kbn-use-tracked-promise/*"],
       "@kbn/user-profile-components": ["packages/kbn-user-profile-components"],
       "@kbn/user-profile-components/*": ["packages/kbn-user-profile-components/*"],
       "@kbn/user-profile-examples-plugin": ["examples/user_profile_examples"],
@@ -1556,7 +1572,9 @@
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"],
+      "@emotion/core": [
+        "typings/@emotion"
+      ],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
@@ -1630,3 +1648,4 @@
     ]
   }
 }
+

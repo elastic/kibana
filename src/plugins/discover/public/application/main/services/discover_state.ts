@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import {
   createKbnUrlStateStorage,
+  IKbnUrlStateStorage,
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
@@ -25,7 +26,7 @@ import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
-import { FetchStatus } from '../../types';
+import { DiscoverDisplayMode, FetchStatus } from '../../types';
 import { changeDataView } from '../hooks/utils/change_data_view';
 import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
@@ -63,6 +64,11 @@ interface DiscoverStateContainerParams {
    * core ui settings service
    */
   services: DiscoverServices;
+  /*
+   * mode in which discover is running
+   *
+   * */
+  mode?: DiscoverDisplayMode;
 }
 
 export interface LoadParams {
@@ -97,6 +103,10 @@ export interface DiscoverStateContainer {
    * State of saved search, the saved object of Discover
    */
   savedSearchState: DiscoverSavedSearchContainer;
+  /**
+   * State of url, allows updating and subscribing to url changes
+   */
+  stateStorage: IKbnUrlStateStorage;
   /**
    * Service for handling search sessions
    */
@@ -183,6 +193,7 @@ export interface DiscoverStateContainer {
 export function getDiscoverStateContainer({
   history,
   services,
+  mode = 'standalone',
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
@@ -193,6 +204,7 @@ export function getDiscoverStateContainer({
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
+    useHashQuery: mode !== 'embedded',
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 
@@ -252,6 +264,7 @@ export function getDiscoverStateContainer({
     services,
     searchSessionManager,
     getAppState: appStateContainer.getState,
+    getInternalState: internalStateContainer.getState,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
   });
@@ -451,6 +464,7 @@ export function getDiscoverStateContainer({
     internalState: internalStateContainer,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
+    stateStorage,
     searchSessionManager,
     actions: {
       initializeAndSync,

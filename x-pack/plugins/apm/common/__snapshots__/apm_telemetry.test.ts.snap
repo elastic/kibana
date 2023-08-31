@@ -14,76 +14,148 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                     "services_per_agent": {
                       "properties": {
                         "android/java": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the android/java agent within the last day"
+                          }
                         },
                         "dotnet": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the dotnet (.Net) agent within the last day"
+                          }
                         },
                         "iOS/swift": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the iOS/swift agent within the last day"
+                          }
                         },
                         "go": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the go agent within the last day"
+                          }
                         },
                         "java": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the Java agent within the last day"
+                          }
                         },
                         "js-base": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the js-base agent within the last day"
+                          }
                         },
                         "nodejs": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the nodeJS agent within the last day"
+                          }
                         },
                         "php": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the PHH agent within the last day"
+                          }
                         },
                         "python": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the Python agent within the last day"
+                          }
                         },
                         "ruby": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the Ruby agent within the last day"
+                          }
                         },
                         "rum-js": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the rum-js agent within the last day"
+                          }
                         },
                         "otlp": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the otlp agent within the last day"
+                          }
                         },
                         "opentelemetry/cpp": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/cpp agent within the last day"
+                          }
                         },
                         "opentelemetry/dotnet": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/dotnet agent within the last day"
+                          }
                         },
                         "opentelemetry/erlang": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/erlang agent within the last day"
+                          }
                         },
                         "opentelemetry/go": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/go agent within the last day"
+                          }
                         },
                         "opentelemetry/java": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/java agent within the last day"
+                          }
                         },
                         "opentelemetry/nodejs": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/nodejs agent within the last day"
+                          }
                         },
                         "opentelemetry/php": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/php agent within the last day"
+                          }
                         },
                         "opentelemetry/python": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/python agent within the last day"
+                          }
                         },
                         "opentelemetry/ruby": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/ruby agent within the last day"
+                          }
                         },
                         "opentelemetry/rust": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/rust agent within the last day"
+                          }
                         },
                         "opentelemetry/swift": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/swift agent within the last day"
+                          }
                         },
                         "opentelemetry/webjs": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of services utilizing the opentelemetry/webjs agent within the last day"
+                          }
                         }
                       }
                     },
@@ -94,10 +166,16 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "agent": {
                               "properties": {
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent versions within the last day"
+                                  }
                                 },
                                 "activation_method": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent activation methods within the last day"
+                                  }
                                 }
                               }
                             },
@@ -106,39 +184,66 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "framework": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework name  within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service framework and version sorted by doc count"
+                                      }
                                     }
                                   }
                                 },
                                 "language": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service language name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 },
                                 "runtime": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service runtime name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 }
@@ -151,10 +256,16 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "agent": {
                               "properties": {
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent versions within the last day"
+                                  }
                                 },
                                 "activation_method": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent activation methods within the last day"
+                                  }
                                 }
                               }
                             },
@@ -163,39 +274,66 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "framework": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework name  within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service framework and version sorted by doc count"
+                                      }
                                     }
                                   }
                                 },
                                 "language": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service language name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 },
                                 "runtime": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service runtime name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 }
@@ -208,10 +346,16 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "agent": {
                               "properties": {
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent versions within the last day"
+                                  }
                                 },
                                 "activation_method": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent activation methods within the last day"
+                                  }
                                 }
                               }
                             },
@@ -220,39 +364,66 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "framework": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework name  within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service framework and version sorted by doc count"
+                                      }
                                     }
                                   }
                                 },
                                 "language": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service language name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 },
                                 "runtime": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service runtime name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 }
@@ -265,10 +436,16 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "agent": {
                               "properties": {
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent versions within the last day"
+                                  }
                                 },
                                 "activation_method": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent activation methods within the last day"
+                                  }
                                 }
                               }
                             },
@@ -277,39 +454,66 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "framework": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework name  within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service framework and version sorted by doc count"
+                                      }
                                     }
                                   }
                                 },
                                 "language": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service language name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 },
                                 "runtime": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service runtime name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 }
@@ -322,10 +526,16 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "agent": {
                               "properties": {
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent versions within the last day"
+                                  }
                                 },
                                 "activation_method": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent activation methods within the last day"
+                                  }
                                 }
                               }
                             },
@@ -334,39 +544,66 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "framework": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework name  within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service framework and version sorted by doc count"
+                                      }
                                     }
                                   }
                                 },
                                 "language": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service language name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 },
                                 "runtime": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service runtime name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 }
@@ -379,10 +616,16 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "agent": {
                               "properties": {
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent versions within the last day"
+                                  }
                                 },
                                 "activation_method": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent activation methods within the last day"
+                                  }
                                 }
                               }
                             },
@@ -391,39 +634,66 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "framework": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework name  within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service framework and version sorted by doc count"
+                                      }
                                     }
                                   }
                                 },
                                 "language": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service language name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 },
                                 "runtime": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service runtime name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 }
@@ -436,10 +706,16 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "agent": {
                               "properties": {
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent versions within the last day"
+                                  }
                                 },
                                 "activation_method": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent activation methods within the last day"
+                                  }
                                 }
                               }
                             },
@@ -448,39 +724,66 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "framework": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework name  within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service framework and version sorted by doc count"
+                                      }
                                     }
                                   }
                                 },
                                 "language": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service language name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 },
                                 "runtime": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service runtime name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 }
@@ -493,10 +796,16 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "agent": {
                               "properties": {
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent versions within the last day"
+                                  }
                                 },
                                 "activation_method": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent activation methods within the last day"
+                                  }
                                 }
                               }
                             },
@@ -505,39 +814,66 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "framework": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework name  within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service framework and version sorted by doc count"
+                                      }
                                     }
                                   }
                                 },
                                 "language": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service language name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 },
                                 "runtime": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service runtime name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 }
@@ -550,10 +886,16 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "agent": {
                               "properties": {
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent versions within the last day"
+                                  }
                                 },
                                 "activation_method": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent activation methods within the last day"
+                                  }
                                 }
                               }
                             },
@@ -562,39 +904,66 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "framework": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework name  within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service framework and version sorted by doc count"
+                                      }
                                     }
                                   }
                                 },
                                 "language": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service language name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 },
                                 "runtime": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service runtime name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 }
@@ -607,10 +976,16 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "agent": {
                               "properties": {
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent versions within the last day"
+                                  }
                                 },
                                 "activation_method": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent activation methods within the last day"
+                                  }
                                 }
                               }
                             },
@@ -619,39 +994,66 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "framework": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework name  within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service framework and version sorted by doc count"
+                                      }
                                     }
                                   }
                                 },
                                 "language": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service language name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 },
                                 "runtime": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service runtime name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 }
@@ -664,10 +1066,16 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "agent": {
                               "properties": {
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent versions within the last day"
+                                  }
                                 },
                                 "activation_method": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 3 agent activation methods within the last day"
+                                  }
                                 }
                               }
                             },
@@ -676,39 +1084,66 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "framework": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework name  within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service framework version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service framework and version sorted by doc count"
+                                      }
                                     }
                                   }
                                 },
                                 "language": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service language version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service language name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 },
                                 "runtime": {
                                   "properties": {
                                     "name": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime name within the last day"
+                                      }
                                     },
                                     "version": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "An array of the top 3 service runtime version within the last day"
+                                      }
                                     },
                                     "composite": {
-                                      "type": "keyword"
+                                      "type": "keyword",
+                                      "_meta": {
+                                        "description": "Composite field containing service runtime name and version sorted by doc count."
+                                      }
                                     }
                                   }
                                 }
@@ -719,20 +1154,32 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                       }
                     },
                     "has_any_services": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "_meta": {
+                        "description": "Indicates whether any service is being monitored. This is determined by checking all agents within the last day"
+                      }
                     },
                     "version": {
                       "properties": {
                         "apm_server": {
                           "properties": {
                             "major": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "The major version of the APM server. Example: 7"
+                              }
                             },
                             "minor": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "The minor version of the APM server. Example: 17"
+                              }
                             },
                             "patch": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "The patch version of the APM server. Example 3"
+                              }
                             }
                           }
                         }
@@ -741,13 +1188,22 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                     "environments": {
                       "properties": {
                         "services_without_environment": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of services without an assigned environment within the last day. This is determined by checking the \\"service.environment\\" field and counting instances where it is null"
+                          }
                         },
                         "services_with_multiple_environments": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of services with more than one assigned environment within the last day"
+                          }
                         },
                         "top_environments": {
-                          "type": "keyword"
+                          "type": "keyword",
+                          "_meta": {
+                            "description": "An array of the top 5 environments in terms of document count within tha last day"
+                          }
                         }
                       }
                     },
@@ -756,60 +1212,96 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         "current_implementation": {
                           "properties": {
                             "expected_metric_document_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             },
                             "transaction_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             }
                           }
                         },
                         "no_observer_name": {
                           "properties": {
                             "expected_metric_document_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             },
                             "transaction_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             }
                           }
                         },
                         "no_rum": {
                           "properties": {
                             "expected_metric_document_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             },
                             "transaction_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             }
                           }
                         },
                         "no_rum_no_observer_name": {
                           "properties": {
                             "expected_metric_document_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             },
                             "transaction_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             }
                           }
                         },
                         "only_rum": {
                           "properties": {
                             "expected_metric_document_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             },
                             "transaction_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             }
                           }
                         },
                         "only_rum_no_observer_name": {
                           "properties": {
                             "expected_metric_document_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             },
                             "transaction_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": ""
+                              }
                             }
                           }
                         }
@@ -818,13 +1310,22 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                     "cloud": {
                       "properties": {
                         "availability_zone": {
-                          "type": "keyword"
+                          "type": "keyword",
+                          "_meta": {
+                            "description": "An array of the top 10 cloud availability zones in terms of document count overall. Example: [us-east1-c, us-east1-b]"
+                          }
                         },
                         "provider": {
-                          "type": "keyword"
+                          "type": "keyword",
+                          "_meta": {
+                            "description": "An array of the top 10 cloud providers in terms of document count overall. Example: [azure]"
+                          }
                         },
                         "region": {
-                          "type": "keyword"
+                          "type": "keyword",
+                          "_meta": {
+                            "description": "An array of the top 10 cloud regions in terms of document count overall. Example: [us-west1, us-central1]"
+                          }
                         }
                       }
                     },
@@ -833,7 +1334,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         "os": {
                           "properties": {
                             "platform": {
-                              "type": "keyword"
+                              "type": "keyword",
+                              "_meta": {
+                                "description": "An array of the top 10 operating system platforms in terms of document count within an hour. Example: [linux, win32]"
+                              }
                             }
                           }
                         }
@@ -844,97 +1348,136 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         "transaction": {
                           "properties": {
                             "1d": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of transaction documents within the last day"
+                              }
                             },
                             "all": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of transaction documents overall"
+                              }
                             }
                           }
                         },
                         "span": {
                           "properties": {
                             "1d": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of span documents within the last day"
+                              }
                             },
                             "all": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of span documents overall"
+                              }
                             }
                           }
                         },
                         "error": {
                           "properties": {
                             "1d": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of error documents within the last day"
+                              }
                             },
                             "all": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of error documents overall"
+                              }
                             }
                           }
                         },
                         "metric": {
                           "properties": {
                             "1d": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of metric documents within the last day"
+                              }
                             },
                             "all": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of metric documents overall"
+                              }
                             }
                           }
                         },
                         "onboarding": {
                           "properties": {
                             "1d": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of onboarding documents within the last day"
+                              }
                             },
                             "all": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of onboarding documents overall"
+                              }
                             }
                           }
                         },
                         "agent_configuration": {
                           "properties": {
                             "all": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of apm-agent-configuration documents overall"
+                              }
                             }
                           }
                         },
                         "max_transaction_groups_per_service": {
                           "properties": {
                             "1d": {
-                              "type": "long"
-                            },
-                            "all": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of distinct transaction groups for the top service for the last 24 hours"
+                              }
                             }
                           }
                         },
                         "max_error_groups_per_service": {
                           "properties": {
                             "1d": {
-                              "type": "long"
-                            },
-                            "all": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of distinct error groups for the top service for the last 24 hours"
+                              }
                             }
                           }
                         },
                         "traces": {
                           "properties": {
                             "1d": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of trace documents within the last day"
+                              }
                             },
                             "all": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of trace documents overall"
+                              }
                             }
                           }
                         },
                         "services": {
                           "properties": {
                             "1d": {
-                              "type": "long"
-                            },
-                            "all": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of unique services within the last day"
+                              }
                             }
                           }
                         },
@@ -971,7 +1514,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                     "rum": {
                                       "properties": {
                                         "1d": {
-                                          "type": "long"
+                                          "type": "long",
+                                          "_meta": {
+                                            "description": "Unique country iso code captured for the agents js-base, rum-js and opentelemetry/webjs within the last day"
+                                          }
                                         }
                                       }
                                     }
@@ -988,14 +1534,20 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "all_agents": {
                                   "properties": {
                                     "1d": {
-                                      "type": "long"
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Unique user agent for all agents within the last day"
+                                      }
                                     }
                                   }
                                 },
                                 "rum": {
                                   "properties": {
                                     "1d": {
-                                      "type": "long"
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Unique user agent for rum agent within the last day"
+                                      }
                                     }
                                   }
                                 }
@@ -1010,14 +1562,20 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "all_agents": {
                                   "properties": {
                                     "1d": {
-                                      "type": "long"
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Unique transaction names for all agents within the last day"
+                                      }
                                     }
                                   }
                                 },
                                 "rum": {
                                   "properties": {
                                     "1d": {
-                                      "type": "long"
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Unique transaction names for rum agent within the last day"
+                                      }
                                     }
                                   }
                                 }
@@ -1032,35 +1590,50 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         "span": {
                           "properties": {
                             "ms": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Represent the time difference in milliseconds between the current date and the date when the span document was recorded"
+                              }
                             }
                           }
                         },
                         "transaction": {
                           "properties": {
                             "ms": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Represent the time difference in milliseconds between the current date and the date when the transaction document was recorded"
+                              }
                             }
                           }
                         },
                         "error": {
                           "properties": {
                             "ms": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Represent the time difference in milliseconds between the current date and the date when the error document was recorded"
+                              }
                             }
                           }
                         },
                         "metric": {
                           "properties": {
                             "ms": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Represent the time difference in milliseconds between the current date and the date when the metric document was recorded"
+                              }
                             }
                           }
                         },
                         "onboarding": {
                           "properties": {
                             "ms": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Represent the time difference in milliseconds between the current date and the date when the onboarding document was recorded"
+                              }
                             }
                           }
                         }
@@ -1071,7 +1644,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         "ml": {
                           "properties": {
                             "all_jobs_count": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of anomaly detection jobs associated with the jobs apm-*, *-high_mean_response_time"
+                              }
                             }
                           }
                         }
@@ -1084,7 +1660,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "shards": {
                               "properties": {
                                 "total": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for metric indices"
+                                  }
                                 }
                               }
                             },
@@ -1095,14 +1674,20 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                     "docs": {
                                       "properties": {
                                         "count": {
-                                          "type": "long"
+                                          "type": "long",
+                                          "_meta": {
+                                            "description": "Total number of metric documents overall"
+                                          }
                                         }
                                       }
                                     },
                                     "store": {
                                       "properties": {
                                         "size_in_bytes": {
-                                          "type": "long"
+                                          "type": "long",
+                                          "_meta": {
+                                            "description": "Size of the metric indicess in byte units overall."
+                                          }
                                         }
                                       }
                                     }
@@ -1117,7 +1702,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "shards": {
                               "properties": {
                                 "total": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Total number of shards for span and trasnaction indices"
+                                  }
                                 }
                               }
                             },
@@ -1128,14 +1716,20 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                     "docs": {
                                       "properties": {
                                         "count": {
-                                          "type": "long"
+                                          "type": "long",
+                                          "_meta": {
+                                            "description": "Total number of transaction and span documents overall"
+                                          }
                                         }
                                       }
                                     },
                                     "store": {
                                       "properties": {
                                         "size_in_bytes": {
-                                          "type": "long"
+                                          "type": "long",
+                                          "_meta": {
+                                            "description": "Size of the index in byte units overall."
+                                          }
                                         }
                                       }
                                     }
@@ -1148,7 +1742,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         "shards": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of shards overall"
+                              }
                             }
                           }
                         },
@@ -1159,14 +1756,20 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                 "docs": {
                                   "properties": {
                                     "count": {
-                                      "type": "long"
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Total number of all documents overall"
+                                      }
                                     }
                                   }
                                 },
                                 "store": {
                                   "properties": {
                                     "size_in_bytes": {
-                                      "type": "long"
+                                      "type": "long",
+                                      "_meta": {
+                                        "description": "Size of the index in byte units overall."
+                                      }
                                     }
                                   }
                                 }
@@ -1179,37 +1782,64 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                     "service_groups": {
                       "properties": {
                         "kuery_fields": {
-                          "type": "keyword"
+                          "type": "keyword",
+                          "_meta": {
+                            "description": "An array of up to 500 unique fields used to create the service groups across all spaces. Example  [service.language.name, service.name] "
+                          }
                         },
                         "total": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of service groups retrived from the saved object across all spaces"
+                          }
                         }
                       }
                     },
                     "per_service": {
                       "properties": {
                         "service_id": {
-                          "type": "keyword"
+                          "type": "keyword",
+                          "_meta": {
+                            "description": "Unique identifier that combines the SHA256 hashed representation of the service name and environment"
+                          }
                         },
                         "num_service_nodes": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of the unique service instances that served the transaction within an hour"
+                          }
                         },
                         "num_transaction_types": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Total number of the unique transaction types within an hour"
+                          }
                         },
                         "timed_out": {
-                          "type": "boolean"
+                          "type": "boolean",
+                          "_meta": {
+                            "description": "Indicates whether the request timed out before completion"
+                          }
                         },
                         "cloud": {
                           "properties": {
                             "availability_zones": {
-                              "type": "keyword"
+                              "type": "keyword",
+                              "_meta": {
+                                "description": "An array of the top 5 cloud availability zones within an hour. Example [ca-central-1a, ca-central-1b]"
+                              }
                             },
                             "regions": {
-                              "type": "keyword"
+                              "type": "keyword",
+                              "_meta": {
+                                "description": "An array of the top 5 cloud regions within an hour. Example [ca-central-1]"
+                              }
                             },
                             "providers": {
-                              "type": "keyword"
+                              "type": "keyword",
+                              "_meta": {
+                                "description": "An array of the top 3 cloud provider within an hour. Example [aws]"
+                              }
                             }
                           }
                         },
@@ -1218,7 +1848,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "trigger": {
                               "properties": {
                                 "type": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "An array of the top 5 faas trigger types within an hour. Example [http, timer, pubsub]"
+                                  }
                                 }
                               }
                             }
@@ -1227,13 +1860,22 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         "agent": {
                           "properties": {
                             "name": {
-                              "type": "keyword"
+                              "type": "keyword",
+                              "_meta": {
+                                "description": "The top value of agent name for the service from transaction documents within an hour. Sorted by _score"
+                              }
                             },
                             "version": {
-                              "type": "keyword"
+                              "type": "keyword",
+                              "_meta": {
+                                "description": "The top value of agent version for the service from transaction documents within an hour. Sorted by _score"
+                              }
                             },
                             "activation_method": {
-                              "type": "keyword"
+                              "type": "keyword",
+                              "_meta": {
+                                "description": "The top value of agent activation method for the service from transaction documents within an hour. Sorted by _score"
+                              }
                             }
                           }
                         },
@@ -1242,30 +1884,48 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "language": {
                               "properties": {
                                 "name": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "The top value of language name for the service from transaction documents within an hour. Sorted by _score"
+                                  }
                                 },
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "The top value of language version for the service from transaction documents within an hour. Sorted by _score"
+                                  }
                                 }
                               }
                             },
                             "framework": {
                               "properties": {
                                 "name": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "The top value of service framework name from transaction documents within an hour. Sorted by _score. Example AWS Lambda"
+                                  }
                                 },
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "The top value of service framework version from transaction documents within an hour. Sorted by _score"
+                                  }
                                 }
                               }
                             },
                             "runtime": {
                               "properties": {
                                 "name": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "The top value of service runtime name from transaction documents within an hour. Sorted by _score"
+                                  }
                                 },
                                 "version": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "The top value of service runtime version version from transaction documents within an hour. Sorted by _score"
+                                  }
                                 }
                               }
                             }
@@ -1276,7 +1936,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "pod": {
                               "properties": {
                                 "name": {
-                                  "type": "keyword"
+                                  "type": "keyword",
+                                  "_meta": {
+                                    "description": "Kuberneted pod name "
+                                  }
                                 }
                               }
                             }
@@ -1285,7 +1948,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         "container": {
                           "properties": {
                             "id": {
-                              "type": "keyword"
+                              "type": "keyword",
+                              "_meta": {
+                                "description": "Container id"
+                              }
                             }
                           }
                         }
@@ -1298,7 +1964,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"aggregated_transactions\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1309,7 +1978,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"cloud\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1320,7 +1992,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"host\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1331,7 +2006,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"processor_events\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1342,7 +2020,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"agent_configuration\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1353,7 +2034,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"services\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1364,7 +2048,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"versions\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1375,7 +2062,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"groupings\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1386,7 +2076,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"integrations\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1397,7 +2090,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"agents\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1408,7 +2104,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"indices_stats\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1419,7 +2118,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"cardinality\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1430,7 +2132,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"environments\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1441,7 +2146,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"service_groups\\" task"
+                                  }
                                 }
                               }
                             }
@@ -1452,7 +2160,10 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             "took": {
                               "properties": {
                                 "ms": {
-                                  "type": "long"
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"per_service\\" task"
+                                  }
                                 }
                               }
                             }

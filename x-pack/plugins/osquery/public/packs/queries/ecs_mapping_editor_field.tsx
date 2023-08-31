@@ -36,7 +36,6 @@ import {
 import sqliteParser from '@appland/sql-parser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import type { FieldErrors, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
@@ -55,6 +54,16 @@ import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { overflowCss } from '../utils';
+import {
+  resultComboBoxCss,
+  fieldSpanCss,
+  fieldIconCss,
+  buttonWrapperCss,
+  descriptionWrapperCss,
+  semicolonWrapperCss,
+  ECSFieldWrapperCss,
+  euiSuperSelectCss,
+} from './ecs_field_css';
 
 export type ECSMappingFormReturn = UseFormReturn<{ ecsMappingArray: ECSMappingArray }>;
 
@@ -76,61 +85,6 @@ const typeMap = {
   boolean: 'boolean',
   constant_keyword: 'string',
 };
-
-// @ts-expect-error update types
-const ResultComboBox = styled(EuiComboBox)`
-  &.euiComboBox {
-    position: relative;
-    left: -1px;
-
-    .euiComboBox__inputWrap {
-      border-radius: 0 6px 6px 0;
-    }
-  }
-`;
-
-const StyledEuiSuperSelect = styled(EuiSuperSelect)`
-  min-width: 70px;
-  border-radius: 6px 0 0 6px;
-
-  .euiIcon {
-    padding: 0;
-    width: 18px;
-    background: none;
-  }
-`;
-
-const StyledFieldIcon = styled(FieldIcon)`
-  width: 32px;
-
-  > svg {
-    padding: 0 6px !important;
-  }
-`;
-
-const StyledFieldSpan = styled.span`
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-`;
-
-const DescriptionWrapper = styled(EuiFlexItem)`
-  overflow: hidden;
-`;
-
-// align the icon to the inputs
-const StyledSemicolonWrapper = styled.div`
-  margin-top: 28px;
-`;
-
-// align the icon to the inputs
-const StyledButtonWrapper = styled.div`
-  margin-top: 28px;
-  width: 24px;
-`;
-
-const ECSFieldWrapper = styled(EuiFlexItem)`
-  max-width: 100%;
-`;
 
 const SINGLE_SELECTION = { asPlainText: true };
 
@@ -207,16 +161,19 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
           }
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__label--expand">
+          <span css={fieldSpanCss} className="euiSuggestItem__label euiSuggestItem__label--expand">
             {option.value.field}
-          </StyledFieldSpan>
+          </span>
         </EuiFlexItem>
 
-        <DescriptionWrapper grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__description euiSuggestItem__description">
+        <EuiFlexItem css={descriptionWrapperCss} grow={false}>
+          <span
+            css={fieldSpanCss}
+            className="euiSuggestItem__description euiSuggestItem__description"
+          >
             {option.value.description}
-          </StyledFieldSpan>
-        </DescriptionWrapper>
+          </span>
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
     []
@@ -224,7 +181,8 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
 
   const prepend = useMemo(
     () => (
-      <StyledFieldIcon
+      <FieldIcon
+        css={fieldIconCss}
         size="l"
         type={
           // @ts-expect-error update types
@@ -435,15 +393,18 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         gutterSize="none"
       >
         <EuiFlexItem grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__label--expand">
+          <span css={fieldSpanCss} className="euiSuggestItem__label euiSuggestItem__label--expand">
             {option.value.suggestion_label}
-          </StyledFieldSpan>
+          </span>
         </EuiFlexItem>
-        <DescriptionWrapper grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__description euiSuggestItem__description">
+        <EuiFlexItem css={descriptionWrapperCss} grow={false}>
+          <span
+            css={fieldSpanCss}
+            className="euiSuggestItem__description euiSuggestItem__description"
+          >
             {option.value.description}
-          </StyledFieldSpan>
-        </DescriptionWrapper>
+          </span>
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
     []
@@ -510,7 +471,8 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
   const Prepend = useMemo(
     () => (
-      <StyledEuiSuperSelect
+      <EuiSuperSelect
+        css={euiSuperSelectCss}
         disabled={euiFieldProps.isDisabled}
         options={OSQUERY_COLUMN_VALUE_TYPE_OPTIONS}
         data-test-subj={`osquery-result-type-select-${index}`}
@@ -577,7 +539,10 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
           {Prepend}
         </EuiFlexItem>
         <EuiFlexItem css={overflowCss}>
-          <ResultComboBox
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore*/}
+          <EuiComboBox
+            css={resultComboBoxCss}
             error={resultFieldState.error?.message}
             // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
             inputRef={(ref: HTMLInputElement) => {
@@ -660,16 +625,14 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                 }}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <StyledSemicolonWrapper>
-                <EuiText>:</EuiText>
-              </StyledSemicolonWrapper>
+            <EuiFlexItem grow={false} css={semicolonWrapperCss}>
+              <EuiText>:</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem css={overflowCss}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
-            <ECSFieldWrapper>
+            <EuiFlexItem css={ECSFieldWrapperCss}>
               <OsqueryColumnField
                 control={control}
                 watch={watch}
@@ -683,10 +646,10 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                   isDisabled,
                 }}
               />
-            </ECSFieldWrapper>
+            </EuiFlexItem>
             {!isDisabled && (
               <EuiFlexItem grow={false}>
-                <StyledButtonWrapper>
+                <div css={buttonWrapperCss}>
                   {!isLastItem && (
                     <EuiButtonIcon
                       aria-label={i18n.translate(
@@ -700,7 +663,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                       onClick={handleDeleteClick}
                     />
                   )}
-                </StyledButtonWrapper>
+                </div>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -957,7 +920,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
               */
 
               const [table, column] = selectItem.name.includes('.')
-                ? selectItem.name?.split('.')
+                ? selectItem.name.split('.')
                 : [Object.keys(astOsqueryTables)[0], selectItem.name];
 
               if (column === '*' && astOsqueryTables[table]) {

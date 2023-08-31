@@ -27,11 +27,8 @@ import {
   INTERNAL_CASE_METRICS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '@kbn/cases-plugin/common/constants';
-import {
-  SingleCaseMetricsResponse,
-  CasesMetricsResponse,
-  CaseMetricsFeature,
-} from '@kbn/cases-plugin/common/api';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
@@ -527,6 +524,7 @@ export const getCase = async ({
       `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}?includeComments=${includeComments}`
     )
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 

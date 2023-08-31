@@ -26,12 +26,16 @@ export interface SetupState {
     symbolizer: {
       installed: boolean;
     };
+    apm: {
+      profilingEnabled: boolean;
+    };
   };
   resource_management: {
     enabled: boolean;
   };
   resources: {
     created: boolean;
+    pre_8_9_1_data: boolean;
   };
   settings: {
     configured: boolean;
@@ -59,12 +63,16 @@ export function createDefaultSetupState(): SetupState {
       symbolizer: {
         installed: false,
       },
+      apm: {
+        profilingEnabled: false,
+      },
     },
     resource_management: {
       enabled: false,
     },
     resources: {
       created: false,
+      pre_8_9_1_data: false,
     },
     settings: {
       configured: false,
@@ -74,11 +82,12 @@ export function createDefaultSetupState(): SetupState {
 
 export function areResourcesSetup(state: SetupState): boolean {
   return (
+    state.policies.collector.installed &&
+    state.policies.symbolizer.installed &&
+    !state.policies.apm.profilingEnabled &&
     state.resource_management.enabled &&
     state.resources.created &&
     state.permissions.configured &&
-    state.policies.collector.installed &&
-    state.policies.symbolizer.installed &&
     state.settings.configured
   );
 }

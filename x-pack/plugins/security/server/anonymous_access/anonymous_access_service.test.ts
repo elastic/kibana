@@ -16,9 +16,9 @@ import {
 } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
+import { AnonymousAccessService } from './anonymous_access_service';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
-import { AnonymousAccessService } from './anonymous_access_service';
 
 const createSecurityConfig = (config: Record<string, any> = {}) => {
   return createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {

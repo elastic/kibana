@@ -11,6 +11,7 @@ import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils'
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { GetSummarizedAlertsParams, IAlertsClient } from '../alerts_client/types';
@@ -24,7 +25,6 @@ import { transformActionParams, transformSummaryActionParams } from './transform
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
-  ActionsCompletion,
   AlertInstanceContext,
   AlertInstanceState,
   RuleAction,
@@ -51,6 +51,14 @@ enum Reasons {
 
 export interface RunResult {
   throttledSummaryActions: ThrottledActions;
+}
+
+export interface RuleUrl {
+  absoluteUrl?: string;
+  kibanaBaseUrl?: string;
+  basePathname?: string;
+  spaceIdSegment?: string;
+  relativePath?: string;
 }
 
 export class ExecutionHandler<
@@ -240,7 +248,7 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl,
+                ruleUrl: ruleUrl?.absoluteUrl,
               }),
             }),
           };
@@ -251,7 +259,7 @@ export class ExecutionHandler<
           });
 
           if (isActionOnInterval(action)) {
-            throttledSummaryActions[action.uuid!] = { date: new Date() };
+            throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
           }
 
           logActions.push({
@@ -284,12 +292,12 @@ export class ExecutionHandler<
                 alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
                 context: alert.getContext(),
                 actionId: action.id,
-                state: alert.getScheduledActionOptions()?.state || {},
+                state: alert.getState(),
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
                 alertParams: this.rule.params,
                 actionParams: action.params,
                 flapping: alert.getFlapping(),
-                ruleUrl,
+                ruleUrl: ruleUrl?.absoluteUrl,
               }),
             }),
           };
@@ -437,7 +445,7 @@ export class ExecutionHandler<
     return alert.getScheduledActionOptions()?.actionGroup || this.ruleType.recoveryActionGroup.id;
   }
 
-  private buildRuleUrl(spaceId: string, start?: number, end?: number): string | undefined {
+  private buildRuleUrl(spaceId: string, start?: number, end?: number): RuleUrl | undefined {
     if (!this.taskRunnerContext.kibanaBaseUrl) {
       return;
     }
@@ -456,7 +464,13 @@ export class ExecutionHandler<
         this.taskRunnerContext.kibanaBaseUrl
       );
 
-      return ruleUrl.toString();
+      return {
+        absoluteUrl: ruleUrl.toString(),
+        kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+        basePathname: basePathnamePrefix,
+        spaceIdSegment,
+        relativePath,
+      };
     } catch (error) {
       this.logger.debug(
         `Rule "${this.rule.id}" encountered an error while constructing the rule.url variable: ${error.message}`

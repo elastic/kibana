@@ -5,6 +5,7 @@
   },
   "exclude": [
     "cypress.config.ts",
+    "serverless_cypress.config.ts",
     "target/**/*",
   ],
   "include": [
@@ -15,9 +16,12 @@
     "scripts/**/**.json",
     "server/**/*",
     "cypress.config.ts",
+    "serverless_cypress.config.ts",
     "../../../typings/**/*",
     // ECS and Osquery schema files
     "public/common/schemas/*/**.json",
+    // Emotion theme typing
+    "./emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -43,7 +47,6 @@
     "@kbn/utility-types",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/osquery-io-ts-types",
-    "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/discover-plugin",
     "@kbn/lens-plugin",
@@ -73,6 +76,6 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/monaco",
-    "@kbn/io-ts-utils"
+    "@kbn/io-ts-utils",
   ]
 }

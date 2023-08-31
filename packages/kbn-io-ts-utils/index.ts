@@ -30,3 +30,5 @@ export {
 } from './src/is_greater_or_equal';
 
 export { datemathStringRt } from './src/datemath_string_rt';
+
+export { createPlainError, decodeOrThrow, formatErrors, throwErrors } from './src/decode_or_throw';

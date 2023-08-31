@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AssistantAvatar } from '../assistant_avatar';
+import { ExperimentalFeatureBanner } from '../chat/experimental_feature_banner';
 
 export interface InsightBaseProps {
   title: string;
@@ -122,7 +123,10 @@ export function InsightBase({
         onToggle={onToggle}
       >
         <EuiSpacer size="m" />
-        {children}
+        <ExperimentalFeatureBanner />
+        <EuiPanel hasBorder={false} hasShadow={false} color="subdued">
+          {children}
+        </EuiPanel>
       </EuiAccordion>
     </EuiPanel>
   );
