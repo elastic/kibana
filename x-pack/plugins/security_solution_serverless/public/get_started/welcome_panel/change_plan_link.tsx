@@ -7,35 +7,32 @@
 
 import React from 'react';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   useEuiTheme,
   useEuiBackgroundColorCSS,
+  EuiLink,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ProductTier } from '../../../common/product';
 import { ProductTierBadge } from './product_tier_badge';
 import { WELCOME_PANEL_PROJECT_CREATED_CHANGE_PLAN_TITLE } from './translations';
 import { Spacer } from './spacer';
+import { getCloudUrl } from '../../navigation/links/util';
+import { useKibana } from '../../common/services';
 
 const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | undefined }) => {
   const { euiTheme } = useEuiTheme();
+  const { cloud } = useKibana().services;
   const colorStyles = useEuiBackgroundColorCSS();
   const cssStyles = [colorStyles.primary];
   return productTier ? (
     <>
       {/* <div> cannot appear as a descendant of <p>, EuiSpacer is a div */}
       <Spacer />
-      <EuiFlexGroup
-        justifyContent="flexEnd"
-        component="span"
-        css={css`
-          margin-top: -6px;
-        `}
-      >
+      <EuiFlexGroup justifyContent="flexEnd" component="span">
         <EuiFlexItem grow={false} component="span">
           <span
             className="eui-displayBlock"
@@ -47,17 +44,18 @@ const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | u
             `}
           >
             <ProductTierBadge productTier={productTier} />
-            <LinkAnchor
+            <EuiLink
               className="eui-alignMiddle"
               id={SecurityPageName.projectSettings}
               css={css`
                 color: ${euiTheme.colors.primaryText};
                 padding-left: ${euiTheme.size.m};
               `}
+              href={getCloudUrl('projects', cloud)}
             >
               {WELCOME_PANEL_PROJECT_CREATED_CHANGE_PLAN_TITLE}
               <EuiIcon type="arrowRight" />
-            </LinkAnchor>
+            </EuiLink>
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
