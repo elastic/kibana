@@ -6,13 +6,20 @@
  */
 
 import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import type { RefObject } from 'react';
-import React, { useCallback } from 'react';
+import { useEffect } from 'react';
+import { useMemo } from 'react';
+import { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { useDiscoverState } from '../../../timelines/components/timeline/discover_tab_content/use_discover_state';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { TimelineId } from '../../../../common/types';
+import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
-import { SaveSearchObjectModal } from './save_search_modal';
 
 export const useDiscoverInTimelineActions = (
   discoverStateContainer: RefObject<DiscoverStateContainer | undefined>
@@ -20,27 +27,74 @@ export const useDiscoverInTimelineActions = (
   const { addSuccess, addError } = useAppToasts();
 
   const {
-    services: { savedObjectsTagging },
+    services: {
+      savedObjectsTagging,
+      customDataService: discoverDataService,
+      savedSearch: savedSearchService,
+    },
   } = useKibana();
 
-  const saveDataSource = useCallback(
-    async (
-      savedSearchOption: SaveSavedSearchOptions,
-      override: { title: string; description: string }
-    ) => {
+  const { discoverSavedSearchState } = useDiscoverState();
+
+  const dispatch = useDispatch();
+
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  const timeline = useShallowEqualSelector(
+    (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
+  );
+
+  const { status, title, description, savedSearchId, updated, savedObjectId } = timeline;
+
+  console.log({
+    status,
+    title,
+    description,
+    savedSearchId,
+    updated,
+  });
+  useEffect(() => {
+    console.log('Discover State Container Changed');
+  }, [discoverStateContainer]);
+
+  const getAppStateFromSavedSearchId = async (newSavedSearchId: string) => {
+    const savedSearch = await savedSearchService.get(newSavedSearchId);
+    discoverStateContainer.current?.savedSearchState.load(newSavedSearchId);
+    if (!savedSearchId) return;
+    const appState =
+      discoverStateContainer.current?.appState.getAppStateFromSavedSearch(savedSearch);
+    return {
+      savedSearch,
+      appState,
+    };
+  };
+
+  const restoreDiscoverSavedSearch = useCallback(
+    async (newSavedSearchId: string) => {
+      try {
+        await discoverStateContainer.current?.actions.loadSavedSearch({
+          savedSearchId: newSavedSearchId,
+        });
+      } catch (err) {
+        addError(err, {
+          title: 'Failed to load Discover Saved Search. Discover state will be reset',
+        });
+      }
+    },
+    [addError, discoverStateContainer]
+  );
+
+  const resetDiscoverState = useCallback(() => {
+    discoverStateContainer.current?.appState.resetInitialState();
+  }, [discoverStateContainer]);
+
+  const persistSavedSearch = useCallback(
+    async (savedSearch: SavedSearch, savedSearchOption: SaveSavedSearchOptions) => {
       if (!discoverStateContainer) {
         // eslint-disable-next-line no-console
-        console.log(`Saved search is no-open since state container is null`);
+        console.log(`Saved search is not open since state container is null`);
         return;
       }
-      const savedSearch = discoverStateContainer.current?.savedSearchState.getState();
-      if (!savedSearch) return;
-      const currentTitle = savedSearch?.title;
-      const currentDescription = savedSearch?.description;
-
-      savedSearch.title = override.title;
-      savedSearch.description = override.description;
-
       if (!savedSearch) return;
 
       function onSuccess(id: string) {
@@ -53,132 +107,79 @@ export const useDiscoverInTimelineActions = (
       }
 
       function onError(error: Error) {
-        if (savedSearch) {
-          savedSearch.title = currentTitle;
-          savedSearch.description = currentDescription;
-        }
         addError(error, { title: 'Error while saving saved Search' });
       }
 
       try {
-        const response = await discoverStateContainer.current?.savedSearchState.persist(
-          savedSearch,
-          savedSearchOption
-        );
-        if (response?.id) {
-          onSuccess(response?.id);
+        const id = await savedSearchService.save(savedSearch, savedSearchOption);
+        if (id) {
+          onSuccess(id);
         }
-        return response;
+        return { id };
       } catch (err) {
         onError(err);
       }
     },
-    [addSuccess, addError, discoverStateContainer]
+    [addSuccess, addError, discoverStateContainer, savedSearchService]
   );
 
-  const saveCurrentSearch = useCallback(
-    async ({ name, description }: { name: string; description: string }) => {
-      debugger;
-      if (!discoverStateContainer) return;
-      const savedSearch = discoverStateContainer.current?.savedSearchState.getState();
-      if (!savedSearch) return;
-      const dataView = discoverStateContainer.current?.internalState.getState().dataView;
+  const updateSavedSearch = useCallback(
+    async (savedSearch: SavedSearch) => {
+      savedSearch.title = `Saved Search for timeline - ${title} `;
+      savedSearch.description = description;
+      savedSearch.timeRestore = true;
 
-      const onTitleDuplicate = () => {
-        const errMsg = 'Cannot Save. Duplicate Saved Search Found.';
-        const duplicateError = new Error(errMsg);
-        addError(duplicateError, { title: 'Duplicate Save Search Error' });
-        throw new Error(errMsg);
-      };
+      if (savedSearchId) {
+        savedSearch.id = savedSearchId;
+      }
+      try {
+        const response = await persistSavedSearch(savedSearch, {
+          onTitleDuplicate: () => {},
+          copyOnSave: !savedSearchId,
+        });
 
-      discoverStateContainer.current?.actions.updateAdHocDataViewId();
-
-      const response = await saveDataSource(
-        {
-          onTitleDuplicate,
-          copyOnSave: true,
-        },
-        {
-          title: name,
-          description,
+        if (!response || !response.id) {
+          throw new Error('Unknown Error occured');
         }
-      );
 
-      return response;
-      const onSave = async ({
-        newTitle,
-        newCopyOnSave,
-        newTimeRestore,
-        newDescription,
-        newTags,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
-      }: {
-        newTitle: string;
-        newTimeRestore: boolean;
-        newCopyOnSave: boolean;
-        newDescription: string;
-        newTags: string[];
-        isTitleDuplicateConfirmed: boolean;
-        onTitleDuplicate: () => void;
-      }) => {
-        const currentTitle = savedSearch.title;
-        const currentTimeRestore = savedSearch.timeRestore;
-        const currentRowsPerPage = savedSearch.rowsPerPage;
-        const currentDescription = savedSearch.description;
-        const currentTags = savedSearch.tags;
-        savedSearch.title = newTitle;
-        savedSearch.description = newDescription;
-        savedSearch.timeRestore = newTimeRestore;
-        savedSearch.rowsPerPage = currentRowsPerPage;
-        // if (savedObjectsTagging) {
-        //   savedSearch.tags = newTags;
-        // }
-        const saveOptions: SaveSavedSearchOptions = {
-          onTitleDuplicate,
-          copyOnSave: newCopyOnSave,
-          isTitleDuplicateConfirmed,
-        };
-
-        if (newCopyOnSave) {
-          discoverStateContainer.current?.actions.updateAdHocDataViewId();
+        if (!savedSearchId) {
+          dispatch(
+            timelineActions.updateSavedSearchId({
+              id: TimelineId.active,
+              savedSearchId: response.id,
+            })
+          );
         }
-        const response = await saveDataSource(saveOptions);
-        // If the save wasn't successful, put the original values back.
-        // if (!response) {
-        //   savedSearch.title = currentTitle;
-        //   savedSearch.timeRestore = currentTimeRestore;
-        //   savedSearch.rowsPerPage = currentRowsPerPage;
-        //   savedSearch.description = currentDescription;
-        //   if (savedObjectsTagging) {
-        //     savedSearch.tags = currentTags;
-        //   }
-        // } else {
-        //   discoverStateContainer?.appState.resetInitialState();
-        // }
-        return response;
-      };
-
-      const saveModal = (
-        <SaveSearchObjectModal
-          isTimeBased={dataView?.isTimeBased() ?? false}
-          savedObjectsTagging={savedObjectsTagging}
-          title={savedSearch.title ?? ''}
-          showCopyOnSave={!!savedSearch.id}
-          description={savedSearch.description}
-          timeRestore={savedSearch.timeRestore}
-          tags={savedSearch.tags ?? []}
-          onSave={onSave}
-          onClose={() => {}}
-        />
-      );
-      showSaveModal(saveModal);
+      } catch (err) {
+        addError('Error saving Discover Saved Search', {
+          title: 'Error saving Discover Saved Search',
+          toastMessage: String(err),
+        });
+      }
     },
-    [discoverStateContainer, saveDataSource, savedObjectsTagging, addError]
+    [title, description, persistSavedSearch, savedSearchId, addError, dispatch]
   );
+
+  useEffect(() => {
+    if (
+      !discoverStateContainer.current ||
+      !discoverSavedSearchState ||
+      status === 'draft' ||
+      !title ||
+      !discoverStateContainer.current.appState.hasChanged()
+    )
+      return;
+
+    const newSavedSearch = discoverStateContainer.current?.savedSearchState.getState();
+    if (!newSavedSearch) return;
+    updateSavedSearch(newSavedSearch);
+  }, [discoverSavedSearchState, updateSavedSearch, status, title, discoverStateContainer]);
 
   return {
-    saveDataSource,
-    saveCurrentSearch,
+    saveDataSource: persistSavedSearch,
+    resetDiscoverState,
+    restoreDiscoverSavedSearch,
+    updateSavedSearch,
+    getAppStateFromSavedSearchId,
   };
 };

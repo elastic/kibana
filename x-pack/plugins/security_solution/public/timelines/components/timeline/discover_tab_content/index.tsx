@@ -12,6 +12,7 @@ import { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { useDispatch } from 'react-redux';
 import { useDiscoverInTimelineContext } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -19,6 +20,10 @@ import { useDiscoverState } from './use_discover_state';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
 import { EmbeddedDiscoverContainer } from './styles';
+import { timelineSelectors } from '../../../store/timeline';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { TimelineId } from '../../../../../common/types';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
   [data-test-subj='searchSessionIndicator'] {
@@ -36,7 +41,41 @@ export const DiscoverTabContent = () => {
 
   const [dataView, setDataView] = useState<DataView | undefined>();
 
-  const { discoverStateContainer, setDiscoverStateContainer } = useDiscoverInTimelineContext();
+  const { discoverStateContainer, setDiscoverStateContainer, getAppStateFromSavedSearchId } =
+    useDiscoverInTimelineContext();
+
+  const [isLoading, setIsLoading] = useState(!dataView);
+
+  const [stateInitialized, setStateInitialized] = useState(false);
+
+  const dispatch = useDispatch();
+
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  const timeline = useShallowEqualSelector(
+    (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
+  );
+
+  const [savedSearchLoaded, setSavedSearchLoaded] = useState(false);
+
+  const { status, title, description, savedSearchId, updated } = timeline;
+  const discoverContainerRef = useRef();
+
+  useEffect(() => {
+    if (dataView) setIsLoading(false);
+  }, [dataView]);
+
+  useEffect(() => {
+    if (!savedSearchId || savedSearchLoaded) return;
+    setIsLoading(true);
+    getAppStateFromSavedSearchId(savedSearchId).then(({ savedSearch, appState }) => {
+      discoverStateContainer.current?.savedSearchState.set(savedSearch);
+      discoverStateContainer.current?.appState.replaceUrlState(appState);
+      discoverStateContainer.current?.appState.set(appState);
+      setIsLoading(false);
+      setSavedSearchLoaded(true);
+    });
+  }, [discoverStateContainer, savedSearchId, getAppStateFromSavedSearchId, savedSearchLoaded]);
 
   const discoverAppStateSubscription = useRef<Subscription>();
   const discoverInternalStateSubscription = useRef<Subscription>();
@@ -52,6 +91,12 @@ export const DiscoverTabContent = () => {
     setDiscoverInternalState,
     setDiscoverAppState,
   } = useDiscoverState();
+
+  useEffect(() => {
+    if (status === 'draft') {
+      discoverStateContainer.current?.appState.resetAppState();
+    }
+  }, [status, discoverStateContainer]);
 
   useEffect(() => {
     if (!dataViewId) return;
@@ -77,8 +122,13 @@ export const DiscoverTabContent = () => {
       setDiscoverStateContainer(stateContainer);
 
       if (discoverAppState && discoverInternalState && discoverSavedSearchState) {
-        stateContainer.appState.set(discoverAppState);
-        await stateContainer.appState.replaceUrlState(discoverAppState);
+        let savedSearchAppState;
+        if (savedSearchId) {
+          savedSearchAppState = await getAppStateFromSavedSearchId(savedSearchId);
+        }
+        const finalState = savedSearchAppState?.appState ?? discoverAppState;
+        stateContainer.appState.set(finalState);
+        await stateContainer.appState.replaceUrlState(finalState);
       } else {
         // set initial dataView Id
         if (dataView) stateContainer.actions.setDataView(dataView);
@@ -114,6 +164,8 @@ export const DiscoverTabContent = () => {
       setDiscoverAppState,
       dataView,
       setDiscoverStateContainer,
+      getAppStateFromSavedSearchId,
+      savedSearchId,
     ]
   );
 
@@ -126,13 +178,12 @@ export const DiscoverTabContent = () => {
     () => ({
       data: discoverDataService,
       filterManager: discoverDataService.query.filterManager,
+      timefilter: discoverDataService.query.timefilter.timefilter,
     }),
     [discoverDataService]
   );
 
   const DiscoverContainer = discover.DiscoverContainer;
-
-  const isLoading = !dataView;
 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">

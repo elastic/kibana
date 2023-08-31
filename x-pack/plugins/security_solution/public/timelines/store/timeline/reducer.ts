@@ -59,6 +59,7 @@ import {
   applyDeltaToColumnWidth,
   clearEventsDeleted,
   clearEventsLoading,
+  updateSavedSearchId,
 } from './actions';
 
 import {
@@ -527,6 +528,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         loadingEventIds: [],
+      },
+    },
+  }))
+  .case(updateSavedSearchId, (state, { id, savedSearchId }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        savedSearchId,
       },
     },
   }))

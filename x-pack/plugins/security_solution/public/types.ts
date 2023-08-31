@@ -55,6 +55,7 @@ import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -130,6 +131,7 @@ export interface StartPlugins {
   discover: DiscoverStart;
   navigation: NavigationPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
+  savedSearch: SavedSearchPublicPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
