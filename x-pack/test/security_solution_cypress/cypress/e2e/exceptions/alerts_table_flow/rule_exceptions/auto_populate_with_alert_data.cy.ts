@@ -51,7 +51,7 @@ describe.skip(
     beforeEach(() => {
       cy.task('esArchiverUnload', 'endpoint');
       cy.task('esArchiverResetKibana');
-      cy.task('esArchiverLoad', 'endpoint');
+      cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       login();
       createRule(getEndpointRule());
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);

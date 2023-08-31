@@ -97,7 +97,7 @@ export const LandingLinksImageCards: React.FC<LandingLinksImagesProps> = React.m
                   </div>
                 }
                 description={
-                  <EuiText size="s" color="text" css={styles.description}>
+                  <EuiText size="s" css={styles.description}>
                     {description}
                   </EuiText>
                 }
