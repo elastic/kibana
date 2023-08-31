@@ -576,11 +576,14 @@ describe('Handler', () => {
       'An internal server error occurred. Check Kibana server logs for details.'
     );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+      Array [
         Array [
-          Array [
-            [Error: unexpected error],
-          ],
-        ]
+          "500 Server Error - /",
+        ],
+        Array [
+          [Error: unexpected error],
+        ],
+      ]
     `);
   });
 
@@ -617,6 +620,9 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
+          "500 Server Error - /",
+        ],
+        Array [
           [Error: Unauthorized],
         ],
       ]
@@ -638,6 +644,9 @@ describe('Handler', () => {
     );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
+        Array [
+          "500 Server Error - /",
+        ],
         Array [
           [Error: Unexpected result from Route Handler. Expected KibanaResponse, but given: string.],
         ],
@@ -672,6 +681,17 @@ describe('Handler', () => {
       message: '[request query.page]: expected value of type [number] but got [string]',
       statusCode: 400,
     });
+
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "400 Bad Request - /?page=one",
+        ],
+        Array [
+          [Error: [request query.page]: expected value of type [number] but got [string]],
+        ],
+      ]
+    `);
   });
 
   it('accept to receive an array payload', async () => {
@@ -1145,6 +1165,9 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
+            "500 Server Error - /",
+          ],
+          Array [
             [Error: expected 'location' header to be set],
           ],
         ]
@@ -1551,6 +1574,9 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
+            "500 Server Error - /",
+          ],
+          Array [
             [Error: Unexpected Http status code. Expected from 400 to 599, but given: 200],
           ],
         ]
@@ -1619,6 +1645,9 @@ describe('Response factory', () => {
 
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
+          Array [
+            "500 Server Error - /",
+          ],
           Array [
             [Error: expected 'location' header to be set],
           ],
@@ -1760,6 +1789,9 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
+            "500 Server Error - /",
+          ],
+          Array [
             [Error: expected error message to be provided],
           ],
         ]
@@ -1786,6 +1818,9 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
+            "500 Server Error - /",
+          ],
+          Array [
             [Error: expected error message to be provided],
           ],
         ]
@@ -1811,6 +1846,9 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
+            "500 Server Error - /",
+          ],
+          Array [
             [Error: options.statusCode is expected to be set. given options: undefined],
           ],
         ]
@@ -1835,6 +1873,9 @@ describe('Response factory', () => {
       );
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
+          Array [
+            "500 Server Error - /",
+          ],
           Array [
             [Error: Unexpected Http status code. Expected from 100 to 599, but given: 20.],
           ],
