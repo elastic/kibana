@@ -10,7 +10,6 @@ import { DataViewsCommonService } from '@kbn/data-plugin/server';
 import { CreateDocSourceResp, IndexSourceMappings, BodySettings } from '../../common/types';
 import { MAPS_NEW_VECTOR_LAYER_META_CREATED_BY } from '../../common/constants';
 
-const DEFAULT_SETTINGS = { number_of_shards: 1 };
 const DEFAULT_META = {
   _meta: {
     created_by: MAPS_NEW_VECTOR_LAYER_META_CREATED_BY,
@@ -49,7 +48,6 @@ async function createIndex(
       ...DEFAULT_META,
       ...mappings,
     },
-    settings: DEFAULT_SETTINGS,
   };
 
   await asCurrentUser.indices.create({ index: indexName, body });

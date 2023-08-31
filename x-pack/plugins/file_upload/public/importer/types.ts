@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type {
   ImportFailure,
   IngestPipeline,
   ImportDoc,
   ImportResponse,
   Mappings,
-  Settings,
 } from '../../common/types';
 
 export interface ImportConfig {
-  settings: Settings;
+  settings: IndicesIndexSettings;
   mappings: Mappings;
   pipeline: IngestPipeline;
 }
@@ -44,7 +45,7 @@ export interface IImporter {
   read(data: ArrayBuffer): { success: boolean };
   initializeImport(
     index: string,
-    settings: Settings,
+    settings: IndicesIndexSettings,
     mappings: Mappings,
     pipeline: IngestPipeline
   ): Promise<ImportResponse>;
