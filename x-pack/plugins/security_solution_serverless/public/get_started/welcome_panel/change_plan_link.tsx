@@ -9,7 +9,6 @@ import React from 'react';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import {
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
