@@ -16,7 +16,6 @@ export interface GlobalRuleEventLogListProps {
   setHeaderActions?: RuleEventLogListCommonProps['setHeaderActions'];
   localStorageKey?: RuleEventLogListCommonProps['localStorageKey'];
   filteredRuleTypes?: RuleEventLogListCommonProps['filteredRuleTypes'];
-  onRuleNameClick?: RuleEventLogListCommonProps['onRuleNameClick'];
 }
 
 const GLOBAL_EVENT_LOG_LIST_STORAGE_KEY =
@@ -32,7 +31,7 @@ const REFRESH_TOKEN = {
 };
 
 export const GlobalRuleEventLogList = (props: GlobalRuleEventLogListProps) => {
-  const { setHeaderActions, localStorageKey, filteredRuleTypes, onRuleNameClick } = props;
+  const { setHeaderActions, localStorageKey, filteredRuleTypes } = props;
   const { spaces } = useKibana().services;
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,7 +51,6 @@ export const GlobalRuleEventLogList = (props: GlobalRuleEventLogListProps) => {
         localStorageKey={localStorageKey || GLOBAL_EVENT_LOG_LIST_STORAGE_KEY}
         filteredRuleTypes={filteredRuleTypes}
         setHeaderActions={setHeaderActions}
-        onRuleNameClick={onRuleNameClick}
       />
     </SpacesContextWrapper>
   );
