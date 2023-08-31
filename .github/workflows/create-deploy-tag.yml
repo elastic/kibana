@@ -75,11 +75,11 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Git tag:*\n${{ env.TAG_NAME }}"
+                      "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*GitHub job:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.job }}|${{ github.job }}>"
+                      "text": "*Git tag:*\n<https://github.com/elastic/kibana/releases/tag/${{ env.TAG_NAME }}|${{ env.TAG_NAME }}>"
                     }
                   ]
                 },
@@ -103,36 +103,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Kibana Serverless Quality Gate for QA"
-                  },
-                  "accessory": {
-                    "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "View",
-                      "emoji": true
-                    },
-                    "value": "buildkite_qa_qg",
-                    "url": "https://buildkite.com/elastic/kibana-tests/builds?branch=run-kibana-quality-gate-suites",
-                    "action_id": "button-action"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "Release process playbook"
-                  },
-                  "accessory": {
-                    "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "View",
-                      "emoji": true
-                    },
-                    "value": "platbook",
-                    "url": "https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr",
-                    "action_id": "button-action"
+                    "text": "*Useful links:*\n\n • <https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr|Release process playbook>\n • <https://buildkite.com/elastic/kibana-tests/builds?branch=run-kibana-quality-gate-suites|QA Quality Gate pipeline>"
                   }
                 },
                 {
@@ -190,11 +161,7 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Git tag:*\n${{ env.TAG_NAME }}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*GitHub job:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.job }}|${{ github.job }}>"
+                      "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
                     }
                   ]
                 },
@@ -202,18 +169,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Release process playbook"
-                  },
-                  "accessory": {
-                    "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "View",
-                      "emoji": true
-                    },
-                    "value": "platbook",
-                    "url": "https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr",
-                    "action_id": "button-action"
+                    "text": "*Useful links:*\n\n • <https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr|Release process playbook>"
                   }
                 }
               ]
