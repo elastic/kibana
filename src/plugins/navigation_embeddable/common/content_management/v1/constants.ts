@@ -18,4 +18,4 @@ export const EXTERNAL_LINK_TYPE = 'externalLink';
 export const NAV_HORIZONTAL_LAYOUT = 'horizontal';
 export const NAV_VERTICAL_LAYOUT = 'vertical';
 
-export const EXTERNAL_LINK_SUPPORTED_PROTOCOLS = ['http', 'https'];
+export const EXTERNAL_LINK_SUPPORTED_PROTOCOLS = ['http', 'https', 'mailto'];
