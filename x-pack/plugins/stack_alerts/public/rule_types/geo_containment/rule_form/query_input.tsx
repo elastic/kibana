@@ -37,18 +37,27 @@ interface Props {
 }
 
 export const QueryInput = (props: Props) => {
-  const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch, usageCollection } =
-    useKibana<{
-      data: DataPublicPluginStart;
-      dataViews: DataViewsPublicPluginStart;
-      docLinks: DocLinksStart;
-      http: HttpSetup;
-      notifications: CoreStart['notifications'];
-      uiSettings: IUiSettingsClient;
-      storage: IStorageWrapper;
-      unifiedSearch: UnifiedSearchPublicPluginStart;
-      usageCollection: UsageCollectionStart;
-    }>().services;
+  const {
+    data,
+    dataViews,
+    docLinks,
+    http,
+    notifications,
+    storage,
+    uiSettings,
+    unifiedSearch,
+    usageCollection,
+  } = useKibana<{
+    data: DataPublicPluginStart;
+    dataViews: DataViewsPublicPluginStart;
+    docLinks: DocLinksStart;
+    http: HttpSetup;
+    notifications: CoreStart['notifications'];
+    uiSettings: IUiSettingsClient;
+    storage: IStorageWrapper;
+    unifiedSearch: UnifiedSearchPublicPluginStart;
+    usageCollection: UsageCollectionStart;
+  }>().services;
 
   const [localQuery, setLocalQuery] = useState<Query>(
     props.query || {
@@ -85,4 +94,4 @@ export const QueryInput = (props: Props) => {
       }}
     />
   );
-}
+};

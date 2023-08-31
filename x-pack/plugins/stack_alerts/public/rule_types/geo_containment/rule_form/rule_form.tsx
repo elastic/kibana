@@ -17,7 +17,9 @@ export const RuleForm: React.FunctionComponent<
   RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
 > = (props) => {
   function getValidationError(key: string) {
-    return props.errors[key]?.length > 0 && key in props.ruleParams ? (props.errors[key] as string[])[0] : null;
+    return props.errors[key]?.length > 0 && key in props.ruleParams
+      ? (props.errors[key] as string[])[0]
+      : null;
   }
 
   return (
@@ -48,7 +50,9 @@ export const RuleForm: React.FunctionComponent<
         }}
         setDataViewTitle={(title: string) => props.setRuleParams('boundaryIndexTitle', title)}
         setGeoField={(fieldName: string) => props.setRuleParams('boundaryGeoField', fieldName)}
-        setNameField={(fieldName: string | undefined) => props.setRuleParams('boundaryNameField', fieldName)}
+        setNameField={(fieldName: string | undefined) =>
+          props.setRuleParams('boundaryNameField', fieldName)
+        }
         setQuery={(query: Query) => props.setRuleParams('boundaryIndexQuery', query)}
         unifiedSearch={props.unifiedSearch}
       />

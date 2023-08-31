@@ -190,9 +190,12 @@ export const BoundaryForm = (props: Props) => {
               })}
             >
               <SingleFieldSelect
-                placeholder={i18n.translate('xpack.stackAlerts.geoContainment.selectBoundaryNameLabel', {
-                  defaultMessage: 'Select name field',
-                })}
+                placeholder={i18n.translate(
+                  'xpack.stackAlerts.geoContainment.selectBoundaryNameLabel',
+                  {
+                    defaultMessage: 'Select name field',
+                  }
+                )}
                 value={props.ruleParams.boundaryNameField}
                 onChange={(fieldName?: string) => {
                   if (fieldName) {
@@ -204,9 +207,12 @@ export const BoundaryForm = (props: Props) => {
             </EuiFormRow>
 
             <EuiFormRow
-              helpText={i18n.translate('xpack.stackAlerts.geoContainment.boundariesFilterHelpText', {
-                defaultMessage: 'Add a filter to narrow boundaries.',
-              })}
+              helpText={i18n.translate(
+                'xpack.stackAlerts.geoContainment.boundariesFilterHelpText',
+                {
+                  defaultMessage: 'Add a filter to narrow boundaries.',
+                }
+              )}
               label={i18n.translate('xpack.stackAlerts.geoContainment.filterLabel', {
                 defaultMessage: 'Filter',
               })}

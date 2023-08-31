@@ -14,10 +14,7 @@ import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 export type IndexPatternSelectProps = Required<
-  Omit<
-    EuiComboBoxProps<any>,
-    'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'
-  >,
+  Omit<EuiComboBoxProps<any>, 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'>,
   'placeholder'
 > & {
   onChange: (indexPatternId?: string) => void;
