@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { AnomaliesTable } from '../../../../pages/metrics/inventory_view/components/ml/anomaly_detection/anomalies_table/anomalies_table';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 
 export const Anomalies = () => {
   const { dateRange } = useDateRangeProviderContext();
-  const { asset, overrides } = useAssetDetailsStateContext();
+  const { asset, overrides } = useAssetDetailsRenderPropsContext();
   const { onClose = () => {} } = overrides?.anomalies ?? {};
 
   return (
