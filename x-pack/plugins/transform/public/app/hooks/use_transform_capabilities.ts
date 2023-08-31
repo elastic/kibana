@@ -8,7 +8,6 @@
 import {
   getInitialTransformCapabilities,
   isTransformCapabilities,
-  type TransformCapabilities,
 } from '../../../common/types/capabilities';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -17,7 +16,7 @@ export const useTransformCapabilities = () => {
   const { application } = useAppDependencies();
 
   if (isTransformCapabilities(application?.capabilities?.transform)) {
-    return application.capabilities.transform as TransformCapabilities;
+    return application.capabilities.transform;
   }
 
   return getInitialTransformCapabilities();
