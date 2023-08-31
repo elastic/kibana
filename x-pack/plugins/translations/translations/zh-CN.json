@@ -37881,7 +37881,6 @@
     "xpack.transform.licenseCheckErrorMessage": "许可证检查失败",
     "xpack.transform.list.emptyPromptButtonText": "创建您的首个转换",
     "xpack.transform.list.emptyPromptTitle": "找不到转换",
-    "xpack.transform.list.errorPromptTitle": "获取转换列表时发生错误",
     "xpack.transform.mode": "模式",
     "xpack.transform.modeFilter": "模式",
     "xpack.transform.models.transformService.allOtherRequestsCancelledDescription": "所有其他请求已取消。",
