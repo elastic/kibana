@@ -34,7 +34,7 @@ Multivalue filtering using tooltip actions is already enabled for XY charts, and
 
 For example, you can filter a heat map by both region and country. You can also filter a partition chart by both product and date.
 
-To use multivalue filtering, right click on the chart to show the tooltip menu. Then select the values you want to filter by, and click on *Filter X Series*. We will continue to add support for multivalue filtering for other types of charts in the future.
+To use multivalue filtering, right-click on the chart to show the tooltip menu. Then select the values you want to filter by, and click on *Filter X Series*. We will continue to add support for multivalue filtering for other types of charts in the future.
 
 [role="screenshot"]
 image::images/multivalue-filtering.png[An example of multivalue filtering on a partition chart, width=70%]
