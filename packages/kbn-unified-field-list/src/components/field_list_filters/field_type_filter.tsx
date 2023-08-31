@@ -32,15 +32,11 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldTypeKnown } from '@kbn/discover-utils/types';
+import { getFieldTypeName, isKnownFieldType, KNOWN_FIELD_TYPE_LIST } from '@kbn/discover-utils';
 import { FieldIcon } from '../field_icon';
-import {
-  getFieldIconType,
-  getFieldTypeName,
-  getFieldTypeDescription,
-  isKnownFieldType,
-  KNOWN_FIELD_TYPE_LIST,
-} from '../../utils/field_types';
-import type { FieldListItem, FieldTypeKnown, GetCustomFieldType } from '../../types';
+import { getFieldIconType, getFieldTypeDescription } from '../../utils/field_types';
+import type { FieldListItem, GetCustomFieldType } from '../../types';
 
 const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" button appears
 const popoverTitleStyle = css`
