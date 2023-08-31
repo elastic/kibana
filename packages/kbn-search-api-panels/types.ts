@@ -24,6 +24,8 @@ export interface LanguageDefinitionSnippetArguments {
   apiKey: string;
   indexName?: string;
   cloudId?: string;
+  ingestPipeline?: string;
+  extraIngestDocumentValues?: Record<string, boolean>;
 }
 
 type CodeSnippet = string | ((args: LanguageDefinitionSnippetArguments) => string);
