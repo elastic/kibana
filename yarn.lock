@@ -9315,6 +9315,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/oboe@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@types/oboe/-/oboe-2.1.1.tgz#f1dc56885879c0c35e69e911ee62a97f99776e95"
+  integrity sha512-Ytg7xGrqNpnWvzK9G2k+ZzTYiG+h+FGxQ5uDR/YBmBYv8P6HkpRwHjwH+Vcuesv6anZnB3AeqX2Wm/CP+e8JFA==
+  dependencies:
+    "@types/node" "*"
+
 "@types/opn@^5.1.0":
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@types/opn/-/opn-5.1.0.tgz#bff7bc371677f4bdbb37884400e03fd81f743927"
