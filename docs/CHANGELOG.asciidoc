@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.9.2>>
 * <<release-notes-8.9.1>>
 * <<release-notes-8.9.0>>
 * <<release-notes-8.8.2>>
@@ -46,6 +47,40 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.9.2]]
+== {kib} 8.9.2
+
+Review the following information about the {kib} 8.9.2 release.
+
+[float]
+[[enhancement-v8.9.2]]
+=== Enhancements
+
+Fleet::
+* Adds the configuration setting `xpack.fleet.packageVerification.gpgKeyPath` as an environment variable in the {kib} container ({kibana-pull}163783[#163783]).
+
+[float]
+[[fixes-v8.9.2]]
+=== Bug Fixes
+
+Dashboard::
+* Fixes missing state on short URLs could be lost on an alias match redirect ({kibana-pull}163658[#163658]).
+* Fixes 'Download CSV' returning no data when panel has custom time range outside the time range of the global time picker ({kibana-pull}163887[#163887]).
+Elastic Security::
+For the Elastic Security 8.9.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens & Visualizations::
+* Allow removing temporary data view from event annotation group in *Lens* ({kibana-pull}163976[#163976]).
+* Fixes **Dashboard** getting stuck at loading in {kib} when Controls is used and mapping changed from integer to keyword ({kibana-pull}163529[#163529]).
+Machine Learning::
+* Anomaly detection wizard: ensure custom URLs test functionality works as expected ({kibana-pull}165055[#165055]).
+* Fixes anomaly detection module manifest queries for {kib} sample data sets, so cold and frozen tiers are not queried ({kibana-pull}164332[#164332]).
+Management::
+* Transforms: Fixes privileges check ({kibana-pull}163687[#163687]).
+Operations::
+* Fixes an issue where {kib} did not start on CentOS/RHEL 7 ({kibana-pull}165151[#165151]).
+Reporting::
+* Allow custom roles to use image reporting in **Dashboard** ({kibana-pull}163873[#163873]).
+
 [[release-notes-8.9.1]]
 == {kib} 8.9.1
 
