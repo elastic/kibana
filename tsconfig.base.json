@@ -1194,6 +1194,8 @@
       "@kbn/security-plugin/*": ["x-pack/plugins/security/*"],
       "@kbn/security-solution-ess": ["x-pack/plugins/security_solution_ess"],
       "@kbn/security-solution-ess/*": ["x-pack/plugins/security_solution_ess/*"],
+      "@kbn/security-solution-features": ["x-pack/packages/security-solution/features"],
+      "@kbn/security-solution-features/*": ["x-pack/packages/security-solution/features/*"],
       "@kbn/security-solution-fixtures-plugin": ["x-pack/test/cases_api_integration/common/plugins/security_solution"],
       "@kbn/security-solution-fixtures-plugin/*": ["x-pack/test/cases_api_integration/common/plugins/security_solution/*"],
       "@kbn/security-solution-navigation": ["x-pack/packages/security-solution/navigation"],

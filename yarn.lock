@@ -5313,6 +5313,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-features@link:x-pack/packages/security-solution/features":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/security_solution":
   version "0.0.0"
   uid ""

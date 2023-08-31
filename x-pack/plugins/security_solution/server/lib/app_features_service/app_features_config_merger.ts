@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { cloneDeep, mergeWith, isArray, uniq } from 'lodash';
+import { cloneDeep, isArray, mergeWith, uniq } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import type {
   AppFeatureKibanaConfig,
   BaseKibanaFeatureConfig,
   SubFeaturesPrivileges,
-} from './types';
+} from '@kbn/security-solution-features';
 
 export class AppFeaturesConfigMerger<T extends string = string> {
   constructor(
@@ -23,6 +23,7 @@ export class AppFeaturesConfigMerger<T extends string = string> {
   /**
    * Merges `appFeaturesConfigs` into `kibanaFeatureConfig`.
    * @param kibanaFeatureConfig the KibanaFeatureConfig to merge into
+   * @param kibanaSubFeatureIds
    * @param appFeaturesConfigs the AppFeatureKibanaConfig to merge
    * @returns mergedKibanaFeatureConfig the merged KibanaFeatureConfig
    * */
