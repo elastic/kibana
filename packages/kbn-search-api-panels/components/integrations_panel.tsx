@@ -19,21 +19,18 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { LEARN_MORE_LABEL } from '../constants';
 import { GithubLink } from './github_link';
 
 export interface IntegrationsPanelProps {
-  docLinks: any;
-  http: HttpStart;
-  pluginId: string;
+  docLinks: { beats: string; connectors: string; logstash: string };
+  assetBasePath: string;
 }
 
 export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
   docLinks,
-  http,
-  pluginId,
+  assetBasePath,
 }) => {
   return (
     <EuiThemeProvider colorMode="dark">
@@ -64,7 +61,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
             <EuiFlexGroup justifyContent="flexStart">
               <EuiFlexItem>
                 <EuiText size="s">
-                  <EuiLink href={docLinks.logStash} target="_blank">
+                  <EuiLink href={docLinks.logstash} target="_blank">
                     {LEARN_MORE_LABEL}
                   </EuiLink>
                 </EuiText>
@@ -75,8 +72,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
                   label={i18n.translate('searchApiPanels.welcomeBanner.ingestData.logstashLink', {
                     defaultMessage: 'Logstash',
                   })}
-                  http={http}
-                  pluginId={pluginId}
+                  assetBasePath={assetBasePath}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -117,8 +113,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
                   label={i18n.translate('searchApiPanels.welcomeBanner.ingestData.beatsLink', {
                     defaultMessage: 'beats',
                   })}
-                  http={http}
-                  pluginId={pluginId}
+                  assetBasePath={assetBasePath}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -162,8 +157,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
                       defaultMessage: 'connectors-python',
                     }
                   )}
-                  http={http}
-                  pluginId={pluginId}
+                  assetBasePath={assetBasePath}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

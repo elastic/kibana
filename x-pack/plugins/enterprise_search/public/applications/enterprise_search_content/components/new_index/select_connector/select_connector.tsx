@@ -129,7 +129,7 @@ export const SelectConnector: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.indices.selectConnector.description.textcloud"
-                    defaultMessage="{native} are available directly within Elastic Cloud deployments. No additional infrastructure is required. Self-managed deployments must deploy the connector service to run native connectors. {learnMore}"
+                    defaultMessage="{native} are available directly within Elastic Cloud deployments. No additional infrastructure is required. {learnMore}"
                     values={{
                       learnMore: (
                         <EuiLink target="_blank" href={docLinks.connectorsNative}>
@@ -150,7 +150,7 @@ export const SelectConnector: React.FC = () => {
                   <br />
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.indices.selectConnector.description.selfManaged.text"
-                    defaultMessage="For advanced use cases, deploy {connectorsClient} on your own infrastructure. Customize existing connectors, or build your own using our connector framework. {learnMore}"
+                    defaultMessage="Deploy connectors on your own infrastructure as {connectorsClient}. You can also customize existing connector clients, or build your own using our connector framework. {learnMore}"
                     values={{
                       connectorsClient: (
                         <b>
@@ -228,7 +228,7 @@ export const SelectConnector: React.FC = () => {
                 {filteredConnectors.map((connector) => (
                   <EuiFlexItem key={connector.serviceType} grow>
                     <ConnectorCheckable
-                      disabled={connector.platinumOnly && !hasPlatinumLicense}
+                      disabled={connector.platinumOnly && (!hasPlatinumLicense || !isCloud)}
                       icon={connector.icon}
                       isBeta={connector.isBeta}
                       isTechPreview={Boolean(connector.isTechPreview)}

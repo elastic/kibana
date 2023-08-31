@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
 import type { ValueToStringConverter } from '../../types';

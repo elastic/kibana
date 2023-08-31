@@ -7,27 +7,32 @@
 
 import * as Boom from '@hapi/boom';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
-import { createConcreteWriteIndex } from '@kbn/alerting-plugin/server';
+import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
-import type {
-  IObservabilityAIAssistantClient,
-  IObservabilityAIAssistantService,
-  ObservabilityAIAssistantResourceNames,
-} from './types';
+import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './kb_service';
+import type { ObservabilityAIAssistantResourceNames } from './types';
+import { splitKbText } from './util/split_kb_text';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
 }
 
-export class ObservabilityAIAssistantService implements IObservabilityAIAssistantService {
-  private readonly core: CoreSetup;
+export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQueuedDocumentsTask';
+
+export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
+
+export class ObservabilityAIAssistantService {
+  private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
+  private kbService?: KnowledgeBaseService;
 
   private readonly resourceNames: ObservabilityAIAssistantResourceNames = {
     componentTemplate: {
@@ -54,14 +59,41 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
     },
   };
 
-  constructor({ logger, core }: { logger: Logger; core: CoreSetup }) {
+  constructor({
+    logger,
+    core,
+    taskManager,
+  }: {
+    logger: Logger;
+    core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+    taskManager: TaskManagerSetupContract;
+  }) {
     this.core = core;
     this.logger = logger;
+
+    taskManager.registerTaskDefinitions({
+      [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
+        title: 'Index queued KB articles',
+        description:
+          'Indexes previously registered entries into the knowledge base when it is ready',
+        timeout: '30m',
+        maxAttempts: 2,
+        createTaskRunner: (context) => {
+          return {
+            run: async () => {
+              if (this.kbService) {
+                await this.kbService.processQueue();
+              }
+            },
+          };
+        },
+      },
+    });
   }
 
   init = once(async () => {
     try {
-      const [coreStart] = await this.core.getStartServices();
+      const [coreStart, pluginsStart] = await this.core.getStartServices();
 
       const esClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -115,6 +147,7 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
           name: `${conversationAliasName}-000001`,
           template: this.resourceNames.indexTemplate.conversations,
         },
+        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
       await esClient.cluster.putComponentTemplate({
@@ -171,6 +204,14 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
           name: `${kbAliasName}-000001`,
           template: this.resourceNames.indexTemplate.kb,
         },
+        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
+      });
+
+      this.kbService = new KnowledgeBaseService({
+        logger: this.logger.get('kb'),
+        esClient,
+        resources: this.resourceNames,
+        taskManagerStart: pluginsStart.taskManager,
       });
 
       this.logger.info('Successfully set up index assets');
@@ -185,7 +226,7 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
     request,
   }: {
     request: KibanaRequest;
-  }): Promise<IObservabilityAIAssistantClient> {
+  }): Promise<ObservabilityAIAssistantClient> {
     const [_, [coreStart, plugins]] = await Promise.all([
       this.init(),
       this.core.getStartServices() as Promise<
@@ -213,6 +254,56 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
         id: user.profile_uid,
         name: user.username,
       },
+      knowledgeBaseService: this.kbService!,
     });
+  }
+
+  addToKnowledgeBase(
+    entries: Array<
+      | {
+          id: string;
+          text: string;
+        }
+      | {
+          id: string;
+          texts: string[];
+        }
+    >
+  ): void {
+    this.init()
+      .then(() => {
+        this.kbService!.queue(
+          entries.flatMap((entry) => {
+            const entryWithSystemProperties = {
+              ...entry,
+              '@timestamp': new Date().toISOString(),
+              public: true,
+              confidence: 'high' as const,
+              is_correction: false,
+              labels: {
+                document_id: entry.id,
+              },
+            };
+
+            const operations =
+              'texts' in entryWithSystemProperties
+                ? splitKbText(entryWithSystemProperties)
+                : [
+                    {
+                      type: KnowledgeBaseEntryOperationType.Index,
+                      document: entryWithSystemProperties,
+                    },
+                  ];
+
+            return operations;
+          })
+        );
+      })
+      .catch((error) => {
+        this.logger.error(
+          `Could not index ${entries.length} entries because of an initialisation error`
+        );
+        this.logger.error(error);
+      });
   }
 }

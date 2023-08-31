@@ -45,9 +45,11 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
   private managementService?: ManagementService;
   private readonly config: ConfigType;
+  private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
+    this.isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: CoreSetup<PluginsStart, SpacesPluginStart>, plugins: PluginsSetup) {
@@ -61,31 +63,35 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
     };
 
-    if (plugins.home) {
-      plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
-    }
+    if (!this.isServerless) {
+      if (plugins.home) {
+        plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
+      }
 
-    if (plugins.management) {
-      this.managementService = new ManagementService();
-      this.managementService.setup({
-        management: plugins.management,
+      if (plugins.management) {
+        this.managementService = new ManagementService();
+        this.managementService.setup({
+          management: plugins.management,
+          getStartServices: core.getStartServices,
+          spacesManager: this.spacesManager,
+          config: this.config,
+        });
+      }
+
+      spaceSelectorApp.create({
         getStartServices: core.getStartServices,
+        application: core.application,
         spacesManager: this.spacesManager,
-        config: this.config,
       });
     }
-
-    spaceSelectorApp.create({
-      getStartServices: core.getStartServices,
-      application: core.application,
-      spacesManager: this.spacesManager,
-    });
 
     return {};
   }
 
   public start(core: CoreStart) {
-    initSpacesNavControl(this.spacesManager, core);
+    if (!this.isServerless) {
+      initSpacesNavControl(this.spacesManager, core);
+    }
 
     return this.spacesApi;
   }

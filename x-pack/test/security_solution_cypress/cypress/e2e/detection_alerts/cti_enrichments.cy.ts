@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import { disableExpandableFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
@@ -30,11 +28,12 @@ import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_det
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
 
-describe('CTI Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'threat_indicator');
-    cy.task('esArchiverLoad', 'suspicious_source_event');
+    // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
+    cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
+    cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
     login();
     createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true });
     disableExpandableFlyout();
@@ -157,7 +156,7 @@ describe('CTI Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   describe('with additional indicators', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'threat_indicator2');
+      cy.task('esArchiverLoad', { archiveName: 'threat_indicator2' });
     });
 
     beforeEach(() => {
