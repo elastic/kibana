@@ -94,7 +94,7 @@ export const sampleDataSchema = schema.object({
   statusMsg: schema.maybe(schema.string()),
 
   // index settings do not work in serverless
-  settingsForIndex: offeringBasedSchema({
+  withIndexSettings: offeringBasedSchema({
     traditional: schema.boolean({ defaultValue: true }),
     serverless: schema.boolean({ defaultValue: false }),
   }),

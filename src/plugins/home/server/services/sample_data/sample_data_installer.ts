@@ -155,15 +155,18 @@ export class SampleDataInstaller {
 
   private async installDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
     const index = createIndexName(dataset.id, dataIndex.id);
-    const statefulOffering = dataset.settingsForIndex ? { number_of_shards: 1, auto_expand_replicas: '0-1' } : {};
+    // these settings are not available in serverless
+    const indexSettings = dataset.withIndexSettings
+      ? { number_of_shards: 1, auto_expand_replicas: '0-1' }
+      : {};
+
     try {
       if (dataIndex.isDataStream) {
         const request = {
           name: index,
           body: {
             template: {
-              // these settings are not available in serverless
-              settings: statefulOffering,
+              settings: indexSettings,
               mappings: { properties: dataIndex.fields },
             },
             index_patterns: [index],
@@ -181,8 +184,8 @@ export class SampleDataInstaller {
           body: {
             settings: {
               index: {
-                ...statefulOffering,
                 ...dataIndex.indexSettings,
+                ...indexSettings,
               },
             },
             mappings: { properties: dataIndex.fields },
@@ -236,8 +239,7 @@ export class SampleDataInstaller {
       await Promise.all(deletePromises);
     } catch (err) {
       throw new SampleDataInstallError(
-        `Unable to delete sample dataset saved objects, error: ${
-          err.body?.error?.type ?? err.message
+        `Unable to delete sample dataset saved objects, error: ${err.body?.error?.type ?? err.message
         }`,
         err.body?.status ?? 500
       );
