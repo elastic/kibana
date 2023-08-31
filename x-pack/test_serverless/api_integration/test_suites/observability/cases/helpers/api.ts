@@ -112,7 +112,7 @@ export const deleteMappings = async (es: Client): Promise<void> => {
   });
 };
 
-export const defaultUser = { email: null, full_name: null, username: 'elastic' };
+export const defaultUser = { email: null, full_name: null, username: 'elastic_serverless' };
 /**
  * A null filled user will occur when the security plugin is disabled
  */
