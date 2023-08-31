@@ -253,7 +253,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
          */
         'xpack.infra.logs (any)',
         'xpack.license_management.ui.enabled (boolean)',
-        'xpack.logs_shared.savedObjects.logView.enabled (any)', // Conditional config, is actually a boolean
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
         'xpack.osquery.actionEnabled (boolean)',
