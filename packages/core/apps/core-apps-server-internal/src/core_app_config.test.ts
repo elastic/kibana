@@ -6,19 +6,15 @@
  * Side Public License, v 1.
  */
 
-export type {
-  PrebootPlugin,
-  Plugin,
-  AsyncPlugin,
-  PluginConfigDescriptor,
-  PluginConfigSchema,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginManifest,
-  SharedGlobalConfig,
-  MakeUsageFromSchema,
-  ExposedToBrowserDescriptor,
-  DynamicConfigDescriptor,
-} from './src';
+import { config, CoreAppConfig } from './core_app_config';
 
-export { SharedGlobalConfigKeys } from './src';
+describe('CoreApp Config', () => {
+  test('set correct defaults', () => {
+    const configValue = new CoreAppConfig(config.schema.validate({}));
+    expect(configValue).toMatchInlineSnapshot(`
+      CoreAppConfig {
+        "allowDynamicConfigOverrides": false,
+      }
+    `);
+  });
+});
