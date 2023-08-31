@@ -86,10 +86,10 @@ export const DashboardLinkComponent = ({
       };
     }
     return {
-      tooltipTitle: Boolean(dashboardDescription) ? dashboardTitle : undefined,
-      tooltipMessage: dashboardDescription || dashboardTitle,
+      tooltipTitle: Boolean(dashboardDescription) ? linkLabel : undefined,
+      tooltipMessage: dashboardDescription || linkLabel,
     };
-  }, [error, dashboardTitle, dashboardDescription]);
+  }, [error, linkLabel, dashboardDescription]);
 
   /**
    * Dashboard-to-dashboard navigation
