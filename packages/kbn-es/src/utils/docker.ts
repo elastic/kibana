@@ -323,12 +323,11 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
     // inherit is required to show Docker pull output
     stdio: ['ignore', 'inherit', 'pipe'],
   }).catch(({ message, stderr }) => {
-    if (stderr.includes('unauthorized: authentication required')) {
-      log.error(`Error authenticating with ${DOCKER_REGISTRY}.
-      Visit https://docker-auth.elastic.co/github_auth to login.
-      `);
-    }
-    throw createCliError(message);
+    throw createCliError(
+      stderr.includes('unauthorized: authentication required')
+        ? `Error authenticating with ${DOCKER_REGISTRY}. Visit https://docker-auth.elastic.co/github_auth to login.`
+        : message
+    );
   });
 }
 
