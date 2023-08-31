@@ -7,16 +7,21 @@
 
 import React, { type FC, useMemo, useCallback } from 'react';
 import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
-
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Filter } from '@kbn/es-query';
 import { isRight } from 'fp-ts/lib/Either';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import type { DataProvider } from '../../../../common/types';
 import { SeverityBadge } from '../../../detections/components/rules/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import * as i18n from './translations';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
+import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../detections/components/alerts_table/translations';
+import { getDataProvider } from '../../../common/components/event_details/table/use_action_cell_data_provider';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+const dataProviderLimit = 5;
 
 export const columns = [
   {
@@ -61,6 +66,14 @@ export interface CorrelationsDetailsAlertsTableProps {
    */
   alertIds: string[] | undefined;
   /**
+   * Maintain backwards compatibility // TODO remove when possible
+   */
+  scopeId: string;
+  /**
+   * Id of the document
+   */
+  eventId: string;
+  /**
    * Data test subject string for testing
    */
   ['data-test-subj']?: string;
@@ -73,6 +86,8 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
   title,
   loading,
   alertIds,
+  scopeId,
+  eventId,
   'data-test-subj': dataTestSubj,
 }) => {
   const {
@@ -110,11 +125,35 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
       );
   }, [data]);
 
+  const shouldUseFilters = Boolean(
+    alertIds && alertIds.length && alertIds.length >= dataProviderLimit
+  );
+  const dataProviders = useMemo(
+    () => (shouldUseFilters ? null : getDataProviders(scopeId, eventId, alertIds)),
+    [alertIds, shouldUseFilters, scopeId, eventId]
+  );
+  const filters: Filter[] | null = useMemo(
+    () => (shouldUseFilters ? getFilters(alertIds) : null),
+    [alertIds, shouldUseFilters]
+  );
+
   return (
     <ExpandablePanel
       header={{
         title,
         iconType: 'warning',
+        headerContent: (
+          <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
+            <InvestigateInTimelineButton
+              dataProviders={dataProviders}
+              filters={filters}
+              asEmptyButton
+              iconType="timeline"
+            >
+              {ACTION_INVESTIGATE_IN_TIMELINE}
+            </InvestigateInTimelineButton>
+          </div>
+        ),
       }}
       content={{ error }}
       expand={{
@@ -134,4 +173,46 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
       />
     </ExpandablePanel>
   );
+};
+
+const getFilters = (alertIds?: string[]) => {
+  if (alertIds && alertIds.length) {
+    return [
+      {
+        meta: {
+          alias: i18n.CORRELATIONS_DETAILS_TABLE_FILTER,
+          type: 'phrases',
+          key: '_id',
+          params: [...alertIds],
+          negate: false,
+          disabled: false,
+          value: alertIds.join(),
+        },
+        query: {
+          bool: {
+            should: alertIds.map((id) => {
+              return {
+                match_phrase: {
+                  _id: id,
+                },
+              };
+            }),
+            minimum_should_match: 1,
+          },
+        },
+      },
+    ];
+  }
+  return null;
+};
+
+const getDataProviders = (scopeId: string, eventId: string, alertIds?: string[]) => {
+  if (alertIds && alertIds.length) {
+    return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
+      const id = `${scopeId}-${eventId}-event.id-${index}-${alertId}`;
+      result.push(getDataProvider('_id', id, alertId));
+      return result;
+    }, []);
+  }
+  return null;
 };

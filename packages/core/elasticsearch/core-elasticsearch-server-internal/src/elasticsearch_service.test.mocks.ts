@@ -23,3 +23,8 @@ export const isScriptingEnabledMock = jest.fn();
 jest.doMock('./is_scripting_enabled', () => ({
   isInlineScriptingEnabled: isScriptingEnabledMock,
 }));
+
+export const getClusterInfoMock = jest.fn();
+jest.doMock('./get_cluster_info', () => ({
+  getClusterInfo$: getClusterInfoMock,
+}));

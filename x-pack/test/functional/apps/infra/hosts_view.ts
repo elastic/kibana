@@ -459,6 +459,37 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      describe('Host details page navigation', () => {
+        after(async () => {
+          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.timePicker.setAbsoluteRange(
+            START_DATE.format(DATE_PICKER_FORMAT),
+            END_DATE.format(DATE_PICKER_FORMAT)
+          );
+
+          await waitForPageToLoad();
+        });
+
+        it('maintains selected date range when navigating to the individual host details', async () => {
+          const start = START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT);
+          const end = END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT);
+
+          await pageObjects.timePicker.setAbsoluteRange(start, end);
+
+          const hostDetailLinks = await pageObjects.infraHostsView.getAllHostDetailLinks();
+          expect(hostDetailLinks.length).not.to.equal(0);
+
+          await hostDetailLinks[0].click();
+
+          expect(await pageObjects.timePicker.timePickerExists()).to.be(true);
+
+          const datePickerValue = await pageObjects.timePicker.getTimeConfig();
+          expect(datePickerValue.start).to.equal(start);
+          expect(datePickerValue.end).to.equal(end);
+        });
+      });
+
       describe('KPIs', () => {
         [
           { metric: 'hostsCount', value: '6' },
