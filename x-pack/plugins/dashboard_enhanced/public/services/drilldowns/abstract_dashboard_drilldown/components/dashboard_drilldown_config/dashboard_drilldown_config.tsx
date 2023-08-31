@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   withSuspense,
-  LazyDashboardDrilldownOptionsComponent,
+  DashboardDrilldownOptionsComponent,
 } from '@kbn/presentation-util-plugin/public';
 
 import { txtChooseDestinationDashboard } from './i18n';
