@@ -78,7 +78,6 @@ components:
       $ref: '#/components/schemas/Snapshot'
       nullable: true
 
-
     Removed:
       type: boolean
 
@@ -86,6 +85,8 @@ components:
       $ref: '#/components/schemas/Removed'
       nullable: true
 
+    PackName:
+      type: string
 
     SavedQueryId:
       type: string
@@ -102,6 +103,21 @@ components:
       $ref: '#/components/schemas/PackId'
       nullable: true
 
+    Enabled:
+      type: boolean
+
+    EnabledOrUndefined:
+      $ref: '#/components/schemas/Enabled'
+      nullable: true
+
+    PolicyIds:
+      type: array
+      items:
+        type: string
+
+    PolicyIdsOrUndefined:
+      $ref: '#/components/schemas/PolicyIds'
+      nullable: true
 
     ExecutionContext:
       type: object
@@ -201,6 +217,7 @@ components:
         - $ref: '#/components/schemas/ArrayQueries'
         - $ref: '#/components/schemas/ObjectQueries'
 
+
     QueriesOrUndefined:
       $ref: '#/components/schemas/Queries'
       nullable: true
@@ -229,3 +246,7 @@ components:
         nullable: true
       - enum: [ asc, desc ]
 
+    Shards:
+      type: object
+      additionalProperties:
+        type: number
