@@ -7,7 +7,7 @@
 
 import { chunk, intersection } from 'lodash';
 import moment from 'moment';
-import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getHttp } from '../kibana_services';
@@ -16,7 +16,6 @@ import type {
   ImportDoc,
   ImportFailure,
   ImportResponse,
-  Mappings,
   IngestPipeline,
 } from '../../common/types';
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
@@ -64,7 +63,7 @@ export abstract class Importer implements IImporter {
   public async initializeImport(
     index: string,
     settings: IndicesIndexSettings,
-    mappings: Mappings,
+    mappings: MappingTypeMapping,
     pipeline: IngestPipeline
   ) {
     updatePipelineTimezone(pipeline);
@@ -280,7 +279,7 @@ export function callImportRoute({
   index: string;
   data: ImportDoc[];
   settings: IndicesIndexSettings;
-  mappings: Mappings | unknown;
+  mappings: MappingTypeMapping;
   ingestPipeline: {
     id?: string;
     pipeline?: IngestPipeline;

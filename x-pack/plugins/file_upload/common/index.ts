@@ -14,5 +14,4 @@ export type {
   FindFileStructureResponse,
   InputOverrides,
   IngestPipeline,
-  Mappings,
 } from './types';

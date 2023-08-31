@@ -6,13 +6,12 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import type { BulkRequest, IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { BulkRequest, IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
 import {
   ImportResponse,
   ImportFailure,
   InputData,
-  Mappings,
   IngestPipelineWrapper,
 } from '../common/types';
 
@@ -21,7 +20,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     id: string | undefined,
     index: string,
     settings: IndicesIndexSettings,
-    mappings: Mappings,
+    mappings: MappingTypeMapping,
     ingestPipeline: IngestPipelineWrapper,
     data: InputData
   ): Promise<ImportResponse> {
@@ -89,8 +88,8 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     }
   }
 
-  async function createIndex(index: string, settings: IndicesIndexSettings, mappings: Mappings) {
-    const body: { mappings: Mappings; settings?: IndicesIndexSettings } = {
+  async function createIndex(index: string, settings: IndicesIndexSettings, mappings: MappingTypeMapping) {
+    const body: { mappings: MappingTypeMapping; settings?: IndicesIndexSettings } = {
       mappings: {
         _meta: {
           created_by: INDEX_META_DATA_CREATED_BY,
