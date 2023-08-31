@@ -27,11 +27,8 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       await kibanaServer.importExport.load(archive);
 
       // load test workpad
-      await PageObjects.common.navigateToUrl(
-        'canvas',
-        '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
-        { ensureCurrentUrl: false }
-      );
+      await PageObjects.canvas.goToListingPage();
+      await PageObjects.canvas.loadFirstWorkpad('Test Workpad');
     });
 
     after(async () => {
