@@ -52,5 +52,6 @@
     "@kbn/data-plugin",
     "@kbn/dev-utils",
     "@kbn/bfetch-plugin",
+    "@kbn/rison",
   ]
 }
