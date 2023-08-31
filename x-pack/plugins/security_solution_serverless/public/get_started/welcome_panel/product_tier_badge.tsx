@@ -21,6 +21,7 @@ const ProductTierBadgeComponent = ({ productTier }: { productTier: ProductTier |
         font-size: ${euiTheme.size.m};
         line-height: ${euiTheme.size.m};
       `}
+      data-test-subj="product-tier-badge"
     >
       <strong>
         {productTier === ProductTier.essentials && PRODUCT_TIER_ESSENTIAL}

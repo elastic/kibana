@@ -85,7 +85,6 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
           type: GetStartedPageActions.AddFinishedStep,
           payload: { stepId, cardId, sectionId },
         });
-        addFinishedStepToStorage(cardId, stepId);
 
         resetAllExpandedCardStepsToStorage();
         addExpandedCardStepToStorage(cardId, stepId);
@@ -95,7 +94,6 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     },
     [
       addExpandedCardStepToStorage,
-      addFinishedStepToStorage,
       removeExpandedCardStepFromStorage,
       resetAllExpandedCardStepsToStorage,
     ]

@@ -14,7 +14,7 @@ export const ACTIVE_PRODUCTS_STORAGE_KEY = 'ACTIVE_PRODUCTS';
 export const FINISHED_STEPS_STORAGE_KEY = 'FINISHED_STEPS';
 export const EXPANDED_CARDS_STORAGE_KEY = 'EXPANDED_CARDS';
 
-const defaultExpandedCards = {
+export const defaultExpandedCards = {
   [GetSetUpCardId.configure]: { isExpanded: true, expandedSteps: [] },
   [GetSetUpCardId.introduction]: { isExpanded: true, expandedSteps: [] },
   [GetSetUpCardId.explore]: { isExpanded: true, expandedSteps: [] },
