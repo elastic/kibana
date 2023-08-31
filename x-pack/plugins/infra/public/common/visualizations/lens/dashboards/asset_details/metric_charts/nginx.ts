@@ -48,7 +48,7 @@ export const nginxActiveConnections: XYConfig = {
 
 export const nginxRequestsPerConnection: XYConfig = {
   id: 'RequestsPerConnection',
-  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.nginx.RequestsPerConnection', {
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.nginx.requestsPerConnection', {
     defaultMessage: 'Requests Per Connection',
   }),
 
