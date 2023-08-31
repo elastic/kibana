@@ -24,7 +24,7 @@ const loadDetectionsPage = (role: ROLES) => {
   waitForAlertsToPopulate();
 };
 
-describe('Alerts timeline', { tags: '@ess' }, () => {
+describe('Alerts timeline', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     // First we login as a privileged user to create alerts.
     cleanKibana();
@@ -34,7 +34,7 @@ describe('Alerts timeline', { tags: '@ess' }, () => {
     waitForAlertsToPopulate();
   });
 
-  context('Privileges: read only', { tags: '@ess' }, () => {
+  context('Privileges: read only', () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.reader);
     });
@@ -52,7 +52,7 @@ describe('Alerts timeline', { tags: '@ess' }, () => {
     });
   });
 
-  context('Privileges: can crud', { tags: '@ess' }, () => {
+  context('Privileges: can crud', () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.platform_engineer);
       cy.get(LOADING_INDICATOR).should('not.exist');
