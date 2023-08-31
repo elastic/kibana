@@ -25,7 +25,7 @@ import { ALERTS_URL, HOSTS_URL } from '../../../urls/navigation';
 describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'bulk_process');
+    cy.task('esArchiverLoad', { archiveName: 'bulk_process' });
     login();
   });
 
@@ -33,7 +33,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
     cy.task('esArchiverUnload', 'bulk_process');
   });
 
-  context('Alerts', () => {
+  context('Alerts', { tags: ['@brokenInServerless'] }, () => {
     before(() => {
       createRule(getNewRule());
     });

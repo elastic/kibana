@@ -16,7 +16,9 @@ import {
 
 import { httpService } from './http';
 
-export const sendRequest = (config: SendRequestConfig): Promise<SendRequestResponse> => {
+export const sendRequest = <T = any>(
+  config: SendRequestConfig
+): Promise<SendRequestResponse<T>> => {
   return _sendRequest(httpService.httpClient, config);
 };
 

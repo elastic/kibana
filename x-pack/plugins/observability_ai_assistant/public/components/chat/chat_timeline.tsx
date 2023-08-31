@@ -11,6 +11,7 @@ import { compact } from 'lodash';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { ChatItem } from './chat_item';
+import { ChatWelcomePanel } from './chat_welcome_panel';
 import type { Feedback } from '../feedback_buttons';
 import type { Message } from '../../../common';
 
@@ -49,6 +50,8 @@ export function ChatTimeline({
   onRegenerate,
   onStopGenerating,
 }: ChatTimelineProps) {
+  const filteredItems = items.filter((item) => !item.display.hide);
+
   return (
     <EuiCommentList
       css={css`
@@ -56,26 +59,25 @@ export function ChatTimeline({
       `}
     >
       {compact(
-        items.map((item, index) =>
-          !item.display.hide ? (
-            <ChatItem
-              // use index, not id to prevent unmounting of component when message is persisted
-              key={index}
-              {...item}
-              onFeedbackClick={(feedback) => {
-                onFeedback(item, feedback);
-              }}
-              onRegenerateClick={() => {
-                onRegenerate(item);
-              }}
-              onEditSubmit={(message) => {
-                return onEdit(item, message);
-              }}
-              onStopGeneratingClick={onStopGenerating}
-            />
-          ) : null
-        )
+        filteredItems.map((item, index) => (
+          <ChatItem
+            // use index, not id to prevent unmounting of component when message is persisted
+            key={index}
+            {...item}
+            onFeedbackClick={(feedback) => {
+              onFeedback(item, feedback);
+            }}
+            onRegenerateClick={() => {
+              onRegenerate(item);
+            }}
+            onEditSubmit={(message) => {
+              return onEdit(item, message);
+            }}
+            onStopGeneratingClick={onStopGenerating}
+          />
+        ))
       )}
+      {filteredItems.length === 1 ? <ChatWelcomePanel /> : null}
     </EuiCommentList>
   );
 }

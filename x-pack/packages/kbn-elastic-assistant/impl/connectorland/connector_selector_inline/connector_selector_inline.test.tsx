@@ -65,7 +65,6 @@ describe('ConnectorSelectorInline', () => {
         <ConnectorSelectorInline
           isDisabled={false}
           onConnectorModalVisibilityChange={noop}
-          onConnectorSelectionChange={noop}
           selectedConnectorId={undefined}
           selectedConversation={undefined}
         />
@@ -85,7 +84,6 @@ describe('ConnectorSelectorInline', () => {
         <ConnectorSelectorInline
           isDisabled={false}
           onConnectorModalVisibilityChange={noop}
-          onConnectorSelectionChange={noop}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
         />
@@ -105,7 +103,6 @@ describe('ConnectorSelectorInline', () => {
         <ConnectorSelectorInline
           isDisabled={false}
           onConnectorModalVisibilityChange={noop}
-          onConnectorSelectionChange={noop}
           selectedConnectorId={mockConnectors[0].id}
           selectedConversation={conversation}
         />

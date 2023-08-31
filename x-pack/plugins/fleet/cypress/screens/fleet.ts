@@ -88,6 +88,7 @@ export const AGENT_FLYOUT = {
   MANAGED_TAB: 'managedTab',
   CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
   INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
+  KUBERNETES_PLATFORM_TYPE: 'platformTypeKubernetes',
 };
 
 export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT = {
@@ -227,4 +228,8 @@ export const FLEET_SERVER_SETUP = {
 
 export const API_KEYS = {
   REVOKE_KEY_BUTTON: 'enrollmentTokenTable.revokeBtn',
+};
+
+export const AGENT_POLICY_DETAILS_PAGE = {
+  ADD_AGENT_LINK: 'addAgentLink',
 };

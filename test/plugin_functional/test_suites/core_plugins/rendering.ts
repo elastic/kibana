@@ -145,6 +145,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',
         'newsfeed.service.urlRoot (string)',
+        'no_data_page.analyticsNoDataPageFlavor (any)', // It's a string (any because schema.conditional)
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
         'telemetry.banner (boolean)',
@@ -279,6 +280,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
         'xpack.snapshot_restore.ui.enabled (boolean)',
+        'xpack.stack_connectors.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean)',
@@ -291,10 +293,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
         'xpack.observability.unsafe.thresholdRule.enabled (boolean)',
         'xpack.observability_onboarding.ui.enabled (boolean)',
-        /**
-         * xpack.discoverLogExplorer.featureFlags is conditional and will never resolve if used in non-serverless environment
-         */
-        'xpack.discoverLogExplorer.featureFlags.deepLinkVisible (any)',
+        'xpack.observabilityLogExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
