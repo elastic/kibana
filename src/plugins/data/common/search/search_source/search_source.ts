@@ -920,7 +920,7 @@ export class SearchSource {
 
     // For testing shard failure messages in the UI, follow these steps:
     // 1. Add all three sample data sets (flights, ecommerce, logs) to Kibana.
-    // 2. Create a data view using the index pattern `kibana*`.
+    // 2. Create a data view using the index pattern `kibana*` and don't use a timestamp field.
     // 3. Uncomment the lines below, navigate to Discover,
     //    and switch to the data view created in step 2.
     // body.query.bool.must.push({
@@ -935,6 +935,7 @@ export class SearchSource {
     //     ],
     //   },
     // });
+    // Alternatively you could also add this query via "Edit as Query DSL", then it needs no code to be changed
 
     if (highlightAll && body.query) {
       body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
