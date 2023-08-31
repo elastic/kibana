@@ -171,5 +171,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('webhook-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
+
+    it('pagerduty connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('pagerduty');
+      await testSubjects.setValue('nameInput', 'PagerDuty test connector');
+      await commonScreenshots.takeScreenshot('pagerduty-connector', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
   });
 }
