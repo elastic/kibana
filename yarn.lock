@@ -4229,10 +4229,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-log-explorer-plugin@link:x-pack/plugins/discover_log_explorer":
-  version "0.0.0"
-  uid ""
-
 "@kbn/discover-plugin@link:src/plugins/discover":
   version "0.0.0"
   uid ""
@@ -4801,6 +4797,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/log-explorer-plugin@link:x-pack/plugins/log_explorer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logging-mocks@link:packages/kbn-logging-mocks":
   version "0.0.0"
   uid ""
@@ -5006,6 +5006,10 @@
   uid ""
 
 "@kbn/observability-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/observability":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-log-explorer-plugin@link:x-pack/plugins/observability_log_explorer":
   version "0.0.0"
   uid ""
 

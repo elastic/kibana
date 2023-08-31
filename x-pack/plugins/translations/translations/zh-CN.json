@@ -37581,7 +37581,6 @@
     "xpack.synthetics.synthetics.waterfallChart.labels.timings.ssl": "TLS",
     "xpack.synthetics.synthetics.waterfallChart.labels.timings.wait": "等待中 (TTFB)",
     "xpack.synthetics.syntheticsFeatureCatalogueTitle": "Synthetics",
-    "xpack.synthetics.syntheticsMonitors": "运行时间 - 监测",
     "xpack.synthetics.testDetails.after": "之后 ",
     "xpack.synthetics.testDetails.codeExecuted": "已执行代码",
     "xpack.synthetics.testDetails.console": "控制台",
