@@ -64,7 +64,7 @@ image::images/log-rate-analysis.png[An example of log rate analysis on dips in d
 ==== Add Change Point Detection charts to dashboards and cases
 preview:[] Continuing the integration of Machine Learning deeper into Elastic tools and workflows, you can now easily attach Change Point Detection charts to **Dashboards** and **Cases** with just a few clicks. Starting from **Machine Learning > AIOps Labs> Change Point Detection**, select the charts that you want to embed, then select the **Attach charts** option using the ellipsis at the top right, and finally select the dashboard or case that you want the selected charts to be added in.  
 
-Additional AIOps enhancements include a validation mechanism when you perform log pattern analysis in ML Labs and in Discover. This verifies that the selected field is suitable for analysis and if not, the UI displays the reason(s) why.
+Additional AIOps enhancements include a validation mechanism when you perform log pattern analysis in AIOps Labs and in Discover. This verifies that the selected field is suitable for analysis and if not, the UI displays the reason(s) why.
 
 [role="screenshot"]
 image::images/change-point-detection.png[An example of a change point detection chart]
