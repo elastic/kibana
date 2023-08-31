@@ -246,6 +246,7 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/update_connector_request_cases_webhook'
                 - $ref: '#/components/schemas/update_connector_request_d3security'
+                - $ref: '#/components/schemas/create_connector_request_genai'
                 - $ref: '#/components/schemas/update_connector_request_index'
                 - $ref: '#/components/schemas/update_connector_request_jira'
                 - $ref: '#/components/schemas/update_connector_request_opsgenie'
