@@ -31,10 +31,10 @@ const navigationTree: NavigationTreeDefinition = {
           id: 'discover-dashboard-alerts-slos',
           children: [
             {
-              title: i18n.translate('xpack.serverlessObservability.nav.discover', {
-                defaultMessage: 'Discover',
+              title: i18n.translate('xpack.serverlessObservability.nav.logExplorer', {
+                defaultMessage: 'Log Explorer',
               }),
-              link: 'discover:log-explorer',
+              link: 'observability-log-explorer',
             },
             {
               title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
