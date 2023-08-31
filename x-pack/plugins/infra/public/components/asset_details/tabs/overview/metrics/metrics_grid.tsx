@@ -58,6 +58,7 @@ export const MetricsGrid = React.memo(
 
     const nginxStubstatusCharts = showNginxStubstatus ? nginxStubstatusMetrics : [];
     const nginxAccessCharts = showNginxAccess ? nginxAccessMetrics : [];
+    const shouldShowNginxSection = nginxStubstatusCharts.length > 0 || nginxAccessCharts.length > 0;
 
     const getFilters = useCallback(
       (dataViewOrigin: DataViewOrigin) => {
@@ -123,7 +124,7 @@ export const MetricsGrid = React.memo(
             ))}
           </EuiFlexGrid>
         </EuiFlexItem>
-        {!isCompactView && (
+        {!isCompactView && shouldShowNginxSection && (
           <>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
