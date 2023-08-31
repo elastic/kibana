@@ -11,6 +11,14 @@ steps:
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
+        SERVERLESS_ONLY: true
+      message: Triggered by pipeline.tests.qa.yaml
+
+  - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/pipeline.sh
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
       message: Triggered by pipeline.tests.qa.yaml
 
   - label: ":pipeline::ship::seedling: Trigger Fleet serverless smoke tests for ${ENVIRONMENT}"
