@@ -16,6 +16,7 @@ The <<webhook-action-type,Webhook connector>> now supports client certification.
 
 [role="screenshot"]
 image::images/webhook-connector.png[A screenshot displaying the new SSL authentication option in the UI, width=70%]
+
 [discrete]
 === Dashboard
 
