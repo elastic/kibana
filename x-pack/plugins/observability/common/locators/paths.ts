@@ -43,3 +43,9 @@ export const paths = {
         : `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURI(sloId)}`,
   },
 };
+
+export const relativePaths = {
+  observability: {
+    ruleDetails: (ruleId: string) => `${RULES_PATH}/${encodeURI(ruleId)}`,
+  },
+};
