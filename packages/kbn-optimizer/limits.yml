@@ -163,4 +163,5 @@ pageLoadAssetSize:
   visTypeVislib: 242838
   visTypeXy: 46868
   visualizations: 90000
+  visualizeListClient: 10000
   watcher: 43598
