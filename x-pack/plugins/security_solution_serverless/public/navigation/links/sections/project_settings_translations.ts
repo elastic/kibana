@@ -187,7 +187,7 @@ export const MAPS_DESCRIPTION = i18n.translate(
   }
 );
 export const VISUALIZE_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.projectSettings.visualize.description',
+  'xpack.securitySolutionServerless.navLinks.projectSettings.visualize.title',
   {
     defaultMessage: 'Visualize library',
   }
