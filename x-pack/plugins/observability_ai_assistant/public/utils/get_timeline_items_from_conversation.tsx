@@ -123,7 +123,8 @@ export function getTimelineItemsfromConversation({
               parsedContent = message.message.content;
             }
 
-            const isError = typeof parsedContent === 'object' && 'error' in parsedContent;
+            const isError =
+              parsedContent && typeof parsedContent === 'object' && 'error' in parsedContent;
 
             title = !isError ? (
               <FormattedMessage

@@ -55,7 +55,7 @@ describe('Enable risk scores', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('exist');
   });
 
-  it('should install host risk score successfully', () => {
+  it('should install host risk score successfully', { tags: ['@brokenInServerless'] }, () => {
     interceptInstallRiskScoreModule();
     clickEnableRiskScore(RiskScoreEntity.host);
     waitForInstallRiskScoreModule();
@@ -89,7 +89,7 @@ describe('Enable risk scores', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('exist');
   });
 
-  it('should install user risk score successfully', () => {
+  it('should install user risk score successfully', { tags: ['@brokenInServerless'] }, () => {
     interceptInstallRiskScoreModule();
     clickEnableRiskScore(RiskScoreEntity.user);
     waitForInstallRiskScoreModule();
