@@ -93,7 +93,8 @@ describe('links', () => {
         SecurityPageName.hostIsolationExceptions,
         SecurityPageName.policies,
         SecurityPageName.responseActionsHistory,
-        SecurityPageName.trustedApps
+        SecurityPageName.trustedApps,
+        SecurityPageName.cloudDefendPolicies
       )
     );
   });
