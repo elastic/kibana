@@ -50,4 +50,20 @@ describe('Response actions history page', () => {
     cy.getByTestSubj('pagination-button-0').click();
     cy.getByTestSubj('response-actions-list-details-tray').should('exist');
   });
+
+  it('collapses expanded tray with a single click', () => {
+    loadPage(`/app/security/administration/response_actions_history`);
+    // 2nd row on 1st page
+    const row = cy.getByTestSubj('response-actions-list-expand-button').eq(1);
+
+    // expand the row
+    row.click();
+    cy.getByTestSubj('response-actions-list-details-tray').should('exist');
+    cy.url().should('include', 'withOutputs');
+
+    // collapse the row
+    row.click();
+    cy.getByTestSubj('response-actions-list-details-tray').should('not.exist');
+    cy.url().should('not.include', 'withOutputs');
+  });
 });
