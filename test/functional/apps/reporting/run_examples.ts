@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default({ getPageObjects, getService }: FtrProviderContext) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   // run-examples
@@ -16,11 +17,10 @@ export default({ getPageObjects, getService }: FtrProviderContext) => {
   // value="report"
   // click button need to add a data-test-subj
   describe('Example app of reporting functionality', async () => {
-    
     it('', async () => {
-    await PageObjects.common.navigateToApp('developerExamples');
-    console.log(PageObjects);
-    await testSubjects.click('euiFieldSearch');
-    })
+      await PageObjects.common.navigateToApp('developerExamples');
+      console.log(PageObjects);
+      await testSubjects.click('euiFieldSearch');
+    });
   });
 };
