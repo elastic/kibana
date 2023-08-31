@@ -60,6 +60,7 @@ export interface TextBasedLanguagesEditorProps {
   isDisabled?: boolean;
   isDarkMode?: boolean;
   dataTestSubj?: string;
+  hideMinimizeButton?: boolean;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -92,6 +93,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   errors,
   isDisabled,
   isDarkMode,
+  hideMinimizeButton,
   dataTestSubj,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
@@ -423,33 +425,35 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
-                <EuiToolTip
-                  position="top"
-                  content={i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.minimizeTooltip',
-                    {
-                      defaultMessage: 'Compact query editor',
-                    }
-                  )}
-                >
-                  <EuiButtonIcon
-                    iconType="minimize"
-                    color="text"
-                    aria-label={i18n.translate(
-                      'textBasedEditor.query.textBasedLanguagesEditor.MinimizeEditor',
+              {!Boolean(hideMinimizeButton) && (
+                <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
+                  <EuiToolTip
+                    position="top"
+                    content={i18n.translate(
+                      'textBasedEditor.query.textBasedLanguagesEditor.minimizeTooltip',
                       {
-                        defaultMessage: 'Minimize editor',
+                        defaultMessage: 'Compact query editor',
                       }
                     )}
-                    data-test-subj="TextBasedLangEditor-minimize"
-                    onClick={() => {
-                      expandCodeEditor(false);
-                      updateLinesFromModel = false;
-                    }}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
+                  >
+                    <EuiButtonIcon
+                      iconType="minimize"
+                      color="text"
+                      aria-label={i18n.translate(
+                        'textBasedEditor.query.textBasedLanguagesEditor.MinimizeEditor',
+                        {
+                          defaultMessage: 'Minimize editor',
+                        }
+                      )}
+                      data-test-subj="TextBasedLangEditor-minimize"
+                      onClick={() => {
+                        expandCodeEditor(false);
+                        updateLinesFromModel = false;
+                      }}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <LanguageDocumentationPopover
                   language={String(language).toUpperCase()}
