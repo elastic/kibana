@@ -34,11 +34,12 @@ export function ObservabilityAIAssistantActionMenuItem() {
 
   const [conversationId, setConversationId] = useState<string>();
 
-  const { conversation, displayedMessages, setDisplayedMessages, save } = useConversation({
-    conversationId,
-    connectorId: connectors.selectedConnector,
-    chatService: chatService.value,
-  });
+  const { conversation, displayedMessages, setDisplayedMessages, save, saveTitle } =
+    useConversation({
+      conversationId,
+      connectorId: connectors.selectedConnector,
+      chatService: chatService.value,
+    });
 
   if (!service.isEnabled()) {
     return null;
@@ -86,6 +87,9 @@ export function ObservabilityAIAssistantActionMenuItem() {
             }}
             onChatUpdate={(nextMessages) => {
               setDisplayedMessages(nextMessages);
+            }}
+            onChatTitleSave={(newTitle) => {
+              saveTitle(newTitle);
             }}
           />
         </ObservabilityAIAssistantChatServiceProvider>
