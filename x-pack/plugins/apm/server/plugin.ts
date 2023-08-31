@@ -97,9 +97,6 @@ export class APMPlugin
 
     plugins.features.registerKibanaFeature(APM_FEATURE);
 
-    // Register a static internal view to use as a fallback when the log view SO is not registered
-    plugins.logsShared.logViews.defineInternalLogView('default', {});
-
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
     const getCoreStart = () =>

@@ -53,9 +53,12 @@ export class LogsSharedPlugin
 
     const logViews = this.logViews.setup();
 
-    // Register saved objects
     if (this.config.savedObjects.logView.enabled) {
+      // Conditionally register log view saved objects
       core.savedObjects.registerType(logViewSavedObjectType);
+    } else {
+      // Register a static internal view to use as a fallback when the log view SO is not registered
+      logViews.defineInternalLogView('default', {});
     }
 
     const domainLibs: LogsSharedDomainLibs = {

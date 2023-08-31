@@ -61,7 +61,6 @@ import {
   CustomIntegrationsPluginSetup,
   CustomIntegrationsPluginStart,
 } from '@kbn/custom-integrations-plugin/server';
-import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -74,7 +73,6 @@ export interface APMPluginSetupDependencies {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
-  logsShared: LogsSharedPluginSetup;
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   infra: InfraPluginSetup;

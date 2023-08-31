@@ -31,7 +31,6 @@ import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
@@ -140,7 +139,6 @@ export interface FleetSetupDeps {
   spaces?: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
-  logsShared: LogsSharedPluginSetup;
 }
 
 export interface FleetStartDeps {
@@ -452,9 +450,6 @@ export class FleetPlugin
     );
 
     registerRoutes(fleetAuthzRouter, config);
-
-    // Register a static internal view to use as a fallback when the log view SO is not registered
-    deps.logsShared.logViews.defineInternalLogView('default', {});
 
     this.telemetryEventsSender.setup(deps.telemetry);
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);

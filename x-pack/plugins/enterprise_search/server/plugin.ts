@@ -276,9 +276,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, EnterpriseSearchPlug
      * Register logs source configuration, used by LogStream components
      * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/logs_shared/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
-    // Register a static internal view to use as a fallback when the log view SO is not registered
-    logsShared.logViews.defineInternalLogView('default', {});
-
     logsShared.logViews.defineInternalLogView(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
       logIndices: {
         indexName: 'logs-app_search.search_relevance_suggestions-*',
