@@ -16,6 +16,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./reporting'));
 
     // platform security
+    loadTestFile(require.resolve('./security/api_keys'));
     loadTestFile(require.resolve('./security/navigation/avatar_menu'));
 
     // Management
