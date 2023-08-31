@@ -156,6 +156,7 @@ export class SampleDataInstaller {
   serializeIndexSettings(isServerless: boolean, indexSettings: Record<string, any> | undefined) {
     if (!isServerless || !indexSettings) return indexSettings;
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { number_of_shards, auto_expand_replicas, ...rest } = indexSettings.entries();
     return rest;
   }
