@@ -39,6 +39,7 @@ import {
   updateLoadingStateAction,
   AiopsLogRateAnalysisApiAction,
 } from '../../common/api/log_rate_analysis';
+import { getCategoryQuery } from '../../common/api/log_categorization/get_category_query';
 import { AIOPS_API_ENDPOINT } from '../../common/api';
 
 import { PLUGIN_ID } from '../../common';
@@ -281,16 +282,19 @@ export const defineLogRateAnalysisRoute = (
 
               // Step 2: Significant Terms
 
+              const significantCategories: SignificantTerm[] = [];
               // Get significant categories of text fields
               if (textFieldCandidates.length > 0) {
-                const significantCategories = await fetchSignificantCategories(
-                  client,
-                  request.body,
-                  textFieldCandidates,
-                  logger,
-                  sampleProbability,
-                  pushError,
-                  abortSignal
+                significantCategories.push(
+                  ...(await fetchSignificantCategories(
+                    client,
+                    request.body,
+                    textFieldCandidates,
+                    logger,
+                    sampleProbability,
+                    pushError,
+                    abortSignal
+                  ))
                 );
 
                 if (significantCategories.length > 0) {
@@ -573,7 +577,7 @@ export const defineLogRateAnalysisRoute = (
                           return;
                         }
                         const histogram =
-                          overallTimeSeries.data.map((o, i) => {
+                          overallTimeSeries.data.map((o) => {
                             const current = cpgTimeSeries.data.find(
                               (d1) => d1.key_as_string === o.key_as_string
                             ) ?? {
@@ -675,7 +679,7 @@ export const defineLogRateAnalysisRoute = (
                     }
 
                     const histogram =
-                      overallTimeSeries.data.map((o, i) => {
+                      overallTimeSeries.data.map((o) => {
                         const current = cpTimeSeries.data.find(
                           (d1) => d1.key_as_string === o.key_as_string
                         ) ?? {
@@ -707,6 +711,90 @@ export const defineLogRateAnalysisRoute = (
 
                 fieldValueHistogramQueue.push(significantTerms);
                 await fieldValueHistogramQueue.drain();
+              }
+
+              // histograms for text field patterns
+              if (overallTimeSeries !== undefined && significantCategories.length > 0) {
+                const significantCategoriesHistogramQueries = significantCategories.map((d) => {
+                  const histogramQuery = getHistogramQuery(request.body);
+                  const categoryQuery = getCategoryQuery(d.fieldName, [
+                    { key: `${d.fieldValue}`, count: d.doc_count, examples: [] },
+                  ]);
+                  if (Array.isArray(histogramQuery.bool?.filter)) {
+                    histogramQuery.bool?.filter?.push(categoryQuery);
+                  }
+                  return histogramQuery;
+                });
+
+                for (const [i, histogramQuery] of significantCategoriesHistogramQueries.entries()) {
+                  const cp = significantCategories[i];
+                  let catTimeSeries: NumericChartData;
+
+                  try {
+                    catTimeSeries = (
+                      (await fetchHistogramsForFields(
+                        client,
+                        request.body.index,
+                        histogramQuery,
+                        // fields
+                        [
+                          {
+                            fieldName: request.body.timeFieldName,
+                            type: KBN_FIELD_TYPES.DATE,
+                            interval: overallTimeSeries.interval,
+                            min: overallTimeSeries.stats[0],
+                            max: overallTimeSeries.stats[1],
+                          },
+                        ],
+                        // samplerShardSize
+                        -1,
+                        undefined,
+                        abortSignal,
+                        sampleProbability,
+                        RANDOM_SAMPLER_SEED
+                      )) as [NumericChartData]
+                    )[0];
+                  } catch (e) {
+                    logger.error(
+                      `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
+                        cp.fieldValue
+                      }", got: \n${e.toString()}`
+                    );
+                    pushError(
+                      `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
+                    );
+                    return;
+                  }
+
+                  const histogram =
+                    overallTimeSeries.data.map((o) => {
+                      const current = catTimeSeries.data.find(
+                        (d1) => d1.key_as_string === o.key_as_string
+                      ) ?? {
+                        doc_count: 0,
+                      };
+                      return {
+                        key: o.key,
+                        key_as_string: o.key_as_string ?? '',
+                        doc_count_significant_term: current.doc_count,
+                        doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                      };
+                    }) ?? [];
+
+                  const { fieldName, fieldValue } = cp;
+
+                  // loaded += (1 / significantTerms.length) * PROGRESS_STEP_HISTOGRAMS;
+                  // pushHistogramDataLoadingState();
+                  push(
+                    addSignificantTermsHistogramAction([
+                      {
+                        fieldName,
+                        fieldValue,
+                        histogram,
+                      },
+                    ])
+                  );
+                }
               }
 
               endWithUpdatedLoadingState();
