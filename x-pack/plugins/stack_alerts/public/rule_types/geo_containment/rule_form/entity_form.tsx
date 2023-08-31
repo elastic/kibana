@@ -68,12 +68,12 @@ export const EntityForm = (props: Props) => {
     setDataViewNotFound(false);
     props.data.indexPatterns
       .get(props.ruleParams.indexId)
-      .then((dataView) => {
+      .then((nextDataView) => {
         if (!ignore) {
-          setDataView(dataView);
-          setDateFields(getDateFields(dataView.fields));
-          setEntityFields(getEntityFields(dataView.fields));
-          setGeoFields(getGeoFields(dataView.fields));
+          setDataView(nextDataView);
+          setDateFields(getDateFields(nextDataView.fields));
+          setEntityFields(getEntityFields(nextDataView.fields));
+          setGeoFields(getGeoFields(nextDataView.fields));
           setIsLoading(false);
         }
       })
@@ -87,7 +87,7 @@ export const EntityForm = (props: Props) => {
     return () => {
       ignore = true;
     };
-  }, [props.ruleParams.indexId]);
+  }, [props.ruleParams.indexId, dataView?.id, props.data.indexPatterns]);
 
   function getDataViewError() {
     const validationError = props.getValidationError('index');
@@ -151,16 +151,16 @@ export const EntityForm = (props: Props) => {
             dataViewId={props.ruleParams.indexId}
             data={props.data}
             isInvalid={Boolean(dataViewError)}
-            onChange={(dataView: DataView) => {
-              if (!dataView.id) {
+            onChange={(nextDataView: DataView) => {
+              if (!nextDataView.id) {
                 return;
               }
-              props.setDataViewId(dataView.id);
-              props.setDataViewTitle(dataView.title);
+              props.setDataViewId(nextDataView.id);
+              props.setDataViewTitle(nextDataView.title);
 
-              const dateFields = getDateFields(dataView.fields);
-              if (dateFields.length) {
-                props.setDateField(dateFields[0].name);
+              const nextDateFields = getDateFields(nextDataView.fields);
+              if (nextDateFields.length) {
+                props.setDateField(nextDateFields[0].name);
               } else if ('dateField' in props.ruleParams) {
                 props.setDateField('');
               }
@@ -171,9 +171,9 @@ export const EntityForm = (props: Props) => {
                 props.setEntityField('');
               }
 
-              const geoFields = getGeoFields(dataView.fields);
-              if (geoFields.length) {
-                props.setGeoField(geoFields[0].name);
+              const nextGeoFields = getGeoFields(nextDataView.fields);
+              if (nextGeoFields.length) {
+                props.setGeoField(nextGeoFields[0].name);
               } else if ('geoField' in props.ruleParams) {
                 props.setGeoField('');
               }
