@@ -24,7 +24,7 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
-import { getPalette, availablePalettes, NeutralPalette } from '@kbn/coloring';
+import { getPalette, AVAILABLE_PALETTES, NeutralPalette } from '@kbn/coloring';
 import { SPECIAL_TOKENS_STRING_CONVERTION } from '@kbn/coloring/src/shared_components/color_mapping/color/rule_matching';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
@@ -490,7 +490,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     layer.colorMapping && splitColumnIds.length > 0
       ? getColorSeriesAccessorFn(
           JSON.parse(layer.colorMapping), // the color mapping is at this point just a strinfigied JSON
-          getPalette(availablePalettes, NeutralPalette),
+          getPalette(AVAILABLE_PALETTES, NeutralPalette),
           isDarkMode,
           {
             type: 'categories',

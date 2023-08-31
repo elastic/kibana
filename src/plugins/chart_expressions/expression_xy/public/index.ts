@@ -17,5 +17,3 @@ export function plugin() {
 export { LayerTypes, XYCurveTypes } from '../common';
 
 export type { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
-
-export { getColorCategories } from './helpers/color/categories';

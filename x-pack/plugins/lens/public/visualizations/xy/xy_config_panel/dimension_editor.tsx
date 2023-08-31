@@ -30,8 +30,7 @@ import {
   SPECIAL_TOKENS_STRING_CONVERTION,
   AVAILABLE_PALETTES,
 } from '@kbn/coloring';
-
-import { getColorCategories } from '@kbn/expression-xy-plugin/public';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
 import { FormatFactory } from '../../../../common/types';

@@ -12,8 +12,8 @@ import {
   getColorFactory,
   SPECIAL_TOKENS_STRING_CONVERTION,
   getPalette,
-  availablePalettes,
   NeutralPalette,
+  AVAILABLE_PALETTES,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -147,7 +147,7 @@ function getColorFromMappingFactory(
       : getColorCategories(rows, columns[0]?.id);
   return getColorFactory(
     JSON.parse(colorMapping),
-    getPalette(availablePalettes, NeutralPalette),
+    getPalette(AVAILABLE_PALETTES, NeutralPalette),
     isDarkMode,
     {
       type: 'categories',

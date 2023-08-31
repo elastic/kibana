@@ -12,7 +12,8 @@
       "fieldFormats",
       "charts",
       "visualizations",
-      "presentationUtil"
+      "presentationUtil",
+      "data"
     ],
     "optionalPlugins": [
       "usageCollection"

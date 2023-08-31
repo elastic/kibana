@@ -122,7 +122,6 @@ export const TagCloudChart = ({
       isDarkMode,
       colorMapping
     );
-    console.log(`has color mappaing`, colorMapping, colorFromMappingFn);
 
     return visData.rows.map((row) => {
       const tag = tagColumn === undefined ? 'all' : row[tagColumn];

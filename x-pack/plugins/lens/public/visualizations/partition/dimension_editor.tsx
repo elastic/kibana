@@ -26,7 +26,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { useState, useCallback } from 'react';
-import { getColorCategories } from '@kbn/expression-xy-plugin/public';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import { PieVisualizationState } from '../../../common/types';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { PalettePanelContainer, PalettePicker } from '../../shared_components';
