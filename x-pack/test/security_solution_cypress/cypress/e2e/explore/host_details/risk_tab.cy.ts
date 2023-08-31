@@ -14,7 +14,7 @@ import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 describe('risk tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_hosts');
+    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
   });
 
   beforeEach(() => {

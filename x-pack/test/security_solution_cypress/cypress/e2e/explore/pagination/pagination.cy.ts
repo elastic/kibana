@@ -24,7 +24,7 @@ import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagina
 describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   describe('Host uncommon processes table)', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'host_uncommon_processes');
+      cy.task('esArchiverLoad', { archiveName: 'host_uncommon_processes' });
     });
 
     beforeEach(() => {
@@ -100,7 +100,7 @@ describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   describe('All users and all Hosts tables', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'all_users');
+      cy.task('esArchiverLoad', { archiveName: 'all_users' });
     });
 
     beforeEach(() => {

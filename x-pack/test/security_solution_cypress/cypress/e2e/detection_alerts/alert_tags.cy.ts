@@ -35,7 +35,7 @@ describe('Alert tagging', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    cy.task('esArchiverLoad', 'endpoint');
+    cy.task('esArchiverLoad', { archiveName: 'endpoint' });
     createRule(getNewRule({ rule_id: 'new custom rule' }));
     visit(ALERTS_URL);
     waitForAlertsToPopulate();

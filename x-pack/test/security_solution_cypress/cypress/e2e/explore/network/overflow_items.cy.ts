@@ -26,7 +26,7 @@ const testDomainTwo = 'myTest2';
 describe('Overflow items', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   context('Network stats and tables', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'network');
+      cy.task('esArchiverLoad', { archiveName: 'network' });
     });
 
     beforeEach(() => {

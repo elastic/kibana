@@ -122,8 +122,8 @@ describe('indicator match', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () =>
 
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'threat_indicator');
-      cy.task('esArchiverLoad', 'suspicious_source_event');
+      cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
+      cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
     });
 
     beforeEach(() => {
