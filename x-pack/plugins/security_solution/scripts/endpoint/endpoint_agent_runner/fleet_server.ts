@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { CA_CERT_PATH, ES_CERT_PATH, KBN_CERT_PATH, FLEET_SERVER_CERT_PATH, FLEET_SERVER_KEY_PATH } from '@kbn/dev-utils';
+import {
+  CA_CERT_PATH,
+  ES_CERT_PATH,
+  KBN_CERT_PATH,
+  FLEET_SERVER_CERT_PATH,
+  FLEET_SERVER_KEY_PATH,
+} from '@kbn/dev-utils';
 import type {
   AgentPolicy,
   CreateAgentPolicyResponse,
@@ -60,7 +66,8 @@ export const runFleetServerIfNeeded = async (): Promise<
 
   try {
     fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
-    const serviceToken = 'AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6cWtqR1hSS2FRSzIyb01McFg3aTQwdw'; // await generateFleetServiceToken();
+    const serviceToken =
+      'AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6cWtqR1hSS2FRSzIyb01McFg3aTQwdw'; // await generateFleetServiceToken();
 
     if (isKibanaOnLocalhost) {
       await configureFleetIfNeeded();
