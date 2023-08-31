@@ -47,7 +47,8 @@ export const useIndexData = (
   dataView: SearchItems['dataView'],
   query: TransformConfigQuery,
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
-  timeRangeMs?: TimeRangeMs
+  timeRangeMs?: TimeRangeMs,
+  populatedFields?: Set<string> | null
 ): UseIndexDataReturnType => {
   const { analytics } = useAppDependencies();
 
@@ -101,7 +102,8 @@ export const useIndexData = (
       },
     },
     // Check whether fetching should be enabled
-    !(dataView.timeFieldName !== undefined && timeRangeMs === undefined)
+    // If populatedFields are not provided, make own request to calculate
+    !!populatedFields && !(dataView.timeFieldName !== undefined && timeRangeMs === undefined)
   );
 
   useEffect(() => {
@@ -128,6 +130,10 @@ export const useIndexData = (
   }, [dataViewFieldsData, dataViewFieldsError, dataViewFieldsIsError, dataViewFieldsIsLoading]);
 
   const dataViewFields = useMemo(() => {
+    if (populatedFields) {
+      return [...populatedFields];
+    }
+
     if (dataViewFieldsData) {
       const docs = dataViewFieldsData.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
@@ -138,7 +144,8 @@ export const useIndexData = (
         .filter((d) => allDataViewFields.includes(d))
         .sort();
     }
-  }, [dataView, dataViewFieldsData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewFieldsData, populatedFields]);
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
     if (typeof dataViewFields === 'undefined') {
