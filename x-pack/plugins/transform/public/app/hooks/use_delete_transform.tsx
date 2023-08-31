@@ -35,8 +35,8 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const { canDeleteIndex: userCanDeleteIndex } = useTransformCapabilities();
 
   const userCanDeleteDataView =
-    (capabilities.savedObjectsManagement && capabilities.savedObjectsManagement.delete === true) ||
-    (capabilities.indexPatterns && capabilities.indexPatterns.save === true);
+    capabilities.savedObjectsManagement?.delete === true ||
+    capabilities.indexPatterns?.save === true;
 
   const [deleteDestIndex, setDeleteDestIndex] = useState<boolean>(true);
   const [deleteDataView, setDeleteDataView] = useState<boolean>(userCanDeleteDataView);

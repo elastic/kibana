@@ -93,8 +93,8 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
 
     const canCreateDataView = useMemo(
       () =>
-        capabilities.savedObjectsManagement.edit === true ||
-        capabilities.indexPatterns.save === true,
+        capabilities.savedObjectsManagement?.edit === true ||
+        capabilities.indexPatterns?.save === true,
       [capabilities]
     );
 
