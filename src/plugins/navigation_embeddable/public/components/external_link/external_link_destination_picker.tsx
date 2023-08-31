@@ -8,7 +8,7 @@
 
 import useMount from 'react-use/lib/useMount';
 import useUnmount from 'react-use/lib/useUnmount';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 
 import { EuiFieldText } from '@elastic/eui';
 

@@ -15,7 +15,7 @@ import {
   DashboardDrilldownOptions,
   DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from '@kbn/presentation-util-plugin/public';
-import { EuiButtonEmpty, EuiListGroupItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
