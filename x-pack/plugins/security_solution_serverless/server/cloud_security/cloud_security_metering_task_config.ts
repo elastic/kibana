@@ -8,7 +8,7 @@
 import { cloudSecurityMetringCallback } from './cloud_security_metering';
 import type { MetringTaskProperties } from '../types';
 
-const TASK_INTERVAL = 3600; // 1 hour
+const TASK_INTERVAL = 120; // 1 hour
 
 export const cloudSecurityMetringTaskProperties: MetringTaskProperties = {
   taskType: 'cloud-security-usage-reporting-task',
