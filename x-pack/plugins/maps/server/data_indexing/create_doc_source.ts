@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { IndicesCreateRequest, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IndicesCreateRequest,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import { DataViewsCommonService } from '@kbn/data-plugin/server';
 import { CreateDocSourceResp } from '../../common/types';
