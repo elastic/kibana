@@ -4,9 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { nginxActiveConnections, nginxRequestRate } from '../metric_charts/nginx';
+import {
+  nginxActiveConnections,
+  nginxRequestRate,
+  nginxRequestsPerConnection,
+} from '../metric_charts/nginx';
 import type { XYConfig } from '../metric_charts/types';
 
-export const nginxStubstatusMetrics: XYConfig[] = [nginxActiveConnections, nginxRequestRate];
+export const nginxStubstatusMetrics: XYConfig[] = [
+  nginxActiveConnections,
+  nginxRequestRate,
+  nginxRequestsPerConnection,
+];
 
 export const nginxAccessMetrics: XYConfig[] = []; // TODO

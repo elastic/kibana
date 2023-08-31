@@ -45,3 +45,18 @@ export const nginxActiveConnections: XYConfig = {
     axisLeft: XY_OVERRIDES.axisLeft,
   },
 };
+
+export const nginxRequestsPerConnection: XYConfig = {
+  id: 'RequestsPerConnection',
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.nginx.requestsPerConnection', {
+    defaultMessage: 'Requests Per Connection',
+  }),
+
+  layers: [
+    {
+      data: [hostLensFormulas.nginxRequestsPerConnection],
+      type: 'visualization',
+    },
+  ],
+  dataViewOrigin: 'metrics',
+};

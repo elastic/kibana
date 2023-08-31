@@ -33,6 +33,7 @@ import {
   memoryCache,
   nginxActiveConnections,
   nginxRequestRate,
+  nginxRequestsPerConnection,
   rx,
   tx,
   hostCount,
@@ -67,6 +68,7 @@ export const hostLensFormulas = {
   memoryCache,
   nginxActiveConnections,
   nginxRequestRate,
+  nginxRequestsPerConnection,
   rx,
   tx,
 };
