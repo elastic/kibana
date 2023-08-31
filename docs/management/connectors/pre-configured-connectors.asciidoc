@@ -128,7 +128,7 @@ xpack.actions.preconfigured:
       executionTimeField: my-field <2>
 --
 <1> The {es} index to be written to.
-<2> An time field that will indicate when each alert condition occurs.
+<2> A time field that will indicate when each alert condition occurs.
 
 [float]
 [[preconfigured-server-log-configuration]]
