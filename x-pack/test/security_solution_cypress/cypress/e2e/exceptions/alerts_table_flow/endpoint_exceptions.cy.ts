@@ -56,7 +56,7 @@ describe.skip(
       cy.task('esArchiverResetKibana');
       login();
       deleteAlertsAndRules();
-      cy.task('esArchiverLoad', 'endpoint');
+      cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       createRule(getEndpointRule());
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
