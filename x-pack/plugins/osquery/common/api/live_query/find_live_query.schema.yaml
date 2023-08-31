@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Find Live Queries Schema
-  version: 8.11.0
+  version: '2023-10-31'
 paths: { }
 components:
   parameters:

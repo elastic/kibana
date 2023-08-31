@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Get package policies schema
-  version: 8.11.0
+  version: '1'
 paths: { }
 components:
   parameters:
