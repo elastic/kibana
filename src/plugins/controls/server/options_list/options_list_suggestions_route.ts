@@ -111,10 +111,7 @@ export const setupOptionsListSuggestionsRoute = (
     }
     const validationBuilder = getValidationAggregationBuilder();
 
-    let controlRuntimeFieldMap = {} as OptionsListRequestBody['runtimeFieldMap'];
-    if (suggestionBuilder.buildRuntimeFieldMapping) {
-      controlRuntimeFieldMap = suggestionBuilder.buildRuntimeFieldMapping(request) ?? {};
-    }
+    const controlRuntimeFieldMap = {} as OptionsListRequestBody['runtimeFieldMap'];
     const suggestionAggregation: any = suggestionBuilder.buildAggregation(request) ?? {};
     const builtValidationAggregation = validationBuilder.buildAggregation(request);
     const validationAggregations = builtValidationAggregation
