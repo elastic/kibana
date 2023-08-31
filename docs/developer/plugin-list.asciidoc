@@ -411,6 +411,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/visualize_list_client/README.md[visualizeListClient]
+|A Kibana plugin
+
+
 |===
 
 [discrete]
