@@ -20,7 +20,7 @@ image::images/webhook-connector.png[A screenshot displaying the new SSL authenti
 
 [discrete]
 ==== Conditional actions
-When creating an observability alerting rule, you define conditions that must be met to trigger an. Now you can also add conditions that affect the actions associated with an alert. For example, you might choose to send notifications only if the alert is received between defined hours.
+When creating an observability alerting rule, you define conditions that must be met to trigger an action. Now you can also add conditions that affect the actions associated with an alert. For example, you might choose to send notifications only if the alert is received between defined hours.
 
 [role="screenshot"]
 image::images/conditional-actions.png[An example of the UI for triggering an action and alert, width=70%]
