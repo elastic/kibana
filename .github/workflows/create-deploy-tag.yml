@@ -79,7 +79,7 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*GitHub job:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.job }}|${{ github.job }}>"
+                      "text": "*Workflow run id:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
                     }
                   ]
                 },
@@ -194,7 +194,7 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*GitHub job:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.job }}|${{ github.job }}>"
+                      "text": "*Workflow run id:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
                     }
                   ]
                 },
