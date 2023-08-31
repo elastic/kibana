@@ -21,6 +21,7 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
 import { Index } from '../../../../../../common';
 import { INDEX_OPEN } from '../../../../../../common/constants';
+import { Error } from '../../../../../shared_imports';
 import { loadIndex } from '../../../../services';
 import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
@@ -87,7 +88,7 @@ export const DetailsPage: React.FunctionComponent<
 }) => {
   const { config } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error | null>(null);
   const [index, setIndex] = useState<Index | null>();
 
   const fetchIndexDetails = useCallback(async () => {
@@ -200,7 +201,9 @@ export const DetailsPage: React.FunctionComponent<
           />
           <Route
             path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Settings}`}
-            component={DetailsPageSettings}
+            render={(props: RouteComponentProps<{ indexName: string }>) => (
+              <DetailsPageSettings {...props} isIndexOpen={index?.status === 'open'} />
+            )}
           />
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Pipelines}`}
