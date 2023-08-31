@@ -52,16 +52,172 @@ jobs:
         run: |
           git tag ${TAG_NAME} ${COMMIT}
           git push origin "refs/tags/${TAG_NAME}"
-      - name: Post Slack message
-        if: always()
-        id: slack
+      - name: Post Slack success message
+        if: success()
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          # Channel ID for #kibana-mission-control
-          channel-id: "C05NJL80DB8"
           payload: |
             {
-              "text": "Initiate Serverless Deploy GitHub Workflow: ${{ job.status }}\nWorkflow: https://github.com/elastic/kibana/actions/workflows/create-deploy-tag.yml${{ job.status == 'success' && format('\nTag: `{0}`\nCommit: `{1}`', env.TAG_NAME, env.COMMIT) || '' }}"
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "A new <https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|commit> has been promoted to QA 🎉\n\nOnce promotion is complete, please begin any required manual testing.\n\n*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA."
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Initiated by:*\n<https://github.com/${{ github.triggering_actor }}|${{ github.triggering_actor }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Git tag:*\n<https://github.com/elastic/kibana/releases/tag/${{ env.TAG_NAME }}|${{ env.TAG_NAME }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Expected Staging promotion date:"
+                  },
+                  "accessory": {
+                    "type": "datepicker",
+                    "placeholder": {
+                      "type": "plain_text",
+                      "text": "Select a date",
+                      "emoji": true
+                    },
+                    "action_id": "datepicker-action"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Kibana Serverless Quality Gate for QA"
+                  },
+                  "accessory": {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View",
+                      "emoji": true
+                    },
+                    "value": "buildkite_qa_qg",
+                    "url": "https://buildkite.com/elastic/kibana-tests/builds?branch=run-kibana-quality-gate-suites",
+                    "action_id": "button-action"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Release process playbook"
+                  },
+                  "accessory": {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View",
+                      "emoji": true
+                    },
+                    "value": "platbook",
+                    "url": "https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr",
+                    "action_id": "button-action"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Day 1 to-do list*"
+                  },
+                  "accessory": {
+                    "type": "checkboxes",
+                    "options": [
+                      {
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "Verify successful promotion to QA"
+                        },
+                        "value": "value-0"
+                      },
+                      {
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "Notify Security Solution team to beging manual testing"
+                        },
+                        "value": "value-1"
+                      }
+                    ],
+                    "action_id": "checkboxes-action"
+                  }
+                }
+              ]
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_TAGGER_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      - name: Post Slack failure message
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Promotion of <https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|commit> to QA failed ⛔️"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Initiated by:*\n<https://github.com/${{ github.triggering_actor }}|${{ github.triggering_actor }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Git tag:*\n<https://github.com/elastic/kibana/releases/tag/${{ env.TAG_NAME }}|${{ env.TAG_NAME }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Release process playbook"
+                  },
+                  "accessory": {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View",
+                      "emoji": true
+                    },
+                    "value": "platbook",
+                    "url": "https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr",
+                    "action_id": "button-action"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_TAGGER_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
