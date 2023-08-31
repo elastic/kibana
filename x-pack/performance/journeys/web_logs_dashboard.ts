@@ -7,7 +7,6 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_logs'],
@@ -19,7 +18,7 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Web Logs Dashboard', async ({ page, log }) => {
+  .step('Go to Web Logs Dashboard', async ({ page, kibanaPage }) => {
     await page.click(subj('dashboardListingTitleLink-[Logs]-Web-Traffic'));
-    await waitForVisualizations(page, log, 11);
+    await kibanaPage.waitForVisualizations(11);
   });

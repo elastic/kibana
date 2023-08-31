@@ -14,8 +14,8 @@ import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/s
 import type {
   RuleExecutionResult,
   GetRuleExecutionResultsResponse,
-} from '../../../../../../../../../common/detection_engine/rule_monitoring';
-import { RuleExecutionStatus } from '../../../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   ExecutionEventAggregationOptions,
   ExecutionUuidAggResult,

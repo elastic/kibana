@@ -16,12 +16,16 @@ export function createTestConfig(options: CreateTestConfigOptions) {
     return {
       ...svlSharedConfig.getAll(),
 
-      services,
+      services: {
+        ...services,
+        ...options.services,
+      },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
+          ...(options.kbnServerArgs || []),
         ],
       },
       testFiles: options.testFiles,

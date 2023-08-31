@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { Conversation } from '../..';
 import type { Message } from '../assistant_context/types';
 import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
@@ -26,7 +27,7 @@ export const getMessageFromRawResponse = (rawResponse: string): Message => {
   }
 };
 
-export const getWelcomeConversation = (
+export const getBlockBotConversation = (
   conversation: Conversation,
   isAssistantEnabled: boolean
 ): Conversation => {
@@ -49,3 +50,12 @@ export const getWelcomeConversation = (
     messages: [...conversation.messages, ...WELCOME_CONVERSATION.messages],
   };
 };
+
+/**
+ * Returns a default connector if there is only one connector
+ * @param connectors
+ */
+export const getDefaultConnector = (
+  connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> | undefined
+): ActionConnector<Record<string, unknown>, Record<string, unknown>> | undefined =>
+  connectors?.length === 1 ? connectors[0] : undefined;

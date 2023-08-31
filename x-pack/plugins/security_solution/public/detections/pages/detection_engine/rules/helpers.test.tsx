@@ -24,7 +24,7 @@ import {
   mockRule,
 } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
+import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {
@@ -144,6 +144,7 @@ describe('rule helpers', () => {
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',
         timestampOverrideFallbackDisabled: false,
+        investigationFields: [],
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
@@ -180,6 +181,14 @@ describe('rule helpers', () => {
       const result: AboutStepRule = getAboutStepsData(mockedRule, false);
 
       expect(result.note).toEqual('');
+    });
+
+    test('returns customHighlightedField as empty array if property does not exist on rule', () => {
+      const mockedRule = mockRuleWithEverything('test-id');
+      delete mockedRule.investigation_fields;
+      const result: AboutStepRule = getAboutStepsData(mockedRule, false);
+
+      expect(result.investigationFields).toEqual([]);
     });
   });
 

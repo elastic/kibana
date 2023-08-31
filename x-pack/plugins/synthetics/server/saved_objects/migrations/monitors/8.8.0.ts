@@ -13,7 +13,7 @@ import {
   ConfigKey,
   MonitorFields,
   ScheduleUnit,
-  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitorWithSecretsAttributes,
   ThrottlingConfig,
 } from '../../../../common/runtime_types';
 import {
@@ -35,18 +35,18 @@ import {
 
 export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => {
   return encryptedSavedObjects.createMigration<
-    SyntheticsMonitorWithSecrets,
-    SyntheticsMonitorWithSecrets
+    SyntheticsMonitorWithSecretsAttributes,
+    SyntheticsMonitorWithSecretsAttributes
   >({
     isMigrationNeededPredicate: function shouldBeMigrated(
       doc
-    ): doc is SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets> {
+    ): doc is SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes> {
       return true;
     },
     migration: (
-      doc: SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>,
+      doc: SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>,
       logger
-    ): SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets> => {
+    ): SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes> => {
       let migrated = doc;
       migrated = {
         ...migrated,
@@ -131,7 +131,7 @@ const omitZipUrlFields = (fields: BrowserFields) => {
 
 const updateThrottlingFields = (
   doc: SavedObjectUnsanitizedDoc<
-    SyntheticsMonitorWithSecrets &
+    SyntheticsMonitorWithSecretsAttributes &
       Partial<{
         [LegacyConfigKey.THROTTLING_CONFIG]: string;
         [LegacyConfigKey.IS_THROTTLING_ENABLED]: boolean;

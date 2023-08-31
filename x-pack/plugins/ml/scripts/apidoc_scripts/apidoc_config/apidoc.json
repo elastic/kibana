@@ -89,7 +89,7 @@
     "NewJobPopulationChart",
     "GetAllJobAndGroupIds",
     "GetLookBackProgress",
-    "ValidateCategoryExamples",
+    "ValidateCategoryValidation",
     "TopCategories",
     "DatafeedPreview",
     "UpdateGroups",
@@ -177,6 +177,8 @@
     "DeleteTrainedModel",
     "SimulateIngestPipeline",
     "InferTrainedModelDeployment",
+    "CreateInferencePipeline",
+    "GetIngestPipelines",
 
     "Alerting",
     "PreviewAlert",

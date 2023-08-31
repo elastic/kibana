@@ -82,6 +82,7 @@ export const metricsExplorerTimestampsRT = t.type({
   fromTimestamp: t.number,
   toTimestamp: t.number,
   interval: t.string,
+  timeFieldName: t.string,
 });
 export type MetricsExplorerTimestampsRT = t.TypeOf<typeof metricsExplorerTimestampsRT>;
 
@@ -181,9 +182,10 @@ export const useMetricsExplorerOptions = () => {
     to,
     interval: DEFAULT_TIMERANGE.interval,
   });
-  const [timestamps, setTimestamps] = useState<MetricsExplorerTimestampsRT>(
-    getDefaultTimeRange({ from, to })
-  );
+  const [timestamps, setTimestamps] = useState<MetricsExplorerTimestampsRT>({
+    ...getDefaultTimeRange({ from, to }),
+    timeFieldName: '@timestamp',
+  });
 
   useSyncKibanaTimeFilterTime(TIME_DEFAULTS, {
     from: timeRange.from,

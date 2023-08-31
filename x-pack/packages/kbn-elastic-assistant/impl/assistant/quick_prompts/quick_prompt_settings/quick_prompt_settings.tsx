@@ -198,6 +198,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
             disabled={selectedQuickPrompt == null}
             fullWidth
             onChange={handlePromptChange}
+            placeholder={i18n.QUICK_PROMPT_PROMPT_PLACEHOLDER}
             value={prompt}
             css={css`
               min-height: 150px;

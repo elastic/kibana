@@ -19,9 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const { dashboardControls, timePicker, common, dashboard, header } = getPageObjects([
+  const { dashboardControls, common, dashboard, header } = getPageObjects([
     'dashboardControls',
-    'timePicker',
     'dashboard',
     'common',
     'header',
@@ -46,16 +45,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
+      await common.setTime({
+        from: 'Oct 22, 2018 @ 00:00:00.000',
+        to: 'Dec 3, 2018 @ 00:00:00.000',
+      });
       await common.navigateToApp('dashboard');
       await dashboardControls.enableControlsLab();
       await common.navigateToApp('dashboard');
       await dashboard.preserveCrossAppState();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
-      await timePicker.setAbsoluteRange(
-        'Oct 22, 2018 @ 00:00:00.000',
-        'Dec 3, 2018 @ 00:00:00.000'
-      );
       await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
     });
 
@@ -66,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.uiSettings.unset('defaultIndex');
+      await common.unsetTime();
       await security.testUser.restoreDefaults();
     });
 
@@ -218,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetUpperBound(firstId, '400');
       });
 
-      it('hides range slider in popover when no data available', async () => {
+      it('cannot open popover when no data available', async () => {
         await dashboardControls.createControl({
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
@@ -226,10 +226,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           width: 'small',
         });
         const secondId = (await dashboardControls.getAllControlIds())[1];
-        await dashboardControls.rangeSliderOpenPopover(secondId);
-        await dashboardControls.rangeSliderPopoverAssertOpen();
+        await testSubjects.click(
+          `range-slider-control-${secondId} > rangeSlider__lowerBoundFieldNumber`
+        ); // try to open popover
         await testSubjects.missingOrFail('rangeSlider__slider');
-        expect((await testSubjects.getVisibleText('rangeSlider__helpText')).length).to.be.above(0);
       });
     });
 

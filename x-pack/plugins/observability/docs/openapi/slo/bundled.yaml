@@ -8,19 +8,22 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: http://localhost:5601
+    description: local
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
 tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
   - name: composite slo
     description: Composite SLO APIs enable you to define, manage and track a group of SLOs.
-servers:
-  - url: http://localhost:5601
-    description: local
 paths:
   /s/{spaceId}/api/observability/slos:
     post:
       summary: Creates an SLO.
-      operationId: createSlo
+      operationId: createSloOp
       description: |
         You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
@@ -69,7 +72,7 @@ paths:
         - url: https://localhost:5601
     get:
       summary: Retrieves a paginated list of SLOs
-      operationId: findSlos
+      operationId: findSlosOp
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
@@ -77,21 +80,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
-        - name: name
+        - name: kqlQuery
           in: query
-          description: Filter by name
+          description: A valid kql query to filter the SLO with
           schema:
             type: string
-          example: awesome-service
-        - name: indicatorTypes
-          in: query
-          description: Filter by indicator type
-          schema:
-            type: array
-            items:
-              type: string
-          example:
-            - sli.kql.custom
+          example: 'slo.name:latency* and slo.tags : "prod"'
         - name: page
           in: query
           description: The page number to return
@@ -105,17 +99,19 @@ paths:
           schema:
             type: integer
             default: 25
-          example: 20
+          example: 25
         - name: sortBy
           in: query
           description: Sort by field
           schema:
             type: string
             enum:
-              - creationTime
-              - indicatorType
-            default: creationTime
-          example: creationTime
+              - sli_value
+              - status
+              - error_budget_consumed
+              - error_budget_remaining
+            default: status
+          example: status
         - name: sortDirection
           in: query
           description: Sort order
@@ -160,7 +156,7 @@ paths:
   /s/{spaceId}/api/observability/slos/{sloId}:
     get:
       summary: Retrieves a SLO
-      operationId: getSlo
+      operationId: getSloOp
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
@@ -169,6 +165,12 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
         - $ref: '#/components/parameters/slo_id'
+        - name: instanceId
+          in: query
+          description: the specific instanceId used by the summary calculation
+          schema:
+            type: string
+          example: host-abcde
       responses:
         '200':
           description: Successful request
@@ -202,7 +204,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
     put:
       summary: Updates an SLO
-      operationId: updateSlo
+      operationId: updateSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
@@ -250,7 +252,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
     delete:
       summary: Deletes an SLO
-      operationId: deleteSlo
+      operationId: deleteSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
@@ -289,7 +291,7 @@ paths:
   /s/{spaceId}/api/observability/slos/{sloId}/enable:
     post:
       summary: Enables an SLO
-      operationId: enableSlo
+      operationId: enableSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
@@ -328,7 +330,7 @@ paths:
   /s/{spaceId}/api/observability/slos/{sloId}/disable:
     post:
       summary: Disables an SLO
-      operationId: disableSlo
+      operationId: disableSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
@@ -367,7 +369,7 @@ paths:
   /s/{spaceId}/internal/observability/slos/_historical_summary:
     post:
       summary: Retrieves the historical summary for a list of SLOs
-      operationId: historicalSummary
+      operationId: historicalSummaryOp
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
@@ -440,47 +442,6 @@ components:
         type: string
         example: 9c235211-6834-11ea-a78c-6feb38a34414
   schemas:
-    indicator_properties_custom_kql:
-      title: Custom KQL
-      required:
-        - type
-        - params
-      description: Defines properties for a custom KQL indicator type
-      type: object
-      properties:
-        params:
-          description: An object containing the indicator parameters.
-          type: object
-          nullable: false
-          required:
-            - index
-            - timestampField
-          properties:
-            index:
-              description: The index or index pattern to use
-              type: string
-              example: my-service-*
-            filter:
-              description: the KQL query to filter the documents with.
-              type: string
-              example: 'field.environment : "production" and service.name : "my-service"'
-            good:
-              description: the KQL query used to define the good events.
-              type: string
-              example: 'request.latency <= 150 and request.status_code : "2xx"'
-            total:
-              description: the KQL query used to define all events.
-              type: string
-              example: ''
-            timestampField:
-              description: |
-                The timestamp field used in the source indice.
-              type: string
-              example: timestamp
-        type:
-          description: The type of indicator.
-          type: string
-          example: sli.kql.custom
     indicator_properties_apm_availability:
       title: APM availability
       required:
@@ -528,6 +489,49 @@ components:
           description: The type of indicator.
           type: string
           example: sli.apm.transactionDuration
+    indicator_properties_custom_kql:
+      title: Custom KQL
+      required:
+        - type
+        - params
+      description: Defines properties for a custom KQL indicator type
+      type: object
+      properties:
+        params:
+          description: An object containing the indicator parameters.
+          type: object
+          nullable: false
+          required:
+            - index
+            - timestampField
+            - good
+            - total
+          properties:
+            index:
+              description: The index or index pattern to use
+              type: string
+              example: my-service-*
+            filter:
+              description: the KQL query to filter the documents with.
+              type: string
+              example: 'field.environment : "production" and service.name : "my-service"'
+            good:
+              description: the KQL query used to define the good events.
+              type: string
+              example: 'request.latency <= 150 and request.status_code : "2xx"'
+            total:
+              description: the KQL query used to define all events.
+              type: string
+              example: ''
+            timestampField:
+              description: |
+                The timestamp field used in the source indice.
+              type: string
+              example: timestamp
+        type:
+          description: The type of indicator.
+          type: string
+          example: sli.kql.custom
     indicator_properties_apm_latency:
       title: APM latency
       required:
@@ -853,9 +857,23 @@ components:
           description: Configure how often the transform runs, default 1m
           type: string
           example: 5m
+    summary_status:
+      title: summary status
+      type: string
+      enum:
+        - NO_DATA
+        - HEALTHY
+        - DEGRADING
+        - VIOLATED
+      example: HEALTHY
     error_budget:
       title: Error budget
       type: object
+      required:
+        - initial
+        - consumed
+        - remaining
+        - isEstimated
       properties:
         initial:
           type: number
@@ -877,15 +895,13 @@ components:
       title: Summary
       type: object
       description: The SLO computed data
+      required:
+        - status
+        - sliValue
+        - errorBudget
       properties:
         status:
-          type: string
-          enum:
-            - NO_DATA
-            - HEALTHY
-            - DEGRADING
-            - VIOLATED
-          example: HEALTHY
+          $ref: '#/components/schemas/summary_status'
         sliValue:
           type: number
           example: 0.9836
@@ -894,6 +910,22 @@ components:
     slo_response:
       title: SLO response
       type: object
+      required:
+        - id
+        - name
+        - description
+        - indicator
+        - timeWindow
+        - budgetingMethod
+        - objective
+        - settings
+        - revision
+        - summary
+        - enabled
+        - groupBy
+        - instanceId
+        - createdAt
+        - updatedAt
       properties:
         id:
           description: The identifier of the SLO.
@@ -908,6 +940,14 @@ components:
           type: string
           example: My SLO description
         indicator:
+          discriminator:
+            propertyName: type
+            mapping:
+              sli.apm.transactionErrorRate: '#/components/schemas/indicator_properties_apm_availability'
+              sli.kql.custom: '#/components/schemas/indicator_properties_custom_kql'
+              sli.apm.transactionDuration: '#/components/schemas/indicator_properties_apm_latency'
+              sli.metric.custom: '#/components/schemas/indicator_properties_custom_metric'
+              sli.histogram.custom: '#/components/schemas/indicator_properties_histogram'
           oneOf:
             - $ref: '#/components/schemas/indicator_properties_custom_kql'
             - $ref: '#/components/schemas/indicator_properties_apm_availability'
@@ -932,6 +972,14 @@ components:
           description: Indicate if the SLO is enabled
           type: boolean
           example: true
+        groupBy:
+          description: optional group by field to use to generate an SLO per distinct value
+          type: string
+          example: some.field
+        instanceId:
+          description: the value derived from the groupBy field, if present, otherwise '*'
+          type: string
+          example: host-abcde
         createdAt:
           description: The creation date
           type: string
@@ -1065,6 +1113,10 @@ components:
           $ref: '#/components/schemas/objective'
         settings:
           $ref: '#/components/schemas/settings'
+        groupBy:
+          description: optional group by field to use to generate an SLO per distinct value
+          type: string
+          example: some.field
     create_slo_response:
       title: Create SLO response
       type: object
@@ -1142,18 +1194,9 @@ components:
               type: string
               example: '2022-01-01T00:00:00.000Z'
             status:
-              type: string
-              enum:
-                - NO_DATA
-                - HEALTHY
-                - DEGRADING
-                - VIOLATED
-              example: HEALTHY
+              $ref: '#/components/schemas/summary_status'
             sliValue:
               type: number
               example: 0.9836
             errorBudget:
               $ref: '#/components/schemas/error_budget'
-security:
-  - basicAuth: []
-  - apiKeyAuth: []

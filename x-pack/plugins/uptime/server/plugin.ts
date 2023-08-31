@@ -19,7 +19,6 @@ import {
   UptimeCorePluginsStart,
   UptimeServerSetup,
 } from './legacy_uptime/lib/adapters';
-import { TelemetryEventsSender } from './legacy_uptime/lib/telemetry/sender';
 import {
   registerUptimeSavedObjects,
   savedObjectsAdapter,
@@ -28,18 +27,14 @@ import { UptimeConfig } from '../common/config';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { uptimeRuleTypeFieldMap } from './legacy_uptime/lib/alerts/common';
 
-export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
-
 export class Plugin implements PluginType {
   private initContext: PluginInitializerContext;
   private logger: Logger;
   private server?: UptimeServerSetup;
-  private readonly telemetryEventsSender: TelemetryEventsSender;
 
   constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
     this.initContext = initializerContext;
     this.logger = initializerContext.logger.get();
-    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
   }
 
   public setup(core: CoreSetup, plugins: UptimeCorePluginsSetup) {
@@ -65,19 +60,12 @@ export class Plugin implements PluginType {
 
     this.server = {
       config,
-      router: core.http.createRouter(),
-      cloud: plugins.cloud,
-      stackVersion: this.initContext.env.packageInfo.version,
       basePath: core.http.basePath,
-      logger: this.logger,
-      telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
       share: plugins.share,
-    } as UptimeServerSetup;
+    };
 
-    this.telemetryEventsSender.setup(plugins.telemetry);
-
-    initUptimeServer(this.server, plugins, ruleDataClient, this.logger);
+    initUptimeServer(this.server, plugins, ruleDataClient, this.logger, core.http.createRouter());
 
     registerUptimeSavedObjects(core.savedObjects);
 

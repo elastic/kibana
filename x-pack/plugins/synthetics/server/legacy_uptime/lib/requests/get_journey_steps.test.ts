@@ -6,41 +6,10 @@
  */
 
 import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
-import { getJourneySteps, formatSyntheticEvents } from './get_journey_steps';
+import { getJourneySteps } from './get_journey_steps';
 import { getUptimeESMockClient } from './test_helpers';
 
 describe('getJourneySteps request module', () => {
-  describe('formatStepTypes', () => {
-    it('returns default steps if none are provided', () => {
-      expect(formatSyntheticEvents()).toMatchInlineSnapshot(`
-        Array [
-          "cmd/status",
-          "journey/browserconsole",
-          "step/end",
-          "step/screenshot",
-          "step/screenshot_ref",
-        ]
-      `);
-    });
-
-    it('returns provided step array if isArray', () => {
-      expect(formatSyntheticEvents(['step/end', 'stderr'])).toMatchInlineSnapshot(`
-        Array [
-          "step/end",
-          "stderr",
-        ]
-      `);
-    });
-
-    it('returns provided step string in an array', () => {
-      expect(formatSyntheticEvents('step/end')).toMatchInlineSnapshot(`
-        Array [
-          "step/end",
-        ]
-      `);
-    });
-  });
-
   describe('getJourneySteps', () => {
     let data: any;
     beforeEach(() => {
@@ -178,7 +147,6 @@ describe('getJourneySteps request module', () => {
       const result: JourneyStep[] = await getJourneySteps({
         uptimeEsClient,
         checkGroup: '2bf952dc-64b5-11eb-8b3b-42010a84000d',
-        syntheticEventTypes: ['stderr', 'step/end'],
       });
 
       const call: any = mockEsClient.search.mock.calls[0][0];
@@ -188,8 +156,11 @@ describe('getJourneySteps request module', () => {
         Object {
           "terms": Object {
             "synthetics.type": Array [
-              "stderr",
+              "cmd/status",
+              "journey/browserconsole",
               "step/end",
+              "step/screenshot",
+              "step/screenshot_ref",
             ],
           },
         }

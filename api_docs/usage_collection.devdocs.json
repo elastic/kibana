@@ -483,7 +483,7 @@
               "SearchResponse",
               "<TDocument, TAggregations>>; }; helpers: ",
               "default",
-              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1445,6 +1445,8 @@
               "default",
               "; ssl: ",
               "default",
+              "; synonyms: ",
+              "default",
               "; tasks: ",
               "default",
               "; termsEnum: { (this: That, params: ",
@@ -1940,7 +1942,7 @@
             "section": "def-server.MakeSchemaFrom",
             "text": "MakeSchemaFrom"
           },
-          "<TFetchReturn> | undefined; fetch: ",
+          "<TFetchReturn, false> | undefined; fetch: ",
           {
             "pluginId": "usageCollection",
             "scope": "server",
@@ -1979,9 +1981,9 @@
         "signature": [
           "{ [Key in keyof Required<Base>]: Required<Base>[Key] extends (infer U)[] ? { type: \"array\"; items: ",
           "RecursiveMakeSchemaFrom",
-          "<U>; } : ",
+          "<U, RequireMeta>; } : ",
           "RecursiveMakeSchemaFrom",
-          "<Required<Base>[Key]>; }"
+          "<Required<Base>[Key], RequireMeta>; }"
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
@@ -2023,7 +2025,7 @@
             "section": "def-server.MakeSchemaFrom",
             "text": "MakeSchemaFrom"
           },
-          "<TFetchReturn> | undefined; fetch: ",
+          "<TFetchReturn, false> | undefined; fetch: ",
           {
             "pluginId": "usageCollection",
             "scope": "server",
@@ -2039,7 +2041,7 @@
             "section": "def-server.MakeSchemaFrom",
             "text": "MakeSchemaFrom"
           },
-          "<TFetchReturn> | undefined; fetch: ",
+          "<TFetchReturn, false> | undefined; fetch: ",
           {
             "pluginId": "usageCollection",
             "scope": "server",

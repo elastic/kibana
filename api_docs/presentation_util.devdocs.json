@@ -734,7 +734,7 @@
           "DataViewTriggerProps",
           "; onChangeDataViewId: (newId: string) => void; selectableProps?: Partial<",
           "EuiSelectableProps",
-          "<{}>> | undefined; }> & { readonly _result: ({ dataViews, selectedDataViewId, onChangeDataViewId, trigger, selectableProps, }: { dataViews: ",
+          "<{}>> | undefined; }> & { readonly _result: ({ dataViews, selectedDataViewId, onChangeDataViewId, trigger, selectableProps, ...other }: { dataViews: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -830,7 +830,7 @@
         "signature": [
           "React.ExoticComponent<",
           "FieldPickerProps",
-          "> & { readonly _result: ({ dataView, onSelectField, filterPredicate, selectedFieldName, selectableProps, }: ",
+          "> & { readonly _result: ({ dataView, onSelectField, filterPredicate, selectedFieldName, selectableProps, ...other }: ",
           "FieldPickerProps",
           ") => JSX.Element; }"
         ],
@@ -1709,7 +1709,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
+              "(solutions?: (\"canvas\" | \"dashboard\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -1731,7 +1731,7 @@
                 "label": "solutions",
                 "description": [],
                 "signature": [
-                  "(\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined"
+                  "(\"canvas\" | \"dashboard\" | \"presentation\")[] | undefined"
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs/types.ts",
                 "deprecated": false,
@@ -3460,7 +3460,7 @@
             "label": "solutions",
             "description": [],
             "signature": [
-              "(\"canvas\" | \"presentation\" | \"dashboard\")[]"
+              "(\"canvas\" | \"dashboard\" | \"presentation\")[]"
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false,
@@ -3639,7 +3639,7 @@
         "label": "SolutionName",
         "description": [],
         "signature": [
-          "\"canvas\" | \"presentation\" | \"dashboard\""
+          "\"canvas\" | \"dashboard\" | \"presentation\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -3785,13 +3785,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DEFER_BELOW_FOLD.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3799,13 +3796,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DEFER_BELOW_FOLD.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3896,13 +3890,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DASHBOARD_CONTROLS.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3910,13 +3901,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DASHBOARD_CONTROLS.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4007,13 +3995,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.BY_VALUE_EMBEDDABLE.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4021,13 +4006,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.BY_VALUE_EMBEDDABLE.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false

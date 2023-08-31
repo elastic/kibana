@@ -34,6 +34,7 @@ export type {
   ChromeUserBanner,
   ChromeProjectNavigation,
   ChromeProjectNavigationNode,
+  CloudLinkId,
   SideNavCompProps,
   SideNavComponent,
   ChromeProjectBreadcrumb,

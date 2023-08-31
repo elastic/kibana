@@ -64,7 +64,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.security.management.apiKeysEmptyPrompt.forbiddenErrorMessage"
-                defaultMessage="Not authorized to manage API keys."
+                defaultMessage="You do not have permission to manage API keys."
               />
             </p>
           }
@@ -147,7 +147,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
 
   return (
     <KibanaPageTemplate.EmptyPrompt
-      iconType="gear"
+      iconType="managementApp"
       title={
         <h1>
           <FormattedMessage
@@ -160,7 +160,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
         <p>
           <FormattedMessage
             id="xpack.security.management.apiKeysEmptyPrompt.emptyMessage"
-            defaultMessage="Allow applications to access Elastic on your behalf."
+            defaultMessage="Allow external services to access the Elastic Stack on your behalf."
           />
         </p>
       }

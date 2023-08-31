@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { User } from '../../../common/api';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { getReporterFilter, getAssigneeFilter } from './get_filter_options';
 import type { ReporterFilter, AssigneeFilter } from './get_filter_options';
+import type { User } from '../../../common/types/domain';
 
 describe('filter options', () => {
   const currentUserProfile = userProfiles[0];

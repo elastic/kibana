@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommentType } from '@kbn/cases-plugin/common/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await cases.api.createAttachment({
         caseId,
-        params: { comment: 'test comment', type: CommentType.user, owner: 'cases' },
+        params: { comment: 'test comment', type: AttachmentType.user, owner: 'cases' },
       });
     });
 

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { escapeKuery } from './escape_kuery';
+export { escapeKuery, escapeQuotes } from './escape_kuery';

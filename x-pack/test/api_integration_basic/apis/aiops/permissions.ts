@@ -11,7 +11,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import expect from '@kbn/expect';
 
-import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
+import type { AiopsApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
 
-  const requestBody: ApiExplainLogRateSpikes['body'] = {
+  const requestBody: AiopsApiLogRateAnalysis['body'] = {
     baselineMax: 1561719083292,
     baselineMin: 1560954147006,
     deviationMax: 1562254538692,
@@ -32,10 +32,10 @@ export default ({ getService }: FtrProviderContext) => {
     timeFieldName: 'order_date',
   };
 
-  describe('POST /internal/aiops/explain_log_rate_spikes', () => {
+  describe('POST /internal/aiops/log_rate_analysis', () => {
     it('should return permission denied without streaming', async () => {
       await supertest
-        .post(`/internal/aiops/explain_log_rate_spikes`)
+        .post(`/internal/aiops/log_rate_analysis`)
         .set('kbn-xsrf', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send(requestBody)
@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return permission denied with streaming', async () => {
-      const response = await fetch(`${kibanaServerUrl}/internal/aiops/explain_log_rate_spikes`, {
+      const response = await fetch(`${kibanaServerUrl}/internal/aiops/log_rate_analysis`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

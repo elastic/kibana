@@ -7,6 +7,7 @@
 
 /** endpoint data streams that are used for host isolation  */
 import { getFileDataIndexName, getFileMetadataIndexName } from '@kbn/fleet-plugin/common';
+import { EndpointSortableField } from './types';
 
 /** for index patterns `.logs-endpoint.actions-* and .logs-endpoint.action.responses-*`*/
 export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
@@ -44,6 +45,8 @@ export const POLICY_RESPONSE_INDEX = 'metrics-endpoint.policy-default';
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
+
+export const ENDPOINT_HEARTBEAT_INDEX = '.logs-endpoint.heartbeat-default';
 
 // File storage indexes supporting endpoint Upload/download
 export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
@@ -97,6 +100,8 @@ export const failedFleetActionErrorCode = '424';
 
 export const ENDPOINT_DEFAULT_PAGE = 0;
 export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
+export const ENDPOINT_DEFAULT_SORT_FIELD = EndpointSortableField.ENROLLED_AT;
+export const ENDPOINT_DEFAULT_SORT_DIRECTION = 'desc';
 
 export const ENDPOINT_ERROR_CODES: Record<string, number> = {
   ES_CONNECTION_ERROR: -272,

@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
  * Helper to cut down on the noise in some of the tests. Does a delete of an exception list.

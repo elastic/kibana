@@ -468,7 +468,7 @@
           },
           " | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"timeRange\" | \"dataView\" | \"services\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\"> & React.RefAttributes<",
+          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\"> & React.RefAttributes<",
           {
             "pluginId": "unifiedHistogram",
             "scope": "public",
@@ -1178,7 +1178,7 @@
           },
           " | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"timeRange\" | \"dataView\" | \"services\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\">"
+          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\">"
         ],
         "path": "src/plugins/unified_histogram/public/container/container.tsx",
         "deprecated": false,

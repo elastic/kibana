@@ -23,6 +23,9 @@ xpack.fleet.agentIdVerificationEnabled: false
 ## APM Serverless Onboarding flow
 xpack.apm.serverlessOnboarding: true
 
+# Fleet specific configuration
+xpack.fleet.internal.capabilities: ['apm', 'uptime', 'observability']
+
 ## Required for force installation of APM Package
 xpack.fleet.packages:
   - name: apm

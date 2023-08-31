@@ -198,7 +198,7 @@ to be displayed).
 
 [[timepicker-refreshintervaldefaults]]`timepicker:refreshIntervalDefaults`::
 The default refresh interval for the time filter. Example:
-`{ "display": "15 seconds", "pause": true, "value": 15000 }`.
+`{ "pause": true, "value": 15000 }`.
 
 [[timepicker-timedefaults]]`timepicker:timeDefaults`::
 The default selection in the time filter.
@@ -429,6 +429,9 @@ preview:[] Sorts services without anomaly detection rules on the APM Service inv
 
 [[observability-default-service-env]]`observability:apmDefaultServiceEnvironment`::
 Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.
+
+[[observability-apm-enable-profiling]]`observability:apmEnableProfilingIntegration`::
+Enable the Universal Profiling integration in APM.
 
 [[observability-enable-aws-lambda-metrics]]`observability:enableAwsLambdaMetrics`::
 preview:[] Display Amazon Lambda metrics in the service metrics tab.

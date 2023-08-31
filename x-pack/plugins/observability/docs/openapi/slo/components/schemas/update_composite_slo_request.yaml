@@ -19,5 +19,4 @@ properties:
   objective:
     $ref: "objective.yaml"
   sources:
-    oneOf:
-      - $ref: "weighted_composite_sources.yaml"
+    - $ref: "weighted_composite_sources.yaml"

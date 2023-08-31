@@ -1,29 +1,33 @@
 {
   "count": {
     "url_params": {
-      "ignore_unavailable": "__flag__",
-      "ignore_throttled": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_indices": "__flag__",
-      "expand_wildcards": [
-        "open",
-        "closed",
-        "hidden",
-        "none",
-        "all"
-      ],
-      "min_score": "",
-      "preference": "random",
-      "routing": [],
-      "q": "",
       "analyzer": "",
       "analyze_wildcard": "__flag__",
       "default_operator": [
-        "AND",
-        "OR"
+        "and",
+        "or"
       ],
       "df": "",
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "ignore_throttled": "__flag__",
+      "ignore_unavailable": "__flag__",
       "lenient": "__flag__",
-      "terminate_after": ""
+      "min_score": "",
+      "preference": "",
+      "routing": "",
+      "terminate_after": "",
+      "q": ""
     },
     "methods": [
       "POST",
@@ -31,8 +35,12 @@
     ],
     "patterns": [
       "_count",
-      "{indices}/_count"
+      "{index}/_count"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-count.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-count.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

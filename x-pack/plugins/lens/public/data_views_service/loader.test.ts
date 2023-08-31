@@ -159,6 +159,65 @@ describe('loader', () => {
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
     });
 
+    it('should move over any time series meta data', async () => {
+      const cache = await loadIndexPatterns({
+        cache: {},
+        patterns: ['foo'],
+        dataViews: {
+          get: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+            metaFields: ['timestamp'],
+            isPersisted: () => true,
+            toSpec: () => ({}),
+            typeMeta: {},
+            fields: [
+              {
+                name: 'timestamp',
+                displayName: 'timestampLabel',
+                type: 'date',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'bytes_counter',
+                displayName: 'bytes_counter',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+                timeSeriesMetric: 'counter',
+              },
+              {
+                name: 'bytes_gauge',
+                displayName: 'bytes_gauge',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+                timeSeriesMetric: 'gauge',
+              },
+              {
+                name: 'dimension',
+                displayName: 'dimension',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+                timeSeriesDimension: true,
+              },
+            ],
+          })),
+          getIdsWithTitle: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+          })),
+          create: jest.fn(),
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+      });
+
+      expect(cache.foo.getFieldByName('bytes_counter')!.timeSeriesMetric).toEqual('counter');
+      expect(cache.foo.getFieldByName('bytes_gauge')!.timeSeriesMetric).toEqual('gauge');
+      expect(cache.foo.getFieldByName('dimension')!.timeSeriesDimension).toEqual(true);
+    });
+
     it('should call the refresh callback when loading new indexpatterns', async () => {
       const onIndexPatternRefresh = jest.fn();
       await loadIndexPatterns({

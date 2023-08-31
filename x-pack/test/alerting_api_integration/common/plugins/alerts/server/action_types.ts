@@ -74,7 +74,12 @@ export function defineActionTypes(
   actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
   actions.registerType(getExcludedActionType());
+
+  /**
+   * System actions
+   */
   actions.registerType(getSystemActionType());
+  actions.registerType(getSystemActionTypeWithKibanaPrivileges());
 
   /** Sub action framework */
 
@@ -420,6 +425,59 @@ function getSystemActionType() {
     },
     isSystemActionType: true,
     async executor({ config, secrets, params, services, actionId }) {
+      return { status: 'ok', actionId };
+    },
+  };
+
+  return result;
+}
+
+function getSystemActionTypeWithKibanaPrivileges() {
+  const result: ActionType<{}, {}, { index?: string; reference?: string }> = {
+    id: 'test.system-action-kibana-privileges',
+    name: 'Test system action with kibana privileges',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    /**
+     * Requires all access to the case feature
+     * in Stack management
+     */
+    getKibanaPrivileges: () => ['cases:cases/createCase'],
+    validate: {
+      params: {
+        schema: schema.any(),
+      },
+      config: {
+        schema: schema.any(),
+      },
+      secrets: {
+        schema: schema.any(),
+      },
+    },
+    isSystemActionType: true,
+    /**
+     * The executor writes a doc to the
+     * testing index. The test uses the doc
+     * to verify that the action is executed
+     * correctly
+     */
+    async executor({ params, services, actionId }) {
+      const { index, reference } = params;
+
+      if (index == null || reference == null) {
+        return { status: 'ok', actionId };
+      }
+
+      await services.scopedClusterClient.index({
+        index,
+        refresh: 'wait_for',
+        body: {
+          params,
+          reference,
+          source: 'action:test.system-action-kibana-privileges',
+        },
+      });
+
       return { status: 'ok', actionId };
     },
   };

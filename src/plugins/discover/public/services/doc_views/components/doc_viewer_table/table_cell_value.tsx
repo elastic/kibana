@@ -9,13 +9,10 @@
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { IgnoredReason } from '../../../../utils/get_ignored_reason';
+import { IgnoredReason } from '@kbn/discover-utils';
 import { FieldRecord } from './table';
-import { DocViewTableRowBtnCollapse } from './legacy/table_row_btn_collapse';
-
-const COLLAPSE_LINE_LENGTH = 350;
 
 interface IgnoreWarningProps {
   reason: IgnoredReason;
@@ -95,29 +92,14 @@ export const TableFieldValue = ({
   rawValue,
   ignoreReason,
 }: TableFieldValueProps) => {
-  const [fieldOpen, setFieldOpen] = useState(false);
-
-  const value = String(rawValue);
-  const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
-  const isCollapsed = isCollapsible && !fieldOpen;
-
   const valueClassName = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     kbnDocViewer__value: true,
-    dscTruncateByHeight: isCollapsible && isCollapsed,
   });
-
-  const onToggleCollapse = () => setFieldOpen((fieldOpenPrev) => !fieldOpenPrev);
-
   return (
     <Fragment>
-      {(isCollapsible || ignoreReason) && (
+      {ignoreReason && (
         <EuiFlexGroup gutterSize="s">
-          {isCollapsible && (
-            <EuiFlexItem grow={false}>
-              <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
-            </EuiFlexItem>
-          )}
           {ignoreReason && (
             <EuiFlexItem grow={false}>
               <IgnoreWarning reason={ignoreReason} rawValue={rawValue} />

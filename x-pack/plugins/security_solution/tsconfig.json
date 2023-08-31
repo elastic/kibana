@@ -12,8 +12,7 @@
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
-    "../../../typings/**/*",
-    "./public/management/cypress/cypress.d.ts"
+    "../../../typings/**/*"
   ],
   "exclude": [
     "target/**/*",
@@ -154,7 +153,6 @@
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/security-solution-side-nav",
-    "@kbn/core-lifecycle-browser",
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
@@ -162,6 +160,18 @@
     "@kbn/field-formats-plugin",
     "@kbn/dev-proc-runner",
     "@kbn/cloud-chat-plugin",
-    "@kbn/alerts-ui-shared"
+    "@kbn/alerts-ui-shared",
+    "@kbn/security-solution-navigation",
+    "@kbn/security-solution-upselling",
+    "@kbn/discover-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/alerts-ui-shared",
+    "@kbn/saved-search-plugin",
+    "@kbn/unified-histogram-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/security-solution-features",
+    "@kbn/handlebars"
   ]
 }

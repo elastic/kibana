@@ -8,8 +8,8 @@
 import type { FeatureKibanaPrivileges } from '@kbn/features-plugin/server';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 
-import { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
+import { Actions } from '../../actions';
 
 describe(`feature_privilege_builder`, () => {
   describe(`alerting`, () => {

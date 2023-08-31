@@ -19,6 +19,7 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { PluginContext } from '../context/plugin_context';
 import { routes } from '../routes';
 import { ExploratoryViewPublicPluginsStart } from '../plugin';
@@ -70,34 +71,42 @@ export const renderApp = ({
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
+  const aiAssistantService = plugins.observabilityAIAssistant;
+
   ReactDOM.render(
     <EuiErrorBoundary>
       <ApplicationUsageTrackingProvider>
         <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-              storage: new Storage(localStorage),
-              isDev,
-            }}
-          >
-            <PluginContext.Provider
-              value={{
-                appMountParameters,
+          <ObservabilityAIAssistantProvider value={aiAssistantService}>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+                storage: new Storage(localStorage),
+                isDev,
               }}
             >
-              <Router history={history}>
-                <EuiThemeProvider darkMode={isDarkMode}>
-                  <i18nCore.Context>
-                    <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                      <App />
-                    </RedirectAppLinks>
-                  </i18nCore.Context>
-                </EuiThemeProvider>
-              </Router>
-            </PluginContext.Provider>
-          </KibanaContextProvider>
+              <PluginContext.Provider
+                value={{
+                  appMountParameters,
+                }}
+              >
+                <Router history={history}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <i18nCore.Context>
+                      <RedirectAppLinks
+                        application={core.application}
+                        className={APP_WRAPPER_CLASS}
+                        data-test-subj="exploratoryViewMainContainer"
+                      >
+                        <App />
+                      </RedirectAppLinks>
+                    </i18nCore.Context>
+                  </EuiThemeProvider>
+                </Router>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
+          </ObservabilityAIAssistantProvider>
         </KibanaThemeProvider>
       </ApplicationUsageTrackingProvider>
     </EuiErrorBoundary>,

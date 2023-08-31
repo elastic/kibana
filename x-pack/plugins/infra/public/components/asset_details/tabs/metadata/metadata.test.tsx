@@ -6,32 +6,43 @@
  */
 
 import React from 'react';
-import { Metadata, type MetadataProps } from './metadata';
-
+import { Metadata } from './metadata';
 import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { ContextProviders } from '../../context_providers';
 
 jest.mock('../../../../containers/metrics_source');
 jest.mock('../../hooks/use_metadata');
 
-const metadataProps: MetadataProps = {
-  currentTimeRange: {
-    from: 1679316685686,
-    to: 1679585836087,
-    interval: '1m',
-  },
-  nodeType: 'host',
-  nodeName: 'host-1',
-  showActionsColumn: true,
-};
-
 const renderHostMetadata = () =>
   render(
     <I18nProvider>
-      <Metadata {...metadataProps} />
+      <ContextProviders
+        props={{
+          assetType: 'host',
+          asset: {
+            id: 'host-1',
+            name: 'host-1',
+          },
+          overrides: {
+            metadata: {
+              showActionsColumn: true,
+            },
+          },
+          dateRange: {
+            from: '2023-04-09T11:07:49Z',
+            to: '2023-04-09T11:23:49Z',
+          },
+          renderMode: {
+            mode: 'page',
+          },
+        }}
+      >
+        <Metadata />
+      </ContextProviders>
     </I18nProvider>,
     { wrapper: EuiThemeProvider }
   );
@@ -60,30 +71,30 @@ describe('Single Host Metadata (Hosts View)', () => {
     mockUseMetadata({ error: 'Internal server error' });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraMetadataErrorCallout')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataErrorCallout')).toBeInTheDocument();
   });
 
   it('should show an no data message if fetching the metadata returns an empty array', async () => {
     mockUseMetadata({ metadata: [] });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
-    expect(result.queryByTestId('infraHostMetadataNoData')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataNoData')).toBeInTheDocument();
   });
 
   it('should show the metadata table if metadata is returned', async () => {
     mockUseMetadata({ metadata: [{ name: 'host.os.name', value: 'Ubuntu' }] });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
-    expect(result.queryByTestId('infraMetadataTable')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataTable')).toBeInTheDocument();
   });
 
   it('should return loading text if loading', async () => {
     mockUseMetadata({ loading: true });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
-    expect(result.queryByTestId('infraHostMetadataLoading')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataLoading')).toBeInTheDocument();
   });
 });

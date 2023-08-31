@@ -754,6 +754,7 @@ const updateExistingDataStream = async ({
 
   let settings: IndicesIndexSettings;
   let mappings: MappingTypeMapping;
+  let lifecycle: any;
 
   try {
     const simulateResult = await retryTransientEsErrors(() =>
@@ -764,6 +765,8 @@ const updateExistingDataStream = async ({
 
     settings = simulateResult.template.settings;
     mappings = simulateResult.template.mappings;
+    // @ts-expect-error template is not yet typed with DLM
+    lifecycle = simulateResult.template.lifecycle;
 
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
     // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
@@ -773,7 +776,7 @@ const updateExistingDataStream = async ({
       delete mappings.properties.data_stream;
     }
 
-    logger.debug(`Updating mappings for ${dataStreamName}`);
+    logger.info(`Attempt to update the mappings for the ${dataStreamName} (write_index_only)`);
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({
@@ -786,9 +789,8 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
-    logger.error(`Mappings update for ${dataStreamName} failed`);
-    logger.error(err);
-
+    logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
+    logger.info(`Triggering a rollover for ${dataStreamName}`);
     await rolloverDataStream(dataStreamName, esClient);
     return;
   }
@@ -799,6 +801,24 @@ const updateExistingDataStream = async ({
       `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
     );
     await rolloverDataStream(dataStreamName, esClient);
+  }
+
+  if (lifecycle?.data_retention) {
+    try {
+      logger.debug(`Updating lifecycle for ${dataStreamName}`);
+
+      await retryTransientEsErrors(
+        () =>
+          esClient.transport.request({
+            method: 'PUT',
+            path: `_data_stream/${dataStreamName}/_lifecycle`,
+            body: { data_retention: lifecycle.data_retention },
+          }),
+        { logger }
+      );
+    } catch (err) {
+      throw new Error(`could not update lifecycle settings for ${dataStreamName}: ${err.message}`);
+    }
   }
 
   // update settings after mappings was successful to ensure

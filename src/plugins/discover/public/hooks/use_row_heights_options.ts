@@ -8,7 +8,7 @@
 
 import type { EuiDataGridRowHeightOption, EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import { useMemo } from 'react';
-import { ROW_HEIGHT_OPTION } from '../../common';
+import { ROW_HEIGHT_OPTION } from '@kbn/discover-utils';
 import { isValidRowHeight } from '../utils/validate_row_height';
 import { useDiscoverServices } from './use_discover_services';
 import {

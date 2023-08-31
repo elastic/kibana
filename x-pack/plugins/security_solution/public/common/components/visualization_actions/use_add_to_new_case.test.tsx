@@ -14,7 +14,7 @@ import {
   readCasesPermissions,
   writeCasesPermissions,
 } from '../../../cases_test_utils';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 
 jest.mock('../../lib/kibana/kibana_react');
 
@@ -128,7 +128,7 @@ describe('useAddToNewCase', () => {
         {
           persistableStateAttachmentState: { attributes: kpiHostMetricLensAttributes, timeRange },
           persistableStateAttachmentTypeId: '.lens',
-          type: CommentType.persistableState as const,
+          type: AttachmentType.persistableState as const,
         },
       ],
     });

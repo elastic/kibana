@@ -237,7 +237,7 @@ describe('Actions Plugin', () => {
          * that got set up on start (step 3).
          */
         // @ts-expect-error: inMemoryConnectors can be accessed
-        expect(actionsContextHandler.getActionsClient().inMemoryConnectors).toEqual([
+        expect(actionsContextHandler.getActionsClient().context.inMemoryConnectors).toEqual([
           {
             id: 'preconfiguredServerLog',
             actionTypeId: '.server-log',
@@ -524,7 +524,7 @@ describe('Actions Plugin', () => {
       });
 
       describe('System actions', () => {
-        it('should handle system actions', async () => {
+        it('should set system actions correctly', async () => {
           setup(getConfig());
           // coreMock.createSetup doesn't support Plugin generics
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -572,6 +572,45 @@ describe('Actions Plugin', () => {
             },
           ]);
           expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.cases')).toBe(true);
+        });
+
+        it('should throw if a system action type is set in preconfigured connectors', async () => {
+          setup(
+            getConfig({
+              preconfigured: {
+                preconfiguredServerLog: {
+                  actionTypeId: 'test.system-action',
+                  name: 'preconfigured-system-action',
+                  config: {},
+                  secrets: {},
+                },
+              },
+            })
+          );
+
+          // coreMock.createSetup doesn't support Plugin generics
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+          pluginSetup.registerType({
+            id: 'test.system-action',
+            name: 'Test',
+            minimumLicenseRequired: 'platinum',
+            supportedFeatureIds: ['alerting'],
+            validate: {
+              config: { schema: schema.object({}) },
+              secrets: { schema: schema.object({}) },
+              params: { schema: schema.object({}) },
+            },
+            isSystemActionType: true,
+            executor,
+          });
+
+          await expect(async () =>
+            plugin.start(coreStart, pluginsStart)
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Setting system action types in preconfigured connectors are not allowed"`
+          );
         });
       });
     });

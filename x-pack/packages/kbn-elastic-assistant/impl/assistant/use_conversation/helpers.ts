@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { Prompt } from '../types';
+import { Conversation } from '../../assistant_context/types';
 
 export interface CodeBlockDetails {
   type: QueryType;
@@ -63,4 +65,25 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
   });
 
   return result;
+};
+
+/**
+ * Returns the default system prompt for a given conversation
+ *
+ * @param allSystemPrompts All available System Prompts
+ * @param conversation Conversation to get the default system prompt for
+ */
+export const getDefaultSystemPrompt = ({
+  allSystemPrompts,
+  conversation,
+}: {
+  allSystemPrompts: Prompt[];
+  conversation: Conversation | undefined;
+}): Prompt | undefined => {
+  const conversationSystemPrompt = allSystemPrompts.find(
+    (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
+  );
+  const defaultNewSystemPrompt = allSystemPrompts.find((prompt) => prompt.isNewConversationDefault);
+
+  return conversationSystemPrompt ?? defaultNewSystemPrompt ?? allSystemPrompts?.[0];
 };

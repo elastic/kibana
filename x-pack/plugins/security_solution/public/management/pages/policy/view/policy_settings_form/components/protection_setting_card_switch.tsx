@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import type {
   ImmutableArray,
-  UIPolicyConfig,
   PolicyConfig,
+  UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
+import type { LinuxPolicyProtection, MacPolicyProtection, PolicyProtection } from '../../../types';
 
 export interface ProtectionSettingCardSwitchProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
@@ -45,19 +46,20 @@ export const ProtectionSettingCardSwitch = React.memo(
     mode,
     'data-test-subj': dataTestSubj,
   }: ProtectionSettingCardSwitchProps) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEditMode = mode === 'edit';
-    const selected = policy && policy.windows[protection].mode;
-    const switchLabel = i18n.translate(
-      'xpack.securitySolution.endpoint.policy.details.protectionsEnabled',
-      {
+    const selected = (policy && policy.windows[protection].mode) !== ProtectionModes.off;
+
+    const switchLabel = useMemo(() => {
+      return i18n.translate('xpack.securitySolution.endpoint.policy.details.protectionsEnabled', {
         defaultMessage: '{protectionLabel} {mode, select, true {enabled} false {disabled}}',
         values: {
           protectionLabel,
-          mode: selected !== ProtectionModes.off,
+          mode: selected,
         },
-      }
-    );
+      });
+    }, [protectionLabel, selected]);
 
     const handleSwitchChange = useCallback(
       (event) => {
@@ -82,6 +84,11 @@ export const ProtectionSettingCardSwitch = React.memo(
                 newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
                   event.target.checked;
               }
+              if (protection === 'behavior_protection') {
+                newPayload.windows.behavior_protection.reputation_service = false;
+                newPayload.mac.behavior_protection.reputation_service = false;
+                newPayload.linux.behavior_protection.reputation_service = false;
+              }
             }
           }
         } else {
@@ -94,6 +101,11 @@ export const ProtectionSettingCardSwitch = React.memo(
               newPayload[os][protection as LinuxPolicyProtection].mode = ProtectionModes.prevent;
             }
             if (isPlatinumPlus) {
+              if (protection === 'behavior_protection') {
+                newPayload.windows.behavior_protection.reputation_service = true;
+                newPayload.mac.behavior_protection.reputation_service = true;
+                newPayload.linux.behavior_protection.reputation_service = true;
+              }
               if (os === 'windows') {
                 newPayload[os].popup[protection].enabled = event.target.checked;
               } else if (os === 'mac') {
@@ -122,16 +134,16 @@ export const ProtectionSettingCardSwitch = React.memo(
     );
 
     if (!isEditMode) {
-      return <>{switchLabel}</>;
+      return <span data-test-subj={getTestId()}>{switchLabel}</span>;
     }
 
     return (
       <EuiSwitch
         label={switchLabel}
-        checked={selected !== ProtectionModes.off}
+        labelProps={{ 'data-test-subj': getTestId('label') }}
+        checked={selected}
         onChange={handleSwitchChange}
-        disabled={!isEditMode}
-        data-test-subj={dataTestSubj}
+        data-test-subj={getTestId()}
       />
     );
   }

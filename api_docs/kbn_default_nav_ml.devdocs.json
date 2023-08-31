@@ -145,13 +145,10 @@
           {
             "parentPluginId": "@kbn/default-nav-ml",
             "id": "def-common.defaultNavigation.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/default-nav/ml/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -175,7 +172,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "[{ title: string; id: \"root\"; children: [{ link: \"ml:overview\"; }, { link: \"ml:notifications\"; }]; }, { title: any; id: \"anomaly_detection\"; children: [{ title: any; link: \"ml:anomalyDetection\"; }, { link: \"ml:anomalyExplorer\"; }, { link: \"ml:singleMetricViewer\"; }, { link: \"ml:settings\"; }]; }, { id: \"data_frame_analytics\"; title: any; children: [{ title: string; link: \"ml:dataFrameAnalytics\"; }, { link: \"ml:resultExplorer\"; }, { link: \"ml:analyticsMap\"; }]; }, { id: \"model_management\"; title: any; children: [{ link: \"ml:nodesOverview\"; }, { link: \"ml:nodes\"; }]; }, { id: \"data_visualizer\"; title: any; children: [{ title: any; link: \"ml:fileUpload\"; }, { title: any; link: \"ml:indexDataVisualizer\"; }]; }, { id: \"aiops_labs\"; title: any; children: [{ link: \"ml:explainLogRateSpikes\"; }, { link: \"ml:logPatternAnalysis\"; }, { link: \"ml:changePointDetections\"; }]; }]"
+              "[{ title: string; id: \"root\"; children: [{ link: \"ml:overview\"; }, { link: \"ml:notifications\"; }]; }, { title: string; id: \"anomaly_detection\"; children: [{ title: string; link: \"ml:anomalyDetection\"; }, { link: \"ml:anomalyExplorer\"; }, { link: \"ml:singleMetricViewer\"; }, { link: \"ml:settings\"; }]; }, { id: \"data_frame_analytics\"; title: string; children: [{ title: string; link: \"ml:dataFrameAnalytics\"; }, { link: \"ml:resultExplorer\"; }, { link: \"ml:analyticsMap\"; }]; }, { id: \"model_management\"; title: string; children: [{ link: \"ml:nodesOverview\"; }, { link: \"ml:nodes\"; }]; }, { id: \"data_visualizer\"; title: string; children: [{ title: string; link: \"ml:fileUpload\"; }, { title: string; link: \"ml:indexDataVisualizer\"; }]; }, { id: \"aiops_labs\"; title: string; children: [{ link: \"ml:logRateAnalysis\"; }, { link: \"ml:logPatternAnalysis\"; }, { link: \"ml:changePointDetections\"; }]; }]"
             ],
             "path": "packages/default-nav/ml/default_navigation.ts",
             "deprecated": false,

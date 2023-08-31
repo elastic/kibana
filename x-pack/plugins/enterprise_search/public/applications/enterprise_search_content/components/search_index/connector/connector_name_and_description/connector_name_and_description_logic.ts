@@ -79,7 +79,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
       if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
         actions.makeRequest({
           connectorId: values.index.connector.id,
-          indexName: values.index.connector.index_name,
+          indexName: values.index.connector.index_name ?? '',
           ...values.localNameAndDescription,
         });
       }

@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import {
-  EuiAccordion,
   EuiButtonEmpty,
   EuiCallOut,
   EuiCheckbox,
   EuiEmptyPrompt,
-  EuiFieldSearch,
+  EuiFormErrorText,
   EuiFormRow,
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { ISearchSource } from '@kbn/data-plugin/common';
@@ -37,15 +36,14 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
-import { Aggregators, Comparator, QUERY_INVALID } from '../../../common/threshold_rule/types';
+import { Aggregators, Comparator } from '../../../common/threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionChart } from './components/expression_chart';
 import { ExpressionRow } from './components/expression_row';
-import { MetricsExplorerKueryBar } from './components/kuery_bar';
+import { RuleFlyoutKueryBar } from '../rule_kql_filter/kuery_bar';
 import { MetricsExplorerGroupBy } from './components/group_by';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
-import { convertKueryToElasticSearchQuery } from './helpers/kuery';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -70,6 +68,7 @@ export default function Expressions(props: Props) {
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
+  const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [paramsError, setParamsError] = useState<Error>();
   const derivedIndexPattern = useMemo<DataViewBase>(
@@ -102,6 +101,25 @@ export default function Expressions(props: Props) {
         setRuleParams('searchConfiguration', initialSearchConfiguration);
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
+
+        if (createdSearchSource.getField('index')) {
+          const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
+          if (!timeFieldName) {
+            setDataViewTimeFieldError(
+              i18n.translate(
+                'xpack.observability.threshold.rule.alertFlyout.dataViewError.noTimestamp',
+                {
+                  defaultMessage:
+                    'The selected data view does not have a timestamp field, please select another data view.',
+                }
+              )
+            );
+          } else {
+            setDataViewTimeFieldError(undefined);
+          }
+        } else {
+          setDataViewTimeFieldError(undefined);
+        }
       } catch (error) {
         setParamsError(error);
       }
@@ -109,7 +127,7 @@ export default function Expressions(props: Props) {
 
     initSearchSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.search.searchSource, data.dataViews]);
+  }, [data.search.searchSource, data.dataViews, dataView]);
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -172,17 +190,9 @@ export default function Expressions(props: Props) {
 
   const onFilterChange = useCallback(
     (filter: any) => {
-      setRuleParams('filterQueryText', filter);
-      try {
-        setRuleParams(
-          'filterQuery',
-          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
-        );
-      } catch (e) {
-        setRuleParams('filterQuery', QUERY_INVALID);
-      }
+      setRuleParams('filterQuery', filter);
     },
-    [setRuleParams, derivedIndexPattern]
+    [setRuleParams]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -252,23 +262,15 @@ export default function Expressions(props: Props) {
   const preFillAlertFilter = useCallback(() => {
     const md = metadata;
     if (md && md.currentOptions?.filterQuery) {
-      setRuleParams('filterQueryText', md.currentOptions.filterQuery);
-      setRuleParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
-      );
+      setRuleParams('filterQuery', md.currentOptions.filterQuery);
     } else if (md && md.currentOptions?.groupBy && md.series) {
       const { groupBy } = md.currentOptions;
       const filter = Array.isArray(groupBy)
         ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
         : `${groupBy}: "${md.series.id}"`;
-      setRuleParams('filterQueryText', filter);
-      setRuleParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      setRuleParams('filterQuery', filter);
     }
-  }, [metadata, derivedIndexPattern, setRuleParams]);
+  }, [metadata, setRuleParams]);
 
   const preFillAlertGroupBy = useCallback(() => {
     const md = metadata;
@@ -300,11 +302,6 @@ export default function Expressions(props: Props) {
       setRuleParams('alertOnGroupDisappear', true);
     }
   }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleFieldSearchChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
-    [onFilterChange]
-  );
 
   const hasGroupBy = useMemo(
     () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
@@ -355,13 +352,29 @@ export default function Expressions(props: Props) {
     return (
       <>
         <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />
-        <EuiSpacer size={'m'} />
+        <EuiSpacer size="m" />
       </>
     );
   }
 
+  const placeHolder = i18n.translate(
+    'xpack.observability.threshold.rule.homePage.toolbar.kqlSearchFieldPlaceholder',
+    {
+      defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+    }
+  );
+
   return (
     <>
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.observability.threshold.rule.alertFlyout.selectDataViewPrompt"
+            defaultMessage="Select a data view"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <DataViewSelectPopover
         dependencies={{ dataViews, dataViewEditor }}
         dataView={dataView}
@@ -371,58 +384,95 @@ export default function Expressions(props: Props) {
           onChangeMetaData({ ...metadata, adHocDataViewList });
         }}
       />
-      <EuiSpacer size={'s'} />
-      <EuiText size="xs">
-        <h4>
+      {dataViewTimeFieldError && (
+        <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
+          {dataViewTimeFieldError}
+        </EuiFormErrorText>
+      )}
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h5>
           <FormattedMessage
-            id="xpack.observability.threshold.rule.alertFlyout.conditions"
-            defaultMessage="Conditions"
+            id="xpack.observability.threshold.rule.alertFlyout.defineTextQueryPrompt"
+            defaultMessage="Define query filter (optional)"
           />
-        </h4>
-      </EuiText>
-      <EuiSpacer size={'xs'} />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <RuleFlyoutKueryBar
+        placeholder={placeHolder}
+        derivedIndexPattern={derivedIndexPattern}
+        onChange={debouncedOnFilterChange}
+        onSubmit={onFilterChange}
+        value={ruleParams.filterQuery}
+      />
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.observability.threshold.rule.alertFlyout.setConditions"
+            defaultMessage="Set rule conditions"
+          />
+        </h5>
+      </EuiTitle>
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
-            <ExpressionRow
-              canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
-              fields={derivedIndexPattern.fields as any}
-              remove={removeExpression}
-              addExpression={addExpression}
-              key={idx} // idx's don't usually make good key's but here the index has semantic meaning
-              expressionId={idx}
-              setRuleParams={updateParams}
-              errors={(errors[idx] as IErrorObject) || emptyError}
-              expression={e || {}}
-              dataView={derivedIndexPattern}
-            >
-              {/* Preview */}
-              <ExpressionChart
-                expression={e}
-                derivedIndexPattern={derivedIndexPattern}
-                filterQuery={ruleParams.filterQueryText}
-                groupBy={ruleParams.groupBy}
-              />
-            </ExpressionRow>
+            <div key={idx}>
+              {/* index has semantic meaning, we show the condition title starting from the 2nd one  */}
+              {idx >= 1 && (
+                <EuiTitle size="xs">
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.observability.threshold.rule.alertFlyout.condition"
+                      defaultMessage="Condition {conditionNumber}"
+                      values={{ conditionNumber: idx + 1 }}
+                    />
+                  </h5>
+                </EuiTitle>
+              )}
+              <ExpressionRow
+                canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
+                fields={derivedIndexPattern.fields as any}
+                remove={removeExpression}
+                addExpression={addExpression}
+                key={idx} // idx's don't usually make good key's but here the index has semantic meaning
+                expressionId={idx}
+                setRuleParams={updateParams}
+                errors={(errors[idx] as IErrorObject) || emptyError}
+                expression={e || {}}
+                dataView={derivedIndexPattern}
+              >
+                {/* Preview */}
+                <ExpressionChart
+                  expression={e}
+                  derivedIndexPattern={derivedIndexPattern}
+                  filterQuery={ruleParams.filterQuery}
+                  groupBy={ruleParams.groupBy}
+                  timeFieldName={dataView?.timeFieldName}
+                />
+              </ExpressionRow>
+            </div>
           );
         })}
-      <div style={{ marginLeft: 28 }}>
-        <ForLastExpression
-          timeWindowSize={timeSize}
-          timeWindowUnit={timeUnit}
-          errors={emptyError}
-          onChangeWindowSize={updateTimeSize}
-          onChangeWindowUnit={updateTimeUnit}
-        />
-      </div>
-      <EuiSpacer size={'m'} />
+
+      <ForLastExpression
+        timeWindowSize={timeSize}
+        timeWindowUnit={timeUnit}
+        errors={emptyError}
+        onChangeWindowSize={updateTimeSize}
+        onChangeWindowUnit={updateTimeUnit}
+        display="fullWidth"
+      />
+
+      <EuiSpacer size="m" />
       <div>
         <EuiButtonEmpty
           data-test-subj="thresholdRuleExpressionsAddConditionButton"
-          color={'primary'}
-          iconSide={'left'}
-          flush={'left'}
-          iconType={'plusInCircleFilled'}
+          color="primary"
+          iconSide="left"
+          flush="left"
+          iconType="plusInCircleFilled"
           onClick={addExpression}
         >
           <FormattedMessage
@@ -431,74 +481,7 @@ export default function Expressions(props: Props) {
           />
         </EuiButtonEmpty>
       </div>
-      <EuiSpacer size={'m'} />
-      <EuiAccordion
-        id="advanced-options-accordion"
-        buttonContent={i18n.translate(
-          'xpack.observability.threshold.rule.alertFlyout.advancedOptions',
-          {
-            defaultMessage: 'Advanced options',
-          }
-        )}
-      >
-        <EuiPanel color="subdued">
-          <EuiCheckbox
-            disabled={disableNoData}
-            id="metrics-alert-no-data-toggle"
-            label={
-              <>
-                {i18n.translate('xpack.observability.threshold.rule.alertFlyout.alertOnNoData', {
-                  defaultMessage: "Alert me if there's no data",
-                })}{' '}
-                <EuiToolTip
-                  content={
-                    (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
-                    i18n.translate(
-                      'xpack.observability.threshold.rule.alertFlyout.noDataHelpText',
-                      {
-                        defaultMessage:
-                          'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-                      }
-                    )
-                  }
-                >
-                  <EuiIcon type="questionInCircle" color="subdued" />
-                </EuiToolTip>
-              </>
-            }
-            checked={ruleParams.alertOnNoData}
-            onChange={(e) => setRuleParams('alertOnNoData', e.target.checked)}
-          />
-        </EuiPanel>
-      </EuiAccordion>
-      <EuiSpacer size={'m'} />
-      <EuiFormRow
-        label={i18n.translate('xpack.observability.threshold.rule.alertFlyout.filterLabel', {
-          defaultMessage: 'Filter (optional)',
-        })}
-        helpText={i18n.translate('xpack.observability.threshold.rule.alertFlyout.filterHelpText', {
-          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
-        })}
-        fullWidth
-        display="rowCompressed"
-      >
-        {(metadata && derivedIndexPattern && (
-          <MetricsExplorerKueryBar
-            derivedIndexPattern={derivedIndexPattern}
-            onChange={debouncedOnFilterChange}
-            onSubmit={onFilterChange}
-            value={ruleParams.filterQueryText}
-          />
-        )) || (
-          <EuiFieldSearch
-            data-test-subj="thresholdRuleExpressionsFieldSearch"
-            onChange={handleFieldSearchChange}
-            value={ruleParams.filterQueryText}
-            fullWidth
-          />
-        )}
-      </EuiFormRow>
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.observability.threshold.rule.alertFlyout.createAlertPerText', {
           defaultMessage: 'Group alerts by (optional)',
@@ -549,7 +532,7 @@ export default function Expressions(props: Props) {
           </EuiText>
         </>
       )}
-      <EuiSpacer size={'s'} />
+      <EuiSpacer size="s" />
       <EuiCheckbox
         id="metrics-alert-group-disappear-toggle"
         label={
@@ -580,7 +563,7 @@ export default function Expressions(props: Props) {
         checked={Boolean(hasGroupBy && ruleParams.alertOnGroupDisappear)}
         onChange={(e) => setRuleParams('alertOnGroupDisappear', e.target.checked)}
       />
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
     </>
   );
 }

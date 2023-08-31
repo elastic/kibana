@@ -8,35 +8,37 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { getNodeDetailUrl } from '../../../pages/link_to';
-import { findInventoryModel } from '../../../../common/inventory_models';
+import { useNodeDetailsRedirect } from '../../../pages/link_to';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface LinkToNodeDetailsProps {
-  currentTime: number;
-  nodeName: string;
-  nodeType: InventoryItemType;
+  dateRangeTimestamp: { from: number; to: number };
+  asset: Asset;
+  assetType: InventoryItemType;
 }
 
-export const LinkToNodeDetails = ({ nodeName, nodeType, currentTime }: LinkToNodeDetailsProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
-
+export const LinkToNodeDetails = ({
+  asset,
+  assetType,
+  dateRangeTimestamp,
+}: LinkToNodeDetailsProps) => {
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
-      nodeType,
-      nodeId: nodeName,
-      from: nodeDetailFrom,
-      to: currentTime,
+      nodeType: assetType,
+      nodeId: asset.id,
+      search: {
+        from: dateRangeTimestamp.from,
+        to: dateRangeTimestamp.to,
+        assetName: asset.name,
+      },
     }),
   });
 
   return (
     <EuiButtonEmpty
-      data-test-subj="infraNodeContextPopoverOpenAsPageButton"
+      data-test-subj="infraAssetDetailsOpenAsPageButton"
       size="xs"
-      iconSide="left"
-      iconType="popout"
       flush="both"
       {...nodeDetailMenuItemLinkProps}
     >

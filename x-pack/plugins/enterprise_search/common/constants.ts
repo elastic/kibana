@@ -79,7 +79,7 @@ export const ANALYTICS_PLUGIN = {
 };
 
 export const ELASTICSEARCH_PLUGIN = {
-  ID: 'elasticsearch',
+  ID: 'enterpriseSearchElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
     defaultMessage: 'Elasticsearch',
   }),
@@ -229,3 +229,4 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
 };
 
 export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
+export const PLUGIN_ID = 'enterpriseSearch';

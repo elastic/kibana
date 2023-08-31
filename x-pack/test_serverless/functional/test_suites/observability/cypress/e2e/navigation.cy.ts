@@ -6,13 +6,13 @@
  */
 
 describe('Serverless', () => {
-  it('Should login', () => {
+  beforeEach(() => {
     cy.loginAsElasticUser();
   });
 
   it('contains the side navigation for observabilitity serverless', () => {
     cy.loginAsElasticUser();
-    cy.contains('Discover');
+    cy.contains('Log Explorer');
     cy.contains('Dashboards');
     cy.contains('Alerts');
     cy.contains('AIOps');
@@ -25,8 +25,8 @@ describe('Serverless', () => {
   it('navigates to discover-dashboard-viz links', () => {
     cy.loginAsElasticUser();
 
-    cy.contains('Discover').click();
-    cy.url().should('include', '/app/discover');
+    cy.contains('Log Explorer').click();
+    cy.url().should('include', '/app/observability-log-explorer');
 
     cy.contains('Dashboards').click();
     cy.url().should('include', '/app/dashboards');
@@ -36,8 +36,6 @@ describe('Serverless', () => {
   });
 
   it('navigates to alerts links', () => {
-    cy.loginAsElasticUser();
-
     cy.contains('Alerts').click();
     cy.url().should('include', '/observability/alerts');
 
@@ -49,8 +47,6 @@ describe('Serverless', () => {
   });
 
   it('navigates to apm links', () => {
-    cy.loginAsElasticUser();
-
     cy.contains('Applications').click();
     cy.contains('Services').click();
     cy.url().should('include', '/apm/services');
@@ -63,32 +59,26 @@ describe('Serverless', () => {
   });
 
   it('navigates to get started links', () => {
-    cy.loginAsElasticUser();
-
     cy.contains('Add data').click();
     cy.url().should('include', '/app/observabilityOnboarding');
   });
 
   it('navigates to AIOps links', () => {
-    cy.loginAsElasticUser();
-
     cy.contains('AIOps').click();
     cy.contains('Anomaly detection').click();
     cy.url().should('include', '/app/ml/jobs');
 
-    cy.contains('Spike analysis').click();
-    cy.url().should('include', 'app/ml/aiops/explain_log_rate_spikes_index_select');
+    cy.contains('Log rate analysis').click();
+    cy.url().should('include', '/app/ml/aiops/log_rate_analysis_index_select');
 
     cy.contains('Change Point Detection').click();
-    cy.url().should('include', 'app/ml/aiops/change_point_detection_index_select');
+    cy.url().should('include', '/app/ml/aiops/change_point_detection_index_select');
 
     cy.contains('Job notifications').click();
-    cy.url().should('include', 'app/ml/notifications');
+    cy.url().should('include', '/app/ml/notifications');
   });
 
   it('navigates to project settings', () => {
-    cy.loginAsElasticUser();
-
     cy.contains('Project settings').click();
     cy.contains('Management').click();
     cy.url().should('include', '/app/management');
@@ -98,6 +88,79 @@ describe('Serverless', () => {
 
     cy.contains('Fleet').click();
     cy.url().should('include', '/app/fleet/agents');
+  });
+
+  it('sets service nav item as active', () => {
+    cy.visitKibana('/app/apm/service-groups');
+    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-apm:services').should(
+      'have.class',
+      'euiSideNavItemButton-isSelected'
+    );
+
+    cy.visitKibana('/app/apm/service-maps');
+    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-apm:services').should(
+      'have.class',
+      'euiSideNavItemButton-isSelected'
+    );
+
+    cy.visitKibana('/app/apm/mobile-services/foo');
+    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-apm:services').should(
+      'have.class',
+      'euiSideNavItemButton-isSelected'
+    );
+  });
+
+  it('sets dependencies nav item as active', () => {
+    cy.visitKibana('/app/apm/dependencies/inventory');
+    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-apm:dependencies').should(
+      'have.class',
+      'euiSideNavItemButton-isSelected'
+    );
+
+    cy.visitKibana('/app/apm/dependencies/operations?dependencyName=foo');
+    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-apm:dependencies').should(
+      'have.class',
+      'euiSideNavItemButton-isSelected'
+    );
+  });
+
+  it('sets traces nav item as active', () => {
+    cy.visitKibana('/app/apm/traces/explorer/waterfall');
+
+    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-apm:traces').should(
+      'have.class',
+      'euiSideNavItemButton-isSelected'
+    );
+
+    cy.visitKibana('/app/apm/traces/explorer/critical_path');
+    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-apm:traces').should(
+      'have.class',
+      'euiSideNavItemButton-isSelected'
+    );
+  });
+
+  it('sets AIOps nav item as active', () => {
+    cy.visitKibana('/app/ml/aiops/explain_log_rate_spikes');
+
+    cy.getByTestSubj('nav-item-id-aiops').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-ml:logRateAnalysis').should(
+      'have.class',
+      'euiSideNavItemButton-isSelected'
+    );
+
+    cy.visitKibana('/app/ml/aiops/change_point_detection');
+    cy.getByTestSubj('nav-item-id-aiops').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-ml:changePointDetections').should(
+      'have.class',
+      'euiSideNavItemButton-isSelected'
+    );
   });
 });
 

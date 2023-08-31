@@ -29,13 +29,13 @@ import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
-import { RuleDetailTabs } from '..';
+
 import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../common/constants';
 import type {
   RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../../../common/detection_engine/rule_monitoring';
-
+} from '../../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleDetailTabs } from '../use_rule_details_tabs';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import {
   UtilityBar,

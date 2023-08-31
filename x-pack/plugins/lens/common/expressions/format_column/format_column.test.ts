@@ -326,4 +326,65 @@ describe('format_column', () => {
       },
     });
   });
+
+  it('does translate the duration params into native parameters', async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'duration',
+      fromUnit: 'seconds',
+      toUnit: 'asHours',
+      compact: true,
+      decimals: 2,
+    });
+
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'duration',
+        params: {
+          pattern: '',
+          formatOverride: true,
+          inputFormat: 'seconds',
+          outputFormat: 'asHours',
+          outputPrecision: 2,
+          useShortSuffix: true,
+          showSuffix: true,
+          includeSpaceWithSuffix: true,
+        },
+      },
+    });
+  });
+
+  it('should apply custom suffix to duration format when configured', async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'duration',
+      fromUnit: 'seconds',
+      toUnit: 'asHours',
+      compact: true,
+      decimals: 2,
+      suffix: ' on Earth',
+    });
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'suffix',
+        params: {
+          suffixString: ' on Earth',
+          id: 'duration',
+          formatOverride: true,
+          params: {
+            pattern: '',
+            formatOverride: true,
+            inputFormat: 'seconds',
+            outputFormat: 'asHours',
+            outputPrecision: 2,
+            useShortSuffix: true,
+            showSuffix: true,
+            includeSpaceWithSuffix: true,
+          },
+        },
+      },
+    });
+  });
 });

@@ -12,13 +12,13 @@ import React from 'react';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
+import { UserProfile, useUserProfileForm } from './user_profile';
 import { UserProfileAPIClient } from '..';
 import type { UserProfileData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { UserAPIClient } from '../../management';
 import { securityMock } from '../../mocks';
 import { Providers } from '../account_management_app';
-import { UserProfile, useUserProfileForm } from './user_profile';
 
 const user = mockAuthenticatedUser();
 const coreStart = coreMock.createStart();
@@ -257,7 +257,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const overrideMsg = testWrapper.find('EuiText[data-test-subj="themeOverrideMessage"]');
+      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
       expect(overrideMsg).toHaveLength(0);
 
       const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
@@ -343,8 +343,9 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const overrideMsg = testWrapper.find('EuiIconTip[data-test-subj="themeOverrideTooltip"]');
+      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
       expect(overrideMsg).toHaveLength(1);
+      expect(overrideMsg.getElement().props.content).not.toEqual('');
 
       const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
       expect(themeMenu).toHaveLength(1);
@@ -380,8 +381,9 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const overrideMsg = testWrapper.find('EuiIconTip[data-test-subj="themeOverrideTooltip"]');
+      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
       expect(overrideMsg).toHaveLength(1);
+      expect(overrideMsg.getElement().props.content).not.toEqual('');
 
       const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
       expect(themeMenu).toHaveLength(1);

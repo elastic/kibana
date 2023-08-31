@@ -11,19 +11,19 @@ import { partition } from 'lodash';
 import { queryToAst } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { defaultAnnotationLabel } from '../../common/manual_event_annotation';
-import { EventAnnotationGroupContent } from '../../common/types';
-import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
-import { EventAnnotationServiceType } from './types';
+import { type EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   isRangeAnnotationConfig,
   isQueryAnnotationConfig,
-} from './helpers';
+  defaultAnnotationLabel,
+  type EventAnnotationGroupContent,
+  type EventAnnotationConfig,
+  type EventAnnotationGroupConfig,
+} from '@kbn/event-annotation-common';
 import { EventAnnotationGroupSavedObjectFinder } from '../components/event_annotation_group_saved_object_finder';
 import { CONTENT_ID } from '../../common/content_management';
 import type {
@@ -47,8 +47,7 @@ export function hasIcon(icon: string | undefined): icon is string {
 
 export function getEventAnnotationService(
   core: CoreStart,
-  contentManagement: ContentManagementPublicStart,
-  savedObjectsManagement: SavedObjectsManagementPluginStart
+  contentManagement: ContentManagementPublicStart
 ): EventAnnotationServiceType {
   const client = contentManagement.client;
 
@@ -219,7 +218,7 @@ export function getEventAnnotationService(
         description,
         ignoreGlobalFilters,
         annotations,
-        dataViewSpec: dataViewSpec || undefined,
+        dataViewSpec,
       },
       references,
     };
@@ -287,9 +286,8 @@ export function getEventAnnotationService(
     renderEventAnnotationGroupSavedObjectFinder: (props) => {
       return (
         <EventAnnotationGroupSavedObjectFinder
-          http={core.http}
+          contentClient={contentManagement.client}
           uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
           checkHasAnnotationGroups={checkHasAnnotationGroups}
           {...props}
         />

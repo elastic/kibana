@@ -26,7 +26,10 @@ import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import type { IndexDetails } from '../../common/types';
-import { NO_VULNERABILITIES_STATUS_TEST_SUBJ } from './test_subjects';
+import {
+  NO_VULNERABILITIES_STATUS_TEST_SUBJ,
+  CNVM_NOT_INSTALLED_ACTION_SUBJ,
+} from './test_subjects';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
@@ -89,7 +92,12 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
       actions={
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton color="primary" fill href={vulnMgmtIntegrationLink}>
+            <EuiButton
+              color="primary"
+              fill
+              href={vulnMgmtIntegrationLink}
+              data-test-subj={CNVM_NOT_INSTALLED_ACTION_SUBJ}
+            >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.addVulMngtIntegrationButtonTitle"
                 defaultMessage="Install Cloud Native Vulnerability Management"

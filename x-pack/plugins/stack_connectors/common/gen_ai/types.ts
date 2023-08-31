@@ -13,6 +13,7 @@ import {
   GenAiRunActionResponseSchema,
   GenAiDashboardActionParamsSchema,
   GenAiDashboardActionResponseSchema,
+  GenAiStreamActionParamsSchema,
 } from './schema';
 
 export type GenAiConfig = TypeOf<typeof GenAiConfigSchema>;
@@ -21,3 +22,4 @@ export type GenAiRunActionParams = TypeOf<typeof GenAiRunActionParamsSchema>;
 export type GenAiRunActionResponse = TypeOf<typeof GenAiRunActionResponseSchema>;
 export type GenAiDashboardActionParams = TypeOf<typeof GenAiDashboardActionParamsSchema>;
 export type GenAiDashboardActionResponse = TypeOf<typeof GenAiDashboardActionResponseSchema>;
+export type GenAiStreamActionParams = TypeOf<typeof GenAiStreamActionParamsSchema>;

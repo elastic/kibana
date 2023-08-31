@@ -20,12 +20,7 @@ import {
   SerializedField,
 } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import {
-  urlTemplateIconChoicesByClass,
-  getSuitableIcon,
-  colorChoices,
-  iconChoicesByClass,
-} from '../../helpers/style_choices';
+import { getSuitableIcon, colorChoices, getIcon } from '../../helpers/style_choices';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,
@@ -52,8 +47,8 @@ function deserializeUrlTemplate({
   };
 
   if (iconClass) {
-    const iconCandidate = urlTemplateIconChoicesByClass[iconClass];
-    template.icon = iconCandidate ? iconCandidate : null;
+    const iconCandidate = getIcon(iconClass);
+    template.icon = iconCandidate || null;
   }
 
   return template;
@@ -140,7 +135,7 @@ function getFieldsWithWorkspaceSettings(indexPattern: DataView, selectedFields: 
     workspaceField.hopSize = serializedField.hopSize;
     workspaceField.lastValidHopSize = serializedField.lastValidHopSize;
     workspaceField.color = serializedField.color;
-    workspaceField.icon = iconChoicesByClass[serializedField.iconClass]!;
+    workspaceField.icon = getIcon(serializedField.iconClass);
     workspaceField.selected = true;
   });
 

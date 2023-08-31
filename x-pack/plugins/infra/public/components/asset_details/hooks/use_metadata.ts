@@ -12,7 +12,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { type InfraMetadata, InfraMetadataRT } from '../../../../common/http_api/metadata_api';
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
-import type { MetricsTimeInput } from '../../../pages/metrics/metric_detail/hooks/use_metrics_time';
 import { getFilteredMetrics } from '../../../pages/metrics/metric_detail/lib/get_filtered_metrics';
 import type { InventoryItemType, InventoryMetric } from '../../../../common/inventory_models/types';
 
@@ -21,7 +20,10 @@ export function useMetadata(
   nodeType: InventoryItemType,
   requiredMetrics: InventoryMetric[],
   sourceId: string,
-  timeRange: MetricsTimeInput
+  timeRange: {
+    from: number;
+    to: number;
+  }
 ) {
   const decodeResponse = (response: any) => {
     return pipe(InfraMetadataRT.decode(response), fold(throwErrors(createPlainError), identity));
@@ -33,7 +35,7 @@ export function useMetadata(
       nodeId,
       nodeType,
       sourceId,
-      timeRange: { from: timeRange.from, to: timeRange.to },
+      timeRange,
     }),
     decodeResponse
   );

@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { UserActionFindResponse } from '../../../common/api';
-import {
-  UserActionFindRequestRt,
-  decodeWithExcessOrThrow,
-  UserActionFindResponseRt,
-} from '../../../common/api';
+import type { UserActionFindResponse } from '../../../common/types/api';
+import { UserActionFindRequestRt, UserActionFindResponseRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';
 import { Operations } from '../../authorization';

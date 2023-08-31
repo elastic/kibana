@@ -13,7 +13,7 @@ import {
   stringifyEvent,
 } from './helpers';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 
 describe('helpers', () => {
   describe('stringifyEvent', () => {

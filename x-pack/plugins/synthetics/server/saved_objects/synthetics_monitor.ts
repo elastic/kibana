@@ -7,8 +7,10 @@
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { SyntheticsMonitorWithSecretsAttributes } from '../../common/runtime_types';
+import { SyntheticsServerSetup } from '../types';
 import { syntheticsMonitorType } from '../../common/types/saved_objects';
-import { secretKeys, ConfigKey, LegacyConfigKey } from '../../common/constants/monitor_management';
+import { ConfigKey, LegacyConfigKey, secretKeys } from '../../common/constants/monitor_management';
 import { monitorMigrations } from './migrations/monitors';
 
 const legacyConfigKeys = Object.values(LegacyConfigKey);
@@ -188,9 +190,25 @@ export const getSyntheticsMonitorSavedObjectType = (
       getTitle: (savedObject) =>
         savedObject.attributes.name +
         ' - ' +
-        i18n.translate('xpack.synthetics.syntheticsMonitors', {
-          defaultMessage: 'Uptime - Monitor',
+        i18n.translate('xpack.synthetics.syntheticsMonitors.label', {
+          defaultMessage: 'Synthetics - Monitor',
         }),
     },
   };
+};
+
+export const getDecryptedMonitor = async (
+  server: SyntheticsServerSetup,
+  monitorId: string,
+  spaceId: string
+) => {
+  const encryptedClient = server.encryptedSavedObjects.getClient();
+
+  return await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
+    syntheticsMonitorType,
+    monitorId,
+    {
+      namespace: spaceId,
+    }
+  );
 };

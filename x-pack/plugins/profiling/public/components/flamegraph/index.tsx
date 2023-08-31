@@ -18,6 +18,7 @@ import {
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { ElasticFlameGraph } from '../../../common/flamegraph';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
 import { FlameGraphLegend } from './flame_graph_legend';
@@ -52,6 +53,7 @@ export function FlameGraph({
   onChangeSearchText,
 }: Props) {
   const theme = useEuiTheme();
+  const trackProfilingEvent = useUiTracker({ app: 'profiling' });
 
   const columnarData = useMemo(() => {
     return getFlamegraphModel({
@@ -154,6 +156,7 @@ export function FlameGraph({
                           baselineScaleFactor={baseline}
                           comparisonScaleFactor={comparison}
                           onShowMoreClick={() => {
+                            trackProfilingEvent({ metric: 'flamegraph_node_details_click' });
                             if (!showInformationWindow) {
                               toggleShowInformationWindow();
                             }
@@ -191,7 +194,6 @@ export function FlameGraph({
           frame={selected}
           totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
           totalSamples={totalSamples}
-          samplingRate={primaryFlamegraph?.SamplingRate ?? 1.0}
         />
       )}
     </>

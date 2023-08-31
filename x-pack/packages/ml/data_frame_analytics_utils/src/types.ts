@@ -378,6 +378,7 @@ export interface AnalyticsMapNodeElement {
     label: string;
     type: string;
     analysisType?: string;
+    isRoot?: boolean;
   };
 }
 

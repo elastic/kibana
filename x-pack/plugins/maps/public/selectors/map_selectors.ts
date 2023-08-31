@@ -386,16 +386,6 @@ export const hasPreviewLayers = createSelector(getLayerList, (layerList) => {
   });
 });
 
-export const isLoadingPreviewLayers = createSelector(
-  getLayerList,
-  getMapZoom,
-  (layerList, zoom) => {
-    return layerList.some((layer) => {
-      return layer.isPreviewLayer() && layer.isLayerLoading(zoom);
-    });
-  }
-);
-
 export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
   layerList
     .filter((layerDescriptor) => {

@@ -18,6 +18,9 @@ import { getConfigFromFiles } from '@kbn/config';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
+const KIBANA_DEV_SERVICE_ACCOUNT_TOKEN =
+  process.env.TEST_KIBANA_SERVICE_ACCOUNT_TOKEN ||
+  'AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA';
 
 function canRequire(path) {
   try {
@@ -55,11 +58,11 @@ function pathCollector() {
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
+export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
-  const merge = _.partial(_.merge, rawConfig);
+
   if (opts.oss) {
     delete rawConfig.xpack;
   }
@@ -68,6 +71,10 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   delete extraCliOptions.env;
 
   if (opts.dev) {
+    if (opts.serverless) {
+      set('elasticsearch.serviceAccountToken', KIBANA_DEV_SERVICE_ACCOUNT_TOKEN);
+    }
+
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
       if (!has('elasticsearch.username')) {
         set('elasticsearch.username', 'kibana_system');
@@ -98,7 +105,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('server.ssl.truststore.path');
       ensureNotDefined('server.ssl.certificateAuthorities');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
-
       const elasticsearchHosts = (
         (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
           'https://localhost:9200',
@@ -135,8 +141,8 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
-  merge(extraCliOptions);
-  merge(readKeystore());
+  _.mergeWith(rawConfig, extraCliOptions, mergeAndReplaceArrays);
+  _.merge(rawConfig, readKeystore());
 
   return rawConfig;
 }
@@ -256,4 +262,16 @@ export default function (program) {
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });
   });
+}
+
+function mergeAndReplaceArrays(objValue, srcValue) {
+  if (typeof srcValue === 'undefined') {
+    return objValue;
+  } else if (Array.isArray(srcValue)) {
+    // do not merge arrays, use new value instead
+    return srcValue;
+  } else {
+    // default to default merging
+    return undefined;
+  }
 }

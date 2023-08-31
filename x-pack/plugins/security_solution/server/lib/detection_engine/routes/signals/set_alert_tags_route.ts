@@ -7,8 +7,8 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { uniq } from 'lodash/fp';
-import type { SetAlertTagsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_alert_tags_schema';
-import { setAlertTagsSchema } from '../../../../../common/detection_engine/schemas/request/set_alert_tags_schema';
+import type { SetAlertTagsRequestBodyDecoded } from '../../../../../common/api/detection_engine/alert_tags';
+import { setAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
@@ -23,8 +23,8 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
     {
       path: DETECTION_ENGINE_ALERT_TAGS_URL,
       validate: {
-        body: buildRouteValidation<typeof setAlertTagsSchema, SetAlertTagsSchemaDecoded>(
-          setAlertTagsSchema
+        body: buildRouteValidation<typeof setAlertTagsRequestBody, SetAlertTagsRequestBodyDecoded>(
+          setAlertTagsRequestBody
         ),
       },
       options: {
@@ -54,12 +54,12 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
 
       const painlessScript = {
         params: { tagsToAdd, tagsToRemove },
-        source: `List newTagsArray = []; 
+        source: `List newTagsArray = [];
         if (ctx._source["kibana.alert.workflow_tags"] != null) {
           for (tag in ctx._source["kibana.alert.workflow_tags"]) {
             if (!params.tagsToRemove.contains(tag)) {
               newTagsArray.add(tag);
-            } 
+            }
           }
           for (tag in params.tagsToAdd) {
             if (!newTagsArray.contains(tag)) {
@@ -90,9 +90,17 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
       }
 
       try {
-        const body = await esClient.bulk({
-          refresh: 'wait_for',
-          body: bulkUpdateRequest,
+        const body = await esClient.updateByQuery({
+          index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+          refresh: false,
+          body: {
+            script: painlessScript,
+            query: {
+              bool: {
+                filter: { terms: { _id: ids } },
+              },
+            },
+          },
         });
         return response.ok({ body });
       } catch (err) {

@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import type {
   RuleCreateProps,
   RuleResponse,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
  * Helper to cut down on the noise in some of the tests.
@@ -26,6 +26,7 @@ export const createRuleWithAuth = async (
   const { body } = await supertest
     .post(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .auth(auth.user, auth.pass)
     .send(rule);
   return body;
