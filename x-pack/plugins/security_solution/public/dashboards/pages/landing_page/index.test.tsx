@@ -31,6 +31,13 @@ jest.mock('@kbn/dashboard-plugin/public', () => {
   };
 });
 
+const mockUseObservable = jest.fn();
+
+jest.mock('react-use', () => ({
+  ...jest.requireActual('react-use'),
+  useObservable: () => mockUseObservable(),
+}));
+
 const DEFAULT_DASHBOARD_CAPABILITIES = { show: true, createNew: true };
 const mockUseCapabilities = useCapabilities as jest.Mock;
 mockUseCapabilities.mockReturnValue(DEFAULT_DASHBOARD_CAPABILITIES);
@@ -209,5 +216,14 @@ describe('Dashboards landing', () => {
         expect(spyTrack).toHaveBeenCalledWith(METRIC_TYPE.CLICK, TELEMETRY_EVENT.CREATE_DASHBOARD);
       });
     });
+  });
+
+  it('should render callout when available', async () => {
+    const DummyComponent = () => <span data-test-subj="test" />;
+    mockUseObservable.mockReturnValue(<DummyComponent />);
+
+    await renderDashboardLanding();
+
+    expect(screen.queryByTestId('test')).toBeInTheDocument();
   });
 });
