@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TagsBadges } from './tag_badges';
 import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
@@ -31,14 +30,6 @@ import {
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
-
-const TitleLabel = euiStyled(EuiDescriptionListTitle)`
-  width: 40%;
-`;
-
-const DescriptionLabel = euiStyled(EuiDescriptionListDescription)`
-  width: 60%;
-`;
 
 export interface MonitorDetailsPanelProps {
   latestPing?: Ping;
@@ -76,11 +67,11 @@ export const MonitorDetailsPanel = ({
       hasBorder={hasBorder}
     >
       <EuiSpacer size="s" />
-      <EuiDescriptionList type="column" compressed align="left">
+      <EuiDescriptionList type="column" columnWidths={[2, 3]} compressed align="left">
         {!hideEnabled && (
           <>
-            <TitleLabel>{ENABLED_LABEL}</TitleLabel>
-            <DescriptionLabel>
+            <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
               {monitor && (
                 <MonitorEnabled
                   initialLoading={loading}
@@ -91,11 +82,11 @@ export const MonitorDetailsPanel = ({
                   }}
                 />
               )}
-            </DescriptionLabel>
+            </EuiDescriptionListDescription>
           </>
         )}
-        <TitleLabel>{URL_LABEL}</TitleLabel>
-        <DescriptionLabel style={{ wordBreak: 'break-all' }}>
+        <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
           {url ? (
             <EuiLink data-test-subj="syntheticsMonitorDetailsPanelLink" href={url} external>
               {url}
@@ -105,47 +96,51 @@ export const MonitorDetailsPanel = ({
               {UN_AVAILABLE_LABEL}
             </EuiText>
           )}
-        </DescriptionLabel>
-        <TitleLabel>{LAST_RUN_LABEL}</TitleLabel>
-        <DescriptionLabel>
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{LAST_RUN_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
           {latestPing?.timestamp ? (
             <Time timestamp={latestPing?.timestamp} />
           ) : (
             <EuiText color="subdued">--</EuiText>
           )}
-        </DescriptionLabel>
-        <TitleLabel>{LAST_MODIFIED_LABEL}</TitleLabel>
-        <DescriptionLabel>
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{LAST_MODIFIED_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
           <Time timestamp={monitor.updated_at} />
-        </DescriptionLabel>
+        </EuiDescriptionListDescription>
         {monitor[ConfigKey.PROJECT_ID] && (
           <>
-            <TitleLabel>{PROJECT_ID_LABEL}</TitleLabel>
-            <DescriptionLabel>{monitor[ConfigKey.PROJECT_ID]}</DescriptionLabel>
+            <EuiDescriptionListTitle>{PROJECT_ID_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {monitor[ConfigKey.PROJECT_ID]}
+            </EuiDescriptionListDescription>
           </>
         )}
-        <TitleLabel>{MONITOR_ID_ITEM_TEXT}</TitleLabel>
-        <DescriptionLabel>{monitor.id}</DescriptionLabel>
-        <TitleLabel>{MONITOR_TYPE_LABEL}</TitleLabel>
-        <DescriptionLabel>
+        <EuiDescriptionListTitle>{MONITOR_ID_ITEM_TEXT}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>{monitor.id}</EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
           <MonitorTypeBadge monitor={monitor} />
-        </DescriptionLabel>
-        <TitleLabel>{FREQUENCY_LABEL}</TitleLabel>
-        <DescriptionLabel>{frequencyStr(monitor[ConfigKey.SCHEDULE])}</DescriptionLabel>
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          {frequencyStr(monitor[ConfigKey.SCHEDULE])}
+        </EuiDescriptionListDescription>
 
         {!hideLocations && (
           <>
-            <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
-            <DescriptionLabel>
+            <EuiDescriptionListTitle>{LOCATIONS_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
               <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
-            </DescriptionLabel>
+            </EuiDescriptionListDescription>
           </>
         )}
 
-        <TitleLabel>{TAGS_LABEL}</TitleLabel>
-        <DescriptionLabel>
+        <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
           <TagsBadges tags={monitor[ConfigKey.TAGS]} />
-        </DescriptionLabel>
+        </EuiDescriptionListDescription>
       </EuiDescriptionList>
     </PanelWithTitle>
   );
