@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { getSchemaFrequencyResultSchema } from '../schema';
-
-export type GetScheduleFrequencyResult = TypeOf<typeof getSchemaFrequencyResultSchema>;
+export { getSchemaFrequencyResultSchema } from './get_schedule_frequency_result_schema';

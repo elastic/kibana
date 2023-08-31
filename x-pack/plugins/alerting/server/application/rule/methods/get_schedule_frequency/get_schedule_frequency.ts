@@ -8,6 +8,7 @@ import { RulesClientContext } from '../../../../rules_client/types';
 import { RuleDomain } from '../../types';
 import { parseDuration } from '../../../../../common/parse_duration';
 import { GetScheduleFrequencyResult } from './types';
+import { getSchemaFrequencyResultSchema } from './schema';
 
 const MS_PER_MINUTE = 60 * 1000;
 
@@ -68,13 +69,21 @@ export const getScheduleFrequency = async (
     return result + scheduleFrequency * occurrence;
   }, 0);
 
-  return {
+  const result = {
     totalScheduledPerMinute,
     remainingSchedulesPerMinute: Math.max(
       context.maxScheduledPerMinute - totalScheduledPerMinute,
       0
     ),
   };
+
+  try {
+    getSchemaFrequencyResultSchema.validate(result);
+  } catch (e) {
+    context.logger.warn(`Error validating rule schedules per minute: ${e}`);
+  }
+
+  return result;
 };
 
 interface ValidateScheduleLimitParams {
