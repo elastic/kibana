@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface GetScheduleFrequencyResult {
-  totalScheduledPerMinute: number;
-  remainingSchedulesPerMinute: number;
-}
+import { TypeOf } from '@kbn/config-schema';
+import { getSchemaFrequencyResultSchema } from '../schema';
+
+export type GetScheduleFrequencyResult = TypeOf<typeof getSchemaFrequencyResultSchema>;

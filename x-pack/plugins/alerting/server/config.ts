@@ -38,7 +38,7 @@ const rulesSchema = schema.object({
     }),
     enforce: schema.boolean({ defaultValue: false }), // if enforce is false, only warnings will be shown
   }),
-  maxScheduledPerMinute: schema.number({ defaultValue: 10000 }),
+  maxScheduledPerMinute: schema.number({ defaultValue: 10000, max: 10000, min: 0 }),
   run: schema.object({
     timeout: schema.maybe(schema.string({ validate: validateDurationSchema })),
     actions: schema.object({

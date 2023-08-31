@@ -42,6 +42,7 @@ import { DataSourceType } from '../../../../detections/pages/detection_engine/ru
 import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { MlJobLink } from '../../../../detections/components/rules/ml_job_link/ml_job_link';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { BadgeList } from './badge_list';
 import * as i18n from './translations';
 
@@ -107,11 +108,42 @@ interface IndexProps {
 
 const Index = ({ index }: IndexProps) => <BadgeList badges={index} />;
 
-interface DataViewProps {
+interface DataViewIdProps {
   dataViewId: string;
 }
 
-const DataView = ({ dataViewId }: DataViewProps) => <EuiText size="s">{dataViewId}</EuiText>;
+const DataViewId = ({ dataViewId }: DataViewIdProps) => <EuiText size="s">{dataViewId}</EuiText>;
+
+interface DataViewIndexPatternProps {
+  dataViewId: string;
+}
+
+const DataViewIndexPattern = ({ dataViewId }: DataViewIndexPatternProps) => {
+  const { data } = useKibana().services;
+  const [indexPattern, setIndexPattern] = React.useState('');
+  const [hasError, setHasError] = React.useState(false);
+
+  React.useEffect(() => {
+    data.dataViews
+      .get(dataViewId)
+      .then((dataView) => {
+        setIndexPattern(dataView.getIndexPattern());
+      })
+      .catch(() => {
+        setHasError(true);
+      });
+  }, [data, dataViewId]);
+
+  if (hasError) {
+    return <EuiText size="s">{i18n.DATA_VIEW_INDEX_PATTERN_FETCH_ERROR_MESSAGE}</EuiText>;
+  }
+
+  if (!indexPattern) {
+    return <EuiLoadingSpinner size="m" />;
+  }
+
+  return <EuiText size="s">{indexPattern}</EuiText>;
+};
 
 interface ThresholdProps {
   threshold: ThresholdType;
@@ -299,10 +331,16 @@ const prepareDefinitionSectionListItems = (
   }
 
   if ('data_view_id' in rule && rule.data_view_id) {
-    definitionSectionListItems.push({
-      title: i18n.DATA_VIEW_FIELD_LABEL,
-      description: <DataView dataViewId={rule.data_view_id} />,
-    });
+    definitionSectionListItems.push(
+      {
+        title: i18n.DATA_VIEW_ID_FIELD_LABEL,
+        description: <DataViewId dataViewId={rule.data_view_id} />,
+      },
+      {
+        title: i18n.DATA_VIEW_INDEX_PATTERN_FIELD_LABEL,
+        description: <DataViewIndexPattern dataViewId={rule.data_view_id} />,
+      }
+    );
   }
 
   if (savedQuery) {

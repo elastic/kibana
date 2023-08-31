@@ -64,6 +64,7 @@ export interface EventLogDataGrid {
   onChangeItemsPerPage: (pageSize: number) => void;
   onChangePage: (pageIndex: number) => void;
   onFlyoutOpen?: (runLog: IExecutionLog) => void;
+  onRuleNameClick?: (ruleId: string) => void;
   setVisibleColumns: (visibleColumns: string[]) => void;
   setSortingColumns: (sortingColumns: EuiDataGridSorting['columns']) => void;
 }
@@ -167,6 +168,7 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
     onChangeItemsPerPage,
     onChangePage,
     onFlyoutOpen,
+    onRuleNameClick,
   } = props;
 
   const { euiTheme } = useEuiTheme();
@@ -343,6 +345,7 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
             ruleId={ruleId}
             spaceIds={spaceIds}
             useExecutionStatus={isRuleUsingExecutionStatus}
+            onRuleNameClick={onRuleNameClick}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
