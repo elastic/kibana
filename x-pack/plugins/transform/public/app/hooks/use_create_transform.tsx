@@ -24,15 +24,17 @@ import { ToastNotificationText } from '../components';
 
 import { useRefreshTransformList } from './use_refresh_transform_list';
 
-export const useCreateTransform = (
-  transformId: TransformId,
-  transformConfig: PutTransformsRequestSchema
-) => {
+interface CreateTransformArgs {
+  transformId: TransformId;
+  transformConfig: PutTransformsRequestSchema;
+}
+
+export const useCreateTransform = () => {
   const { http, i18n: i18nStart, theme } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
 
-  function errorToast(error: unknown) {
+  function errorToast(error: unknown, { transformId }: CreateTransformArgs) {
     toastNotifications.addDanger({
       title: i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
         defaultMessage: 'An error occurred creating the transform {transformId}:',
@@ -46,15 +48,19 @@ export const useCreateTransform = (
   }
 
   const mutation = useMutation({
-    mutationFn: () =>
-      http.put<PutTransformsResponseSchema>(addInternalBasePath(`transforms/${transformId}`), {
-        body: JSON.stringify(transformConfig),
-        version: '1',
-      }),
+    mutationFn: ({ transformId, transformConfig }: CreateTransformArgs) => {
+      return http.put<PutTransformsResponseSchema>(
+        addInternalBasePath(`transforms/${transformId}`),
+        {
+          body: JSON.stringify(transformConfig),
+          version: '1',
+        }
+      );
+    },
     onError: errorToast,
-    onSuccess: (resp) => {
+    onSuccess: (resp, options) => {
       if (resp.errors.length > 0) {
-        errorToast(resp.errors.length === 1 ? resp.errors[0] : resp.errors);
+        errorToast(resp.errors.length === 1 ? resp.errors[0] : resp.errors, options);
       }
 
       refreshTransformList();

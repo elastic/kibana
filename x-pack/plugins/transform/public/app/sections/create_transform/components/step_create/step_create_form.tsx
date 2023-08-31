@@ -122,24 +122,27 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     }, [created, started, dataViewId]);
 
     const startTransforms = useStartTransforms();
-    const createTransform = useCreateTransform(transformId, transformConfig);
+    const createTransform = useCreateTransform();
 
     function createTransformHandler(startAfterCreation = false) {
       setLoading(true);
 
-      createTransform(undefined, {
-        onError: () => setCreated(false),
-        onSuccess: () => {
-          setCreated(true);
-          if (createDataView) {
-            createKibanaDataView();
-          }
-          if (startAfterCreation) {
-            startTransform();
-          }
-        },
-        onSettled: () => setLoading(false),
-      });
+      createTransform(
+        { transformId, transformConfig },
+        {
+          onError: () => setCreated(false),
+          onSuccess: () => {
+            setCreated(true);
+            if (createDataView) {
+              createKibanaDataView();
+            }
+            if (startAfterCreation) {
+              startTransform();
+            }
+          },
+          onSettled: () => setLoading(false),
+        }
+      );
     }
 
     function startTransform() {
