@@ -67,6 +67,7 @@ export interface EventLogDataGrid {
   onRuleNameClick?: (ruleId: string) => void;
   setVisibleColumns: (visibleColumns: string[]) => void;
   setSortingColumns: (sortingColumns: EuiDataGridSorting['columns']) => void;
+  getRuleDetailsRoute?: (ruleId: string) => string;
 }
 
 export const numTriggeredActionsDisplay = i18n.translate(
@@ -169,6 +170,7 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
     onChangePage,
     onFlyoutOpen,
     onRuleNameClick,
+    getRuleDetailsRoute,
   } = props;
 
   const { euiTheme } = useEuiTheme();
@@ -346,6 +348,7 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
             spaceIds={spaceIds}
             useExecutionStatus={isRuleUsingExecutionStatus}
             onRuleNameClick={onRuleNameClick}
+            getRuleDetailsRoute={getRuleDetailsRoute}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

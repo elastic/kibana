@@ -96,6 +96,7 @@ export interface RuleEventLogListCommonProps {
   filteredRuleTypes?: string[];
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   onRuleNameClick?: (ruleId: string) => void;
+  getRuleDetailsRoute?: (ruleId: string) => string;
 }
 
 export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'default'> =
@@ -118,6 +119,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     setHeaderActions,
     filteredRuleTypes,
     onRuleNameClick,
+    getRuleDetailsRoute,
   } = props;
 
   const { uiSettings, notifications } = useKibana().services;
@@ -632,6 +634,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           onRuleNameClick={onRuleNameClick}
           setVisibleColumns={setVisibleColumns}
           setSortingColumns={setSortingColumns}
+          getRuleDetailsRoute={getRuleDetailsRoute}
         />
       </>
     );
