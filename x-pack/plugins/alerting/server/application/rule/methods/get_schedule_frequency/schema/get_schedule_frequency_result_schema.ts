@@ -7,13 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-const schedulePerMinuteValidation = (value: number) => {
-  if (value < 0) {
-    return `schedule per minute cannot be negative: ${value}`;
-  }
-};
-
 export const getSchemaFrequencyResultSchema = schema.object({
-  totalScheduledPerMinute: schema.number({ validate: schedulePerMinuteValidation }),
-  remainingSchedulesPerMinute: schema.number({ validate: schedulePerMinuteValidation }),
+  totalScheduledPerMinute: schema.number({ min: 0 }),
+  remainingSchedulesPerMinute: schema.number({ min: 0 }),
 });
