@@ -235,7 +235,9 @@ describe('links', () => {
 
       const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
-      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.policies));
+      expect(filteredLinks).toEqual(
+        getLinksWithout(SecurityPageName.policies, SecurityPageName.cloudDefendPolicies)
+      );
     });
   });
 
