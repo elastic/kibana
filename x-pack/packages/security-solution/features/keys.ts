@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { AppFeatures } from './app_features';
+export * from './src/app_features_keys';
