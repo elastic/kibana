@@ -62,19 +62,6 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 8.10.0, review the breaking changes, then mitigate the impact to your application.
 
 [discrete]
-[[breaking-163150]]
-.Case comments changes
-[%collapsible]
-====
-*Details* +
-Updating a case comment is now included in the 10000 user actions restriction. For more information, refer to ({kibana-pull}163150[#163150]).
-
-Updating a case now fails if the operation makes it reach more than 10000 user actions. For more information, refer to ({kibana-pull}161848[#161848]).
-
-The total number of characters per comment is limited to 30000. For more information, refer to ({kibana-pull}161357[#161357]).
-====
-
-[discrete]
 [[breaking-162665]]
 .New summary search capabilities 
 [%collapsible]
@@ -100,120 +87,24 @@ The get case metrics APIs are now internal. For more information, refer to ({kib
       
 [discrete]
 [[breaking-162492]]
-.Cases APIs have new limits on objects processed and amount of data stored in objects
+.Case limits
 [%collapsible]
 ====
 *Details* +
-For Cases APIs, limits are now imposed on the number of objects that can be processed or the amount of data those objects can store. For more information, refer to ({kibana-pull}162492[#162492]).
-====
-
-[discrete]
-[[breaking-161282]]
-.The getConnectors API new limit
-[%collapsible]
-====
-*Details* +
-The getConnectors API now limits the number of supported connectors returned to 1000. For more information, refer to ({kibana-pull}161282[#161282]).
-====
-      
-[discrete]
-[[breaking-162411]]
-.Find Cases API new limits
-[%collapsible]
-====
-*Details* +
-New limits:
-
-* Maximum number of assignees to filter to 100
-* Maximum number of tags to filter to 100
-* Maximum number of categories to filter to 100 
-
-For more information, refer to ({kibana-pull}162411[#162411]).
-====
-      
-[discrete]
-[[breaking-162245]]
-.Find Cases API new restrictions
-[%collapsible]
-====
-*Details* +
-New restrictions:
-
-* Restrict searchFields, sortField and remove rootSearchFields from find_cases API.
-* Restrict searchFields only to the title and the description
-* Restrict sortField to: title, category, createdAt, updatedAt, status, and severity
-
-For more information, refer to ({kibana-pull}162245[#162245]).
-====
-      
-[discrete]
-[[breaking-162071]]
-.Case external references limit change
-[%collapsible]
-====
-*Details* +
-A case can now only have 100 external references and persistable state(excluding files) attachments combined. For more information, refer to ({kibana-pull}162071[#162071]).
-====
-      
-[discrete]
-[[breaking-161111]]
-.Find Cases API max value change
-[%collapsible]
-====
-*Details* +
-Max value for perPage parameter in find Cases API is now 100. For more information, refer to ({kibana-pull}161111[#161111]).
-====
-      
-[discrete]
-[[breaking-161087]]
-.Create Case and Update Case APIs have the following limits
-[%collapsible]
-====
-*Details* +
-UI validations to check:
-
-maximum 30000 characters per description
-maximum 256 characters per tag
-maximum 200 tags per case
- 
-For more information, refer to ({kibana-pull}161087[#161087]).
-
-New limits on titles, descriptions, tags and category:
-
-* Total number of characters per title: 160
-* Total number of characters per description: 30K
-* Total number of tags per case: 200
-* Total number of characters per tag: 256
-* Total number of characters per category: 50
-
-For more information, refer to ({kibana-pull}160844[#160844]).
-====
-      
-[discrete]
-[[breaking-161076]]
-.Update cases simultaneously limits
-[%collapsible]
-====
-*Details* +
-The maximum number of cases that can be updated simultaneously is now 100. The minimum is 1.For more information, refer to ({kibana-pull}161076[#161076]).
-====
-      
-[discrete]
-[[breaking-160846]]
-.Delete cases API new limits
-[%collapsible]
-====
-*Details* +
-The Delete cases API now limits the number of cases to be deleted to 100. For more information, refer to ({kibana-pull}160846[#160846]).
-====
-      
-[discrete]
-[[breaking-160705]]
-.Find Cases API new limits
-[%collapsible]
-====
-*Details* +
-The Find Cases API now limits the array fields tags, assignees, and categories to 100 items. For more information, refer to ({kibana-pull}160705[#160705]).
+Limits are now imposed on the number of objects cases can process or the amount of data those objects can store.
+////
+For example:
+* Updating a case comment is now included in the 10000 user actions restriction. ({kibana-pull}163150[#163150])
+* Updating a case now fails if the operation makes it reach more than 10000 user actions. ({kibana-pull}161848[#161848])
+* The total number of characters per comment is limited to 30000. ({kibana-pull}161357[#161357])
+* The getConnectors API now limits the number of supported connectors returned to 1000. ({kibana-pull}161282[#161282])
+* There are new limits and restrictions when retrieving cases. ({kibana-pull}162411[#162411]), ({kibana-pull}162245[#162245]), ({kibana-pull}161111[#161111]), ({kibana-pull}160705[#160705])
+* A case can now only have 100 external references and persistable state(excluding files) attachments combined. ({kibana-pull}162071[#162071]).
+* New limits on titles, descriptions, tags and category. ({kibana-pull}160844[#160844]).
+* The maximum number of cases that can be updated simultaneously is now 100. The minimum is 1. ({kibana-pull}161076[#161076]).
+* The Delete cases API now limits the number of cases to be deleted to 100.({kibana-pull}160846[#160846]).
+////
+For the full list, refer to {kib-issue}146945[#146945].
 ====
       
 [discrete]
