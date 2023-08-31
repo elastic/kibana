@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ElasticsearchClient } from '../../../../..';
 import {
   createRootWithCorePlugins,
@@ -48,6 +49,7 @@ describe('Elasticsearch Errors', () => {
       client,
       indexName: 'existing_index_with_write_block',
       mappings: { properties: {} },
+      esCapabilities: elasticsearchServiceMock.createCapabilities(),
     })();
     await setWriteBlock({ client, index: 'existing_index_with_write_block' })();
   });

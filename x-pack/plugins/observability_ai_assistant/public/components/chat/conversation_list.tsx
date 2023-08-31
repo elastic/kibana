@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { NewChatButton } from '../buttons/new_chat_button';
 
 const containerClassName = css`
@@ -43,17 +43,16 @@ const newChatButtonWrapperClassName = css`
 
 export function ConversationList({
   selected,
-  onClickNewChat,
   loading,
   error,
   conversations,
+  onClickNewChat,
   onClickDeleteConversation,
 }: {
   selected: string;
   loading: boolean;
   error?: any;
   conversations?: Array<{ id: string; label: string; href?: string }>;
-  onClickConversation: (conversationId: string) => void;
   onClickNewChat: () => void;
   onClickDeleteConversation: (id: string) => void;
 }) {

@@ -67,12 +67,12 @@ export class SavedObjectTaggingPlugin
     return {};
   }
 
-  public start({ http, application, overlays, theme }: CoreStart) {
+  public start({ http, application, overlays, theme, analytics }: CoreStart) {
     this.tagCache = new TagsCache({
       refreshHandler: () => this.tagClient!.getAll({ asSystemRequest: true }),
       refreshInterval: this.config.cacheRefreshInterval,
     });
-    this.tagClient = new TagsClient({ http, changeListener: this.tagCache });
+    this.tagClient = new TagsClient({ analytics, http, changeListener: this.tagCache });
     this.assignmentService = new TagAssignmentService({ http });
 
     // do not fetch tags on anonymous page

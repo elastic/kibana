@@ -18,8 +18,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import type { HttpStart } from '@kbn/core-http-browser';
-
 import { LanguageDefinition } from '../types';
 import './select_client.scss';
 
@@ -27,8 +25,7 @@ interface SelectClientProps {
   language: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
   isSelectedLanguage: boolean;
-  http: HttpStart;
-  pluginId?: string;
+  assetBasePath?: string;
   src?: string;
 }
 
@@ -36,8 +33,7 @@ export const LanguageClientPanel: React.FC<SelectClientProps> = ({
   language,
   setSelectedLanguage,
   isSelectedLanguage,
-  http,
-  pluginId,
+  assetBasePath,
   src,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -60,9 +56,7 @@ export const LanguageClientPanel: React.FC<SelectClientProps> = ({
             <EuiFlexItem grow={false}>
               <EuiImage
                 alt=""
-                src={
-                  src || http.basePath.prepend(`/plugins/${pluginId}/assets/${language.iconType}`)
-                }
+                src={src || `${assetBasePath}${language.iconType}`}
                 height={euiTheme.size.xl}
                 width={euiTheme.size.xl}
               />

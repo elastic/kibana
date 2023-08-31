@@ -37,7 +37,7 @@ import {
 
 import {
   ENDPOINT_LIST_URL,
-  EXCEPTION_FILTER,
+  INTERNAL_EXCEPTION_FILTER,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -579,8 +579,9 @@ export const getExceptionFilterFromExceptionListIds = async ({
   http,
   signal,
 }: GetExceptionFilterFromExceptionListIdsProps): Promise<ExceptionFilterResponse> =>
-  http.fetch(EXCEPTION_FILTER, {
+  http.fetch(INTERNAL_EXCEPTION_FILTER, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       exception_list_ids: exceptionListIds,
       type: 'exception_list_ids',
@@ -607,8 +608,9 @@ export const getExceptionFilterFromExceptions = async ({
   chunkSize,
   signal,
 }: GetExceptionFilterFromExceptionsProps): Promise<ExceptionFilterResponse> =>
-  http.fetch(EXCEPTION_FILTER, {
+  http.fetch(INTERNAL_EXCEPTION_FILTER, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       exceptions,
       type: 'exception_items',
