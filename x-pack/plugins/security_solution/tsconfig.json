@@ -170,6 +170,7 @@
     "@kbn/navigation-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
+    "@kbn/security-solution-features",
     "@kbn/handlebars",
     "@kbn/content-management-plugin"
   ]
