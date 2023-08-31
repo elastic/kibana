@@ -3,6 +3,12 @@
 exports[`AnnotationDescriptionList Initialization with annotation. 1`] = `
 <EuiDescriptionList
   className="ml-annotation-description-list"
+  columnWidths={
+    Array [
+      3,
+      7,
+    ]
+  }
   data-test-subj="mlAnnotationDescriptionList"
   listItems={
     Array [

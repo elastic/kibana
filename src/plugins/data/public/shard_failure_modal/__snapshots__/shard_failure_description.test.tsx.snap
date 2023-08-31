@@ -11,6 +11,12 @@ exports[`ShardFailureDescription renders matching snapshot given valid propertie
   >
     <EuiDescriptionList
       className="shardFailureModal__desc"
+      columnWidths={
+        Array [
+          1,
+          6,
+        ]
+      }
       compressed={true}
       descriptionProps={
         Object {
@@ -77,6 +83,12 @@ exports[`ShardFailureDescription should show more details when button is pressed
   >
     <EuiDescriptionList
       className="shardFailureModal__desc"
+      columnWidths={
+        Array [
+          1,
+          6,
+        ]
+      }
       compressed={true}
       descriptionProps={
         Object {
