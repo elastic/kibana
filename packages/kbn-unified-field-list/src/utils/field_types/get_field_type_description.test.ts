@@ -7,7 +7,7 @@
  */
 
 import { getFieldTypeDescription, UNKNOWN_FIELD_TYPE_DESC } from './get_field_type_description';
-import { KNOWN_FIELD_TYPES } from './field_types';
+import { KNOWN_FIELD_TYPES } from '@kbn/discover-utils';
 
 describe('UnifiedFieldList getFieldTypeDescription()', () => {
   describe('known field types should be recognized', () => {
