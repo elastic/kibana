@@ -75,11 +75,11 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Git tag:*\n${{ env.TAG_NAME }}"
+                      "text": "*Git tag:*\n<https://github.com/elastic/kibana/releases/tag/${{ env.TAG_NAME }}|${{ env.TAG_NAME }}>"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Workflow run id:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
+                      "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
                     }
                   ]
                 },
@@ -190,11 +190,11 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Git tag:*\n${{ env.TAG_NAME }}"
+                      "text": "*Git tag:*\n<https://github.com/elastic/kibana/releases/tag/${{ env.TAG_NAME }}|${{ env.TAG_NAME }}>"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Workflow run id:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
+                      "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
                     }
                   ]
                 },
