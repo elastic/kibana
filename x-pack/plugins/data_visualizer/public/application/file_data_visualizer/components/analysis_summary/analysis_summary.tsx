@@ -28,7 +28,12 @@ export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ re
 
       <EuiSpacer size="m" />
 
-      <EuiDescriptionList type="column" listItems={items} className="analysis-summary-list" />
+      <EuiDescriptionList
+        type="column"
+        columnWidths={[15, 85]}
+        listItems={items}
+        className="analysis-summary-list"
+      />
     </React.Fragment>
   );
 };
