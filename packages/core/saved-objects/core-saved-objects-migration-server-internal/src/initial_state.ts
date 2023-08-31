@@ -15,6 +15,7 @@ import type {
   IndexTypesMap,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import {
   getOutdatedDocumentsQuery,
   type OutdatedDocumentsQueryParams,
@@ -35,6 +36,7 @@ export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   typeRegistry: ISavedObjectTypeRegistry;
   docLinks: DocLinksServiceStart;
   logger: Logger;
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 /**
@@ -54,6 +56,7 @@ export const createInitialState = ({
   typeRegistry,
   docLinks,
   logger,
+  esCapabilities,
 }: CreateInitialStateParams): InitState => {
   const outdatedDocumentsQuery = getOutdatedDocumentsQuery({
     coreMigrationVersionPerType,
@@ -137,5 +140,6 @@ export const createInitialState = ({
     knownTypes,
     excludeFromUpgradeFilterHooks: excludeFilterHooks,
     migrationDocLinks,
+    esCapabilities,
   };
 };

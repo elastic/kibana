@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   COLLAPSED_ACTION_BTN,
@@ -14,16 +12,16 @@ import {
   ADD_ELASTIC_RULES_BTN,
   RULES_EMPTY_PROMPT,
   RULES_MONITORING_TAB,
-  RULES_ROW,
-  RULES_MANAGEMENT_TABLE,
   RULE_SWITCH,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   INSTALL_ALL_RULES_BUTTON,
 } from '../../../screens/alerts_detection_rules';
 import {
   deleteFirstRule,
+  disableAutoRefresh,
+  getRulesManagementTableRows,
   selectAllRules,
-  selectNumberOfRules,
+  selectRulesByName,
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRuleToUpdate,
 } from '../../../tasks/alerts_detection_rules';
@@ -35,6 +33,7 @@ import {
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../../tasks/api_calls/prebuilt_rules';
 import {
   cleanKibana,
@@ -51,7 +50,7 @@ const rules = Array.from(Array(5)).map((_, i) => {
   });
 });
 
-describe('Prebuilt rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Prebuilt rules', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -60,16 +59,18 @@ describe('Prebuilt rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     login();
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
+    preventPrebuiltRulesPackageInstallation();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createAndInstallMockedPrebuiltRules({ rules });
     cy.reload();
     waitForPrebuiltDetectionRulesToBeLoaded();
+    disableAutoRefresh();
   });
 
   describe('Alerts rules, prebuilt rules', () => {
     it('Loads prebuilt rules', () => {
       // Check that the rules table contains rules
-      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length.gte', 1);
+      getRulesManagementTableRows().should('have.length.gte', 1);
 
       // Check the correct count of prebuilt rules is displayed
       getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
@@ -111,8 +112,7 @@ describe('Prebuilt rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       });
 
       it('Does not allow to delete one rule when more than one is selected', () => {
-        const numberOfRulesToBeSelected = 2;
-        selectNumberOfRules(numberOfRulesToBeSelected);
+        selectAllRules();
 
         cy.get(COLLAPSED_ACTION_BTN).each((collapsedItemActionBtn) => {
           cy.wrap(collapsedItemActionBtn).should('have.attr', 'disabled');
@@ -153,16 +153,16 @@ describe('Prebuilt rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
       it('Deletes and recovers more than one rule', () => {
         getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-          const numberOfRulesToBeSelected = 2;
+          const rulesToDelete = ['Test rule 1', 'Test rule 2'] as const;
           const expectedNumberOfRulesAfterDeletion = availablePrebuiltRulesCount - 2;
           const expectedNumberOfRulesAfterRecovering = availablePrebuiltRulesCount;
 
-          selectNumberOfRules(numberOfRulesToBeSelected);
+          selectRulesByName(rulesToDelete);
           deleteSelectedRules();
 
           cy.get(ADD_ELASTIC_RULES_BTN).should(
             'have.text',
-            `Add Elastic rules${numberOfRulesToBeSelected}`
+            `Add Elastic rules${rulesToDelete.length}`
           );
           cy.get(ELASTIC_RULES_BTN).should(
             'have.text',

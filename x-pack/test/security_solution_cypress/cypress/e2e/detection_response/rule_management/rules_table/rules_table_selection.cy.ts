@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   SELECTED_RULES_NUMBER_LABEL,
@@ -14,8 +12,8 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../../../screens/alerts_detection_rules';
 import {
-  selectNumberOfRules,
-  unselectNumberOfRules,
+  selectRulesByName,
+  unselectRulesByName,
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../../../tasks/alerts_detection_rules';
 import {
@@ -35,7 +33,7 @@ const RULE_2 = createRuleAssetSavedObject({
   rule_id: 'rule_2',
 });
 
-describe('Rules table: selection', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Rules table: selection', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -51,11 +49,11 @@ describe('Rules table: selection', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   it('should correctly update the selection label when rules are individually selected and unselected', () => {
     waitForPrebuiltDetectionRulesToBeLoaded();
 
-    selectNumberOfRules(2);
+    selectRulesByName(['Test rule 1', 'Test rule 2']);
 
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '2');
 
-    unselectNumberOfRules(2);
+    unselectRulesByName(['Test rule 1', 'Test rule 2']);
 
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');
   });

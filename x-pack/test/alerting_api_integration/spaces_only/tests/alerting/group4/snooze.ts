@@ -35,8 +35,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
   const log = getService('log');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/159076
-  describe.skip('snooze', () => {
+  describe('snooze', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -354,11 +353,19 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
-        snooze_schedule: {
-          ...SNOOZE_SCHEDULE,
-          duration: 3000,
+      const dateStart = new Date().toISOString();
+      const snooze = {
+        ...SNOOZE_SCHEDULE,
+        rRule: {
+          ...SNOOZE_SCHEDULE.rRule,
+          // updating the dtstart to the current time because otherwise the snooze might be over already
+          dtstart: dateStart,
         },
+        duration: 3000,
+      };
+
+      const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        snooze_schedule: snooze,
       });
 
       expect(response.statusCode).to.eql(204);
@@ -369,12 +376,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
           .set('kbn-xsrf', 'foo')
           .expect(200);
-        expect(updatedAlert.snooze_schedule).to.eql([
-          {
-            ...SNOOZE_SCHEDULE,
-            duration: 3000,
-          },
-        ]);
+        expect(updatedAlert.snooze_schedule).to.eql([snooze]);
       });
       log.info('wait for snoozing to end');
       await retry.try(async () => {

@@ -11,7 +11,7 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { type PublicFrameworkAlertsService } from '@kbn/alerting-plugin/server';
+import type { PublicFrameworkAlertsService, DataStreamAdapter } from '@kbn/alerting-plugin/server';
 import { INDEX_PREFIX } from '../config';
 import { type IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';
@@ -94,6 +94,7 @@ interface ConstructorOptions {
   disabledRegistrationContexts: string[];
   frameworkAlerts: PublicFrameworkAlertsService;
   pluginStop$: Observable<void>;
+  dataStreamAdapter: DataStreamAdapter;
 }
 
 export class RuleDataService implements IRuleDataService {
@@ -116,6 +117,7 @@ export class RuleDataService implements IRuleDataService {
       isWriteEnabled: options.isWriteEnabled,
       frameworkAlerts: options.frameworkAlerts,
       pluginStop$: options.pluginStop$,
+      dataStreamAdapter: options.dataStreamAdapter,
     });
 
     this.installCommonResources = Promise.resolve(right('ok'));
@@ -222,6 +224,7 @@ export class RuleDataService implements IRuleDataService {
       waitUntilReadyForReading,
       waitUntilReadyForWriting,
       logger: this.options.logger,
+      isUsingDataStreams: this.options.dataStreamAdapter.isUsingDataStreams(),
     });
   }
 
