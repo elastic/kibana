@@ -7,13 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import {
-  getSLOTransformId,
-  SLO_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '../../assets/constants';
 import { DeleteSLOInstances } from './delete_slo_instances';
-import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 
 describe('DeleteSLOInstances', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
