@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 import dedent from 'dedent';
@@ -29,6 +29,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   SelectClientPanel,
   LanguageDefinition,
+  LanguageDefinitionSnippetArguments,
   LanguageClientPanel,
   InstallClientPanel,
   OverviewPanel,
@@ -57,17 +58,28 @@ const DEFAULT_URL = 'https://localhost:9200';
 
 export const APIGettingStarted = () => {
   const { http } = useValues(HttpLogic);
-  const { apiKey, isGenerateModalOpen } = useValues(OverviewLogic);
-  const { openGenerateModal, closeGenerateModal } = useActions(OverviewLogic);
+  const { apiKey, isGenerateModalOpen, indexPipelineParameters } = useValues(OverviewLogic);
+  const { fetchIndexPipelineParameters, openGenerateModal, closeGenerateModal } =
+    useActions(OverviewLogic);
   const { indexName } = useValues(IndexViewLogic);
   const { services } = useKibana<KibanaDeps>();
 
   const cloudContext = useCloudDetails();
 
-  const codeArgs = {
+  useEffect(() => {
+    fetchIndexPipelineParameters({ indexName });
+  }, [indexName]);
+
+  const codeArgs: LanguageDefinitionSnippetArguments = {
     apiKey,
     cloudId: cloudContext.cloudId,
+    extraIngestDocumentValues: {
+      _extract_binary_content: indexPipelineParameters.extract_binary_content,
+      _reduce_whitespace: indexPipelineParameters.reduce_whitespace,
+      _run_ml_inference: indexPipelineParameters.run_ml_inference,
+    },
     indexName,
+    ingestPipeline: indexPipelineParameters.name,
     url: cloudContext.elasticsearchUrl || DEFAULT_URL,
   };
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/client_libraries/`);
