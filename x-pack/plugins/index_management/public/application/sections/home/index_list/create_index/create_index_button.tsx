@@ -18,7 +18,7 @@ export const CreateIndexButton = ({ loadIndices }: { loadIndices: () => void }) 
     <>
       <EuiButton
         fill
-        iconType="plusInCircle"
+        iconType="plusInCircleFilled"
         onClick={() => setCreateIndexModalOpen(true)}
         key="createIndexButton"
         data-test-subj="createIndexButton"
