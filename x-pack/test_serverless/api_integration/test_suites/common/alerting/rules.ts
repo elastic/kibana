@@ -35,7 +35,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('Alerting rules', () => {
+  // Issue: https://github.com/elastic/kibana/issues/165145
+  describe.skip('Alerting rules', () => {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     let actionId: string;

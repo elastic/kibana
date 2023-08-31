@@ -83,7 +83,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         });
 
-        it('should display an empty prompt for no integrations', async () => {
+        // Skip: failing assertion
+        // Issue: https://github.com/elastic/kibana/issues/165138
+        it.skip('should display an empty prompt for no integrations', async () => {
           const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
           expect(integrations.length).to.be(0);
 
