@@ -13,7 +13,10 @@ import {
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
-import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
+import {
+  createAndInstallMockedPrebuiltRules,
+  installPrebuiltRuleAssets,
+} from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -67,7 +70,7 @@ describe(
       resetRulesTableState();
       deleteAlertsAndRules();
       cy.task('esArchiverResetKibana');
-      createAndInstallMockedPrebuiltRules({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
+      createAndInstallMockedPrebuiltRules([OUTDATED_RULE_1, OUTDATED_RULE_2]);
     });
 
     describe('User with read privileges on Security Solution', () => {
@@ -81,7 +84,7 @@ describe(
       });
       beforeEach(() => {
         // Now login with read-only user in preparation for test
-        createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
+        installPrebuiltRuleAssets([RULE_1, RULE_2]);
         loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
       });
 
@@ -104,10 +107,7 @@ describe(
     describe('User with read privileges on Security Solution', () => {
       beforeEach(() => {
         /* Create a second version of the rule, making it available for update */
-        createAndInstallMockedPrebuiltRules({
-          rules: [UPDATED_RULE_1, UPDATED_RULE_2],
-          installToKibana: false,
-        });
+        installPrebuiltRuleAssets([UPDATED_RULE_1, UPDATED_RULE_2]);
         // Now login with read-only user in preparation for test
         loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
       });

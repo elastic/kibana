@@ -6,8 +6,11 @@
  */
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
-import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
+import {
+  installPrebuiltRuleAssets,
+  createAndInstallMockedPrebuiltRules,
+} from '../../../tasks/api_calls/prebuilt_rules';
+import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
   addElasticRulesButtonClick,
@@ -46,7 +49,7 @@ describe(
         rule_id: 'rule_2',
       });
       beforeEach(() => {
-        createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
+        installPrebuiltRuleAssets([RULE_1, RULE_2]);
       });
 
       it('installing prebuilt rules one by one', () => {
@@ -104,13 +107,10 @@ describe(
       });
       beforeEach(() => {
         /* Create a new rule and install it */
-        createAndInstallMockedPrebuiltRules({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
+        createAndInstallMockedPrebuiltRules([OUTDATED_RULE_1, OUTDATED_RULE_2]);
         /* Create a second version of the rule, making it available for update */
-        createAndInstallMockedPrebuiltRules({
-          rules: [UPDATED_RULE_1, UPDATED_RULE_2],
-          installToKibana: false,
-        });
-        cy.reload();
+        installPrebuiltRuleAssets([UPDATED_RULE_1, UPDATED_RULE_2]);
+        reload();
       });
 
       it('upgrading prebuilt rules one by one', () => {
