@@ -12,7 +12,6 @@ import {
   IEmbeddable,
   PanelState,
 } from '@kbn/embeddable-plugin/public';
-import { v4 as uuidv4 } from 'uuid';
 
 import { DashboardPanelState } from '../../../../common';
 import { DashboardContainer } from '../dashboard_container';
