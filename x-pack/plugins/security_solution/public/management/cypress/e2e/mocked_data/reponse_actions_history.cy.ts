@@ -66,7 +66,7 @@ describe('Response actions history page', () => {
     row.click();
     // wait for the API response to come back
     // and then see if the tray is actually closed
-    cy.wait('@getResponses', { timeout: 500 }).then((xhr) => {
+    cy.wait('@getResponses', { timeout: 500 }).then(() => {
       cy.getByTestSubj('response-actions-list-details-tray').should('not.exist');
       cy.url().should('not.include', 'withOutputs');
     });
