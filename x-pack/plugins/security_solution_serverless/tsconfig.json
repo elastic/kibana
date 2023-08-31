@@ -10,8 +10,6 @@
     "public/**/*.tsx",
     "server/**/*.ts",
     "../../../typings/**/*"
-    ,
-    "../../packages/security-solution/upselling/sections/generic_upselling_section.tsx"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
@@ -39,6 +37,8 @@
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
     "@kbn/cloud-security-posture-plugin",
+    "@kbn/security-solution-features",
+    "@kbn/cases-plugin",
     "@kbn/fleet-plugin",
     "@kbn/core-elasticsearch-server",
     "@kbn/usage-collection-plugin"
