@@ -12,9 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./management'));
 
-    // reporting management app
-    loadTestFile(require.resolve('./reporting'));
-
     // platform security
     loadTestFile(require.resolve('./security/navigation/avatar_menu'));
 
@@ -23,5 +20,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     // Data View Management
     loadTestFile(require.resolve('./data_view_mgmt'));
+
+    // reporting management app
+    loadTestFile(require.resolve('./reporting'));
   });
 }

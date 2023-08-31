@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
   const reportingAPI = getService('svlReportingAPI');
+  const security = getService('security');
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
@@ -47,8 +48,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const TEST_PASSWORD = 'changeme';
 
     before('initialize saved object archive', async () => {
-      await reportingAPI.createReportingRole();
-      await reportingAPI.createReportingUser(TEST_USERNAME, TEST_PASSWORD);
+      await reportingAPI.createReportingRole(security);
+      await reportingAPI.createReportingUser(security, TEST_USERNAME, TEST_PASSWORD);
 
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);

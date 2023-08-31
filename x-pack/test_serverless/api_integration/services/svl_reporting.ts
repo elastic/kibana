@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { SecurityService } from 'test/common/services/security/security';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
@@ -26,7 +27,6 @@ const REPORTING_USER_USERNAME = 'reporting_user';
  * Services to create roles and users for security testing
  */
 export function SvlReportingServiceProvider({ getService }: FtrProviderContext) {
-  const security = getService('security');
   const log = getService('log');
   const supertest = getService('supertestWithoutAuth');
   const retry = getService('retry');
@@ -41,7 +41,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     /**
      * Define a role that DOES NOT grant privileges to create any type of report.
      */
-    async createDataAnalystRole() {
+    async createDataAnalystRole(security: SecurityService) {
       await security.role.create(DATA_ANALYST_ROLE, {
         metadata: {},
         elasticsearch: {
@@ -65,7 +65,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       });
     },
 
-    async createDataAnalystUser() {
+    async createDataAnalystUser(security: SecurityService) {
       await security.user.create(DATA_ANALYST_USERNAME, {
         password: DATA_ANALYST_PASSWORD,
         roles: [DATA_ANALYST_ROLE],
@@ -76,7 +76,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     /**
      * Define a role that DOES grant privileges to create certain types of reports.
      */
-    async createReportingRole() {
+    async createReportingRole(security: SecurityService) {
       await security.role.create(REPORTING_ROLE, {
         metadata: {},
         elasticsearch: {
@@ -101,6 +101,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     },
 
     async createReportingUser(
+      security: SecurityService,
       username = REPORTING_USER_USERNAME,
       password = REPORTING_USER_PASSWORD
     ) {
