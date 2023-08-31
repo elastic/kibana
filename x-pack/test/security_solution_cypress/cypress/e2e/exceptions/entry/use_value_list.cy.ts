@@ -54,7 +54,7 @@ describe('Use Value list in exception entry', { tags: ['@ess', '@serverless'] },
   before(() => {
     cleanKibana();
     login();
-    cy.task('esArchiverLoad', 'exceptions');
+    cy.task('esArchiverLoad', { archiveName: 'exceptions' });
     createRule({
       ...getNewRule(),
       query: 'user.name:*',

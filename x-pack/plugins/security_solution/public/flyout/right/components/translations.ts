@@ -130,6 +130,13 @@ export const ENTITIES_TITLE = i18n.translate(
   { defaultMessage: 'Entities' }
 );
 
+export const ENTITIES_NO_DATA_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.entitiesNoDataMessage',
+  {
+    defaultMessage: 'No user or host data available',
+  }
+);
+
 export const THREAT_INTELLIGENCE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle',
   { defaultMessage: 'Threat Intelligence' }
@@ -299,6 +306,11 @@ export const RESPONSE_TITLE = i18n.translate(
 export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
   defaultMessage: 'There are no response actions defined for this event.',
 });
+
+export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
+  { defaultMessage: 'Technical preview' }
+);
 
 export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage',
