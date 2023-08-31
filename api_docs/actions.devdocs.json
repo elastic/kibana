@@ -3247,9 +3247,7 @@
             "section": "def-common.ActionTypeExecutorResult",
             "text": "ActionTypeExecutorResult"
           },
-          "<unknown>>; enqueueExecution: (options: ",
-          "ExecuteOptions",
-          ") => Promise<void>; bulkEnqueueExecution: (options: ",
+          "<unknown>>; bulkEnqueueExecution: (options: ",
           "ExecuteOptions",
           "[]) => Promise<void>; ephemeralEnqueuedExecution: (options: ",
           "ExecuteOptions",
@@ -3261,14 +3259,10 @@
             "section": "def-server.RunNowResult",
             "text": "RunNowResult"
           },
-          ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ListTypesOptions) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "common",
-            "docId": "kibActionsPluginApi",
-            "section": "def-common.ActionType",
-            "text": "ActionType"
-          },
+          ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ",
+          "ListTypesParams",
+          ") => Promise<",
+          "ConnectorType",
           "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
           {
             "pluginId": "actions",
