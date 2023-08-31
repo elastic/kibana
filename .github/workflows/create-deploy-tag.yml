@@ -162,10 +162,6 @@ jobs:
                     {
                       "type": "mrkdwn",
                       "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Git tag:*\n<https://github.com/elastic/kibana/releases/tag/${{ env.TAG_NAME }}|${{ env.TAG_NAME }}>"
                     }
                   ]
                 },
