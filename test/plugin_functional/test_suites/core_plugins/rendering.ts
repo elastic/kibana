@@ -161,7 +161,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.testBuildId (string)',
         'telemetry.labels.testJobId (string)',
         'telemetry.labels.ciBuildName (string)',
-        'telemetry.labels.serverless (any)',
+        'telemetry.labels.performancePhase (string)',
+        'telemetry.labels.serverless (any)', // It's the project type (string), claims any because schema.conditional. Can only be set on Serverless.
         'telemetry.hidePrivacyStatement (boolean)',
         'telemetry.optIn (boolean)',
         'telemetry.sendUsageFrom (alternatives)',
@@ -329,6 +330,30 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+
+        'telemetry.allowChangingOptInStatus (boolean)',
+        'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
+        'telemetry.banner (boolean)',
+        'telemetry.labels.branch (string)',
+        'telemetry.labels.ciBuildId (string)',
+        'telemetry.labels.ciBuildJobId (string)',
+        'telemetry.labels.ciBuildNumber (number)',
+        'telemetry.labels.ftrConfig (string)',
+        'telemetry.labels.gitRev (string)',
+        'telemetry.labels.isPr (boolean)',
+        'telemetry.labels.journeyName (string)',
+        'telemetry.labels.prId (number)',
+        'telemetry.labels.testBuildId (string)',
+        'telemetry.labels.testJobId (string)',
+        'telemetry.labels.ciBuildName (string)',
+        'telemetry.labels.performancePhase (string)',
+        'telemetry.labels.serverless (any)', // It's the project type (string), claims any because schema.conditional. Can only be set on Serverless.
+        'telemetry.hidePrivacyStatement (boolean)',
+        'telemetry.optIn (boolean)',
+        'telemetry.sendUsageFrom (alternatives)',
+        'telemetry.sendUsageTo (any)',
+        'usageCollection.uiCounters.debug (boolean)',
+        'usageCollection.uiCounters.enabled (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
