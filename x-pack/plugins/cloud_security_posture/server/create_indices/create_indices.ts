@@ -197,7 +197,6 @@ const createIndexSafe = async (esClient: ElasticsearchClient, logger: Logger, in
     });
 
     if (!isLatestIndexExists) {
-      // esClient.indices.createDataStream
       await esClient.indices.create({
         index,
       });
