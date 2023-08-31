@@ -527,7 +527,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         ) : (
           <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
             <EuiButtonIcon
-              data-test-subj="refreshButton"
+              data-test-subj="ruleLastExecutionStatusRefreshButton"
               color="primary"
               onClick={refreshRule}
               iconType="refresh"
