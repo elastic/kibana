@@ -133,7 +133,6 @@ export const useAvailablePackages = () => {
     error: eprPackageLoadingError,
   } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
-  // TODO move to another function
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
     eprPackages.items.forEach(function (element) {
