@@ -62,8 +62,13 @@ describe('Response actions history page', () => {
     cy.url().should('include', 'withOutputs');
 
     // collapse the row
+    cy.intercept('GET', '/api/endpoint/action*').as('getResponses');
     row.click();
-    cy.getByTestSubj('response-actions-list-details-tray').should('not.exist');
-    cy.url().should('not.include', 'withOutputs');
+    // wait for the API response to come back
+    // and then see if the tray is actually closed
+    cy.wait('@getResponses', { timeout: 500 }).then((xhr) => {
+      cy.getByTestSubj('response-actions-list-details-tray').should('not.exist');
+      cy.url().should('not.include', 'withOutputs');
+    });
   });
 });
