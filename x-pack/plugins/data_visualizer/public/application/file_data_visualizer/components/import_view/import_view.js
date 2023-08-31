@@ -37,7 +37,6 @@ import {
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
-// const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
 const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };
 
 const DEFAULT_STATE = {

@@ -282,14 +282,9 @@ export function fileUploadRoutes(
   /**
    * @apiGroup FileDataVisualizer
    *
-   * @api {post} /internal/file_upload/time_field_range Get time field range
-   * @apiName GetTimeFieldRange
-   * @apiDescription Returns the time range for the given index and query using the specified time range.
-   *
-   * @apiSchema (body) getTimeFieldRangeSchema
-   *
-   * @apiSuccess {Object} start start of time range with epoch and string properties.
-   * @apiSuccess {Object} end end of time range with epoch and string properties.
+   * @api {post} /internal/file_upload/default_index_settings Get the default index settings to be used for index creation.
+   * @apiName GetDefaultIndexSettings
+   * @apiDescription Returns the default index settings to be used for index creation.
    */
   router.versioned
     .get({
