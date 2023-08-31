@@ -7,7 +7,6 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
 import { defaultsDeep } from 'lodash';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { Cluster } from '@kbn/es';
@@ -78,17 +77,14 @@ function createServerlessES() {
         basePath: ES_BASE_PATH_DIR,
         teardown: true,
         background: true,
+        clean: true,
       });
       // runServerless doesn't wait until the nodes are up
       await waitUntilClusterReady(getServerlessESClient());
       return {
         getClient: getServerlessESClient,
         stop: async () => {
-          try {
-            await es.stop();
-          } finally {
-            Fs.rmSync(ES_BASE_PATH_DIR, { recursive: true, force: true });
-          }
+          await es.stop();
         },
       };
     },
