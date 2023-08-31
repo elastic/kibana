@@ -7,17 +7,15 @@
 
 import { chunk, intersection } from 'lodash';
 import moment from 'moment';
-import type { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getHttp } from '../kibana_services';
 import { MB } from '../../common/constants';
-import type {
-  ImportDoc,
-  ImportFailure,
-  ImportResponse,
-  IngestPipeline,
-} from '../../common/types';
+import type { ImportDoc, ImportFailure, ImportResponse, IngestPipeline } from '../../common/types';
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
 
 const CHUNK_SIZE = 5000;

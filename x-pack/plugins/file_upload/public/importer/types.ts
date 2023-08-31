@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import type {
-  ImportFailure,
-  IngestPipeline,
-  ImportDoc,
-  ImportResponse,
-} from '../../common/types';
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type { ImportFailure, IngestPipeline, ImportDoc, ImportResponse } from '../../common/types';
 
 export interface ImportConfig {
   settings: IndicesIndexSettings;
