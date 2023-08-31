@@ -41,7 +41,7 @@ image::images/multivalue-filtering.png[An example of multivalue filtering on a p
 
 [discrete]
 ==== Access dashboards' metadata from the listing page
-Easily view and edit dashboards’ title, description and tags from the listing page.
+Easily view and edit dashboards’ title, description, and tags from the listing page.
 
 [role="screenshot"]
 image::images/dashboards-metadata.png[An example of the listing page displaying metadata, width=70%]
