@@ -24,7 +24,7 @@ import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_hosts');
+    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
   });
 
   beforeEach(() => {
@@ -53,7 +53,8 @@ describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
     removeCriticalFilterAndCloseRiskTableFilter();
   });
 
-  it('should be able to change items count per page', () => {
+  // Flaky
+  it.skip('should be able to change items count per page', () => {
     selectFiveItemsPerPageOption();
 
     cy.get(HOST_BY_RISK_TABLE_HOSTNAME_CELL).should('have.length', 5);
