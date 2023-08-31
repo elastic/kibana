@@ -27,10 +27,28 @@ const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | u
   const cssStyles = [colorStyles.primary];
   return productTier ? (
     <>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <div
+      {/* <div> cannot appear as a descendant of <p>, EuiSpacer is a div */}
+      <span
+        css={css`
+          padding: ${euiTheme.size.l} 0 00;
+          width: 100%;
+          height: 1px;
+          display: inline-block;
+          &::before {
+            content: ' ';
+          }
+        `}
+      />
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+        component="span"
+        css={css`
+          margin-top: -6px;
+        `}
+      >
+        <EuiFlexItem grow={false} component="span">
+          <span
+            className="eui-displayBlock"
             css={css`
               ${cssStyles};
               border-radius: ${euiTheme.border.radius.medium};
@@ -50,7 +68,7 @@ const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | u
               {WELCOME_PANEL_PROJECT_CREATED_CHANGE_PLAN_TITLE}
               <EuiIcon type="arrowRight" />
             </LinkAnchor>
-          </div>
+          </span>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

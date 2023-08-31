@@ -30,6 +30,7 @@ export interface GetStartedProps {
 export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes }) => {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('s');
+
   const {
     onProductSwitchChanged,
     onCardClicked,
