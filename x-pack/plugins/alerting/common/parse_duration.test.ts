@@ -10,6 +10,7 @@ import {
   formatDuration,
   getDurationNumberInItsUnit,
   getDurationUnitValue,
+  convertDurationToFrequency,
 } from './parse_duration';
 
 test('parses seconds', () => {
@@ -179,4 +180,27 @@ test('getDurationUnitValue days', () => {
 test('getDurationUnitValue hours', () => {
   const result = getDurationUnitValue('100h');
   expect(result).toEqual('h');
+});
+
+test('convertDurationToFrequency converts duration', () => {
+  let result = convertDurationToFrequency('1m');
+  expect(result).toEqual(1);
+  result = convertDurationToFrequency('5m');
+  expect(result).toEqual(0.2);
+  result = convertDurationToFrequency('10s');
+  expect(result).toEqual(6);
+  result = convertDurationToFrequency('1s');
+  expect(result).toEqual(60);
+});
+
+test('convertDurationToFrequency throws when duration is invalid', () => {
+  expect(() => convertDurationToFrequency('0d')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"0d\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+});
+
+test('convertDurationToFrequency throws when denomination is 0', () => {
+  expect(() => convertDurationToFrequency('1s', 0)).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid denomination value: value cannot be 0"`
+  );
 });
