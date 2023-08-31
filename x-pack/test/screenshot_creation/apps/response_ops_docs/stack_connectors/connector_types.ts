@@ -179,8 +179,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('nameInput', 'OpenAI test connector');
       await testSubjects.setValue('secrets.apiKey-input', 'testkey');
       await commonScreenshots.takeScreenshot('gen-ai-connector', screenshotDirectories, 1920, 1200);
-      const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
-      await flyOutCancelButton.click();
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await commonScreenshots.takeScreenshot('gen-ai-params-test', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
     });
   });
 }
