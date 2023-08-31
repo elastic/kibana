@@ -37,7 +37,9 @@ import { ExperimentalFeaturesService } from '../../../../services';
 
 import { promoteFeaturedIntegrations } from '../utils';
 
-import { ControlsColumn, MissingIntegrationContent, GridColumn } from './controls';
+import { ControlsColumn } from './controls';
+import { GridColumn } from './grid';
+import { MissingIntegrationContent } from './missing_integrations';
 import { SearchBox } from './search_box';
 
 export interface Props {
