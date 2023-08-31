@@ -9,13 +9,13 @@ import React, { useMemo } from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { AppFeatureKey } from '@kbn/security-solution-features/keys';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
-import { AppFeatureKey } from '../../../../common';
 import { ResponseActionFormField } from './osquery_response_action_form_field';
 import type { ArrayItem } from '../../../shared_imports';
+import { UseField } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
 import { NOT_AVAILABLE, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
-import { UseField } from '../../../shared_imports';
 
 interface OsqueryResponseActionProps {
   item: ArrayItem;

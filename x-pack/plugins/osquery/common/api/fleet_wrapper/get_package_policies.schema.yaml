@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: Get package policies schema
+  version: '1'
+paths: { }
+components:
+  parameters:
+   GetPackagePoliciesRequestQueryParameter:
+      name: query
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/GetPackagePoliciesRequestParams'
+  schemas:
+    GetPackagePoliciesRequestParams:
+      type: object
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed
