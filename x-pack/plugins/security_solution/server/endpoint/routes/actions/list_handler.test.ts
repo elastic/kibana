@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -15,7 +13,7 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
@@ -23,6 +21,7 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import { registerActionListRoutes } from './list';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
@@ -61,17 +60,14 @@ describe('Action List Handler', () => {
         query,
       });
       mockResponse = httpServerMock.createResponseFactory();
-      const [, routeHandler]: [
-        RouteConfig<any, any, any, any>,
-        RequestHandler<
-          unknown,
-          EndpointActionListRequestQuery,
-          unknown,
-          SecuritySolutionRequestHandlerContext
-        >
-      ] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(BASE_ENDPOINT_ACTION_ROUTE)
-      )!;
+
+      const { routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        BASE_ENDPOINT_ACTION_ROUTE,
+        '2023-10-31'
+      );
+
       await routeHandler(
         coreMock.createCustomRequestHandlerContext(
           createRouteHandlerContext(esClientMock, savedObjectsClientMock.create())
@@ -89,7 +85,7 @@ describe('Action List Handler', () => {
   });
 
   describe('Internals', () => {
-    const defaultParams = { pageSize: 10, page: 1, withAutomatedActions: true };
+    const defaultParams = { pageSize: 10, page: 1 };
     it('should return `notFound` when actions index does not exist', async () => {
       mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
       await actionListHandler(defaultParams);
@@ -117,7 +113,6 @@ describe('Action List Handler', () => {
         commands: 'running-processes',
         statuses: 'failed',
         userIds: 'userX',
-        withAutomatedActions: true,
       });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
@@ -16,6 +16,8 @@ import { hostname } from 'os';
 import url from 'url';
 
 import type { Duration } from 'moment';
+import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { CspConfigType, CspConfig } from './csp';
 import { ExternalUrlConfig } from './external_url';
 import {
@@ -137,6 +139,21 @@ const configSchema = schema.object(
         { defaultValue: [] }
       ),
     }),
+    eluMonitor: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      logging: schema.object({
+        enabled: schema.conditional(
+          schema.contextRef('dist'),
+          false,
+          schema.boolean({ defaultValue: true }),
+          schema.boolean({ defaultValue: false })
+        ),
+        threshold: schema.object({
+          elu: schema.number({ defaultValue: 0.15, min: 0, max: 1 }),
+          ela: schema.number({ defaultValue: 250, min: 0 }),
+        }),
+      }),
+    }),
     requestId: schema.object(
       {
         allowFromAnyIp: schema.boolean({ defaultValue: false }),
@@ -150,7 +167,38 @@ const configSchema = schema.object(
         },
       }
     ),
-    restrictInternalApis: schema.boolean({ defaultValue: false }), // allow access to internal routes by default to prevent breaking changes in current offerings
+    // allow access to internal routes by default to prevent breaking changes in current offerings
+    restrictInternalApis: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+    }),
+
+    versioned: schema.object({
+      /**
+       * Which handler resolution algo to use: "newest" or "oldest".
+       *
+       * @note in development we have an additional option "none" which is also the default.
+       *       This prevents any fallbacks and requires that a version specified.
+       *       Useful for ensuring that a given client always specifies a version.
+       */
+      versionResolution: schema.conditional(
+        schema.contextRef('dev'),
+        true,
+        schema.oneOf([schema.literal('newest'), schema.literal('oldest'), schema.literal('none')], {
+          defaultValue: 'none',
+        }),
+        schema.oneOf([schema.literal('newest'), schema.literal('oldest')], {
+          defaultValue: 'oldest',
+        })
+      ),
+
+      /**
+       * Whether we require the Kibana browser build version to match the Kibana server build version.
+       *
+       * This number is determined when a distributable version of Kibana is built and ensures that only
+       * same-build browsers can access the Kibana server.
+       */
+      strictClientVersionCheck: schema.boolean({ defaultValue: true }),
+    }),
   },
   {
     validate: (rawConfig) => {
@@ -223,8 +271,14 @@ export class HttpConfig implements IHttpConfig {
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
+  public versioned: {
+    versionResolution: HandlerResolutionStrategy;
+    strictClientVersionCheck: boolean;
+  };
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
+
+  public eluMonitor: IHttpEluMonitorConfig;
 
   /**
    * @internal
@@ -244,12 +298,12 @@ export class HttpConfig implements IHttpConfig {
     this.securityResponseHeaders = securityResponseHeaders;
     this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders ?? {}).reduce(
       (headers, [key, value]) => {
-        return {
-          ...headers,
-          [key]: Array.isArray(value) ? value.map((e) => convertHeader(e)) : convertHeader(value),
-        };
+        headers[key] = Array.isArray(value)
+          ? value.map((e) => convertHeader(e))
+          : convertHeader(value);
+        return headers;
       },
-      {}
+      {} as Record<string, string | string[]>
     );
     this.maxPayload = rawHttpConfig.maxPayload;
     this.name = rawHttpConfig.name;
@@ -265,7 +319,11 @@ export class HttpConfig implements IHttpConfig {
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
-    this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
+
+    // default to `false` to prevent breaking changes in current offerings
+    this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
+    this.eluMonitor = rawHttpConfig.eluMonitor;
+    this.versioned = rawHttpConfig.versioned;
   }
 }
 

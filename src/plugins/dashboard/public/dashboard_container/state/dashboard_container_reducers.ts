@@ -56,6 +56,10 @@ export const dashboardContainerReducers = {
     }
   },
 
+  setLastSavedId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.lastSavedId = action.payload;
+  },
+
   setStateFromSettingsFlyout: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardStateFromSettingsFlyout>
@@ -114,6 +118,10 @@ export const dashboardContainerReducers = {
     action: PayloadAction<DashboardPublicState['lastSavedInput']>
   ) => {
     state.componentState.lastSavedInput = action.payload;
+
+    // if we set the last saved input, it means we have saved this Dashboard - therefore clientside migrations have
+    // been serialized into the SO.
+    state.componentState.hasRunClientsideMigrations = false;
   },
 
   /**
@@ -217,5 +225,12 @@ export const dashboardContainerReducers = {
 
   setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
     state.componentState.highlightPanelId = action.payload;
+  },
+
+  setAnimatePanelTransforms: (
+    state: DashboardReduxState,
+    action: PayloadAction<boolean | undefined>
+  ) => {
+    state.componentState.animatePanelTransforms = action.payload;
   },
 };

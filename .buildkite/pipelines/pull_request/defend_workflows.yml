@@ -4,11 +4,24 @@ steps:
     agents:
       queue: n2-4-spot
     depends_on: build
-    timeout_in_minutes: 120
+    timeout_in_minutes: 60
+    parallelism: 2
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
+        - exit_status: '*'
+          limit: 1
+    artifact_paths:
+      - "target/kibana-security-solution/**/*"
+
+  - command: .buildkite/scripts/steps/functional/defend_workflows_vagrant.sh
+    label: 'Defend Workflows Endpoint Cypress Tests'
+    agents:
+      queue: n2-4-virt
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 6
+    retry:
+      automatic:
         - exit_status: '*'
           limit: 1
     artifact_paths:

@@ -6,13 +6,14 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { useMemo } from 'react';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import type { ErrorType } from '@kbn/ml-error-utils';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { HttpService } from '../http_service';
-import { basePath } from '.';
 import { useMlKibana } from '../../contexts/kibana';
 import type {
   TrainedModelConfigResponse,
@@ -55,12 +56,9 @@ export interface InferenceStatsResponse {
  * @param httpService
  */
 export function trainedModelsApiProvider(httpService: HttpService) {
-  const apiBasePath = basePath();
-
   return {
     /**
      * Fetches configuration information for a trained inference model.
-     *
      * @param modelId - Model ID, collection of Model IDs or Model ID pattern.
      *                  Fetches all In case nothing is provided.
      * @param params - Optional query params
@@ -69,15 +67,15 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       const model = Array.isArray(modelId) ? modelId.join(',') : modelId;
 
       return httpService.http<TrainedModelConfigResponse[]>({
-        path: `${apiBasePath}/trained_models${model ? `/${model}` : ''}`,
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models${model ? `/${model}` : ''}`,
         method: 'GET',
         ...(params ? { query: params as HttpFetchQuery } : {}),
+        version: '1',
       });
     },
 
     /**
      * Fetches usage information for trained inference models.
-     *
      * @param modelId - Model ID, collection of Model IDs or Model ID pattern.
      *                  Fetches all In case nothing is provided.
      * @param params - Optional query params
@@ -86,14 +84,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       const model = Array.isArray(modelId) ? modelId.join(',') : modelId;
 
       return httpService.http<InferenceStatsResponse>({
-        path: `${apiBasePath}/trained_models${model ? `/${model}` : ''}/_stats`,
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models${model ? `/${model}` : ''}/_stats`,
         method: 'GET',
+        version: '1',
       });
     },
 
     /**
      * Fetches pipelines associated with provided models
-     *
      * @param modelId - Model ID, collection of Model IDs.
      */
     getTrainedModelPipelines(modelId: string | string[]) {
@@ -103,27 +101,59 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       }
 
       return httpService.http<ModelPipelines[]>({
-        path: `${apiBasePath}/trained_models/${model}/pipelines`,
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/${model}/pipelines`,
         method: 'GET',
+        version: '1',
+      });
+    },
+
+    /**
+     * Fetches all ingest pipelines
+     */
+    getAllIngestPipelines() {
+      return httpService.http<NodesOverviewResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/ingest_pipelines`,
+        method: 'GET',
+        version: '1',
+      });
+    },
+
+    /**
+     * Creates inference pipeline
+     */
+    createInferencePipeline(pipelineName: string, pipeline: IngestPipeline) {
+      return httpService.http<estypes.IngestSimulateResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_pipeline`,
+        method: 'POST',
+        body: JSON.stringify({ pipeline, pipelineName }),
+        version: '1',
       });
     },
 
     /**
      * Deletes an existing trained inference model.
-     *
      * @param modelId - Model ID
      */
-    deleteTrainedModel(modelId: string) {
+    deleteTrainedModel(
+      modelId: string,
+      options: { with_pipelines?: boolean; force?: boolean } = {
+        with_pipelines: false,
+        force: false,
+      }
+    ) {
       return httpService.http<{ acknowledge: boolean }>({
-        path: `${apiBasePath}/trained_models/${modelId}`,
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}`,
         method: 'DELETE',
+        version: '1',
+        query: options,
       });
     },
 
     getTrainedModelsNodesOverview() {
       return httpService.http<NodesOverviewResponse>({
-        path: `${apiBasePath}/model_management/nodes_overview`,
+        path: `${ML_INTERNAL_BASE_PATH}/model_management/nodes_overview`,
         method: 'GET',
+        version: '1',
       });
     },
 
@@ -137,9 +167,10 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       }
     ) {
       return httpService.http<{ acknowledge: boolean }>({
-        path: `${apiBasePath}/trained_models/${modelId}/deployment/_start`,
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
         query: queryParams,
+        version: '1',
       });
     },
 
@@ -151,11 +182,12 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       const force = options?.force;
 
       return httpService.http<Record<string, { acknowledge: boolean; error?: ErrorType }>>({
-        path: `${apiBasePath}/trained_models/${modelId}/${deploymentsIds.join(
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/${deploymentsIds.join(
           ','
         )}/deployment/_stop`,
         method: 'POST',
         query: { force },
+        version: '1',
       });
     },
 
@@ -165,9 +197,10 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       params: { number_of_allocations: number }
     ) {
       return httpService.http<{ acknowledge: boolean }>({
-        path: `${apiBasePath}/trained_models/${modelId}/${deploymentId}/deployment/_update`,
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/${deploymentId}/deployment/_update`,
         method: 'POST',
         body: JSON.stringify(params),
+        version: '1',
       });
     },
 
@@ -179,10 +212,11 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     ) {
       const body = JSON.stringify(payload);
       return httpService.http<estypes.MlInferTrainedModelResponse>({
-        path: `${apiBasePath}/trained_models/infer/${modelId}/${deploymentsId}`,
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/infer/${modelId}/${deploymentsId}`,
         method: 'POST',
         body,
         ...(timeout ? { query: { timeout } as HttpFetchQuery } : {}),
+        version: '1',
       });
     },
 
@@ -195,25 +229,28 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         docs,
       });
       return httpService.http<estypes.IngestSimulateResponse>({
-        path: `${apiBasePath}/trained_models/pipeline_simulate`,
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/pipeline_simulate`,
         method: 'POST',
         body,
+        version: '1',
       });
     },
 
     memoryUsage(type?: MlSavedObjectType, node?: string, showClosedJobs = false) {
       return httpService.http<MemoryUsageInfo[]>({
-        path: `${apiBasePath}/model_management/memory_usage`,
+        path: `${ML_INTERNAL_BASE_PATH}/model_management/memory_usage`,
         method: 'GET',
         query: { type, node, showClosedJobs },
+        version: '1',
       });
     },
 
     putTrainedModelConfig(modelId: string, config: object) {
       return httpService.http<estypes.MlPutTrainedModelResponse>({
-        path: `${apiBasePath}/trained_models/${modelId}`,
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}`,
         method: 'PUT',
         body: JSON.stringify(config),
+        version: '1',
       });
     },
   };

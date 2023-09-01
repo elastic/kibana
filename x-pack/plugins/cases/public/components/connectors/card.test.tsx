@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { ConnectorCard } from './card';
 import { createQueryWithMarkup } from '../../common/test_utils';
 
@@ -26,7 +26,7 @@ describe('ConnectorCard ', () => {
     ).not.toThrowError();
   });
 
-  it('shows the loading spinner if loading', () => {
+  it('shows the loading skeleton if loading', () => {
     render(
       <ConnectorCard
         connectorType={ConnectorTypes.none}

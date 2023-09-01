@@ -23,9 +23,9 @@ const RecallError = ({ error }: { error: Error }) => {
 };
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-  }
+  state = {
+    originalError: undefined,
+  };
 
   static getDerivedStateFromError(error: Error) {
     // Update state so the next render will show the fallback UI.
@@ -36,8 +36,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     this.props.onError?.(error);
   }
 
-  componentWillReceiveProps() {
-    this.setState({ originalError: undefined });
+  static getDerivedStateFromProps() {
+    return { originalError: undefined };
   }
 
   render() {

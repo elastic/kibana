@@ -12,15 +12,15 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import Semver from 'semver';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import {
-  MAIN_SAVED_OBJECT_INDEX,
   type SavedObjectUnsanitizedDoc,
-  type SavedObjectsRawDoc,
   type ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
 import {
@@ -29,31 +29,29 @@ import {
   type SavedObjectsTypeMappingDefinitions,
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
+  type MigrateDocumentOptions,
   type KibanaMigratorStatus,
   type MigrationResult,
   type IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { getIndicesInvolvedInRelocation } from './kibana_migrator_utils';
 import { buildActiveMappings, buildTypesMappings } from './core';
 import { DocumentMigrator } from './document_migrator';
-import { createIndexMap } from './core/build_index_map';
-import { runResilientMigrator } from './run_resilient_migrator';
-import { migrateRawDocsSafely } from './core/migrate_raw_docs';
 import { runZeroDowntimeMigration } from './zdt';
-import { createMultiPromiseDefer, indexMapToIndexTypesMap } from './kibana_migrator_utils';
-import { ALLOWED_CONVERT_VERSION, DEFAULT_INDEX_TYPES_MAP } from './kibana_migrator_constants';
+import { ALLOWED_CONVERT_VERSION } from './kibana_migrator_constants';
+import { runV2Migration } from './run_v2_migration';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
+  defaultIndexTypesMap: IndexTypesMap;
   soMigrationsConfig: SavedObjectsMigrationConfigType;
   kibanaIndex: string;
   kibanaVersion: string;
   logger: Logger;
   docLinks: DocLinksServiceStart;
   waitForMigrationCompletion: boolean;
-  defaultIndexTypesMap?: IndexTypesMap;
   nodeRoles: NodeRoles;
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 /**
@@ -66,6 +64,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
+  private readonly defaultIndexTypesMap: IndexTypesMap;
   private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<MigrationResult[]>;
   private readonly status$ = new BehaviorSubject<KibanaMigratorStatus>({
@@ -75,8 +74,9 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
   private readonly docLinks: DocLinksServiceStart;
   private readonly waitForMigrationCompletion: boolean;
-  private readonly defaultIndexTypesMap: IndexTypesMap;
   private readonly nodeRoles: NodeRoles;
+  private readonly esCapabilities: ElasticsearchCapabilities;
+
   public readonly kibanaVersion: string;
 
   /**
@@ -86,18 +86,20 @@ export class KibanaMigrator implements IKibanaMigrator {
     client,
     typeRegistry,
     kibanaIndex,
+    defaultIndexTypesMap,
     soMigrationsConfig,
     kibanaVersion,
     logger,
     docLinks,
-    defaultIndexTypesMap = DEFAULT_INDEX_TYPES_MAP,
     waitForMigrationCompletion,
     nodeRoles,
+    esCapabilities,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
     this.soMigrationsConfig = soMigrationsConfig;
     this.typeRegistry = typeRegistry;
+    this.defaultIndexTypesMap = defaultIndexTypesMap;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     this.mappingProperties = buildTypesMappings(this.typeRegistry.getAllTypes());
     this.log = logger;
@@ -114,7 +116,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
     this.docLinks = docLinks;
-    this.defaultIndexTypesMap = defaultIndexTypesMap;
+    this.esCapabilities = esCapabilities;
   }
 
   public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<MigrationResult[]> {
@@ -144,123 +146,49 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.status$.asObservable();
   }
 
-  private async runMigrationsInternal(): Promise<MigrationResult[]> {
+  private runMigrationsInternal(): Promise<MigrationResult[]> {
     const migrationAlgorithm = this.soMigrationsConfig.algorithm;
     if (migrationAlgorithm === 'zdt') {
-      return await this.runMigrationZdt();
-    } else {
-      return await this.runMigrationV2();
-    }
-  }
-
-  private runMigrationZdt(): Promise<MigrationResult[]> {
-    return runZeroDowntimeMigration({
-      kibanaVersion: this.kibanaVersion,
-      kibanaIndexPrefix: this.kibanaIndex,
-      typeRegistry: this.typeRegistry,
-      logger: this.log,
-      documentMigrator: this.documentMigrator,
-      migrationConfig: this.soMigrationsConfig,
-      docLinks: this.docLinks,
-      serializer: this.serializer,
-      elasticsearchClient: this.client,
-      nodeRoles: this.nodeRoles,
-    });
-  }
-
-  private async runMigrationV2(): Promise<MigrationResult[]> {
-    const indexMap = createIndexMap({
-      kibanaIndexName: this.kibanaIndex,
-      indexMap: this.mappingProperties,
-      registry: this.typeRegistry,
-    });
-
-    this.log.debug('Applying registered migrations for the following saved object types:');
-    Object.entries(this.documentMigrator.migrationVersion)
-      .sort(([t1, v1], [t2, v2]) => {
-        return Semver.compare(v1, v2);
-      })
-      .forEach(([type, migrationVersion]) => {
-        this.log.debug(`migrationVersion: ${migrationVersion} saved object type: ${type}`);
+      return runZeroDowntimeMigration({
+        kibanaVersion: this.kibanaVersion,
+        kibanaIndexPrefix: this.kibanaIndex,
+        typeRegistry: this.typeRegistry,
+        logger: this.log,
+        documentMigrator: this.documentMigrator,
+        migrationConfig: this.soMigrationsConfig,
+        docLinks: this.docLinks,
+        serializer: this.serializer,
+        elasticsearchClient: this.client,
+        nodeRoles: this.nodeRoles,
+        esCapabilities: this.esCapabilities,
       });
-
-    // build a indexTypesMap from the info present in tye typeRegistry, e.g.:
-    // {
-    //   '.kibana': ['typeA', 'typeB', ...]
-    //   '.kibana_task_manager': ['task', ...]
-    //   '.kibana_cases': ['typeC', 'typeD', ...]
-    //   ...
-    // }
-    const indexTypesMap = indexMapToIndexTypesMap(indexMap);
-
-    // compare indexTypesMap with the one present (or not) in the .kibana index meta
-    // and check if some SO types have been moved to different indices
-    const indicesWithMovingTypes = await getIndicesInvolvedInRelocation({
-      mainIndex: MAIN_SAVED_OBJECT_INDEX,
-      client: this.client,
-      indexTypesMap,
-      logger: this.log,
-      defaultIndexTypesMap: this.defaultIndexTypesMap,
-    });
-
-    // we create 2 synchronization objects (2 synchronization points) for each of the
-    // migrators involved in relocations, aka each of the migrators that will:
-    // A) reindex some documents TO other indices
-    // B) receive some documents FROM other indices
-    // C) both
-    const readyToReindexDefers = createMultiPromiseDefer(indicesWithMovingTypes);
-    const doneReindexingDefers = createMultiPromiseDefer(indicesWithMovingTypes);
-
-    // build a list of all migrators that must be started
-    const migratorIndices = new Set(Object.keys(indexMap));
-    // indices involved in a relocation might no longer be present in current mappings
-    // but if their SOs must be relocated to another index, we still need a migrator to do the job
-    indicesWithMovingTypes.forEach((index) => migratorIndices.add(index));
-
-    const migrators = Array.from(migratorIndices).map((indexName, i) => {
-      return {
-        migrate: (): Promise<MigrationResult> => {
-          const readyToReindex = readyToReindexDefers[indexName];
-          const doneReindexing = doneReindexingDefers[indexName];
-          // check if this migrator's index is involved in some document redistribution
-          const mustRelocateDocuments = !!readyToReindex;
-
-          return runResilientMigrator({
-            client: this.client,
-            kibanaVersion: this.kibanaVersion,
-            mustRelocateDocuments,
-            indexTypesMap,
-            waitForMigrationCompletion: this.waitForMigrationCompletion,
-            // a migrator's index might no longer have any associated types to it
-            targetMappings: buildActiveMappings(indexMap[indexName]?.typeMappings ?? {}),
-            logger: this.log,
-            preMigrationScript: indexMap[indexName]?.script,
-            readyToReindex,
-            doneReindexing,
-            transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
-              migrateRawDocsSafely({
-                serializer: this.serializer,
-                migrateDoc: this.documentMigrator.migrateAndConvert,
-                rawDocs,
-              }),
-            migrationVersionPerType: this.documentMigrator.migrationVersion,
-            indexPrefix: indexName,
-            migrationsConfig: this.soMigrationsConfig,
-            typeRegistry: this.typeRegistry,
-            docLinks: this.docLinks,
-          });
-        },
-      };
-    });
-
-    return Promise.all(migrators.map((migrator) => migrator.migrate()));
+    } else {
+      return runV2Migration({
+        kibanaVersion: this.kibanaVersion,
+        kibanaIndexPrefix: this.kibanaIndex,
+        typeRegistry: this.typeRegistry,
+        defaultIndexTypesMap: this.defaultIndexTypesMap,
+        logger: this.log,
+        documentMigrator: this.documentMigrator,
+        migrationConfig: this.soMigrationsConfig,
+        docLinks: this.docLinks,
+        serializer: this.serializer,
+        elasticsearchClient: this.client,
+        mappingProperties: this.mappingProperties,
+        waitForMigrationCompletion: this.waitForMigrationCompletion,
+        esCapabilities: this.esCapabilities,
+      });
+    }
   }
 
   public getActiveMappings(): IndexMapping {
     return this.activeMappings;
   }
 
-  public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    return this.documentMigrator.migrate(doc);
+  public migrateDocument(
+    doc: SavedObjectUnsanitizedDoc,
+    { allowDowngrade = false }: MigrateDocumentOptions = {}
+  ): SavedObjectUnsanitizedDoc {
+    return this.documentMigrator.migrate(doc, { allowDowngrade });
   }
 }

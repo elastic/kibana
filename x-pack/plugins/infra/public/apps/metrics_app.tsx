@@ -9,8 +9,7 @@ import { History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import '../index.scss';
@@ -72,10 +71,11 @@ const MetricsApp: React.FC<{
         storage={storage}
         theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
+        observabilityAIAssistant={plugins.observabilityAIAssistant}
       >
         <SourceProvider sourceId="default">
           <Router history={history}>
-            <Switch>
+            <Routes>
               <Route path="/link-to" component={LinkToMetricsPage} />
               {uiCapabilities?.infrastructure?.show && (
                 <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
@@ -89,7 +89,7 @@ const MetricsApp: React.FC<{
               {uiCapabilities?.infrastructure?.show && (
                 <Route path="/" component={InfrastructurePage} />
               )}
-            </Switch>
+            </Routes>
           </Router>
         </SourceProvider>
       </CommonInfraProviders>

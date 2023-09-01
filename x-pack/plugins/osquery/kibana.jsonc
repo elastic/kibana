@@ -26,7 +26,6 @@
     "optionalPlugins": [
       "fleet",
       "home",
-      "usageCollection",
       "lens",
       "telemetry",
       "cases"

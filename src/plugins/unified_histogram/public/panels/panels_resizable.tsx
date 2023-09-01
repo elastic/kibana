@@ -164,10 +164,8 @@ export const PanelsResizable = ({
 
   const { euiTheme } = useEuiTheme();
   const buttonCss = css`
-    && {
-      margin-top: -${euiTheme.size.base};
-      margin-bottom: 0;
-    }
+    margin-top: -${euiTheme.size.base};
+    margin-bottom: 0;
   `;
 
   return (

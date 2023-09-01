@@ -19,6 +19,7 @@
     "@kbn/i18n",
     "@kbn/ui-theme",
     "@kbn/config-schema",
+    "@kbn/cloud-chat-provider-plugin",
   ],
   "exclude": [
     "target/**/*",

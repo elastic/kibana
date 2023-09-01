@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { getJsonSchemaQuerySchema } from '../../common/api_schemas/json_schema_schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
@@ -14,35 +15,42 @@ export function jsonSchemaRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JsonSchema
    *
-   * @api {get} /api/ml/json_schema Get requested JSON schema
+   * @api {get} /internal/ml/json_schema Get requested JSON schema
    * @apiName GetJsonSchema
    * @apiDescription Retrieves the JSON schema
    */
-  router.get(
-    {
-      path: '/api/ml/json_schema',
-      validate: {
-        query: getJsonSchemaQuerySchema,
-      },
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/json_schema`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canAccessML'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ request, response }) => {
-      try {
-        const jsonSchemaService = new JsonSchemaService();
-
-        const result = await jsonSchemaService.extractSchema(
-          request.query.path,
-          request.query.method
-        );
-
-        return response.ok({
-          body: result,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: getJsonSchemaQuerySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ request, response }) => {
+        try {
+          const jsonSchemaService = new JsonSchemaService();
+
+          const result = await jsonSchemaService.extractSchema(
+            request.query.path,
+            request.query.method
+          );
+
+          return response.ok({
+            body: result,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 }

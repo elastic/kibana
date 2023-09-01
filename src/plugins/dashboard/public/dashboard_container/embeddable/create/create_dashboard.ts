@@ -13,60 +13,35 @@ import {
   CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
 } from '@kbn/controls-plugin/common';
-import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { type ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
+import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 
 import { DashboardContainerInput } from '../../../../common';
 import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
-import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
+import { LoadDashboardReturn } from '../../../services/dashboard_content_management/types';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
+import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../../../dashboard_constants';
 import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 
 /**
- *
- * @param creationOptions
+ * Builds a new Dashboard from scratch.
  */
 export const createDashboard = async (
-  embeddableId: string,
   creationOptions?: DashboardCreationOptions,
   dashboardCreationStartTime?: number,
   savedObjectId?: string
-): Promise<DashboardContainer> => {
-  // --------------------------------------------------------------------------------------
-  // Unpack services & Options
-  // --------------------------------------------------------------------------------------
+): Promise<DashboardContainer | undefined> => {
   const {
-    dashboardSessionStorage,
-    embeddable: { getEmbeddableFactory },
-    data: {
-      dataViews,
-      query: queryService,
-      search: { session },
-    },
-    dashboardSavedObject: { loadDashboardStateFromSavedObject },
+    data: { dataViews },
+    dashboardContentManagement: { loadDashboardState },
   } = pluginServices.getServices();
-
-  const {
-    queryString,
-    filterManager,
-    timefilter: { timefilter: timefilterService },
-  } = queryService;
-
-  const {
-    searchSessionSettings,
-    unifiedSearchSettings,
-    validateLoadedSavedObject,
-    useControlGroupIntegration,
-    useUnifiedSearchIntegration,
-    initialInput: overrideInput,
-    useSessionStorageIntegration,
-  } = creationOptions ?? {};
 
   // --------------------------------------------------------------------------------------
   // Create method which allows work to be done on the dashboard container when it's ready.
@@ -83,12 +58,9 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Lazy load required systems and Dashboard saved object.
   // --------------------------------------------------------------------------------------
-
   const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
   const defaultDataViewAssignmentPromise = dataViews.getDefaultDataView();
-  const dashboardSavedObjectPromise = savedObjectId
-    ? loadDashboardStateFromSavedObject({ id: savedObjectId })
-    : Promise.resolve(undefined);
+  const dashboardSavedObjectPromise = loadDashboardState({ id: savedObjectId });
 
   const [reduxEmbeddablePackage, savedObjectResult, defaultDataView] = await Promise.all([
     reduxEmbeddablePackagePromise,
@@ -96,19 +68,86 @@ export const createDashboard = async (
     defaultDataViewAssignmentPromise,
   ]);
 
-  // --------------------------------------------------------------------------------------
-  // Run validations.
-  // --------------------------------------------------------------------------------------
   if (!defaultDataView) {
     throw new Error('Dashboard requires at least one data view before it can be initialized.');
   }
 
-  if (
-    savedObjectResult &&
-    validateLoadedSavedObject &&
-    !validateLoadedSavedObject(savedObjectResult)
-  ) {
+  // --------------------------------------------------------------------------------------
+  // Initialize Dashboard integrations
+  // --------------------------------------------------------------------------------------
+  const initializeResult = await initializeDashboard({
+    loadDashboardReturn: savedObjectResult,
+    untilDashboardReady,
+    creationOptions,
+  });
+  if (!initializeResult) return;
+  const { input, searchSessionId } = initializeResult;
+
+  // --------------------------------------------------------------------------------------
+  // Build and return the dashboard container.
+  // --------------------------------------------------------------------------------------
+  const dashboardContainer = new DashboardContainer(
+    input,
+    reduxEmbeddablePackage,
+    searchSessionId,
+    savedObjectResult?.dashboardInput,
+    savedObjectResult.anyMigrationRun,
+    dashboardCreationStartTime,
+    undefined,
+    creationOptions,
+    savedObjectId
+  );
+  dashboardContainerReady$.next(dashboardContainer);
+  return dashboardContainer;
+};
+
+/**
+ * Initializes a Dashboard and starts all of its integrations
+ */
+export const initializeDashboard = async ({
+  loadDashboardReturn,
+  untilDashboardReady,
+  creationOptions,
+  controlGroup,
+}: {
+  loadDashboardReturn: LoadDashboardReturn;
+  untilDashboardReady: () => Promise<DashboardContainer>;
+  creationOptions?: DashboardCreationOptions;
+  controlGroup?: ControlGroupContainer;
+}) => {
+  const {
+    dashboardSessionStorage,
+    embeddable: { getEmbeddableFactory },
+    data: {
+      query: queryService,
+      search: { session },
+    },
+  } = pluginServices.getServices();
+  const {
+    queryString,
+    filterManager,
+    timefilter: { timefilter: timefilterService },
+  } = queryService;
+
+  const {
+    getInitialInput,
+    searchSessionSettings,
+    unifiedSearchSettings,
+    validateLoadedSavedObject,
+    useControlGroupIntegration,
+    useUnifiedSearchIntegration,
+    useSessionStorageIntegration,
+  } = creationOptions ?? {};
+
+  // --------------------------------------------------------------------------------------
+  // Run validation.
+  // --------------------------------------------------------------------------------------
+  const validationResult = loadDashboardReturn && validateLoadedSavedObject?.(loadDashboardReturn);
+  if (validationResult === 'invalid') {
+    // throw error to stop the rest of Dashboard loading and make the factory return an ErrorEmbeddable.
     throw new Error('Dashboard failed saved object result validation');
+  } else if (validationResult === 'redirected') {
+    return;
   }
 
   // --------------------------------------------------------------------------------------
@@ -116,18 +155,18 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   const sessionStorageInput = ((): Partial<DashboardContainerInput> | undefined => {
     if (!useSessionStorageIntegration) return;
-    return dashboardSessionStorage.getState(savedObjectId);
+    return dashboardSessionStorage.getState(loadDashboardReturn.dashboardId);
   })();
 
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
   // --------------------------------------------------------------------------------------
+  const overrideInput = getInitialInput?.();
   const initialInput: DashboardContainerInput = cloneDeep({
     ...DEFAULT_DASHBOARD_INPUT,
-    ...(savedObjectResult?.dashboardInput ?? {}),
+    ...(loadDashboardReturn?.dashboardInput ?? {}),
     ...sessionStorageInput,
     ...overrideInput,
-    id: embeddableId,
   });
 
   initialInput.executionContext = {
@@ -139,7 +178,13 @@ export const createDashboard = async (
   // Set up unified search integration.
   // --------------------------------------------------------------------------------------
   if (useUnifiedSearchIntegration && unifiedSearchSettings?.kbnUrlStateStorage) {
-    const { filters, query, timeRestore, timeRange, refreshInterval } = initialInput;
+    const {
+      query,
+      filters,
+      timeRestore,
+      timeRange: savedTimeRange,
+      refreshInterval: savedRefreshInterval,
+    } = initialInput;
     const { kbnUrlStateStorage } = unifiedSearchSettings;
 
     // apply filters and query to the query service
@@ -147,23 +192,31 @@ export const createDashboard = async (
     queryString.setQuery(query ?? queryString.getDefaultQuery());
 
     /**
-     * If a global time range is not set explicitly and the time range was saved with the dashboard, apply
-     * time range and refresh interval to the query service. Otherwise, set the current dashboard time range
-     * from the query service. The order of the following lines is very important.
+     * Get initial time range, and set up dashboard time restore if applicable
      */
+    const initialTimeRange: TimeRange = (() => {
+      // if there is an explicit time range in the URL it always takes precedence.
+      const urlOverrideTimeRange =
+        kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY)?.time;
+      if (urlOverrideTimeRange) return urlOverrideTimeRange;
+
+      // if this Dashboard has timeRestore return the time range that was saved with the dashboard.
+      if (timeRestore && savedTimeRange) return savedTimeRange;
+
+      // otherwise fall back to the time range from the timefilterService.
+      return timefilterService.getTime();
+    })();
+    initialInput.timeRange = initialTimeRange;
     if (timeRestore) {
-      if (timeRange) timefilterService.setTime(timeRange);
-      if (refreshInterval) timefilterService.setRefreshInterval(refreshInterval);
+      if (savedTimeRange) timefilterService.setTime(savedTimeRange);
+      if (savedRefreshInterval) timefilterService.setRefreshInterval(savedRefreshInterval);
     }
 
+    // start syncing global query state with the URL.
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
       queryService,
       kbnUrlStateStorage
     );
-
-    if (!timeRestore) {
-      initialInput.timeRange = timefilterService.getTime();
-    }
 
     untilDashboardReady().then((dashboardContainer) => {
       const stopSyncingUnifiedSearchState =
@@ -178,16 +231,20 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Place the incoming embeddable if there is one
   // --------------------------------------------------------------------------------------
-  const incomingEmbeddable = creationOptions?.incomingEmbeddable;
+  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
   if (incomingEmbeddable) {
-    initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
+    const scrolltoIncomingEmbeddable = (container: DashboardContainer, id: string) => {
+      container.setScrollToPanelId(id);
+      container.setHighlightPanelId(id);
+    };
 
-    const panelExists =
+    initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
+    if (
       incomingEmbeddable.embeddableId &&
-      Boolean(initialInput.panels[incomingEmbeddable.embeddableId]);
-    if (panelExists) {
+      Boolean(initialInput.panels[incomingEmbeddable.embeddableId])
+    ) {
       // this embeddable already exists, we will update the explicit input.
-      const panelToUpdate = initialInput.panels[incomingEmbeddable.embeddableId as string];
+      const panelToUpdate = initialInput.panels[incomingEmbeddable.embeddableId];
       const sameType = panelToUpdate.type === incomingEmbeddable.type;
 
       panelToUpdate.type = incomingEmbeddable.type;
@@ -196,22 +253,24 @@ export const createDashboard = async (
         ...(sameType ? panelToUpdate.explicitInput : {}),
 
         ...incomingEmbeddable.input,
-        id: incomingEmbeddable.embeddableId as string,
+        id: incomingEmbeddable.embeddableId,
 
         // maintain hide panel titles setting.
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
+      untilDashboardReady().then((container) =>
+        scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string)
+      );
     } else {
       // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
       untilDashboardReady().then(async (container) => {
-        container.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input);
+        const embeddable = await container.addNewEmbeddable(
+          incomingEmbeddable.type,
+          incomingEmbeddable.input
+        );
+        scrolltoIncomingEmbeddable(container, embeddable.id);
       });
     }
-
-    untilDashboardReady().then(async (container) => {
-      container.setScrollToPanelId(incomingEmbeddable.embeddableId);
-      container.setHighlightPanelId(incomingEmbeddable.embeddableId);
-    });
   }
 
   // --------------------------------------------------------------------------------------
@@ -251,7 +310,7 @@ export const createDashboard = async (
       ControlGroupContainer
     >(CONTROL_GROUP_TYPE);
     const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
-    const controlGroup = await controlsGroupFactory?.create({
+    const fullControlGroupInput = {
       id: `control_group_${id ?? 'new_dashboard'}`,
       ...getDefaultControlGroupInput(),
       ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
@@ -259,9 +318,15 @@ export const createDashboard = async (
       viewMode,
       filters,
       query,
-    });
-    if (!controlGroup || isErrorEmbeddable(controlGroup)) {
-      throw new Error('Error in control group startup');
+    };
+    if (controlGroup) {
+      controlGroup.updateInputAndReinitialize(fullControlGroupInput);
+    } else {
+      const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput);
+      if (!newControlGroup || isErrorEmbeddable(newControlGroup)) {
+        throw new Error('Error in control group startup');
+      }
+      controlGroup = newControlGroup;
     }
 
     untilDashboardReady().then((dashboardContainer) => {
@@ -275,22 +340,17 @@ export const createDashboard = async (
   // Start the data views integration.
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboardContainer) => {
-    dashboardContainer.subscriptions.add(startSyncingDashboardDataViews.bind(dashboardContainer)());
+    dashboardContainer.integrationSubscriptions.add(
+      startSyncingDashboardDataViews.bind(dashboardContainer)()
+    );
   });
 
   // --------------------------------------------------------------------------------------
-  // Build and return the dashboard container.
+  // Start animating panel transforms 500 ms after dashboard is created.
   // --------------------------------------------------------------------------------------
-  const dashboardContainer = new DashboardContainer(
-    initialInput,
-    reduxEmbeddablePackage,
-    initialSearchSessionId,
-    savedObjectResult?.dashboardInput,
-    dashboardCreationStartTime,
-    undefined,
-    creationOptions,
-    savedObjectId
+  untilDashboardReady().then((dashboard) =>
+    setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
   );
-  dashboardContainerReady$.next(dashboardContainer);
-  return dashboardContainer;
+
+  return { input: initialInput, searchSessionId: initialSearchSessionId };
 };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EventAction } from '../../../common/types/process_tree';
 import { mockEvents } from '../../../common/mocks/constants/session_view_process.mock';
 import { ProcessImpl } from './hooks';
 
@@ -23,7 +22,7 @@ describe('ProcessTree hooks', () => {
 
       result = process.getDetails();
 
-      expect(result.event?.action).toEqual(EventAction.exec);
+      expect(result.event?.action).toEqual('exec');
     });
   });
 });

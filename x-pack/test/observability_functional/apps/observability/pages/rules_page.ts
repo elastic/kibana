@@ -85,24 +85,30 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Rules table', () => {
-      let uptimeRuleId: string;
+      let metricThresholdRuleId: string;
       let logThresholdRuleId: string;
       before(async () => {
-        const uptimeRule = {
+        const metricThresholdRule = {
           params: {
-            search: '',
-            numTimes: 5,
-            timerangeUnit: 'm',
-            timerangeCount: 15,
-            shouldCheckStatus: true,
-            shouldCheckAvailability: true,
-            availability: { range: 30, rangeUnit: 'd', threshold: '99' },
+            criteria: [
+              {
+                aggType: 'avg',
+                comparator: '>',
+                threshold: [0.5],
+                timeSize: 5,
+                timeUnit: 'm',
+                metric: 'system.cpu.user.pct',
+              },
+            ],
+            sourceId: 'default',
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
           },
-          consumer: 'alerts',
+          consumer: 'infrastructure',
+          tags: ['infrastructure'],
+          name: 'metric-threshold',
           schedule: { interval: '1m' },
-          tags: [],
-          name: 'uptime',
-          rule_type_id: 'xpack.uptime.alerts.monitorStatus',
+          rule_type_id: 'metrics.alert.threshold',
           notify_when: 'onActionGroupChange',
           actions: [],
         };
@@ -125,12 +131,12 @@ export default ({ getService }: FtrProviderContext) => {
           notify_when: 'onActionGroupChange',
           actions: [],
         };
-        uptimeRuleId = await createRule(uptimeRule);
+        metricThresholdRuleId = await createRule(metricThresholdRule);
         logThresholdRuleId = await createRule(logThresholdRule);
         await observability.alerts.common.navigateToRulesPage();
       });
       after(async () => {
-        await deleteRuleById(uptimeRuleId);
+        await deleteRuleById(metricThresholdRuleId);
         await deleteRuleById(logThresholdRuleId);
       });
 
@@ -142,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(rows.length).to.be(2);
         expect(rows[0].name).to.contain('error-log');
         expect(rows[0].enabled).to.be('Enabled');
-        expect(rows[1].name).to.contain('uptime');
+        expect(rows[1].name).to.contain('metric-threshold');
         expect(rows[1].enabled).to.be('Enabled');
       });
 
@@ -156,6 +162,17 @@ export default ({ getService }: FtrProviderContext) => {
           expect(rows[0].enabled).to.be('Disabled');
           return true;
         });
+      });
+
+      it('should navigate to the details page when clicking on a rule in event logs tab', async () => {
+        await observability.alerts.rulesPage.clickLogsTab();
+        await observability.alerts.rulesPage.clickOnRuleInEventLogs();
+        await testSubjects.existOrFail('ruleDetails');
+      });
+
+      it('shows the rule event log when navigating by URL', async () => {
+        await observability.alerts.common.navigateToRulesLogsPage();
+        await testSubjects.existOrFail('ruleEventLogListTable');
       });
     });
 

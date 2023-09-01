@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { closeAllToasts } from './close_all_toasts';
+import type { ConsoleResponseActionCommands } from '../../../../common/endpoint/service/response_actions/constants';
+import { closeAllToasts } from './toasts';
 import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
+import { loadPage } from './common';
 import Chainable = Cypress.Chainable;
 
 export const waitForEndpointListPageToBeLoaded = (endpointHostname: string): void => {
-  cy.visit(APP_ENDPOINTS_PATH);
+  loadPage(APP_ENDPOINTS_PATH);
   closeAllToasts();
   cy.contains(endpointHostname).should('exist');
 };
@@ -46,9 +48,17 @@ export const submitCommand = (): void => {
   cy.getByTestSubj('endpointResponseActionsConsole-inputTextSubmitButton').click();
 };
 
-export const waitForCommandToBeExecuted = (): void => {
-  cy.contains('Action pending.').should('exist');
-  cy.contains('Action completed.', { timeout: 120000 }).should('exist');
+export const waitForCommandToBeExecuted = (command: ConsoleResponseActionCommands): void => {
+  const actionResultMessage =
+    command === 'execute'
+      ? 'Command execution was successful'
+      : command === 'get-file'
+      ? 'File retrieved from the host.'
+      : 'Action completed.';
+  const actionPendingMessage =
+    command === 'get-file' ? 'Retrieving the file from host.' : 'Action pending.';
+  cy.contains(actionPendingMessage).should('exist');
+  cy.contains(actionResultMessage, { timeout: 120000 }).should('exist');
 };
 
 export const performCommandInputChecks = (command: string) => {

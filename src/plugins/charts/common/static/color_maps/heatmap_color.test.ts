@@ -67,22 +67,4 @@ describe('Vislib Heatmap Color Module Test Suite', () => {
       expect(getHeatmapColors(i / 10, schema)).toMatch(colorRegex);
     }
   });
-
-  describe('drawColormap function', () => {
-    const canvasElement = {
-      getContext: jest.fn(() => ({
-        fillStyle: null,
-        fillRect: jest.fn(),
-      })),
-    };
-    beforeEach(() => {
-      jest.spyOn(document, 'createElement').mockImplementation(() => canvasElement as any);
-    });
-
-    it('should return canvas element', () => {
-      const response = getHeatmapColors.prototype.drawColormap('Greens');
-      expect(typeof response).toEqual('object');
-      expect(response).toBe(canvasElement);
-    });
-  });
 });

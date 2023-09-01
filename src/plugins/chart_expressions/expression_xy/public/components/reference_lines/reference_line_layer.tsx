@@ -13,13 +13,14 @@ import { Position } from '@elastic/charts';
 import { ReferenceLineLayerConfig } from '../../../common/types';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
 import { LayerAccessorsTitles, GroupsConfiguration, AxesMap } from '../../helpers';
-import { getAxisGroupForReferenceLine } from './utils';
+import { FormattersMap, getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineLayerProps {
   layer: ReferenceLineLayerConfig;
   paddingMap: Partial<Record<Position, number>>;
   isHorizontal: boolean;
   titles?: LayerAccessorsTitles;
+  formatters: FormattersMap;
   xAxisFormatter: FieldFormat;
   axesConfiguration: GroupsConfiguration;
   yAxesMap: AxesMap;
@@ -28,6 +29,7 @@ interface ReferenceLineLayerProps {
 export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   layer,
   axesConfiguration,
+  formatters,
   xAxisFormatter,
   paddingMap,
   isHorizontal,
@@ -59,7 +61,8 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
       isHorizontal
     );
 
-    const formatter = axisGroup?.formatter || xAxisFormatter;
+    const formatter =
+      formatters[decorationConfig.forAccessor] || axisGroup?.formatter || xAxisFormatter;
     const name =
       columnToLabelMap[decorationConfig.forAccessor] ??
       titles?.yTitles?.[decorationConfig.forAccessor];

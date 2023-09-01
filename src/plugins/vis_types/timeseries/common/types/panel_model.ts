@@ -102,7 +102,6 @@ export interface Series {
   };
   point_size?: number;
   separate_axis: number;
-  seperate_axis: number;
   series_drop_last_bucket: number;
   series_index_pattern: IndexPatternValue;
   series_interval?: string;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import AbortController from 'abort-controller';
 import fetch from 'node-fetch';
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -53,6 +52,8 @@ export const callEnterpriseSearchConfigAPI = async ({
       features: {
         hasConnectors: config.hasConnectors,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
+        hasDocumentLevelSecurityEnabled: config.hasDocumentLevelSecurityEnabled,
+        hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
         hasNativeConnectors: config.hasNativeConnectors,
         hasWebCrawler: config.hasWebCrawler,
       },
@@ -106,6 +107,8 @@ export const callEnterpriseSearchConfigAPI = async ({
       features: {
         hasConnectors: config.hasConnectors,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
+        hasDocumentLevelSecurityEnabled: config.hasDocumentLevelSecurityEnabled,
+        hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
         hasNativeConnectors: config.hasNativeConnectors,
         hasWebCrawler: config.hasWebCrawler,
       },

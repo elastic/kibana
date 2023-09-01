@@ -235,7 +235,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
-      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.index).toHaveBeenCalledTimes(1);
       expect(result).toEqual(
         expect.objectContaining({ id, type, attributes, namespaces: [namespace] })
       );
@@ -250,7 +250,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
-      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.index).toHaveBeenCalledTimes(1);
       expect(result).toEqual(
         expect.objectContaining({ id, type, attributes, namespaces: [namespace] })
       );
@@ -742,6 +742,9 @@ describe('SavedObjectsRepository Security Extension', () => {
           attributes: doc._source![doc._source!.type],
           references: [],
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
     });
@@ -795,6 +798,9 @@ describe('SavedObjectsRepository Security Extension', () => {
           attributes: doc._source![doc._source!.type],
           references: [],
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
     });
@@ -849,6 +855,9 @@ describe('SavedObjectsRepository Security Extension', () => {
           attributes: doc._source![doc._source!.type],
           references: [],
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
     });

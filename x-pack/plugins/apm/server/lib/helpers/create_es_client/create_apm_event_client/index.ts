@@ -11,8 +11,8 @@ import type {
   FieldCapsResponse,
   MsearchMultisearchBody,
   MsearchMultisearchHeader,
-  TermsEnumRequest,
   TermsEnumResponse,
+  TermsEnumRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
@@ -20,12 +20,12 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
 import { ValuesType } from 'utility-types';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ApmDataSource } from '../../../../../common/data_source';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   callAsyncWithDebug,
@@ -46,17 +46,13 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
 };
 
-export type APMEventESTermsEnumRequest = Omit<TermsEnumRequest, 'index'> & {
+type APMEventWrapper<T> = Omit<T, 'index'> & {
   apm: { events: ProcessorEvent[] };
 };
 
-export type APMEventEqlSearchRequest = Omit<EqlSearchRequest, 'index'> & {
-  apm: { events: ProcessorEvent[] };
-};
-
-export type APMEventFieldCapsRequest = Omit<FieldCapsRequest, 'index'> & {
-  apm: { events: ProcessorEvent[] };
-};
+type APMEventTermsEnumRequest = APMEventWrapper<TermsEnumRequest>;
+type APMEventEqlSearchRequest = APMEventWrapper<EqlSearchRequest>;
+type APMEventFieldCapsRequest = APMEventWrapper<FieldCapsRequest>;
 
 // These keys shoul all be `ProcessorEvent.x`, but until TypeScript 4.2 we're inlining them here.
 // See https://github.com/microsoft/TypeScript/issues/37888
@@ -91,7 +87,7 @@ export interface APMEventClientConfig {
   esClient: ElasticsearchClient;
   debug: boolean;
   request: KibanaRequest;
-  indices: ApmIndicesConfig;
+  indices: APMIndices;
   options: {
     includeFrozen: boolean;
     forceSyntheticSource: boolean;
@@ -102,7 +98,7 @@ export class APMEventClient {
   private readonly esClient: ElasticsearchClient;
   private readonly debug: boolean;
   private readonly request: KibanaRequest;
-  public readonly indices: ApmIndicesConfig;
+  public readonly indices: APMIndices;
   private readonly includeFrozen: boolean;
   private readonly forceSyntheticSource: boolean;
 
@@ -280,7 +276,7 @@ export class APMEventClient {
 
     return this.callAsyncWithDebug({
       operationName,
-      requestType: 'field_caps',
+      requestType: '_field_caps',
       params: requestParams,
       cb: (opts) => this.esClient.fieldCaps(requestParams, opts),
     });
@@ -288,7 +284,7 @@ export class APMEventClient {
 
   async termsEnum(
     operationName: string,
-    params: APMEventESTermsEnumRequest
+    params: APMEventTermsEnumRequest
   ): Promise<TermsEnumResponse> {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
@@ -299,7 +295,7 @@ export class APMEventClient {
 
     return this.callAsyncWithDebug({
       operationName,
-      requestType: 'terms_enum',
+      requestType: '_terms_enum',
       params: requestParams,
       cb: (opts) => this.esClient.termsEnum(requestParams, opts),
     });

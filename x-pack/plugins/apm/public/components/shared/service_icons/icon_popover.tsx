@@ -7,7 +7,7 @@
 
 import {
   EuiButtonIcon,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
@@ -60,7 +60,7 @@ export function IconPopover({
       <EuiPopoverTitle>{title}</EuiPopoverTitle>
       <div style={{ minWidth: 300 }}>
         {isLoading ? (
-          <EuiLoadingContent data-test-subj="loading-content" />
+          <EuiSkeletonText data-test-subj="loading-content" />
         ) : (
           children
         )}

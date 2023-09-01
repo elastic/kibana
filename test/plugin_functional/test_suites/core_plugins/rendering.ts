@@ -23,7 +23,7 @@ declare global {
 }
 
 const EXPOSED_CONFIG_SETTINGS_ERROR =
-  'Actual config settings exposed to the browser do not match what is expected; this assertion fails if extra settings are present and/or expected settings are missing';
+  'Actual config settings exposed to the browser do not match list defined in test; this assertion fails if extra settings are present and/or expected settings are missing';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const appsMenu = getService('appsMenu');
@@ -83,6 +83,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // what types of config settings can be exposed to the browser.
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
+        'console.autocompleteDefinitions.endpointsAvailability (alternatives)',
         'console.ui.enabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
         'unifiedSearch.autocomplete.querySuggestions.enabled (boolean)',
@@ -103,9 +104,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.management.refreshTimeout (duration)',
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
+        'data_views.scriptedFieldsEnabled (any)', // It's a boolean (any because schema.conditional)
+        'dev_tools.deeplinks.navLinkStatus (string)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
+        'enterpriseSearch.ui.enabled (boolean)',
         'home.disableWelcomeScreen (boolean)',
+        'management.deeplinks.navLinkStatus (string)',
         'map.emsFileApiUrl (string)',
         'map.emsFontLibraryUrl (string)',
         'map.emsLandingPageUrl (string)',
@@ -140,7 +145,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',
         'newsfeed.service.urlRoot (string)',
+        'no_data_page.analyticsNoDataPageFlavor (any)', // It's a string (any because schema.conditional)
         'telemetry.allowChangingOptInStatus (boolean)',
+        'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
         'telemetry.banner (boolean)',
         'telemetry.labels.branch (string)',
         'telemetry.labels.ciBuildId (string)',
@@ -154,21 +161,47 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.testBuildId (string)',
         'telemetry.labels.testJobId (string)',
         'telemetry.labels.ciBuildName (string)',
+        'telemetry.labels.performancePhase (string)',
+        'telemetry.labels.serverless (any)', // It's the project type (string), claims any because schema.conditional. Can only be set on Serverless.
         'telemetry.hidePrivacyStatement (boolean)',
         'telemetry.optIn (boolean)',
         'telemetry.sendUsageFrom (alternatives)',
         'telemetry.sendUsageTo (any)',
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
+        // readOnly is boolean flag
+        'input_control_vis.readOnly (any)',
+        'vis_type_gauge.readOnly (any)',
+        'vis_type_heatmap.readOnly (any)',
+        'vis_type_metric.readOnly (any)',
+        'vis_type_pie.readOnly (any)',
+        'vis_type_table.readOnly (any)',
+        'vis_type_tagcloud.readOnly (any)',
+        'vis_type_timelion.readOnly (any)',
+        'vis_type_timeseries.readOnly (any)',
+        'vis_type_vislib.readOnly (any)',
+        'vis_type_xy.readOnly (any)',
         'vis_type_vega.enableExternalUrls (boolean)',
         'xpack.actions.email.domain_allowlist (array)',
         'xpack.apm.serviceMapEnabled (boolean)',
         'xpack.apm.ui.enabled (boolean)',
         'xpack.apm.ui.maxTraceItems (number)',
+        'xpack.apm.managedServiceUrl (any)',
+        'xpack.apm.serverlessOnboarding (any)',
         'xpack.apm.latestAgentVersionsUrl (string)',
+        'xpack.apm.featureFlags.agentConfigurationAvailable (any)',
+        'xpack.apm.featureFlags.configurableIndicesAvailable (any)',
+        'xpack.apm.featureFlags.infrastructureTabAvailable (any)',
+        'xpack.apm.featureFlags.infraUiAvailable (any)',
+        'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
+        'xpack.apm.featureFlags.sourcemapApiAvailable (any)',
+        'xpack.apm.featureFlags.storageExplorerAvailable (any)',
+        'xpack.apm.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
+        'xpack.observability_onboarding.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
         'xpack.cases.markdownPlugins.lens (boolean)',
+        'xpack.cases.stack.enabled (boolean)',
         'xpack.ccr.ui.enabled (boolean)',
         'xpack.cloud.base_url (string)',
         'xpack.cloud.cname (string)',
@@ -190,19 +223,36 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud_integrations.gain_sight.org_id (any)',
         'xpack.cloud.id (string)',
         'xpack.cloud.organization_url (string)',
+        'xpack.cloud.billing_url (string)',
         'xpack.cloud.profile_url (string)',
+        'xpack.cloud.performance_url (string)',
+        'xpack.cloud.users_and_roles_url (string)',
+        'xpack.cloud.projects_url (any)', // It's a string (any because schema.conditional)
+        // can't be used to infer urls or customer id from the outside
+        'xpack.cloud.serverless.project_id (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
         'xpack.fleet.enableExperimental (array)',
+        'xpack.fleet.internal.activeAgentsSoftLimit (number)',
+        'xpack.fleet.internal.disableProxies (boolean)',
+        'xpack.fleet.internal.fleetServerStandalone (boolean)',
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number)',
         'xpack.global_search.search_timeout (duration)',
         'xpack.graph.canEditDrillDownUrls (boolean)',
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.infra.logs.app_target (alternatives)',
+        'xpack.index_management.enableIndexActions (any)',
+        'xpack.index_management.enableLegacyTemplates (any)',
+        'xpack.index_management.dev.enableIndexDetailsPage (boolean)',
+        'xpack.index_management.enableIndexStats (any)',
         'xpack.infra.sources.default.fields.message (array)',
+        /**
+         * xpack.infra.logs is conditional and will resolve to an object of properties
+         * - xpack.infra.logs.app_target (string)
+         */
+        'xpack.infra.logs (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
@@ -224,10 +274,14 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
+        'xpack.security.ui (any)',
+        'xpack.spaces.maxSpaces (number)',
+        'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
         'xpack.snapshot_restore.ui.enabled (boolean)',
+        'xpack.stack_connectors.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean)',
@@ -237,7 +291,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
+        'xpack.observability.unsafe.thresholdRule.enabled (boolean)',
         'xpack.observability_onboarding.ui.enabled (boolean)',
+        'xpack.observabilityLogExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
@@ -272,6 +329,31 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
+        'xpack.security.ui (any)',
+
+        'telemetry.allowChangingOptInStatus (boolean)',
+        'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
+        'telemetry.banner (boolean)',
+        'telemetry.labels.branch (string)',
+        'telemetry.labels.ciBuildId (string)',
+        'telemetry.labels.ciBuildJobId (string)',
+        'telemetry.labels.ciBuildNumber (number)',
+        'telemetry.labels.ftrConfig (string)',
+        'telemetry.labels.gitRev (string)',
+        'telemetry.labels.isPr (boolean)',
+        'telemetry.labels.journeyName (string)',
+        'telemetry.labels.prId (number)',
+        'telemetry.labels.testBuildId (string)',
+        'telemetry.labels.testJobId (string)',
+        'telemetry.labels.ciBuildName (string)',
+        'telemetry.labels.performancePhase (string)',
+        'telemetry.labels.serverless (any)', // It's the project type (string), claims any because schema.conditional. Can only be set on Serverless.
+        'telemetry.hidePrivacyStatement (boolean)',
+        'telemetry.optIn (boolean)',
+        'telemetry.sendUsageFrom (alternatives)',
+        'telemetry.sendUsageTo (any)',
+        'usageCollection.uiCounters.debug (boolean)',
+        'usageCollection.uiCounters.enabled (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's

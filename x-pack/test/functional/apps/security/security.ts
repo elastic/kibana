@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spaces = getService('spaces');
 
   describe('Security', function () {
-    this.tags('includeFirefox');
+    // FLAKY: https://github.com/elastic/kibana/issues/157722
+    // this.tags('includeFirefox');
     describe('Login Page', () => {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();

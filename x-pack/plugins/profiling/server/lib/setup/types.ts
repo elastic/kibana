@@ -8,19 +8,15 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { Logger } from '@kbn/logging';
+import { ProfilingConfig } from '../..';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
-export interface ProfilingSetupStep {
-  name: string;
-  init: () => Promise<void>;
-  hasCompleted: () => Promise<boolean>;
-}
-
-export interface ProfilingSetupStepFactoryOptions {
+export interface ProfilingSetupOptions {
   client: ProfilingESClient;
   soClient: SavedObjectsClientContract;
   packagePolicyClient: PackagePolicyClient;
   logger: Logger;
   spaceId: string;
   isCloudEnabled: boolean;
+  config: ProfilingConfig;
 }

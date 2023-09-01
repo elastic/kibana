@@ -54,13 +54,10 @@ export class RollupSearchCapabilities extends DefaultSearchCapabilities {
     });
 
     const getFields = (fields: { [key: string]: any }) =>
-      Object.keys(fields).reduce(
-        (acc, item) => ({
-          ...acc,
-          [item]: true,
-        }),
-        this.createUiRestriction({})
-      );
+      Object.keys(fields).reduce((acc, item) => {
+        acc[item] = true;
+        return acc;
+      }, this.createUiRestriction({}) as Record<string, boolean>);
 
     return Object.keys(this.availableMetrics).reduce(
       (acc, item) => ({

@@ -6,74 +6,74 @@
  */
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { TestNowResponse } from '../../../common/types';
-import {
-  ConfigKey,
-  MonitorFields,
-  SyntheticsMonitorWithSecrets,
-} from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
-export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
+export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
   method: 'GET',
-  path: API_URLS.TRIGGER_MONITOR + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.TRIGGER_MONITOR + '/{monitorId}',
   validate: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ request, server, syntheticsMonitorClient }): Promise<any> => {
-    const { monitorId } = request.params;
-    const encryptedClient = server.encryptedSavedObjects.getClient();
+  handler: async (routeContext) => {
+    const { monitorId } = routeContext.request.params;
+    return triggerTestNow(monitorId, routeContext);
+  },
+});
 
-    const monitorWithSecrets =
-      await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-        syntheticsMonitorType,
-        monitorId
-      );
-    const normalizedMonitor = normalizeSecrets(monitorWithSecrets);
+export const triggerTestNow = async (
+  monitorId: string,
+  routeContext: RouteContext
+): Promise<TestNowResponse> => {
+  const { server, spaceId, syntheticsMonitorClient, savedObjectsClient } = routeContext;
 
-    const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } =
-      monitorWithSecrets.attributes;
+  const monitorWithSecrets = await getDecryptedMonitor(server, monitorId, spaceId);
+  const normalizedMonitor = normalizeSecrets(monitorWithSecrets);
 
-    const { syntheticsService } = syntheticsMonitorClient;
+  const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } =
+    monitorWithSecrets.attributes;
 
-    const testRunId = uuidv4();
+  const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
+    savedObjectsClient,
+    normalizedMonitor.attributes
+  );
+  const testRunId = uuidv4();
 
-    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-
-    const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
-
-    const errors = await syntheticsService.runOnceConfigs({
-      // making it enabled, even if it's disabled in the UI
-      monitor: { ...normalizedMonitor.attributes, enabled: true },
-      configId: monitorId,
-      heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
+  const [, errors] = await syntheticsMonitorClient.testNowConfigs(
+    {
+      monitor: normalizedMonitor.attributes as MonitorFields,
+      id: monitorId,
       testRunId,
-      params: paramsBySpace[spaceId],
-    });
+    },
+    savedObjectsClient,
+    privateLocations,
+    spaceId
+  );
 
-    if (errors && errors?.length > 0) {
-      return {
-        errors,
-        testRunId,
-        schedule,
-        locations,
-        configId: monitorId,
-        monitor: normalizedMonitor.attributes,
-      } as TestNowResponse;
-    }
-
+  if (errors && errors?.length > 0) {
     return {
+      errors,
       testRunId,
       schedule,
       locations,
       configId: monitorId,
       monitor: normalizedMonitor.attributes,
-    } as TestNowResponse;
-  },
-});
+    };
+  }
+
+  return {
+    testRunId,
+    schedule,
+    locations,
+    configId: monitorId,
+    monitor: normalizedMonitor.attributes,
+  };
+};

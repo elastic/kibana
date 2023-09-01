@@ -19,6 +19,8 @@ import { getLayerList } from './map_config';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
 
+import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
+
 jest.mock('./create_embeddable');
 jest.mock('./map_config');
 jest.mock('../../../../common/containers/sourcerer');
@@ -29,9 +31,6 @@ jest.mock('./index_patterns_missing_prompt', () => ({
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
-      embeddable: {
-        EmbeddablePanel: jest.fn(() => <div data-test-subj="EmbeddablePanel" />),
-      },
       docLinks: {
         ELASTIC_WEBSITE_URL: 'ELASTIC_WEBSITE_URL',
         links: {
@@ -50,6 +49,10 @@ jest.mock('../../../../common/lib/kibana', () => ({
     addWarning: jest.fn(),
     remove: jest.fn(),
   }),
+}));
+jest.mock('@kbn/embeddable-plugin/public', () => ({
+  ...jest.requireActual('@kbn/embeddable-plugin/public'),
+  EmbeddablePanel: jest.fn().mockReturnValue(<div data-test-subj="EmbeddablePanel" />),
 }));
 
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
@@ -107,6 +110,9 @@ describe('EmbeddedMapComponent', () => {
     mockUseSourcererDataView.mockReturnValue({ selectedPatterns: ['filebeat-*', 'auditbeat-*'] });
     mockCreateEmbeddable.mockResolvedValue(embeddableValue);
     mockUseIsFieldInIndexPattern.mockReturnValue(() => true);
+
+    // stub Kibana services for the embeddable plugin to ensure embeddable panel renders.
+    setStubKibanaServices();
   });
 
   afterEach(() => {
@@ -138,7 +144,7 @@ describe('EmbeddedMapComponent', () => {
     });
   });
 
-  test('renders services.embeddable.EmbeddablePanel', async () => {
+  test('renders EmbeddablePanel from embeddable plugin', async () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />

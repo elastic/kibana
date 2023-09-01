@@ -254,6 +254,38 @@ the error should be verbose and informative so that the corrupt document can be 
 
 **WARNING:** Do not attempt to change the `typeMigrationVersion`, `id`, or `type` fields within a migration function, this is not supported.
 
+### Deferred Migrations
+Usually, migrations run during the upgrade process, and sometimes that may block it if there is a huge amount of outdated objects.
+In this case, it is recommended to mark some of the migrations to defer their execution.
+
+```ts
+export const dashboardVisualization: SavedObjectsType = {
+  name: 'dashboard_visualization', [1]
+  /** ... */
+  migrations: {
+    // Takes a pre 1.1.0 doc, and converts it to 1.1.0
+    '1.1.0': {
+      deferred: true,
+      transform: migrateDashboardVisualization110,
+    },
+  },
+};
+```
+
+By default, all the migrations are not deferred, and in order to make them so, the `deferred` flag should be explicitly set to `true`.
+In this case, the documents with only pending deferred migrations will not be migrated during the upgrade process.
+
+But whenever they are accessed via Saved Object API or repository, all the migrations will be applied to them on the fly:
+- On read operations, the stored objects remain untouched and only transformed before returning the result.
+  If there are some failures during the migration, an exception or 500 server error will be thrown,
+  so that it is guaranteed that all the returned objects will be up to date.
+- On write operations, the objects will be migrated to the latest version before writing them.
+
+In other words, this flag postpones the write operation until the objects are explicitly modified.
+
+One important notice: if there is a few pending migrations for a document and not all of them can be deferred,
+the document will be migrated during the upgrade process, and all pending migrations will be applied.
+
 ### Testing Migrations
 
 Bugs in a migration function cause downtime for our users and therefore have a very high impact. Follow the <DocLink id="kibDevTutorialTestingPlugins" section="saved-objects-migrations" text="Saved Object migrations section in the plugin testing guide"/>.

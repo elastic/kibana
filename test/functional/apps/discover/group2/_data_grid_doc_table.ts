@@ -18,7 +18,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'dashboard']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'dashboard',
+    'unifiedFieldList',
+  ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -221,16 +228,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async function () {
         for (const column of extraColumns) {
-          await PageObjects.discover.clickFieldListItemRemove(column);
+          await PageObjects.unifiedFieldList.clickFieldListItemRemove(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
         }
       });
 
       it('should add more columns to the table', async function () {
         for (const column of extraColumns) {
-          await PageObjects.discover.clearFieldSearchInput();
-          await PageObjects.discover.findFieldByName(column);
-          await PageObjects.discover.clickFieldListItemAdd(column);
+          await PageObjects.unifiedFieldList.clearFieldSearchInput();
+          await PageObjects.unifiedFieldList.findFieldByName(column);
+          await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
           // test the header now
           const header = await dataGrid.getHeaderFields();
@@ -240,13 +247,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should remove columns from the table', async function () {
         for (const column of extraColumns) {
-          await PageObjects.discover.clearFieldSearchInput();
-          await PageObjects.discover.findFieldByName(column);
-          await PageObjects.discover.clickFieldListItemAdd(column);
+          await PageObjects.unifiedFieldList.clearFieldSearchInput();
+          await PageObjects.unifiedFieldList.findFieldByName(column);
+          await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
         }
         // remove the second column
-        await PageObjects.discover.clickFieldListItemRemove(extraColumns[1]);
+        await PageObjects.unifiedFieldList.clickFieldListItemRemove(extraColumns[1]);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // test that the second column is no longer there
         const header = await dataGrid.getHeaderFields();

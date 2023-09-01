@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type { QueryOrIds } from '../../../../../rule_management/logic';
 import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
 
-import { convertRulesFilterToKQL } from '../../../../../rule_management/logic/utils';
 import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 
 type PrepareSearchFilterProps =
@@ -52,5 +52,7 @@ export const prepareSearchParams = ({
     }
   });
 
-  return { query: convertRulesFilterToKQL(modifiedFilterOptions) };
+  return {
+    query: convertRulesFilterToKQL(modifiedFilterOptions),
+  };
 };

@@ -13,7 +13,7 @@ import { EuiOutsideClickDetector } from '@elastic/eui';
 import { EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetricsTab } from './tabs/metrics/metrics';
@@ -23,7 +23,7 @@ import { PropertiesTab } from './tabs/properties';
 import { AnomaliesTab } from './tabs/anomalies/anomalies';
 import { OsqueryTab } from './tabs/osquery';
 import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN } from './tabs/shared';
-import { getNodeDetailUrl } from '../../../../link_to';
+import { useNodeDetailsRedirect } from '../../../../link_to';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
 import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
@@ -51,6 +51,7 @@ export const NodeContextPopover = ({
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
   const { application, share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>().services;
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const uiCapabilities = application?.capabilities;
   const canCreateAlerts = useMemo(
     () => Boolean(uiCapabilities?.infrastructure?.save),
@@ -81,8 +82,11 @@ export const NodeContextPopover = ({
     ...getNodeDetailUrl({
       nodeType,
       nodeId: node.id,
-      from: nodeDetailFrom,
-      to: currentTime,
+      search: {
+        from: nodeDetailFrom,
+        to: currentTime,
+        assetName: node.name,
+      },
     }),
   });
   const apmField = nodeType === 'host' ? 'host.hostname' : inventoryModel.fields.id;

@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { InstalledIntegration } from '../../../../../common/detection_engine/fleet_integrations';
+import type { InstalledIntegration } from '../../../../../common/api/detection_engine/fleet_integrations';
 import { TestProviders } from '../../../../common/mock';
 import { MANAGED_USER_PACKAGE_NAME } from './constants';
 import { useManagedUser } from './hooks';

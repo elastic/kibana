@@ -298,6 +298,7 @@ export function callImportRoute({
   return getHttp().fetch<ImportResponse>({
     path: `/internal/file_upload/import`,
     method: 'POST',
+    version: '1',
     query,
     body,
   });

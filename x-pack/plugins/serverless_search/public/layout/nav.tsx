@@ -5,52 +5,167 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
-  ChromeNavigationNodeViewModel,
-  Navigation,
+  DefaultNavigation,
   NavigationKibanaProvider,
+  type NavigationTreeDefinition,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
-const navItems: ChromeNavigationNodeViewModel[] = [
-  {
-    title: '',
-    id: 'root',
-    items: [
-      { id: 'overview', title: 'Overview', href: '/app/enterprise_search/overview' },
-      { id: 'indices', title: 'Indices', href: '/app/enterprise_search/content/search_indices' },
-      { id: 'engines', title: 'Engines', href: '/app/enterprise_search/content/engines' },
-      { id: 'api_keys', title: 'API keys', href: '/app/management/security/api_keys' },
-      {
-        id: 'ingest_pipelines',
-        title: 'Ingest pipelines',
-        href: '/app/management/ingest/ingest_pipelines',
-      },
-    ],
-  },
-];
-
-export const createServerlessSearchSideNavComponent = (core: CoreStart) => () => {
-  // Currently, this allows the "Search" section of the side nav to render as pre-expanded.
-  // This will soon be powered from state received from core.chrome
-  const activeNavItemId = 'search_project_nav.root';
-
-  return (
-    <NavigationKibanaProvider core={core}>
-      <Navigation
-        navigationTree={[
-          {
-            id: 'search_project_nav',
-            items: navItems,
-            title: 'Search',
-            icon: 'logoEnterpriseSearch',
-          },
-        ]}
-        activeNavItemId={activeNavItemId}
-        homeHref="/app/enterprise_search/content/setup_guide"
-        linkToCloud="projects"
-      />
-    </NavigationKibanaProvider>
-  );
+// Hiding this until page is in a better space
+const _connectorItem = {
+  link: 'serverlessConnectors',
+  title: i18n.translate('xpack.serverlessSearch.nav.connectors', {
+    defaultMessage: 'Connectors',
+  }),
 };
+
+const navigationTree: NavigationTreeDefinition = {
+  body: [
+    { type: 'recentlyAccessed' },
+    {
+      type: 'navGroup',
+      id: 'search_project_nav',
+      title: 'Elasticsearch',
+      icon: 'logoElasticsearch',
+      defaultIsCollapsed: false,
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          id: 'search_getting_started',
+          title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+            defaultMessage: 'Getting started',
+          }),
+          link: 'serverlessElasticsearch',
+        },
+        {
+          id: 'dev_tools',
+          title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
+            defaultMessage: 'Dev Tools',
+          }),
+          children: [{ link: 'dev_tools:console' }, { link: 'dev_tools:searchprofiler' }],
+        },
+        {
+          id: 'explore',
+          title: i18n.translate('xpack.serverlessSearch.nav.explore', {
+            defaultMessage: 'Explore',
+          }),
+          children: [
+            {
+              link: 'discover',
+            },
+            {
+              link: 'dashboards',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+              },
+            },
+            {
+              link: 'visualize',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return (
+                  pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+                  pathNameSerialized.startsWith(prepend('/app/lens')) ||
+                  pathNameSerialized.startsWith(prepend('/app/maps'))
+                );
+              },
+            },
+            {
+              link: 'management:triggersActions',
+              title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
+                defaultMessage: 'Alerts',
+              }),
+            },
+          ],
+        },
+        {
+          id: 'content',
+          title: i18n.translate('xpack.serverlessSearch.nav.content', {
+            defaultMessage: 'Content',
+          }),
+          children: [
+            {
+              title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
+                defaultMessage: 'Index Management',
+              }),
+              link: 'management:index_management',
+            },
+            {
+              title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
+                defaultMessage: 'Pipelines',
+              }),
+              link: 'management:ingest_pipelines',
+            },
+          ],
+        },
+        {
+          id: 'security',
+          title: i18n.translate('xpack.serverlessSearch.nav.security', {
+            defaultMessage: 'Security',
+          }),
+          children: [
+            {
+              link: 'management:api_keys',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  footer: [
+    {
+      type: 'navGroup',
+      id: 'project_settings_project_nav',
+      title: i18n.translate('xpack.serverlessSearch.nav.projectSettings', {
+        defaultMessage: 'Project settings',
+      }),
+      icon: 'gear',
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          id: 'settings',
+          children: [
+            {
+              link: 'management',
+              title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
+                defaultMessage: 'Management',
+              }),
+            },
+            {
+              id: 'cloudLinkDeployment',
+              cloudLink: 'deployment',
+              title: i18n.translate('xpack.serverlessSearch.nav.performance', {
+                defaultMessage: 'Performance',
+              }),
+            },
+            {
+              id: 'cloudLinkUserAndRoles',
+              cloudLink: 'userAndRoles',
+            },
+            {
+              id: 'cloudLinkBilling',
+              cloudLink: 'billingAndSub',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+export const createServerlessSearchSideNavComponent =
+  (
+    core: CoreStart,
+    { serverless, cloud }: { serverless: ServerlessPluginStart; cloud: CloudStart }
+  ) =>
+  () => {
+    return (
+      <NavigationKibanaProvider core={core} serverless={serverless} cloud={cloud}>
+        <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlSearchSideNav" />
+      </NavigationKibanaProvider>
+    );
+  };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
  * Given a rule this will convert it to an ndjson buffer which is useful for

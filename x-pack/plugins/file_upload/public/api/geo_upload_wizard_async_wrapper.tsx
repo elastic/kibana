@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import { FileUploadComponentProps, lazyLoadModules } from '../lazy_load_bundle';
 
 interface State {
@@ -36,6 +36,6 @@ export class GeoUploadWizardAsyncWrapper extends React.Component<FileUploadCompo
 
   render() {
     const { GeoUploadWizard } = this.state;
-    return GeoUploadWizard ? <GeoUploadWizard {...this.props} /> : <EuiLoadingContent lines={3} />;
+    return GeoUploadWizard ? <GeoUploadWizard {...this.props} /> : <EuiSkeletonText lines={3} />;
   }
 }

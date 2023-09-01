@@ -9,9 +9,9 @@ import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
+import { defineSessionExtendRoutes } from './extend';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineSessionExtendRoutes } from './extend';
 
 describe('Extend session routes', () => {
   let router: jest.Mocked<SecurityRouter>;

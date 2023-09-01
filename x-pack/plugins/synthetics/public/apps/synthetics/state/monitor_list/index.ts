@@ -6,18 +6,19 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
-  ConfigKey,
   MonitorManagementListResult,
-  SyntheticsMonitor,
+  MonitorFiltersResult,
+  EncryptedSyntheticsSavedMonitor,
 } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import { MonitorListPageState } from './models';
+import { getMonitorListPageStateWithDefaults } from './helpers';
+
 import {
   cleanMonitorListState,
   clearMonitorUpsertStatus,
@@ -27,6 +28,7 @@ import {
   fetchUpsertMonitorAction,
   fetchUpsertSuccessAction,
   updateManagementPageStateAction,
+  fetchMonitorFiltersAction,
 } from './actions';
 
 export interface MonitorListState {
@@ -39,20 +41,17 @@ export interface MonitorListState {
   loading: boolean;
   loaded: boolean;
   error: IHttpSerializedFetchError | null;
+  monitorFilterOptions: MonitorFiltersResult | null;
 }
 
 const initialState: MonitorListState = {
   data: { page: 1, perPage: 10, total: null, monitors: [], syncErrors: [], absoluteTotal: 0 },
   monitorUpsertStatuses: {},
-  pageState: {
-    pageIndex: 0,
-    pageSize: 10,
-    sortOrder: 'asc',
-    sortField: `${ConfigKey.NAME}.keyword`,
-  },
+  pageState: getMonitorListPageStateWithDefaults(),
   loading: false,
   loaded: false,
   error: null,
+  monitorFilterOptions: null,
 };
 
 export const monitorListReducer = createReducer(initialState, (builder) => {
@@ -67,6 +66,7 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
     .addCase(fetchMonitorListAction.success, (state, action) => {
       state.loading = false;
       state.loaded = true;
+      state.error = null;
       state.data = action.payload;
     })
     .addCase(fetchMonitorListAction.fail, (state, action) => {
@@ -79,9 +79,9 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
       };
     })
     .addCase(fetchUpsertSuccessAction, (state, action) => {
-      state.monitorUpsertStatuses[action.payload.id] = {
+      state.monitorUpsertStatuses[action.payload.config_id] = {
         status: FETCH_STATUS.SUCCESS,
-        enabled: action.payload.attributes.enabled,
+        enabled: action.payload.enabled,
       };
     })
     .addCase(fetchUpsertFailureAction, (state, action) => {
@@ -94,17 +94,19 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
       };
     })
     .addCase(enableMonitorAlertAction.success, (state, action) => {
-      state.monitorUpsertStatuses[action.payload.id] = {
-        ...state.monitorUpsertStatuses[action.payload.id],
+      state.monitorUpsertStatuses[action.payload.config_id] = {
+        ...state.monitorUpsertStatuses[action.payload.config_id],
         alertStatus: FETCH_STATUS.SUCCESS,
       };
       if ('updated_at' in action.payload) {
-        state.data.monitors = state.data.monitors.map((monitor) => {
-          if (monitor.id === action.payload.id) {
-            return action.payload as SavedObject<SyntheticsMonitor>;
+        state.data.monitors = state.data.monitors.map<EncryptedSyntheticsSavedMonitor>(
+          (monitor: any) => {
+            if (monitor.config_id === action.payload.config_id) {
+              return action.payload;
+            }
+            return monitor;
           }
-          return monitor;
-        });
+        );
       }
     })
     .addCase(enableMonitorAlertAction.fail, (state, action) => {
@@ -120,6 +122,12 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
     })
     .addCase(cleanMonitorListState, (state) => {
       return { ...initialState, pageState: state.pageState };
+    })
+    .addCase(fetchMonitorFiltersAction.success, (state, action) => {
+      state.monitorFilterOptions = action.payload;
+    })
+    .addCase(fetchMonitorFiltersAction.fail, (state, action) => {
+      state.error = action.payload;
     });
 });
 
@@ -128,4 +136,5 @@ export * from './models';
 export * from './actions';
 export * from './effects';
 export * from './selectors';
-export { fetchDeleteMonitor, fetchUpsertMonitor, fetchCreateMonitor } from './api';
+export * from './helpers';
+export { fetchDeleteMonitor, fetchUpsertMonitor, createGettingStartedMonitor } from './api';

@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { CoreStart, OverlayRef } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { createKibanaReactContext, toMountPoint, DataPublicPluginStart } from './shared_imports';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { createKibanaReactContext, DataPublicPluginStart } from './shared_imports';
 
 import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
@@ -67,22 +67,20 @@ export const getEditorOpener =
       overlayRef = overlays.openFlyout(
         toMountPoint(
           <KibanaReactContextProvider>
-            <I18nProvider>
-              <DataViewEditorLazy
-                onSave={onSaveIndexPattern}
-                onCancel={() => {
-                  closeEditor();
-                  onCancel();
-                }}
-                editData={editData}
-                defaultTypeIsRollup={defaultTypeIsRollup}
-                requireTimestampField={requireTimestampField}
-                allowAdHocDataView={allowAdHocDataView}
-                showManagementLink={Boolean(editData && editData.isPersisted())}
-              />
-            </I18nProvider>
+            <DataViewEditorLazy
+              onSave={onSaveIndexPattern}
+              onCancel={() => {
+                closeEditor();
+                onCancel();
+              }}
+              editData={editData}
+              defaultTypeIsRollup={defaultTypeIsRollup}
+              requireTimestampField={requireTimestampField}
+              allowAdHocDataView={allowAdHocDataView}
+              showManagementLink={Boolean(editData && editData.isPersisted())}
+            />
           </KibanaReactContextProvider>,
-          { theme$: core.theme.theme$ }
+          { theme: core.theme, i18n: core.i18n }
         ),
         {
           hideCloseButton: true,

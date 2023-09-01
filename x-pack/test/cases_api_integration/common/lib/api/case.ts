@@ -6,7 +6,8 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { CasePostRequest, Case } from '@kbn/cases-plugin/common/api';
+import { Case } from '@kbn/cases-plugin/common/types/domain';
+import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
 import { User } from '../authentication/types';
 
@@ -26,6 +27,7 @@ export const createCase = async (
 
   const { body: theCase } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
     .set(headers)
     .send(params)
     .expect(expectedHttpCode);

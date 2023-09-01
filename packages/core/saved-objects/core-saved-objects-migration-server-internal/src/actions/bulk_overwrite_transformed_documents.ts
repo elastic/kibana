@@ -26,6 +26,12 @@ export interface BulkOverwriteTransformedDocumentsParams {
   index: string;
   operations: BulkOperation[];
   refresh?: estypes.Refresh;
+  /**
+   * If true, we prevent Elasticsearch from auto-creating the index if it
+   * doesn't exist. We use the ES paramater require_alias: true so `index`
+   * must be an alias, otherwise the bulk index will fail.
+   */
+  useAliasToPreventAutoCreate?: boolean;
 }
 
 /**
@@ -38,6 +44,7 @@ export const bulkOverwriteTransformedDocuments =
     index,
     operations,
     refresh = false,
+    useAliasToPreventAutoCreate = false,
   }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
     | RetryableEsClientError
     | TargetIndexHadWriteBlock
@@ -56,7 +63,7 @@ export const bulkOverwriteTransformedDocuments =
         // probably unlikely so for now we'll accept this risk and wait till
         // system indices puts in place a hard control.
         index,
-        require_alias: false,
+        require_alias: useAliasToPreventAutoCreate,
         wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
         refresh,
         filter_path: ['items.*.error'],

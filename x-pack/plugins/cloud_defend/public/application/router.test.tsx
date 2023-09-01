@@ -7,7 +7,7 @@
 import CloudDefendRouter from './router';
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import type { CloudDefendPage, CloudDefendPageNavigationItem } from '../common/navigation/types';
 import { CloudDefendSecuritySolutionContext } from '../types';
 import { createMemoryHistory, MemoryHistory } from 'history';

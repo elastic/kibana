@@ -11,14 +11,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, visualBuilder, timeToVisualize, dashboard, header, common } = getPageObjects([
-    'visualBuilder',
-    'visualize',
-    'timeToVisualize',
-    'dashboard',
-    'header',
-    'common',
-  ]);
+  const { visualize, visualBuilder, timeToVisualize, dashboard, common, visChart } = getPageObjects(
+    ['visualBuilder', 'visualize', 'timeToVisualize', 'dashboard', 'header', 'common', 'visChart']
+  );
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -51,7 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickDataTab('timeSeries');
       });
 
-      describe('basics', () => {
+      describe('basics', function () {
         this.tags('includeFirefox');
 
         it('should render all necessary components', async () => {
@@ -171,7 +166,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
-        describe('Clicking on the chart', () => {
+        describe('Clicking on the chart', function () {
+          this.tags('skipFirefox');
           const act = async (visName: string, clickCoordinates: { x: number; y: number }) => {
             await testSubjects.click('visualizeSaveButton');
 
@@ -222,10 +218,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should create a filter for series with multiple split by terms fields one of which has formatting', async () => {
             const expectedFilterPills = ['0, win 7'];
             await visualBuilder.setMetricsGroupByTerms('bytes');
-            await header.waitUntilLoadingHasFinished();
+            await visChart.waitForVisualizationRenderingStabilized();
             await visualBuilder.setAnotherGroupByTermsField('machine.os.raw');
+            await visChart.waitForVisualizationRenderingStabilized();
             await visualBuilder.clickSeriesOption();
             await visualBuilder.setChartType('Bar');
+            await visChart.waitForVisualizationRenderingStabilized();
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setIntervalValue('1w');
 
@@ -237,7 +235,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe('Elastic charts', () => {
+      describe('Elastic charts', function () {
+        this.tags('skipFirefox');
         beforeEach(async () => {
           await visualBuilder.toggleNewChartsLibraryWithDebug(true);
           await visualBuilder.clickPanelOptions('timeSeries');
@@ -594,7 +593,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         after(async () => await visualBuilder.toggleNewChartsLibraryWithDebug(false));
       });
 
-      describe('index pattern selection mode', () => {
+      describe('index pattern selection mode', function () {
+        this.tags('skipFirefox');
         it('should disable switch for Kibana index patterns mode by default', async () => {
           await visualBuilder.clickPanelOptions('timeSeries');
           const isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();

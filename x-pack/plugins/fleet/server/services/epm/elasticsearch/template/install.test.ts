@@ -320,11 +320,139 @@ describe('EPM index template install', () => {
     const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
 
     if (!('settings' in packageTemplate)) {
-      throw new Error('no mappings on package template');
+      throw new Error('no settings on package template');
     }
 
     expect(packageTemplate.settings?.index?.mapping).toEqual(
       expect.objectContaining({ ignored_malformed: true })
     );
+  });
+
+  it('test prepareTemplate to set a runtime field in index_template.mappings', () => {
+    const dataStream = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+      elasticsearch: {
+        'index_template.mappings': {
+          runtime: {
+            day_of_week: {
+              type: 'keyword',
+              script: {
+                source:
+                  "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+              },
+            },
+          },
+        },
+      },
+    } as RegistryDataStream;
+
+    const pkg = {
+      name: 'package',
+      version: '0.0.1',
+    };
+
+    const { componentTemplates } = prepareTemplate({
+      pkg,
+      dataStream,
+    });
+
+    const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
+
+    if (!('mappings' in packageTemplate)) {
+      throw new Error('no mappings on package template');
+    }
+
+    expect(packageTemplate.mappings?.runtime).toEqual(
+      expect.objectContaining({
+        day_of_week: {
+          type: 'keyword',
+          script: {
+            source:
+              "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+          },
+        },
+      })
+    );
+  });
+
+  it('test prepareTemplate to set a lifecycle field in index_template if ILM policies are disabled', () => {
+    appContextService.start(
+      createAppContextStartContractMock({
+        internal: { disableILMPolicies: true },
+      } as any)
+    );
+
+    const dataStream = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+      lifecycle: {
+        data_retention: '3d',
+      },
+    } as RegistryDataStream;
+
+    const pkg = {
+      name: 'package',
+      version: '0.0.1',
+    };
+
+    const { componentTemplates } = prepareTemplate({
+      pkg,
+      dataStream,
+    });
+
+    const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
+
+    expect(packageTemplate).toHaveProperty('lifecycle');
+    if (!('lifecycle' in packageTemplate)) {
+      throw new Error('no lifecycle on package template');
+    }
+
+    expect(packageTemplate.lifecycle).toEqual({ data_retention: '3d' });
+  });
+
+  it('test prepareTemplate to not set a lifecycle field in index_template if ILM policies are enabled', () => {
+    appContextService.start(
+      createAppContextStartContractMock({
+        internal: { disableILMPolicies: false },
+      } as any)
+    );
+
+    const dataStream = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+      lifecycle: {
+        data_retention: '3d',
+      },
+    } as RegistryDataStream;
+
+    const pkg = {
+      name: 'package',
+      version: '0.0.1',
+    };
+
+    const { componentTemplates } = prepareTemplate({
+      pkg,
+      dataStream,
+    });
+
+    const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
+
+    expect(packageTemplate).not.toHaveProperty('lifecycle');
   });
 });

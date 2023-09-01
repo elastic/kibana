@@ -19,7 +19,6 @@ jest.mock('../../../../../common/hooks/use_experimental_features');
 describe('ChartSelect', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('it renders the chart select button when alertsPageChartsEnabled is false', () => {

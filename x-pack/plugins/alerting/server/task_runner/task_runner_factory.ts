@@ -24,6 +24,7 @@ import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import {
+  RuleAlertData,
   RuleTypeParams,
   RuleTypeRegistry,
   SpaceIdToNamespaceFunction,
@@ -88,7 +89,8 @@ export class TaskRunnerFactory {
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
+    AlertData extends RuleAlertData
   >(
     ruleType: NormalizedRuleType<
       Params,
@@ -97,7 +99,8 @@ export class TaskRunnerFactory {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >,
     { taskInstance }: RunContext,
     inMemoryMetrics: InMemoryMetrics
@@ -113,7 +116,13 @@ export class TaskRunnerFactory {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
-    >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
+      RecoveryActionGroupId,
+      AlertData
+    >({
+      ruleType,
+      taskInstance,
+      context: this.taskRunnerContext!,
+      inMemoryMetrics,
+    });
   }
 }

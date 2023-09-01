@@ -78,7 +78,9 @@ export const AgentDetailsJsonFlyout = memo<{ agent: Agent; onClose: () => void }
             </p>
           </EuiText>
           <EuiSpacer />
-          <EuiCodeBlock language="json">{agentToJson}</EuiCodeBlock>
+          <EuiCodeBlock language="json" isCopyable>
+            {agentToJson}
+          </EuiCodeBlock>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">

@@ -10,7 +10,7 @@ import { useMemo, useState } from 'react';
 import type {
   LogLevel,
   RuleExecutionEventType,
-} from '../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../common/api/detection_engine/rule_monitoring';
 
 export const useFilters = () => {
   const [logLevels, setLogLevels] = useState<LogLevel[]>([]);

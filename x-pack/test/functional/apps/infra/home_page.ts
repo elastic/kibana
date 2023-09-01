@@ -38,7 +38,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getNoMetricsIndicesPrompt();
       });
 
-      it('renders the correct error page title', async () => {
+      // Unskip once asset details error handling has been implemented
+      it.skip('renders the correct error page title', async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
           '/detail/host/test',
@@ -71,6 +72,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
+      });
+
+      it('renders the inventory survey link', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.infraHome.waitForLoading();
+
+        await pageObjects.infraHome.ensureInventoryFeedbackLinkIsVisible();
       });
 
       it('renders the kubernetes tour component and allows user to dismiss it without seeing it again', async () => {
@@ -190,6 +198,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.openTimeline();
         await pageObjects.infraHome.closeTimeline();
       });
+
+      it('toggles the inventory switcher', async () => {
+        await pageObjects.infraHome.toggleInventorySwitcher();
+      });
     });
 
     describe('alerts flyouts', () => {
@@ -209,7 +221,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.closeAlertFlyout();
       });
 
-      it('should open and close inventory alert flyout', async () => {
+      it('should open and close metrics threshold alert flyout', async () => {
         await pageObjects.infraHome.openMetricsThresholdAlertFlyout();
         await pageObjects.infraHome.closeAlertFlyout();
       });
@@ -218,18 +230,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clickAlertsAndRules();
         await pageObjects.infraHome.ensurePopoverOpened();
         await pageObjects.infraHome.clickAlertsAndRules();
-        await pageObjects.infraHome.ensurePopoverClosed();
+        await retry.try(async () => {
+          await pageObjects.infraHome.ensurePopoverClosed();
+        });
       });
     });
 
     describe('Saved Views', () => {
       before(async () => {
-        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-        await pageObjects.common.navigateToApp('infraOps');
-        await pageObjects.infraHome.waitForLoading();
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await pageObjects.infraHome.goToMetricExplorer();
       });
 
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+
+      beforeEach(async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+      });
+      afterEach(async () => {
+        await pageObjects.infraSavedViews.closeSavedViewsPopover();
+      });
 
       it('should render a button with the view name', async () => {
         await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
@@ -237,7 +257,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should open/close the views popover menu on button click', async () => {
         await pageObjects.infraSavedViews.clickSavedViewsButton();
-        testSubjects.existOrFail('savedViews-popover');
+        await testSubjects.existOrFail('savedViews-popover');
         await pageObjects.infraSavedViews.closeSavedViewsPopover();
       });
 
@@ -246,8 +266,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
       });
 
-      it('should laod a clicked view from the manage views section', async () => {
-        await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
+      it('should load a clicked view from the manage views section', async () => {
         const views = await pageObjects.infraSavedViews.getManageViewsEntries();
         await views[0].click();
         await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
@@ -258,14 +277,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(views.length).to.equal(2);
         await pageObjects.infraSavedViews.pressEsc();
 
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         await pageObjects.infraSavedViews.createView('view2');
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view2');
+
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         views = await pageObjects.infraSavedViews.getManageViewsEntries();
         expect(views.length).to.equal(3);
         await pageObjects.infraSavedViews.pressEsc();
 
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         await pageObjects.infraSavedViews.updateView('view3');
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view3');
+
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         views = await pageObjects.infraSavedViews.getManageViewsEntries();
         expect(views.length).to.equal(3);
         await pageObjects.infraSavedViews.pressEsc();

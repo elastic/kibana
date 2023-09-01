@@ -15,7 +15,6 @@ import {
   getActionsStepsData,
   getHumanizedDuration,
   getModifiedAboutDetailsData,
-  getPrePackagedRuleInstallationStatus,
   getPrePackagedTimelineInstallationStatus,
   determineDetailsValue,
   fillEmptySeverityMappings,
@@ -25,7 +24,7 @@ import {
   mockRule,
 } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
+import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {
@@ -145,6 +144,7 @@ describe('rule helpers', () => {
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',
         timestampOverrideFallbackDisabled: false,
+        investigationFields: [],
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
@@ -181,6 +181,14 @@ describe('rule helpers', () => {
       const result: AboutStepRule = getAboutStepsData(mockedRule, false);
 
       expect(result.note).toEqual('');
+    });
+
+    test('returns customHighlightedField as empty array if property does not exist on rule', () => {
+      const mockedRule = mockRuleWithEverything('test-id');
+      delete mockedRule.investigation_fields;
+      const result: AboutStepRule = getAboutStepsData(mockedRule, false);
+
+      expect(result.investigationFields).toEqual([]);
     });
   });
 
@@ -427,73 +435,6 @@ describe('rule helpers', () => {
       };
 
       expect(result).toEqual(aboutRuleDetailsData);
-    });
-  });
-
-  describe('getPrePackagedRuleStatus', () => {
-    test('ruleNotInstalled', () => {
-      const rulesInstalled = 0;
-      const rulesNotInstalled = 1;
-      const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleInstallationStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
-      );
-
-      expect(result).toEqual('ruleNotInstalled');
-    });
-
-    test('ruleInstalled', () => {
-      const rulesInstalled = 1;
-      const rulesNotInstalled = 0;
-      const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleInstallationStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
-      );
-
-      expect(result).toEqual('ruleInstalled');
-    });
-
-    test('someRuleUninstall', () => {
-      const rulesInstalled = 1;
-      const rulesNotInstalled = 1;
-      const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleInstallationStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
-      );
-
-      expect(result).toEqual('someRuleUninstall');
-    });
-
-    test('ruleNeedUpdate', () => {
-      const rulesInstalled = 1;
-      const rulesNotInstalled = 0;
-      const rulesNotUpdated = 1;
-      const result: string = getPrePackagedRuleInstallationStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
-      );
-
-      expect(result).toEqual('ruleNeedUpdate');
-    });
-
-    test('unknown', () => {
-      const rulesInstalled = undefined;
-      const rulesNotInstalled = undefined;
-      const rulesNotUpdated = undefined;
-      const result: string = getPrePackagedRuleInstallationStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
-      );
-
-      expect(result).toEqual('unknown');
     });
   });
 

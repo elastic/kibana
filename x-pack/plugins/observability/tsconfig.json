@@ -37,18 +37,14 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/security-plugin",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/navigation-plugin",
     "@kbn/std",
     "@kbn/i18n-react",
     "@kbn/utility-types",
-    "@kbn/es-types",
-    "@kbn/rison",
     "@kbn/datemath",
     "@kbn/core-ui-settings-browser",
     "@kbn/es-query",
     "@kbn/server-route-repository",
     "@kbn/ui-theme",
-    "@kbn/shared-ux-page-kibana-template-mocks",
     "@kbn/test-jest-helpers",
     "@kbn/core-http-browser",
     "@kbn/config-schema",
@@ -71,7 +67,26 @@
     "@kbn/core-theme-browser",
     "@kbn/core-elasticsearch-server",
     "@kbn/observability-shared-plugin",
-    "@kbn/exploratory-view-plugin"
+    "@kbn/exploratory-view-plugin",
+    "@kbn/rison",
+    "@kbn/io-ts-utils",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/observability-alert-details",
+    "@kbn/ui-actions-plugin",
+    "@kbn/field-types",
+    "@kbn/safer-lodash-set",
+    "@kbn/core-http-server",
+    "@kbn/cloud-chat-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/stack-alerts-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/core-capabilities-common",
+    "@kbn/deeplinks-analytics",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/osquery-plugin"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

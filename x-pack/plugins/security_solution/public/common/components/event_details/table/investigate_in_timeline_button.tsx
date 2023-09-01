@@ -7,6 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 
@@ -18,7 +19,8 @@ import { updateProviders, setFilters } from '../../../../timelines/store/timelin
 import { sourcererActions } from '../../../store/actions';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
 import type { DataProvider } from '../../../../../common/types';
-import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
@@ -30,11 +32,21 @@ export interface InvestigateInTimelineButtonProps {
   timeRange?: TimeRange;
   keepDataView?: boolean;
   isDisabled?: boolean;
+  iconType?: IconType;
 }
 
 export const InvestigateInTimelineButton: React.FunctionComponent<
   InvestigateInTimelineButtonProps
-> = ({ asEmptyButton, children, dataProviders, filters, timeRange, keepDataView, ...rest }) => {
+> = ({
+  asEmptyButton,
+  children,
+  dataProviders,
+  filters,
+  timeRange,
+  keepDataView,
+  iconType,
+  ...rest
+}) => {
   const dispatch = useDispatch();
 
   const getDataViewsSelector = useMemo(
@@ -112,6 +124,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<
       onClick={configureAndOpenTimeline}
       flush="right"
       size="xs"
+      iconType={iconType}
     >
       {children}
     </EuiButtonEmpty>

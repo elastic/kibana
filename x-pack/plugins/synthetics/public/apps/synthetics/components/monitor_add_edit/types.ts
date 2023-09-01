@@ -11,6 +11,8 @@ import {
   ControllerRenderProps,
   ControllerFieldState,
   FormState,
+  UseControllerProps,
+  FieldValues,
 } from 'react-hook-form';
 import {
   ConfigKey,
@@ -18,6 +20,7 @@ import {
   FormMonitorType,
   MonitorFields,
   ResponseCheckJSON,
+  RequestBodyCheck,
 } from '../../../../../common/runtime_types/monitor_management';
 import { AlertConfigKey } from './constants';
 
@@ -37,12 +40,15 @@ export interface FormLocation {
   id: string;
   isServiceManaged: boolean;
   label: string;
+  isInvalid?: boolean;
 }
+
 export type FormConfig = MonitorFields & {
   isTLSEnabled: boolean;
   ['schedule.number']: string;
   ['source.inline']: string;
   [AlertConfigKey.STATUS_ENABLED]: boolean;
+  [AlertConfigKey.TLS_ENABLED]: boolean;
   [ConfigKey.LOCATIONS]: FormLocation[];
 
   /* Dot notation keys must have a type configuration both for their flattened and nested
@@ -57,6 +63,9 @@ export type FormConfig = MonitorFields & {
     supported_protocols: MonitorFields[ConfigKey.TLS_VERSION];
   };
   check: {
+    request: {
+      body: RequestBodyCheck;
+    };
     response: {
       json: ResponseCheckJSON[];
     };
@@ -74,6 +83,7 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
     field?: ControllerRenderProps<FormConfig, TFieldKey>;
     formState: FormState<FormConfig>;
     setValue: UseFormReturn<FormConfig>['setValue'];
+    trigger: UseFormReturn<FormConfig>['trigger'];
     reset: UseFormReturn<FormConfig>['reset'];
     locations: Array<ServiceLocation & { key: string }>;
     dependencies: unknown[];
@@ -83,7 +93,6 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
   }) => Record<string, any>;
   controlled?: boolean;
   required?: boolean;
-  shouldUseSetValue?: boolean;
   customHook?: (value: unknown) => {
     // custom hooks are only supported for controlled components and only supported for determining error validation
     func: Function;
@@ -95,9 +104,9 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
     event: React.ChangeEvent<HTMLInputElement>,
     formOnChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   ) => void;
-  validation?: (dependencies: unknown[]) => Parameters<UseFormReturn['register']>[1];
+  validation?: (dependencies: unknown[]) => UseControllerProps<FieldValues, TFieldKey>['rules'];
   error?: React.ReactNode;
-  dependencies?: Array<keyof FormConfig>; // fields that another field may depend for or validation. Values are passed to the validation function
+  dependencies?: Array<keyof FormConfig>; // fields that another field may depend on or for validation. Values are passed to the validation function
 }
 
 export interface FieldMap {
@@ -122,6 +131,7 @@ export interface FieldMap {
   [ConfigKey.SCREENSHOTS]: FieldMeta<ConfigKey.SCREENSHOTS>;
   [ConfigKey.ENABLED]: FieldMeta<ConfigKey.ENABLED>;
   [AlertConfigKey.STATUS_ENABLED]: FieldMeta<AlertConfigKey.STATUS_ENABLED>;
+  [AlertConfigKey.TLS_ENABLED]: FieldMeta<AlertConfigKey.TLS_ENABLED>;
   [ConfigKey.NAMESPACE]: FieldMeta<ConfigKey.NAMESPACE>;
   [ConfigKey.TIMEOUT]: FieldMeta<ConfigKey.TIMEOUT>;
   [ConfigKey.MAX_REDIRECTS]: FieldMeta<ConfigKey.MAX_REDIRECTS>;

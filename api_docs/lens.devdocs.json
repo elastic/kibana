@@ -290,6 +290,143 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getFullAttributes",
+            "type": "Function",
+            "tags": [],
+            "label": "getFullAttributes",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensSavedObjectAttributes",
+                "text": "LensSavedObjectAttributes"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.isTextBasedLanguage",
+            "type": "Function",
+            "tags": [],
+            "label": "isTextBasedLanguage",
+            "description": [],
+            "signature": [
+              "() => boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getTextBasedLanguage",
+            "type": "Function",
+            "tags": [],
+            "label": "getTextBasedLanguage",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.updateVisualization",
+            "type": "Function",
+            "tags": [],
+            "label": "updateVisualization",
+            "description": [],
+            "signature": [
+              "(datasourceState: unknown, visualizationState: unknown) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.updateVisualization.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "datasourceState",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.updateVisualization.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "visualizationState",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.openConfingPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "openConfingPanel",
+            "description": [],
+            "signature": [
+              "(startDependencies: ",
+              "LensPluginStartDependencies",
+              ") => Promise<JSX.Element | null>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.openConfingPanel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "startDependencies",
+                "description": [],
+                "signature": [
+                  "LensPluginStartDependencies"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Embeddable.initializeSavedVis",
             "type": "Function",
             "tags": [],
@@ -1208,7 +1345,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\""
+              "\"bar\" | \"line\" | \"area\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -1508,6 +1645,20 @@
             "tags": [],
             "label": "datasourceId",
             "description": [],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DatasourcePublicAPI.datasourceAliasIds",
+            "type": "Array",
+            "tags": [],
+            "label": "datasourceAliasIds",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2158,6 +2309,20 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.FormBasedLayer.ignoreGlobalFilters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreGlobalFilters",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
             "deprecated": false,
@@ -2976,7 +3141,7 @@
                 "section": "def-public.Visualization",
                 "text": "Visualization"
               },
-              "<T, T> | (() => Promise<",
+              "<T, T, unknown> | (() => Promise<",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -2984,7 +3149,7 @@
                 "section": "def-public.Visualization",
                 "text": "Visualization"
               },
-              "<T, T>>)) => void"
+              "<T, T, unknown>>)) => void"
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
@@ -3005,7 +3170,7 @@
                     "section": "def-public.Visualization",
                     "text": "Visualization"
                   },
-                  "<T, T> | (() => Promise<",
+                  "<T, T, unknown> | (() => Promise<",
                   {
                     "pluginId": "lens",
                     "scope": "public",
@@ -3013,7 +3178,7 @@
                     "section": "def-public.Visualization",
                     "text": "Visualization"
                   },
-                  "<T, T>>)"
+                  "<T, T, unknown>>)"
                 ],
                 "path": "x-pack/plugins/lens/public/plugin.ts",
                 "deprecated": false,
@@ -3130,6 +3295,28 @@
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LensPublicStart.EditLensConfigPanelApi",
+            "type": "Function",
+            "tags": [
+              "experimental"
+            ],
+            "label": "EditLensConfigPanelApi",
+            "description": [
+              "\nReact component which can be used to embed a Lens Visualization Config Panel Component.\n\nThis API might undergo breaking changes even in minor versions.\n"
+            ],
+            "signature": [
+              "() => Promise<",
+              "EditLensConfigPanelComponent",
+              ">"
+            ],
+            "path": "x-pack/plugins/lens/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "lens",
@@ -4788,6 +4975,20 @@
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.SuggestionRequest.allowMixed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowMixed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4933,7 +5134,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; accuracyMode?: boolean | undefined; include?: string[] | number[] | undefined; exclude?: string[] | number[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
+              "{ size: number; accuracyMode?: boolean | undefined; include?: string[] | number[] | undefined; exclude?: string[] | number[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"significant\"; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -4967,7 +5168,7 @@
             "section": "def-public.Visualization",
             "text": "Visualization"
           },
-          "<T, P>"
+          "<T, P, ExtraAppendLayerArg>"
         ],
         "path": "x-pack/plugins/lens/public/types.ts",
         "deprecated": false,
@@ -4988,6 +5189,20 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.alias",
+            "type": "Array",
+            "tags": [],
+            "label": "alias",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.initialize",
             "type": "Function",
             "tags": [],
@@ -4996,7 +5211,7 @@
               "\nInitialize is allowed to modify the state stored in memory. The initialize function\nis called with a previous state in two cases:\n- Loading from a saved visualization\n- When using suggestions, the suggested state is passed in"
             ],
             "signature": [
-              "(addNewLayer: () => string, state?: T | P | undefined, mainPalette?: ",
+              "{ (addNewLayer: () => string, nonPersistedState?: T | undefined, mainPalette?: ",
               {
                 "pluginId": "@kbn/coloring",
                 "scope": "common",
@@ -5004,7 +5219,17 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined, references?: ",
+              "<{ [key: string]: unknown; }> | undefined): T; (addNewLayer: () => string, persistedState: P, mainPalette?: ",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
+              "<{ [key: string]: unknown; }> | undefined, annotationGroups?: ",
+              "AnnotationGroups",
+              " | undefined, references?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -5012,138 +5237,11 @@
                 "section": "def-common.SavedObjectReference",
                 "text": "SavedObjectReference"
               },
-              "[] | undefined, initialContext?: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.VisualizeFieldContext",
-                "text": "VisualizeFieldContext"
-              },
-              " | ",
-              "VisualizeEditorContext",
-              "<",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.Configuration",
-                "text": "Configuration"
-              },
-              "> | undefined) => T"
+              "[] | undefined): T; }"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.initialize.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "addNewLayer",
-                "description": [],
-                "signature": [
-                  "() => string"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.initialize.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "T | P | undefined"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.initialize.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "mainPalette",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/coloring",
-                    "scope": "common",
-                    "docId": "kibKbnColoringPluginApi",
-                    "section": "def-common.PaletteOutput",
-                    "text": "PaletteOutput"
-                  },
-                  "<{ [key: string]: unknown; }> | undefined"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.initialize.$4",
-                "type": "Array",
-                "tags": [],
-                "label": "references",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
-                  "[] | undefined"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.initialize.$5",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "initialContext",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.VisualizeFieldContext",
-                    "text": "VisualizeFieldContext"
-                  },
-                  " | ",
-                  "VisualizeEditorContext",
-                  "<",
-                  {
-                    "pluginId": "visualizations",
-                    "scope": "common",
-                    "docId": "kibVisualizationsPluginApi",
-                    "section": "def-common.Configuration",
-                    "text": "Configuration"
-                  },
-                  "> | undefined"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "lens",
@@ -5698,7 +5796,7 @@
             "signature": [
               "((state: T, layerId: string, type: ",
               "LayerType",
-              ", indexPatternId: string) => T) | undefined"
+              ", indexPatternId: string, extraArg?: ExtraAppendLayerArg | undefined) => T) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -5763,6 +5861,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.appendLayer.$5",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "extraArg",
+                "description": [],
+                "signature": [
+                  "ExtraAppendLayerArg | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -5779,11 +5892,9 @@
             "signature": [
               "(state?: T | undefined, frame?: Pick<",
               "FramePublicAPI",
-              ", \"activeData\" | \"datasourceLayers\"> | undefined) => { type: ",
-              "LayerType",
-              "; label: string; icon?: ",
-              "IconType",
-              " | undefined; noDatasource?: boolean | undefined; disabled?: boolean | undefined; toolTipContent?: string | undefined; initialDimensions?: { columnId: string; groupId: string; staticValue?: unknown; autoTimeField?: boolean | undefined; }[] | undefined; canAddViaMenu?: boolean | undefined; }[]"
+              ", \"activeData\" | \"datasourceLayers\"> | undefined) => ",
+              "VisualizationLayerDescription",
+              "[]"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -5834,8 +5945,12 @@
               "\nreturns a list of custom actions supported by the visualization layer.\nDefault actions like delete/clear are not included in this list and are managed by the editor frame"
             ],
             "signature": [
-              "((layerId: string, state: T) => ",
-              "LayerActionFromVisualization",
+              "((layerId: string, state: T, setState: ",
+              "StateSetter",
+              "<T, unknown>, registerLibraryAnnotationGroup: ",
+              "RegisterLibraryAnnotationGroupFunction",
+              ", isSaveable?: boolean | undefined) => ",
+              "LayerAction",
               "[]) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -5871,21 +5986,67 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getSupportedActionsForLayer.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "setState",
+                "description": [],
+                "signature": [
+                  "StateSetter",
+                  "<T, unknown>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getSupportedActionsForLayer.$4",
+                "type": "Function",
+                "tags": [],
+                "label": "registerLibraryAnnotationGroup",
+                "description": [],
+                "signature": [
+                  "RegisterLibraryAnnotationGroupFunction"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getSupportedActionsForLayer.$5",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isSaveable",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.onLayerAction",
+            "id": "def-public.Visualization.getCustomRemoveLayerText",
             "type": "Function",
             "tags": [],
-            "label": "onLayerAction",
+            "label": "getCustomRemoveLayerText",
             "description": [
-              "\nPerform state mutations in response to a layer action"
+              "\nThis method is a clunky solution to the problem, but I'm banking on the confirm modal being removed\nwith undo/redo anyways"
             ],
             "signature": [
-              "((layerId: string, actionId: string, state: T) => T) | undefined"
+              "((layerId: string, state: T) => { title?: string | undefined; description?: string | undefined; } | undefined) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -5893,7 +6054,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.onLayerAction.$1",
+                "id": "def-public.Visualization.getCustomRemoveLayerText.$1",
                 "type": "string",
                 "tags": [],
                 "label": "layerId",
@@ -5908,22 +6069,7 @@
               },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.onLayerAction.$2",
-                "type": "string",
-                "tags": [],
-                "label": "actionId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.onLayerAction.$3",
+                "id": "def-public.Visualization.getCustomRemoveLayerText.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -6161,17 +6307,19 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.renderLayerHeader",
+            "id": "def-public.Visualization.LayerHeaderComponent",
             "type": "Function",
             "tags": [],
-            "label": "renderLayerHeader",
+            "label": "LayerHeaderComponent",
             "description": [
               "\nHeader rendered as layer title. This can be used for both static and dynamic content like\nfor extra configurability, such as for switch chart type"
             ],
             "signature": [
-              "((domElement: Element, props: ",
+              "((props: ",
               "VisualizationLayerWidgetProps",
-              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+              "<T>) => React.ReactElement<",
+              "VisualizationLayerWidgetProps",
+              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6179,22 +6327,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderLayerHeader.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "domElement",
-                "description": [],
-                "signature": [
-                  "Element"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderLayerHeader.$2",
+                "id": "def-public.Visualization.LayerHeaderComponent.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -6213,17 +6346,19 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.renderLayerPanel",
+            "id": "def-public.Visualization.LayerPanelComponent",
             "type": "Function",
             "tags": [],
-            "label": "renderLayerPanel",
+            "label": "LayerPanelComponent",
             "description": [
               "\nLayer panel content rendered. This can be used to render a custom content below the title,\nlike a custom dataview switch"
             ],
             "signature": [
-              "((domElement: Element, props: ",
+              "((props: ",
               "VisualizationLayerWidgetProps",
-              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+              "<T>) => React.ReactElement<",
+              "VisualizationLayerWidgetProps",
+              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6231,22 +6366,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderLayerPanel.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "domElement",
-                "description": [],
-                "signature": [
-                  "Element"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderLayerPanel.$2",
+                "id": "def-public.Visualization.LayerPanelComponent.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -6265,17 +6385,19 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.renderToolbar",
+            "id": "def-public.Visualization.ToolbarComponent",
             "type": "Function",
             "tags": [],
-            "label": "renderToolbar",
+            "label": "ToolbarComponent",
             "description": [
               "\nToolbar rendered above the visualization. This is meant to be used to provide chart-level\nsettings for the visualization."
             ],
             "signature": [
-              "((domElement: Element, props: ",
+              "((props: ",
               "VisualizationToolbarProps",
-              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+              "<T>) => React.ReactElement<",
+              "VisualizationToolbarProps",
+              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6283,22 +6405,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderToolbar.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "domElement",
-                "description": [],
-                "signature": [
-                  "Element"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderToolbar.$2",
+                "id": "def-public.Visualization.ToolbarComponent.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "props",
@@ -6404,9 +6511,9 @@
               "; source: ",
               {
                 "pluginId": "@kbn/dom-drag-drop",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnDomDragDropPluginApi",
-                "section": "def-public.DragDropIdentifier",
+                "section": "def-common.DragDropIdentifier",
                 "text": "DragDropIdentifier"
               },
               "; frame: ",
@@ -6414,9 +6521,9 @@
               "; dropType: ",
               {
                 "pluginId": "@kbn/dom-drag-drop",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnDomDragDropPluginApi",
-                "section": "def-public.DropType",
+                "section": "def-common.DropType",
                 "text": "DropType"
               },
               "; group?: ",
@@ -6543,9 +6650,9 @@
               "<unknown>) => { dropTypes: ",
               {
                 "pluginId": "@kbn/dom-drag-drop",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnDomDragDropPluginApi",
-                "section": "def-public.DropType",
+                "section": "def-common.DropType",
                 "text": "DropType"
               },
               "[]; nextLabel?: string | undefined; } | undefined) | undefined"
@@ -6612,15 +6719,17 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.renderLayerSettings",
+            "id": "def-public.Visualization.LayerSettingsComponent",
             "type": "Function",
             "tags": [],
-            "label": "renderLayerSettings",
+            "label": "LayerSettingsComponent",
             "description": [],
             "signature": [
-              "((domElement: Element, props: ",
+              "((props: ",
               "VisualizationConfigProps",
-              "<T> & { setState(newState: T | ((currState: T) => T)): void; panelRef: React.MutableRefObject<HTMLDivElement | null>; } & { section: \"data\" | \"appearance\"; }) => void | ((cleanupElement: Element) => void)) | undefined"
+              "<T> & { setState(newState: T | ((currState: T) => T)): void; panelRef: React.MutableRefObject<HTMLDivElement | null>; } & { section: \"data\" | \"appearance\"; }) => React.ReactElement<",
+              "VisualizationLayerSettingsProps",
+              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6628,22 +6737,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderLayerSettings.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "domElement",
-                "description": [],
-                "signature": [
-                  "Element"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderLayerSettings.$2",
+                "id": "def-public.Visualization.LayerSettingsComponent.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -6662,17 +6756,19 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.renderDimensionEditor",
+            "id": "def-public.Visualization.DimensionEditorComponent",
             "type": "Function",
             "tags": [],
-            "label": "renderDimensionEditor",
+            "label": "DimensionEditorComponent",
             "description": [
               "\nAdditional editor that gets rendered inside the dimension popover in the \"appearance\" section.\nThis can be used to configure dimension-specific options"
             ],
             "signature": [
-              "((domElement: Element, props: ",
+              "((props: ",
               "VisualizationDimensionEditorProps",
-              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+              "<T>) => React.ReactElement<",
+              "VisualizationDimensionEditorProps",
+              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6680,22 +6776,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderDimensionEditor.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "domElement",
-                "description": [],
-                "signature": [
-                  "Element"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderDimensionEditor.$2",
+                "id": "def-public.Visualization.DimensionEditorComponent.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -6714,17 +6795,19 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.renderDimensionEditorAdditionalSection",
+            "id": "def-public.Visualization.DimensionEditorAdditionalSectionComponent",
             "type": "Function",
             "tags": [],
-            "label": "renderDimensionEditorAdditionalSection",
+            "label": "DimensionEditorAdditionalSectionComponent",
             "description": [
               "\nAdditional editor that gets rendered inside the dimension popover in an additional section below \"appearance\".\nThis can be used to configure dimension-specific options"
             ],
             "signature": [
-              "((domElement: Element, props: ",
+              "((props: ",
               "VisualizationDimensionEditorProps",
-              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+              "<T>) => React.ReactElement<",
+              "VisualizationDimensionEditorProps",
+              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6732,22 +6815,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderDimensionEditorAdditionalSection.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "domElement",
-                "description": [],
-                "signature": [
-                  "Element"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderDimensionEditorAdditionalSection.$2",
+                "id": "def-public.Visualization.DimensionEditorAdditionalSectionComponent.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -6766,17 +6834,19 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.renderDimensionEditorDataExtra",
+            "id": "def-public.Visualization.DimensionEditorDataExtraComponent",
             "type": "Function",
             "tags": [],
-            "label": "renderDimensionEditorDataExtra",
+            "label": "DimensionEditorDataExtraComponent",
             "description": [
               "\nAdditional editor that gets rendered inside the data section.\nThis can be used to configure dimension-specific options"
             ],
             "signature": [
-              "((domElement: Element, props: ",
+              "((props: ",
               "VisualizationDimensionEditorProps",
-              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+              "<T>) => React.ReactElement<",
+              "VisualizationDimensionEditorProps",
+              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6784,22 +6854,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderDimensionEditorDataExtra.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "domElement",
-                "description": [],
-                "signature": [
-                  "Element"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderDimensionEditorDataExtra.$2",
+                "id": "def-public.Visualization.DimensionEditorDataExtraComponent.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -6818,15 +6873,15 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.renderDimensionTrigger",
+            "id": "def-public.Visualization.DimensionTriggerComponent",
             "type": "Function",
             "tags": [],
-            "label": "renderDimensionTrigger",
+            "label": "DimensionTriggerComponent",
             "description": [
               "\nRenders dimension trigger. Used only for noDatasource layers"
             ],
             "signature": [
-              "((props: { columnId: string; label: string; hideTooltip?: boolean | undefined; }) => JSX.Element | null) | undefined"
+              "((props: { columnId: string; label: string; hideTooltip?: boolean | undefined; }) => React.ReactElement<{ columnId: string; label: string; hideTooltip?: boolean | undefined; }, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6834,7 +6889,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.renderDimensionTrigger.$1",
+                "id": "def-public.Visualization.DimensionTriggerComponent.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "props",
@@ -6845,7 +6900,7 @@
                 "children": [
                   {
                     "parentPluginId": "lens",
-                    "id": "def-public.Visualization.renderDimensionTrigger.$1.columnId",
+                    "id": "def-public.Visualization.DimensionTriggerComponent.$1.columnId",
                     "type": "string",
                     "tags": [],
                     "label": "columnId",
@@ -6856,7 +6911,7 @@
                   },
                   {
                     "parentPluginId": "lens",
-                    "id": "def-public.Visualization.renderDimensionTrigger.$1.label",
+                    "id": "def-public.Visualization.DimensionTriggerComponent.$1.label",
                     "type": "string",
                     "tags": [],
                     "label": "label",
@@ -6867,7 +6922,7 @@
                   },
                   {
                     "parentPluginId": "lens",
-                    "id": "def-public.Visualization.renderDimensionTrigger.$1.hideTooltip",
+                    "id": "def-public.Visualization.DimensionTriggerComponent.$1.hideTooltip",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "hideTooltip",
@@ -6880,6 +6935,38 @@
                     "trackAdoption": false
                   }
                 ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.getAddLayerButtonComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getAddLayerButtonComponent",
+            "description": [],
+            "signature": [
+              "((props: AddLayerButtonProps) => React.ReactElement<AddLayerButtonProps, string | React.JSXElementConstructor<any>> | null) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getAddLayerButtonComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "AddLayerButtonProps"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -7571,6 +7658,130 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.isEqual",
+            "type": "Function",
+            "tags": [],
+            "label": "isEqual",
+            "description": [],
+            "signature": [
+              "((state1: P, references1: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[], state2: P, references2: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[], annotationGroups: ",
+              "AnnotationGroups",
+              ") => boolean) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isEqual.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state1",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isEqual.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "references1",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isEqual.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state2",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isEqual.$4",
+                "type": "Array",
+                "tags": [],
+                "label": "references2",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isEqual.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "annotationGroups",
+                "description": [],
+                "signature": [
+                  "AnnotationGroups"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.getVisualizationInfo",
             "type": "Function",
             "tags": [],
@@ -7768,116 +7979,6 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-public.XYAnnotationLayerConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "XYAnnotationLayerConfig",
-        "description": [],
-        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.layerId",
-            "type": "string",
-            "tags": [],
-            "label": "layerId",
-            "description": [],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.layerType",
-            "type": "string",
-            "tags": [],
-            "label": "layerType",
-            "description": [],
-            "signature": [
-              "\"annotations\""
-            ],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.annotations",
-            "type": "Array",
-            "tags": [],
-            "label": "annotations",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "eventAnnotation",
-                "scope": "common",
-                "docId": "kibEventAnnotationPluginApi",
-                "section": "def-common.EventAnnotationConfig",
-                "text": "EventAnnotationConfig"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.hide",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hide",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.indexPatternId",
-            "type": "string",
-            "tags": [],
-            "label": "indexPatternId",
-            "description": [],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.simpleView",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "simpleView",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.ignoreGlobalFilters",
-            "type": "boolean",
-            "tags": [],
-            "label": "ignoreGlobalFilters",
-            "description": [],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8346,7 +8447,9 @@
               },
               "<Partial<",
               "GridLineStyle",
-              "> | undefined>; ticks?: number | undefined; domain?: ",
+              "> | undefined>; position?: ",
+              "Position",
+              " | undefined; ticks?: number | undefined; domain?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -8356,11 +8459,7 @@
               },
               "<",
               "YDomainRange",
-              " | undefined>; position?: ",
-              "Position",
-              " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { tooltip?: ",
-              "TooltipSettings",
-              " | undefined; debug?: boolean | undefined; theme?: ",
+              " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -8376,7 +8475,7 @@
               "LegendPositionConfig",
               " | undefined; rotation?: ",
               "Rotation",
-              " | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+              " | undefined; debug?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
               "Rendering",
               " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
               "MakeOverridesSerializable",
@@ -8394,7 +8493,7 @@
               "CustomXDomain",
               " | undefined>; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
               "LegendStrategy",
-              " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>>) | undefined"
+              " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>> & Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>>) | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -8461,7 +8560,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -8773,7 +8872,7 @@
             "label": "preferredSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -10104,7 +10203,7 @@
             "section": "def-public.GenericIndexPatternColumn",
             "text": "GenericIndexPatternColumn"
           },
-          ">; columnOrder: string[]; linkToLayers?: string[] | undefined; incompleteColumns?: Record<string, ",
+          ">; ignoreGlobalFilters?: boolean | undefined; columnOrder: string[]; linkToLayers?: string[] | undefined; incompleteColumns?: Record<string, ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -10176,7 +10275,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+          "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
         "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -10311,9 +10410,7 @@
             "section": "def-public.MetricVisualizationState",
             "text": "MetricVisualizationState"
           },
-          "> | LensAttributes<string, unknown>; overrides?: Partial<Record<\"settings\", { tooltip?: ",
-          "TooltipSettings",
-          " | undefined; debug?: boolean | undefined; theme?: ",
+          "> | LensAttributes<string, unknown>; overrides?: Partial<Record<\"settings\", { theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -10329,7 +10426,7 @@
           "LegendPositionConfig",
           " | undefined; rotation?: ",
           "Rotation",
-          " | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+          " | undefined; debug?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
           "Rendering",
           " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
           "MakeOverridesSerializable",
@@ -10407,7 +10504,9 @@
           },
           "<Partial<",
           "GridLineStyle",
-          "> | undefined>; ticks?: number | undefined; domain?: ",
+          "> | undefined>; position?: ",
+          "Position",
+          " | undefined; ticks?: number | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -10417,9 +10516,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; position?: ",
-          "Position",
-          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; }"
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx",
         "deprecated": false,
@@ -10490,6 +10587,23 @@
           "\"time\" | \"linear\" | \"ordinal\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.XYAnnotationLayerConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "XYAnnotationLayerConfig",
+        "description": [],
+        "signature": [
+          "XYByValueAnnotationLayerConfig",
+          " | ",
+          "XYByReferenceAnnotationLayerConfig"
+        ],
+        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

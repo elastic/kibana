@@ -12,13 +12,13 @@ import expect from 'expect';
 import {
   BulkActionType,
   BulkActionEditType,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleMlRule,
   getSimpleRule,
   installMockPrebuiltRules,
@@ -34,13 +34,20 @@ export default ({ getService }: FtrProviderContext): void => {
     supertest
       .post(DETECTION_ENGINE_RULES_BULK_ACTION)
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
       .query({ dry_run: true });
 
   const fetchRule = (ruleId: string) =>
-    supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`).set('kbn-xsrf', 'true');
+    supertest
+      .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
 
   const findRules = () =>
-    supertest.get(`${DETECTION_ENGINE_RULES_URL}/_find`).set('kbn-xsrf', 'true');
+    supertest
+      .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
 
   describe('perform_bulk_action dry_run', () => {
     beforeEach(async () => {
@@ -48,7 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

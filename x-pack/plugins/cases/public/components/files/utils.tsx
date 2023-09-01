@@ -6,17 +6,17 @@
  */
 
 import type {
-  CommentRequestExternalReferenceType,
+  ExternalReferenceAttachmentPayload,
   FileAttachmentMetadata,
-} from '../../../common/api';
+} from '../../../common/types/domain';
+import { FileAttachmentMetadataRt } from '../../../common/types/domain';
 
 import {
   compressionMimeTypes,
-  imageMimeTypes,
+  IMAGE_MIME_TYPES,
   textMimeTypes,
   pdfMimeTypes,
 } from '../../../common/constants/mime_types';
-import { FileAttachmentMetadataRt } from '../../../common/api';
 import * as i18n from './translations';
 
 export const isImage = (file: { mimeType?: string }) => file.mimeType?.startsWith('image/');
@@ -26,7 +26,7 @@ export const parseMimeType = (mimeType: string | undefined) => {
     return i18n.UNKNOWN_MIME_TYPE;
   }
 
-  if (imageMimeTypes.includes(mimeType)) {
+  if (IMAGE_MIME_TYPES.has(mimeType)) {
     return i18n.IMAGE_MIME_TYPE;
   }
 
@@ -52,7 +52,7 @@ export const parseMimeType = (mimeType: string | undefined) => {
 };
 
 export const isValidFileExternalReferenceMetadata = (
-  externalReferenceMetadata: CommentRequestExternalReferenceType['externalReferenceMetadata']
+  externalReferenceMetadata: ExternalReferenceAttachmentPayload['externalReferenceMetadata']
 ): externalReferenceMetadata is FileAttachmentMetadata => {
   return (
     FileAttachmentMetadataRt.is(externalReferenceMetadata) &&

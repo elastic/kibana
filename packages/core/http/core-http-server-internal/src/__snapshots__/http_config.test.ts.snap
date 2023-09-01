@@ -56,6 +56,16 @@ Object {
     "enabled": false,
   },
   "customResponseHeaders": Object {},
+  "eluMonitor": Object {
+    "enabled": true,
+    "logging": Object {
+      "enabled": false,
+      "threshold": Object {
+        "ela": 250,
+        "elu": 0.15,
+      },
+    },
+  },
   "host": "localhost",
   "keepaliveTimeout": 120000,
   "maxPayload": ByteSizeValue {
@@ -67,12 +77,11 @@ Object {
     "allowFromAnyIp": false,
     "ipAllowlist": Array [],
   },
-  "restrictInternalApis": false,
   "rewriteBasePath": false,
   "securityResponseHeaders": Object {
     "crossOriginOpenerPolicy": "same-origin",
     "disableEmbedding": false,
-    "permissionsPolicy": null,
+    "permissionsPolicy": "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()",
     "referrerPolicy": "no-referrer-when-downgrade",
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
@@ -115,6 +124,10 @@ Object {
       "TLSv1.3",
     ],
     "truststore": Object {},
+  },
+  "versioned": Object {
+    "strictClientVersionCheck": true,
+    "versionResolution": "oldest",
   },
   "xsrf": Object {
     "allowlist": Array [],

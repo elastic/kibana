@@ -8,7 +8,7 @@
 import type {
   RuleCreateProps,
   RuleUpdateProps,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getSimpleRule } from './get_simple_rule';
 
 export const getRuleWithWebHookAction = (

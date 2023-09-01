@@ -6,54 +6,51 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { lastValueFrom } from 'rxjs';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { extractInfluencers } from '../../../common/util/job_utils';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
 import { HttpService } from '../../application/services/http_service';
-import { AnomalyChartsEmbeddableInput } from '..';
+import type { AnomalyChartsEmbeddableInput } from '..';
 import { resolveJobSelection } from '../common/resolve_job_selection';
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
+import { mlApiServicesProvider } from '../../application/services/ml_api_service';
 
 export async function resolveEmbeddableAnomalyChartsUserInput(
   coreStart: CoreStart,
   input?: AnomalyChartsEmbeddableInput
 ): Promise<Partial<AnomalyChartsEmbeddableInput>> {
-  const { http, overlays } = coreStart;
+  const { http, overlays, theme, i18n } = coreStart;
 
-  const anomalyDetectorService = new AnomalyDetectorService(new HttpService(http));
+  const { getJobs } = mlApiServicesProvider(new HttpService(http));
 
   return new Promise(async (resolve, reject) => {
     try {
       const { jobIds } = await resolveJobSelection(coreStart, input?.jobIds);
       const title = input?.title ?? getDefaultExplorerChartsPanelTitle(jobIds);
-      const jobs = await lastValueFrom(anomalyDetectorService.getJobs$(jobIds));
-      const influencers = anomalyDetectorService.extractInfluencers(jobs);
+      const { jobs } = await getJobs({ jobId: jobIds.join(',') });
+      const influencers = extractInfluencers(jobs);
       influencers.push(VIEW_BY_JOB_LABEL);
-      const { theme$ } = coreStart.theme;
       const modalSession = overlays.openModal(
         toMountPoint(
-          wrapWithTheme(
-            <AnomalyChartsInitializer
-              defaultTitle={title}
-              initialInput={input}
-              onCreate={({ panelTitle, maxSeriesToPlot }) => {
-                modalSession.close();
-                resolve({
-                  jobIds,
-                  title: panelTitle,
-                  maxSeriesToPlot,
-                });
-              }}
-              onCancel={() => {
-                modalSession.close();
-                reject();
-              }}
-            />,
-            theme$
-          )
+          <AnomalyChartsInitializer
+            defaultTitle={title}
+            initialInput={input}
+            onCreate={({ panelTitle, maxSeriesToPlot }) => {
+              modalSession.close();
+              resolve({
+                jobIds,
+                title: panelTitle,
+                maxSeriesToPlot,
+              });
+            }}
+            onCancel={() => {
+              modalSession.close();
+              reject();
+            }}
+          />,
+          { theme, i18n }
         )
       );
     } catch (error) {

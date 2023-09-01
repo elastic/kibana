@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsBarChartWrapper } from './wrapper';
 import {
   BARCHART_WRAPPER_TEST_ID,
@@ -17,7 +17,7 @@ import {
   LOADING_TEST_ID,
 } from './test_ids';
 import moment from 'moment';
-import { DROPDOWN_TEST_ID } from './field_selector/test_ids';
+import { DROPDOWN_TEST_ID } from './test_ids';
 
 jest.mock('../../../query_bar/hooks/use_filters');
 

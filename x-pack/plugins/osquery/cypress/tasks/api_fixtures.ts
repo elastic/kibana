@@ -8,9 +8,10 @@
 import type {
   RuleCreateProps,
   RuleResponse,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { Case } from '@kbn/cases-plugin/common';
+import { API_VERSIONS } from '../../common/constants';
 import type { SavedQuerySOFormData } from '../../public/saved_queries/form/use_saved_query_form';
 import type { LiveQueryDetailsItem } from '../../public/actions/use_live_query_details';
 import type { PackSavedObject, PackItem } from '../../public/packs/types';
@@ -72,11 +73,21 @@ export const loadSavedQuery = (payload: SavedQuerySOFormData = savedQueryFixture
       ...payload,
       id: payload.id ?? generateRandomStringName(1)[0],
     },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
     url: '/api/osquery/saved_queries',
   }).then((response) => response.body.data);
 
 export const cleanupSavedQuery = (id: string) => {
-  request({ method: 'DELETE', url: `/api/osquery/saved_queries/${id}` });
+  request({
+    method: 'DELETE',
+    url: `/api/osquery/saved_queries/${id}`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+    failOnStatusCode: false,
+  });
 };
 
 export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
@@ -89,17 +100,29 @@ export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
       queries: payload.queries ?? {},
       enabled: payload.enabled || true,
     },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+
     url: `/s/${space}/api/osquery/packs`,
   }).then((response) => response.body.data);
 
 export const cleanupPack = (id: string, space = 'default') => {
-  request({ method: 'DELETE', url: `/s/${space}/api/osquery/packs/${id}` });
+  request({
+    method: 'DELETE',
+    url: `/s/${space}/api/osquery/packs/${id}`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+    failOnStatusCode: false,
+  });
 };
 
 export const loadLiveQuery = (
   payload = {
     agent_all: true,
     query: 'select * from uptime;',
+    kuery: '',
   }
 ) =>
   request<{
@@ -108,6 +131,9 @@ export const loadLiveQuery = (
     method: 'POST',
     body: payload,
     url: `/api/osquery/live_queries`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
   }).then((response) => response.body.data);
 
 export const loadRule = (includeResponseActions = false) =>
@@ -126,7 +152,30 @@ export const loadRule = (includeResponseActions = false) =>
         'winlogbeat-*',
         '-*elastic-cloud-logs-*',
       ],
-      filters: [],
+      filters: [
+        {
+          meta: {
+            type: 'custom',
+            disabled: false,
+            negate: false,
+            alias: null,
+            key: 'query',
+            value: '{"bool":{"must_not":{"wildcard":{"host.name":"dev-fleet-server.*"}}}}',
+          },
+          query: {
+            bool: {
+              must_not: {
+                wildcard: {
+                  'host.name': 'dev-fleet-server.*',
+                },
+              },
+            },
+          },
+          $state: {
+            store: 'appState',
+          },
+        },
+      ],
       language: 'kuery',
       query: '_id:*',
       author: [],
@@ -174,10 +223,20 @@ export const loadRule = (includeResponseActions = false) =>
         : {}),
     } as RuleCreateProps,
     url: `/api/detection_engine/rules`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
   }).then((response) => response.body);
 
 export const cleanupRule = (id: string) => {
-  request({ method: 'DELETE', url: `/api/detection_engine/rules?id=${id}` });
+  request({
+    method: 'DELETE',
+    url: `/api/detection_engine/rules?id=${id}`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+    failOnStatusCode: false,
+  });
 };
 
 export const loadCase = (owner: string) =>
@@ -197,7 +256,12 @@ export const loadCase = (owner: string) =>
   }).then((response) => response.body);
 
 export const cleanupCase = (id: string) => {
-  request({ method: 'DELETE', url: '/api/cases', qs: { ids: JSON.stringify([id]) } });
+  request({
+    method: 'DELETE',
+    url: '/api/cases',
+    qs: { ids: JSON.stringify([id]) },
+    failOnStatusCode: false,
+  });
 };
 
 export const loadSpace = () => {
@@ -234,4 +298,8 @@ export const loadAgentPolicy = () =>
   }).then((response) => response.body.item);
 
 export const cleanupAgentPolicy = (agentPolicyId: string) =>
-  request({ method: 'POST', body: { agentPolicyId }, url: '/api/fleet/agent_policies/delete' });
+  request({
+    method: 'POST',
+    body: { agentPolicyId },
+    url: '/api/fleet/agent_policies/delete',
+  });

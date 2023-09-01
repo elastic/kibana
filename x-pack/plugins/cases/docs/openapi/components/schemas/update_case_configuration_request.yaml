@@ -1,0 +1,24 @@
+title: Update case configuration request
+description: External connection details, such as the closure type and default connector for cases.
+type: object
+required: 
+  - version
+properties:
+  closure_type:
+    $ref: 'closure_types.yaml'
+  connector:
+    description: An object that contains the connector configuration.
+    type: object
+    properties:
+      $ref: 'case_configure_connector_properties.yaml'
+    required:
+      - fields
+      - id
+      - name
+      - type
+  version:
+    description: >
+      The version of the connector.
+      To retrieve the version value, use the get configuration API.
+    type: string
+    example: WzIwMiwxXQ==

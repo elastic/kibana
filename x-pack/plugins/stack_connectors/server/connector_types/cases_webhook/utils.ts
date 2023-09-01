@@ -90,8 +90,8 @@ export const throwDescriptiveErrorIfResponseIsNotValid = ({
 export const removeSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
 export const stringifyObjValues = (properties: Record<string, string | string[]>) => ({
-  case: Object.entries(properties).reduce(
-    (acc, [key, value]) => ({ ...acc, [key]: JSON.stringify(value) }),
-    {}
-  ),
+  case: Object.entries(properties).reduce((acc, [key, value]) => {
+    acc[key] = JSON.stringify(value);
+    return acc;
+  }, {} as Record<string, string>),
 });

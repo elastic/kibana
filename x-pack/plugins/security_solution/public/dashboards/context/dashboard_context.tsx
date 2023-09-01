@@ -9,8 +9,11 @@ import React from 'react';
 import type { Tag } from '@kbn/saved-objects-tagging-plugin/common';
 import { useFetchSecurityTags } from '../containers/use_fetch_security_tags';
 
+export interface TagReference extends Tag {
+  type: string;
+}
 export interface DashboardContextType {
-  securityTags: Tag[] | null;
+  securityTags: TagReference[] | null;
 }
 
 const DashboardContext = React.createContext<DashboardContextType | null>({ securityTags: null });

@@ -8,25 +8,27 @@
 // Service for querying filters, which hold lists of entities,
 // for example a list of known safe URL domains.
 import { useMemo } from 'react';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
-import { basePath } from '.';
 import type { Filter, FilterStats } from '../../../../common/types/filters';
 
 export const filtersApiProvider = (httpService: HttpService) => ({
   filters(obj?: { filterId?: string }) {
     const filterId = obj && obj.filterId ? `/${obj.filterId}` : '';
     return httpService.http<Filter[]>({
-      path: `${basePath()}/filters${filterId}`,
+      path: `${ML_INTERNAL_BASE_PATH}/filters${filterId}`,
       method: 'GET',
+      version: '1',
     });
   },
 
   filtersStats() {
     return httpService.http<FilterStats[]>({
-      path: `${basePath()}/filters/_stats`,
+      path: `${ML_INTERNAL_BASE_PATH}/filters/_stats`,
       method: 'GET',
+      version: '1',
     });
   },
 
@@ -37,8 +39,9 @@ export const filtersApiProvider = (httpService: HttpService) => ({
       items,
     });
     return httpService.http<Filter>({
-      path: `${basePath()}/filters`,
+      path: `${ML_INTERNAL_BASE_PATH}/filters`,
       method: 'PUT',
+      version: '1',
       body,
     });
   },
@@ -51,16 +54,18 @@ export const filtersApiProvider = (httpService: HttpService) => ({
     });
 
     return httpService.http<Filter>({
-      path: `${basePath()}/filters/${filterId}`,
+      path: `${ML_INTERNAL_BASE_PATH}/filters/${filterId}`,
       method: 'PUT',
       body,
+      version: '1',
     });
   },
 
   deleteFilter(filterId: string) {
     return httpService.http<{ acknowledged: boolean }>({
-      path: `${basePath()}/filters/${filterId}`,
+      path: `${ML_INTERNAL_BASE_PATH}/filters/${filterId}`,
       method: 'DELETE',
+      version: '1',
     });
   },
 });

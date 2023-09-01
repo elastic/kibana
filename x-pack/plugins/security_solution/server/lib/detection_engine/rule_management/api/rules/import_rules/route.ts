@@ -12,11 +12,14 @@ import { createPromiseFromStreams } from '@kbn/utils';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import type { ImportQuerySchemaDecoded } from '@kbn/securitysolution-io-ts-types';
-import { importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
+import type { IKibanaResponse } from '@kbn/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { ImportRulesResponse } from '../../../../../../../common/detection_engine/rule_management';
+import type { ImportRulesRequestQueryDecoded } from '../../../../../../../common/api/detection_engine/rule_management';
+import {
+  ImportRulesRequestQuery,
+  ImportRulesResponse,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';
@@ -44,15 +47,10 @@ export const importRulesRoute = (
   config: ConfigType,
   ml: SetupPlugins['ml']
 ) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,
-      validate: {
-        query: buildRouteValidation<typeof importQuerySchema, ImportQuerySchemaDecoded>(
-          importQuerySchema
-        ),
-        body: schema.any(), // validation on file object is accomplished later in the handler.
-      },
       options: {
         tags: ['access:securitySolution'],
         body: {
@@ -60,150 +58,163 @@ export const importRulesRoute = (
           output: 'stream',
         },
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            query: buildRouteValidation<
+              typeof ImportRulesRequestQuery,
+              ImportRulesRequestQueryDecoded
+            >(ImportRulesRequestQuery),
+            body: schema.any(), // validation on file object is accomplished later in the handler.
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<ImportRulesResponse>> => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const ctx = await context.resolve([
-          'core',
-          'securitySolution',
-          'alerting',
-          'actions',
-          'lists',
-          'licensing',
-        ]);
+        try {
+          const ctx = await context.resolve([
+            'core',
+            'securitySolution',
+            'alerting',
+            'actions',
+            'lists',
+            'licensing',
+          ]);
 
-        const rulesClient = ctx.alerting.getRulesClient();
-        const actionsClient = ctx.actions.getActionsClient();
-        const actionSOClient = ctx.core.savedObjects.getClient({
-          includedHiddenTypes: ['action'],
-        });
-        const actionsImporter = ctx.core.savedObjects.getImporter(actionSOClient);
+          const rulesClient = ctx.alerting.getRulesClient();
+          const actionsClient = ctx.actions.getActionsClient();
+          const actionSOClient = ctx.core.savedObjects.getClient({
+            includedHiddenTypes: ['action'],
+          });
+          const actionsImporter = ctx.core.savedObjects.getImporter(actionSOClient);
 
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const exceptionsClient = ctx.lists?.getExceptionListClient();
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const exceptionsClient = ctx.lists?.getExceptionListClient();
 
-        const mlAuthz = buildMlAuthz({
-          license: ctx.licensing.license,
-          ml,
-          request,
-          savedObjectsClient,
-        });
+          const mlAuthz = buildMlAuthz({
+            license: ctx.licensing.license,
+            ml,
+            request,
+            savedObjectsClient,
+          });
 
-        const { filename } = (request.body.file as HapiReadableStream).hapi;
-        const fileExtension = extname(filename).toLowerCase();
-        if (fileExtension !== '.ndjson') {
+          const { filename } = (request.body.file as HapiReadableStream).hapi;
+          const fileExtension = extname(filename).toLowerCase();
+          if (fileExtension !== '.ndjson') {
+            return siemResponse.error({
+              statusCode: 400,
+              body: `Invalid file extension ${fileExtension}`,
+            });
+          }
+
+          const objectLimit = config.maxRuleImportExportSize;
+
+          // parse file to separate out exceptions from rules
+          const readAllStream = createRulesAndExceptionsStreamFromNdJson(objectLimit);
+          const [{ exceptions, rules, actionConnectors }] = await createPromiseFromStreams<
+            RuleExceptionsPromiseFromStreams[]
+          >([request.body.file as HapiReadableStream, ...readAllStream]);
+
+          // import exceptions, includes validation
+          const {
+            errors: exceptionsErrors,
+            successCount: exceptionsSuccessCount,
+            success: exceptionsSuccess,
+          } = await importRuleExceptions({
+            exceptions,
+            exceptionsClient,
+            overwrite: request.query.overwrite_exceptions,
+            maxExceptionsImportSize: objectLimit,
+          });
+          // report on duplicate rules
+          const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
+            getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
+
+          const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
+            parsedObjectsWithoutDuplicateErrors,
+            actionSOClient
+          );
+
+          // import actions-connectors
+          const {
+            successCount: actionConnectorSuccessCount,
+            success: actionConnectorSuccess,
+            warnings: actionConnectorWarnings,
+            errors: actionConnectorErrors,
+            rulesWithMigratedActions,
+          } = await importRuleActionConnectors({
+            actionConnectors,
+            actionsClient,
+            actionsImporter,
+            rules: migratedParsedObjectsWithoutDuplicateErrors,
+            overwrite: request.query.overwrite_action_connectors,
+          });
+
+          // rulesWithMigratedActions: Is returned only in case connectors were exported from different namespace and the
+          // original rules actions' ids were replaced with new destinationIds
+          const parsedRules = actionConnectorErrors.length
+            ? []
+            : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
+
+          // gather all exception lists that the imported rules reference
+          const foundReferencedExceptionLists = await getReferencedExceptionLists({
+            rules: parsedRules,
+            savedObjectsClient,
+          });
+
+          const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
+
+          const importRuleResponse: ImportRuleResponse[] = await importRulesHelper({
+            ruleChunks: chunkParseObjects,
+            rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
+            mlAuthz,
+            overwriteRules: request.query.overwrite,
+            rulesClient,
+            savedObjectsClient,
+            exceptionsClient,
+            spaceId: ctx.securitySolution.getSpaceId(),
+            existingLists: foundReferencedExceptionLists,
+            allowMissingConnectorSecrets: !!actionConnectors.length,
+          });
+          const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
+          const successes = importRuleResponse.filter((resp) => {
+            if (isImportRegular(resp)) {
+              return resp.status_code === 200;
+            } else {
+              return false;
+            }
+          });
+          const importRules: ImportRulesResponse = {
+            success: errorsResp.length === 0,
+            success_count: successes.length,
+            rules_count: rules.length,
+            errors: errorsResp,
+            exceptions_errors: exceptionsErrors,
+            exceptions_success: exceptionsSuccess,
+            exceptions_success_count: exceptionsSuccessCount,
+            action_connectors_success: actionConnectorSuccess,
+            action_connectors_success_count: actionConnectorSuccessCount,
+            action_connectors_errors: actionConnectorErrors,
+            action_connectors_warnings: actionConnectorWarnings,
+          };
+
+          const [validated, errors] = validate(importRules, ImportRulesResponse);
+          if (errors != null) {
+            return siemResponse.error({ statusCode: 500, body: errors });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
-            statusCode: 400,
-            body: `Invalid file extension ${fileExtension}`,
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-
-        const objectLimit = config.maxRuleImportExportSize;
-
-        // parse file to separate out exceptions from rules
-        const readAllStream = createRulesAndExceptionsStreamFromNdJson(objectLimit);
-        const [{ exceptions, rules, actionConnectors }] = await createPromiseFromStreams<
-          RuleExceptionsPromiseFromStreams[]
-        >([request.body.file as HapiReadableStream, ...readAllStream]);
-
-        // import exceptions, includes validation
-        const {
-          errors: exceptionsErrors,
-          successCount: exceptionsSuccessCount,
-          success: exceptionsSuccess,
-        } = await importRuleExceptions({
-          exceptions,
-          exceptionsClient,
-          overwrite: request.query.overwrite_exceptions,
-          maxExceptionsImportSize: objectLimit,
-        });
-        // report on duplicate rules
-        const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
-          getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
-
-        const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
-          parsedObjectsWithoutDuplicateErrors,
-          actionSOClient
-        );
-
-        // import actions-connectors
-        const {
-          successCount: actionConnectorSuccessCount,
-          success: actionConnectorSuccess,
-          warnings: actionConnectorWarnings,
-          errors: actionConnectorErrors,
-          rulesWithMigratedActions,
-        } = await importRuleActionConnectors({
-          actionConnectors,
-          actionsClient,
-          actionsImporter,
-          rules: migratedParsedObjectsWithoutDuplicateErrors,
-          overwrite: request.query.overwrite_action_connectors,
-        });
-
-        // rulesWithMigratedActions: Is returened only in case connectors were exorted from different namesapce and the
-        // original rules actions' ids were replaced with new destinationIds
-        const parsedRules = actionConnectorErrors.length
-          ? []
-          : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
-
-        // gather all exception lists that the imported rules reference
-        const foundReferencedExceptionLists = await getReferencedExceptionLists({
-          rules: parsedRules,
-          savedObjectsClient,
-        });
-
-        const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
-
-        const importRuleResponse: ImportRuleResponse[] = await importRulesHelper({
-          ruleChunks: chunkParseObjects,
-          rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
-          mlAuthz,
-          overwriteRules: request.query.overwrite,
-          rulesClient,
-          savedObjectsClient,
-          exceptionsClient,
-          spaceId: ctx.securitySolution.getSpaceId(),
-          existingLists: foundReferencedExceptionLists,
-          allowMissingConnectorSecrets: !!actionConnectors.length,
-        });
-        const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
-        const successes = importRuleResponse.filter((resp) => {
-          if (isImportRegular(resp)) {
-            return resp.status_code === 200;
-          } else {
-            return false;
-          }
-        });
-        const importRules: ImportRulesResponse = {
-          success: errorsResp.length === 0,
-          success_count: successes.length,
-          rules_count: rules.length,
-          errors: errorsResp,
-          exceptions_errors: exceptionsErrors,
-          exceptions_success: exceptionsSuccess,
-          exceptions_success_count: exceptionsSuccessCount,
-          action_connectors_success: actionConnectorSuccess,
-          action_connectors_success_count: actionConnectorSuccessCount,
-          action_connectors_errors: actionConnectorErrors,
-          action_connectors_warnings: actionConnectorWarnings,
-        };
-
-        const [validated, errors] = validate(importRules, ImportRulesResponse);
-        if (errors != null) {
-          return siemResponse.error({ statusCode: 500, body: errors });
-        } else {
-          return response.ok({ body: validated ?? {} });
-        }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

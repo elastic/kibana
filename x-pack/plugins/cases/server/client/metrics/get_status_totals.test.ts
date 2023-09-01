@@ -31,6 +31,13 @@ describe('getStatusTotalsByType', () => {
       });
     });
 
+    it('throws with excess fields', async () => {
+      await expect(
+        // @ts-expect-error: excess attribute
+        getStatusTotalsByType({ foo: 'bar' }, clientArgs)
+      ).rejects.toThrow('invalid keys "foo"');
+    });
+
     it('returns the status correctly', async () => {
       const metrics = await getStatusTotalsByType({}, clientArgs);
       expect(metrics).toEqual({

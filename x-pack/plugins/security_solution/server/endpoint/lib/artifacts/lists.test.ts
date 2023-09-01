@@ -10,7 +10,12 @@ import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { EntriesArray, EntryList } from '@kbn/securitysolution-io-ts-list-types';
-import { buildArtifact, getEndpointExceptionList, getFilteredEndpointExceptionList } from './lists';
+import {
+  buildArtifact,
+  getAllItemsFromEndpointExceptionList,
+  getFilteredEndpointExceptionListRaw,
+  convertExceptionsToEndpointFormat,
+} from './lists';
 import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
 import {
@@ -29,10 +34,10 @@ describe('artifacts lists', () => {
     mockExceptionClient = listMock.getExceptionListClient();
   });
 
-  describe('getFilteredEndpointExceptionList', () => {
+  describe('getFilteredEndpointExceptionListRaw', () => {
     const TEST_FILTER = 'exception-list-agnostic.attributes.os_types:"linux"';
 
-    test('it should convert the exception lists response to the proper endpoint format', async () => {
+    test('it should get convert the exception lists response to the proper endpoint format', async () => {
       const expectedEndpointExceptions = {
         type: 'simple',
         entries: [
@@ -59,13 +64,13 @@ describe('artifacts lists', () => {
 
       const first = getFoundExceptionListItemSchemaMock();
       mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
-      const resp = await getFilteredEndpointExceptionList({
+      const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      expect(resp).toEqual({
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
     });
@@ -105,13 +110,13 @@ describe('artifacts lists', () => {
       first.data[0].entries = testEntries;
       mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-      const resp = await getFilteredEndpointExceptionList({
+      const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      expect(resp).toEqual({
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
     });
@@ -156,13 +161,13 @@ describe('artifacts lists', () => {
       first.data[0].entries = testEntries;
       mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-      const resp = await getFilteredEndpointExceptionList({
+      const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      expect(resp).toEqual({
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
     });
@@ -209,13 +214,13 @@ describe('artifacts lists', () => {
       first.data[0].entries = testEntries;
       mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-      const resp = await getFilteredEndpointExceptionList({
+      const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      expect(resp).toEqual({
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
     });
@@ -261,13 +266,13 @@ describe('artifacts lists', () => {
       first.data[0].entries = testEntries;
       mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-      const resp = await getFilteredEndpointExceptionList({
+      const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      expect(resp).toEqual({
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
     });
@@ -304,13 +309,13 @@ describe('artifacts lists', () => {
       first.data[1].entries = testEntries;
       mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-      const resp = await getFilteredEndpointExceptionList({
+      const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      expect(resp).toEqual({
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
     });
@@ -347,13 +352,13 @@ describe('artifacts lists', () => {
       first.data[0].entries = testEntries;
       mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-      const resp = await getFilteredEndpointExceptionList({
+      const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      expect(resp).toEqual({
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
     });
@@ -376,15 +381,15 @@ describe('artifacts lists', () => {
         .mockReturnValueOnce(first)
         .mockReturnValueOnce(second);
 
-      const resp = await getFilteredEndpointExceptionList({
+      const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
 
-      // Expect 2 exceptions, the first two calls returned the same exception list items
-      expect(resp.entries.length).toEqual(2);
+      // Expect 1 exceptions, the first two calls returned the same exception list items
+      expect(translated.entries.length).toEqual(1);
     });
 
     test('it should handle no exceptions', async () => {
@@ -392,13 +397,13 @@ describe('artifacts lists', () => {
       exceptionsResponse.data = [];
       exceptionsResponse.total = 0;
       mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionsResponse);
-      const resp = await getFilteredEndpointExceptionList({
+      const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      expect(resp.entries.length).toEqual(0);
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated.entries.length).toEqual(0);
     });
 
     test('it should return a stable hash regardless of order of entries', async () => {
@@ -552,13 +557,13 @@ describe('artifacts lists', () => {
         first.data[0].os_types = [os];
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        expect(resp).toEqual({
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -597,13 +602,13 @@ describe('artifacts lists', () => {
         first.data[0].os_types = [os];
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        expect(resp).toEqual({
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -636,13 +641,13 @@ describe('artifacts lists', () => {
         first.data[0].os_types = [os];
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        expect(resp).toEqual({
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -700,14 +705,14 @@ describe('artifacts lists', () => {
 
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
 
-        expect(resp).toEqual({
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -740,13 +745,13 @@ describe('artifacts lists', () => {
         first.data[0].os_types = [os];
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        expect(resp).toEqual({
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -804,14 +809,14 @@ describe('artifacts lists', () => {
 
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
 
-        expect(resp).toEqual({
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -854,13 +859,13 @@ describe('artifacts lists', () => {
         first.data[0].os_types = [os];
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        expect(resp).toEqual({
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -901,13 +906,13 @@ describe('artifacts lists', () => {
         first.data[0].os_types = [os];
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        expect(resp).toEqual({
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -942,13 +947,13 @@ describe('artifacts lists', () => {
         first.data[0].os_types = [os];
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        expect(resp).toEqual({
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -1008,14 +1013,14 @@ describe('artifacts lists', () => {
 
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
 
-        expect(resp).toEqual({
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -1049,13 +1054,13 @@ describe('artifacts lists', () => {
         first.data[0].os_types = [os];
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        expect(resp).toEqual({
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -1115,14 +1120,14 @@ describe('artifacts lists', () => {
 
         mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-        const resp = await getFilteredEndpointExceptionList({
+        const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
-          schemaVersion: 'v1',
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
 
-        expect(resp).toEqual({
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
       });
@@ -1157,25 +1162,26 @@ describe('artifacts lists', () => {
     ],
   };
 
-  describe('Builds proper kuery without policy', () => {
+  describe('Builds proper kuery', () => {
     test('for Endpoint List', async () => {
       mockExceptionClient.findExceptionListItem = jest
         .fn()
         .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
-      const resp = await getEndpointExceptionList({
+      const resp = await getAllItemsFromEndpointExceptionList({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         os: 'windows',
+        listId: ENDPOINT_LIST_ID,
       });
 
-      expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
         listId: ENDPOINT_LIST_ID,
         namespaceType: 'agnostic',
         filter: 'exception-list-agnostic.attributes.os_types:"windows"',
-        perPage: 100,
+        perPage: 1000,
         page: 1,
         sortField: 'created_at',
         sortOrder: 'desc',
@@ -1187,21 +1193,20 @@ describe('artifacts lists', () => {
         .fn()
         .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
-      const resp = await getEndpointExceptionList({
+      const resp = await getAllItemsFromEndpointExceptionList({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         os: 'macos',
         listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       });
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
 
-      expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
+      expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
         listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         namespaceType: 'agnostic',
-        filter:
-          'exception-list-agnostic.attributes.os_types:"macos" and (exception-list-agnostic.attributes.tags:"policy:all")',
-        perPage: 100,
+        filter: 'exception-list-agnostic.attributes.os_types:"macos"',
+        perPage: 1000,
         page: 1,
         sortField: 'created_at',
         sortOrder: 'desc',
@@ -1213,21 +1218,20 @@ describe('artifacts lists', () => {
         .fn()
         .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
-      const resp = await getEndpointExceptionList({
+      const resp = await getAllItemsFromEndpointExceptionList({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         os: 'macos',
         listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
       });
 
-      expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
         listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
         namespaceType: 'agnostic',
-        filter:
-          'exception-list-agnostic.attributes.os_types:"macos" and (exception-list-agnostic.attributes.tags:"policy:all")',
-        perPage: 100,
+        filter: 'exception-list-agnostic.attributes.os_types:"macos"',
+        perPage: 1000,
         page: 1,
         sortField: 'created_at',
         sortOrder: 'desc',
@@ -1239,21 +1243,20 @@ describe('artifacts lists', () => {
         .fn()
         .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
-      const resp = await getEndpointExceptionList({
+      const resp = await getAllItemsFromEndpointExceptionList({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         os: 'macos',
         listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
       });
 
-      expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
         listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
         namespaceType: 'agnostic',
-        filter:
-          'exception-list-agnostic.attributes.os_types:"macos" and (exception-list-agnostic.attributes.tags:"policy:all")',
-        perPage: 100,
+        filter: 'exception-list-agnostic.attributes.os_types:"macos"',
+        perPage: 1000,
         page: 1,
         sortField: 'created_at',
         sortOrder: 'desc',
@@ -1265,138 +1268,20 @@ describe('artifacts lists', () => {
         .fn()
         .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
-      const resp = await getEndpointExceptionList({
+      const resp = await getAllItemsFromEndpointExceptionList({
         elClient: mockExceptionClient,
-        schemaVersion: 'v1',
         os: 'macos',
         listId: ENDPOINT_BLOCKLISTS_LIST_ID,
       });
 
-      expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
         listId: ENDPOINT_BLOCKLISTS_LIST_ID,
         namespaceType: 'agnostic',
-        filter:
-          'exception-list-agnostic.attributes.os_types:"macos" and (exception-list-agnostic.attributes.tags:"policy:all")',
-        perPage: 100,
-        page: 1,
-        sortField: 'created_at',
-        sortOrder: 'desc',
-      });
-    });
-  });
-
-  describe('Build proper kuery with policy', () => {
-    test('for Trusted Apps', async () => {
-      mockExceptionClient.findExceptionListItem = jest
-        .fn()
-        .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
-
-      const resp = await getEndpointExceptionList({
-        elClient: mockExceptionClient,
-        schemaVersion: 'v1',
-        os: 'macos',
-        policyId: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
-        listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
-      });
-
-      expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
-
-      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
-        listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
-        namespaceType: 'agnostic',
-        filter:
-          'exception-list-agnostic.attributes.os_types:"macos" and ' +
-          '(exception-list-agnostic.attributes.tags:"policy:all" or ' +
-          'exception-list-agnostic.attributes.tags:"policy:c6d16e42-c32d-4dce-8a88-113cfe276ad1")',
-        perPage: 100,
-        page: 1,
-        sortField: 'created_at',
-        sortOrder: 'desc',
-      });
-    });
-
-    test('for Event Filters', async () => {
-      mockExceptionClient.findExceptionListItem = jest
-        .fn()
-        .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
-
-      const resp = await getEndpointExceptionList({
-        elClient: mockExceptionClient,
-        schemaVersion: 'v1',
-        os: 'macos',
-        policyId: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
-        listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
-      });
-
-      expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
-
-      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
-        listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
-        namespaceType: 'agnostic',
-        filter:
-          'exception-list-agnostic.attributes.os_types:"macos" and ' +
-          '(exception-list-agnostic.attributes.tags:"policy:all" or ' +
-          'exception-list-agnostic.attributes.tags:"policy:c6d16e42-c32d-4dce-8a88-113cfe276ad1")',
-        perPage: 100,
-        page: 1,
-        sortField: 'created_at',
-        sortOrder: 'desc',
-      });
-    });
-
-    test('for Host Isolation Exceptions', async () => {
-      mockExceptionClient.findExceptionListItem = jest
-        .fn()
-        .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
-
-      const resp = await getEndpointExceptionList({
-        elClient: mockExceptionClient,
-        schemaVersion: 'v1',
-        os: 'macos',
-        policyId: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
-        listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-      });
-
-      expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
-
-      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
-        listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-        namespaceType: 'agnostic',
-        filter:
-          'exception-list-agnostic.attributes.os_types:"macos" and ' +
-          '(exception-list-agnostic.attributes.tags:"policy:all" or ' +
-          'exception-list-agnostic.attributes.tags:"policy:c6d16e42-c32d-4dce-8a88-113cfe276ad1")',
-        perPage: 100,
-        page: 1,
-        sortField: 'created_at',
-        sortOrder: 'desc',
-      });
-    });
-    test('for Blocklists', async () => {
-      mockExceptionClient.findExceptionListItem = jest
-        .fn()
-        .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
-
-      const resp = await getEndpointExceptionList({
-        elClient: mockExceptionClient,
-        schemaVersion: 'v1',
-        os: 'macos',
-        policyId: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
-        listId: ENDPOINT_BLOCKLISTS_LIST_ID,
-      });
-
-      expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
-
-      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
-        listId: ENDPOINT_BLOCKLISTS_LIST_ID,
-        namespaceType: 'agnostic',
-        filter:
-          'exception-list-agnostic.attributes.os_types:"macos" and ' +
-          '(exception-list-agnostic.attributes.tags:"policy:all" or ' +
-          'exception-list-agnostic.attributes.tags:"policy:c6d16e42-c32d-4dce-8a88-113cfe276ad1")',
-        perPage: 100,
+        filter: 'exception-list-agnostic.attributes.os_types:"macos"',
+        perPage: 1000,
         page: 1,
         sortField: 'created_at',
         sortOrder: 'desc',

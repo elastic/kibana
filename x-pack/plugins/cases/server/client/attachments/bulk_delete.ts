@@ -6,9 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type { PromiseResult, PromiseRejectedResult } from 'p-settle';
 import pSettle from 'p-settle';
@@ -17,7 +14,8 @@ import type { Logger } from '@kbn/core/server';
 import type { File, FileJSON } from '@kbn/files-plugin/common';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
-import { BulkDeleteFileAttachmentsRequestRt, excess, throwErrors } from '../../../common/api';
+import { BulkDeleteFileAttachmentsRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
@@ -41,10 +39,7 @@ export const bulkDeleteFileAttachments = async (
   } = clientArgs;
 
   try {
-    const request = pipe(
-      excess(BulkDeleteFileAttachmentsRequestRt).decode({ ids: fileIds }),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const request = decodeWithExcessOrThrow(BulkDeleteFileAttachmentsRequestRt)({ ids: fileIds });
 
     await casesClient.cases.resolve({ id: caseId, includeComments: false });
 

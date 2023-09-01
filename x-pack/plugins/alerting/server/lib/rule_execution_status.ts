@@ -6,15 +6,18 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import {
   RuleExecutionStatus,
   RuleExecutionStatusValues,
   RuleExecutionStatusWarningReasons,
   RawRuleExecutionStatus,
+  RawRule,
+  Rule,
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { ActionsCompletion, RuleExecutionStatuses } from '../../common';
+import { RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { RuleRunMetrics } from './rule_run_metrics_store';
@@ -137,9 +140,18 @@ export function ruleExecutionStatusFromRaw(
   return executionStatus;
 }
 
-export const getRuleExecutionStatusPending = (lastExecutionDate: string) => ({
-  status: 'pending' as RuleExecutionStatuses,
+export const getRuleExecutionStatusPendingAttributes = (
+  lastExecutionDate: string
+): RawRule['executionStatus'] => ({
+  status: 'pending',
   lastExecutionDate,
   error: null,
   warning: null,
+});
+
+export const getRuleExecutionStatusPending = (
+  lastExecutionDate: string
+): Rule['executionStatus'] => ({
+  status: 'pending',
+  lastExecutionDate: new Date(lastExecutionDate),
 });

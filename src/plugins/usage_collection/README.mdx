@@ -392,14 +392,14 @@ document. Examples of interactions include tracking:
  - the number of API calls
  - the number of times users installed and uninstalled the sample datasets
 
-When using `incrementCounter` for collecting usage data, you need to ensure
+When using `incrementCounter` for collecting usage, you need to ensure
 that usage collection happens on a best-effort basis and doesn't
 negatively affect your plugin or users (see the example):
  - Swallow any exceptions thrown from the incrementCounter method and log
    a message in development.
  - Don't block your application on the incrementCounter method (e.g.
    don't use `await`)
- - Set the `refresh` option to false to prevent unecessary index refreshes
+ - Set the `refresh` option to false to prevent unnecessary index refreshes
    which slows down Elasticsearch performance
 
 

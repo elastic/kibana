@@ -11,16 +11,18 @@ import { BlockListProvider } from '../containers/block_list_provider';
 import { BlockListFlyout } from '../../block_list/containers/flyout';
 import { IndicatorsBarChartWrapper } from '../components/barchart/wrapper';
 import { IndicatorsTable } from '../components/table/table';
-import { useAggregatedIndicators, useIndicators, useSourcererDataView } from '../hooks';
-import { DefaultPageLayout } from '../../../components/layout/layout';
+import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
+import { useIndicators } from '../hooks/use_indicators';
+import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
+import { DefaultPageLayout } from '../../../components/layout';
 import { useFilters } from '../../query_bar/hooks/use_filters';
 import { FiltersGlobal } from '../../../containers/filters_global';
 import { FieldTypesProvider } from '../../../containers/field_types_provider';
-import { InspectorProvider } from '../../../containers/inspector/inspector';
-import { useColumnSettings } from '../components/table/hooks/use_column_settings';
+import { InspectorProvider } from '../../../containers/inspector';
+import { useColumnSettings } from '../hooks/use_column_settings';
 import { IndicatorsFilters } from '../containers/filters';
-import { UpdateStatus } from '../../../components/update_status/update_status';
-import { QueryBar } from '../../query_bar/query_bar';
+import { UpdateStatus } from '../../../components/update_status';
+import { QueryBar } from '../../query_bar/components/query_bar';
 
 const IndicatorsPageProviders: FC = ({ children }) => (
   <IndicatorsFilters>

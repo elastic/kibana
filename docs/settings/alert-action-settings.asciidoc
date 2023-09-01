@@ -4,10 +4,10 @@
 <titleabbrev>Alerting and action settings</titleabbrev>
 ++++
 
-:description: Learn about the settings that affect {kib} {alert-features}.
-:tags-products: [kibana, alerting]
-:tags-content-type: [reference]
-:tags-user-goals: [configure]
+:frontmatter-description: Learn about the settings that affect {kib} {alert-features}.
+:frontmatter-tags-products: [kibana, alerting] 
+:frontmatter-tags-content-type: [reference] 
+:frontmatter-tags-user-goals: [configure]
 
 Alerting and actions are enabled by default in {kib}, but require you to configure the following:
 
@@ -36,9 +36,9 @@ Be sure to back up the encryption key value somewhere safe, as your alerting rul
 === Action settings
 
 `xpack.actions.allowedHosts` {ess-icon}::
-A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
+A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
 +
-Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `[*]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
+Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
 
 `xpack.actions.customHostSettings` {ess-icon}::
 A list of custom host settings to override existing global settings.
@@ -138,15 +138,9 @@ WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not 
 A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions. Default: true.
 
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
-
-`xpack.actions.preconfiguredAlertHistoryEsIndex` {ess-icon}::
-Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Default: `false`.
-
-`xpack.actions.preconfigured`::
-Specifies preconfigured connector IDs and configs. Default: {}.
 
 `xpack.actions.proxyUrl` {ess-icon}::
 Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
@@ -166,10 +160,26 @@ curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
 --
 
 `xpack.actions.proxyBypassHosts` {ess-icon}::
-Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
+Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings. Example:
++
+[source,yaml]
+----
+# If applicable, include the subdomain in the hostname
+xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
+----
++
+By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
 
 `xpack.actions.proxyOnlyHosts` {ess-icon}::
-Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, no hosts will use the proxy, but if an action's hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
+Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings. Example:
++
+[source,yaml]
+----
+# If applicable, include the subdomain in the hostname
+xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
+----
++
+By default, no hosts will use the proxy, but if an action's hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
 
 `xpack.actions.proxyHeaders` {ess-icon}::
 Specifies HTTP headers for the proxy, if using a proxy for actions. Default: {}.
@@ -198,10 +208,8 @@ This setting can be overridden for specific URLs by using the setting
 Specifies the max number of bytes of the http response for requests to external resources. Default: 1000000 (1MB).
 
 `xpack.actions.responseTimeout` {ess-icon}::
-Specifies the time allowed for requests to external resources. Requests that take longer are aborted. The time is formatted as:
-+
-`<count>[ms,s,m,h,d,w,M,Y]` 
-+
+Specifies the time allowed for requests to external resources. Requests that take longer are canceled.
+The time is formatted as a number and a time unit (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, or `Y`).
 For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
 
 `xpack.actions.run.maxAttempts` {ess-icon}::
@@ -220,6 +228,34 @@ xpack.actions.run:
 --
 
 [float]
+[[preconfigured-connector-settings]]
+=== Preconfigured connector settings
+
+These settings vary depending on which type of <<pre-configured-connectors,preconfigured connector>> you're adding.
+For example:
+
+[source,yaml]
+----------------------------------------
+xpack.actions.preconfigured:
+  my-server-log:
+    name: preconfigured-server-log-connector-type
+    actionTypeId: .server-log
+----------------------------------------
+
+`xpack.actions.preconfiguredAlertHistoryEsIndex` {ess-icon}::
+Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Default: `false`.
+
+`xpack.actions.preconfigured`::
+Specifies configuration details that are specific to the type of preconfigured connector.
+
+`xpack.actions.preconfigured.<connector-id>.actionTypeId`::
+The type of preconfigured connector.
+For example: `.email`, `.index`, `.opsgenie`, `.server-log`, `.resilient`, `.slack`, and `.webhook`.
+
+`xpack.actions.preconfigured.<connector-id>.name`::
+The name of the preconfigured connector.
+
+[float]
 [[alert-settings]]
 === Alerting settings
 
@@ -235,10 +271,8 @@ processing was cancelled due to a timeout. Default: `true`. This setting can be
 overridden by individual rule types.
 
 `xpack.alerting.rules.minimumScheduleInterval.value` {ess-icon}::
-Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value. The time is formatted as:
-+
-`<count>[s,m,h,d]` 
-+
+Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value.
+The time is formatted as a number and a time unit (`s`, `m`, `h`, or `d`). 
 For example, `20m`, `24h`, `7d`. This duration cannot exceed `1d`. Default: `1m`.
 
 `xpack.alerting.rules.minimumScheduleInterval.enforce` {ess-icon}::
@@ -249,12 +283,12 @@ Specifies the maximum number of actions that a rule can generate each time detec
 
 `xpack.alerting.rules.run.alerts.max` {ess-icon}::
 Specifies the maximum number of alerts that a rule can generate each time detection checks run. Default: 1000.
++
+WARNING: The exact number of alerts your cluster can safely handle depends on your cluster configuration and workload, however setting a value higher than the default (`1000`) is not recommended or supported. Doing so could strain system resources and lead to performance issues, delays in alert processing, and potential disruptions during high alert activity periods.
 
 `xpack.alerting.rules.run.timeout` {ess-icon}::
-Specifies the default timeout for tasks associated with all types of rules. The time is formatted as:
-+
-`<count>[ms,s,m,h,d,w,M,Y]`
-+
+Specifies the default timeout for tasks associated with all types of rules.
+The time is formatted as a number and a time unit (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, or `Y`).
 For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
 
 `xpack.alerting.rules.run.ruleTypeOverrides` {ess-icon}::

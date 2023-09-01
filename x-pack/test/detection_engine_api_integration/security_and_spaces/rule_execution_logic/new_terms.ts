@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 
-import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { orderBy } from 'lodash';
-import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema/mocks';
+import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import {
   getNewTermsRuntimeMappings,
   AGG_FIELD_NAME,
@@ -19,7 +19,7 @@ import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/d
 import {
   createRule,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getOpenSignals,
   getPreviewAlerts,
   previewRule,
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/new_terms');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
@@ -166,6 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
         ],
         'kibana.alert.status': 'active',
         'kibana.alert.workflow_status': 'open',
+        'kibana.alert.workflow_tags': [],
         'kibana.alert.depth': 1,
         'kibana.alert.reason':
           'authentication event with source 8.42.77.171 by root on zeek-newyork-sha-aa8df15 created high alert Query with a rule id.',
@@ -493,6 +494,49 @@ export default ({ getService }: FtrProviderContext) => {
       expect(hostNames[4]).eql(['zeek-sensor-san-francisco']);
     });
 
+    // github.com/elastic/kibana/issues/149920
+    it('should generate 1 alert for new terms if query has wildcard in field path', async () => {
+      // historical window documents
+      const historicalDocuments = [
+        {
+          host: { name: 'host-0', ip: '127.0.0.1' },
+        },
+        {
+          host: { name: 'host-1', ip: '127.0.0.2' },
+        },
+      ];
+
+      // rule execution documents
+      const ruleExecutionDocuments = [
+        {
+          host: { name: 'host-0', ip: '127.0.0.2' },
+        },
+        {
+          host: { name: 'host-1', ip: '127.0.0.1' },
+        },
+      ];
+
+      const testId = await newTermsTestExecutionSetup({
+        historicalDocuments,
+        ruleExecutionDocuments,
+      });
+
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        index: ['new_terms'],
+        new_terms_fields: ['host.name', 'host.ip'],
+        from: ruleExecutionStart,
+        history_window_start: historicalWindowStart,
+        query: `id: "${testId}" and host.n*: host-0`,
+      };
+
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      expect(previewAlerts.length).eql(1);
+
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['host-0', '127.0.0.2']);
+    });
     describe('null values', () => {
       it('should not generate alerts with null values for single field', async () => {
         const rule: NewTermsRuleCreateProps = {
@@ -886,11 +930,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {

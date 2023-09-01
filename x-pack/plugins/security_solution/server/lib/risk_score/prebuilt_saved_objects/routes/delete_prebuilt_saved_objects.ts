@@ -16,7 +16,7 @@ import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { bulkDeleteSavedObjects } from '../helpers/bulk_delete_saved_objects';
-import { deletePrebuiltSavedObjectsSchema } from '../schema';
+import { deletePrebuiltSavedObjectsRequestBody } from '../../../../../common/api/risk_score';
 
 export const deletePrebuiltSavedObjectsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -25,7 +25,7 @@ export const deletePrebuiltSavedObjectsRoute = (
   router.post(
     {
       path: PREBUILT_SAVED_OBJECTS_BULK_DELETE,
-      validate: deletePrebuiltSavedObjectsSchema,
+      validate: deletePrebuiltSavedObjectsRequestBody,
       options: {
         tags: ['access:securitySolution'],
       },

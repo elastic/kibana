@@ -8,6 +8,7 @@
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
 import type { Alerts } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ERROR_FETCH_BROWSER_FIELDS } from './translations';
@@ -28,7 +29,7 @@ const INVALID_FEATURE_ID = 'siem';
 export const useFetchBrowserFieldCapabilities = ({
   featureIds,
   initialBrowserFields,
-}: FetchAlertsArgs): [boolean | undefined, BrowserFields] => {
+}: FetchAlertsArgs): [boolean | undefined, BrowserFields, unknown[]] => {
   const {
     http,
     notifications: { toasts },
@@ -38,17 +39,24 @@ export const useFetchBrowserFieldCapabilities = ({
   const [browserFields, setBrowserFields] = useState<BrowserFields>(
     () => initialBrowserFields ?? {}
   );
+  const [fields, setFields] = useState<FieldDescriptor[]>([]);
 
-  const getBrowserFieldInfo = useCallback(async () => {
-    if (!http) return Promise.resolve({});
+  const getBrowserFieldInfo = useCallback(async (): Promise<{
+    browserFields: BrowserFields;
+    fields: FieldDescriptor[];
+  }> => {
+    if (!http) return Promise.resolve({ browserFields: {}, fields: [] });
 
     try {
-      return await http.get<BrowserFields>(`${BASE_RAC_ALERTS_API_PATH}/browser_fields`, {
-        query: { featureIds },
-      });
+      return await http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(
+        `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
+        {
+          query: { featureIds },
+        }
+      );
     } catch (e) {
       toasts.addDanger(ERROR_FETCH_BROWSER_FIELDS);
-      return {};
+      return Promise.resolve({ browserFields: {}, fields: [] });
     }
   }, [featureIds, http, toasts]);
 
@@ -67,8 +75,8 @@ export const useFetchBrowserFieldCapabilities = ({
     setIsLoading(true);
 
     const callApi = async () => {
-      const browserFieldsInfo = await getBrowserFieldInfo();
-
+      const { browserFields: browserFieldsInfo, fields: newFields } = await getBrowserFieldInfo();
+      setFields(newFields);
       setBrowserFields(browserFieldsInfo);
       setIsLoading(false);
     };
@@ -76,5 +84,5 @@ export const useFetchBrowserFieldCapabilities = ({
     callApi();
   }, [getBrowserFieldInfo, isLoading, featureIds, initialBrowserFields]);
 
-  return [isLoading, browserFields];
+  return [isLoading, browserFields, fields];
 };

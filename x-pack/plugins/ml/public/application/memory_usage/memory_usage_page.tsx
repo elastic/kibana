@@ -12,8 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { NodesList } from './nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { MemoryPage, JobMemoryTreeMap } from './memory_tree_map';
-import { useIsServerless } from '../contexts/kibana/use_is_serverless';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 enum TAB {
   NODES,
@@ -21,9 +21,13 @@ enum TAB {
 }
 
 export const MemoryUsagePage: FC = () => {
-  const serverless = useIsServerless();
   const [selectedTab, setSelectedTab] = useState<TAB>(TAB.NODES);
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
+  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
+    'isADEnabled',
+    'isDFAEnabled',
+    'isNLPEnabled',
+  ]);
 
   const refresh = useCallback(() => {
     mlTimefilterRefresh$.next({
@@ -46,9 +50,7 @@ export const MemoryUsagePage: FC = () => {
 
       <SavedObjectsWarning onCloseFlyout={refresh} />
 
-      {serverless ? (
-        <JobMemoryTreeMap />
-      ) : (
+      {isADEnabled && isDFAEnabled && isNLPEnabled ? (
         <>
           <EuiTabs>
             <EuiTab
@@ -66,6 +68,8 @@ export const MemoryUsagePage: FC = () => {
           </EuiTabs>
           {selectedTab === TAB.NODES ? <NodesList /> : <MemoryPage />}
         </>
+      ) : (
+        <JobMemoryTreeMap />
       )}
     </>
   );

@@ -7,37 +7,35 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { isArray, camelCase, isObject, omit, get } from 'lodash';
+import type {
+  AttachmentRequest,
+  CaseResolveResponse,
+  CasesFindResponse,
+} from '../../common/types/api';
+import type { Attachment, Case, Cases, UserActions } from '../../common/types/domain';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../common/utils/attachments';
-import type {
-  CasesFindResponse,
-  Case,
-  UserActions,
-  CommentRequest,
-  Comment,
-  CaseResolveResponse,
-  Cases,
-} from '../../common/api';
 import { isCommentUserAction } from '../../common/utils/user_actions';
 import type {
   CasesFindResponseUI,
   CasesUI,
   CaseUI,
-  CommentUI,
+  AttachmentUI,
   ResolvedCase,
 } from '../containers/types';
 
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   arrayOfSnakes.reduce((acc: unknown[], value) => {
     if (isArray(value)) {
-      return [...acc, convertArrayToCamelCase(value)];
+      acc.push(convertArrayToCamelCase(value));
     } else if (isObject(value)) {
-      return [...acc, convertToCamelCase(value)];
+      acc.push(convertToCamelCase(value));
     } else {
-      return [...acc, value];
+      acc.push(value);
     }
+    return acc;
   }, []);
 
 export const convertToCamelCase = <T, U extends {}>(obj: T): U =>
@@ -70,11 +68,11 @@ export const convertCaseResolveToCamelCase = (res: CaseResolveResponse): Resolve
   };
 };
 
-export const convertAttachmentsToCamelCase = (attachments: Comment[]): CommentUI[] => {
+export const convertAttachmentsToCamelCase = (attachments: Attachment[]): AttachmentUI[] => {
   return attachments.map((attachment) => convertAttachmentToCamelCase(attachment));
 };
 
-export const convertAttachmentToCamelCase = (attachment: CommentRequest): CommentUI => {
+export const convertAttachmentToCamelCase = (attachment: AttachmentRequest): AttachmentUI => {
   if (isCommentRequestTypeExternalReference(attachment)) {
     return convertAttachmentToCamelExceptProperty(attachment, 'externalReferenceMetadata');
   }
@@ -83,7 +81,7 @@ export const convertAttachmentToCamelCase = (attachment: CommentRequest): Commen
     return convertAttachmentToCamelExceptProperty(attachment, 'persistableStateAttachmentState');
   }
 
-  return convertToCamelCase<CommentRequest, CommentUI>(attachment);
+  return convertToCamelCase<AttachmentRequest, AttachmentUI>(attachment);
 };
 
 export const convertUserActionsToCamelCase = (userActions: UserActions) => {
@@ -105,9 +103,9 @@ export const convertUserActionsToCamelCase = (userActions: UserActions) => {
 };
 
 const convertAttachmentToCamelExceptProperty = (
-  attachment: CommentRequest,
+  attachment: AttachmentRequest,
   key: string
-): CommentUI => {
+): AttachmentUI => {
   const intactValue = get(attachment, key);
   const attachmentWithoutIntactValue = omit(attachment, key);
   const camelCaseAttachmentWithoutIntactValue = convertToCamelCase(attachmentWithoutIntactValue);
@@ -115,7 +113,7 @@ const convertAttachmentToCamelExceptProperty = (
   return {
     ...camelCaseAttachmentWithoutIntactValue,
     [key]: intactValue,
-  } as CommentUI;
+  } as AttachmentUI;
 };
 
 export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesFindResponseUI => ({

@@ -80,7 +80,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the title correctly', async () => {
-        const title = await testSubjects.find('header-page-title');
+        const title = await testSubjects.find('editable-title-header-value');
         expect(await title.getVisibleText()).equal('Upgrade test in Kibana');
       });
 

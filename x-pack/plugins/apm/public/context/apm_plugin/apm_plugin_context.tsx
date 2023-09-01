@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createContext } from 'react';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import { MapsStartApi } from '@kbn/maps-plugin/public';
-import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
-import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ApmPluginSetupDeps } from '../../plugin';
-import { ConfigSchema } from '../..';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
+import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ApmPluginSetupDeps } from '../../plugin';
+import type { ConfigSchema } from '../..';
 
 export interface ApmPluginContextValue {
   appMountParameters: AppMountParameters;
@@ -26,10 +28,12 @@ export interface ApmPluginContextValue {
   plugins: ApmPluginSetupDeps & { maps?: MapsStartApi };
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   observability: ObservabilityPublicStart;
+  infra: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

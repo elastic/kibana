@@ -231,7 +231,6 @@ describe('AddFile', () => {
     expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
       caseId: basicCaseId,
       fileIds: [mockedExternalReferenceId],
-      signal: expect.any(AbortSignal),
     });
 
     createAttachmentsMock.mockRestore();

@@ -11,7 +11,7 @@ import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constant
 import {
   getCreateMachineLearningRulesSchemaMock,
   getCreateThreatMatchRulesSchemaMock,
-} from '../../../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
 describe('createRules', () => {
   it('calls the rulesClient with legacy ML params', async () => {

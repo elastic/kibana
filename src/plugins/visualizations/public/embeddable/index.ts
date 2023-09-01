@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 export { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
 export { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 export { VIS_EVENT_TO_TRIGGER } from './events';

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { SetStateAction, Dispatch } from 'react';
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 
@@ -35,6 +36,7 @@ import { useImportExceptionList } from '../../hooks/use_import_exception_list';
 
 import * as i18n from '../../translations';
 
+// eslint-disable-next-line react/display-name
 export const ImportExceptionListFlyout = React.memo(
   ({
     handleRefresh,
@@ -172,6 +174,7 @@ export const ImportExceptionListFlyout = React.memo(
                 id={'basicCheckboxId'}
                 label={i18n.IMPORT_EXCEPTION_LIST_OVERWRITE}
                 checked={overwrite}
+                data-test-subj="importExceptionListOverwriteExistingCheckbox"
                 onChange={(e) => {
                   setOverwrite(!overwrite);
                   setAsNewList(false);
@@ -180,6 +183,7 @@ export const ImportExceptionListFlyout = React.memo(
               <EuiCheckbox
                 id={'createNewListCheckbox'}
                 label={i18n.IMPORT_EXCEPTION_LIST_AS_NEW_LIST}
+                data-test-subj="importExceptionListCreateNewCheckbox"
                 checked={asNewList}
                 onChange={(e) => {
                   setAsNewList(!asNewList);
@@ -193,6 +197,7 @@ export const ImportExceptionListFlyout = React.memo(
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="exceptionListsImportFormCloseBTN"
                 iconType="cross"
                 onClick={() => setDisplayImportListFlyout(false)}
                 flush="left"

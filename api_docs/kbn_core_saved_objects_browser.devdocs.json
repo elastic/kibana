@@ -34,6 +34,10 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "@kbn/core",
+            "path": "src/core/server/index.ts"
+          },
+          {
             "plugin": "@kbn/core-lifecycle-browser",
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
           },
@@ -58,28 +62,12 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/services.ts"
           },
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/services.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           },
           {
             "plugin": "exploratoryView",
@@ -90,22 +78,6 @@
             "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
           },
           {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/types.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/types.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/platform.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/platform.ts"
-          },
-          {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
           },
@@ -114,32 +86,12 @@
             "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
           },
           {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
-          },
-          {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/server/index.ts"
           }
         ],
         "children": [

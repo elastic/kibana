@@ -10,11 +10,11 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevel,
   RuleExecutionEventType,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/api/detection_engine/rule_monitoring';
 
 import { api } from './api_client';
 
@@ -25,7 +25,25 @@ describe('Rule Monitoring API Client', () => {
   const mockKibanaServices = KibanaServices.get as jest.Mock;
   mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
-  const signal = new AbortController().signal;
+  describe('setupDetectionEngineHealthApi', () => {
+    const responseMock = {};
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(responseMock);
+    });
+
+    it('calls API with correct parameters', async () => {
+      await api.setupDetectionEngineHealthApi();
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/internal/detection_engine/health/_setup',
+        expect.objectContaining({
+          method: 'POST',
+        })
+      );
+    });
+  });
 
   describe('fetchRuleExecutionEvents', () => {
     const responseMock: GetRuleExecutionEventsResponse = {
@@ -43,15 +61,14 @@ describe('Rule Monitoring API Client', () => {
     });
 
     it('calls API correctly with only rule id specified', async () => {
-      await api.fetchRuleExecutionEvents({ ruleId: '42', signal });
+      await api.fetchRuleExecutionEvents({ ruleId: '42' });
 
       expect(fetchMock).toHaveBeenCalledWith(
         '/internal/detection_engine/rules/42/execution/events',
-        {
+        expect.objectContaining({
           method: 'GET',
           query: {},
-          signal,
-        }
+        })
       );
     });
 
@@ -63,12 +80,11 @@ describe('Rule Monitoring API Client', () => {
         sortOrder: 'asc',
         page: 42,
         perPage: 146,
-        signal,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(
         '/internal/detection_engine/rules/42/execution/events',
-        {
+        expect.objectContaining({
           method: 'GET',
           query: {
             event_types: 'message',
@@ -77,8 +93,7 @@ describe('Rule Monitoring API Client', () => {
             page: 42,
             per_page: 146,
           },
-          signal,
-        }
+        })
       );
     });
   });
@@ -101,12 +116,11 @@ describe('Rule Monitoring API Client', () => {
         end: '2001-01-02T17:00:00.000Z',
         queryText: '',
         statusFilters: [],
-        signal,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(
         '/internal/detection_engine/rules/42/execution/results',
-        {
+        expect.objectContaining({
           method: 'GET',
           query: {
             end: '2001-01-02T17:00:00.000Z',
@@ -118,8 +132,7 @@ describe('Rule Monitoring API Client', () => {
             start: '2001-01-01T17:00:00.000Z',
             status_filters: '',
           },
-          signal,
-        }
+        })
       );
     });
 
@@ -130,7 +143,6 @@ describe('Rule Monitoring API Client', () => {
         end: 'now',
         queryText: '',
         statusFilters: [],
-        signal,
       });
       expect(response).toEqual(responseMock);
     });

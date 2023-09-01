@@ -22,13 +22,16 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 interface ErrorToastProps {
   title: string;
   error: Error;
   toastMessage: string;
   openModal: OverlayStart['openModal'];
-  i18nContext: () => I18nStart['Context'];
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
 }
 
 interface RequestError extends Error {
@@ -52,9 +55,9 @@ export function showErrorDialog({
   title,
   error,
   openModal,
-  i18nContext,
-}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'i18nContext'>) {
-  const I18nContext = i18nContext();
+  i18n,
+  theme,
+}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'i18n' | 'theme'>) {
   let text = '';
 
   if (isRequestError(error)) {
@@ -68,32 +71,30 @@ export function showErrorDialog({
 
   const modal = openModal(
     mount(
-      <React.Fragment>
-        <I18nContext>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody data-test-subj="errorModalBody">
-            <EuiCallOut size="s" color="danger" iconType="error" title={error.message} />
-            {text && (
-              <React.Fragment>
-                <EuiSpacer size="s" />
-                <EuiCodeBlock isCopyable={true} paddingSize="s">
-                  {text}
-                </EuiCodeBlock>
-              </React.Fragment>
-            )}
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButton onClick={() => modal.close()} fill>
-              <FormattedMessage
-                id="core.notifications.errorToast.closeModal"
-                defaultMessage="Close"
-              />
-            </EuiButton>
-          </EuiModalFooter>
-        </I18nContext>
-      </React.Fragment>
+      <KibanaRenderContextProvider i18n={i18n} theme={theme}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody data-test-subj="errorModalBody">
+          <EuiCallOut size="s" color="danger" iconType="error" title={error.message} />
+          {text && (
+            <React.Fragment>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock isCopyable={true} paddingSize="s">
+                {text}
+              </EuiCodeBlock>
+            </React.Fragment>
+          )}
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButton onClick={() => modal.close()} fill>
+            <FormattedMessage
+              id="core.notifications.errorToast.closeModal"
+              defaultMessage="Close"
+            />
+          </EuiButton>
+        </EuiModalFooter>
+      </KibanaRenderContextProvider>
     )
   );
 }
@@ -103,7 +104,8 @@ export function ErrorToast({
   error,
   toastMessage,
   openModal,
-  i18nContext,
+  i18n,
+  theme,
 }: ErrorToastProps) {
   return (
     <React.Fragment>
@@ -113,7 +115,7 @@ export function ErrorToast({
           size="s"
           color="danger"
           data-test-subj="errorToastBtn"
-          onClick={() => showErrorDialog({ title, error, openModal, i18nContext })}
+          onClick={() => showErrorDialog({ title, error, openModal, i18n, theme })}
         >
           <FormattedMessage
             id="core.toasts.errorToast.seeFullError"

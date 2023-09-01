@@ -6,7 +6,7 @@
  */
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { MlJobFieldType } from '../../../../../common/types/field_types';
+import type { MlJobFieldType } from '@kbn/ml-anomaly-utils';
 
 export interface FieldRequestConfig {
   fieldName?: string;

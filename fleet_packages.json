@@ -24,34 +24,40 @@
 [
   {
     "name": "apm",
-    "version": "8.9.0-preview-1683859066",
+    "version": "8.11.0-preview-1693211748",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
   {
     "name": "elastic_agent",
-    "version": "1.8.0"
+    "version": "1.12.0"
   },
   {
     "name": "endpoint",
-    "version": "8.8.0"
+    "version": "8.10.2"
   },
   {
     "name": "fleet_server",
-    "version": "1.3.0"
+    "version": "1.3.1"
   },
   {
     "name": "profiler_symbolizer",
-    "version": "8.8.0-preview",
+    "version": "8.9.0-preview",
+    "forceAlignStackVersion": true,
+    "allowSyncToPrerelease": true
+  },
+  {
+    "name": "profiler_collector",
+    "version": "8.9.1-preview",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
   {
     "name": "synthetics",
-    "version": "1.0.1"
+    "version": "1.0.4"
   },
   {
     "name": "security_detection_engine",
-    "version": "8.8.1"
+    "version": "8.10.1"
   }
 ]

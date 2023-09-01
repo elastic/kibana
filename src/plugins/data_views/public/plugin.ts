@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { getIndexPatternLoad } from './expressions';
+import type { ClientConfigType } from '../common/types';
 import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
@@ -16,7 +18,7 @@ import {
 } from './types';
 
 import { DataViewsApiClient } from '.';
-import { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
+import { ContentMagementWrapper } from './content_management_wrapper';
 
 import { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 
@@ -24,6 +26,9 @@ import { DataViewsServicePublic } from './data_views_service_public';
 import { getIndices, HasData } from './services';
 
 import { debounceByKey } from './debounce_by_key';
+
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common/constants';
+import { LATEST_VERSION } from '../common/content_management/v1/constants';
 
 export class DataViewsPublicPlugin
   implements
@@ -36,20 +41,32 @@ export class DataViewsPublicPlugin
 {
   private readonly hasData = new HasData();
 
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
   public setup(
     core: CoreSetup<DataViewsPublicStartDependencies, DataViewsPublicPluginStart>,
-    { expressions }: DataViewsPublicSetupDependencies
+    { expressions, contentManagement }: DataViewsPublicSetupDependencies
   ): DataViewsPublicPluginSetup {
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
+
+    contentManagement.registry.register({
+      id: DATA_VIEW_SAVED_OBJECT_TYPE,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: i18n.translate('dataViews.contentManagementType', {
+        defaultMessage: 'Data view',
+      }),
+    });
 
     return {};
   }
 
   public start(
     core: CoreStart,
-    { fieldFormats }: DataViewsPublicStartDependencies
+    { fieldFormats, contentManagement }: DataViewsPublicStartDependencies
   ): DataViewsPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, application } = core;
+    const { uiSettings, http, notifications, application } = core;
 
     const onNotifDebounced = debounceByKey(
       notifications.toasts.add.bind(notifications.toasts),
@@ -60,10 +77,12 @@ export class DataViewsPublicPlugin
       10000
     );
 
+    const config = this.initializerContext.config.get<ClientConfigType>();
+
     return new DataViewsServicePublic({
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
-      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
       apiClient: new DataViewsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields, key) => {
@@ -77,6 +96,7 @@ export class DataViewsPublicPlugin
       getCanSaveAdvancedSettings: () =>
         Promise.resolve(application.capabilities.advancedSettings.save === true),
       getIndices: (props) => getIndices({ ...props, http: core.http }),
+      scriptedFieldsEnabled: config.scriptedFieldsEnabled === false ? false : true, // accounting for null value
     });
   }
 

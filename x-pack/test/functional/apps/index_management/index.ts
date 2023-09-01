@@ -11,5 +11,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Index Management app', function () {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./home_page'));
+    loadTestFile(require.resolve('./index_template_wizard'));
   });
 };

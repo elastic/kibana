@@ -18,7 +18,9 @@ import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
+
 export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
+export { getParsedFilterQuery } from './utils/get_parsed_filtered_query';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
 export * from './types';
@@ -34,19 +36,38 @@ const configSchema = schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
       logs: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
+        // Enable it by default: https://github.com/elastic/kibana/issues/159945
+        enabled: schema.boolean({ defaultValue: true }),
       }),
       uptime: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
+      observability: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+    }),
+    thresholdRule: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
+  thresholdRule: schema.object({
+    groupByPageSize: schema.number({ defaultValue: 10_000 }),
+  }),
   enabled: schema.boolean({ defaultValue: true }),
+  compositeSlo: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     unsafe: true,
+    aiAssistant: {
+      enabled: true,
+      feedback: {
+        enabled: true,
+      },
+    },
   },
   schema: configSchema,
 };

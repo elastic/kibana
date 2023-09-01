@@ -12,8 +12,8 @@ import { range } from 'lodash';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
-import { createApmRule } from './alerting_api_helper';
-import { waitForRuleStatus } from './wait_for_rule_status';
+import { createApmRule, deleteRuleById } from './helpers/alerting_api_helper';
+import { waitForRuleStatus } from './helpers/wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -23,8 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
-
-  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/155930
+  // FLAKY https://github.com/elastic/kibana/issues/160298
   registry.when.skip(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
@@ -38,7 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const NORMAL_DURATION = 100;
       const NORMAL_RATE = 1;
 
-      let ruleId: string | undefined;
+      let ruleId: string;
 
       before(async () => {
         const serviceA = apm
@@ -70,7 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await synthtraceEsClient.clean();
-        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
+        await deleteRuleById({ supertest, ruleId });
       });
 
       describe('with ml jobs', () => {
@@ -88,8 +87,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             name: 'Latency anomaly | service-a',
             params: {
               environment: 'production',
-              windowSize: 99,
-              windowUnit: 'y',
+              windowSize: 5,
+              windowUnit: 'h',
               anomalySeverityType: ML_ANOMALY_SEVERITY.WARNING,
             },
             ruleTypeId: ApmRuleType.Anomaly,
@@ -99,12 +98,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           if (!ruleId) {
             expect(ruleId).to.not.eql(undefined);
           } else {
-            const executionStatus = await waitForRuleStatus({
-              id: ruleId,
+            const ruleStatus = await waitForRuleStatus({
+              ruleId,
               expectedStatus: 'active',
               supertest,
             });
-            expect(executionStatus.status).to.be('active');
+            expect(ruleStatus).to.be('active');
           }
         });
       });

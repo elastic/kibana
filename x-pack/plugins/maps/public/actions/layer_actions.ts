@@ -76,6 +76,7 @@ import { IField } from '../classes/fields/field';
 import type { IESSource } from '../classes/sources/es_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
+import { isSpatialJoin } from '../classes/joins/is_spatial_join';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -453,15 +454,16 @@ function updateSourcePropWithoutSync(
         });
         await dispatch(updateStyleProperties(layerId));
       } else if (value === SCALING_TYPES.MVT) {
-        if (joins.length > 1) {
-          // Maplibre feature-state join uses promoteId and there is a limit to one promoteId
-          // Therefore, Vector tile scaling supports only one join
-          dispatch({
-            type: SET_JOINS,
-            layerId,
-            joins: [joins[0]],
-          });
-        }
+        const filteredJoins = joins.filter((joinDescriptor) => {
+          return !isSpatialJoin(joinDescriptor);
+        });
+        // Maplibre feature-state join uses promoteId and there is a limit to one promoteId
+        // Therefore, Vector tile scaling supports only one join
+        dispatch({
+          type: SET_JOINS,
+          layerId,
+          joins: filteredJoins.length ? [filteredJoins[0]] : [],
+        });
         // update style props regardless of updating joins
         // Allow style to clean-up data driven style properties with join fields that do not support feature-state.
         await dispatch(updateStyleProperties(layerId));
@@ -764,7 +766,7 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor: StyleDescripto
   };
 }
 
-export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
+export function setJoinsForLayer(layer: ILayer, joins: Array<Partial<JoinDescriptor>>) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     const previousFields = await (layer as IVectorLayer).getFields();
     dispatch({

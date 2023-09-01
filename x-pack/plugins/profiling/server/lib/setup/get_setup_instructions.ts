@@ -7,34 +7,62 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { getApmPolicy } from './steps/get_apm_policy';
+import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
+import { getCollectorPolicy, getSymbolizerPolicy } from './fleet_policies';
 
 export interface SetupDataCollectionInstructions {
-  variables: {
-    apmServerUrl: string;
-    secretToken: string;
+  collector: {
+    secretToken?: string;
+    host?: string;
   };
+  symbolizer: {
+    host?: string;
+  };
+  profilerAgent: {
+    version: string;
+  };
+
+  stackVersion: string;
 }
 
 export async function getSetupInstructions({
   packagePolicyClient,
   soClient,
+  apmServerHost,
+  stackVersion,
 }: {
   packagePolicyClient: PackagePolicyClient;
   soClient: SavedObjectsClientContract;
+  apmServerHost?: string;
+  stackVersion: string;
 }): Promise<SetupDataCollectionInstructions> {
-  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
+  const profilerAgent = await fetchFindLatestPackageOrThrow('profiler_agent', { prerelease: true });
+  const collectorPolicy = await getCollectorPolicy({ packagePolicyClient, soClient });
+  const symbolizerPolicy = await getSymbolizerPolicy({ packagePolicyClient, soClient });
 
-  if (!apmPolicy) {
-    throw new Error('Could not find APM policy');
+  if (!collectorPolicy) {
+    throw new Error('Could not find Collector policy');
   }
 
-  const apmServerVars = apmPolicy.inputs[0].vars;
+  if (!symbolizerPolicy) {
+    throw new Error('Could not find Symbolizer policy');
+  }
+
+  const collectorVars = collectorPolicy.inputs[0].vars;
+  const symbolizerHost = apmServerHost?.replace(/\.apm\./, '.symbols.');
+  const collectorHost = apmServerHost?.replace(/\.apm\./, '.profiling.')?.replace('https://', '');
 
   return {
-    variables: {
-      apmServerUrl: apmServerVars!.url.value!,
-      secretToken: apmServerVars!.secret_token.value!,
+    collector: {
+      secretToken: collectorVars?.secret_token?.value,
+      host: collectorHost,
     },
+    symbolizer: {
+      host: symbolizerHost,
+    },
+    profilerAgent: {
+      version: profilerAgent.version,
+    },
+    stackVersion,
   };
 }

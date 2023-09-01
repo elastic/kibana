@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  // Failing: See https://github.com/elastic/kibana/issues/156671
-  describe.skip('edit embeddable redirects', () => {
+  describe('edit embeddable redirects', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -44,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('redirects via save as button after edit, renaming itself', async () => {
       const newTitle = 'wowee, looks like I have a new title';
-      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
@@ -61,8 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('redirects via save as button after edit, adding a new panel', async () => {
       const newTitle = 'wowee, my title just got cooler';
-      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {

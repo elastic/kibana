@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { Redirect } from 'react-router-dom';
-
 import { useTimefilter } from '@kbn/ml-date-picker';
-
+import React, { FC, Suspense } from 'react';
+import { Redirect } from 'react-router-dom';
 import { ML_PAGES } from '../../../locator';
 import type { NavigateToPath } from '../../contexts/kibana';
-import { checkFullLicense } from '../../license';
-import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
-
-import { createPath, MlRoute, PageLoader, PageProps } from '../router';
-import { useResolver } from '../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
+import { createPath, MlRoute, PageLoader, PageProps } from '../router';
+import { useRouteResolver } from '../use_resolver';
 
 const OverviewPage = React.lazy(() => import('../../overview/overview_page'));
 
@@ -47,23 +41,12 @@ export const overviewRouteFactory = (
   'data-test-subj': 'mlPageOverview',
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { redirectToMlAccessDeniedPage } = deps;
+const PageWrapper: FC<PageProps> = () => {
+  const { context } = useRouteResolver('full', ['canGetMlInfo'], {
+    getMlNodeCount,
+    loadMlServerInfo,
+  });
 
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    {
-      checkFullLicense,
-      checkGetJobsCapabilities: () =>
-        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-      getMlNodeCount,
-      loadMlServerInfo,
-    }
-  );
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   return (

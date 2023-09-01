@@ -7,6 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
+import { CaseSeverity } from '../../../common/types/domain';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
@@ -14,13 +16,17 @@ import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
 import type { CaseUI } from '../../containers/types';
-import type { CasePostRequest } from '../../../common/api';
-import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
+import type { CasePostRequest } from '../../../common/types/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { getConnectorById } from '../utils';
+import {
+  getConnectorById,
+  getConnectorsFormDeserializer,
+  getConnectorsFormSerializer,
+} from '../utils';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
@@ -63,6 +69,25 @@ export const FormContext: React.FC<Props> = ({
   const { mutateAsync: createAttachments } = useCreateAttachments();
   const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
+  const availableOwners = useAvailableCasesOwners();
+
+  const trimUserFormData = (userFormData: CaseUI) => {
+    let formData = {
+      ...userFormData,
+      title: userFormData.title.trim(),
+      description: userFormData.description.trim(),
+    };
+
+    if (userFormData.category) {
+      formData = { ...formData, category: userFormData.category.trim() };
+    }
+
+    if (userFormData.tags) {
+      formData = { ...formData, tags: userFormData.tags.map((tag: string) => tag.trim()) };
+    }
+
+    return formData;
+  };
 
   const submitCase = useCallback(
     async (
@@ -77,6 +102,7 @@ export const FormContext: React.FC<Props> = ({
       if (isValid) {
         const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
+        const defaultOwner = owner[0] ?? availableOwners[0];
 
         startTransaction({ appId, attachments });
 
@@ -84,12 +110,14 @@ export const FormContext: React.FC<Props> = ({
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
+        const trimmedData = trimUserFormData(userFormData);
+
         const theCase = await postCase({
           request: {
-            ...userFormData,
+            ...trimmedData,
             connector: connectorToUpdate,
             settings: { syncAlerts },
-            owner: selectedOwner ?? owner[0],
+            owner: selectedOwner ?? defaultOwner,
           },
         });
 
@@ -126,6 +154,7 @@ export const FormContext: React.FC<Props> = ({
       attachments,
       postCase,
       owner,
+      availableOwners,
       afterCaseCreated,
       onSuccess,
       createAttachments,
@@ -138,6 +167,8 @@ export const FormContext: React.FC<Props> = ({
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitCase,
+    serializer: getConnectorsFormSerializer,
+    deserializer: getConnectorsFormDeserializer,
   });
 
   const childrenWithExtraProp = useMemo(

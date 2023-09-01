@@ -7,6 +7,10 @@
 The following pages have moved or been deleted.
 
 --
+[role="exclude",id="explain-log-rate-spikes"]
+== Explain log rate spikes
+Refer to <<log-rate-analysis>>.
+
 [role="exclude",id="snapshot-repositories"]
 == Snapshot and Restore
 Refer to {ref}/snapshot-restore.html[Snapshot and Restore].

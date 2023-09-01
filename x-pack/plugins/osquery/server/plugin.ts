@@ -19,7 +19,7 @@ import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/co
 
 import type { Subscription } from 'rxjs';
 import { upgradeIntegration } from './utils/upgrade_integration';
-import type { PackSavedObjectAttributes } from './common/types';
+import type { PackSavedObject } from './common/types';
 import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
 import { packSavedObjectType } from '../common/types';
 import { createConfig } from './create_config';
@@ -27,7 +27,6 @@ import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 import { initSavedObjects } from './saved_objects';
-import { initUsageCollectors } from './usage';
 import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
 import type { ConfigType } from '../common/config';
@@ -78,11 +77,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     };
 
     initSavedObjects(core.savedObjects);
-    initUsageCollectors({
-      core,
-      osqueryContext,
-      usageCollection: plugins.usageCollection,
-    });
 
     this.createActionService = createActionService(osqueryContext);
 
@@ -152,15 +146,23 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             if (newPackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
               await this.initialize(core, dataViewsService);
 
-              const allPacks = await client.find<PackSavedObjectAttributes>({
-                type: packSavedObjectType,
-              });
+              const allPacks = await client
+                .find<PackSavedObject>({
+                  type: packSavedObjectType,
+                })
+                .then((data) => ({
+                  ...data,
+                  saved_objects: data.saved_objects.map((pack) => ({
+                    ...pack.attributes,
+                    saved_object_id: pack.id,
+                  })),
+                }));
 
               if (allPacks.saved_objects) {
                 return updateGlobalPacksCreateCallback(
                   newPackagePolicy,
                   client,
-                  allPacks,
+                  allPacks.saved_objects,
                   this.osqueryAppContextService
                 );
               }

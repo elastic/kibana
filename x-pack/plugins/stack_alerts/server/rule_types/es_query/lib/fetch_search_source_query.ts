@@ -186,12 +186,15 @@ async function generateLink(
   const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id!);
 
   const redirectUrlParams: DiscoverAppLocatorParams = {
-    dataViewSpec: newDataView.toSpec(false),
+    dataViewSpec: getSmallerDataViewSpec(newDataView),
     filters: updatedFilters,
     query: searchSource.getField('query'),
     timeRange: { from: dateStart, to: dateEnd },
     isAlertResults: true,
   };
+
+  // use `lzCompress` flag for making the link readable during debugging/testing
+  // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
   const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
   const [start, end] = redirectUrl.split('/app');
 
@@ -212,4 +215,10 @@ function updateFilterReferences(filters: Filter[], fromDataView: string, toDataV
       return filter;
     }
   });
+}
+
+export function getSmallerDataViewSpec(
+  dataView: DataView
+): DiscoverAppLocatorParams['dataViewSpec'] {
+  return dataView.toMinimalSpec();
 }

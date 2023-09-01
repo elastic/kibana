@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CasesStatus } from '@kbn/cases-plugin/common/ui';
+import type { CasesStatus } from '@kbn/cases-plugin/common';
 import { useState, useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { APP_ID } from '../../../../../common/constants';

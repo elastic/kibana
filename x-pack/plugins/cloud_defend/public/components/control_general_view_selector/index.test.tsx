@@ -10,7 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewSelector } from '.';
-import { Selector } from '../../types';
+import { Selector } from '../../../common';
 import { getSelectorConditions } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
 
@@ -300,22 +300,27 @@ describe('<ControlGeneralViewSelector />', () => {
     }
 
     updatedSelector = onChange.mock.calls[1][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
-
     expect(findByText(errorStr)).toMatchObject({});
 
     userEvent.type(el, '/*{enter}');
     updatedSelector = onChange.mock.calls[2][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
-
     expect(findByText(errorStr)).toMatchObject({});
 
     userEvent.type(el, 'badpath{enter}');
     updatedSelector = onChange.mock.calls[3][0];
-
+    expect(updatedSelector.hasErrors).toBeTruthy();
     rerender(<WrappedComponent selector={updatedSelector} />);
-
     expect(getByText(errorStr)).toBeTruthy();
+
+    userEvent.type(el, ' {enter}');
+    updatedSelector = onChange.mock.calls[4][0];
+    expect(updatedSelector.hasErrors).toBeTruthy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(getByText('"targetFilePath" values cannot be empty')).toBeTruthy();
   });
 
   it('validates processExecutable conditions values', async () => {
@@ -336,7 +341,7 @@ describe('<ControlGeneralViewSelector />', () => {
       'input'
     );
 
-    const errorStr = i18n.errorInvalidProcessExecutable;
+    const regexError = i18n.errorInvalidProcessExecutable;
 
     if (el) {
       userEvent.type(el, '/usr/bin/**{enter}');
@@ -345,28 +350,33 @@ describe('<ControlGeneralViewSelector />', () => {
     }
 
     updatedSelector = onChange.mock.calls[1][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
-
-    expect(findByText(errorStr)).toMatchObject({});
+    expect(findByText(regexError)).toMatchObject({});
 
     userEvent.type(el, '/*{enter}');
     updatedSelector = onChange.mock.calls[2][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
-
-    expect(findByText(errorStr)).toMatchObject({});
+    expect(findByText(regexError)).toMatchObject({});
 
     userEvent.type(el, '/usr/bin/ls{enter}');
     updatedSelector = onChange.mock.calls[3][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
-
-    expect(findByText(errorStr)).toMatchObject({});
+    expect(findByText(regexError)).toMatchObject({});
 
     userEvent.type(el, 'badpath{enter}');
     updatedSelector = onChange.mock.calls[4][0];
-
+    expect(updatedSelector.hasErrors).toBeTruthy();
     rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(getByText(regexError)).toBeTruthy();
 
-    expect(getByText(errorStr)).toBeTruthy();
+    userEvent.type(el, ' {enter}');
+    updatedSelector = onChange.mock.calls[4][0];
+    expect(updatedSelector.hasErrors).toBeTruthy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(getByText('"processExecutable" values cannot be empty')).toBeTruthy();
   });
 
   it('validates containerImageFullName conditions values', async () => {
@@ -385,10 +395,13 @@ describe('<ControlGeneralViewSelector />', () => {
       'input'
     );
 
-    const errorStr = i18n.errorInvalidFullContainerImageName;
+    const regexError = i18n.errorInvalidFullContainerImageName;
 
     if (el) {
       userEvent.type(el, 'docker.io/nginx{enter}');
+      userEvent.type(el, 'docker.io/nginx-dev{enter}');
+      userEvent.type(el, 'docker.io/nginx.dev{enter}');
+      userEvent.type(el, '127.0.0.1:8080/nginx_dev{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -396,13 +409,13 @@ describe('<ControlGeneralViewSelector />', () => {
     updatedSelector = onChange.mock.calls[1][0];
     rerender(<WrappedComponent selector={updatedSelector} />);
 
-    expect(findByText(errorStr)).toMatchObject({});
+    expect(findByText(regexError)).toMatchObject({});
 
     userEvent.type(el, 'nginx{enter}');
-    updatedSelector = onChange.mock.calls[2][0];
+    updatedSelector = onChange.mock.calls[5][0];
     rerender(<WrappedComponent selector={updatedSelector} />);
 
-    expect(getByText(errorStr)).toBeTruthy();
+    expect(getByText(regexError)).toBeTruthy();
   });
 
   it('validates kubernetesPodLabel conditions values', async () => {
@@ -496,7 +509,8 @@ describe('<ControlGeneralViewSelector />', () => {
       throw new Error("Can't find input");
     }
 
-    const expectedError = '"containerImageName" values must match the pattern: /^[a-z0-9]+$/';
+    const expectedError =
+      '"containerImageName" values must match the pattern: /^([a-z0-9]+(?:[._-][a-z0-9]+)*)$/';
 
     expect(getByText(expectedError)).toBeTruthy();
   });
@@ -547,9 +561,8 @@ describe('<ControlGeneralViewSelector />', () => {
 
     const count = getByTestId('cloud-defend-conditions-count');
     expect(count).toBeTruthy();
-    expect(count.childNodes[0]).toHaveTextContent('Conditions:');
-    expect(count.childNodes[1]).toHaveTextContent('1');
-    expect(count.querySelector(`[title^='operation']`)).toBeTruthy();
+    expect(count).toHaveTextContent('1');
+    expect(count.title).toEqual('operation');
 
     act(() => title.click());
 

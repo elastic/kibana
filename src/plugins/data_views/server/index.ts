@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 export { getFieldByName, findIndexPatternById } from './utils';
 export type { FieldDescriptor, RollupIndexCapability } from './fetcher';
 export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './fetcher';
 export type {
+  DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
   DataViewsServerPluginSetupDependencies,
   DataViewsServerPluginStartDependencies,
@@ -35,6 +38,24 @@ export type {
 };
 export { DataViewsServerPlugin as Plugin };
 
+const configSchema = schema.object({
+  scriptedFieldsEnabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: false }),
+    schema.never()
+  ),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    scriptedFieldsEnabled: true,
+  },
+};
+
 export {
   SERVICE_PATH,
   SERVICE_PATH_LEGACY,
@@ -52,9 +73,10 @@ export {
   SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
+  DATA_VIEW_SWAP_REFERENCES_PATH,
 } from './constants';
 
 export type { SERVICE_KEY_TYPE } from './constants';
 
-export type { FieldSpec, SavedObjectsClientCommon } from '../common/types';
+export type { FieldSpec } from '../common/types';
 export { DataViewsService, DataView } from '../common/data_views';

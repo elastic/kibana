@@ -7,8 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export type CasesCommon = ProvidedType<typeof CasesCommonServiceProvider>;
@@ -20,6 +19,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
   const common = getPageObject('common');
   const toasts = getService('toasts');
   const retry = getService('retry');
+  const comboBox = getService('comboBox');
 
   return {
     /**
@@ -117,6 +117,16 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
         if (indexes.includes(index)) {
           await row.click();
         }
+      }
+
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async addMultipleTags(tags: string[]) {
+      await testSubjects.click('tag-list-edit-button');
+
+      for (const [index, tag] of tags.entries()) {
+        await comboBox.setCustom('comboBoxInput', `${tag}-${index}`);
       }
 
       await header.waitUntilLoadingHasFinished();

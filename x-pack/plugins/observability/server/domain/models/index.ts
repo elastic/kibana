@@ -11,3 +11,4 @@ export * from './error_budget';
 export * from './indicators';
 export * from './slo';
 export * from './time_window';
+export * from './composite_slo';

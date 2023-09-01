@@ -10,14 +10,16 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiFormRowProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 
 type OptionalFormRowProps = EuiFormRowProps;
 
 export function OptionalFormRow(props: OptionalFormRowProps) {
+  const { euiTheme } = useEuiTheme();
+
   const { label, children, helpText } = props;
   return (
     <EuiFormRow
@@ -27,7 +29,7 @@ export function OptionalFormRow(props: OptionalFormRowProps) {
         },
         '.euiFormLabel > .euiFlexGroup > div:last-of-type': {
           fontWeight: 'normal',
-          color: euiThemeVars.euiTextSubduedColor,
+          color: euiTheme.colors.subduedText,
         },
       }}
       label={

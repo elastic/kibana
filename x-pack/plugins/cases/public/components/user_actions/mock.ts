@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
@@ -15,7 +15,7 @@ import { userProfiles, userProfilesMap } from '../../containers/user_profiles/ap
 import type { UserActionBuilderArgs } from './types';
 
 export const getMockBuilderArgs = (): UserActionBuilderArgs => {
-  const userAction = getUserAction('title', Actions.update);
+  const userAction = getUserAction('title', UserActionActions.update);
   const commentRefs = { current: {} };
 
   const alertData = {

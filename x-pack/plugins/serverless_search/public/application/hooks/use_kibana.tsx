@@ -5,9 +5,18 @@
  * 2.0.
  */
 
+import { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
+import { GetUserProfileResponse, UserProfileData } from '@kbn/security-plugin/common';
 
-type ServerlessSearchKibanaContext = CoreStart;
+export interface ServerlessSearchContext {
+  cloud: CloudStart;
+  share: SharePluginStart;
+  userProfile: GetUserProfileResponse<UserProfileData>;
+}
+
+type ServerlessSearchKibanaContext = CoreStart & ServerlessSearchContext;
 
 export const useKibanaServices = () => useKibanaBase<ServerlessSearchKibanaContext>().services;

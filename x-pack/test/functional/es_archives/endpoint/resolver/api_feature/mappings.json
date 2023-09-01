@@ -2684,12 +2684,13 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "lifecycle": {
           "name": "endgame_policy-4.21.0",
           "rollover_alias": "endgame-4.21.0"
         },
         "mapping": {
-          "ignore_malformed": "true",
+          "ignore_malformed": true,
           "total_fields": {
             "limit": "10000"
           }

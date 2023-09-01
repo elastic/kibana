@@ -16,6 +16,7 @@ export class ConsolePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly browser = this.ctx.getService('browser');
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -47,6 +48,16 @@ export class ConsolePageObject extends FtrService {
 
   public async openSettings() {
     await this.testSubjects.click('consoleSettingsButton');
+  }
+
+  public async toggleA11yOverlaySetting() {
+    // while the settings form opens/loads this may fail, so retry for a while
+    await this.retry.try(async () => {
+      const toggle = await this.testSubjects.find('enableA11yOverlay');
+      await toggle.click();
+    });
+
+    await this.testSubjects.click('settings-save-button');
   }
 
   public async openVariablesModal() {
@@ -127,13 +138,12 @@ export class ConsolePageObject extends FtrService {
   // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
   public async promptAutocomplete(letter = 'b') {
     const textArea = await this.testSubjects.find('console-textarea');
-    await textArea.clickMouseButton();
     await textArea.type(letter);
     await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
   }
 
   public async isAutocompleteVisible() {
-    const element = await this.find.byCssSelector('.ace_autocomplete');
+    const element = await this.find.byCssSelector('.ace_autocomplete').catch(() => null);
     if (!element) return false;
 
     const attribute = await element.getAttribute('style');
@@ -189,6 +199,31 @@ export class ConsolePageObject extends FtrService {
   public async pressEnter() {
     const textArea = await this.testSubjects.find('console-textarea');
     await textArea.pressKeys(Key.ENTER);
+  }
+
+  public async pressEscape() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.ESCAPE);
+  }
+
+  public async pressDown() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.DOWN);
+  }
+
+  public async pressLeft() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.LEFT);
+  }
+
+  public async pressRight() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.RIGHT);
+  }
+
+  public async pressUp() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.UP);
   }
 
   public async clearTextArea() {
@@ -403,6 +438,10 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('consoleMenuAutoIndent');
   }
 
+  public async isA11yOverlayVisible() {
+    return await this.testSubjects.exists('a11y-overlay');
+  }
+
   public async clickCopyAsCurlButton() {
     const button = await this.testSubjects.find('consoleMenuCopyAsCurl');
     await button.click();
@@ -546,5 +585,17 @@ export class ConsolePageObject extends FtrService {
   public async closeHistory() {
     const closeButton = await this.testSubjects.find('consoleHistoryCloseButton');
     await closeButton.click();
+  }
+
+  public async sleepForDebouncePeriod(milliseconds: number = 100) {
+    // start to sleep after confirming JS engine responds
+    await this.retry.waitFor('pinging JS engine', () => this.browser.execute('return true;'));
+    await this.common.sleep(milliseconds);
+  }
+
+  async setAutocompleteTrace(flag: boolean) {
+    await this.browser.execute((f: boolean) => {
+      (window as any).autocomplete_trace = f;
+    }, flag);
   }
 }

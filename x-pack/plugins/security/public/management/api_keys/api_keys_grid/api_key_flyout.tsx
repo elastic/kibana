@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import type { ExclusiveUnion } from '@elastic/eui';
 import {
   EuiCallOut,
+  EuiCheckableCard,
   EuiFieldNumber,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiFormFieldset,
   EuiFormRow,
-  EuiHealth,
-  EuiIcon,
-  EuiLoadingContent,
+  EuiHorizontalRule,
+  EuiSkeletonText,
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiToolTip,
+  EuiTitle,
 } from '@elastic/eui';
+import { Form, FormikProvider, useFormik } from 'formik';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
@@ -31,51 +31,79 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { ApiKey, ApiKeyRoleDescriptors, AuthenticatedUser } from '../../../../common/model';
+import type { CategorizedApiKey } from './api_keys_grid_page';
+import { ApiKeyBadge, ApiKeyStatus, TimeToolTip, UsernameWithIcon } from './api_keys_grid_page';
+import type { ApiKeyRoleDescriptors } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
+import { FormField } from '../../../components/form_field';
 import type { FormFlyoutProps } from '../../../components/form_flyout';
 import { FormFlyout } from '../../../components/form_flyout';
+import { FormRow } from '../../../components/form_row';
 import { useCurrentUser } from '../../../components/use_current_user';
-import { useForm } from '../../../components/use_form';
-import type { ValidationErrors } from '../../../components/use_form';
 import { useInitialFocus } from '../../../components/use_initial_focus';
 import { RolesAPIClient } from '../../roles/roles_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
 import type {
-  CreateApiKeyRequest,
-  CreateApiKeyResponse,
-  UpdateApiKeyRequest,
-  UpdateApiKeyResponse,
+  CreateAPIKeyParams,
+  CreateAPIKeyResult,
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
 } from '../api_keys_api_client';
 
 export interface ApiKeyFormValues {
   name: string;
+  type: string;
   expiration: string;
   customExpiration: boolean;
   customPrivileges: boolean;
   includeMetadata: boolean;
+  access: string;
   role_descriptors: string;
   metadata: string;
 }
 
-export interface ApiKeyFlyoutProps {
-  defaultValues?: ApiKeyFormValues;
-  onSuccess?: (
-    createApiKeyResponse: CreateApiKeyResponse | undefined,
-    updateApiKeyResponse: UpdateApiKeyResponse | undefined
-  ) => void;
+interface CommonApiKeyFlyoutProps {
+  initialValues?: ApiKeyFormValues;
   onCancel: FormFlyoutProps['onCancel'];
-  apiKey?: ApiKey;
-  readonly?: boolean;
+  canManageCrossClusterApiKeys?: boolean;
+  readOnly?: boolean;
 }
 
-const defaultDefaultValues: ApiKeyFormValues = {
+interface CreateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
+  onSuccess?: (createApiKeyResponse: CreateAPIKeyResult) => void;
+}
+
+interface UpdateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
+  onSuccess?: (updateApiKeyResponse: UpdateAPIKeyResult) => void;
+  apiKey: CategorizedApiKey;
+}
+
+export type ApiKeyFlyoutProps = ExclusiveUnion<CreateApiKeyFlyoutProps, UpdateApiKeyFlyoutProps>;
+
+const defaultInitialValues: ApiKeyFormValues = {
   name: '',
+  type: 'rest',
   customExpiration: false,
   expiration: '',
   includeMetadata: false,
   metadata: '{}',
   customPrivileges: false,
+  access: JSON.stringify(
+    {
+      search: [
+        {
+          names: ['*'],
+        },
+      ],
+      replication: [
+        {
+          names: ['*'],
+        },
+      ],
+    },
+    null,
+    2
+  ),
   role_descriptors: '{}',
 };
 
@@ -83,66 +111,38 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   onSuccess,
   onCancel,
   apiKey,
-  readonly = false,
+  canManageCrossClusterApiKeys = false,
+  readOnly = false,
 }) => {
-  let formTitle = 'Create API Key';
-  let inProgressButtonText = 'Creating API Key…';
-  let errorTitle = 'create API key';
-
-  const { value: currentUser, loading: isLoadingCurrentUser } = useCurrentUser();
-
-  let canEditApiKey = false;
-
-  let defaultValues = defaultDefaultValues;
-
-  if (apiKey) {
-    defaultValues = retrieveValuesFromApiKeyToDefaultFlyout(apiKey);
-
-    canEditApiKey = isEditable(currentUser, apiKey);
-
-    if (readonly || !canEditApiKey) {
-      formTitle = 'API key details';
-      inProgressButtonText = ''; // This won't be seen since Submit will be disabled
-      errorTitle = '';
-    } else {
-      formTitle = 'Update API Key';
-      inProgressButtonText = 'Updating API Key…';
-      errorTitle = 'update API key';
-    }
-  }
-
   const { services } = useKibana();
-
+  const { value: currentUser, loading: isLoadingCurrentUser } = useCurrentUser();
   const [{ value: roles, loading: isLoadingRoles }, getRoles] = useAsyncFn(
     () => new RolesAPIClient(services.http!).getRoles(),
     [services.http]
   );
 
-  const [form, eventHandlers] = useForm({
+  const formik = useFormik<ApiKeyFormValues>({
     onSubmit: async (values) => {
       try {
         if (apiKey) {
           const updateApiKeyResponse = await new APIKeysAPIClient(services.http!).updateApiKey(
-            mapUpdateApiKeyValues(apiKey.id, values)
+            mapUpdateApiKeyValues(apiKey.type, apiKey.id, values)
           );
 
-          onSuccess?.(undefined, updateApiKeyResponse);
+          onSuccess?.(updateApiKeyResponse);
         } else {
           const createApiKeyResponse = await new APIKeysAPIClient(services.http!).createApiKey(
             mapCreateApiKeyValues(values)
           );
 
-          onSuccess?.(createApiKeyResponse, undefined);
+          onSuccess?.(createApiKeyResponse);
         }
       } catch (error) {
         throw error;
       }
     },
-    validate,
-    defaultValues,
+    initialValues: apiKey ? mapApiKeyFormValues(apiKey) : defaultInitialValues,
   });
-
-  const isLoading = isLoadingCurrentUser || isLoadingRoles;
 
   useEffect(() => {
     getRoles();
@@ -161,433 +161,574 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
         {}
       );
 
-      if (!form.touched.role_descriptors && !apiKey) {
-        form.setValue('role_descriptors', JSON.stringify(userPermissions, null, 2));
+      if (!formik.touched.role_descriptors && !apiKey) {
+        formik.setFieldValue('role_descriptors', JSON.stringify(userPermissions, null, 2));
       }
     }
   }, [currentUser, roles]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const isLoading = isLoadingCurrentUser || isLoadingRoles;
+
+  const isOwner = currentUser && apiKey ? currentUser.username === apiKey.username : false;
+  const hasExpired = apiKey ? apiKey.expiration && moment(apiKey.expiration).isBefore() : false;
+  const canEdit = isOwner && !hasExpired;
+
   const firstFieldRef = useInitialFocus<HTMLInputElement>([isLoading]);
 
   return (
-    <FormFlyout
-      title={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.title', {
-        defaultMessage: `{formTitle}`,
-        values: { formTitle },
-      })}
-      onCancel={onCancel}
-      onSubmit={form.submit}
-      submitButtonText={i18n.translate(
-        'xpack.security.accountManagement.apiKeyFlyout.submitButton',
-        {
-          defaultMessage: `{isSubmitting, select, true{{inProgressButtonText}} other{{formTitle}}}`,
-          values: { isSubmitting: form.isSubmitting, inProgressButtonText, formTitle },
+    <FormikProvider value={formik}>
+      <FormFlyout
+        title={
+          apiKey
+            ? readOnly || !canEdit
+              ? i18n.translate('xpack.security.accountManagement.apiKeyFlyout.viewTitle', {
+                  defaultMessage: `API key details`,
+                })
+              : i18n.translate('xpack.security.accountManagement.apiKeyFlyout.updateTitle', {
+                  defaultMessage: `Update API key`,
+                })
+            : i18n.translate('xpack.security.accountManagement.apiKeyFlyout.createTitle', {
+                defaultMessage: `Create API key`,
+              })
         }
-      )}
-      isLoading={form.isSubmitting}
-      isDisabled={
-        isLoading || (form.isSubmitted && form.isInvalid) || readonly || (apiKey && !canEditApiKey)
-      }
-      isSubmitButtonHidden={readonly || (!!apiKey && !canEditApiKey)}
-      size="s"
-      ownFocus
-    >
-      {form.submitError && (
-        <>
-          <EuiCallOut
-            title={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.errorMessage', {
-              defaultMessage: 'Could not {errorTitle}',
-              values: { errorTitle },
-            })}
-            color="danger"
-          >
-            {(form.submitError as any).body?.message || form.submitError.message}
-          </EuiCallOut>
-          <EuiSpacer />
-        </>
-      )}
-
-      {isLoading ? (
-        <EuiLoadingContent />
-      ) : (
-        <EuiForm
-          component="form"
-          isInvalid={form.isInvalid}
-          error={Object.values(form.errors)}
-          invalidCallout={!form.submitError && form.isSubmitted ? 'above' : 'none'}
-          {...eventHandlers}
-        >
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.security.management.users.changePasswordFlyout.userLabel',
-              {
-                defaultMessage: 'User',
-              }
-            )}
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="user" />
-              </EuiFlexItem>
-              <EuiFlexItem style={{ overflow: 'hidden' }}>
-                <EuiSpacer size="xs" />
-                <EuiText
-                  style={{
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                    textOverflow: 'ellipsis',
-                  }}
-                  data-test-subj="apiKeyFlyoutUsername"
-                >
-                  {apiKey ? apiKey.username : currentUser?.username}
-                </EuiText>
-                <EuiSpacer size="xs" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.nameLabel', {
-              defaultMessage: 'Name',
-            })}
-            error={form.errors.name}
-            isInvalid={form.touched.name && !!form.errors.name}
-          >
-            <EuiFieldText
-              name="name"
-              defaultValue={form.values.name}
-              isInvalid={form.touched.name && !!form.errors.name}
-              inputRef={firstFieldRef}
-              disabled={!!apiKey || readonly}
-              fullWidth
-              data-test-subj="apiKeyNameInput"
-            />
-          </EuiFormRow>
-
-          {!!apiKey && (
-            <>
-              <EuiSpacer />
-              <EuiFormRow
-                label={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.statusLabel', {
-                  defaultMessage: 'Status',
-                })}
-              >
-                {determineReadonlyExpiration(form.values?.expiration)}
-              </EuiFormRow>
-            </>
-          )}
-
-          <EuiSpacer />
-          <EuiFormFieldset>
-            <EuiSwitch
-              label={i18n.translate(
-                'xpack.security.accountManagement.apiKeyFlyout.customPrivilegesLabel',
-                {
-                  defaultMessage: 'Restrict privileges',
-                }
-              )}
-              checked={form.values.customPrivileges}
-              data-test-subj="apiKeysRoleDescriptorsSwitch"
-              onChange={(e) => form.setValue('customPrivileges', e.target.checked)}
-              disabled={readonly || (apiKey && !canEditApiKey)}
-            />
-            {form.values.customPrivileges && (
+        onCancel={onCancel}
+        onSubmit={formik.submitForm}
+        submitButtonText={
+          apiKey
+            ? i18n.translate('xpack.security.accountManagement.apiKeyFlyout.updateSubmitButton', {
+                defaultMessage: `{isSubmitting, select, true{Updating API key…} other{Update API key}}`,
+                values: { isSubmitting: formik.isSubmitting },
+              })
+            : i18n.translate('xpack.security.accountManagement.apiKeyFlyout.createSubmitButton', {
+                defaultMessage: `{isSubmitting, select, true{Creating API key…} other{Create API key}}`,
+                values: { isSubmitting: formik.isSubmitting },
+              })
+        }
+        isLoading={formik.isSubmitting}
+        isDisabled={
+          isLoading ||
+          (formik.submitCount > 0 && !formik.isValid) ||
+          readOnly ||
+          (apiKey && !canEdit)
+        }
+        isSubmitButtonHidden={readOnly || (apiKey && !canEdit)}
+        size="m"
+        ownFocus
+      >
+        <EuiSkeletonText isLoading={isLoading}>
+          {apiKey && !readOnly ? (
+            !isOwner ? (
               <>
-                <EuiSpacer size="m" />
-                <EuiFormRow
-                  data-test-subj="apiKeysRoleDescriptorsCodeEditor"
-                  helpText={
-                    <DocLink
-                      app="elasticsearch"
-                      doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
-                    >
-                      <FormattedMessage
-                        id="xpack.security.accountManagement.apiKeyFlyout.roleDescriptorsHelpText"
-                        defaultMessage="Learn how to structure role descriptors."
-                      />
-                    </DocLink>
+                <EuiCallOut
+                  iconType="lock"
+                  title={
+                    <FormattedMessage
+                      id="xpack.security.accountManagement.apiKeyFlyout.readonlyOwnedByOtherUserWarning"
+                      defaultMessage="You cannot update this API key, since it is owned by another user."
+                    />
                   }
-                  error={form.errors.role_descriptors}
-                  isInvalid={form.touched.role_descriptors && !!form.errors.role_descriptors}
-                >
-                  <CodeEditorField
-                    value={form.values.role_descriptors!}
-                    onChange={(value) => form.setValue('role_descriptors', value)}
-                    languageId="xjson"
-                    height={200}
-                    options={{ readOnly: readonly || (apiKey && !canEditApiKey) }}
-                  />
-                </EuiFormRow>
-                <EuiSpacer size="s" />
+                />
+                <EuiSpacer />
               </>
-            )}
-          </EuiFormFieldset>
+            ) : hasExpired ? (
+              <>
+                <EuiCallOut
+                  iconType="lock"
+                  title={
+                    <FormattedMessage
+                      id="xpack.security.accountManagement.apiKeyFlyout.readonlyExpiredWarning"
+                      defaultMessage="You cannot update this API key, since it has already expired."
+                    />
+                  }
+                />
+                <EuiSpacer />
+              </>
+            ) : null
+          ) : null}
 
-          {!apiKey && (
-            <>
-              <EuiSpacer />
+          <Form>
+            <FormRow
+              label={
+                <FormattedMessage
+                  id="xpack.security.accountManagement.apiKeyFlyout.nameLabel"
+                  defaultMessage="Name"
+                />
+              }
+              fullWidth
+            >
+              <FormField
+                name="name"
+                inputRef={firstFieldRef}
+                data-test-subj="apiKeyNameInput"
+                disabled={readOnly || !!apiKey}
+                validate={{
+                  required: i18n.translate(
+                    'xpack.security.management.apiKeys.apiKeyFlyout.nameRequired',
+                    {
+                      defaultMessage: 'Enter a name.',
+                    }
+                  ),
+                }}
+                fullWidth
+              />
+            </FormRow>
+
+            {apiKey ? (
+              <>
+                <EuiSpacer />
+                <EuiFlexGroup gutterSize="xl">
+                  <EuiFlexItem grow={false}>
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+                          defaultMessage="Type"
+                        />
+                      }
+                    >
+                      <ApiKeyBadge type={apiKey.type} />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.apiKeyFlyout.ownerLabel"
+                          defaultMessage="Owner"
+                        />
+                      }
+                    >
+                      <UsernameWithIcon username={apiKey.username} />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.apiKeyFlyout.createdLabel"
+                          defaultMessage="Created"
+                        />
+                      }
+                    >
+                      <TimeToolTip timestamp={apiKey.creation} />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.apiKeyFlyout.statusLabel"
+                          defaultMessage="Status"
+                        />
+                      }
+                    >
+                      <ApiKeyStatus expiration={apiKey.expiration} />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            ) : canManageCrossClusterApiKeys ? (
+              <FormRow
+                name="type"
+                label={
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+                    defaultMessage="Type"
+                  />
+                }
+                fullWidth
+              >
+                <EuiFlexGroup gutterSize="m">
+                  <EuiFlexItem>
+                    <EuiCheckableCard
+                      id="rest"
+                      label={
+                        <>
+                          <EuiTitle size="xxs">
+                            <h2>
+                              <FormattedMessage
+                                id="xpack.security.accountManagement.apiKeyFlyout.restTypeLabel"
+                                defaultMessage="Personal API key"
+                              />
+                            </h2>
+                          </EuiTitle>
+                          <EuiSpacer size="xs" />
+                          <EuiText size="s">
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.apiKeyFlyout.restTypeDescription"
+                              defaultMessage="Allow external services to access the Elastic Stack on your behalf."
+                            />
+                          </EuiText>
+                        </>
+                      }
+                      onChange={() => formik.setFieldValue('type', 'rest')}
+                      checked={formik.values.type === 'rest'}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiCheckableCard
+                      id="cross_cluster"
+                      label={
+                        <>
+                          <EuiTitle size="xxs">
+                            <h2>
+                              <FormattedMessage
+                                id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeLabel"
+                                defaultMessage="Cross-Cluster API key"
+                              />
+                            </h2>
+                          </EuiTitle>
+                          <EuiSpacer size="xs" />
+                          <EuiText size="s">
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeDescription"
+                              defaultMessage="Allow remote clusters to connect to your local cluster."
+                            />
+                          </EuiText>
+                        </>
+                      }
+                      onChange={() => formik.setFieldValue('type', 'cross_cluster')}
+                      checked={formik.values.type === 'cross_cluster'}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </FormRow>
+            ) : (
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+                    defaultMessage="Type"
+                  />
+                }
+              >
+                <ApiKeyBadge type="rest" />
+              </EuiFormRow>
+            )}
+            <EuiHorizontalRule />
+
+            {formik.values.type === 'cross_cluster' ? (
+              <FormRow
+                data-test-subj="apiKeysAccessCodeEditor"
+                label={
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.apiKeyFlyout.accessLabel"
+                    defaultMessage="Access"
+                  />
+                }
+                helpText={
+                  <DocLink
+                    app="elasticsearch"
+                    doc="security-api-create-cross-cluster-api-key.html#security-api-create-cross-cluster-api-key-request-body"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.accountManagement.apiKeyFlyout.accessHelpText"
+                      defaultMessage="Learn how to structure access permissions."
+                    />
+                  </DocLink>
+                }
+                fullWidth
+              >
+                <FormField
+                  as={CodeEditorField}
+                  name="access"
+                  value={formik.values.access}
+                  options={{ readOnly: readOnly || (apiKey && !canEdit) }}
+                  onChange={(value: string) => formik.setFieldValue('access', value)}
+                  validate={(value: string) => {
+                    if (!value) {
+                      return i18n.translate(
+                        'xpack.security.management.apiKeys.apiKeyFlyout.accessRequired',
+                        {
+                          defaultMessage: 'Enter access permissions or disable this option.',
+                        }
+                      );
+                    }
+                    try {
+                      JSON.parse(value);
+                    } catch (e) {
+                      return i18n.translate(
+                        'xpack.security.management.apiKeys.apiKeyFlyout.invalidJsonError',
+                        {
+                          defaultMessage: 'Enter valid JSON.',
+                        }
+                      );
+                    }
+                  }}
+                  fullWidth
+                  languageId="xjson"
+                  height={200}
+                />
+              </FormRow>
+            ) : (
               <EuiFormFieldset>
                 <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.security.accountManagement.apiKeyFlyout.customExpirationLabel',
-                    {
-                      defaultMessage: 'Expire after time',
-                    }
-                  )}
-                  checked={form.values.customExpiration}
-                  onChange={(e) => form.setValue('customExpiration', e.target.checked)}
-                  disabled={readonly || !!apiKey}
-                  data-test-subj="apiKeyCustomExpirationSwitch"
+                  label={
+                    <FormattedMessage
+                      id="xpack.security.accountManagement.apiKeyFlyout.customPrivilegesLabel"
+                      defaultMessage="Restrict privileges"
+                    />
+                  }
+                  checked={formik.values.customPrivileges}
+                  data-test-subj="apiKeysRoleDescriptorsSwitch"
+                  onChange={(e) => formik.setFieldValue('customPrivileges', e.target.checked)}
+                  disabled={readOnly || (apiKey && !canEdit)}
                 />
-                {form.values.customExpiration && (
+                {formik.values.customPrivileges && (
                   <>
                     <EuiSpacer size="m" />
-
-                    <EuiFormRow
-                      error={form.errors.expiration}
-                      isInvalid={form.touched.expiration && !!form.errors.expiration && !apiKey}
-                      label={i18n.translate(
-                        'xpack.security.accountManagement.apiKeyFlyout.customExpirationInputLabel',
-                        {
-                          defaultMessage: 'Lifetime',
-                        }
-                      )}
+                    <FormRow
+                      helpText={
+                        <DocLink
+                          app="elasticsearch"
+                          doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
+                        >
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.apiKeyFlyout.roleDescriptorsHelpText"
+                            defaultMessage="Learn how to structure role descriptors."
+                          />
+                        </DocLink>
+                      }
+                      fullWidth
+                      data-test-subj="apiKeysRoleDescriptorsCodeEditor"
                     >
-                      <EuiFieldNumber
-                        append={i18n.translate(
-                          'xpack.security.accountManagement.apiKeyFlyout.expirationUnit',
-                          {
-                            defaultMessage: 'days',
+                      <FormField
+                        as={CodeEditorField}
+                        name="role_descriptors"
+                        value={formik.values.role_descriptors}
+                        options={{ readOnly: readOnly || (apiKey && !canEdit) }}
+                        onChange={(value: string) =>
+                          formik.setFieldValue('role_descriptors', value)
+                        }
+                        validate={(value: string) => {
+                          if (!value) {
+                            return i18n.translate(
+                              'xpack.security.management.apiKeys.apiKeyFlyout.roleDescriptorsRequired',
+                              {
+                                defaultMessage: 'Enter role descriptors or disable this option.',
+                              }
+                            );
                           }
-                        )}
-                        name="expiration"
-                        min={0}
-                        defaultValue={form.values.expiration}
-                        isInvalid={form.touched.expiration && !!form.errors.expiration && !apiKey}
+                          try {
+                            JSON.parse(value);
+                          } catch (e) {
+                            return i18n.translate(
+                              'xpack.security.management.apiKeys.apiKeyFlyout.invalidJsonError',
+                              {
+                                defaultMessage: 'Enter valid JSON.',
+                              }
+                            );
+                          }
+                        }}
                         fullWidth
-                        data-test-subj="apiKeyCustomExpirationInput"
-                        disabled={readonly || !!apiKey}
+                        languageId="xjson"
+                        height={200}
                       />
-                    </EuiFormRow>
+                    </FormRow>
                     <EuiSpacer size="s" />
                   </>
                 )}
               </EuiFormFieldset>
-            </>
-          )}
-          <EuiSpacer />
-          <EuiFormFieldset>
-            <EuiSwitch
-              label={i18n.translate(
-                'xpack.security.accountManagement.apiKeyFlyout.includeMetadataLabel',
-                {
-                  defaultMessage: 'Include metadata',
-                }
-              )}
-              data-test-subj="apiKeysMetadataSwitch"
-              checked={form.values.includeMetadata}
-              disabled={readonly || (apiKey && !canEditApiKey)}
-              onChange={(e) => form.setValue('includeMetadata', e.target.checked)}
-            />
-            {form.values.includeMetadata && (
+            )}
+
+            {!apiKey && (
               <>
-                <EuiSpacer size="m" />
-                <EuiFormRow
-                  data-test-subj="apiKeysMetadataCodeEditor"
-                  helpText={
-                    <DocLink
-                      app="elasticsearch"
-                      doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
-                    >
+                <EuiSpacer />
+                <EuiFormFieldset>
+                  <EuiSwitch
+                    label={
                       <FormattedMessage
-                        id="xpack.security.accountManagement.apiKeyFlyout.metadataHelpText"
-                        defaultMessage="Learn how to structure metadata."
+                        id="xpack.security.accountManagement.apiKeyFlyout.customExpirationLabel"
+                        defaultMessage="Expire after time"
                       />
-                    </DocLink>
-                  }
-                  error={form.errors.metadata}
-                  isInvalid={form.touched.metadata && !!form.errors.metadata}
-                >
-                  <CodeEditorField
-                    value={form.values.metadata!}
-                    onChange={(value) => form.setValue('metadata', value)}
-                    languageId="xjson"
-                    height={200}
-                    options={{ readOnly: readonly || (apiKey && !canEditApiKey) }}
+                    }
+                    checked={formik.values.customExpiration}
+                    onChange={(e) => formik.setFieldValue('customExpiration', e.target.checked)}
+                    disabled={readOnly || !!apiKey}
+                    data-test-subj="apiKeyCustomExpirationSwitch"
                   />
-                </EuiFormRow>
-                <EuiSpacer size="s" />
+                  {formik.values.customExpiration && (
+                    <>
+                      <EuiSpacer size="m" />
+                      <FormRow
+                        label={
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.apiKeyFlyout.customExpirationInputLabel"
+                            defaultMessage="Lifetime"
+                          />
+                        }
+                        fullWidth
+                      >
+                        <FormField
+                          as={EuiFieldNumber}
+                          name="expiration"
+                          min={0}
+                          append={i18n.translate(
+                            'xpack.security.accountManagement.apiKeyFlyout.expirationUnit',
+                            {
+                              defaultMessage: 'days',
+                            }
+                          )}
+                          validate={{
+                            min: {
+                              value: 1,
+                              message: i18n.translate(
+                                'xpack.security.management.apiKeys.apiKeyFlyout.expirationRequired',
+                                {
+                                  defaultMessage: 'Enter a valid duration or disable this option.',
+                                }
+                              ),
+                            },
+                          }}
+                          disabled={readOnly || !!apiKey}
+                          data-test-subj="apiKeyCustomExpirationInput"
+                        />
+                      </FormRow>
+                      <EuiSpacer size="s" />
+                    </>
+                  )}
+                </EuiFormFieldset>
               </>
             )}
-          </EuiFormFieldset>
-
-          {/* Hidden submit button is required for enter key to trigger form submission */}
-          <input type="submit" hidden />
-        </EuiForm>
-      )}
-    </FormFlyout>
+            <EuiSpacer />
+            <EuiFormFieldset>
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.apiKeyFlyout.includeMetadataLabel"
+                    defaultMessage="Include metadata"
+                  />
+                }
+                data-test-subj="apiKeysMetadataSwitch"
+                checked={formik.values.includeMetadata}
+                disabled={readOnly || (apiKey && !canEdit)}
+                onChange={(e) => formik.setFieldValue('includeMetadata', e.target.checked)}
+              />
+              {formik.values.includeMetadata && (
+                <>
+                  <EuiSpacer size="m" />
+                  <FormRow
+                    data-test-subj="apiKeysMetadataCodeEditor"
+                    helpText={
+                      <DocLink
+                        app="elasticsearch"
+                        doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
+                      >
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.apiKeyFlyout.metadataHelpText"
+                          defaultMessage="Learn how to structure metadata."
+                        />
+                      </DocLink>
+                    }
+                    fullWidth
+                  >
+                    <FormField
+                      as={CodeEditorField}
+                      name="metadata"
+                      options={{ readOnly: readOnly || (apiKey && !canEdit) }}
+                      value={formik.values.metadata}
+                      onChange={(value: string) => formik.setFieldValue('metadata', value)}
+                      validate={(value: string) => {
+                        if (!value) {
+                          return i18n.translate(
+                            'xpack.security.management.apiKeys.apiKeyFlyout.metadataRequired',
+                            {
+                              defaultMessage: 'Enter metadata or disable this option.',
+                            }
+                          );
+                        }
+                        try {
+                          JSON.parse(value);
+                        } catch (e) {
+                          return i18n.translate(
+                            'xpack.security.management.apiKeys.apiKeyFlyout.invalidJsonError',
+                            {
+                              defaultMessage: 'Enter valid JSON.',
+                            }
+                          );
+                        }
+                      }}
+                      fullWidth
+                      languageId="xjson"
+                      height={200}
+                    />
+                  </FormRow>
+                  <EuiSpacer size="s" />
+                </>
+              )}
+            </EuiFormFieldset>
+          </Form>
+        </EuiSkeletonText>
+      </FormFlyout>
+    </FormikProvider>
   );
 };
 
-export function validate(values: ApiKeyFormValues) {
-  const errors: ValidationErrors<ApiKeyFormValues> = {};
+export function mapCreateApiKeyValues(values: ApiKeyFormValues): CreateAPIKeyParams {
+  const { type, name } = values;
+  const expiration = values.customExpiration ? `${values.expiration}d` : undefined;
+  const metadata = values.includeMetadata ? JSON.parse(values.metadata) : '{}';
 
-  if (!values.name) {
-    errors.name = i18n.translate('xpack.security.management.apiKeys.apiKeyFlyout.nameRequired', {
-      defaultMessage: 'Enter a name.',
-    });
+  if (type === 'cross_cluster') {
+    return {
+      type,
+      name,
+      expiration,
+      metadata,
+      access: JSON.parse(values.access),
+    };
   }
 
-  if (values.customExpiration) {
-    const parsedExpiration = parseFloat(values.expiration);
-    if (isNaN(parsedExpiration) || parsedExpiration <= 0) {
-      errors.expiration = i18n.translate(
-        'xpack.security.management.apiKeys.apiKeyFlyout.expirationRequired',
-        {
-          defaultMessage: 'Enter a valid duration or disable this option.',
-        }
-      );
-    }
-  }
-
-  if (values.customPrivileges) {
-    if (!values.role_descriptors) {
-      errors.role_descriptors = i18n.translate(
-        'xpack.security.management.apiKeys.apiKeyFlyout.roleDescriptorsRequired',
-        {
-          defaultMessage: 'Enter role descriptors or disable this option.',
-        }
-      );
-    } else {
-      try {
-        JSON.parse(values.role_descriptors);
-      } catch (e) {
-        errors.role_descriptors = i18n.translate(
-          'xpack.security.management.apiKeys.apiKeyFlyout.invalidJsonError',
-          {
-            defaultMessage: 'Enter valid JSON.',
-          }
-        );
-      }
-    }
-  }
-
-  if (values.includeMetadata) {
-    if (!values.metadata) {
-      errors.metadata = i18n.translate(
-        'xpack.security.management.apiKeys.apiKeyFlyout.metadataRequired',
-        {
-          defaultMessage: 'Enter metadata or disable this option.',
-        }
-      );
-    } else {
-      try {
-        JSON.parse(values.metadata);
-      } catch (e) {
-        errors.metadata = i18n.translate(
-          'xpack.security.management.apiKeys.apiKeyFlyout.invalidJsonError',
-          {
-            defaultMessage: 'Enter valid JSON.',
-          }
-        );
-      }
-    }
-  }
-
-  return errors;
-}
-
-export function mapCreateApiKeyValues(values: ApiKeyFormValues): CreateApiKeyRequest {
   return {
-    name: values.name,
-    expiration: values.customExpiration && values.expiration ? `${values.expiration}d` : undefined,
-    role_descriptors:
-      values.customPrivileges && values.role_descriptors
-        ? JSON.parse(values.role_descriptors)
-        : undefined,
-    metadata: values.includeMetadata && values.metadata ? JSON.parse(values.metadata) : undefined,
+    name,
+    expiration,
+    metadata,
+    role_descriptors: values.customPrivileges ? JSON.parse(values.role_descriptors) : '{}',
   };
 }
 
-export function mapUpdateApiKeyValues(id: string, values: ApiKeyFormValues): UpdateApiKeyRequest {
+export function mapUpdateApiKeyValues(
+  type: CategorizedApiKey['type'],
+  id: string,
+  values: ApiKeyFormValues
+): UpdateAPIKeyParams {
+  const metadata = values.includeMetadata ? JSON.parse(values.metadata) : '{}';
+
+  if (type === 'cross_cluster') {
+    return {
+      type,
+      id,
+      metadata,
+      access: JSON.parse(values.access),
+    };
+  }
+
   return {
     id,
-    role_descriptors:
-      values.customPrivileges && values.role_descriptors
-        ? JSON.parse(values.role_descriptors)
-        : undefined,
-    metadata: values.includeMetadata && values.metadata ? JSON.parse(values.metadata) : {},
+    metadata,
+    role_descriptors: values.customPrivileges ? JSON.parse(values.role_descriptors) : '{}',
   };
 }
 
-function isEditable(currentUser: AuthenticatedUser | undefined, apiKey: ApiKey): boolean {
-  let result = false;
-  const isApiKeyOwner = currentUser && currentUser.username === apiKey.username;
-  const isNotExpired = !apiKey.expiration || moment(apiKey.expiration).isAfter();
-
-  if (isApiKeyOwner && isNotExpired) {
-    result = true;
-  }
-
-  return result;
-}
-
-function determineReadonlyExpiration(expiration?: string) {
-  const DATE_FORMAT = 'MMMM Do YYYY HH:mm:ss';
-
-  if (!expiration) {
-    return (
-      <EuiHealth color="primary" data-test-subj="apiKeyStatus">
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.statusActive"
-          defaultMessage="Active"
-        />
-      </EuiHealth>
-    );
-  }
-
-  const expirationInt = parseInt(expiration, 10);
-
-  if (Date.now() > expirationInt) {
-    return (
-      <EuiHealth color="subdued" data-test-subj="apiKeyStatus">
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.statusExpired"
-          defaultMessage="Expired"
-        />
-      </EuiHealth>
-    );
-  }
-
-  return (
-    <EuiHealth color="warning" data-test-subj="apiKeyStatus">
-      <EuiToolTip content={moment(expirationInt).format(DATE_FORMAT)}>
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.statusExpires"
-          defaultMessage="Expires {timeFromNow}"
-          values={{
-            timeFromNow: moment(expirationInt).fromNow(),
-          }}
-        />
-      </EuiToolTip>
-    </EuiHealth>
-  );
-}
-
-function retrieveValuesFromApiKeyToDefaultFlyout(apiKey: ApiKey): ApiKeyFormValues {
-  // Collect data from the selected API key to pre-populate the form
-  const doesMetadataExist = Object.keys(apiKey.metadata).length > 0;
-  const doCustomPrivilegesExist = Object.keys(apiKey.role_descriptors ?? 0).length > 0;
+/**
+ * Maps data from the selected API key to pre-populate the form
+ */
+function mapApiKeyFormValues(apiKey: CategorizedApiKey): ApiKeyFormValues {
+  const includeMetadata = Object.keys(apiKey.metadata).length > 0;
+  const customPrivileges =
+    apiKey.type !== 'cross_cluster' ? Object.keys(apiKey.role_descriptors).length > 0 : false;
 
   return {
     name: apiKey.name,
+    type: apiKey.type,
     customExpiration: !!apiKey.expiration,
     expiration: !!apiKey.expiration ? apiKey.expiration.toString() : '',
-    includeMetadata: doesMetadataExist,
-    metadata: doesMetadataExist ? JSON.stringify(apiKey.metadata, null, 2) : '{}',
-    customPrivileges: doCustomPrivilegesExist,
-    role_descriptors: doCustomPrivilegesExist
-      ? JSON.stringify(apiKey.role_descriptors, null, 2)
+    includeMetadata,
+    metadata: includeMetadata ? JSON.stringify(apiKey.metadata, null, 2) : '{}',
+    customPrivileges,
+    role_descriptors: customPrivileges
+      ? JSON.stringify(apiKey.type !== 'cross_cluster' && apiKey.role_descriptors, null, 2)
       : '{}',
+    access: apiKey.type === 'cross_cluster' ? JSON.stringify(apiKey.access, null, 2) : '{}',
   };
 }

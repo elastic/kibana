@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import type { CoreSetup, NotificationsSetup } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
-import type { ISearchEmbeddable, SavedSearch } from '@kbn/discover-plugin/public';
+import type { ISearchEmbeddable } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -67,7 +68,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     });
   }
 
-  public async getSearchSource(savedSearch: SavedSearch, _embeddable: ISearchEmbeddable) {
+  public async getSharingData(savedSearch: SavedSearch) {
     const [{ uiSettings }, { data }] = await Rx.firstValueFrom(this.startServices$);
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
@@ -125,10 +126,13 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const savedSearch = embeddable.getSavedSearch();
-    const { columns, getSearchSource } = await this.getSearchSource(savedSearch, embeddable);
+    const { columns, getSearchSource } = await this.getSharingData(savedSearch);
 
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
-      searchSource: getSearchSource(true),
+      searchSource: getSearchSource({
+        addGlobalTimeFilter: !embeddable.hasTimeRange(),
+        absoluteTime: true,
+      }),
       columns,
       title: savedSearch.title || '',
       objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType

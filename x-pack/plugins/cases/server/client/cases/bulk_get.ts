@@ -5,33 +5,21 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pick, partition } from 'lodash';
+import { partition } from 'lodash';
 
-import { MAX_BULK_GET_CASES } from '../../../common/constants';
-import type {
-  CasesBulkGetResponse,
-  CasesBulkGetRequest,
-  CaseAttributes,
-} from '../../../common/api';
-import {
-  CasesBulkGetRequestRt,
-  CasesBulkGetResponseFieldsRt,
-  excess,
-  throwErrors,
-  CasesBulkGetResponseRt,
-} from '../../../common/api';
+import type { CaseAttributes } from '../../../common/types/domain';
+import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/types/api';
+import { CasesBulkGetResponseRt, CasesBulkGetRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
-import type { CasesClientArgs, SOWithErrors } from '../types';
+import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { SOWithErrors } from '../../common/types';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
-type CaseSavedObjectWithErrors = SOWithErrors<CaseAttributes>;
-type BulkGetCase = CasesBulkGetResponse['cases'][number];
+type CaseSavedObjectWithErrors = Array<SOWithErrors<CaseAttributes>>;
 
 /**
  * Retrieves multiple cases by ids.
@@ -47,18 +35,9 @@ export const bulkGet = async (
   } = clientArgs;
 
   try {
-    const fields = Object.keys(CasesBulkGetResponseFieldsRt.props).filter(
-      (field) => !['totalComments', 'id', 'version'].includes(field)
-    );
+    const request = decodeWithExcessOrThrow(CasesBulkGetRequestRt)(params);
 
-    const request = pipe(
-      excess(CasesBulkGetRequestRt).decode(params),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
-
-    throwErrorIfCaseIdsReachTheLimit(request.ids);
-
-    const cases = await caseService.getCases({ caseIds: request.ids, fields });
+    const cases = await caseService.getCases({ caseIds: request.ids });
 
     const [validCases, soBulkGetErrors] = partition(
       cases.saved_objects,
@@ -76,25 +55,22 @@ export const bulkGet = async (
     });
 
     const flattenedCases = authorizedCases.map((theCase) => {
-      const { userComments } = commentTotals.get(theCase.id) ?? {
+      const { userComments, alerts } = commentTotals.get(theCase.id) ?? {
         alerts: 0,
         userComments: 0,
       };
 
-      const flattenedCase = flattenCaseSavedObject({
+      return flattenCaseSavedObject({
         savedObject: theCase,
         totalComment: userComments,
+        totalAlerts: alerts,
       });
-
-      return {
-        ...(pick(flattenedCase, [...fields, 'id', 'version']) as BulkGetCase),
-        totalComments: flattenedCase.totalComment,
-      };
     });
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
+    const res = { cases: flattenedCases, errors };
 
-    return CasesBulkGetResponseRt.encode({ cases: flattenedCases, errors });
+    return decodeOrThrow(CasesBulkGetResponseRt)(res);
   } catch (error) {
     const ids = params.ids ?? [];
     throw createCaseError({
@@ -102,12 +78,6 @@ export const bulkGet = async (
       error,
       logger,
     });
-  }
-};
-
-const throwErrorIfCaseIdsReachTheLimit = (ids: string[]) => {
-  if (ids.length > MAX_BULK_GET_CASES) {
-    throw Boom.badRequest(`Maximum request limit of ${MAX_BULK_GET_CASES} cases reached`);
   }
 };
 

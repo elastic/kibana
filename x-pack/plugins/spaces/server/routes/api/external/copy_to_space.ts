@@ -24,10 +24,10 @@ const areObjectsUnique = (objects: SavedObjectIdentifier[]) =>
   _.uniqBy(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getSpacesService, usageStatsServicePromise, getStartServices } = deps;
+  const { router, getSpacesService, usageStatsServicePromise, getStartServices } = deps;
   const usageStatsClientPromise = usageStatsServicePromise.then(({ getClient }) => getClient());
 
-  externalRouter.post(
+  router.post(
     {
       path: '/api/spaces/_copy_saved_objects',
       options: {
@@ -105,23 +105,39 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         })
       );
 
-      const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-        startServices.savedObjects,
-        request
-      );
-      const sourceSpaceId = getSpacesService().getSpaceId(request);
-      const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
-        objects,
-        includeReferences,
-        overwrite,
-        createNewCopies,
-        compatibilityMode,
-      });
-      return response.ok({ body: copyResponse });
+      try {
+        const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
+          startServices.savedObjects,
+          request
+        );
+        const sourceSpaceId = getSpacesService().getSpaceId(request);
+        const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
+          objects,
+          includeReferences,
+          overwrite,
+          createNewCopies,
+          compatibilityMode,
+        });
+        return response.ok({ body: copyResponse });
+      } catch (e) {
+        if (e.type === 'object-fetch-error' && e.attributes?.objects) {
+          return response.notFound({
+            body: {
+              message: 'Saved objects not found',
+              attributes: {
+                objects: e.attributes?.objects.map((obj: SavedObjectIdentifier) => ({
+                  id: obj.id,
+                  type: obj.type,
+                })),
+              },
+            },
+          });
+        } else throw e;
+      }
     })
   );
 
-  externalRouter.post(
+  router.post(
     {
       path: '/api/spaces/_resolve_copy_saved_objects_errors',
       options: {

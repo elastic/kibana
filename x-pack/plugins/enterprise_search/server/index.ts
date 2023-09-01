@@ -8,7 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 
-import { EnterpriseSearchPlugin } from './plugin';
+import { EnterpriseSearchPlugin, EnterpriseSearchPluginStart as PluginStart } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new EnterpriseSearchPlugin(initializerContext);
@@ -22,9 +22,12 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   hasConnectors: schema.boolean({ defaultValue: true }),
   hasDefaultIngestPipeline: schema.boolean({ defaultValue: true }),
+  hasDocumentLevelSecurityEnabled: schema.boolean({ defaultValue: true }),
+  hasIncrementalSyncEnabled: schema.boolean({ defaultValue: true }),
   hasNativeConnectors: schema.boolean({ defaultValue: true }),
   hasWebCrawler: schema.boolean({ defaultValue: true }),
   host: schema.maybe(schema.string()),
+  isCloud: schema.boolean({ defaultValue: false }),
   ssl: schema.object({
     certificateAuthorities: schema.maybe(
       schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
@@ -34,6 +37,9 @@ export const configSchema = schema.object({
       { defaultValue: 'full' }
     ),
   }),
+  ui: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;
@@ -42,11 +48,15 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
     canDeployEntSearch: true,
     host: true,
+    ui: true,
   },
   schema: configSchema,
 };
 export const CONNECTORS_INDEX = '.elastic-connectors';
 export const CURRENT_CONNECTORS_INDEX = '.elastic-connectors-v1';
 export const CONNECTORS_JOBS_INDEX = '.elastic-connectors-sync-jobs';
+export const CURRENT_CONNECTORS_JOB_INDEX = '.elastic-connectors-sync-jobs-v1';
 export const CONNECTORS_VERSION = 1;
 export const CRAWLERS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';
+
+export type EnterpriseSearchPluginStart = PluginStart;

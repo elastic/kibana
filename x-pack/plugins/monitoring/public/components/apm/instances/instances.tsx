@@ -12,7 +12,6 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiScreenReaderOnly,
   EuiPanel,
@@ -185,7 +184,7 @@ export function ApmServerInstances({ apms, setupMode, alerts }: Props) {
           <Status stats={data.stats} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
-        <EuiPageContent>
+        <EuiPanel>
           {setupModeCallout}
           <EuiMonitoringTable
             className="apmInstancesTable"
@@ -222,7 +221,7 @@ export function ApmServerInstances({ apms, setupMode, alerts }: Props) {
               defaultFields: ['name'],
             }}
           />
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

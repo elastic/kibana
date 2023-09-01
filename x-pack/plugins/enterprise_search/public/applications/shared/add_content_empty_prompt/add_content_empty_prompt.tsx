@@ -51,7 +51,7 @@ export const AddContentEmptyPrompt: React.FC<EmptyPromptProps> = ({ title, butto
                 <h2>
                   {title ||
                     i18n.translate('xpack.enterpriseSearch.overview.emptyState.heading', {
-                      defaultMessage: 'Add content to Enterprise Search',
+                      defaultMessage: 'Add content to Search',
                     })}
                 </h2>
               </EuiTitle>
@@ -81,7 +81,7 @@ export const AddContentEmptyPrompt: React.FC<EmptyPromptProps> = ({ title, butto
                     <EuiButton color="primary" fill>
                       {buttonLabel ||
                         i18n.translate('xpack.enterpriseSearch.overview.emptyState.buttonTitle', {
-                          defaultMessage: 'Add content to Enterprise Search',
+                          defaultMessage: 'Add content to Search',
                         })}
                     </EuiButton>
                   </EuiLinkTo>

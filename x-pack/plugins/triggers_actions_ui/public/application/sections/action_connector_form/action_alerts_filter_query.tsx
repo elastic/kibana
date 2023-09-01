@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch, EuiSpacer } from '@elastic/eui';
@@ -16,11 +17,17 @@ import { AlertsSearchBar } from '../alerts_search_bar';
 interface ActionAlertsFilterQueryProps {
   state?: AlertsFilter['query'];
   onChange: (update?: AlertsFilter['query']) => void;
+  appName: string;
+  featureIds: ValidFeatureId[];
+  ruleTypeId?: string;
 }
 
 export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = ({
   state,
   onChange,
+  appName,
+  featureIds,
+  ruleTypeId,
 }) => {
   const [query, setQuery] = useState(state ?? { kql: '', filters: [] });
 
@@ -61,7 +68,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterQueryToggleLabel',
           {
-            defaultMessage: 'if alert matches a query',
+            defaultMessage: 'If alert matches a query',
           }
         )}
         checked={queryEnabled}
@@ -72,9 +79,10 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
         <>
           <EuiSpacer size="s" />
           <AlertsSearchBar
-            appName="siem"
+            appName={appName}
+            featureIds={featureIds}
+            ruleTypeId={ruleTypeId}
             disableQueryLanguageSwitcher={true}
-            featureIds={['siem']}
             query={query.kql}
             filters={query.filters ?? []}
             onQueryChange={onQueryChange}

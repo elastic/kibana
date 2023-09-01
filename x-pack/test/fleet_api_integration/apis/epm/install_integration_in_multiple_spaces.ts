@@ -16,6 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
+  const esArchiver = getService('esArchiver');
   const server = dockerServers.get('registry');
   const pkgName = 'system';
   const pkgVersion = '1.27.0';
@@ -72,6 +73,7 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       if (!server.enabled) return;
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await installPackage(pkgName, pkgVersion);
 
       await createSpace(testSpaceId);
@@ -81,6 +83,7 @@ export default function (providerContext: FtrProviderContext) {
 
     after(async () => {
       await deleteSpace(testSpaceId);
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     it('should install kibana assets', async function () {

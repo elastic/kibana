@@ -15,12 +15,12 @@ import {
 } from '@kbn/core/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
+import { SpacesGridPage } from './spaces_grid_page';
 import { SpaceAvatarInternal } from '../../space_avatar/space_avatar_internal';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesGridPage } from './spaces_grid_page';
 
 const spaces = [
   {
@@ -66,6 +66,34 @@ describe('SpacesGridPage', () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
 
+    const wrapper = shallowWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        maxSpaces={1000}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spaces);
+  });
+
+  it('renders a create spaces button', async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
     const wrapper = mountWithIntl(
       <SpacesGridPage
         spacesManager={spacesManager as unknown as SpacesManager}
@@ -79,6 +107,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        maxSpaces={1000}
       />
     );
 
@@ -86,7 +115,37 @@ describe('SpacesGridPage', () => {
     await act(async () => {});
     wrapper.update();
 
-    expect(wrapper.find(SpaceAvatarInternal)).toHaveLength(spaces.length);
+    expect(wrapper.find({ 'data-test-subj': 'createSpace' }).length).toBeTruthy();
+    expect(wrapper.find('EuiCallOut')).toHaveLength(0);
+  });
+
+  it('does not render a create spaces button when limit has been reached', async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
+    const wrapper = mountWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        maxSpaces={1}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    expect(wrapper.find({ 'data-test-subj': 'createSpace' }).length).toBeFalsy();
+    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
   });
 
   it('notifies when spaces fail to load', async () => {
@@ -98,7 +157,7 @@ describe('SpacesGridPage', () => {
 
     const notifications = notificationServiceMock.createStartContract();
 
-    const wrapper = mountWithIntl(
+    const wrapper = shallowWithIntl(
       <SpacesGridPage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -111,6 +170,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        maxSpaces={1000}
       />
     );
 
@@ -132,7 +192,7 @@ describe('SpacesGridPage', () => {
 
     const notifications = notificationServiceMock.createStartContract();
 
-    const wrapper = mountWithIntl(
+    const wrapper = shallowWithIntl(
       <SpacesGridPage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={() => Promise.reject(error)}
@@ -145,6 +205,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        maxSpaces={1000}
       />
     );
 

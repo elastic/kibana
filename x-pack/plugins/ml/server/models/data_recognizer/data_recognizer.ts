@@ -40,6 +40,7 @@ import type {
   DataRecognizerConfigResponse,
   GeneralDatafeedsOverride,
   JobSpecificOverride,
+  RecognizeResult,
 } from '../../../common/types/modules';
 import { isGeneralJobOverride } from '../../../common/types/modules';
 import {
@@ -78,14 +79,6 @@ interface Config {
   dirName?: string;
   module: FileBasedModule | Module;
   isSavedObject: boolean;
-}
-
-export interface RecognizeResult {
-  id: string;
-  title: string;
-  query: any;
-  description: string;
-  logo: Logo;
 }
 
 interface ObjectExistResult {
@@ -487,7 +480,7 @@ export class DataRecognizer {
       indexPatternName === undefined ? moduleConfig.defaultIndexPattern : indexPatternName;
     this._indexPatternId = await this._getIndexPatternId(this._indexPatternName);
 
-    // the module's jobs contain custom URLs which require an index patten id
+    // the module's jobs contain custom URLs which require an index pattern id
     // but there is no corresponding data view, throw an error
     if (this._indexPatternId === undefined && this._doJobUrlsContainIndexPatternId(moduleConfig)) {
       throw Boom.badRequest(
@@ -495,7 +488,7 @@ export class DataRecognizer {
       );
     }
 
-    // the module's saved objects require an index patten id
+    // the module's saved objects require an index pattern id
     // but there is no corresponding data view, throw an error
     if (
       this._indexPatternId === undefined &&

@@ -10,9 +10,11 @@ import { render } from '@testing-library/react';
 import { VISUALIZATIONS_SECTION_HEADER_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../common/mock';
 import { VisualizationsSection } from './visualizations_section';
-import { mockContextValue, mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockContextValue } from '../mocks/mock_right_panel_context';
+import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import { RightPanelContext } from '../context';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 
 jest.mock('../../../common/containers/alerts/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
@@ -35,10 +37,16 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should render visualizations component', () => {
+    const flyoutContextValue = {
+      openLeftPanel: jest.fn(),
+    } as unknown as ExpandableFlyoutContext;
+
     const { getByTestId, getAllByRole } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <VisualizationsSection />
-      </RightPanelContext.Provider>
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <RightPanelContext.Provider value={contextValue}>
+          <VisualizationsSection />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
     );
 
     expect(getByTestId(VISUALIZATIONS_SECTION_HEADER_TEST_ID)).toBeInTheDocument();

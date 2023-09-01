@@ -27,7 +27,7 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -41,7 +41,6 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
-import { type } from './utils';
 import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
@@ -65,6 +64,7 @@ import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -74,7 +74,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.hostsPageEvents) ?? timelineDefaults).graphEventId
@@ -238,11 +238,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               </>
             )}
 
-            <TabNavigationWithBreadcrumbs
+            <TabNavigation
               navTabs={navTabsUsersDetails(
                 detailName,
                 hasMlUserPermissions(capabilities),
-                isPlatinumOrTrialLicense
+                hasEntityAnalyticsCapability
               )}
             />
             <EuiSpacer />
@@ -257,7 +257,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               userDetailFilter={usersDetailsPageFilters}
               setQuery={setQuery}
               to={to}
-              type={type}
+              type={UsersType.details}
               usersDetailsPagePath={usersDetailsPagePath}
             />
           </SecuritySolutionPageWrapper>

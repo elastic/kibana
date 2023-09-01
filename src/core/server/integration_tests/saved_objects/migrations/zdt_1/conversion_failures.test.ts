@@ -63,7 +63,7 @@ describe('ZDT upgrades - encountering conversion failures', () => {
 
   describe('when discardCorruptObjects is false', () => {
     it('fails the migration with an explicit message and keep the documents', async () => {
-      const { runMigrations, savedObjectsRepository } = await prepareScenario({
+      const { client, runMigrations } = await prepareScenario({
         discardCorruptObjects: false,
       });
 
@@ -84,15 +84,13 @@ describe('ZDT upgrades - encountering conversion failures', () => {
       const records = await parseLogFile(logFilePath);
       expect(records).toContainLogEntry('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL');
 
-      const { saved_objects: sampleADocs } = await savedObjectsRepository.find({
-        type: 'sample_a',
-      });
-      const { saved_objects: sampleBDocs } = await savedObjectsRepository.find({
-        type: 'sample_b',
-      });
-
-      expect(sampleADocs).toHaveLength(5);
-      expect(sampleBDocs).toHaveLength(5);
+      const { kibanaIndex: index } = getBaseMigratorParams();
+      await expect(
+        client.count({ index, query: { term: { type: 'sample_a' } } })
+      ).resolves.toHaveProperty('count', 5);
+      await expect(
+        client.count({ index, query: { term: { type: 'sample_b' } } })
+      ).resolves.toHaveProperty('count', 5);
     });
   });
 
@@ -108,8 +106,8 @@ describe('ZDT upgrades - encountering conversion failures', () => {
       '2': {
         changes: [
           {
-            type: 'data_backfill',
-            transform: (doc) => {
+            type: 'unsafe_transform',
+            transformFn: (doc) => {
               throw new Error(`error from ${doc.id}`);
             },
           },
@@ -123,8 +121,8 @@ describe('ZDT upgrades - encountering conversion failures', () => {
       '2': {
         changes: [
           {
-            type: 'data_backfill',
-            transform: (doc) => {
+            type: 'unsafe_transform',
+            transformFn: (doc) => {
               if (doc.id === 'b-0') {
                 throw new Error(`error from ${doc.id}`);
               }

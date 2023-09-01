@@ -6,8 +6,20 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { CORRELATIONS_ERROR_MESSAGE } from './translations';
 import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
+import { RelatedAlertsBySession } from './related_alerts_by_session';
+import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
+import { RelatedCases } from './related_cases';
+import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
+import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
+import { useLeftPanelContext } from '../context';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
+import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
+import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
+import { SuppressedAlerts } from './suppressed_alerts';
 
 export const CORRELATIONS_TAB_ID = 'correlations-details';
 
@@ -15,7 +27,83 @@ export const CORRELATIONS_TAB_ID = 'correlations-details';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  return <EuiText data-test-subj={CORRELATIONS_DETAILS_TEST_ID}>{'Correlations'}</EuiText>;
+  const { dataAsNestedObject, dataFormattedForFieldBrowser, eventId, getFieldsData, scopeId } =
+    useLeftPanelContext();
+
+  const {
+    show: showAlertsByAncestry,
+    documentId,
+    indices,
+  } = useShowRelatedAlertsByAncestry({
+    getFieldsData,
+    dataAsNestedObject,
+    dataFormattedForFieldBrowser,
+  });
+  const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
+    getFieldsData,
+  });
+  const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
+  const showCases = useShowRelatedCases();
+  const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
+    getFieldsData,
+  });
+
+  const canShowAtLeastOneInsight =
+    showAlertsByAncestry ||
+    showSameSourceAlerts ||
+    showAlertsBySession ||
+    showCases ||
+    showSuppressedAlerts;
+
+  return (
+    <>
+      {canShowAtLeastOneInsight ? (
+        <EuiFlexGroup gutterSize="l" direction="column">
+          {showSuppressedAlerts && (
+            <EuiFlexItem>
+              <SuppressedAlerts
+                alertSuppressionCount={alertSuppressionCount}
+                dataAsNestedObject={dataAsNestedObject}
+              />
+            </EuiFlexItem>
+          )}
+          {showCases && (
+            <EuiFlexItem>
+              <RelatedCases eventId={eventId} />
+            </EuiFlexItem>
+          )}
+          {showSameSourceAlerts && originalEventId && (
+            <EuiFlexItem>
+              <RelatedAlertsBySameSourceEvent
+                originalEventId={originalEventId}
+                scopeId={scopeId}
+                eventId={eventId}
+              />
+            </EuiFlexItem>
+          )}
+          {showAlertsBySession && entityId && (
+            <EuiFlexItem>
+              <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
+            </EuiFlexItem>
+          )}
+          {showAlertsByAncestry && documentId && indices && (
+            <EuiFlexItem>
+              <RelatedAlertsByAncestry
+                documentId={documentId}
+                indices={indices}
+                scopeId={scopeId}
+                eventId={eventId}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      ) : (
+        <div data-test-subj={`${CORRELATIONS_DETAILS_TEST_ID}Error`}>
+          {CORRELATIONS_ERROR_MESSAGE}
+        </div>
+      )}
+    </>
+  );
 };
 
 CorrelationsDetails.displayName = 'CorrelationsDetails';

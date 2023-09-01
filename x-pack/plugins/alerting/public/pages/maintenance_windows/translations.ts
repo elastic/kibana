@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Moment } from 'moment';
-import { Frequency } from 'rrule';
+import { Frequency } from '@kbn/rrule';
 import { monthDayDate } from './helpers/month_day_date';
 
 export const MAINTENANCE_WINDOWS = i18n.translate('xpack.alerting.maintenanceWindows', {
@@ -80,7 +80,7 @@ export const CREATE_MAINTENANCE_WINDOW_DESCRIPTION = i18n.translate(
   'xpack.alerting.maintenanceWindows.create.description',
   {
     defaultMessage:
-      'Schedule a single or recurring period in which rule notifications cease and alerts are in maintenance mode.',
+      'Schedule a single or recurring period in which new alerts do not send notifications.',
   }
 );
 
@@ -311,6 +311,13 @@ export const CREATE_FORM_WEEKDAY_SHORT = (dayOfWeek: string) => [
     values: { dayOfWeek },
   }),
 ];
+
+export const CREATE_FORM_BYWEEKDAY_REQUIRED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.byweekdayFieldRequiredError',
+  {
+    defaultMessage: 'A week day is required.',
+  }
+);
 
 export const CREATE_FORM_CUSTOM_REPEAT_MONTHLY_ON_DAY = (startDate: Moment) =>
   i18n.translate('xpack.alerting.maintenanceWindows.createForm.repeatOnMonthlyDay', {
@@ -610,3 +617,7 @@ export const START_TRIAL = i18n.translate(
     defaultMessage: 'Start trial',
   }
 );
+
+export const REFRESH = i18n.translate('xpack.alerting.maintenanceWindows.refreshButton', {
+  defaultMessage: 'Refresh',
+});

@@ -21,14 +21,20 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlUrlConfig, MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import {
+  isDataFrameAnalyticsConfigs,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
+import { parseUrlState } from '@kbn/ml-url-state';
+
 import { useMlKibana } from '../../../contexts/kibana';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import { type DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
 import { TIME_RANGE_TYPE } from './constants';
-import { Job, isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
+import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
@@ -44,6 +50,8 @@ export interface CustomUrlListProps {
   job: Job | DataFrameAnalyticsConfig;
   customUrls: MlUrlConfig[];
   onChange: (customUrls: MlUrlConfig[]) => void;
+  dataViewListItems?: DataViewListItem[];
+  isPartialDFAJob?: boolean;
 }
 
 /*
@@ -54,9 +62,15 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
   job,
   customUrls,
   onChange: setCustomUrls,
+  dataViewListItems,
+  isPartialDFAJob,
 }) => {
   const {
-    services: { http, notifications },
+    services: {
+      http,
+      notifications,
+      data: { dataViews },
+    },
   } = useMlKibana();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
 
@@ -106,26 +120,60 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     }
   };
 
-  const onTestButtonClick = (index: number) => {
-    if (index < customUrls.length) {
-      getTestUrl(job, customUrls[index])
-        .then((testUrl) => {
-          openCustomUrlWindow(testUrl, customUrls[index], http.basePath.get());
-        })
-        .catch((resp) => {
-          // eslint-disable-next-line no-console
-          console.error('Error obtaining URL for test:', resp);
+  const onTestButtonClick = async (index: number) => {
+    const customUrl = customUrls[index] as MlKibanaUrlConfig;
+    let timefieldName = null;
 
-          const { toasts } = notifications;
-          toasts.addDanger(
-            i18n.translate(
-              'xpack.ml.customUrlEditorList.obtainingUrlToTestConfigurationErrorMessage',
-              {
-                defaultMessage: 'An error occurred obtaining the URL to test the configuration',
-              }
-            )
-          );
-        });
+    if (
+      index < customUrls.length &&
+      (isDataFrameAnalyticsConfigs(job) || isPartialDFAJob) &&
+      customUrl.time_range !== undefined &&
+      customUrl.time_range !== TIME_RANGE_TYPE.AUTO
+    ) {
+      // Ensure cast as dfaJob if it's just a partial from the wizard
+      const dfaJob = job as DataFrameAnalyticsConfig;
+      let dataViewId;
+      // DFA job url - need the timefield to test the URL. Get it from the job config. Use source index when partial job since dest index does not exist yet.
+      if (customUrl.url_value.includes('dashboards')) {
+        const sourceIndex = Array.isArray(dfaJob.source.index)
+          ? dfaJob.source.index.join()
+          : dfaJob.source.index;
+        // need to get the dataview from the dashboard to get timefield
+        const indexName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
+        const backupIndexName = sourceIndex;
+        dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
+        if (!dataViewId) {
+          dataViewId = dataViewListItems?.find((item) => item.title === backupIndexName)?.id;
+        }
+      } else {
+        const urlState = parseUrlState(customUrl.url_value);
+        dataViewId = urlState._a?.index;
+      }
+
+      if (dataViewId) {
+        const dataView = await dataViews.get(dataViewId);
+        timefieldName = dataView?.timeFieldName ?? null;
+      }
+    }
+
+    if (index < customUrls.length) {
+      try {
+        const testUrl = await getTestUrl(job, customUrl, timefieldName, undefined, isPartialDFAJob);
+        openCustomUrlWindow(testUrl, customUrl, http.basePath.get());
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error obtaining URL for test:', error);
+
+        const { toasts } = notifications;
+        toasts.addDanger(
+          i18n.translate(
+            'xpack.ml.customUrlEditorList.obtainingUrlToTestConfigurationErrorMessage',
+            {
+              defaultMessage: 'An error occurred obtaining the URL to test the configuration',
+            }
+          )
+        );
+      }
     }
   };
 
@@ -145,6 +193,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
     // Validate the time range.
     const timeRange = (customUrl as MlKibanaUrlConfig).time_range;
+    const isCustomTimeRange = (customUrl as MlKibanaUrlConfig).is_custom_time_range === true;
     const isInvalidTimeRange = !isValidTimeRange(timeRange);
     const invalidIntervalError = isInvalidTimeRange
       ? [
@@ -210,7 +259,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
               )}
             </EuiFormRow>
           </EuiFlexItem>
-          {isAnomalyDetectionJob(job) ? (
+          {isCustomTimeRange === false ? (
             <EuiFlexItem grow={false}>
               <EuiFormRow
                 label={

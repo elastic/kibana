@@ -20,7 +20,6 @@ describe('ExpandableFlyout', () => {
       component: () => <div>{'component'}</div>,
     },
   ];
-  const onClose = () => window.alert('closed');
 
   it(`shouldn't render flyout if no panels`, () => {
     const context: ExpandableFlyoutContext = {
@@ -33,7 +32,7 @@ describe('ExpandableFlyout', () => {
 
     const result = render(
       <ExpandableFlyoutContext.Provider value={context}>
-        <ExpandableFlyout registeredPanels={registeredPanels} onClose={onClose} />
+        <ExpandableFlyout registeredPanels={registeredPanels} />
       </ExpandableFlyoutContext.Provider>
     );
 
@@ -53,7 +52,7 @@ describe('ExpandableFlyout', () => {
 
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={context}>
-        <ExpandableFlyout registeredPanels={registeredPanels} onClose={onClose} />
+        <ExpandableFlyout registeredPanels={registeredPanels} />
       </ExpandableFlyoutContext.Provider>
     );
 
@@ -73,7 +72,7 @@ describe('ExpandableFlyout', () => {
 
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={context}>
-        <ExpandableFlyout registeredPanels={registeredPanels} onClose={onClose} />
+        <ExpandableFlyout registeredPanels={registeredPanels} />
       </ExpandableFlyoutContext.Provider>
     );
 
@@ -95,7 +94,7 @@ describe('ExpandableFlyout', () => {
 
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={context}>
-        <ExpandableFlyout registeredPanels={registeredPanels} onClose={onClose} />
+        <ExpandableFlyout registeredPanels={registeredPanels} />
       </ExpandableFlyoutContext.Provider>
     );
 

@@ -63,11 +63,32 @@ export const COPY_TO_CLIPBOARD = i18n.translate(
   }
 );
 
+export const DATA_QUALITY_PROMPT_CONTEXT_PILL = (indexName: string) =>
+  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.dataQualityPromptContextPill', {
+    values: { indexName },
+    defaultMessage: 'Data Quality ({indexName})',
+  });
+
+export const DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.dataQualityPromptContextPillTooltip',
+  {
+    defaultMessage: 'Add this Data Quality report as context',
+  }
+);
+
 /** The subtitle displayed on the Data Quality dashboard */
 export const DATA_QUALITY_SUBTITLE: string = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.securitySolutionPackages.ecsDataQualityDashboardSubtitle',
   {
     defaultMessage: 'Check index mappings and values for compatibility with the',
+  }
+);
+
+export const DATA_QUALITY_SUGGESTED_USER_PROMPT = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.dataQualitySuggestedUserPrompt',
+  {
+    defaultMessage:
+      'Explain the results above, and describe some options to fix incompatibilities.',
   }
 );
 

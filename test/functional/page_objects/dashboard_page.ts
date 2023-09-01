@@ -138,7 +138,7 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.existOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
   }
 
-  public async expectUnsavedChangesDoesNotExist(title: string) {
+  public async expectUnsavedChangesListingDoesNotExist(title: string) {
     this.log.debug(`Expect Unsaved Changes Listing Does Not Exist for `, title);
     await this.testSubjects.missingOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
   }
@@ -174,11 +174,6 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.existOrFail('dashboardLandingPage');
   }
 
-  public async clickDashboardBreadcrumbLink() {
-    this.log.debug('clickDashboardBreadcrumbLink');
-    await this.testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
-  }
-
   public async expectOnDashboard(expectedTitle: string) {
     await this.retry.waitFor(
       `last breadcrumb to have dashboard title: ${expectedTitle}`,
@@ -192,42 +187,26 @@ export class DashboardPageObject extends FtrService {
 
   public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
     this.log.debug('gotoDashboardLandingPage');
-    const onPage = await this.onDashboardLandingPage();
-    if (!onPage) {
-      await this.clickDashboardBreadcrumbLink();
-      await this.retry.try(async () => {
-        const warning = await this.testSubjects.exists('confirmModalTitleText');
-        if (warning) {
-          await this.testSubjects.click(
-            ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-          );
-        }
-      });
-      await this.expectExistsDashboardLandingPage();
-    }
+    if (await this.onDashboardLandingPage()) return;
+
+    const breadcrumbLink = this.config.get('serverless')
+      ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
+      : 'breadcrumb dashboardListingBreadcrumb first';
+    await this.testSubjects.click(breadcrumbLink);
+    await this.retry.try(async () => {
+      const warning = await this.testSubjects.exists('confirmModalTitleText');
+      if (warning) {
+        await this.testSubjects.click(
+          ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+        );
+      }
+    });
+    await this.expectExistsDashboardLandingPage();
   }
 
   public async clickClone() {
     this.log.debug('Clicking clone');
     await this.testSubjects.click('dashboardClone');
-  }
-
-  public async getCloneTitle() {
-    return await this.testSubjects.getAttribute('clonedDashboardTitle', 'value');
-  }
-
-  public async confirmClone() {
-    this.log.debug('Confirming clone');
-    await this.testSubjects.click('cloneConfirmButton');
-  }
-
-  public async cancelClone() {
-    this.log.debug('Canceling clone');
-    await this.testSubjects.click('cloneCancelButton');
-  }
-
-  public async setClonedDashboardTitle(title: string) {
-    await this.testSubjects.setValue('clonedDashboardTitle', title);
   }
 
   /**
@@ -354,6 +333,12 @@ export class DashboardPageObject extends FtrService {
     });
   }
 
+  public async expectMissingUnsavedChangesBadge() {
+    await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+    });
+  }
+
   public async clickNewDashboard(continueEditing = false) {
     const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
     if (!continueEditing && discardButtonExists) {
@@ -472,11 +457,10 @@ export class DashboardPageObject extends FtrService {
    */
   public async saveDashboard(
     dashboardName: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true },
-    clickMenuItem = true
+    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
   ) {
     await this.retry.try(async () => {
-      await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions, clickMenuItem);
+      await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
 
       if (saveOptions.needsConfirm) {
         await this.ensureDuplicateTitleCallout();
@@ -516,10 +500,12 @@ export class DashboardPageObject extends FtrService {
    */
   public async enterDashboardTitleAndClickSave(
     dashboardTitle: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true },
-    clickMenuItem = true
+    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
   ) {
-    if (clickMenuItem) {
+    const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
+      timeout: 2000,
+    });
+    if (!isSaveModalOpen) {
       await this.testSubjects.click('dashboardSaveMenuItem');
     }
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');

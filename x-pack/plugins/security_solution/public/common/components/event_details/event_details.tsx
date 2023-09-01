@@ -9,7 +9,7 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiHorizontalRule,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiSpacer,
@@ -21,8 +21,11 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { RawEventData } from './types';
-import { useEndpointResponseActionsTab } from './endpoint_response_actions_tab';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import type { RawEventData } from '../../../../common/types/response_actions';
+import { useResponseActionsView } from './response_actions_view';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -32,7 +35,6 @@ import {
   getTourAnchor,
   SecurityStepId,
 } from '../guided_onboarding_tour/tour_config';
-import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
@@ -57,6 +59,7 @@ import { useRiskScoreData } from './use_risk_score_data';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { useOsqueryTab } from './osquery_tab';
 
 export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 
@@ -67,7 +70,9 @@ export type EventViewId =
   | EventsViewType.jsonView
   | EventsViewType.summaryView
   | EventsViewType.threatIntelView
-  | EventsViewType.osqueryView;
+  // Depending on endpointResponseActionsEnabled flag whether to render Osquery Tab or the commonTab (osquery + endpoint results)
+  | EventsViewType.osqueryView
+  | EventsViewType.responseActionsView;
 
 export enum EventsViewType {
   tableView = 'table-view',
@@ -75,7 +80,7 @@ export enum EventsViewType {
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
   osqueryView = 'osquery-results-view',
-  endpointView = 'endpoint-results-view',
+  responseActionsView = 'response-actions-results-view',
 }
 
 interface Props {
@@ -83,7 +88,6 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   detailsEcsData: Ecs | null;
   id: string;
-  indexName: string;
   isAlert: boolean;
   isDraggable?: boolean;
   rawEventData: object | undefined;
@@ -151,7 +155,6 @@ const EventDetailsComponent: React.FC<Props> = ({
   data,
   detailsEcsData,
   id,
-  indexName,
   isAlert,
   isDraggable,
   rawEventData,
@@ -168,6 +171,8 @@ const EventDetailsComponent: React.FC<Props> = ({
   const goToTableTab = useCallback(() => setSelectedTabId(EventsViewType.tableView), []);
 
   const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
+  const basicAlertData = useBasicDataFromDetailsData(data);
+  const { rule: maybeRule } = useRuleWithFallback(basicAlertData.ruleId);
   const existingEnrichments = useMemo(
     () =>
       isAlert
@@ -197,7 +202,7 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const enrichmentCount = allEnrichments.length;
 
-  const { hostRisk, userRisk, isLicenseValid } = useRiskScoreData(data);
+  const { hostRisk, userRisk, isAuthorized } = useRiskScoreData(data);
 
   const renderer = useMemo(
     () =>
@@ -211,9 +216,12 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const showThreatSummary = useMemo(() => {
     const hasEnrichments = enrichmentCount > 0;
-    const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
+    const hasRiskInfoWithLicense = isAuthorized && (hostRisk || userRisk);
     return hasEnrichments || hasRiskInfoWithLicense;
-  }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
+  }, [enrichmentCount, hostRisk, isAuthorized, userRisk]);
+  const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
+    'endpointResponseActionsEnabled'
+  );
 
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
@@ -230,7 +238,6 @@ const EventDetailsComponent: React.FC<Props> = ({
                   contextId={scopeId}
                   data={data}
                   eventId={id}
-                  indexName={indexName}
                   scopeId={scopeId}
                   handleOnEventClosed={handleOnEventClosed}
                   isReadOnly={isReadOnly}
@@ -282,6 +289,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     isReadOnly,
                   }}
                   goToTable={goToTableTab}
+                  investigationFields={maybeRule?.investigation_fields?.field_names ?? []}
                 />
                 <EuiSpacer size="xl" />
                 <Insights
@@ -308,11 +316,13 @@ const EventDetailsComponent: React.FC<Props> = ({
 
                 {isEnrichmentsLoading && (
                   <>
-                    <EuiLoadingContent lines={2} />
+                    <EuiSkeletonText lines={2} />
                   </>
                 )}
 
-                <InvestigationGuideView data={data} />
+                {basicAlertData.ruleId && maybeRule?.note && (
+                  <InvestigationGuideView basicData={basicAlertData} ruleNote={maybeRule.note} />
+                )}
               </>
             ),
           }
@@ -323,19 +333,21 @@ const EventDetailsComponent: React.FC<Props> = ({
       scopeId,
       data,
       id,
-      indexName,
       handleOnEventClosed,
       isReadOnly,
+      threatDetails,
       renderer,
       detailsEcsData,
       isDraggable,
       goToTableTab,
-      threatDetails,
+      maybeRule?.investigation_fields,
+      maybeRule?.note,
       showThreatSummary,
       hostRisk,
       userRisk,
       allEnrichments,
       isEnrichmentsLoading,
+      basicAlertData,
     ]
   );
 
@@ -359,6 +371,7 @@ const EventDetailsComponent: React.FC<Props> = ({
             ),
             content: (
               <ThreatDetailsView
+                before={<EuiSpacer size="m" />}
                 loading={isEnrichmentsLoading}
                 enrichments={allEnrichments}
                 showInvestigationTimeEnrichments={!isEmpty(eventFields)}
@@ -426,26 +439,24 @@ const EventDetailsComponent: React.FC<Props> = ({
     }),
     [rawEventData]
   );
-
+  const responseActionsTab = useResponseActionsView({
+    rawEventData: rawEventData as RawEventData,
+    ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
+  });
   const osqueryTab = useOsqueryTab({
     rawEventData: rawEventData as RawEventData,
     ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
   });
 
-  const endpointResponseActionsTab = useEndpointResponseActionsTab({
-    rawEventData: rawEventData as RawEventData,
-  });
+  const responseActionsTabs = useMemo(() => {
+    return endpointResponseActionsEnabled ? [responseActionsTab] : [osqueryTab];
+  }, [endpointResponseActionsEnabled, osqueryTab, responseActionsTab]);
 
   const tabs = useMemo(() => {
-    return [
-      summaryTab,
-      threatIntelTab,
-      tableTab,
-      jsonTab,
-      osqueryTab,
-      endpointResponseActionsTab,
-    ].filter((tab: EventViewTab | undefined): tab is EventViewTab => !!tab);
-  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab, endpointResponseActionsTab]);
+    return [summaryTab, threatIntelTab, tableTab, jsonTab, ...responseActionsTabs].filter(
+      (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
+    );
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab, responseActionsTabs]);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],

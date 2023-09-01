@@ -15,6 +15,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AggregationsSingleMetricAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { isTextBasedQuery } from '../../../utils/is_text_based_query';
 
 export interface Params {
   dataView?: DataView;
@@ -86,7 +87,9 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
   }, [abortControllerRef, mountedRef]);
 
   useEffect(() => {
-    fetchOccurrences(params.dataView, params.query, params.filters);
+    if (!isTextBasedQuery(params.query)) {
+      fetchOccurrences(params.dataView, params.query, params.filters);
+    }
   }, [fetchOccurrences, params.query, params.filters, params.dataView]);
 
   return {

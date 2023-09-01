@@ -10,7 +10,7 @@ import { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FilterStats } from '@kbn/ml-plugin/common/types/filters';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -174,9 +174,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should fetch all filters stats`, async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/filters/_stats`)
+        .get(`/internal/ml/filters/_stats`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body).to.have.length(testDataList.length);
@@ -206,9 +206,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should not allow retrieving filters stats for user without required permission`, async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/filters/_stats`)
+        .get(`/internal/ml/filters/_stats`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
@@ -217,9 +217,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should not allow retrieving filters stats for unauthorized user`, async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/filters/_stats`)
+        .get(`/internal/ml/filters/_stats`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');

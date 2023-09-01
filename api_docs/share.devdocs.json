@@ -880,6 +880,28 @@
           },
           {
             "parentPluginId": "share",
+            "id": "def-public.ShareContext.shareableUrlLocatorParams",
+            "type": "Object",
+            "tags": [],
+            "label": "shareableUrlLocatorParams",
+            "description": [],
+            "signature": [
+              "{ locator: ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<any>; params: any; } | undefined"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
             "id": "def-public.ShareContext.sharingData",
             "type": "Object",
             "tags": [],

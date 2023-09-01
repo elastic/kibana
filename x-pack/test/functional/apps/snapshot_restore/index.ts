@@ -11,5 +11,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Snapshots app', function () {
     this.tags('skipCloud');
     loadTestFile(require.resolve('./home_page'));
+    loadTestFile(require.resolve('./snapshot_restore'));
   });
 };

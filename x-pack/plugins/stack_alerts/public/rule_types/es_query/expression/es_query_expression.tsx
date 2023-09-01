@@ -6,6 +6,7 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
+import { get, sortBy } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,7 +33,7 @@ import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { useTriggerUiActionServices } from '../util';
+import { convertRawRuntimeFieldtoFieldOption, useTriggerUiActionServices } from '../util';
 
 const { useXJsonMode } = XJson;
 
@@ -89,6 +90,8 @@ export const EsQueryExpression: React.FC<
   const { http, docLinks } = services;
 
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
+  const [runtimeFields, setRuntimeFields] = useState<FieldOption[]>([]);
+  const [combinedFields, setCombinedFields] = useState<FieldOption[]>([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
 
   const setDefaultExpressionValues = async () => {
@@ -108,6 +111,21 @@ export const EsQueryExpression: React.FC<
   const refreshEsFields = async (indices: string[]) => {
     const currentEsFields = await getFields(http, indices);
     setEsFields(currentEsFields);
+    setCombinedFields(sortBy(currentEsFields.concat(runtimeFields), 'name'));
+  };
+
+  const getRuntimeFields = (xjson: string) => {
+    let runtimeMappings;
+    try {
+      runtimeMappings = get(JSON.parse(xjson), 'runtime_mappings');
+    } catch (e) {
+      // ignore error
+    }
+    if (runtimeMappings) {
+      const currentRuntimeFields = convertRawRuntimeFieldtoFieldOption(runtimeMappings);
+      setRuntimeFields(currentRuntimeFields);
+      setCombinedFields(sortBy(esFields.concat(currentRuntimeFields), 'name'));
+    }
   };
 
   const onTestQuery = useCallback(async () => {
@@ -252,6 +270,7 @@ export const EsQueryExpression: React.FC<
           onChange={(xjson: string) => {
             setXJson(xjson);
             setParam('esQuery', convertToJson(xjson));
+            getRuntimeFields(xjson);
           }}
           options={{
             ariaLabel: i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
@@ -276,7 +295,7 @@ export const EsQueryExpression: React.FC<
         timeWindowSize={timeWindowSize}
         timeWindowUnit={timeWindowUnit}
         size={size}
-        esFields={esFields}
+        esFields={combinedFields}
         aggType={aggType}
         aggField={aggField}
         groupBy={groupBy}

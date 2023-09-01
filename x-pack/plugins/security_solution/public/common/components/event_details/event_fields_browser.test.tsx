@@ -25,6 +25,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../hooks/use_get_field_spec');
+
 jest.mock('@kbn/cell-actions/src/hooks/use_load_actions', () => {
   const actual = jest.requireActual('@kbn/cell-actions/src/hooks/use_load_actions');
   return {

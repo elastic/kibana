@@ -16,7 +16,7 @@ const StyledSpinnerFlexItem = styled.span`
   margin-right: 5px;
 `;
 
-export function PanelLoading() {
+export function PanelLoading({ id }: { id: string }) {
   const waitingString = i18n.translate(
     'xpack.securitySolution.endpoint.resolver.panel.relatedDetail.wait',
     {
@@ -29,7 +29,7 @@ export function PanelLoading() {
       defaultMessage: 'Events',
     }
   );
-  const nodesLinkNavProps = useLinkProps({
+  const nodesLinkNavProps = useLinkProps(id, {
     panelView: 'nodes',
   });
   const waitCrumbs = useMemo(() => {

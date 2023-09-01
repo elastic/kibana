@@ -26,6 +26,7 @@ const STORYBOOKS = [
   'dashboard_enhanced',
   'dashboard',
   'data',
+  'log_explorer',
   'embeddable',
   'expression_error',
   'expression_image',
@@ -34,6 +35,7 @@ const STORYBOOKS = [
   'expression_reveal_image',
   'expression_shape',
   'expression_tagcloud',
+  'management',
   'fleet',
   'grouping',
   'home',
@@ -41,8 +43,10 @@ const STORYBOOKS = [
   'kibana_react',
   'lists',
   'observability',
+  'observability_ai_assistant',
   'presentation',
-  'security_solution',
+  // 'security_solution', => This build is error out and failing CI. SEE: https://github.com/elastic/kibana/issues/162290
+  'security_solution_packages',
   'serverless',
   'shared_ux',
   'triggers_actions_ui',
@@ -50,6 +54,7 @@ const STORYBOOKS = [
   'language_documentation_popover',
   'unified_search',
   'random_sampling',
+  'text_based_editor',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';

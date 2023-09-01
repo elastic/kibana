@@ -6,52 +6,53 @@
  */
 
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
-
-import { LinkDescriptor } from '@kbn/observability-plugin/public';
+import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
-import { getFromFromLocation, getToFromLocation } from './query_params';
+import {
+  getFromFromLocation,
+  getToFromLocation,
+  getNodeNameFromLocation,
+  getStateFromLocation,
+} from './query_params';
 import { InventoryItemType } from '../../../common/inventory_models/types';
+import { RouteState } from '../../components/asset_details/types';
 
-type RedirectToNodeDetailProps = RouteComponentProps<{
-  nodeId: string;
-  nodeType: InventoryItemType;
-}>;
+export const RedirectToNodeDetail = () => {
+  const {
+    params: { nodeType, nodeId },
+  } = useRouteMatch<{ nodeType: InventoryItemType; nodeId: string }>();
 
-export const RedirectToNodeDetail = ({
-  match: {
-    params: { nodeId, nodeType },
-  },
-  location,
-}: RedirectToNodeDetailProps) => {
+  const location = useLocation();
+
   const searchString = replaceMetricTimeInQueryString(
     getFromFromLocation(location),
     getToFromLocation(location)
   )('');
 
-  return <Redirect to={`/detail/${nodeType}/${nodeId}?${searchString}`} />;
-};
+  const queryParams = new URLSearchParams(searchString);
 
-export const getNodeDetailUrl = ({
-  nodeType,
-  nodeId,
-  to,
-  from,
-}: {
-  nodeType: InventoryItemType;
-  nodeId: string;
-  to?: number;
-  from?: number;
-}): LinkDescriptor => {
-  return {
-    app: 'metrics',
-    pathname: `link-to/${nodeType}-detail/${nodeId}`,
-    search:
-      to && from
-        ? {
-            to: `${to}`,
-            from: `${from}`,
-          }
-        : undefined,
-  };
+  if (nodeType === 'host') {
+    const assetName = getNodeNameFromLocation(location);
+    if (assetName) {
+      queryParams.set('assetName', assetName);
+    }
+  }
+
+  let state: RouteState | undefined;
+  try {
+    const stateFromLocation = getStateFromLocation(location);
+    state = stateFromLocation ? JSON.parse(stateFromLocation) : undefined;
+  } catch (err) {
+    state = undefined;
+  }
+
+  return (
+    <Redirect
+      to={{
+        pathname: `/detail/${nodeType}/${nodeId}`,
+        search: queryParams.toString(),
+        state,
+      }}
+    />
+  );
 };

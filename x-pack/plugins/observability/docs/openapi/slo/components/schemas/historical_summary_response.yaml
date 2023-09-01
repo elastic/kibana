@@ -9,13 +9,7 @@ additionalProperties:
           type: string
           example: "2022-01-01T00:00:00.000Z"
         status:
-          type: string
-          enum: 
-            - NO_DATA
-            - HEALTHY
-            - DEGRADING
-            - VIOLATED
-          example: "HEALTHY"
+          $ref: './summary_status.yaml'
         sliValue:
           type: number
           example: 0.9836

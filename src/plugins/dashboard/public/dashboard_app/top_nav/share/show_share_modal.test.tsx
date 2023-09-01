@@ -130,12 +130,9 @@ describe('ShowShareModal', () => {
         locatorParams: { params: DashboardAppLocatorParams };
       }
     ).locatorParams.params;
-    const {
-      initializerContext: { kibanaVersion },
-    } = pluginServices.getServices();
     const rawDashboardState = {
       ...unsavedDashboardState,
-      panels: convertPanelMapToSavedPanels(unsavedDashboardState.panels, kibanaVersion),
+      panels: convertPanelMapToSavedPanels(unsavedDashboardState.panels),
     };
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(

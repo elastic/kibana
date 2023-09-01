@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SettingsProps } from '@elastic/charts';
+import type { ChartProps, SettingsProps } from '@elastic/charts';
 
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
@@ -25,6 +25,10 @@ export type MakeOverridesSerializable<T> = {
     ? MakeOverridesSerializable<T[KeyType]>
     : NonNullable<T[KeyType]>;
 };
+
+export type AllowedChartOverrides = Partial<
+  Record<'chart', Simplify<MakeOverridesSerializable<Pick<ChartProps, 'title' | 'description'>>>>
+>;
 
 export type AllowedSettingsOverrides = Partial<
   Record<

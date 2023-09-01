@@ -27,7 +27,6 @@ import {
 } from './translations';
 
 interface Props {
-  data: TimelineEventsDetailsItem;
   eventId: string;
   index: TimelineEventsDetailsItem;
   originalDocumentId: TimelineEventsDetailsItem;
@@ -69,7 +68,7 @@ const dataProviderLimit = 5;
  * state inside the component rather than to add it to Redux.
  */
 export const RelatedAlertsByProcessAncestry = React.memo<Props>(
-  ({ data, originalDocumentId, index, eventId, scopeId }) => {
+  ({ originalDocumentId, index, eventId, scopeId }) => {
     const [showContent, setShowContent] = useState(false);
     const [cache, setCache] = useState<Partial<Cache>>({});
 
@@ -91,7 +90,6 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
       }
       return (
         <FetchAndNotifyCachedAlertsByProcessAncestry
-          data={data}
           index={index}
           originalDocumentId={originalDocumentId}
           eventId={eventId}
@@ -99,7 +97,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
           onCacheLoad={setCache}
         />
       );
-    }, [showContent, cache.alertIds, data, index, originalDocumentId, eventId, scopeId]);
+    }, [showContent, cache.alertIds, index, originalDocumentId, eventId, scopeId]);
 
     return (
       <InsightAccordion
@@ -124,20 +122,16 @@ RelatedAlertsByProcessAncestry.displayName = 'RelatedAlertsByProcessAncestry';
  * Fetches data, displays a loading and error state and notifies about on success
  */
 const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
-  data: TimelineEventsDetailsItem;
   eventId: string;
   index: TimelineEventsDetailsItem;
   originalDocumentId: TimelineEventsDetailsItem;
   isActiveTimelines: boolean;
   onCacheLoad: (cache: Cache) => void;
-}> = ({ data, originalDocumentId, index, isActiveTimelines, onCacheLoad, eventId }) => {
-  const { values: wrappedProcessEntityId } = data;
+}> = ({ originalDocumentId, index, isActiveTimelines, onCacheLoad, eventId }) => {
   const { values: indices } = index;
   const { values: wrappedDocumentId } = originalDocumentId;
   const documentId = Array.isArray(wrappedDocumentId) ? wrappedDocumentId[0] : '';
-  const processEntityId = Array.isArray(wrappedProcessEntityId) ? wrappedProcessEntityId[0] : '';
   const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
-    processEntityId,
     isActiveTimeline: isActiveTimelines,
     documentId,
     indices: indices ?? [],

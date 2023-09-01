@@ -7,10 +7,14 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/core/server';
-import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
+import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_constants';
 import { ApmSourceMap } from './create_apm_source_map_index_template';
 import { SourceMap } from './route';
-import { getEncodedContent, getSourceMapId } from './sourcemap_utils';
+import {
+  getEncodedSourceMapContent,
+  getEncodedContent,
+  getSourceMapId,
+} from './sourcemap_utils';
 
 export async function createApmSourceMap({
   internalESClient,
@@ -31,9 +35,75 @@ export async function createApmSourceMap({
   serviceName: string;
   serviceVersion: string;
 }) {
-  const { contentEncoded, contentHash } = await getEncodedContent(
+  const { contentEncoded, contentHash } = await getEncodedSourceMapContent(
     sourceMapContent
   );
+  return await doCreateApmMap({
+    internalESClient,
+    logger,
+    fleetId,
+    created,
+    bundleFilepath,
+    serviceName,
+    serviceVersion,
+    contentEncoded,
+    contentHash,
+  });
+}
+
+export async function createApmAndroidMap({
+  internalESClient,
+  logger,
+  fleetId,
+  created,
+  mapContent,
+  bundleFilepath,
+  serviceName,
+  serviceVersion,
+}: {
+  internalESClient: ElasticsearchClient;
+  logger: Logger;
+  fleetId: string;
+  created: string;
+  mapContent: string;
+  bundleFilepath: string;
+  serviceName: string;
+  serviceVersion: string;
+}) {
+  const { contentEncoded, contentHash } = await getEncodedContent(mapContent);
+  return await doCreateApmMap({
+    internalESClient,
+    logger,
+    fleetId,
+    created,
+    bundleFilepath,
+    serviceName,
+    serviceVersion,
+    contentEncoded,
+    contentHash,
+  });
+}
+async function doCreateApmMap({
+  internalESClient,
+  logger,
+  fleetId,
+  created,
+  bundleFilepath,
+  serviceName,
+  serviceVersion,
+  contentEncoded,
+  contentHash,
+}: {
+  internalESClient: ElasticsearchClient;
+  logger: Logger;
+  fleetId: string;
+  created: string;
+  bundleFilepath: string;
+  serviceName: string;
+  serviceVersion: string;
+  contentEncoded: string;
+  contentHash: string;
+}) {
   const doc: ApmSourceMap = {
     fleet_id: fleetId,
     created,

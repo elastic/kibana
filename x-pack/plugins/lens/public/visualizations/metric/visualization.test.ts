@@ -923,7 +923,6 @@ describe('metric visualization', () => {
       expect(supportedLayers[0].initialDimensions).toBeUndefined();
       expect(supportedLayers[0]).toMatchInlineSnapshot(`
         Object {
-          "canAddViaMenu": true,
           "disabled": true,
           "initialDimensions": undefined,
           "label": "Visualization",
@@ -933,7 +932,6 @@ describe('metric visualization', () => {
 
       expect({ ...supportedLayers[1], initialDimensions: undefined }).toMatchInlineSnapshot(`
         Object {
-          "canAddViaMenu": true,
           "disabled": false,
           "initialDimensions": undefined,
           "label": "Trendline",

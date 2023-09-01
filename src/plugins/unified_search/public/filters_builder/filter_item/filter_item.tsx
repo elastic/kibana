@@ -114,7 +114,7 @@ export function FilterItem({
   }
   const [multiValueFilterParams, setMultiValueFilterParams] = useState<
     Array<Filter | boolean | string | number>
-  >([]);
+  >(Array.isArray(params) ? params : []);
 
   const onHandleField = useCallback(
     (selectedField: DataViewField) => {

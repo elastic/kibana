@@ -5,11 +5,32 @@
  * 2.0.
  */
 
-import { PostureTypes } from './types';
+import {
+  PostureTypes,
+  VulnSeverity,
+  AwsCredentialsTypeFieldMap,
+  GcpCredentialsTypeFieldMap,
+} from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
+export const STATUS_API_CURRENT_VERSION = '1';
+
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_template}';
+
+export const VULNERABILITIES_DASHBOARD_ROUTE_PATH =
+  '/internal/cloud_security_posture/vulnerabilities_dashboard';
+
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
+export const BENCHMARKS_API_CURRENT_VERSION = '1';
+
+export const FIND_CSP_RULE_TEMPLATE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
+export const FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION = '1';
+
+export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
+export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
+
+export const GET_DETECTION_RULE_ALERTS_STATUS_PATH =
+  '/internal/cloud_security_posture/detection_engine_rules/alerts/_status';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 // TODO: REMOVE CSP_LATEST_FINDINGS_DATA_VIEW and replace it with LATEST_FINDINGS_INDEX_PATTERN
@@ -23,6 +44,7 @@ export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.
 export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings_latest-*';
 export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
+export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
@@ -39,6 +61,8 @@ export const LATEST_VULNERABILITIES_INDEX_PATTERN =
   'logs-cloud_security_posture.vulnerabilities_latest*';
 export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
+export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
+
 export const DATA_VIEW_INDEX_PATTERN = 'logs-*';
 
 export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
@@ -57,7 +81,6 @@ export const POSTURE_TYPE_ALL = 'all';
 export const INTERNAL_FEATURE_FLAGS = {
   showManageRulesMock: false,
   showFindingFlyoutEvidence: false,
-  showFindingsGroupBy: true,
 } as const;
 
 export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
@@ -72,6 +95,8 @@ export const CLOUDBEAT_AZURE = 'cloudbeat/cis_azure';
 export const CLOUDBEAT_VULN_MGMT_AWS = 'cloudbeat/vuln_mgmt_aws';
 export const CLOUDBEAT_VULN_MGMT_GCP = 'cloudbeat/vuln_mgmt_gcp';
 export const CLOUDBEAT_VULN_MGMT_AZURE = 'cloudbeat/vuln_mgmt_azure';
+export const CIS_AWS = 'cis_aws';
+export const CIS_GCP = 'cis_gcp';
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
 export const VULN_MGMT_POLICY_TEMPLATE = 'vuln_mgmt';
@@ -101,3 +126,31 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
 
 export const VULNERABILITIES = 'vulnerabilities';
 export const CONFIGURATIONS = 'configurations';
+
+export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL',
+  UNKNOWN: 'UNKNOWN',
+};
+
+export const VULNERABILITIES_ENUMERATION = 'CVE';
+
+export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {
+  assume_role: ['role_arn'],
+  direct_access_keys: ['access_key_id', 'secret_access_key'],
+  temporary_keys: ['access_key_id', 'secret_access_key', 'session_token'],
+  shared_credentials: ['shared_credential_file', 'credential_profile_name'],
+  cloud_formation: [],
+};
+
+export const SETUP_ACCESS_CLOUD_SHELL = 'google_cloud_shell';
+export const SETUP_ACCESS_MANUAL = 'manual';
+
+export const DETECTION_ENGINE_ALERTS_INDEX_DEFAULT = '.alerts-security.alerts-default';
+
+export const GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP: GcpCredentialsTypeFieldMap = {
+  'credentials-file': ['gcp.credentials.file'],
+  'credentials-json': ['gcp.credentials.json'],
+};

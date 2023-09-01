@@ -9,12 +9,14 @@
 import _ from 'lodash';
 import { getServices } from './kibana_services';
 import { i18n } from '@kbn/i18n';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
 const baseUrl = getServices().addBasePath('/api/kibana/home/tutorials');
 const headers = new Headers();
 headers.append('Accept', 'application/json');
 headers.append('Content-Type', 'application/json');
 headers.append('kbn-xsrf', 'kibana');
+headers.append(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
 let tutorials = [];
 let tutorialsLoaded = false;

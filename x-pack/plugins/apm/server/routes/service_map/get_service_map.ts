@@ -46,8 +46,10 @@ async function getConnectionData({
   end,
   serviceGroupKuery,
   kuery,
+  logger,
 }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
+    logger.debug('Getting trace sample IDs');
     const { traceIds } = await getTraceSampleIds({
       config,
       apmEventClient,
@@ -58,6 +60,8 @@ async function getConnectionData({
       serviceGroupKuery,
       kuery,
     });
+
+    logger.debug(`Found ${traceIds.length} traces to inspect`);
 
     const chunks = chunk(traceIds, config.serviceMapMaxTracesPerRequest);
 
@@ -70,6 +74,8 @@ async function getConnectionData({
       return init;
     }
 
+    logger.debug(`Executing scripted metric agg (${chunks.length} chunks)`);
+
     const chunkedResponses = await withApmSpan(
       'get_service_paths_from_all_trace_ids',
       () =>
@@ -80,12 +86,16 @@ async function getConnectionData({
               traceIds: traceIdsChunk,
               start,
               end,
+              terminateAfter: config.serviceMapTerminateAfter,
+              logger,
             })
           )
         )
     );
 
-    return chunkedResponses.reduce((prev, current) => {
+    logger.debug('Received chunk responses');
+
+    const mergedResponses = chunkedResponses.reduce((prev, current) => {
       return {
         connections: prev.connections.concat(current.connections),
         discoveredServices: prev.discoveredServices.concat(
@@ -93,6 +103,10 @@ async function getConnectionData({
         ),
       };
     });
+
+    logger.debug('Merged responses');
+
+    return mergedResponses;
   });
 }
 
@@ -119,12 +133,19 @@ export function getServiceMap(
       getServiceStats(options),
       anomaliesPromise,
     ]);
-    return transformServiceMapResponses({
+
+    logger.debug('Received and parsed all responses');
+
+    const transformedResponse = transformServiceMapResponses({
       response: {
         ...connectionData,
         services: servicesData,
         anomalies,
       },
     });
+
+    logger.debug('Transformed service map response');
+
+    return transformedResponse;
   });
 }

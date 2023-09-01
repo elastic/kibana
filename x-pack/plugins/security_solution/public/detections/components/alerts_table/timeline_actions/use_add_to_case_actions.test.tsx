@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { EuiContextMenuPanelProps } from '@elastic/eui';
-import { EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,6 +19,7 @@ import {
   sampleCase,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
+import type { AlertTableContextMenuItem } from '../types';
 
 jest.mock('../../../../common/components/guided_onboarding_tour');
 jest.mock('../../../../common/lib/kibana');
@@ -53,7 +53,8 @@ const addToNewCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const addToExistingCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const useKibanaMock = useKibana as jest.Mock;
 
-const renderContextMenu = (items: EuiContextMenuPanelProps['items']) => {
+const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
+  const panels = [{ id: 0, items }];
   render(
     <EuiPopover
       isOpen={true}
@@ -62,7 +63,7 @@ const renderContextMenu = (items: EuiContextMenuPanelProps['items']) => {
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };
@@ -105,10 +106,10 @@ describe('useAddToCaseActions', () => {
       wrapper: TestProviders,
     });
     expect(result.current.addToCaseActionItems.length).toEqual(2);
-    expect(result.current.addToCaseActionItems[0].props['data-test-subj']).toEqual(
+    expect(result.current.addToCaseActionItems[0]['data-test-subj']).toEqual(
       'add-to-existing-case-action'
     );
-    expect(result.current.addToCaseActionItems[1].props['data-test-subj']).toEqual(
+    expect(result.current.addToCaseActionItems[1]['data-test-subj']).toEqual(
       'add-to-new-case-action'
     );
   });

@@ -573,6 +573,7 @@ export const RuleForm = ({
             }
           >
             <RuleParamsExpressionComponent
+              id={rule.id}
               ruleParams={rule.params}
               ruleInterval={`${ruleInterval ?? 1}${ruleIntervalUnit}`}
               ruleThrottle={''}
@@ -659,8 +660,11 @@ export const RuleForm = ({
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
             messageVariables={selectedRuleType.actionVariables}
             defaultActionGroupId={defaultActionGroupId}
-            hasSummary={selectedRuleType.hasGetSummarizedAlerts}
+            hasAlertsMappings={selectedRuleType.hasAlertsMappings}
             featureId={connectorFeatureId}
+            producerId={selectedRuleType.producer}
+            hasFieldsForAAD={selectedRuleType.hasFieldsForAAD}
+            ruleTypeId={rule.ruleTypeId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
             }

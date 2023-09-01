@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { IndexField } from '../../../../common/search_strategy/index_fields';
-import { getBrowserFields, getAllBrowserFields } from '.';
 import type { IndexFieldSearch } from './use_data_view';
 import { useDataView } from './use_data_view';
 import { mocksSource } from './mock';
@@ -27,32 +25,6 @@ jest.mock('../../lib/kibana');
 jest.mock('../../lib/apm/use_track_http_request');
 
 describe('source/index.tsx', () => {
-  describe('getAllBrowserFields', () => {
-    test('it returns an array of all fields in the BrowserFields argument', () => {
-      expect(
-        getAllBrowserFields(getBrowserFields('title 1', mocksSource.indexFields as IndexField[]))
-      ).toMatchSnapshot();
-    });
-  });
-  describe('getBrowserFields', () => {
-    test('it returns an empty object given an empty array', () => {
-      const fields = getBrowserFields('title 1', []);
-      expect(fields).toEqual({});
-    });
-
-    test('it returns the same input given the same title and same fields length', () => {
-      const oldFields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
-      const newFields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
-      // Since it is memoized it will return the same object instance
-      expect(newFields).toBe(oldFields);
-    });
-
-    test('it transforms input into output as expected', () => {
-      const fields = getBrowserFields('title 2', mocksSource.indexFields as IndexField[]);
-      expect(fields).toMatchSnapshot();
-    });
-  });
-
   describe('useDataView hook', () => {
     const mockSearchResponse = {
       ...mocksSource,
@@ -74,8 +46,8 @@ describe('source/index.tsx', () => {
           data: {
             dataViews: {
               ...useKibana().services.data.dataViews,
-              get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
-                Promise.resolve({
+              get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) => {
+                const dataViewMock = {
                   id: dataViewId,
                   matchedIndices: refreshFields
                     ? ['hello', 'world', 'refreshed']
@@ -88,8 +60,14 @@ describe('source/index.tsx', () => {
                       type: 'keyword',
                     },
                   }),
-                }),
+                };
+                return Promise.resolve({
+                  toSpec: () => dataViewMock,
+                  ...dataViewMock,
+                });
+              },
               getFieldsForWildcard: async () => Promise.resolve(),
+              getExistingIndices: async (indices: string[]) => Promise.resolve(indices),
             },
             search: {
               search: jest.fn().mockReturnValue({
@@ -178,7 +156,6 @@ describe('source/index.tsx', () => {
       const {
         payload: { patternList: newPatternList },
       } = mockDispatch.mock.calls[1][0];
-
       expect(patternList).not.toBe(newPatternList);
       expect(patternList).not.toContain('refreshed*');
       expect(newPatternList).toContain('refreshed*');

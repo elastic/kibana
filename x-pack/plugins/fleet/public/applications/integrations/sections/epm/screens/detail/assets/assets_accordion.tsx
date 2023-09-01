@@ -23,15 +23,16 @@ import {
 
 import { AssetTitleMap } from '../../../constants';
 
+import type { SimpleSOAssetType, AllowedAssetTypes } from '../../../../../../../../common';
+
 import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
 
 import { ElasticsearchAssetType, KibanaAssetType } from '../../../../../types';
 
-import type { AllowedAssetType, AssetSavedObject } from './types';
-
+export type AllowedAssetType = AllowedAssetTypes[number] | 'view';
 interface Props {
   type: AllowedAssetType;
-  savedObjects: AssetSavedObject[];
+  savedObjects: SimpleSOAssetType[];
 }
 
 export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }) => {

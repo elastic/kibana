@@ -5,12 +5,7 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import {
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiPageHeader,
-  type EuiDescriptionListProps,
-} from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, type EuiDescriptionListProps } from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
@@ -49,7 +44,7 @@ const getDefaultQuery = ({
 
 const BackToResourcesButton = () => (
   <Link to={generatePath(findingsNavigation.findings_by_resource.path)}>
-    <EuiButtonEmpty iconType={'arrowLeft'}>
+    <EuiButtonEmpty iconType="arrowLeft" flush="both">
       <FormattedMessage
         id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
         defaultMessage="Back to resources"
@@ -195,8 +190,9 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={resourceFindings.isFetching}
       />
+      <BackToResourcesButton />
+      <EuiSpacer size="xs" />
       <PageTitle>
-        <BackToResourcesButton />
         <PageTitleText
           title={
             <CloudPosturePageTitle
@@ -214,21 +210,19 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           }
         />
       </PageTitle>
-      <EuiPageHeader
-        description={
-          resourceFindings.data && (
-            <CspInlineDescriptionList
-              listItems={getResourceFindingSharedValues({
-                resourceId: decodedResourceId,
-                resourceName: resourceFindings.data?.resourceName || '',
-                resourceSubType: resourceFindings.data?.resourceSubType || '',
-                clusterId: resourceFindings.data?.clusterId || '',
-                cloudAccountName: resourceFindings.data?.cloudAccountName || '',
-              })}
-            />
-          )
-        }
-      />
+      <EuiSpacer />
+      {resourceFindings.data && (
+        <CspInlineDescriptionList
+          listItems={getResourceFindingSharedValues({
+            resourceId: decodedResourceId,
+            resourceName: resourceFindings.data?.resourceName || '',
+            resourceSubType: resourceFindings.data?.resourceSubType || '',
+            clusterId: resourceFindings.data?.clusterId || '',
+            cloudAccountName: resourceFindings.data?.cloudAccountName || '',
+          })}
+        />
+      )}
+
       <EuiSpacer />
       {error && <ErrorCallout error={error} />}
       {!error && (

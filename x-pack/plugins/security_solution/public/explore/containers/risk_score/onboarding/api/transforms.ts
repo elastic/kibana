@@ -26,7 +26,7 @@ import type {
   StopTransformsResult,
 } from './types';
 
-const TRANSFORM_API_BASE_PATH = `/api/transform`;
+const TRANSFORM_API_BASE_PATH = `/internal/transform`;
 const toastLifeTimeMs = 600000;
 
 const getErrorToastMessage = ({
@@ -49,6 +49,7 @@ export async function createTransform({
   const res = await http
     .put<CreateTransformResult>(`${TRANSFORM_API_BASE_PATH}/transforms/${transformId}`, {
       body: JSON.stringify(options),
+      version: '1',
       signal,
     })
     .then((result) => {
@@ -100,6 +101,7 @@ export async function startTransforms({
           id,
         }))
       ),
+      version: '1',
       signal,
     })
     .then((result) => {
@@ -146,6 +148,7 @@ export async function getTransformState({
     .get<{ transforms: Array<{ id: string; state: string }>; count: number }>(
       `${TRANSFORM_API_BASE_PATH}/transforms/${transformId}/_stats`,
       {
+        version: '1',
         signal,
       }
     )
@@ -206,6 +209,7 @@ export async function stopTransforms({
   const states = await getTransformsState({ http, signal, transformIds });
   const res = await http
     .post<StopTransformsResult>(`${TRANSFORM_API_BASE_PATH}/stop_transforms`, {
+      version: '1',
       body: JSON.stringify(
         states.reduce(
           (acc, state) =>
@@ -270,6 +274,7 @@ export async function deleteTransforms({
   await stopTransforms({ http, signal, transformIds });
   const res = await http
     .post<DeleteTransformsResult>(`${TRANSFORM_API_BASE_PATH}/delete_transforms`, {
+      version: '1',
       body: JSON.stringify({
         transformsInfo: transformIds.map((id) => ({
           id,

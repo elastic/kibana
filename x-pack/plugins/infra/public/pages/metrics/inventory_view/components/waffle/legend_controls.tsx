@@ -27,8 +27,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
 import { first, last } from 'lodash';
-import { InfraWaffleMapBounds, InventoryColorPalette, PALETTES } from '../../../../../lib/lib';
-import { WaffleLegendOptions } from '../../hooks/use_waffle_options';
+import type { WaffleLegendOptions } from '../../hooks/use_waffle_options';
+import {
+  type InfraWaffleMapBounds,
+  type InventoryColorPalette,
+  PALETTES,
+} from '../../../../../lib/lib';
 import { getColorPalette } from '../../lib/get_color_palette';
 import { convertBoundsToPercents } from '../../lib/convert_bounds_to_percents';
 import { SwatchLabel } from './swatch_label';

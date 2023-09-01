@@ -7,8 +7,9 @@
 
 import * as tinymath from '@kbn/tinymath';
 import { parse as hjsonParse } from 'hjson';
-
 import moment from 'moment-timezone';
+
+import { formatNumber } from './number_formatter';
 
 type Variables = Record<string, unknown>;
 
@@ -38,6 +39,11 @@ function getLambdas() {
       function (text: string, render: RenderFn) {
         const dateString = render(text.trim()).trim();
         return formatDate(dateString);
+      },
+    FormatNumber: () =>
+      function (text: string, render: RenderFn) {
+        const numberString = render(text.trim()).trim();
+        return formatNumber(numberString);
       },
   };
 }

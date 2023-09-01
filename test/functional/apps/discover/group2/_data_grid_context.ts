@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'settings',
     'dashboard',
     'header',
+    'unifiedFieldList',
   ]);
   const defaultSettings = { defaultIndex: 'logstash-*' };
   const kibanaServer = getService('kibanaServer');
@@ -47,12 +48,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
 
       for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemAdd(columnName);
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd(columnName);
       }
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
-        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
+        await PageObjects.unifiedFieldList.clickFieldListItem(columnName);
+        await PageObjects.unifiedFieldList.clickFieldListPlusFilter(columnName, value);
       }
     });
     after(async () => {

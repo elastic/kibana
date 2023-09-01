@@ -222,6 +222,18 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
@@ -283,11 +295,6 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
               },
               Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition
@@ -611,6 +618,18 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
@@ -670,11 +689,6 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
               },
               Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition
@@ -1060,6 +1074,18 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
@@ -1121,11 +1147,6 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
               },
               Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition
@@ -1511,6 +1532,18 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
@@ -1572,11 +1605,6 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
               },
               Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition
@@ -1900,6 +1928,18 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
@@ -1959,11 +1999,6 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
               },
               Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition
@@ -2244,6 +2279,18 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
         size="100%"
       >
         <ChartSplit />
+        <Tooltip
+          actions={
+            Array [
+              Object {
+                "disabled": [Function],
+                "label": [Function],
+                "onSelect": [Function],
+              },
+            ]
+          }
+          type="follow"
+        />
         <Settings
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
@@ -2306,11 +2353,6 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               },
               Object {},
             ]
-          }
-          tooltip={
-            Object {
-              "type": "follow",
-            }
           }
         />
         <Partition

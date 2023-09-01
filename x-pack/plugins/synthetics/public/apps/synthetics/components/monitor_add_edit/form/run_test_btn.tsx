@@ -10,17 +10,14 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { TestNowModeFlyout, TestRun } from '../../test_now_mode/test_now_mode_flyout';
 import { format } from './formatter';
-import {
-  Locations,
-  MonitorFields as MonitorFieldsType,
-} from '../../../../../../common/runtime_types';
+import { MonitorFields as MonitorFieldsType } from '../../../../../../common/runtime_types';
 import { runOnceMonitor } from '../../../state/manual_test_runs/api';
 
 export const RunTestButton = () => {
-  const { watch, formState, getValues, handleSubmit } = useFormContext();
+  const { formState, getValues, handleSubmit } = useFormContext();
 
   const [inProgress, setInProgress] = useState(false);
   const [testRun, setTestRun] = useState<TestRun>();
@@ -51,13 +48,7 @@ export const RunTestButton = () => {
     }
   }, [testRun?.id]);
 
-  const locations = watch('locations') as Locations;
-
-  const { tooltipContent, isDisabled } = useTooltipContent(
-    locations,
-    formState.isValid,
-    inProgress
-  );
+  const { tooltipContent, isDisabled } = useTooltipContent(formState.isValid, inProgress);
 
   return (
     <>
@@ -94,22 +85,12 @@ export const RunTestButton = () => {
   );
 };
 
-const useTooltipContent = (
-  locations: Locations,
-  isValid: boolean,
-  isTestRunInProgress?: boolean
-) => {
-  const isAnyPublicLocationSelected = locations?.some((loc) => loc.isServiceManaged);
-  const isOnlyPrivateLocations = (locations?.length ?? 0) > 0 && !isAnyPublicLocationSelected;
-
-  let tooltipContent =
-    isOnlyPrivateLocations || (isValid && !isAnyPublicLocationSelected)
-      ? PRIVATE_AVAILABLE_LABEL
-      : TEST_NOW_DESCRIPTION;
+const useTooltipContent = (isValid: boolean, isTestRunInProgress?: boolean) => {
+  let tooltipContent = !isValid ? INVALID_DESCRIPTION : TEST_NOW_DESCRIPTION;
 
   tooltipContent = isTestRunInProgress ? TEST_SCHEDULED_LABEL : tooltipContent;
 
-  const isDisabled = isTestRunInProgress || !isAnyPublicLocationSelected;
+  const isDisabled = isTestRunInProgress || !isValid;
 
   return { tooltipContent, isDisabled };
 };
@@ -118,17 +99,14 @@ const TEST_NOW_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.descriptio
   defaultMessage: 'Test your monitor and verify the results before saving',
 });
 
+const INVALID_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.invalid', {
+  defaultMessage: 'Monitor has to be valid to run test, please fix above required fields.',
+});
+
 export const TEST_SCHEDULED_LABEL = i18n.translate(
   'xpack.synthetics.monitorList.testNow.scheduled',
   {
     defaultMessage: 'Test is already scheduled',
-  }
-);
-
-export const PRIVATE_AVAILABLE_LABEL = i18n.translate(
-  'xpack.synthetics.app.testNow.available.private',
-  {
-    defaultMessage: `You can't manually start tests on a private location.`,
   }
 );
 

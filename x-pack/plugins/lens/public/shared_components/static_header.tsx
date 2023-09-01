@@ -7,8 +7,17 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, IconType } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-export const StaticHeader = ({ label, icon }: { label: string; icon?: IconType }) => {
+export const StaticHeader = ({
+  label,
+  icon,
+  indicator,
+}: {
+  label: string;
+  icon?: IconType;
+  indicator?: React.ReactNode;
+}) => {
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -21,10 +30,17 @@ export const StaticHeader = ({ label, icon }: { label: string; icon?: IconType }
           <EuiIcon type={icon} />{' '}
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow>
+      <EuiFlexItem
+        grow
+        css={css`
+          flex-direction: row;
+          align-items: center;
+        `}
+      >
         <EuiTitle size="xxs">
           <h5>{label}</h5>
         </EuiTitle>
+        {indicator}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

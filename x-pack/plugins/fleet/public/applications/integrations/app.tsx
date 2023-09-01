@@ -9,8 +9,8 @@ import React, { memo } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -75,7 +75,9 @@ export const IntegrationsAppContext: React.FC<{
     theme$,
     fleetStatus,
   }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const theme = useObservable(theme$);
+    const isDarkMode = theme && theme.darkMode;
+
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
@@ -130,7 +132,7 @@ export const AppRoutes = memo(() => {
 
   return (
     <>
-      <Switch>
+      <Routes>
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
           <EPMApp />
         </Route>
@@ -154,7 +156,7 @@ export const AppRoutes = memo(() => {
             );
           }}
         />
-      </Switch>
+      </Routes>
 
       {flyoutContext.isEnrollmentFlyoutOpen && (
         <EuiPortal>

@@ -23,7 +23,7 @@ const Template: ComponentStory<typeof Component> = (props: Props) => {
   const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES });
   return (
     <FormProvider {...methods}>
-      <Component {...props} control={methods.control} />
+      <Component {...props} />
     </FormProvider>
   );
 };

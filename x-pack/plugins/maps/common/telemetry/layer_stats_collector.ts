@@ -17,6 +17,7 @@ import {
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
+  JoinDescriptor,
   VectorLayerDescriptor,
 } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
@@ -49,7 +50,12 @@ export class LayerStatsCollector {
     this._layerCount = layerList.length;
     layerList.forEach((layerDescriptor) => {
       this._updateCounts(getBasemapKey(layerDescriptor), this._basemapCounts);
-      this._updateCounts(getJoinKey(layerDescriptor), this._joinCounts);
+      const joins = (layerDescriptor as VectorLayerDescriptor)?.joins;
+      if (joins && joins.length) {
+        joins.forEach((joinDescriptor) => {
+          this._updateCounts(getJoinKey(joinDescriptor), this._joinCounts);
+        });
+      }
       this._updateCounts(getLayerKey(layerDescriptor), this._layerCounts);
       this._updateCounts(getResolutionKey(layerDescriptor), this._resolutionCounts);
       this._updateCounts(getScalingKey(layerDescriptor), this._scalingCounts);
@@ -147,11 +153,16 @@ function getBasemapKey(layerDescriptor: LayerDescriptor): EMS_BASEMAP_KEYS | nul
   return null;
 }
 
-function getJoinKey(layerDescriptor: LayerDescriptor): JOIN_KEYS | null {
-  return layerDescriptor.type === LAYER_TYPE.GEOJSON_VECTOR &&
-    (layerDescriptor as VectorLayerDescriptor)?.joins?.length
-    ? JOIN_KEYS.TERM
-    : null;
+function getJoinKey(joinDescriptor: Partial<JoinDescriptor>): JOIN_KEYS | null {
+  if (joinDescriptor?.right?.type === SOURCE_TYPES.ES_TERM_SOURCE) {
+    return JOIN_KEYS.TERM;
+  }
+
+  if (joinDescriptor?.right?.type === SOURCE_TYPES.ES_DISTANCE_SOURCE) {
+    return JOIN_KEYS.DISTANCE;
+  }
+
+  return null;
 }
 
 function getLayerKey(layerDescriptor: LayerDescriptor): LAYER_KEYS | null {

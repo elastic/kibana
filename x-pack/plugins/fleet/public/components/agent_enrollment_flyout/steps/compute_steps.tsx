@@ -14,11 +14,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
 
-import {
-  fullAgentPolicyToYaml,
-  agentPolicyRouteService,
-  getCloudFormationTemplateUrlFromPackagePolicy,
-} from '../../../services';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
 
 import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
@@ -40,6 +36,8 @@ import {
   ConfigureStandaloneAgentStep,
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
+  InstallCloudFormationManagedAgentStep,
+  InstallGoogleCloudShellManagedAgentStep,
   IncomingDataConfirmationStep,
 } from '.';
 
@@ -55,6 +53,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   selectedApiKeyId,
   setSelectedAPIKeyId,
   isK8s,
+  cloudSecurityIntegration,
 }) => {
   const core = useStartServices();
   const { notifications } = core;
@@ -159,6 +158,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       InstallStandaloneAgentStep({
         installCommand: standaloneInstallCommands,
         isK8s,
+        cloudSecurityIntegration,
       })
     );
 
@@ -166,6 +166,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   }, [
     kibanaVersion,
     isK8s,
+    cloudSecurityIntegration,
     agentPolicy,
     selectedPolicy,
     agentPolicies,
@@ -198,6 +199,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   selectionType,
   onClickViewAgents,
   isK8s,
+  cloudSecurityIntegration,
   installedPackagePolicy,
 }) => {
   const kibanaVersion = useKibanaVersion();
@@ -220,8 +222,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   });
 
   const instructionsSteps = useMemo(() => {
-    const cloudFormationTemplateUrl = getCloudFormationTemplateUrlFromPackagePolicy(selectedPolicy);
-
     const steps: EuiContainedStepProps[] = !agentPolicy
       ? [
           AgentPolicySelectionStep({
@@ -247,16 +247,38 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
       );
     }
 
-    steps.push(
-      InstallManagedAgentStep({
-        installCommand: installManagedCommands,
-        apiKeyData,
-        selectedApiKeyId,
-        isK8s,
-        enrollToken,
-        cloudFormationTemplateUrl,
-      })
-    );
+    if (cloudSecurityIntegration?.isCloudFormation) {
+      steps.push(
+        InstallCloudFormationManagedAgentStep({
+          apiKeyData,
+          selectedApiKeyId,
+          enrollToken,
+          cloudSecurityIntegration,
+        })
+      );
+    } else if (cloudSecurityIntegration?.cloudShellUrl) {
+      steps.push(
+        InstallGoogleCloudShellManagedAgentStep({
+          apiKeyData,
+          selectedApiKeyId,
+          cloudShellUrl: cloudSecurityIntegration.cloudShellUrl,
+          cloudShellCommand: installManagedCommands.googleCloudShell,
+        })
+      );
+    } else {
+      steps.push(
+        InstallManagedAgentStep({
+          installCommand: installManagedCommands,
+          apiKeyData,
+          selectedApiKeyId,
+          isK8s,
+          cloudSecurityIntegration,
+          fleetServerHost: fleetServerHosts?.[0],
+          enrollToken,
+        })
+      );
+    }
+
     if (selectedApiKeyId && apiKeyData) {
       steps.push(
         AgentEnrollmentConfirmationStep({
@@ -289,15 +311,17 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     setSelectedPolicyId,
     refreshAgentPolicies,
     selectionType,
-    isK8s,
-    installManagedCommands,
+    cloudSecurityIntegration,
     apiKeyData,
-    enrolledAgentIds,
     mode,
     setMode,
     enrollToken,
+    installManagedCommands,
+    isK8s,
+    fleetServerHosts,
     onClickViewAgents,
     link,
+    enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
   ]);

@@ -9,11 +9,12 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
-import { MgetRequest, MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ProfilingESEvent } from '../../common/elasticsearch';
+import {
+  ProfilingStatusResponse,
+  StackTraceResponse,
+} from '@kbn/profiling-data-access-plugin/common/stack_traces';
 import { withProfilingSpan } from './with_profiling_span';
-import { StackTraceResponse } from '../../common/stack_traces';
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
@@ -32,14 +33,11 @@ export interface ProfilingESClient {
     operationName: string,
     searchRequest: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
-  mget<TDocument = ProfilingESEvent>(
-    operationName: string,
-    mgetRequest: MgetRequest
-  ): Promise<MgetResponse<TDocument>>;
   profilingStacktraces({}: {
     query: QueryDslQueryContainer;
     sampleSize: number;
   }): Promise<StackTraceResponse>;
+  profilingStatus(): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
 }
 
@@ -72,25 +70,6 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise);
     },
-    mget<TDocument = ProfilingESEvent>(
-      operationName: string,
-      mgetRequest: MgetRequest
-    ): Promise<MgetResponse<TDocument>> {
-      const controller = new AbortController();
-
-      const promise = withProfilingSpan(operationName, () => {
-        return cancelEsRequestOnAbort(
-          esClient.mget<TDocument>(mgetRequest, {
-            signal: controller.signal,
-            meta: true,
-          }),
-          request,
-          controller
-        );
-      });
-
-      return unwrapEsResponse(promise);
-    },
     profilingStacktraces({ query, sampleSize }) {
       const controller = new AbortController();
 
@@ -116,6 +95,28 @@ export function createProfilingEsClient({
       });
 
       return unwrapEsResponse(promise) as Promise<StackTraceResponse>;
+    },
+    profilingStatus() {
+      const controller = new AbortController();
+
+      const promise = withProfilingSpan('_profiling/status', () => {
+        return cancelEsRequestOnAbort(
+          esClient.transport.request(
+            {
+              method: 'GET',
+              path: encodeURI('/_profiling/status'),
+            },
+            {
+              signal: controller.signal,
+              meta: true,
+            }
+          ),
+          request,
+          controller
+        );
+      });
+
+      return unwrapEsResponse(promise) as Promise<ProfilingStatusResponse>;
     },
     getEsClient() {
       return esClient;

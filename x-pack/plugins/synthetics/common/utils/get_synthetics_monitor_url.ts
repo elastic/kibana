@@ -4,25 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { stringify } from 'querystring';
 
-import { format } from './get_monitor_url';
-
-export const getSyntheticsMonitorRouteFromMonitorId = ({
+const format = ({ pathname, query }: { pathname: string; query: Record<string, any> }): string => {
+  return `${pathname}?${stringify(query)}`;
+};
+export const getSyntheticsErrorRouteFromMonitorId = ({
   configId,
-  dateRangeStart,
-  dateRangeEnd,
+  stateId,
   locationId,
 }: {
+  stateId: string;
   configId: string;
-  dateRangeStart: string;
-  dateRangeEnd: string;
   locationId: string;
 }) =>
   format({
-    pathname: `/app/synthetics/monitor/${configId}/history`,
+    pathname: encodeURI(`/app/synthetics/monitor/${configId}/errors/${stateId}`),
     query: {
-      dateRangeEnd,
-      dateRangeStart,
       locationId,
     },
   });

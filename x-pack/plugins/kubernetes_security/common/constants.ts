@@ -8,11 +8,13 @@
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const KUBERNETES_TITLE = 'Kubernetes';
 export const LOCAL_STORAGE_HIDE_WIDGETS_KEY = 'kubernetesSecurity:shouldHideWidgets';
+export const LOCAL_STORAGE_TREE_NAV_KEY = 'kubernetesSecurity:treeNavSelection';
 
+export const CURRENT_API_VERSION = '1';
 export const AGGREGATE_ROUTE = '/internal/kubernetes_security/aggregate';
 export const COUNT_ROUTE = '/internal/kubernetes_security/count';
 export const MULTI_TERMS_AGGREGATE_ROUTE = '/internal/kubernetes_security/multi_terms_aggregate';
-export const AGENT_ID_ROUTE = '/internal/kubernetes_security/agent_id';
+
 export const AGGREGATE_PAGE_SIZE = 10;
 
 // so, bucket sort can only page through what we request at the top level agg, which means there is a ceiling to how many aggs we can page through.
@@ -44,20 +46,24 @@ export const COUNT_WIDGET_KEY_NODES = 'CountNodesWidgets';
 export const COUNT_WIDGET_KEY_PODS = 'CountPodsWidgets';
 export const COUNT_WIDGET_KEY_CONTAINER_IMAGES = 'CountContainerImagesWidgets';
 
-export const DEFAULT_QUERY = '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}';
-export const DEFAULT_KUBERNETES_FILTER_QUERY =
-  '{"bool":{"must":[],"filter":[{"bool": {"should": [{"exists": {"field": "orchestrator.cluster.id"}}]}}],"should":[],"must_not":[]}}';
-export const DEFAULT_FILTER_QUERY =
-  '{"bool":{"must":[],"filter":[{"bool": {"should": [{"exists": {"field": "process.entry_leader.entity_id"}}]}}],"should":[],"must_not":[]}}';
 export const DEFAULT_FILTER = {
   bool: {
     should: [
       {
         exists: {
-          field: ENTRY_LEADER_ENTITY_ID,
+          field: ORCHESTRATOR_CLUSTER_ID,
         },
       },
     ],
     minimum_should_match: 1,
   },
 };
+
+export const DEFAULT_FILTER_QUERY = JSON.stringify({
+  bool: {
+    must: [],
+    filter: [DEFAULT_FILTER],
+    should: [],
+    must_not: [],
+  },
+});

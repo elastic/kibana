@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getDefaultControlGroupInput } from '..';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { ControlGroupInput } from './types';
+import { getDefaultControlGroupInput } from '..';
+import { ControlGroupContainerFactory } from '../../public';
 
 export const mockControlGroupInput = (partial?: Partial<ControlGroupInput>): ControlGroupInput => ({
   id: 'mocked_control_group',
@@ -45,3 +47,16 @@ export const mockControlGroupInput = (partial?: Partial<ControlGroupInput>): Con
   },
   ...(partial ?? {}),
 });
+
+export const mockControlGroupContainer = async (explicitInput?: Partial<ControlGroupInput>) => {
+  const controlGroupFactoryStub = new ControlGroupContainerFactory(
+    {} as unknown as EmbeddablePersistableStateService
+  );
+  const controlGroupContainer = await controlGroupFactoryStub.create({
+    id: 'mocked-control-group',
+    ...getDefaultControlGroupInput(),
+    ...explicitInput,
+  });
+
+  return controlGroupContainer;
+};

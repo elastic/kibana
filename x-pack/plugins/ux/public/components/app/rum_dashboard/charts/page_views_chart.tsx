@@ -7,7 +7,8 @@
 
 import moment from 'moment';
 import React, { useCallback } from 'react';
-import { fromQuery, toQuery, useTheme } from '@kbn/observability-plugin/public';
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { AllSeries, RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { useHistory } from 'react-router-dom';
 

@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import moment from 'moment';
+import type { IReport, Report, ReportDocument } from '.';
+import { SavedReport } from '.';
 import { statuses } from '..';
 import type { ReportingCore } from '../..';
 import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import type { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
 import type { ReportTaskParams } from '../tasks';
-import type { IReport, Report, ReportDocument } from '.';
-import { SavedReport } from '.';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
 import { MIGRATION_VERSION } from './report';
+
+type UpdateResponse<T> = estypes.UpdateResponse<T>;
+type IndexResponse = estypes.IndexResponse;
 
 /*
  * When an instance of Kibana claims a report job, this information tells us about that instance
@@ -89,7 +92,7 @@ export class ReportingStore {
     const config = reportingCore.getConfig();
 
     this.indexPrefix = REPORTING_SYSTEM_INDEX;
-    this.indexInterval = config.get('queue', 'indexInterval');
+    this.indexInterval = config.queue.indexInterval;
     this.logger = logger.get('store');
   }
 
@@ -150,14 +153,11 @@ export class ReportingStore {
     }
   }
 
-  /*
-   * Called from addReport, which handles any errors
-   */
   private async indexReport(report: Report): Promise<IndexResponse> {
     const doc = {
       index: report._index!,
       id: report._id,
-      refresh: true,
+      refresh: false,
       body: {
         ...report.toReportSource(),
         ...sourceDoc({
@@ -289,7 +289,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {
@@ -328,7 +328,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {
@@ -363,7 +363,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {
@@ -390,7 +390,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {

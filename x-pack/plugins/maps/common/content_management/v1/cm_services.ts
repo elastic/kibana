@@ -16,7 +16,7 @@ import {
 const mapAttributesSchema = schema.object(
   {
     title: schema.string(),
-    description: schema.maybe(schema.string()),
+    description: schema.maybe(schema.nullable(schema.string())),
     mapStateJSON: schema.maybe(schema.string()),
     layerListJSON: schema.maybe(schema.string()),
     uiStateJSON: schema.maybe(schema.string()),

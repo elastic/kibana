@@ -6,10 +6,17 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import {
+  type Aggregation,
+  type AggFieldPair,
+  type Field,
+  DOC_COUNT,
+  ML_JOB_AGGREGATION,
+  ES_AGGREGATION,
+} from '@kbn/ml-anomaly-utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
-import { Field, Aggregation, AggFieldPair } from '../../../../../../common/types/fields';
 import {
   Job,
   Datafeed,
@@ -17,19 +24,14 @@ import {
   BucketSpan,
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
-import {
-  ML_JOB_AGGREGATION,
-  ES_AGGREGATION,
-} from '../../../../../../common/constants/aggregation_types';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
-import { DOC_COUNT } from '../../../../../../common/constants/field_types';
 import { getRichDetectors } from './util/general';
 import { isSparseDataJob } from './util/general';
 
 export class SingleMetricJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
     this._wizardInitialized$.next(true);
@@ -59,7 +61,7 @@ export class SingleMetricJobCreator extends JobCreator {
   // overriding set means we need to override get too
   // JS doesn't do inheritance very well
   public get bucketSpan(): BucketSpan {
-    return this._job_config.analysis_config.bucket_span;
+    return this._job_config.analysis_config.bucket_span!;
   }
 
   // aggregations need to be recreated whenever the detector or bucket_span change

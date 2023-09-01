@@ -9,8 +9,8 @@ import React, { useCallback, memo, useEffect } from 'react';
 import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { TableListView } from '@kbn/content-management-table-list';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
+import { TableListView } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 
 import type { MapItem } from '../../../common/content_management';
 import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';
@@ -21,6 +21,7 @@ import {
   getNavigateToApp,
   getUiSettings,
   getUsageCollection,
+  getServerless,
 } from '../../kibana_services';
 import { mapsClient } from '../../content_management';
 
@@ -78,7 +79,11 @@ function MapsListViewComp({ history }: Props) {
   // wrap chrome updates in useEffect to avoid potentially causing state changes in other component during render phase.
   useEffect(() => {
     getCoreChrome().docTitle.change(APP_NAME);
-    getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
+    if (getServerless()) {
+      getServerless()!.setBreadcrumbs({ text: APP_NAME });
+    } else {
+      getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
+    }
   }, []);
 
   const findMaps = useCallback(
@@ -133,7 +138,7 @@ function MapsListViewComp({ history }: Props) {
       entityNamePlural={i18n.translate('xpack.maps.mapListing.entityNamePlural', {
         defaultMessage: 'maps',
       })}
-      tableListTitle={APP_NAME}
+      title={APP_NAME}
       onClickTitle={({ id }) => history.push(getEditPath(id))}
     />
   );

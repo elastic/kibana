@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import * as i18n from './translations';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
@@ -14,7 +14,7 @@ import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { TotalAnomalies } from './components/total_anomalies';
 import type { AnomaliesCount } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 
-type AnomaliesColumns = Array<EuiBasicTableColumn<AnomaliesCount>>;
+type AnomaliesColumns = Array<EuiTableFieldDataColumnType<AnomaliesCount>>;
 
 const MediumShadeText = styled.span`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
@@ -33,8 +33,13 @@ export const useAnomaliesColumns = (
         truncateText: true,
         mobileOptions: { show: true },
         'data-test-subj': 'anomalies-table-column-name',
-        render: (jobName, { count, job }) => {
-          if (count > 0 || (job && isJobStarted(job.jobState, job.datafeedState))) {
+        render: (jobName: AnomaliesCount['name'], { count, job }) => {
+          if (
+            count > 0 ||
+            (job &&
+              (isJobStarted(job.jobState, job.datafeedState) ||
+                recentlyEnabledJobIds.includes(job.id)))
+          ) {
             return jobName;
           } else {
             return <MediumShadeText>{jobName}</MediumShadeText>;
@@ -60,7 +65,7 @@ export const useAnomaliesColumns = (
         mobileOptions: { show: true },
         width: '15%',
         'data-test-subj': 'anomalies-table-column-count',
-        render: (count, { entity, job }) => {
+        render: (count: AnomaliesCount['count'], { entity, job }) => {
           if (!job) return '';
           return (
             <TotalAnomalies

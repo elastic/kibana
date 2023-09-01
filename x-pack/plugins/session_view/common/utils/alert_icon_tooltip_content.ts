@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { ProcessEventAlertCategory } from '../types/process_tree';
+import { ProcessEventAlertCategory } from '..';
 import * as i18n from '../translations';
 
-export const getAlertIconTooltipContent = (processEventAlertCategory: string) => {
+export const getAlertIconTooltipContent = (
+  processEventAlertCategory: ProcessEventAlertCategory
+) => {
   let tooltipContent = '';
   switch (processEventAlertCategory) {
-    case ProcessEventAlertCategory.file:
+    case 'file':
       tooltipContent = i18n.ALERT_TYPE_TOOLTIP_FILE;
       break;
-    case ProcessEventAlertCategory.network:
+    case 'network':
       tooltipContent = i18n.ALERT_TYPE_TOOLTIP_NETWORK;
       break;
     default:

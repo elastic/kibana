@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
-import type { CasesStatusRequest, CasesStatusResponse } from '../../../common/api';
-import {
-  excess,
-  CasesStatusRequestRt,
-  throwErrors,
-  CasesStatusResponseRt,
-} from '../../../common/api';
+import type { CasesStatusRequest, CasesStatusResponse } from '../../../common/types/api';
+import { CasesStatusRequestRt, CasesStatusResponseRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import { constructQueryOptions } from '../utils';
 import { createCaseError } from '../../common/error';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 export async function getStatusTotalsByType(
   params: CasesStatusRequest,
@@ -33,10 +25,7 @@ export async function getStatusTotalsByType(
   } = clientArgs;
 
   try {
-    const queryParams = pipe(
-      excess(CasesStatusRequestRt).decode(params),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(CasesStatusRequestRt)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getCaseStatuses
@@ -52,12 +41,13 @@ export async function getStatusTotalsByType(
     const statusStats = await caseService.getCaseStatusStats({
       searchOptions: options,
     });
-
-    return CasesStatusResponseRt.encode({
+    const res = {
       count_open_cases: statusStats.open,
       count_in_progress_cases: statusStats['in-progress'],
       count_closed_cases: statusStats.closed,
-    });
+    };
+
+    return decodeOrThrow(CasesStatusResponseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to get status stats: ${error}`, error, logger });
   }

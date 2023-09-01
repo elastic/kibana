@@ -1,0 +1,8 @@
+in: query
+name: perPage
+description: The number of items to return. Limited to 100 items.
+required: false
+schema:
+  type: integer
+  default: 20
+  maximum: 100

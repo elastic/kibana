@@ -21,6 +21,98 @@
     "functions": [
       {
         "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.getLogRateAnalysisType",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogRateAnalysisType",
+        "description": [
+          "\nIdentify the log rate analysis type based on the baseline/deviation\ntime ranges on a given log rate histogram.\n"
+        ],
+        "signature": [
+          "(logRateHistogram: ",
+          {
+            "pluginId": "@kbn/aiops-utils",
+            "scope": "common",
+            "docId": "kibKbnAiopsUtilsPluginApi",
+            "section": "def-common.LogRateHistogramItem",
+            "text": "LogRateHistogramItem"
+          },
+          "[], windowParameters: ",
+          {
+            "pluginId": "@kbn/aiops-utils",
+            "scope": "common",
+            "docId": "kibKbnAiopsUtilsPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/aiops-utils",
+            "scope": "common",
+            "docId": "kibKbnAiopsUtilsPluginApi",
+            "section": "def-common.LogRateAnalysisType",
+            "text": "LogRateAnalysisType"
+          }
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/get_log_rate_analysis_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.getLogRateAnalysisType.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "logRateHistogram",
+            "description": [
+              "The log rate histogram."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-utils",
+                "scope": "common",
+                "docId": "kibKbnAiopsUtilsPluginApi",
+                "section": "def-common.LogRateHistogramItem",
+                "text": "LogRateHistogramItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/get_log_rate_analysis_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.getLogRateAnalysisType.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "windowParameters",
+            "description": [
+              "The window parameters with baseline and deviation time range."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-utils",
+                "scope": "common",
+                "docId": "kibKbnAiopsUtilsPluginApi",
+                "section": "def-common.WindowParameters",
+                "text": "WindowParameters"
+              }
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/get_log_rate_analysis_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The log rate analysis type."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
         "id": "def-common.getSnappedWindowParameters",
         "type": "Function",
         "tags": [],
@@ -46,7 +138,7 @@
             "text": "WindowParameters"
           }
         ],
-        "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+        "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +149,7 @@
             "tags": [],
             "label": "windowParameters",
             "description": [
-              "time range definition for baseline and deviation to be used by spike log analysis"
+              "time range definition for baseline and deviation to be used by log rate analysis"
             ],
             "signature": [
               {
@@ -68,7 +160,7 @@
                 "text": "WindowParameters"
               }
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,7 +177,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -103,7 +195,7 @@
         "tags": [],
         "label": "getWindowParameters",
         "description": [
-          "\nGiven a point in time (e.g. where a user clicks), use simple heuristics to compute:\n\n1. The time window around the click to evaluate for changes\n2. The historical time window prior to the click to use as a baseline.\n\nThe philosophy here is that charts are displayed with different granularities according to their\noverall time window. We select the log spike and historical time windows inline with the\noverall time window.\n\nThe algorithm for doing this is based on the typical granularities that exist in machine data.\n"
+          "\nGiven a point in time (e.g. where a user clicks), use simple heuristics to compute:\n\n1. The time window around the click to evaluate for changes\n2. The historical time window prior to the click to use as a baseline.\n\nThe philosophy here is that charts are displayed with different granularities according to their\noverall time window. We select the log deviation and historical time windows inline with the\noverall time window.\n\nThe algorithm for doing this is based on the typical granularities that exist in machine data.\n"
         ],
         "signature": [
           "(clickTime: number, minTime: number, maxTime: number) => ",
@@ -115,7 +207,7 @@
             "text": "WindowParameters"
           }
         ],
-        "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+        "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,12 +218,12 @@
             "tags": [],
             "label": "clickTime",
             "description": [
-              "timestamp of the clicked log rate spike."
+              "timestamp of the clicked log rate deviation."
             ],
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -148,7 +240,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -165,7 +257,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -175,709 +267,50 @@
           "WindowParameters"
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.streamFactory",
-        "type": "Function",
-        "tags": [],
-        "label": "streamFactory",
-        "description": [
-          "\nOverload to set up a string based response stream with support\nfor gzip compression depending on provided request headers.\n"
-        ],
-        "signature": [
-          "(headers: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.Headers",
-            "text": "Headers"
-          },
-          ", logger: ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "common",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-common.Logger",
-            "text": "Logger"
-          },
-          ", compressOverride: boolean | undefined, flushFix: boolean | undefined) => StreamFactoryReturnType<T>"
-        ],
-        "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.streamFactory.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "headers",
-            "description": [
-              "- Request headers."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.Headers",
-                "text": "Headers"
-              }
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.streamFactory.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "logger",
-            "description": [
-              "- Kibana logger."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "common",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-common.Logger",
-                "text": "Logger"
-              }
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.streamFactory.$3",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "compressOverride",
-            "description": [
-              "- Optional flag to override header based compression setting."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.streamFactory.$4",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "flushFix",
-            "description": [
-              "- Adds an attribute with a random string payload to overcome buffer flushing with certain proxy configurations."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "An object with stream attributes and methods."
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.streamFactory",
-        "type": "Function",
-        "tags": [],
-        "label": "streamFactory",
-        "description": [
-          "\nSets up a response stream with support for gzip compression depending on provided\nrequest headers. Any non-string data pushed to the stream will be stream as NDJSON.\n"
-        ],
-        "signature": [
-          "(headers: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.Headers",
-            "text": "Headers"
-          },
-          ", logger: ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "common",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-common.Logger",
-            "text": "Logger"
-          },
-          ", compressOverride: boolean, flushFix: boolean) => StreamFactoryReturnType<T>"
-        ],
-        "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.streamFactory.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "headers",
-            "description": [
-              "- Request headers."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.Headers",
-                "text": "Headers"
-              }
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.streamFactory.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "logger",
-            "description": [
-              "- Kibana logger."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "common",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-common.Logger",
-                "text": "Logger"
-              }
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.streamFactory.$3",
-            "type": "boolean",
-            "tags": [],
-            "label": "compressOverride",
-            "description": [
-              "- Optional flag to override header based compression setting."
-            ],
-            "signature": [
-              "boolean"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.streamFactory.$4",
-            "type": "boolean",
-            "tags": [],
-            "label": "flushFix",
-            "description": [
-              "- Adds an attribute with a random string payload to overcome buffer flushing with certain proxy configurations."
-            ],
-            "signature": [
-              "boolean"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "An object with stream attributes and methods."
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.useFetchStream",
-        "type": "Function",
-        "tags": [],
-        "label": "useFetchStream",
-        "description": [],
-        "signature": [
-          "(endpoint: `${BasePath}${I[\"endpoint\"]}`, body: I[\"body\"]) => UseFetchStreamReturnType<string, React.ReducerAction<I[\"reducer\"]>>"
-        ],
-        "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.useFetchStream.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "endpoint",
-            "description": [],
-            "signature": [
-              "`${BasePath}${I[\"endpoint\"]}`"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.useFetchStream.$2",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "body",
-            "description": [],
-            "signature": [
-              "I[\"body\"]"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.useFetchStream",
-        "type": "Function",
-        "tags": [],
-        "label": "useFetchStream",
-        "description": [],
-        "signature": [
-          "(endpoint: `${BasePath}${I[\"endpoint\"]}`, body: I[\"body\"], options: { reducer: I[\"reducer\"]; initialState: React.ReducerState<I[\"reducer\"]>; }) => UseFetchStreamReturnType<React.ReducerState<I[\"reducer\"]>, React.ReducerAction<I[\"reducer\"]>>"
-        ],
-        "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.useFetchStream.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "endpoint",
-            "description": [],
-            "signature": [
-              "`${BasePath}${I[\"endpoint\"]}`"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.useFetchStream.$2",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "body",
-            "description": [],
-            "signature": [
-              "I[\"body\"]"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.useFetchStream.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/aiops-utils",
-                "id": "def-common.useFetchStream.$3.reducer",
-                "type": "Function",
-                "tags": [],
-                "label": "reducer",
-                "description": [],
-                "signature": [
-                  "I[\"reducer\"]"
-                ],
-                "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/aiops-utils",
-                    "id": "def-common.useFetchStream.$3.reducer.$1",
-                    "type": "Uncategorized",
-                    "tags": [],
-                    "label": "prevState",
-                    "description": [],
-                    "signature": [
-                      "S"
-                    ],
-                    "path": "node_modules/@types/react/index.d.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "@kbn/aiops-utils",
-                    "id": "def-common.useFetchStream.$3.reducer.$2",
-                    "type": "Uncategorized",
-                    "tags": [],
-                    "label": "action",
-                    "description": [],
-                    "signature": [
-                      "A"
-                    ],
-                    "path": "node_modules/@types/react/index.d.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/aiops-utils",
-                "id": "def-common.useFetchStream.$3.initialState",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "initialState",
-                "description": [],
-                "signature": [
-                  "I[\"reducer\"] extends React.Reducer<infer S, any> ? S : never"
-                ],
-                "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.useFetchStream",
-        "type": "Function",
-        "tags": [],
-        "label": "useFetchStream",
-        "description": [
-          "\nCustom hook to receive streaming data.\n"
-        ],
-        "signature": [
-          "(endpoint: `${BasePath}${I[\"endpoint\"]}`, body: I[\"body\"], options: { reducer: I[\"reducer\"]; initialState: React.ReducerState<I[\"reducer\"]>; } | undefined) => UseFetchStreamReturnType<React.ReducerState<I[\"reducer\"]>, React.ReducerAction<I[\"reducer\"]>>"
-        ],
-        "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.useFetchStream.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "endpoint",
-            "description": [
-              "- API endpoint including Kibana base path."
-            ],
-            "signature": [
-              "`${BasePath}${I[\"endpoint\"]}`"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.useFetchStream.$2",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "body",
-            "description": [
-              "- API request body."
-            ],
-            "signature": [
-              "I[\"body\"]"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.useFetchStream.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/aiops-utils",
-                "id": "def-common.useFetchStream.$3.reducer",
-                "type": "Function",
-                "tags": [],
-                "label": "reducer",
-                "description": [],
-                "signature": [
-                  "I[\"reducer\"]"
-                ],
-                "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/aiops-utils",
-                    "id": "def-common.useFetchStream.$3.reducer.$1",
-                    "type": "Uncategorized",
-                    "tags": [],
-                    "label": "prevState",
-                    "description": [],
-                    "signature": [
-                      "S"
-                    ],
-                    "path": "node_modules/@types/react/index.d.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "@kbn/aiops-utils",
-                    "id": "def-common.useFetchStream.$3.reducer.$2",
-                    "type": "Uncategorized",
-                    "tags": [],
-                    "label": "action",
-                    "description": [],
-                    "signature": [
-                      "A"
-                    ],
-                    "path": "node_modules/@types/react/index.d.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/aiops-utils",
-                "id": "def-common.useFetchStream.$3.initialState",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "initialState",
-                "description": [],
-                "signature": [
-                  "I[\"reducer\"] extends React.Reducer<infer S, any> ? S : never"
-                ],
-                "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [
-          "An object with streaming data and methods act on the stream."
-        ],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.UseFetchStreamCustomReducerParams",
+        "id": "def-common.LogRateHistogramItem",
         "type": "Interface",
         "tags": [],
-        "label": "UseFetchStreamCustomReducerParams",
+        "label": "LogRateHistogramItem",
         "description": [
-          "\nCustom hook type definition of the base params for an NDJSON stream with custom reducer."
+          "\nLog rate histogram item"
         ],
-        "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
+        "path": "x-pack/packages/ml/aiops_utils/log_rate_histogram_item.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.UseFetchStreamCustomReducerParams.endpoint",
-            "type": "string",
+            "id": "def-common.LogRateHistogramItem.time",
+            "type": "CompoundType",
             "tags": [],
-            "label": "endpoint",
-            "description": [],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
+            "label": "time",
+            "description": [
+              "\nTime of bucket"
+            ],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/log_rate_histogram_item.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.UseFetchStreamCustomReducerParams.body",
-            "type": "Uncategorized",
+            "id": "def-common.LogRateHistogramItem.value",
+            "type": "number",
             "tags": [],
-            "label": "body",
-            "description": [],
-            "signature": [
-              "object"
+            "label": "value",
+            "description": [
+              "\nNumber of doc count for that time bucket"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
+            "path": "x-pack/packages/ml/aiops_utils/log_rate_histogram_item.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.UseFetchStreamCustomReducerParams.reducer",
-            "type": "Function",
-            "tags": [],
-            "label": "reducer",
-            "description": [],
-            "signature": [
-              "(prevState: any, action: any) => any"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/aiops-utils",
-                "id": "def-common.UseFetchStreamCustomReducerParams.reducer.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "prevState",
-                "description": [],
-                "signature": [
-                  "S"
-                ],
-                "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/aiops-utils",
-                "id": "def-common.UseFetchStreamCustomReducerParams.reducer.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "action",
-                "description": [],
-                "signature": [
-                  "A"
-                ],
-                "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.UseFetchStreamParamsDefault",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseFetchStreamParamsDefault",
-        "description": [
-          "\nCustom hook type definition of the base params for a string base stream without a custom reducer."
-        ],
-        "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.UseFetchStreamParamsDefault.endpoint",
-            "type": "string",
-            "tags": [],
-            "label": "endpoint",
-            "description": [],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.UseFetchStreamParamsDefault.body",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "body",
-            "description": [],
-            "signature": [
-              "object"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.UseFetchStreamParamsDefault.reducer",
-            "type": "Function",
-            "tags": [],
-            "label": "reducer",
-            "description": [],
-            "signature": [
-              "(prevState: string, action: StringReducerPayload) => string"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/aiops-utils",
-                "id": "def-common.UseFetchStreamParamsDefault.reducer.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "prevState",
-                "description": [],
-                "signature": [
-                  "S"
-                ],
-                "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/aiops-utils",
-                "id": "def-common.UseFetchStreamParamsDefault.reducer.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "action",
-                "description": [],
-                "signature": [
-                  "A"
-                ],
-                "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "initialIsOpen": false
@@ -886,12 +319,16 @@
         "parentPluginId": "@kbn/aiops-utils",
         "id": "def-common.WindowParameters",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "export",
+          "interface",
+          "typedef"
+        ],
         "label": "WindowParameters",
         "description": [
-          "\nTime range definition for baseline and deviation to be used by spike log analysis."
+          "\nTime range definition for baseline and deviation to be used by log rate analysis.\n"
         ],
-        "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+        "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -899,10 +336,14 @@
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.WindowParameters.baselineMin",
             "type": "number",
-            "tags": [],
+            "tags": [
+              "type"
+            ],
             "label": "baselineMin",
-            "description": [],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "description": [
+              "\nBaseline minimum value"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -910,10 +351,14 @@
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.WindowParameters.baselineMax",
             "type": "number",
-            "tags": [],
+            "tags": [
+              "type"
+            ],
             "label": "baselineMax",
-            "description": [],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "description": [
+              "\nBaseline maximum value"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -921,10 +366,14 @@
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.WindowParameters.deviationMin",
             "type": "number",
-            "tags": [],
+            "tags": [
+              "type"
+            ],
             "label": "deviationMin",
-            "description": [],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "description": [
+              "\nDeviation minimum value"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -932,10 +381,14 @@
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.WindowParameters.deviationMax",
             "type": "number",
-            "tags": [],
+            "tags": [
+              "type"
+            ],
             "label": "deviationMax",
-            "description": [],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "description": [
+              "\nDeviation maximum value"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -944,7 +397,43 @@
       }
     ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.LogRateAnalysisType",
+        "type": "Type",
+        "tags": [],
+        "label": "LogRateAnalysisType",
+        "description": [
+          "\nUnion type of log rate analysis types."
+        ],
+        "signature": [
+          "\"spike\" | \"dip\""
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/log_rate_analysis_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.LOG_RATE_ANALYSIS_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "LOG_RATE_ANALYSIS_TYPE",
+        "description": [
+          "\nThe type of log rate analysis (spike or dip) will affect how parameters are\npassed to the analysis API endpoint."
+        ],
+        "signature": [
+          "{ readonly SPIKE: \"spike\"; readonly DIP: \"dip\"; }"
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/log_rate_analysis_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

@@ -9,6 +9,8 @@
 import expect from '@kbn/expect';
 import request from 'superagent';
 import { inflateResponse } from '@kbn/bfetch-plugin/public/streaming';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';
@@ -29,25 +31,28 @@ export default function ({ getService }: FtrProviderContext) {
   describe('bsearch', () => {
     describe('post', () => {
       it('should return 200 a single response', async () => {
-        const resp = await supertest.post(`/internal/bsearch`).send({
-          batch: [
-            {
-              request: {
-                params: {
-                  index: '.kibana',
-                  body: {
-                    query: {
-                      match_all: {},
+        const resp = await supertest
+          .post(`/internal/bsearch`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .send({
+            batch: [
+              {
+                request: {
+                  params: {
+                    index: '.kibana',
+                    body: {
+                      query: {
+                        match_all: {},
+                      },
                     },
                   },
                 },
+                options: {
+                  strategy: 'es',
+                },
               },
-              options: {
-                strategy: 'es',
-              },
-            },
-          ],
-        });
+            ],
+          });
 
         const jsonBody = parseBfetchResponse(resp);
 
@@ -59,25 +64,28 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 200 a single response from compressed', async () => {
-        const resp = await supertest.post(`/internal/bsearch?compress=true`).send({
-          batch: [
-            {
-              request: {
-                params: {
-                  index: '.kibana',
-                  body: {
-                    query: {
-                      match_all: {},
+        const resp = await supertest
+          .post(`/internal/bsearch?compress=true`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .send({
+            batch: [
+              {
+                request: {
+                  params: {
+                    index: '.kibana',
+                    body: {
+                      query: {
+                        match_all: {},
+                      },
                     },
                   },
                 },
+                options: {
+                  strategy: 'es',
+                },
               },
-              options: {
-                strategy: 'es',
-              },
-            },
-          ],
-        });
+            ],
+          });
 
         const jsonBody = parseBfetchResponse(resp, true);
 
@@ -89,34 +97,37 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return a batch of successful responses', async () => {
-        const resp = await supertest.post(`/internal/bsearch`).send({
-          batch: [
-            {
-              request: {
-                params: {
-                  index: '.kibana',
-                  body: {
-                    query: {
-                      match_all: {},
+        const resp = await supertest
+          .post(`/internal/bsearch`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .send({
+            batch: [
+              {
+                request: {
+                  params: {
+                    index: '.kibana',
+                    body: {
+                      query: {
+                        match_all: {},
+                      },
                     },
                   },
                 },
               },
-            },
-            {
-              request: {
-                params: {
-                  index: '.kibana',
-                  body: {
-                    query: {
-                      match_all: {},
+              {
+                request: {
+                  params: {
+                    index: '.kibana',
+                    body: {
+                      query: {
+                        match_all: {},
+                      },
                     },
                   },
                 },
               },
-            },
-          ],
-        });
+            ],
+          });
 
         expect(resp.status).to.be(200);
         const parsedResponse = parseBfetchResponse(resp);
@@ -129,25 +140,28 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return error for not found strategy', async () => {
-        const resp = await supertest.post(`/internal/bsearch`).send({
-          batch: [
-            {
-              request: {
-                params: {
-                  index: '.kibana',
-                  body: {
-                    query: {
-                      match_all: {},
+        const resp = await supertest
+          .post(`/internal/bsearch`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .send({
+            batch: [
+              {
+                request: {
+                  params: {
+                    index: '.kibana',
+                    body: {
+                      query: {
+                        match_all: {},
+                      },
                     },
                   },
                 },
+                options: {
+                  strategy: 'wtf',
+                },
               },
-              options: {
-                strategy: 'wtf',
-              },
-            },
-          ],
-        });
+            ],
+          });
 
         expect(resp.status).to.be(200);
         parseBfetchResponse(resp).forEach((responseJson, i) => {
@@ -157,26 +171,29 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 400 when index type is provided in "es" strategy', async () => {
-        const resp = await supertest.post(`/internal/bsearch`).send({
-          batch: [
-            {
-              request: {
-                index: '.kibana',
-                indexType: 'baad',
-                params: {
-                  body: {
-                    query: {
-                      match_all: {},
+        const resp = await supertest
+          .post(`/internal/bsearch`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .send({
+            batch: [
+              {
+                request: {
+                  index: '.kibana',
+                  indexType: 'baad',
+                  params: {
+                    body: {
+                      query: {
+                        match_all: {},
+                      },
                     },
                   },
                 },
+                options: {
+                  strategy: 'es',
+                },
               },
-              options: {
-                strategy: 'es',
-              },
-            },
-          ],
-        });
+            ],
+          });
 
         expect(resp.status).to.be(200);
         parseBfetchResponse(resp).forEach((responseJson, i) => {
@@ -194,16 +211,19 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
         });
         it('should return 400 "search_phase_execution_exception" for Painless error in "es" strategy', async () => {
-          const resp = await supertest.post(`/internal/bsearch`).send({
-            batch: [
-              {
-                request: painlessErrReq,
-                options: {
-                  strategy: 'es',
+          const resp = await supertest
+            .post(`/internal/bsearch`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+            .send({
+              batch: [
+                {
+                  request: painlessErrReq,
+                  options: {
+                    strategy: 'es',
+                  },
                 },
-              },
-            ],
-          });
+              ],
+            });
 
           expect(resp.status).to.be(200);
           parseBfetchResponse(resp).forEach((responseJson, i) => {

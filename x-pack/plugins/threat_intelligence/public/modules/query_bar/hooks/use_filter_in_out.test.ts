@@ -11,7 +11,7 @@ import {
   generateMockUrlIndicator,
   Indicator,
 } from '../../../../common/types/indicator';
-import { TestProvidersComponent } from '../../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { useFilterInOut, UseFilterInValue } from './use_filter_in_out';
 import { FilterIn } from '../utils/filter';
 

@@ -8,35 +8,16 @@
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
+import { compileConfigStack } from './compile_config_stack';
+import { getConfigFromFiles } from '@kbn/config';
 
-/** @typedef {'es' | 'oblt' | 'security'} ServerlessProjectMode */
-/** @type {ServerlessProjectMode[]} */
-const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
-
-/**
- * @param {Record<string, unknown>} opts
- * @returns {ServerlessProjectMode | true | null}
- */
-function getServerlessProjectMode(opts) {
-  if (!opts.serverless) {
-    return null;
-  }
-
-  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless) || opts.serverless === true) {
-    return opts.serverless;
-  }
-
-  throw new Error(
-    `invalid --serverless value, must be one of ${VALID_SERVERLESS_PROJECT_MODE.join(', ')}`
-  );
-}
+const DEV_MODE_PATH = '@kbn/cli-dev-mode';
+const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
 
 function canRequire(path) {
   try {
@@ -51,9 +32,6 @@ function canRequire(path) {
   }
 }
 
-const DEV_MODE_PATH = '@kbn/cli-dev-mode';
-const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
-
 const getBootstrapScript = (isDev) => {
   if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
     // need dynamic require to exclude it from production build
@@ -66,100 +44,61 @@ const getBootstrapScript = (isDev) => {
   }
 };
 
-const pathCollector = function () {
+const setServerlessKibanaDevServiceAccountIfPossible = (get, set, opts) => {
+  const esHosts = [].concat(
+    get('elasticsearch.hosts', []),
+    opts.elasticsearch ? opts.elasticsearch.split(',') : []
+  );
+
+  /*
+   * We only handle the service token if serverless ES is running locally.
+   * Example would be if the user is running SES in the cloud and KBN serverless
+   * locally, they would be expected to handle auth on their own and this token
+   * is likely invalid anyways.
+   */
+  const isESlocalhost = esHosts.length
+    ? esHosts.some((hostUrl) => {
+        const parsedUrl = url.parse(hostUrl);
+        return (
+          parsedUrl.hostname === 'localhost' ||
+          parsedUrl.hostname === '127.0.0.1' ||
+          parsedUrl.hostname === 'host.docker.internal'
+        );
+      })
+    : true; // default is localhost:9200
+
+  if (!opts.dev || !opts.serverless || !isESlocalhost) {
+    return;
+  }
+
+  const DEV_UTILS_PATH = '@kbn/dev-utils';
+
+  if (!canRequire(DEV_UTILS_PATH)) {
+    return;
+  }
+
+  // need dynamic require to exclude it from production build
+  // eslint-disable-next-line import/no-dynamic-require
+  const { kibanaDevServiceAccount } = require(DEV_UTILS_PATH);
+  set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
+};
+
+function pathCollector() {
   const paths = [];
   return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
-};
+}
 
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-/**
- * @param {string} name The config file name
- * @returns {boolean} Whether the file exists
- */
-function configFileExists(name) {
-  const path = resolve(getConfigDirectory(), name);
-  try {
-    return statSync(path).isFile();
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      return false;
-    }
-
-    throw err;
-  }
-}
-
-/**
- * @param {string} name
- * @param {string[]} configs
- * @param {'push' | 'unshift'} method
- */
-function maybeAddConfig(name, configs, method) {
-  if (configFileExists(name)) {
-    configs[method](resolve(getConfigDirectory(), name));
-  }
-}
-
-/**
- * @param {string} file
- * @param {'es' | 'security' | 'oblt' | true} projectType
- * @param {boolean} isDevMode
- * @param {string[]} configs
- * @param {'push' | 'unshift'} method
- */
-function maybeSetRecentConfig(file, projectType, isDevMode, configs, method) {
-  const path = resolve(getConfigDirectory(), file);
-
-  function writeMode(selectedProjectType) {
-    writeFileSync(
-      path,
-      `${
-        isDevMode ? 'xpack.serverless.plugin.developer.projectSwitcher.enabled: true\n' : ''
-      }serverless: ${selectedProjectType}\n`
-    );
-  }
-
-  try {
-    if (!existsSync(path)) {
-      writeMode(projectType === true ? 'es' : projectType);
-    } else if (typeof projectType === 'string') {
-      const data = readFileSync(path, 'utf-8');
-      const match = data.match(/serverless: (\w+)\n/);
-      if (!match || match[1] !== projectType) {
-        writeMode(projectType);
-      }
-    }
-
-    configs[method](path);
-  } catch (err) {
-    throw err;
-  }
-}
-
-/**
- * @returns {string[]}
- */
-function getEnvConfigs() {
-  const val = process.env.KBN_CONFIG_PATHS;
-  if (typeof val === 'string') {
-    return val
-      .split(',')
-      .filter((v) => !!v)
-      .map((p) => resolve(p.trim()));
-  }
-  return [];
-}
-
-function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
+export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
-  const merge = _.partial(_.merge, rawConfig);
+
   if (opts.oss) {
     delete rawConfig.xpack;
   }
@@ -168,6 +107,10 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   delete extraCliOptions.env;
 
   if (opts.dev) {
+    if (opts.serverless) {
+      setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
+    }
+
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
       if (!has('elasticsearch.username')) {
         set('elasticsearch.username', 'kibana_system');
@@ -198,7 +141,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('server.ssl.truststore.path');
       ensureNotDefined('server.ssl.certificateAuthorities');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
-
       const elasticsearchHosts = (
         (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
           'https://localhost:9200',
@@ -235,8 +177,8 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
-  merge(extraCliOptions);
-  merge(readKeystore());
+  _.mergeWith(rawConfig, extraCliOptions, mergeAndReplaceArrays);
+  _.merge(rawConfig, readKeystore());
 
   return rawConfig;
 }
@@ -306,21 +248,19 @@ export default function (program) {
 
   command.action(async function (opts) {
     const unknownOptions = this.getUnknownOptions();
-    const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
-    const serverlessMode = getServerlessProjectMode(opts);
+    const configs = compileConfigStack({
+      configOverrides: opts.config,
+      devConfig: opts.devConfig,
+      dev: opts.dev,
+      serverless: opts.serverless || unknownOptions.serverless,
+    });
 
-    if (serverlessMode) {
-      maybeSetRecentConfig('serverless.recent.yml', serverlessMode, opts.dev, configs, 'push');
-    }
-
-    // .dev. configs are "pushed" so that they override all other config files
-    if (opts.dev && opts.devConfig !== false) {
-      maybeAddConfig('kibana.dev.yml', configs, 'push');
-      if (serverlessMode) {
-        maybeAddConfig(`serverless.dev.yml`, configs, 'push');
-        maybeAddConfig('serverless.recent.dev.yml', configs, 'push');
-      }
-    }
+    const configsEvaluted = getConfigFromFiles(configs);
+    const isServerlessMode = !!(
+      configsEvaluted.serverless ||
+      opts.serverless ||
+      unknownOptions.serverless
+    );
 
     const cliArgs = {
       dev: !!opts.dev,
@@ -340,6 +280,7 @@ export default function (program) {
       oss: !!opts.oss,
       cache: !!opts.cache,
       dist: !!opts.dist,
+      serverless: isServerlessMode,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
@@ -357,4 +298,16 @@ export default function (program) {
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });
   });
+}
+
+function mergeAndReplaceArrays(objValue, srcValue) {
+  if (typeof srcValue === 'undefined') {
+    return objValue;
+  } else if (Array.isArray(srcValue)) {
+    // do not merge arrays, use new value instead
+    return srcValue;
+  } else {
+    // default to default merging
+    return undefined;
+  }
 }

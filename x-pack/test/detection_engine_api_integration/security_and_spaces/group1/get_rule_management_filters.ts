@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/urls';
+import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllRules, getSimpleRule, installMockPrebuiltRules } from '../../utils';
 import { deleteAllPrebuiltRuleAssets } from '../../utils/prebuilt_rules/delete_all_prebuilt_rule_assets';
@@ -28,6 +28,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(RULE_MANAGEMENT_FILTERS_URL)
         .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'Kibana')
+        .set('elastic-api-version', '1')
         .send()
         .expect(200);
 
@@ -50,6 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(rule)
           .expect(200);
       });
@@ -58,6 +61,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .get(RULE_MANAGEMENT_FILTERS_URL)
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .set('elastic-api-version', '1')
           .send()
           .expect(200);
 
@@ -69,6 +74,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .get(RULE_MANAGEMENT_FILTERS_URL)
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .set('elastic-api-version', '1')
           .send()
           .expect(200);
 
@@ -86,6 +93,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .get(RULE_MANAGEMENT_FILTERS_URL)
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .set('elastic-api-version', '1')
           .send()
           .expect(200);
 
@@ -97,6 +106,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .get(RULE_MANAGEMENT_FILTERS_URL)
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .set('elastic-api-version', '1')
           .send()
           .expect(200);
 

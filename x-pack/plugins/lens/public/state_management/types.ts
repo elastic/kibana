@@ -22,6 +22,7 @@ import type {
   VisualizeEditorContext,
   IndexPattern,
   IndexPatternRef,
+  AnnotationGroups,
 } from '../types';
 export interface VisualizationState {
   activeId: string | null;
@@ -63,12 +64,8 @@ export interface LensAppState extends EditorFrameState {
   sharingSavedObjectProps?: Omit<SharingSavedObjectProps, 'sourceId'>;
   // Dataview/Indexpattern management has moved in here from datasource
   dataViews: DataViewsState;
+  annotationGroups: AnnotationGroups;
 }
-
-export type DispatchSetState = (state: Partial<LensAppState>) => {
-  payload: Partial<LensAppState>;
-  type: string;
-};
 
 export interface LensState {
   lens: LensAppState;

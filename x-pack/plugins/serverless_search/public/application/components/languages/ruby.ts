@@ -6,20 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
-import { LanguageDefinition, Languages } from './types';
+import { INDEX_NAME_PLACEHOLDER } from '../../constants';
 
 export const rubyDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.rubyAdvancedConfig,
   apiReference: docLinks.rubyExamples,
   buildSearchQuery: `client.search(index: 'books', q: 'snow')`,
-  configureClient: `client = ElasticsearchServerless::Client.new(
-  api_key: 'your_api_key',
-  url: 'https://my-deployment-url'
+  configureClient: ({ url, apiKey }) => `client = ElasticsearchServerless::Client.new(
+  api_key: '${apiKey}',
+  url: '${url}'
 )
 `,
   basicConfig: docLinks.rubyBasicConfig,
   docLink: docLinks.rubyClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-ruby',
+    label: i18n.translate('xpack.serverlessSearch.languages.ruby.githubLabel', {
+      defaultMessage: 'elasticsearch-serverless-ruby',
+    }),
+  },
   iconType: 'ruby.svg',
   id: Languages.RUBY,
   ingestData: `documents = [
@@ -31,6 +37,18 @@ export const rubyDefinition: LanguageDefinition = {
   { index: { _index: 'books', data: {name: "The Handmaid's Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311} } }
 ]
 client.bulk(body: documents)`,
+  ingestDataIndex: ({ apiKey, url, indexName }) => `client = ElasticsearchServerless::Client.new(
+  api_key: '${apiKey}',
+  url: '${url}'
+)
+
+documents = [
+  { index: { _index: '${
+    indexName ?? INDEX_NAME_PLACEHOLDER
+  }', data: {name: "foo", "title": "bar"} } },
+]
+client.bulk(body: documents)
+`,
   installClient: `# Requires Ruby version 3.0 or higher
 
 # From the project's root directory:$ gem build elasticsearch-serverless.gemspec
@@ -38,5 +56,5 @@ $ gem install elasticsearch-serverless-x.x.x.gem`,
   name: i18n.translate('xpack.serverlessSearch.languages.ruby', {
     defaultMessage: 'Ruby',
   }),
-  testConnection: `TBD`,
+  testConnection: `client.info`,
 };

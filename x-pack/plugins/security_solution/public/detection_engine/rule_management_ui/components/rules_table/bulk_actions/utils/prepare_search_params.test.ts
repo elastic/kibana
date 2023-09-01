@@ -8,12 +8,12 @@
 import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
 
-import { convertRulesFilterToKQL } from '../../../../../rule_management/logic/utils';
+import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 
 import { prepareSearchParams } from './prepare_search_params';
 
-jest.mock('../../../../../rule_management/logic/utils', () => ({
+jest.mock('../../../../../../../common/detection_engine/rule_management/rule_filtering', () => ({
   convertRulesFilterToKQL: jest.fn().mockReturnValue('str'),
 }));
 

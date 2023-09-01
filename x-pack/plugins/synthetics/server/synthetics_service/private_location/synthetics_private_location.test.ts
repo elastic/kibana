@@ -4,34 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
-import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import {
   DataStream,
   MonitorFields,
   ScheduleUnit,
   SourceType,
   HeartbeatConfig,
-  PrivateLocation,
 } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
+import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { SyntheticsServerSetup } from '../../types';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 
 describe('SyntheticsPrivateLocation', () => {
-  const mockPrivateLocation: PrivateLocation = {
+  const mockPrivateLocation: PrivateLocationAttributes = {
     id: 'policyId',
     label: 'Test Location',
     concurrentMonitors: 1,
     agentPolicyId: 'policyId',
+    isServiceManaged: false,
   };
   const testConfig = {
     id: 'testId',
     type: 'http',
     enabled: true,
     schedule: '@every 3m',
-    'service.name': '',
+    'service.name': 'test service',
     locations: [mockPrivateLocation],
     tags: [],
     timeout: '16',
@@ -52,16 +54,7 @@ describe('SyntheticsPrivateLocation', () => {
     username: '',
   } as unknown as HeartbeatConfig;
 
-  const savedObjectsClientMock = {
-    bulkUpdate: jest.fn(),
-    get: jest.fn().mockReturnValue({
-      attributes: {
-        locations: [mockPrivateLocation],
-      },
-    }),
-  } as unknown as SavedObjectsClientContract;
-
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     uptimeEsClient: { search: jest.fn() },
     logger: loggerMock.create(),
     config: {
@@ -72,11 +65,6 @@ describe('SyntheticsPrivateLocation', () => {
       },
     },
     fleet: {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
         buildPackagePolicyFromPackage: jest.fn(),
@@ -87,94 +75,82 @@ describe('SyntheticsPrivateLocation', () => {
         getSpaceId: jest.fn().mockReturnValue('nonDefaultSpace'),
       },
     },
-  } as unknown as UptimeServerSetup;
+    coreStart: {
+      savedObjects: savedObjectsServiceMock.createStartContract(),
+    },
+  } as unknown as SyntheticsServerSetup;
 
-  it.each([
-    [true, 'Unable to create Synthetics package policy for private location'],
-    [
-      false,
-      'Unable to create Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
-    ],
-  ])('throws errors for create monitor', async (writeIntegrationPolicies, error) => {
-    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
-      ...serverMock,
-      fleet: {
-        ...serverMock.fleet,
-        authz: {
-          fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
+  it.each([['Unable to create Synthetics package policy template for private location']])(
+    'throws errors for create monitor',
+    async (error) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
         },
-      },
-    });
+      });
 
-    try {
-      await syntheticsPrivateLocation.createPackagePolicies(
-        [{ config: testConfig, globalParams: {} }],
-        {} as unknown as KibanaRequest,
-        savedObjectsClientMock,
-        [mockPrivateLocation],
-        'test-space'
-      );
-    } catch (e) {
-      expect(e).toEqual(new Error(error));
+      try {
+        await syntheticsPrivateLocation.createPackagePolicies(
+          [{ config: testConfig, globalParams: {} }],
+          [mockPrivateLocation],
+          'test-space'
+        );
+      } catch (e) {
+        expect(e).toEqual(new Error(error));
+      }
     }
-  });
+  );
 
-  it.each([
-    [true, 'Unable to create Synthetics package policy for private location'],
-    [
-      false,
-      'Unable to update Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
-    ],
-  ])('throws errors for edit monitor', async (writeIntegrationPolicies, error) => {
-    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
-      ...serverMock,
-      fleet: {
-        ...serverMock.fleet,
-        authz: {
-          fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
+  it.each([['Unable to create Synthetics package policy template for private location']])(
+    'throws errors for edit monitor',
+    async (error) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
         },
-      },
-    });
+      });
 
-    try {
-      await syntheticsPrivateLocation.editMonitors(
-        [{ config: testConfig, globalParams: {} }],
-        {} as unknown as KibanaRequest,
-        savedObjectsClientMock,
-        [mockPrivateLocation],
-        'test-space'
-      );
-    } catch (e) {
-      expect(e).toEqual(new Error(error));
+      try {
+        await syntheticsPrivateLocation.editMonitors(
+          [{ config: testConfig, globalParams: {} }],
+          [mockPrivateLocation],
+          'test-space'
+        );
+      } catch (e) {
+        expect(e).toEqual(new Error(error));
+      }
     }
-  });
+  );
 
   it.each([
     [
-      true,
       'Unable to delete Synthetics package policy for monitor Test Monitor with private location Test Location',
     ],
     [
-      false,
       'Unable to delete Synthetics package policy for monitor Test Monitor. Fleet write permissions are needed to use Synthetics private locations.',
     ],
-  ])('throws errors for delete monitor', async (writeIntegrationPolicies, error) => {
+  ])('throws errors for delete monitor', async (error) => {
     const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
       ...serverMock,
       fleet: {
         ...serverMock.fleet,
-        authz: {
-          fromRequest: jest.fn().mockReturnValue({ integrations: { writeIntegrationPolicies } }),
+        packagePolicyService: {
+          ...serverMock.fleet.packagePolicyService,
+          delete(
+            soClient: SavedObjectsClientContract,
+            esClient: any,
+            ids: string[],
+            options?: any
+          ): any {
+            throw new Error(error);
+          },
         },
       },
     });
     try {
-      await syntheticsPrivateLocation.deleteMonitors(
-        [testConfig],
-        {} as unknown as KibanaRequest,
-        savedObjectsClientMock,
-        'test-space'
-      );
+      await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
     } catch (e) {
       expect(e).toEqual(new Error(error));
     }
@@ -226,7 +202,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         name: {
           type: 'text',
-          value: 'Browser monitor',
+          value: '"Browser monitor"',
         },
         params: {
           type: 'yaml',
@@ -246,7 +222,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'service.name': {
           type: 'text',
-          value: '',
+          value: '"test service"',
         },
         'source.inline.script': {
           type: 'yaml',
@@ -286,7 +262,7 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   type: DataStream.BROWSER,
   enabled: true,
   schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
-  'service.name': '',
+  'service.name': 'test service',
   tags: [],
   timeout: null,
   name: 'Browser monitor',

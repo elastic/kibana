@@ -14,7 +14,7 @@ import type { HttpApiTagOperation, Owner } from '../constants/types';
  * This type is only used to validate for deletion, it does not check all the fields that should exist in the file
  * metadata.
  */
-export const CaseFileMetadataForDeletionRt = rt.type({
+export const CaseFileMetadataForDeletionRt = rt.strict({
   caseIds: rt.array(rt.string),
 });
 

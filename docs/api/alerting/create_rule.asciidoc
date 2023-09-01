@@ -30,17 +30,6 @@ you must also have `read` privileges for the *Management* >
 *{connectors-feature}* feature. For more details, refer to
 <<kibana-feature-privileges>>.
 
-=== {api-description-title}
-
-[WARNING]
-====
-* This API supports only
-<<token-api-authentication,token-based authentication>>.
-* When you create a rule, it identifies which roles you have at that point in time.
-Thereafter, when the rule performs queries, it uses those security privileges.
-If a user with different privileges updates the rule, its behavior might change.
-====
-
 [[create-rule-api-path-params]]
 === {api-path-parms-title}
 
@@ -173,7 +162,7 @@ POST api/alerting/rule
          "group":"threshold met",
          "params":{
             "level":"info",
-            "message":"alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+            "message":"Rule '{{rule.name}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
          }
       }
    ],
@@ -231,7 +220,7 @@ The API returns the following:
       "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
       "params": {
         "level": "info",
-        "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+        "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
       },
       "connector_type_id": ".server-log"
     }

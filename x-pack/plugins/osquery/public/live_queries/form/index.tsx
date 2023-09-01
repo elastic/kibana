@@ -250,7 +250,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         setValue('queryType', 'pack');
 
         if (!isPackDataFetched) return;
-        const selectedPackOption = find(packsData?.data, ['id', defaultValue.packId]);
+        const selectedPackOption = find(packsData?.data, ['saved_object_id', defaultValue.packId]);
         if (selectedPackOption) {
           setValue('packId', [defaultValue.packId]);
         }

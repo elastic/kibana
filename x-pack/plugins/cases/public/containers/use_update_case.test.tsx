@@ -19,7 +19,6 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useUpdateCase', () => {
-  const abortCtrl = new AbortController();
   const updateKey: UpdateKey = 'description';
 
   const addSuccess = jest.fn();
@@ -57,7 +56,7 @@ describe('useUpdateCase', () => {
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'patchCase');
+    const patchCaseSpy = jest.spyOn(api, 'patchCase');
     const { waitForNextUpdate, result } = renderHook(() => useUpdateCase(), {
       wrapper: appMockRender.AppWrapper,
     });
@@ -68,12 +67,11 @@ describe('useUpdateCase', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(
-      basicCase.id,
-      { description: 'updated description' },
-      basicCase.version,
-      abortCtrl.signal
-    );
+    expect(patchCaseSpy).toHaveBeenCalledWith({
+      caseId: basicCase.id,
+      updatedCase: { description: 'updated description' },
+      version: basicCase.version,
+    });
   });
 
   it('shows a success toaster', async () => {

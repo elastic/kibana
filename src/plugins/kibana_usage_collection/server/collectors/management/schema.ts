@@ -18,6 +18,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:alertTags': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -41,11 +45,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'banners:textContent': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
-  },
-  // non-sensitive
-  'visualize:enableLabs': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:heatmap:maxBuckets': {
     type: 'long',
@@ -108,6 +107,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableNewsFeed': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableExpandableFlyout': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -450,10 +453,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:profilingElasticsearchPlugin': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -502,7 +501,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:enableSql': {
+  'discover:enableESQL': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -550,6 +549,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableProfilingIntegration': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:apmEnableCriticalPath': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -567,6 +570,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:visualize:legacyGaugeChartsLibrary': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableLegacyUptimeApp': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

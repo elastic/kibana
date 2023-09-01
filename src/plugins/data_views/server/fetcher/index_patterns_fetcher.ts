@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
 import type { QueryDslQueryContainer } from '../../common/types';
@@ -27,7 +28,7 @@ export interface FieldDescriptor {
   metadata_field?: boolean;
   fixedInterval?: string[];
   timeZone?: string[];
-  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge';
+  timeSeriesMetric?: estypes.MappingTimeSeriesMetricType;
   timeSeriesDimension?: boolean;
 }
 
@@ -39,10 +40,16 @@ interface FieldSubType {
 export class IndexPatternsFetcher {
   private elasticsearchClient: ElasticsearchClient;
   private allowNoIndices: boolean;
+  private rollupsEnabled: boolean;
 
-  constructor(elasticsearchClient: ElasticsearchClient, allowNoIndices: boolean = false) {
+  constructor(
+    elasticsearchClient: ElasticsearchClient,
+    allowNoIndices: boolean = false,
+    rollupsEnabled: boolean = false
+  ) {
     this.elasticsearchClient = elasticsearchClient;
     this.allowNoIndices = allowNoIndices;
+    this.rollupsEnabled = rollupsEnabled;
   }
 
   /**
@@ -80,7 +87,7 @@ export class IndexPatternsFetcher {
       fields: options.fields || ['*'],
     });
 
-    if (type === 'rollup' && rollupIndex) {
+    if (this.rollupsEnabled && type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const capabilityCheck = getCapabilitiesForRollupIndices(
         await this.elasticsearchClient.rollup.getRollupIndexCaps({

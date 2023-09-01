@@ -48,6 +48,7 @@ export const renderApp = ({
     plugins: pluginsSetup,
     data: pluginsStart.data,
     inspector: pluginsStart.inspector,
+    infra: pluginsStart.infra,
     observability: pluginsStart.observability,
     observabilityShared: pluginsStart.observabilityShared,
     observabilityRuleTypeRegistry,
@@ -55,6 +56,7 @@ export const renderApp = ({
     unifiedSearch: pluginsStart.unifiedSearch,
     lens: pluginsStart.lens,
     uiActions: pluginsStart.uiActions,
+    observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
   };
 
   // render APM feedback link in global help menu

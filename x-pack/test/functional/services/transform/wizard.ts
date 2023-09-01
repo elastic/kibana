@@ -29,7 +29,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   const ml = getService('ml');
   const toasts = getService('toasts');
 
-  const pageObjects = getPageObjects(['discover', 'timePicker']);
+  const pageObjects = getPageObjects(['discover', 'timePicker', 'unifiedFieldList']);
 
   return {
     async clickNextButton() {
@@ -1083,7 +1083,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async assertDiscoverContainField(field: string) {
       await pageObjects.discover.isDiscoverAppOnScreen();
       await retry.tryForTime(60 * 1000, async () => {
-        const allFields = await pageObjects.discover.getAllFieldNames();
+        const allFields = await pageObjects.unifiedFieldList.getAllFieldNames();
         if (Array.isArray(allFields)) {
           expect(allFields).to.contain(
             field,

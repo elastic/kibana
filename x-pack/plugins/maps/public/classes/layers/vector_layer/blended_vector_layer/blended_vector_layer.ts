@@ -232,14 +232,6 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       : displayName;
   }
 
-  showJoinEditor() {
-    return true;
-  }
-
-  getJoinsDisabledReason() {
-    return this._documentSource.getJoinsDisabledReason();
-  }
-
   getJoins() {
     return [];
   }

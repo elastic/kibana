@@ -14,6 +14,7 @@ import {
   FilteringPolicy,
   FilteringRule,
   FilteringRuleRule,
+  SyncJobType,
 } from '../../../common/types/connectors';
 
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -55,7 +56,13 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const body = await addConnector(client, request.body);
+        const body = await addConnector(client, {
+          deleteExistingConnector: request.body.delete_existing_connector,
+          indexName: request.body.index_name,
+          isNative: request.body.is_native,
+          language: request.body.language,
+          serviceType: request.body.service_type,
+        });
         return response.ok({ body });
       } catch (error) {
         if (
@@ -124,7 +131,11 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/scheduling',
       validate: {
-        body: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+        body: schema.object({
+          access_control: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+          full: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+          incremental: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+        }),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -151,7 +162,44 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startConnectorSync(client, request.params.connectorId, request.body.nextSyncConfig);
+      await startConnectorSync(
+        client,
+        request.params.connectorId,
+        SyncJobType.FULL,
+        request.body.nextSyncConfig
+      );
+      return response.ok();
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/start_incremental_sync',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      await startConnectorSync(client, request.params.connectorId, SyncJobType.INCREMENTAL);
+      return response.ok();
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/start_access_control_sync',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      await startConnectorSync(client, request.params.connectorId, SyncJobType.ACCESS_CONTROL);
       return response.ok();
     })
   );
@@ -166,6 +214,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
           size: schema.number({ defaultValue: 10, min: 0 }),
+          type: schema.maybe(schema.string()),
         }),
       },
     },
@@ -175,7 +224,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         client,
         request.params.connectorId,
         request.query.from,
-        request.query.size
+        request.query.size,
+        request.query.type as 'content' | 'access_control' | 'all'
       );
       return response.ok({ body: result });
     })
@@ -228,7 +278,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       path: '/internal/enterprise_search/connectors/default_pipeline',
       validate: {},
     },
-    elasticsearchErrorHandler(log, async (context, request, response) => {
+    elasticsearchErrorHandler(log, async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await getDefaultPipeline(client);
       return response.ok({ body: result });

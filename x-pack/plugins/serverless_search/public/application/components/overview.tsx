@@ -6,70 +6,122 @@
  */
 
 import {
+  EuiAvatar,
+  EuiButtonEmpty,
+  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
   EuiPageTemplate,
-  EuiSpacer,
+  EuiPanel,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import {
+  WelcomeBanner,
+  IngestData,
+  SelectClientPanel,
+  OverviewPanel,
+  CodeBox,
+  LanguageClientPanel,
+  InstallClientPanel,
+  getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
+} from '@kbn/search-api-panels';
+
+import React, { useMemo, useState } from 'react';
+import type {
+  LanguageDefinition,
+  LanguageDefinitionSnippetArguments,
+} from '@kbn/search-api-panels';
+import { useQuery } from '@tanstack/react-query';
+import { Connector } from '@kbn/enterprise-search-plugin/common/types/connectors';
+import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
-import { CodeBox } from './code_box';
+import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { LanguageDefinition } from './languages/types';
-import { InstallClientPanel } from './overview_panels/install_client';
-import { OverviewPanel } from './overview_panels/overview_panel';
 import './overview.scss';
-import { IngestData } from './overview_panels/ingest_data';
+import { ApiKeyPanel } from './api_key/api_key';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
-  const { http } = useKibanaServices();
+  const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
+  const { application, cloud, http, userProfile, share } = useKibanaServices();
+
+  const elasticsearchURL = useMemo(() => {
+    return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
+  }, [cloud]);
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
+  const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
+    url: elasticsearchURL,
+    apiKey: clientApiKey,
+  };
+
+  const { data: _data } = useQuery({
+    queryKey: ['fetchConnectors'],
+    queryFn: () =>
+      http.fetch<{ connectors: Connector[] }>('/internal/serverless_search/connectors'),
+  });
 
   return (
-    <EuiPageTemplate offset={0} grow restrictWidth>
+    <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
       <EuiPageTemplate.Section alignment="top" className="serverlessSearchHeaderSection">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" direction="column" gutterSize="l">
-              <EuiFlexItem grow={false}>
-                <EuiTitle className="serverlessSearchHeaderTitle" size="l">
-                  <h1>
-                    {i18n.translate('xpack.serverlessSearch.header.title', {
-                      defaultMessage: 'Get started with Elasticsearch',
-                    })}
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  {i18n.translate('xpack.serverlessSearch.header.description', {
-                    defaultMessage:
-                      "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
-                  })}
-                </EuiText>
-                <EuiSpacer size="xxl" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiImage
-              alt=""
-              src={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/serverless_header.png`)}
-              size="554px"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiText color="ghost">
+          <WelcomeBanner userProfile={userProfile} assetBasePath={assetBasePath} />
+        </EuiText>
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
-        <InstallClientPanel language={selectedLanguage} setSelectedLanguage={setSelectedLanguage} />
+        <SelectClientPanel docLinks={docLinks} http={http}>
+          {languageDefinitions.map((language, index) => (
+            <EuiFlexItem key={`panelItem.${index}`}>
+              <LanguageClientPanel
+                language={language}
+                setSelectedLanguage={setSelectedLanguage}
+                isSelectedLanguage={selectedLanguage === language}
+                assetBasePath={assetBasePath}
+              />
+            </EuiFlexItem>
+          ))}
+        </SelectClientPanel>
+      </EuiPageTemplate.Section>
+
+      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+        <InstallClientPanel
+          codeSnippet={getLanguageDefinitionCodeSnippet(
+            selectedLanguage,
+            'installClient',
+            codeSnippetArguments
+          )}
+          consoleRequest={getConsoleRequest('installClient')}
+          languages={languageDefinitions}
+          language={selectedLanguage}
+          setSelectedLanguage={setSelectedLanguage}
+          assetBasePath={assetBasePath}
+          application={application}
+          sharePlugin={share}
+        />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+        <OverviewPanel
+          description={i18n.translate('xpack.serverlessSearch.apiKey.description', {
+            defaultMessage:
+              "You'll need these unique identifiers to securely connect to your Elasticsearch project.",
+          })}
+          leftPanelContent={<ApiKeyPanel setClientApiKey={setClientApiKey} />}
+          links={[
+            {
+              href: docLinks.securityApis,
+              label: i18n.translate('xpack.serverlessSearch.configureClient.basicConfigLabel', {
+                defaultMessage: 'Basic configuration',
+              }),
+            },
+          ]}
+          title={i18n.translate('xpack.serverlessSearch.apiKey.title', {
+            defaultMessage: 'Store your API key and Cloud ID',
+          })}
+        />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <OverviewPanel
@@ -78,10 +130,18 @@ export const ElasticsearchOverview = () => {
           })}
           leftPanelContent={
             <CodeBox
-              code="configureClient"
               languages={languageDefinitions}
+              codeSnippet={getLanguageDefinitionCodeSnippet(
+                selectedLanguage,
+                'configureClient',
+                codeSnippetArguments
+              )}
+              consoleRequest={getConsoleRequest('configureClient')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
+              assetBasePath={assetBasePath}
+              application={application}
+              sharePlugin={share}
             />
           }
           links={[
@@ -93,19 +153,6 @@ export const ElasticsearchOverview = () => {
                       'xpack.serverlessSearch.configureClient.basicConfigLabel',
                       {
                         defaultMessage: 'Basic configuration',
-                      }
-                    ),
-                  },
-                ]
-              : []),
-            ...(selectedLanguage.advancedConfig
-              ? [
-                  {
-                    href: selectedLanguage.advancedConfig,
-                    label: i18n.translate(
-                      'xpack.serverlessSearch.configureClient.advancedConfigLabel',
-                      {
-                        defaultMessage: 'Advanced configuration',
                       }
                     ),
                   },
@@ -125,10 +172,18 @@ export const ElasticsearchOverview = () => {
           })}
           leftPanelContent={
             <CodeBox
-              code="testConnection"
               languages={languageDefinitions}
+              codeSnippet={getLanguageDefinitionCodeSnippet(
+                selectedLanguage,
+                'testConnection',
+                codeSnippetArguments
+              )}
+              consoleRequest={getConsoleRequest('testConnection')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
+              assetBasePath={assetBasePath}
+              application={application}
+              sharePlugin={share}
             />
           }
           links={[]}
@@ -138,7 +193,21 @@ export const ElasticsearchOverview = () => {
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
-        <IngestData selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage} />
+        <IngestData
+          codeSnippet={getLanguageDefinitionCodeSnippet(
+            selectedLanguage,
+            'ingestData',
+            codeSnippetArguments
+          )}
+          consoleRequest={getConsoleRequest('ingestData')}
+          languages={languageDefinitions}
+          selectedLanguage={selectedLanguage}
+          setSelectedLanguage={setSelectedLanguage}
+          assetBasePath={assetBasePath}
+          docLinks={docLinks}
+          application={application}
+          sharePlugin={share}
+        />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <OverviewPanel
@@ -148,10 +217,18 @@ export const ElasticsearchOverview = () => {
           })}
           leftPanelContent={
             <CodeBox
-              code="buildSearchQuery"
               languages={languageDefinitions}
+              codeSnippet={getLanguageDefinitionCodeSnippet(
+                selectedLanguage,
+                'buildSearchQuery',
+                codeSnippetArguments
+              )}
+              consoleRequest={getConsoleRequest('buildSearchQuery')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
+              assetBasePath={assetBasePath}
+              application={application}
+              sharePlugin={share}
             />
           }
           links={[]}
@@ -160,6 +237,149 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section alignment="top" className="serverlessSearchOverviewFooterSection">
+        <OverviewPanel
+          title={i18n.translate('xpack.serverlessSearch.overview.footer.title', {
+            defaultMessage: 'Do more with your data',
+          })}
+          description={i18n.translate('xpack.serverlessSearch.overview.footer.description', {
+            defaultMessage:
+              "Your Elasticsearch endpoint is set up and you've made some basic queries. Now you're ready to dive deeper into more advanced tools and use cases.",
+          })}
+          leftPanelContent={<OverviewFooter />}
+          links={[]}
+          overviewPanelProps={{ color: 'transparent', hasShadow: false }}
+        />
+      </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
 };
+
+const OverviewFooter = () => {
+  const {
+    application: { navigateToApp },
+    cloud,
+  } = useKibanaServices();
+
+  return (
+    <EuiFlexGroup gutterSize="xl" direction="column">
+      <EuiFlexGroup gutterSize="m" direction="column">
+        <EuiFlexItem>
+          <EuiCard
+            layout="horizontal"
+            icon={
+              <EuiAvatar
+                size="xl"
+                color="subdued"
+                type="space"
+                iconType="discoverApp"
+                iconSize="original"
+                name="discover"
+              />
+            }
+            titleSize="xs"
+            title={i18n.translate('xpack.serverlessSearch.overview.footer.discover.title', {
+              defaultMessage: 'Discover',
+            })}
+            description={i18n.translate(
+              'xpack.serverlessSearch.overview.footer.discover.description',
+              {
+                defaultMessage:
+                  'Search and filter your data, learn how your fields are structured, and create visualizations.',
+              }
+            )}
+            onClick={() => navigateToApp('discover')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            layout="horizontal"
+            icon={
+              <EuiAvatar
+                size="xl"
+                color="subdued"
+                type="space"
+                iconType="pipelineApp"
+                iconSize="original"
+                name="pipelines"
+              />
+            }
+            titleSize="xs"
+            title={i18n.translate('xpack.serverlessSearch.overview.footer.pipelines.title', {
+              defaultMessage: 'Pipelines',
+            })}
+            description={i18n.translate(
+              'xpack.serverlessSearch.overview.footer.pipelines.description',
+              {
+                defaultMessage:
+                  'Transform your data before indexing. Remove or rename fields, run custom scripts, and much more.',
+              }
+            )}
+            onClick={() => navigateToApp('management', { path: '/ingest/ingest_pipelines' })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            layout="horizontal"
+            icon={
+              <EuiAvatar
+                size="xl"
+                color="subdued"
+                type="space"
+                iconType="notebookApp"
+                iconSize="original"
+                name="documentation"
+              />
+            }
+            titleSize="xs"
+            title={i18n.translate('xpack.serverlessSearch.overview.footer.documentation.title', {
+              defaultMessage: 'Documentation',
+            })}
+            description={i18n.translate(
+              'xpack.serverlessSearch.overview.footer.documentation.description',
+              {
+                defaultMessage: 'Learn more with our references, how-to guides, and tutorials.',
+              }
+            )}
+            href={docLinks.gettingStartedSearch}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        {cloud.usersAndRolesUrl && (
+          <FooterButtonContainer>
+            <EuiButtonEmpty iconType="users" href={cloud.usersAndRolesUrl}>
+              {i18n.translate('xpack.serverlessSearch.overview.footer.links.inviteUsers', {
+                defaultMessage: 'Invite more users',
+              })}
+            </EuiButtonEmpty>
+          </FooterButtonContainer>
+        )}
+        <FooterButtonContainer>
+          <EuiButtonEmpty iconType="heart" href="https://www.elastic.co/community/">
+            {i18n.translate('xpack.serverlessSearch.overview.footer.links.community', {
+              defaultMessage: 'Join our community',
+            })}
+          </EuiButtonEmpty>
+        </FooterButtonContainer>
+        <FooterButtonContainer>
+          <EuiButtonEmpty iconType="faceHappy" href={docLinks.kibanaFeedback}>
+            {i18n.translate('xpack.serverlessSearch.overview.footer.links.feedback', {
+              defaultMessage: 'Give feedback',
+            })}
+          </EuiButtonEmpty>
+        </FooterButtonContainer>
+      </EuiFlexGroup>
+    </EuiFlexGroup>
+  );
+};
+
+const FooterButtonContainer: React.FC = ({ children }) => (
+  <EuiFlexItem>
+    <EuiPanel hasShadow={false} paddingSize="none">
+      <EuiFlexGroup>
+        <EuiFlexItem>{children}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  </EuiFlexItem>
+);

@@ -10,7 +10,7 @@ import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 
 // These are a collection of transforms that are UI specific and useful for UI concerns

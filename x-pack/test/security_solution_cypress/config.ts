@@ -49,12 +49,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'alertDetailsPageEnabled',
           'chartEmbeddablesEnabled',
+          'discoverInTimeline',
         ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',
         `--home.disableWelcomeScreen=true`,
         // Specify which version of the detection-rules package to install
         // `--xpack.securitySolution.prebuiltRulesPackageVersion=8.3.1`,
+        // Set an inexistent directory as the Fleet bundled packages location
+        // in order to force Fleet to reach out to the registry to download the
+        // packages listed in fleet_packages.json
+        // See: https://elastic.slack.com/archives/CNMNXV4RG/p1683033379063079
+        `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
       ],
     },
   };

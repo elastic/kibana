@@ -330,7 +330,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -352,7 +352,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -379,7 +379,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -411,7 +411,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -428,7 +428,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -450,7 +450,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -477,7 +477,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -499,7 +499,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -512,6 +512,29 @@ describe('getMigrationHash', () => {
                 },
               },
             ],
+          },
+        },
+      });
+
+      expect(getMigrationHash(typeA)).not.toEqual(getMigrationHash(typeB));
+    });
+
+    it('returns different hashes if different schemas are registered', () => {
+      const typeA = createType({
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: jest.fn(),
+            },
+          },
+        },
+      });
+      const typeB = createType({
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {},
           },
         },
       });
