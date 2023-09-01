@@ -64,9 +64,10 @@ export interface KnowledgeBaseEntry {
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
   public: boolean;
+  labels: Record<string, string>;
 }
 
-type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
+export type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
 
 export interface ContextDefinition {
   name: string;

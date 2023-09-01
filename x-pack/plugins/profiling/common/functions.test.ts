@@ -6,18 +6,16 @@
  */
 
 import { sum } from 'lodash';
-
 import { createTopNFunctions } from './functions';
-import { decodeStackTraceResponse } from './stack_traces';
-
-import { stackTraceFixtures } from './__fixtures__/stacktraces';
+import { decodeStackTraceResponse } from '@kbn/profiling-data-access-plugin/common/stack_traces';
+import { stackTraceFixtures } from '@kbn/profiling-data-access-plugin/common/__fixtures__/stacktraces';
 
 describe('TopN function operations', () => {
   stackTraceFixtures.forEach(({ response, seconds, upsampledBy }) => {
     const { events, stackTraces, stackFrames, executables, samplingRate } =
       decodeStackTraceResponse(response);
 
-    describe(`stacktraces from ${seconds} seconds and upsampled by ${upsampledBy}`, () => {
+    describe(`stacktraces upsampled by ${upsampledBy}`, () => {
       const maxTopN = 5;
       const topNFunctions = createTopNFunctions({
         events,
@@ -27,7 +25,6 @@ describe('TopN function operations', () => {
         startIndex: 0,
         endIndex: maxTopN,
         samplingRate,
-        totalSeconds: seconds,
       });
       const exclusiveCounts = topNFunctions.TopN.map((value) => value.CountExclusive);
 

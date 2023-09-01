@@ -642,7 +642,13 @@
                 "label": "layerConfig",
                 "description": [],
                 "signature": [
-                  "MetricLayerConfig"
+                  {
+                    "pluginId": "@kbn/lens-embeddable-utils",
+                    "scope": "public",
+                    "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+                    "section": "def-public.MetricLayerConfig",
+                    "text": "MetricLayerConfig"
+                  }
                 ],
                 "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
                 "deprecated": false,
@@ -933,18 +939,18 @@
       },
       {
         "parentPluginId": "@kbn/lens-embeddable-utils",
-        "id": "def-public.ReferenceLineColumn",
+        "id": "def-public.StaticColumn",
         "type": "Class",
         "tags": [],
-        "label": "ReferenceLineColumn",
+        "label": "StaticColumn",
         "description": [],
         "signature": [
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "public",
             "docId": "kibKbnLensEmbeddableUtilsPluginApi",
-            "section": "def-public.ReferenceLineColumn",
-            "text": "ReferenceLineColumn"
+            "section": "def-public.StaticColumn",
+            "text": "StaticColumn"
           },
           " implements ",
           {
@@ -955,13 +961,13 @@
             "text": "StaticChartColumn"
           }
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/reference_line.ts",
+        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/lens-embeddable-utils",
-            "id": "def-public.ReferenceLineColumn.Unnamed",
+            "id": "def-public.StaticColumn.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -969,13 +975,13 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/reference_line.ts",
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/lens-embeddable-utils",
-                "id": "def-public.ReferenceLineColumn.Unnamed.$1",
+                "id": "def-public.StaticColumn.Unnamed.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "valueConfig",
@@ -989,7 +995,7 @@
                     "text": "StaticValueConfig"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/reference_line.ts",
+                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -999,7 +1005,7 @@
           },
           {
             "parentPluginId": "@kbn/lens-embeddable-utils",
-            "id": "def-public.ReferenceLineColumn.getValueConfig",
+            "id": "def-public.StaticColumn.getValueConfig",
             "type": "Function",
             "tags": [],
             "label": "getValueConfig",
@@ -1014,7 +1020,7 @@
                 "text": "StaticValueConfig"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/reference_line.ts",
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1022,7 +1028,7 @@
           },
           {
             "parentPluginId": "@kbn/lens-embeddable-utils",
-            "id": "def-public.ReferenceLineColumn.getData",
+            "id": "def-public.StaticColumn.getData",
             "type": "Function",
             "tags": [],
             "label": "getData",
@@ -1045,13 +1051,13 @@
                 "text": "PersistedIndexPatternLayer"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/reference_line.ts",
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/lens-embeddable-utils",
-                "id": "def-public.ReferenceLineColumn.getData.$1",
+                "id": "def-public.StaticColumn.getData.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -1059,14 +1065,14 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/reference_line.ts",
+                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/lens-embeddable-utils",
-                "id": "def-public.ReferenceLineColumn.getData.$2",
+                "id": "def-public.StaticColumn.getData.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "baseLayer",
@@ -1080,7 +1086,7 @@
                     "text": "PersistedIndexPatternLayer"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/reference_line.ts",
+                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1380,7 +1386,13 @@
                 "label": "layerConfig",
                 "description": [],
                 "signature": [
-                  "XYLayerConfig"
+                  {
+                    "pluginId": "@kbn/lens-embeddable-utils",
+                    "scope": "public",
+                    "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+                    "section": "def-public.XYLayerConfig",
+                    "text": "XYLayerConfig"
+                  }
                 ],
                 "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
@@ -1819,7 +1831,13 @@
                 "label": "layerConfig",
                 "description": [],
                 "signature": [
-                  "XYReferenceLinesLayerConfig"
+                  {
+                    "pluginId": "@kbn/lens-embeddable-utils",
+                    "scope": "public",
+                    "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+                    "section": "def-public.XYReferenceLinesLayerConfig",
+                    "text": "XYReferenceLinesLayerConfig"
+                  }
                 ],
                 "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
                 "deprecated": false,
@@ -2790,6 +2808,88 @@
       },
       {
         "parentPluginId": "@kbn/lens-embeddable-utils",
+        "id": "def-public.MetricLayerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "MetricLayerConfig",
+        "description": [],
+        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-public.MetricLayerConfig.data",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "Omit<{ formula: string; label?: string | undefined; filter?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined; reducedTimeRange?: string | undefined; timeScale?: ",
+              "TimeScaleUnit",
+              " | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }, \"formula\"> & { color?: string | undefined; value: string; }"
+            ],
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-public.MetricLayerConfig.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/lens-embeddable-utils",
+                "scope": "public",
+                "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+                "section": "def-public.MetricLayerOptions",
+                "text": "MetricLayerOptions"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-public.MetricLayerConfig.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "\nIt is possible to define a specific dataView for the layer. It will override the global chart one"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-embeddable-utils",
         "id": "def-public.MetricLayerOptions",
         "type": "Interface",
         "tags": [],
@@ -3048,6 +3148,85 @@
       },
       {
         "parentPluginId": "@kbn/lens-embeddable-utils",
+        "id": "def-public.XYLayerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "XYLayerConfig",
+        "description": [],
+        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-public.XYLayerConfig.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/lens-embeddable-utils",
+                "scope": "public",
+                "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+                "section": "def-public.FormulaValueConfig",
+                "text": "FormulaValueConfig"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-public.XYLayerConfig.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/lens-embeddable-utils",
+                "scope": "public",
+                "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+                "section": "def-public.XYLayerOptions",
+                "text": "XYLayerOptions"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-public.XYLayerConfig.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "\nIt is possible to define a specific dataView for the layer. It will override the global chart one"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-embeddable-utils",
         "id": "def-public.XYLayerOptions",
         "type": "Interface",
         "tags": [],
@@ -3103,6 +3282,64 @@
               " | undefined"
             ],
             "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-embeddable-utils",
+        "id": "def-public.XYReferenceLinesLayerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "XYReferenceLinesLayerConfig",
+        "description": [],
+        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-public.XYReferenceLinesLayerConfig.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/lens-embeddable-utils",
+                "scope": "public",
+                "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+                "section": "def-public.StaticValueConfig",
+                "text": "StaticValueConfig"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-public.XYReferenceLinesLayerConfig.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "\nIt is possible to define a specific dataView for the layer. It will override the global chart one"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           }

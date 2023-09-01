@@ -72,9 +72,9 @@ import type { DiscoverGridSettings } from '../components/discover_grid/types';
 import type { DocTableProps } from '../components/doc_table/doc_table_wrapper';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
+import { fetchTextBased } from '../application/main/utils/fetch_text_based';
 import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
-import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
 
@@ -165,6 +165,10 @@ export class SavedSearchEmbeddable
     });
   }
 
+  private getCurrentTitle() {
+    return this.input.hidePanelTitles ? '' : this.input.title ?? this.savedSearch?.title ?? '';
+  }
+
   private async initializeSavedSearch(input: SearchInput) {
     try {
       const unwrapResult = await this.attributeService.unwrapAttributes(input);
@@ -178,7 +182,7 @@ export class SavedSearchEmbeddable
         unwrapResult
       );
 
-      this.panelTitle = this.savedSearch.title ?? '';
+      this.panelTitle = this.getCurrentTitle();
 
       await this.initializeOutput();
 
@@ -201,7 +205,7 @@ export class SavedSearchEmbeddable
     const dataView = savedSearch.searchSource.getField('index');
     const indexPatterns = dataView ? [dataView] : [];
     const input = this.getInput();
-    const title = input.hidePanelTitles ? '' : input.title ?? savedSearch.title;
+    const title = this.getCurrentTitle();
     const description = input.hidePanelTitles ? '' : input.description ?? savedSearch.description;
     const savedObjectId = (input as SearchByReferenceInput).savedObjectId;
     const locatorParams = getDiscoverLocatorParams({ input, savedSearch });
@@ -276,7 +280,7 @@ export class SavedSearchEmbeddable
       useNewFieldsApi,
       {
         sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
-        defaultSort: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+        sortDir: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
       }
     );
 
@@ -317,12 +321,12 @@ export class SavedSearchEmbeddable
 
     const query = savedSearch.searchSource.getField('query');
     const dataView = savedSearch.searchSource.getField('index')!;
-    const useSql = this.isTextBasedSearch(savedSearch);
+    const useTextBased = this.isTextBasedSearch(savedSearch);
 
     try {
-      // Request SQL data
-      if (useSql && query) {
-        const result = await fetchSql(
+      // Request text based data
+      if (useTextBased && query) {
+        const result = await fetchTextBased(
           savedSearch.searchSource.getField('query')!,
           dataView,
           this.services.data,
@@ -765,5 +769,9 @@ export class SavedSearchEmbeddable
 
     this.subscription?.unsubscribe();
     this.abortController?.abort();
+  }
+
+  public hasTimeRange() {
+    return this.getTimeRange() !== undefined;
   }
 }

@@ -29,46 +29,52 @@ import { validateGetRuleHealthRequest } from './get_rule_health_request';
  *   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)
  */
 export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: GET_RULE_HEALTH_URL,
-      validate: {
-        body: buildRouteValidation(GetRuleHealthRequestBody),
-      },
       options: {
         tags: ['access:securitySolution'],
-        access: 'public', // must be public to enable "system" users to collect data
       },
-    },
-    async (context, request, response): Promise<IKibanaResponse<GetRuleHealthResponse>> => {
-      const siemResponse = buildSiemResponse(response);
-
-      try {
-        const params = validateGetRuleHealthRequest(request.body);
-
-        const ctx = await context.resolve(['securitySolution']);
-        const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
-
-        const ruleHealthParameters = { interval: params.interval, rule_id: params.ruleId };
-        const ruleHealth = await healthClient.calculateRuleHealth(ruleHealthParameters);
-
-        const responseBody: GetRuleHealthResponse = {
-          timings: calculateHealthTimings(params.requestReceivedAt),
-          parameters: ruleHealthParameters,
-          health: {
-            ...ruleHealth,
-            debug: params.debug ? ruleHealth.debug : undefined,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: buildRouteValidation(GetRuleHealthRequestBody),
           },
-        };
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<GetRuleHealthResponse>> => {
+        const siemResponse = buildSiemResponse(response);
 
-        return response.ok({ body: responseBody });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+        try {
+          const params = validateGetRuleHealthRequest(request.body);
+
+          const ctx = await context.resolve(['securitySolution']);
+          const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
+
+          const ruleHealthParameters = { interval: params.interval, rule_id: params.ruleId };
+          const ruleHealth = await healthClient.calculateRuleHealth(ruleHealthParameters);
+
+          const responseBody: GetRuleHealthResponse = {
+            timings: calculateHealthTimings(params.requestReceivedAt),
+            parameters: ruleHealthParameters,
+            health: {
+              ...ruleHealth,
+              debug: params.debug ? ruleHealth.debug : undefined,
+            },
+          };
+
+          return response.ok({ body: responseBody });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

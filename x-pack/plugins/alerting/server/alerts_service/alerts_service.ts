@@ -19,7 +19,13 @@ import {
   getComponentTemplateName,
   getIndexTemplateAndPattern,
 } from './resource_installer_utils';
-import { AlertInstanceContext, AlertInstanceState, IRuleTypeAlerts, RuleAlertData } from '../types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  IRuleTypeAlerts,
+  RuleAlertData,
+  DataStreamAdapter,
+} from '../types';
 import {
   createResourceInstallationHelper,
   errorResult,
@@ -49,6 +55,7 @@ interface AlertsServiceParams {
   kibanaVersion: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   timeoutMs?: number;
+  dataStreamAdapter: DataStreamAdapter;
 }
 
 export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
@@ -114,9 +121,12 @@ export class AlertsService implements IAlertsService {
   private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
   private commonInitPromise: Promise<InitializationPromise>;
+  private dataStreamAdapter: DataStreamAdapter;
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
+
+    this.dataStreamAdapter = options.dataStreamAdapter;
 
     // Kick off initialization of common assets and save the promise
     this.commonInitPromise = this.initializeCommon(this.options.timeoutMs);
@@ -221,6 +231,7 @@ export class AlertsService implements IAlertsService {
       namespace: opts.namespace,
       rule: opts.rule,
       kibanaVersion: this.options.kibanaVersion,
+      dataStreamAdapter: this.dataStreamAdapter,
     });
   }
 
@@ -296,6 +307,7 @@ export class AlertsService implements IAlertsService {
             esClient,
             name: DEFAULT_ALERTS_ILM_POLICY_NAME,
             policy: DEFAULT_ALERTS_ILM_POLICY,
+            dataStreamAdapter: this.dataStreamAdapter,
           }),
         () =>
           createOrUpdateComponentTemplate({
@@ -421,6 +433,7 @@ export class AlertsService implements IAlertsService {
             kibanaVersion: this.options.kibanaVersion,
             namespace,
             totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            dataStreamAdapter: this.dataStreamAdapter,
           }),
         }),
       async () =>
@@ -429,6 +442,7 @@ export class AlertsService implements IAlertsService {
           esClient,
           totalFieldsLimit: TOTAL_FIELDS_LIMIT,
           indexPatterns: indexTemplateAndPattern,
+          dataStreamAdapter: this.dataStreamAdapter,
         }),
     ]);
 

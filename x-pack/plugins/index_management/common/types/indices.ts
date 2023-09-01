@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  HealthStatus,
+  IndicesStatsIndexMetadataState,
+  Uuid,
+} from '@elastic/elasticsearch/lib/api/types';
+
 interface IndexModule {
   number_of_shards: number | string;
   codec: string;
@@ -50,21 +56,30 @@ export interface IndexSettings {
   analysis?: AnalysisModule;
   [key: string]: any;
 }
-
 export interface Index {
-  health?: string;
-  status?: string;
   name: string;
-  uuid?: string;
   primary?: number | string;
   replica?: number | string;
-  documents: number;
-  documents_deleted: number;
-  size: string;
-  primary_size: string;
   isFrozen: boolean;
   hidden: boolean;
   aliases: string | string[];
   data_stream?: string;
-  [key: string]: any;
+
+  // The types below are added by extension services if corresponding plugins are enabled (ILM, Rollup, CCR)
+  isRollupIndex?: boolean;
+  ilm?: {
+    index: string;
+    managed: boolean;
+  };
+  isFollowerIndex?: boolean;
+
+  // The types from here below represent information returned from the index stats API;
+  // treated optional as the stats API is not available on serverless
+  health?: HealthStatus;
+  status?: IndicesStatsIndexMetadataState;
+  uuid?: Uuid;
+  documents?: number;
+  size?: string;
+  primary_size?: string;
+  documents_deleted?: number;
 }

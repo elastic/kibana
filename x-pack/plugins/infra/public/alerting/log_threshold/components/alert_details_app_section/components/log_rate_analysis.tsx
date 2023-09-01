@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { pick, orderBy } from 'lodash';
 import moment from 'moment';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
@@ -29,6 +28,7 @@ import {
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { ALERT_END } from '@kbn/rule-data-utils';
+import { pick, orderBy } from 'lodash';
 import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
@@ -230,7 +230,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
       Do not mention indidivual p-values from the analysis results. Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
 
-    const now = new Date().toString();
+    const now = new Date().toISOString();
 
     return [
       {
@@ -289,6 +289,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
               'unifiedSearch',
               'theme',
               'lens',
+              'i18n',
             ])}
           />
         </EuiFlexItem>

@@ -15,8 +15,8 @@ import { ControlOutput } from '../types';
 // Component state is only used by public components.
 export interface RangeSliderComponentState {
   field?: FieldSpec;
-  min: number;
-  max: number;
+  min?: number;
+  max?: number;
   error?: string;
   isInvalid?: boolean;
 }

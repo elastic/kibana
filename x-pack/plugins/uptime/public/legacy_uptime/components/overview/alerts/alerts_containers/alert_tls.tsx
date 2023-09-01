@@ -19,9 +19,11 @@ import { AlertQueryBar } from '../alert_query_bar/query_bar';
 import { AlertMonitorCount } from '../monitor_status_alert/alert_monitor_status';
 
 export const AlertTls: React.FC<{
+  id?: string;
+  stackVersion?: string;
   ruleParams: RuleTypeParamsExpressionProps<TLSParams>['ruleParams'];
   setRuleParams: RuleTypeParamsExpressionProps<TLSParams>['setRuleParams'];
-}> = ({ ruleParams, setRuleParams }) => {
+}> = ({ id, stackVersion, ruleParams, setRuleParams }) => {
   const dispatch = useDispatch();
 
   const { settings } = useSelector(selectDynamicSettings);
@@ -29,6 +31,12 @@ export const AlertTls: React.FC<{
   const { count, loading } = useSnapShotCount({
     query: ruleParams.search ?? '',
   });
+
+  useEffect(() => {
+    if (!id && stackVersion && !ruleParams.stackVersion) {
+      setRuleParams('stackVersion', stackVersion);
+    }
+  }, [ruleParams, id, stackVersion, setRuleParams]);
 
   useEffect(() => {
     if (typeof settings === 'undefined') {
