@@ -15,6 +15,16 @@ paths:
             application/json:
               schema:
                 $ref: './list_metadata.schema.yaml#/components/schemas/SuccessResponse'
+  /api/endpoint/metadata/transforms:
+    get:
+      summary: Get Metadata Transform schema
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
 
   /api/endpoint/metadata/{id}:
     get:

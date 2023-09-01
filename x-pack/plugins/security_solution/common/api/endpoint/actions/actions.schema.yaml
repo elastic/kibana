@@ -15,6 +15,16 @@ paths:
             application/json:
               schema:
                 $ref: './list.schema.yaml#/components/schemas/SuccessResponse'
+  /api/endpoint/action/state:
+    get:
+      summary: Get Action State schema
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
   /api/endpoint/action/{action_id}:
     get:
       summary: Get Action details schema
