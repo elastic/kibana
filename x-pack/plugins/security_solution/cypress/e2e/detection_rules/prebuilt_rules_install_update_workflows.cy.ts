@@ -12,26 +12,34 @@ import {
   GO_BACK_TO_RULES_TABLE_BUTTON,
   INSTALL_ALL_RULES_BUTTON,
   INSTALL_SELECTED_RULES_BUTTON,
-  RULES_MANAGEMENT_TABLE,
-  RULES_ROW,
-  RULES_UPDATES_TABLE,
+  NO_RULES_AVAILABLE_FOR_INSTALL_MESSSAGE,
+  NO_RULES_AVAILABLE_FOR_UPGRADE_MESSSAGE,
+  RULES_UPDATES_TAB,
+  RULE_CHECKBOX,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   TOASTER,
 } from '../../screens/alerts_detection_rules';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
-  getRuleAssets,
   createAndInstallMockedPrebuiltRules,
+  getRuleAssets,
 } from '../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
+import { deleteAlertsAndRules, reload, resetRulesTableState } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 import {
   addElasticRulesButtonClick,
+  assertRuleAvailableForInstallAndInstallOne,
+  assertRuleAvailableForInstallAndInstallSelected,
+  assertRuleAvailableForInstallAndInstallAllInPage,
+  assertRuleAvailableForInstallAndInstallAll,
+  assertRuleUpgradeAvailableAndUpgradeOne,
+  assertRuleUpgradeAvailableAndUpgradeSelected,
+  assertRuleUpgradeAvailableAndUpgradeAllInPage,
   assertRuleUpgradeAvailableAndUpgradeAll,
   ruleUpdatesTabClick,
 } from '../../tasks/prebuilt_rules';
+import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
   beforeEach(() => {
@@ -53,8 +61,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
 
     it('should install package from Fleet in the background', () => {
-      /* Assert that the package in installed from Fleet by checking that
-      /* the installSource is "registry", as opposed to "bundle" */
+      /* Assert that the package in installed from Fleet */
       cy.wait('@installPackageBulk', {
         timeout: 60000,
       }).then(({ response: bulkResponse }) => {
@@ -63,7 +70,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         const packages = bulkResponse?.body.items.map(
           ({ name, result }: BulkInstallPackageInfo) => ({
             name,
-            installSource: result.installSource,
           })
         );
 
@@ -79,17 +85,14 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
             cy.wrap(response?.body)
               .should('have.property', 'items')
               .should('have.length.greaterThan', 0);
-            cy.wrap(response?.body)
-              .should('have.property', '_meta')
-              .should('have.property', 'install_source')
-              .should('eql', 'registry');
           });
         } else {
           // Normal flow, install via the Fleet bulk install API
           expect(packages.length).to.have.greaterThan(0);
-          expect(packages).to.deep.include.members([
-            { name: 'security_detection_engine', installSource: 'registry' },
-          ]);
+          // At least one of the packages installed should be the security_detection_engine package
+          expect(packages).to.satisfy((pckgs: BulkInstallPackageInfo[]) =>
+            pckgs.some((pkg) => pkg.name === 'security_detection_engine')
+          );
         }
       });
     });
@@ -104,7 +107,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           const numberOfRulesToInstall = new Set(ruleIds).size;
           addElasticRulesButtonClick();
 
-          cy.get(INSTALL_ALL_RULES_BUTTON).click();
+          cy.get(INSTALL_ALL_RULES_BUTTON).should('be.enabled').click();
           cy.get(TOASTER)
             .should('be.visible')
             .should('have.text', `${numberOfRulesToInstall} rules installed successfully.`);
@@ -144,17 +147,38 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     beforeEach(() => {
       createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
       waitForRulesTableToBeLoaded();
+      cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform').as(
+        'installPrebuiltRules'
+      );
     });
 
-    it('should install selected rules when user clicks on Install selected rules', () => {
+    it('should install prebuilt rules one by one', () => {
       addElasticRulesButtonClick();
-      cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-      cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
+      assertRuleAvailableForInstallAndInstallOne({ rules: [RULE_1] });
+    });
+
+    it('should install multiple selected prebuilt rules by selecting them individually', () => {
+      addElasticRulesButtonClick();
+      assertRuleAvailableForInstallAndInstallSelected({ rules: [RULE_1, RULE_2] });
+    });
+
+    it('should install multiple selected prebuilt rules by selecting all in page', () => {
+      addElasticRulesButtonClick();
+      assertRuleAvailableForInstallAndInstallAllInPage({ rules: [RULE_1, RULE_2] });
+    });
+
+    it('should install all available rules at once', () => {
+      addElasticRulesButtonClick();
+      assertRuleAvailableForInstallAndInstallAll({ rules: [RULE_1, RULE_2] });
+    });
+
+    it('should display an empty screen when all available prebuilt rules have been installed', () => {
+      addElasticRulesButtonClick();
+      cy.get(INSTALL_ALL_RULES_BUTTON).click();
       cy.get(TOASTER).should('be.visible').should('have.text', `2 rules installed successfully.`);
-      cy.get(GO_BACK_TO_RULES_TABLE_BUTTON).click();
-      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', 2);
-      cy.get(RULES_MANAGEMENT_TABLE).contains(RULE_1['security-rule'].name);
-      cy.get(RULES_MANAGEMENT_TABLE).contains(RULE_2['security-rule'].name);
+      cy.get(RULE_CHECKBOX).should('not.exist');
+      cy.get(NO_RULES_AVAILABLE_FOR_INSTALL_MESSSAGE).should('exist');
+      cy.get(GO_BACK_TO_RULES_TABLE_BUTTON).should('exist');
     });
 
     it('should fail gracefully with toast error message when request to install rules fails', () => {
@@ -170,47 +194,70 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
   });
 
-  describe('Update of prebuilt rules', () => {
-    const RULE_ID = 'rule_id';
-    const OUTDATED_RULE = createRuleAssetSavedObject({
-      name: 'Outdated rule',
-      rule_id: RULE_ID,
+  describe('Upgrade of prebuilt rules', () => {
+    const RULE_1_ID = 'rule_1';
+    const RULE_2_ID = 'rule_2';
+    const OUTDATED_RULE_1 = createRuleAssetSavedObject({
+      name: 'Outdated rule 1',
+      rule_id: RULE_1_ID,
       version: 1,
     });
-    const UPDATED_RULE = createRuleAssetSavedObject({
-      name: 'Updated rule',
-      rule_id: RULE_ID,
+    const UPDATED_RULE_1 = createRuleAssetSavedObject({
+      name: 'Updated rule 1',
+      rule_id: RULE_1_ID,
+      version: 2,
+    });
+    const OUTDATED_RULE_2 = createRuleAssetSavedObject({
+      name: 'Outdated rule 2',
+      rule_id: RULE_2_ID,
+      version: 1,
+    });
+    const UPDATED_RULE_2 = createRuleAssetSavedObject({
+      name: 'Updated rule 2',
+      rule_id: RULE_2_ID,
       version: 2,
     });
     beforeEach(() => {
+      cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform').as(
+        'updatePrebuiltRules'
+      );
       /* Create a new rule and install it */
-      createAndInstallMockedPrebuiltRules({ rules: [OUTDATED_RULE] });
+      createAndInstallMockedPrebuiltRules({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
       /* Create a second version of the rule, making it available for update */
-      createAndInstallMockedPrebuiltRules({ rules: [UPDATED_RULE], installToKibana: false });
+      createAndInstallMockedPrebuiltRules({
+        rules: [UPDATED_RULE_1, UPDATED_RULE_2],
+        installToKibana: false,
+      });
       waitForRulesTableToBeLoaded();
       reload();
     });
 
-    it('should update rule succesfully', () => {
-      cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform').as(
-        'updatePrebuiltRules'
-      );
+    it('should upgrade prebuilt rules one by one', () => {
       ruleUpdatesTabClick();
-      assertRuleUpgradeAvailableAndUpgradeAll(OUTDATED_RULE);
-      cy.get(TOASTER).should('be.visible').should('have.text', `1 rule updated successfully.`);
+      assertRuleUpgradeAvailableAndUpgradeOne({ rules: [OUTDATED_RULE_1] });
     });
 
-    it('should fail gracefully with toast error message when request to update rules fails', () => {
-      /* Stub request to force rules update to fail */
-      cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform', {
-        statusCode: 500,
-      }).as('updatePrebuiltRules');
+    it('should upgrade multiple selected prebuilt rules by selecting them individually', () => {
       ruleUpdatesTabClick();
-      assertRuleUpgradeAvailableAndUpgradeAll(OUTDATED_RULE);
-      cy.get(TOASTER).should('be.visible').should('have.text', 'Rule update failed');
+      assertRuleUpgradeAvailableAndUpgradeSelected({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
+    });
 
-      /* Assert that the rule has not been updated in the UI */
-      cy.get(RULES_UPDATES_TABLE).should('contain', OUTDATED_RULE['security-rule'].name);
+    it('should upgrade multiple selected prebuilt rules by selecting all in page', () => {
+      ruleUpdatesTabClick();
+      assertRuleUpgradeAvailableAndUpgradeAllInPage({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
+    });
+
+    it('should upgrade all rules with available upgrades at once', () => {
+      ruleUpdatesTabClick();
+      assertRuleUpgradeAvailableAndUpgradeAll({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
+      cy.get(RULES_UPDATES_TAB).should('not.exist');
+    });
+
+    it('should display an empty screen when all rules with available updates have been upgraded', () => {
+      ruleUpdatesTabClick();
+      assertRuleUpgradeAvailableAndUpgradeAll({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
+      cy.get(RULES_UPDATES_TAB).should('not.exist');
+      cy.get(NO_RULES_AVAILABLE_FOR_UPGRADE_MESSSAGE).should('exist');
     });
   });
 });

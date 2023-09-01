@@ -22,8 +22,7 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
 
-import { getChartTheme } from '../../../utils/get_chart_theme';
-import { useIsDarkMode } from '../../../hooks/use_is_dark_mode';
+import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
@@ -72,7 +71,7 @@ export const ExpressionChart: React.FC<Props> = ({
   timeRange,
 }) => {
   const { charts } = useKibanaContextForPlugin().services;
-  const isDarkMode = useIsDarkMode();
+  const chartTheme = useTimelineChartTheme();
 
   const { isLoading, data } = useMetricsExplorerChartData(
     expression,
@@ -200,7 +199,7 @@ export const ExpressionChart: React.FC<Props> = ({
             externalPointerEvents={{
               tooltip: { visible: true },
             }}
-            theme={getChartTheme(isDarkMode)}
+            baseTheme={chartTheme.baseTheme}
           />
         </Chart>
       </ChartContainer>

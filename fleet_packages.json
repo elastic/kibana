@@ -24,17 +24,17 @@
 [
   {
     "name": "apm",
-    "version": "8.9.0-preview-1686650721",
+    "version": "8.9.2-preview-1692290473",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
   {
     "name": "elastic_agent",
-    "version": "1.8.0"
+    "version": "1.11.2"
   },
   {
     "name": "endpoint",
-    "version": "8.9.0"
+    "version": "8.9.1"
   },
   {
     "name": "fleet_server",
@@ -42,7 +42,7 @@
   },
   {
     "name": "profiler_symbolizer",
-    "version": "8.8.1-preview",
+    "version": "8.9.0-preview",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
@@ -58,6 +58,6 @@
   },
   {
     "name": "security_detection_engine",
-    "version": "8.8.4"
+    "version": "8.9.4"
   }
 ]

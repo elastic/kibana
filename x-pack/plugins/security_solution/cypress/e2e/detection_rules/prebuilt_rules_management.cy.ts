@@ -22,6 +22,7 @@ import {
   confirmRulesDelete,
   deleteFirstRule,
   deleteSelectedRules,
+  disableAutoRefresh,
   disableSelectedRules,
   enableSelectedRules,
   selectAllRules,
@@ -32,6 +33,7 @@ import {
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana, deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -53,9 +55,11 @@ describe('Prebuilt rules', () => {
     login();
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
+    preventPrebuiltRulesPackageInstallation();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createAndInstallMockedPrebuiltRules({ rules });
     cy.reload();
+    disableAutoRefresh();
     waitForPrebuiltDetectionRulesToBeLoaded();
   });
 

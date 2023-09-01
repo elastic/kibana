@@ -39,6 +39,90 @@ image::images/case-notification.png[Example email with case name, description, t
 
 To learn more, check out cases in the {observability-guide}/create-cases.html[{observability}], <<cases,{stack-manage-app}>>, or {security-guide}/cases-overview.html[{security-app}].
 
+[discrete]
+=== Dashboard
 
+[discrete]
+==== Wildcard search in dashboard controls
+You can now search for strings anywhere within a control. Previously, the string had to be located at the start of the value. This option is disabled by default as it is more expensive than just searching for the prefix. To enable it in **Dashboard**, select **Edit control > Options list settings > Contains**. 
 
+[role="screenshot"]
+image::images/wildcard-search.png[Example of new string search]
 
+[discrete]
+=== Maps
+
+[discrete]
+==== Spatial join
+**Maps** now supports grouping documents by geospatial relationships using a new layer wizard named **Spatial join**. Useful for tracking moving objects in relation to static ones. For example, tracking bicycle courier in relation to stores. 
+
+[role="screenshot"]
+image::images/currierlocation.png[Example of currier locations in relations to stores]
+
+[discrete]
+=== Lens
+
+[discrete]
+==== Stacked bar chart legend
+The stacked bar chart legends are now arranged in descending order based on their values, with the segment having the highest total value shown at the top.
+
+[role="screenshot"]
+image::images/newwayhighlighted.png[Example of the new ordering of the chart legend, width=90%]
+
+[discrete]
+==== Step curve
+**Lens** now supports a new line interpolation option for line charts. Step curve line charts help users understand clearly when data changes at irregular intervals, reducing misinterpretation. When creating visualizations, select **Line** in the visualization type dropdown. Then use the **Visual options** menu to choose step in the **Line interpolation** dropdown.
+
+[role="screenshot"]
+image::images/stepcurve.gif[An short video displaying the three new chart options]
+
+[discrete]
+==== Significance (significant terms)
+
+This new ranking method in the top values breakdown displays data by significance (significant terms). It helps you identify the key and most crucial terms for a specific query. It’s a powerful way to find anomalies in your data with multiple use cases. Refer to the {ref}/search-aggregations-bucket-significantterms-aggregation.html[Significant terms aggregation] documentation to learn more.
+This is not just based on the most popular terms in a set. When calculating significant terms, {es} looks for significant changes in popularity of a specific term between two sets of data. A foreground set (the data returned by a query) and a background set (the data in our indices). This is supported on all charts. 
+
+[role="screenshot"]
+image::images/significant-terms.png[Example of a donut chart organized by significant terms, width=70%]
+
+[discrete]
+==== Tag cloud
+
+preview:[] You can now create a word cloud in **Lens** using Tag cloud. When creating new visualizations, select **Tag cloud** in the visualization type dropdown. From the available fields, drag and drop the desired field into the workspace to visualize keywords. 
+ 
+[role="screenshot"]
+image::images/tagcloud.png[Example of a tag cloud, width=70%]
+
+[discrete]
+==== Save annotation groups as a Kibana saved object
+
+Group annotations and save them to the visualize library, so the content can be reused across multiple visualizations. This saves time for users with complicated annotations. From the main menu select Visualize Library, then select the tab **Annotation groups**. Here you can create new annotation groups in **Lens**, or select from a list of previously created annotation groups.
+ 
+[role="screenshot"]
+image::images/annotation.gif[Example of how to save an annotation group to the visualize library, width=75%]
+
+[discrete]
+==== New time functions in Lens formula
+
+The **Lens** formula now supports customizing the histogram interval and defining the desired time range. This was already available in TSVB charts and it was important to facilitate the conversion to **Lens**. 
+ 
+[role="screenshot"]
+image::images/timefunctions.png[Example of customizing the histogram interval and defining the desired time range]
+
+[discrete]
+==== Ignore global filters in Lens
+
+We now offer users the ability to ignore global filters per data layer in **Lens**. This allows users to easily compare different time frames in the same chart. This functionality previously only existed in the annotations layer.
+ 
+[role="screenshot"]
+image::images/globalfilter.png[Example of the new global filter slider]
+
+[discrete]
+=== Machine learning
+
+[discrete]
+==== Explain log rate spikes
+preview:[] The AIOps Labs **Explain Log Rate Spikes** feature is now embeddable into other pages. This reusable component has been picked up by the Observability team and added the analysis to their log threshold alert details page. This is a new view introduced in 8.9. It is the starting point for troubleshooting log alerts. The log rate spike analysis helps find the reason behind a particular change possibly in millions of log events across multiple fields and values in seconds. Additionally, users can trigger the AI assistant from here to get remediation and troubleshooting suggestions.
+
+[role="screenshot"]
+image::images/logratespikes1.png[Example of the new log rates spikes dashboard]

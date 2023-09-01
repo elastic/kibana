@@ -21,6 +21,7 @@ import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -101,6 +102,15 @@ function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
     ApmFeatureFlagName.InfraUiAvailable
   );
 
+  const {
+    query: { rangeFrom, rangeTo, environment },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer/waterfall',
+    '/dependencies/operation'
+  );
+
   const sections = getSections({
     transaction,
     basePath: core.http.basePath,
@@ -108,6 +118,9 @@ function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
     apmRouter,
     infraLocators: locators,
     infraLinksAvailable,
+    rangeFrom,
+    rangeTo,
+    environment,
   });
 
   const externalMenuItems = useAsync(() => {
@@ -138,7 +151,7 @@ function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
   }
 
   return (
-    <div>
+    <div data-test-subj="apmActionMenuInvestigateButtonPopup">
       {sections.map((section, idx) => {
         const isLastSection = idx !== sections.length - 1;
         return (

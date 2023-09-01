@@ -382,8 +382,12 @@ describe('fleet usage telemetry', () => {
             message: 'stderr panic some other panic',
           },
         ],
-        // agent_logs_top_errors: ['stderr panic close of closed channel'],
-        // fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
+        agent_logs_top_errors: [
+          'stderr panic some other panic',
+          'stderr panic close of closed channel',
+          'this should not be included in metrics',
+        ],
+        fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
       })
     );
   });

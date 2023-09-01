@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen, waitFor, within, fireEvent } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
   alertComment,
@@ -325,13 +325,12 @@ describe('Case View Page activity tab', () => {
       });
     });
 
-    it('should show all filter as active', async () => {
+    it('should call user action hooks correctly when filtering for all', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
       const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
-      expect(await screen.findByTestId('user-actions-activity-bar'));
-      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
+      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
 
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
         caseData.id,
@@ -348,25 +347,14 @@ describe('Case View Page activity tab', () => {
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
     });
 
-    it('should call user action hooks correctly when filtering for all', async () => {
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
-
-      expect(screen.getByLabelText(`${userActionsStats.total} active filters`));
-      expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
-      expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
-    });
-
-    it('should show comment filter as active', async () => {
+    it('should call user action hooks correctly when filtering for comments', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
       const lastPageForComment = Math.ceil(
         userActionsStats.totalComments / userActivityQueryParams.perPage
       );
 
-      expect(await screen.findByTestId('user-actions-activity-bar'));
-      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
+      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-comments'));
 
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
@@ -381,28 +369,6 @@ describe('Case View Page activity tab', () => {
       );
     });
 
-    it('should call user action hooks correctly when filtering for comments', async () => {
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-      expect(await screen.findByTestId('user-actions-activity-bar'));
-      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
-
-      expect(screen.getByLabelText(`${userActionsStats.totalComments} active filters`));
-      expect(screen.getByLabelText(`${userActionsStats.total} available filters`));
-      expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
-    });
-
-    it('should show history as active filter correctly', async () => {
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-      expect(await screen.findByTestId('user-actions-activity-bar'));
-      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
-
-      expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} active filters`));
-      expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
-      expect(screen.getByLabelText(`${userActionsStats.total} available filters`));
-    });
-
     it('should call user action hooks correctly when filtering for history', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
@@ -410,8 +376,7 @@ describe('Case View Page activity tab', () => {
         userActionsStats.totalOtherActions / userActivityQueryParams.perPage
       );
 
-      expect(await screen.findByTestId('user-actions-activity-bar'));
-      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
+      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-history'));
 
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
@@ -424,29 +389,6 @@ describe('Case View Page activity tab', () => {
         { ...userActivityQueryParams, type: 'action', page: lastPageForHistory },
         true
       );
-    });
-
-    it('should render by desc sort order', async () => {
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-      const sortSelect = await screen.findByTestId('user-actions-sort-select');
-
-      fireEvent.change(sortSelect, { target: { value: 'desc' } });
-
-      await waitFor(() => {
-        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-          caseData.id,
-          { type: 'all', sortOrder: 'desc', page: 3, perPage: 10 },
-          true
-        );
-
-        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
-          caseData.id,
-          { type: 'all', sortOrder: 'desc', page: 1, perPage: 10 },
-          true
-        );
-      });
     });
   });
 

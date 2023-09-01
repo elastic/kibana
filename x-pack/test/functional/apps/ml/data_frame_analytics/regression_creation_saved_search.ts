@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '10mb',
                   'Version',
-                  '8.9.0',
+                  '8.9.2',
                 ],
               },
               {
@@ -183,7 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '10mb',
                   'Version',
-                  '8.9.0',
+                  '8.9.2',
                 ],
               },
               {
@@ -272,7 +272,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '5mb',
                   'Version',
-                  '8.9.0',
+                  '8.9.2',
                 ],
               },
               {
@@ -361,7 +361,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '5mb',
                   'Version',
-                  '8.9.0',
+                  '8.9.2',
                 ],
               },
               {

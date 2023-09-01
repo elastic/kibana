@@ -253,7 +253,8 @@ export const FleetAppContext: React.FC<{
     theme$,
     fleetStatus,
   }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const darkModeObservable = useObservable(startServices.theme.theme$);
+    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
 
     return (
       <RedirectAppLinks application={startServices.application}>

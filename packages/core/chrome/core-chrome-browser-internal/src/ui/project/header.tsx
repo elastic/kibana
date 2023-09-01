@@ -132,14 +132,14 @@ const Logo = (
   );
 
   return (
-    <span css={logo.container}>
+    <span css={logo.container} data-test-subj="nav-header-logo">
       {loadingCount === 0 ? (
         <EuiHeaderLogo
           iconType="logoElastic"
           onClick={navigateHome}
           href={fullHref}
           css={logo}
-          data-test-subj="nav-header-logo"
+          data-test-subj="globalLoadingIndicator-hidden"
           aria-label={headerStrings.logo.ariaLabel}
         />
       ) : (
@@ -148,7 +148,7 @@ const Logo = (
             size="l"
             aria-hidden={false}
             onClick={navigateHome}
-            data-test-subj="nav-header-loading-spinner"
+            data-test-subj="globalLoadingIndicator"
           />
         </a>
       )}
