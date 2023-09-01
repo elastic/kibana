@@ -51,3 +51,8 @@ export interface MSearchIn<Options extends void | object = object> {
   query: MSearchQuery;
   options?: Options;
 }
+
+export interface MSearchOut<T = unknown> {
+  contentTypes: Array<{ contentTypeId: string; version?: Version }>;
+  result: MSearchResult<T>;
+}
