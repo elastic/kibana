@@ -33,6 +33,7 @@ import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
 import type { AllocatedModel, TrainedModelStat } from '../../../common/types/trained_models';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
+import { useIsServerless } from '../contexts/kibana';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
@@ -113,6 +114,7 @@ export function useListItemsFormatter() {
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const formatToListItems = useListItemsFormatter();
+  const isServerless = useIsServerless();
 
   const {
     inference_config: inferenceConfig,
@@ -195,6 +197,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
 
     return items;
   }, [stats]);
+
+  const hideColumns = useMemo(() => {
+    return isServerless ? ['model_id', 'node_name'] : ['model_id'];
+  }, [isServerless]);
 
   const tabs = useMemo<EuiTabbedContentTab[]>(() => {
     return [
@@ -341,7 +347,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                           </h5>
                         </EuiTitle>
                         <EuiSpacer size={'m'} />
-                        <AllocatedModels models={deploymentStatItems} hideColumns={['model_id']} />
+                        <AllocatedModels models={deploymentStatItems} hideColumns={hideColumns} />
                       </EuiPanel>
                       <EuiSpacer size={'s'} />
                     </>
@@ -455,6 +461,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     restMetaData,
     stats,
     item.model_id,
+    hideColumns,
   ]);
 
   const initialSelectedTab =
