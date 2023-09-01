@@ -233,6 +233,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         describe('Processes Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickProcessesTab();
+            await pageObjects.header.waitUntilLoadingHasFinished();
           });
 
           it('should render processes tab and with Total Value summary', async () => {
