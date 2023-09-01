@@ -14,6 +14,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { type ObservabilityLogExplorerConfig } from '../common/plugin_config';
+import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../common/constants';
 import { logExplorerAppTitle } from '../common/translations';
 import { renderObservabilityLogExplorer } from './applications/observability_log_explorer';
 import type {
@@ -37,7 +38,7 @@ export class ObservabilityLogExplorerPlugin
     _pluginsSetup: ObservabilityLogExplorerSetupDeps
   ) {
     core.application.register({
-      id: 'observability-log-explorer',
+      id: OBSERVABILITY_LOG_EXPLORER_APP_ID,
       title: logExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoLogging',

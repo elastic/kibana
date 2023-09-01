@@ -5,28 +5,29 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ObservablityLogExplorerMainRoute } from '../routes/main';
 import { ObservabilityLogExplorerPluginStart, ObservabilityLogExplorerStartDeps } from '../types';
+import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 
 export const renderObservabilityLogExplorer = (
   core: CoreStart,
   pluginsStart: ObservabilityLogExplorerStartDeps,
   ownPluginStart: ObservabilityLogExplorerPluginStart,
-  { element, history }: AppMountParameters
+  appParams: AppMountParameters
 ) => {
   ReactDOM.render(
     <ObservabilityLogExplorerApp
+      appParams={appParams}
       core={core}
-      history={history}
       plugins={pluginsStart}
       pluginStart={ownPluginStart}
     />,
-    element
+    appParams.element
   );
 
   return () => {
@@ -34,40 +35,51 @@ export const renderObservabilityLogExplorer = (
     // observable in the search session service
     pluginsStart.data.search.session.clear();
 
-    ReactDOM.unmountComponentAtNode(element);
+    ReactDOM.unmountComponentAtNode(appParams.element);
   };
 };
 
 export interface ObservabilityLogExplorerAppProps {
+  appParams: AppMountParameters;
   core: CoreStart;
   plugins: ObservabilityLogExplorerStartDeps;
   pluginStart: ObservabilityLogExplorerPluginStart;
-  history: ScopedHistory;
 }
 
 export const ObservabilityLogExplorerApp = ({
+  appParams,
   core,
-  plugins: { logExplorer, observabilityShared, serverless },
+  plugins,
   pluginStart,
-  history,
-}: ObservabilityLogExplorerAppProps) => (
-  <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
-    <Router history={history}>
-      <Routes>
-        <Route
-          path="/"
-          exact={true}
-          render={() => (
-            <ObservablityLogExplorerMainRoute
-              core={core}
-              history={history}
-              logExplorer={logExplorer}
-              observabilityShared={observabilityShared}
-              serverless={serverless}
+}: ObservabilityLogExplorerAppProps) => {
+  const { logExplorer, observabilityShared, serverless } = plugins;
+  const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
+    core,
+    plugins,
+    pluginStart
+  );
+
+  return (
+    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+      <KibanaContextProviderForPlugin>
+        <Router history={appParams.history}>
+          <Routes>
+            <Route
+              path="/"
+              exact={true}
+              render={() => (
+                <ObservablityLogExplorerMainRoute
+                  appParams={appParams}
+                  core={core}
+                  logExplorer={logExplorer}
+                  observabilityShared={observabilityShared}
+                  serverless={serverless}
+                />
+              )}
             />
-          )}
-        />
-      </Routes>
-    </Router>
-  </KibanaRenderContextProvider>
-);
+          </Routes>
+        </Router>
+      </KibanaContextProviderForPlugin>
+    </KibanaRenderContextProvider>
+  );
+};
