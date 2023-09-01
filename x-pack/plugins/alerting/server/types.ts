@@ -480,3 +480,5 @@ export interface RawRule {
   revision: number;
   running?: boolean | null;
 }
+
+export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

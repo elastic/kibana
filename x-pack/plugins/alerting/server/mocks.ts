@@ -35,6 +35,7 @@ const createSetupMock = () => {
       enabled: jest.fn(),
       getContextInitializationPromise: jest.fn(),
     },
+    getDataStreamAdapter: jest.fn(),
     registerConnectorAdapter: jest.fn(),
   };
   return mock;
@@ -191,3 +192,5 @@ export const alertsMock = {
 export const ruleMonitoringServiceMock = { create: createRuleMonitoringServiceMock };
 
 export const ruleLastRunServiceMock = { create: createRuleLastRunServiceMock };
+
+export { createDataStreamAdapterMock } from './alerts_service/lib/data_stream_adapter.mock';
