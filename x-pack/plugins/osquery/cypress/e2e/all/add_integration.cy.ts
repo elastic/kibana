@@ -111,6 +111,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@brokenInServerless'] }, () 
       cy.getBySel('createAgentPolicyFlyoutBtn').click();
       cy.getBySel('agentPolicyNameLink').contains(policyName).click();
       cy.getBySel('addPackagePolicyButton').click();
+      cy.getBySel('epmList.searchBar').type('osquery');
       cy.getBySel('integration-card:epr:osquery_manager').click();
       cy.getBySel('addIntegrationPolicyButton').click();
       cy.getBySel('agentPolicySelect').within(() => {
