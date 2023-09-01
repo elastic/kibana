@@ -13,12 +13,18 @@ import { getIndexPipelineParameters } from './get_index_pipeline';
 describe('getIndexPipelineParameters', () => {
   const defaultMockClient = () => ({
     asCurrentUser: {
+      get: jest.fn().mockResolvedValue({}),
       indices: {
         getMapping: jest.fn().mockResolvedValue({}),
       },
       ingest: {
         getPipeline: jest.fn().mockRejectedValue('Pipeline not found'),
       },
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [],
+        },
+      }),
     },
   });
   let mockClient = defaultMockClient();
@@ -33,6 +39,35 @@ describe('getIndexPipelineParameters', () => {
     await expect(getIndexPipelineParameters('my-index', client)).resolves.toEqual(
       DEFAULT_PIPELINE_VALUES
     );
+  });
+  it('returns connector pipeline params if found', async () => {
+    mockClient.asCurrentUser.search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'unit-test',
+            _source: {},
+          },
+        ],
+      },
+    });
+    mockClient.asCurrentUser.get = jest.fn().mockResolvedValue({
+      _id: 'unit-test',
+      _source: {
+        pipeline: {
+          extract_binary_content: false,
+          name: 'unit-test-pipeline',
+          reduce_whitespace: true,
+          run_ml_inference: true,
+        },
+      },
+    });
+    await expect(getIndexPipelineParameters('my-index', client)).resolves.toEqual({
+      extract_binary_content: false,
+      name: 'unit-test-pipeline',
+      reduce_whitespace: true,
+      run_ml_inference: true,
+    });
   });
   it('returns default pipeline if fetch custom throws', async () => {
     mockClient.asCurrentUser.ingest.getPipeline = jest.fn().mockRejectedValue('Boom');
@@ -74,6 +109,34 @@ describe('getIndexPipelineParameters', () => {
     await expect(getIndexPipelineParameters('my-index', client)).resolves.toEqual({
       extract_binary_content: false,
       name: 'my-unit-test-index',
+      reduce_whitespace: false,
+      run_ml_inference: true,
+    });
+  });
+  it('returns connector params with custom pipeline name', async () => {
+    mockClient.asCurrentUser.indices.getMapping = jest.fn().mockResolvedValueOnce({
+      '.elastic-connectors-v1': {
+        mappings: {
+          _meta: {
+            pipeline: {
+              default_extract_binary_content: false,
+              default_name: 'my-unit-test-index',
+              default_reduce_whitespace: false,
+              default_run_ml_inference: true,
+            },
+          },
+        },
+      },
+    });
+    mockClient.asCurrentUser.ingest.getPipeline = jest.fn().mockResolvedValueOnce({
+      'my-index': {
+        fake: 'ingest-pipeline',
+      },
+    });
+
+    await expect(getIndexPipelineParameters('my-index', client)).resolves.toEqual({
+      extract_binary_content: false,
+      name: 'my-index',
       reduce_whitespace: false,
       run_ml_inference: true,
     });
