@@ -6,7 +6,22 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { LensWrapperProps } from './lens_wrapper';
+import { TimeRange } from '@kbn/es-query';
+import { LensAttributes } from '@kbn/lens-embeddable-utils';
+import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+
+export type LensWrapperProps = Omit<
+  TypedLensByValueInput,
+  'timeRange' | 'attributes' | 'viewMode'
+> & {
+  attributes: LensAttributes | null;
+  dateRange: TimeRange;
+  extraActions: Action[];
+  loading?: boolean;
+};
+
+export type BrushEndArgs = Parameters<NonNullable<LensEmbeddableInput['onBrushEnd']>>[0];
 
 export type BaseChartProps = Pick<
   LensWrapperProps,

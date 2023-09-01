@@ -16,7 +16,7 @@ import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 
 export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { height: number }) => {
-  const { searchCriteria } = useUnifiedSearchContext();
+  const { searchCriteria, parsedDateRange } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
@@ -52,7 +52,7 @@ export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { he
   // we want it to reload only once the table has finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
     lastReloadRequestTime: requestTs,
-    dateRange: searchCriteria.dateRange,
+    dateRange: parsedDateRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
   });

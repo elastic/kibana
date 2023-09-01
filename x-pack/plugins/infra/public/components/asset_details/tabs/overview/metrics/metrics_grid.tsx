@@ -5,24 +5,20 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-
 import { EuiFlexGrid, EuiFlexItem, EuiTitle, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import {
   assetDetailsDashboards,
   XY_MISSING_VALUE_DOTTED_LINE_CONFIG,
 } from '../../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { LensChart, HostMetricsExplanationContent } from '../../../../lens';
+import { LensChart, HostMetricsExplanationContent, type BrushEndArgs } from '../../../../lens';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
 import { Popover } from '../../common/popover';
 import type { DataViewOrigin } from '../../../types';
 import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
-
-type BrushEndArgs = Parameters<NonNullable<LensEmbeddableInput['onBrushEnd']>>[0];
 
 interface Props {
   nodeName: string;
@@ -34,7 +30,8 @@ interface Props {
 
 export const MetricsGrid = React.memo(
   ({ nodeName, metricsDataView, logsDataView, timeRange, isCompactView }: Props) => {
-    const { setDateRange } = useDateRangeProviderContext();
+    const { setDateRange, refreshTs } = useDateRangeProviderContext();
+
     const getDataView = useCallback(
       (dataViewOrigin: DataViewOrigin) => {
         return dataViewOrigin === 'metrics' ? metricsDataView : logsDataView;
@@ -91,12 +88,13 @@ export const MetricsGrid = React.memo(
                   dateRange={timeRange}
                   height={METRIC_CHART_HEIGHT}
                   visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG}
+                  lastReloadRequestTime={refreshTs}
                   layers={layers}
                   filters={getFilters(dataViewOrigin)}
                   title={title}
                   overrides={overrides}
-                  visualizationType="lnsXY"
                   onBrushEnd={handleBrushEnd}
+                  visualizationType="lnsXY"
                 />
               </EuiFlexItem>
             ))}

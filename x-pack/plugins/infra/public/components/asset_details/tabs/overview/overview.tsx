@@ -20,7 +20,7 @@ import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 
 export const Overview = () => {
-  const { dateRange } = useDateRangeProviderContext();
+  const { getParsedDateRange } = useDateRangeProviderContext();
   const { asset, assetType, renderMode } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
@@ -29,10 +29,12 @@ export const Overview = () => {
   } = useMetadataStateProviderContext();
   const { logs, metrics } = useDataViewsProviderContext();
 
+  const parsedDateRange = getParsedDateRange();
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={asset.name} timeRange={dateRange} dataView={metrics.dataView} />
+        <KPIGrid nodeName={asset.name} timeRange={parsedDateRange} dataView={metrics.dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
@@ -71,12 +73,16 @@ export const Overview = () => {
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AlertsSummaryContent assetName={asset.name} assetType={assetType} dateRange={dateRange} />
+        <AlertsSummaryContent
+          assetName={asset.name}
+          assetType={assetType}
+          dateRange={parsedDateRange}
+        />
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <MetricsGrid
-          timeRange={dateRange}
+          timeRange={parsedDateRange}
           logsDataView={logs.dataView}
           metricsDataView={metrics.dataView}
           nodeName={asset.name}

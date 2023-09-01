@@ -23,7 +23,7 @@ export interface ChartProps extends Pick<TypedLensByValueInput, 'id' | 'override
 }
 
 export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProps) => {
-  const { searchCriteria } = useUnifiedSearchContext();
+  const { parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, loading } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
@@ -46,7 +46,7 @@ export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProp
   // we want it to reload only once the table has finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
     lastReloadRequestTime: requestTs,
-    dateRange: searchCriteria.dateRange,
+    dateRange: parsedDateRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
   });
 

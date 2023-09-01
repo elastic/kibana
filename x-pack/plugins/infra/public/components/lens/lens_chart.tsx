@@ -56,7 +56,7 @@ export const LensChart = ({
 
   const sytle: CSSProperties = useMemo(() => ({ height }), [height]);
 
-  const Lens = (
+  const lens = (
     <LensWrapper
       id={id}
       attributes={attributes}
@@ -64,35 +64,30 @@ export const LensChart = ({
       disableTriggers={disableTriggers}
       extraActions={extraActions}
       filters={filters}
+      hidePanelTitles={hidePanelTitles}
       lastReloadRequestTime={lastReloadRequestTime}
       loading={isLoading}
       style={sytle}
       query={query}
       overrides={overrides}
       onBrushEnd={onBrushEnd}
-      hidePanelTitles={hidePanelTitles}
     />
   );
-
-  const getContent = () => {
-    if (!toolTip) {
-      return Lens;
-    }
-
-    return (
-      <EuiToolTip
-        delay="regular"
-        content={React.cloneElement(toolTip, {
-          formula,
-        })}
-        anchorClassName="eui-fullWidth"
-      >
-        {/* EuiToolTip forwards some event handlers to the child component. 
+  const content = !toolTip ? (
+    lens
+  ) : (
+    <EuiToolTip
+      delay="regular"
+      content={React.cloneElement(toolTip, {
+        formula,
+      })}
+      anchorClassName="eui-fullWidth"
+    >
+      {/* EuiToolTip forwards some event handlers to the child component. 
         Wrapping Lens inside a div prevents that from causing unnecessary re-renders  */}
-        <div>{Lens}</div>
-      </EuiToolTip>
-    );
-  };
+      <div>{lens}</div>
+    </EuiToolTip>
+  );
 
   return (
     <EuiPanel
@@ -106,7 +101,7 @@ export const LensChart = ({
         min-height: ${height}px;
       `}
     >
-      {error ? <ChartLoadError /> : getContent()}
+      {error ? <ChartLoadError /> : content}
     </EuiPanel>
   );
 };

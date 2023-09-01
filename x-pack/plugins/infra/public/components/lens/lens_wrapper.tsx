@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
@@ -15,16 +15,7 @@ import { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { ChartLoadingProgress, ChartPlaceholder } from './chart_placeholder';
 import { parseDateRange } from '../../utils/datemath';
-
-export type LensWrapperProps = Omit<
-  TypedLensByValueInput,
-  'timeRange' | 'attributes' | 'viewMode'
-> & {
-  attributes: LensAttributes | null;
-  dateRange: TimeRange;
-  extraActions: Action[];
-  loading?: boolean;
-};
+import type { LensWrapperProps } from './types';
 
 export const LensWrapper = ({
   attributes,
@@ -32,6 +23,7 @@ export const LensWrapper = ({
   filters,
   lastReloadRequestTime,
   loading = false,
+  onLoad,
   query,
   ...props
 }: LensWrapperProps) => {
@@ -85,11 +77,17 @@ export const LensWrapper = ({
     query,
   ]);
 
-  const onLoad = useCallback(() => {
-    if (!embeddableLoaded) {
-      setEmbeddableLoaded(true);
-    }
-  }, [embeddableLoaded]);
+  const handlOnLoad = useCallback(
+    (isLoading: boolean) => {
+      if (!embeddableLoaded) {
+        setEmbeddableLoaded(true);
+      }
+      if (onLoad) {
+        onLoad(isLoading);
+      }
+    },
+    [embeddableLoaded, onLoad]
+  );
 
   const parsedDateRange: TimeRange = useMemo(() => {
     const { from = state.dateRange.from, to = state.dateRange.to } = parseDateRange(
@@ -104,7 +102,6 @@ export const LensWrapper = ({
     <div
       css={css`
         position: relative;
-        border-radius: ${euiTheme.size.s};
         overflow: hidden;
         height: 100%;
         .echMetric {
@@ -125,7 +122,7 @@ export const LensWrapper = ({
               attributes={state.attributes}
               filters={state.filters}
               lastReloadRequestTime={state.lastReloadRequestTime}
-              onLoad={onLoad}
+              onLoad={handlOnLoad}
               query={state.query}
               timeRange={parsedDateRange}
               viewMode={ViewMode.VIEW}
