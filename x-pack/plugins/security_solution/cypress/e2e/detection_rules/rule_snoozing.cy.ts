@@ -7,35 +7,39 @@
 
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import type { RuleResponse } from '../../../common/detection_engine/rule_schema';
+import { getNewRule } from '../../objects/rule';
+import { RULE_NAME } from '../../screens/alerts';
+import { RULES_MANAGEMENT_TABLE } from '../../screens/alerts_detection_rules';
+import { TOOLTIP } from '../../screens/common';
+import { actionFormSelector } from '../../screens/common/rule_actions';
+import { DISABLED_SNOOZE_BADGE } from '../../screens/rule_snoozing';
+import {
+  disableAutoRefresh,
+  duplicateFirstRule,
+  importRules,
+} from '../../tasks/alerts_detection_rules';
+import { createSlackConnector } from '../../tasks/api_calls/connectors';
 import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
-import { login, visitWithoutDateRange } from '../../tasks/login';
-import { getNewRule } from '../../objects/rule';
-import { ruleDetailsUrl, ruleEditUrl, SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import { internalAlertingSnoozeRule } from '../../urls/routes';
-import { RULES_MANAGEMENT_TABLE, RULE_NAME } from '../../screens/alerts_detection_rules';
-import {
-  expectRuleSnoozed,
-  expectRuleSnoozedInTable,
-  expectRuleUnsnoozed,
-  expectRuleUnsnoozedInTable,
-  expectSnoozeErrorToast,
-  expectSnoozeSuccessToast,
-  expectUnsnoozeSuccessToast,
-  snoozeRule,
-  snoozeRuleInTable,
-  unsnoozeRuleInTable,
-} from '../../tasks/rule_snoozing';
-import { createSlackConnector } from '../../tasks/api_calls/connectors';
-import { duplicateFirstRule, importRules } from '../../tasks/alerts_detection_rules';
-import { goToActionsStepTab } from '../../tasks/create_new_rule';
-import { goToRuleEditSettings } from '../../tasks/rule_details';
-import { actionFormSelector } from '../../screens/common/rule_actions';
-import { RULE_INDICES } from '../../screens/create_new_rule';
 import { addEmailConnectorAndRuleAction } from '../../tasks/common/rule_actions';
+import { goToActionsStepTab } from '../../tasks/create_new_rule';
 import { saveEditedRule } from '../../tasks/edit_rule';
-import { DISABLED_SNOOZE_BADGE } from '../../screens/rule_snoozing';
-import { TOOLTIP } from '../../screens/common';
+import { login, visitSecurityDetectionRulesPage, visitWithoutDateRange } from '../../tasks/login';
+import { goToRuleEditSettings } from '../../tasks/rule_details';
+import {
+  snoozeRuleInTable,
+  expectRuleSnoozed,
+  expectSnoozeSuccessToast,
+  expectRuleSnoozedInTable,
+  unsnoozeRuleInTable,
+  expectUnsnoozeSuccessToast,
+  expectRuleUnsnoozedInTable,
+  snoozeRule,
+  expectSnoozeErrorToast,
+  expectRuleUnsnoozed,
+} from '../../tasks/rule_snoozing';
+import { ruleEditUrl, ruleDetailsUrl } from '../../urls/navigation';
+import { internalAlertingSnoozeRule } from '../../urls/routes';
 
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
@@ -50,9 +54,10 @@ describe('rule snoozing', () => {
   });
 
   it('ensures the rule is snoozed on the rules management page, rule details page and rule editing page', () => {
-    createRule(getNewRule({ name: 'Test on all pages' }));
+    createRule(getNewRule({ name: 'Test on all pages', enabled: false }));
 
-    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+    visitSecurityDetectionRulesPage();
+    disableAutoRefresh();
 
     snoozeRuleInTable({
       tableSelector: RULES_MANAGEMENT_TABLE,
@@ -74,9 +79,10 @@ describe('rule snoozing', () => {
 
   describe('Rules management table', () => {
     it('snoozes a rule without actions for 3 hours', () => {
-      createRule(getNewRule({ name: 'Test rule without actions' }));
+      createRule(getNewRule({ name: 'Test rule without actions', enabled: false }));
 
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
+      disableAutoRefresh();
 
       snoozeRuleInTable({
         tableSelector: RULES_MANAGEMENT_TABLE,
@@ -95,7 +101,8 @@ describe('rule snoozing', () => {
     it('snoozes a rule with actions for 2 days', () => {
       createRuleWithActions({ name: 'Test rule with actions' }, createRule);
 
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
+      disableAutoRefresh();
 
       snoozeRuleInTable({
         tableSelector: RULES_MANAGEMENT_TABLE,
@@ -114,7 +121,8 @@ describe('rule snoozing', () => {
     it('unsnoozes a rule with actions', () => {
       createSnoozedRule(getNewRule({ name: 'Snoozed rule' }));
 
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
+      disableAutoRefresh();
 
       unsnoozeRuleInTable({
         tableSelector: RULES_MANAGEMENT_TABLE,
@@ -129,9 +137,10 @@ describe('rule snoozing', () => {
     });
 
     it('ensures snooze settings persist after page reload', () => {
-      createRule(getNewRule({ name: 'Test persistence' }));
+      createRule(getNewRule({ name: 'Test persistence', enabled: false }));
 
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
+      disableAutoRefresh();
 
       snoozeRuleInTable({
         tableSelector: RULES_MANAGEMENT_TABLE,
@@ -149,14 +158,16 @@ describe('rule snoozing', () => {
     });
 
     it('ensures a duplicated rule is not snoozed', () => {
-      createRule(getNewRule({ name: 'Test rule' }));
+      createRule(getNewRule({ name: 'Test rule', enabled: false }));
 
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
+      disableAutoRefresh();
 
       duplicateFirstRule();
 
       // Make sure rules table is shown as it navigates to rule editing page after successful duplication
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
+      disableAutoRefresh();
 
       expectRuleUnsnoozedInTable({
         tableSelector: RULES_MANAGEMENT_TABLE,
@@ -165,8 +176,7 @@ describe('rule snoozing', () => {
     });
   });
 
-  // SKIPPED: https://github.com/elastic/kibana/issues/159349
-  describe.skip('Rule editing page / actions tab', () => {
+  describe('Rule editing page / actions tab', () => {
     beforeEach(() => {
       deleteConnectors();
     });
@@ -174,8 +184,6 @@ describe('rule snoozing', () => {
     it('adds an action to a snoozed rule', () => {
       createSnoozedRule(getNewRule({ name: 'Snoozed rule' })).then(({ body: rule }) => {
         visitWithoutDateRange(ruleEditUrl(rule.id));
-        // Wait for rule data being loaded
-        cy.get(RULE_INDICES).should('be.visible');
         goToActionsStepTab();
 
         addEmailConnectorAndRuleAction('abc@example.com', 'Test action');
@@ -195,7 +203,7 @@ describe('rule snoozing', () => {
     });
 
     it('ensures imported rules are unsnoozed', () => {
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
 
       importRules(RULES_TO_IMPORT_FILENAME);
 
@@ -212,7 +220,7 @@ describe('rule snoozing', () => {
 
   describe('Handling errors', () => {
     it('shows an error if unable to load snooze settings', () => {
-      createRule(getNewRule({ name: 'Test rule' })).then(({ body: rule }) => {
+      createRule(getNewRule({ name: 'Test rule', enabled: false })).then(({ body: rule }) => {
         cy.intercept('GET', `${INTERNAL_ALERTING_API_FIND_RULES_PATH}*`, {
           statusCode: 500,
         });
@@ -226,7 +234,7 @@ describe('rule snoozing', () => {
     });
 
     it('shows an error if unable to save snooze settings', () => {
-      createRule(getNewRule({ name: 'Test rule' })).then(({ body: rule }) => {
+      createRule(getNewRule({ name: 'Test rule', enabled: false })).then(({ body: rule }) => {
         cy.intercept('POST', internalAlertingSnoozeRule(rule.id), { forceNetworkError: true });
 
         visitWithoutDateRange(ruleDetailsUrl(rule.id));

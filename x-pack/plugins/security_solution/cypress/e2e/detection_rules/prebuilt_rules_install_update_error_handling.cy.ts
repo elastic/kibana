@@ -6,23 +6,20 @@
  */
 
 import { createRuleAssetSavedObject } from '../../helpers/rules';
-import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import { createAndInstallMockedPrebuiltRules } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
-import { login, visitWithoutDateRange } from '../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
+import { login, visitSecurityDetectionRulesPage } from '../../tasks/login';
 import {
   addElasticRulesButtonClick,
   assertRuleAvailableForInstallAndInstallOne,
   assertRuleAvailableForInstallAndInstallSelected,
   assertRuleAvailableForInstallAndInstallAllInPage,
   assertRuleAvailableForInstallAndInstallAll,
+  ruleUpdatesTabClick,
   assertRuleUpgradeAvailableAndUpgradeOne,
   assertRuleUpgradeAvailableAndUpgradeSelected,
   assertRuleUpgradeAvailableAndUpgradeAllInPage,
   assertRuleUpgradeAvailableAndUpgradeAll,
-  ruleUpdatesTabClick,
 } from '../../tasks/prebuilt_rules';
 
 describe('Detection rules, Prebuilt Rules Installation and Update - Error handling', () => {
@@ -30,9 +27,9 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Error handli
     login();
     resetRulesTableState();
     deleteAlertsAndRules();
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
 
-    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+    visitSecurityDetectionRulesPage();
   });
 
   describe('Installation of prebuilt rules - Should fail gracefully with toast error message when', () => {
@@ -46,7 +43,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Error handli
     });
     beforeEach(() => {
       createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
-      waitForRulesTableToBeLoaded();
     });
 
     it('installing prebuilt rules one by one', () => {
@@ -72,7 +68,10 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Error handli
 
     it('installing all available rules at once', () => {
       addElasticRulesButtonClick();
-      assertRuleAvailableForInstallAndInstallAll({ rules: [RULE_1, RULE_2], didRequestFail: true });
+      assertRuleAvailableForInstallAndInstallAll({
+        rules: [RULE_1, RULE_2],
+        didRequestFail: true,
+      });
     });
   });
 
@@ -107,7 +106,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Error handli
         rules: [UPDATED_RULE_1, UPDATED_RULE_2],
         installToKibana: false,
       });
-      waitForRulesTableToBeLoaded();
       reload();
     });
 

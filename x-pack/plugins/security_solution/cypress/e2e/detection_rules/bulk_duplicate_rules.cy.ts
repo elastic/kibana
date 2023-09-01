@@ -5,33 +5,28 @@
  * 2.0.
  */
 
+import { getNewRule } from '../../objects/rule';
+import { EXCEPTION_CARD_ITEM_NAME } from '../../screens/exceptions';
 import {
-  waitForRulesTableToBeLoaded,
-  goToTheRuleDetailsOf,
-  selectNumberOfRules,
-  duplicateSelectedRulesWithoutExceptions,
+  disableAutoRefresh,
+  selectAllRules,
   expectManagementTableRules,
-  duplicateSelectedRulesWithExceptions,
-  duplicateSelectedRulesWithNonExpiredExceptions,
+  goToTheRuleDetailsOf,
 } from '../../tasks/alerts_detection_rules';
-
-import { goToExceptionsTab, viewExpiredExceptionItems } from '../../tasks/rule_details';
-import { login, visitWithoutDateRange } from '../../tasks/login';
-
-import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
+import { createRuleExceptionItem } from '../../tasks/api_calls/exceptions';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
-
-import { getNewRule } from '../../objects/rule';
-
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
-
-import { createRuleExceptionItem } from '../../tasks/api_calls/exceptions';
-import { EXCEPTION_CARD_ITEM_NAME } from '../../screens/exceptions';
 import {
   assertExceptionItemsExists,
   assertNumberOfExceptionItemsExists,
 } from '../../tasks/exceptions';
+import { login, visitSecurityDetectionRulesPage } from '../../tasks/login';
+import { goToExceptionsTab, viewExpiredExceptionItems } from '../../tasks/rule_details';
+import {
+  duplicateSelectedRulesWithExceptions,
+  duplicateSelectedRulesWithNonExpiredExceptions,
+  duplicateSelectedRulesWithoutExceptions,
+} from '../../tasks/rules_bulk_actions';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
@@ -60,56 +55,55 @@ describe('Detection rules, bulk duplicate', () => {
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    esArchiverResetKibana();
-    createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' })).then(
-      (response) => {
-        createRuleExceptionItem(response.body.id, [
-          {
-            description: 'Exception item for rule default exception list',
-            entries: [
-              {
-                field: 'user.name',
-                operator: 'included',
-                type: 'match',
-                value: 'some value',
-              },
-            ],
-            name: EXPIRED_EXCEPTION_ITEM_NAME,
-            type: 'simple',
-            expire_time: expiredDate,
-          },
-          {
-            description: 'Exception item for rule default exception list',
-            entries: [
-              {
-                field: 'user.name',
-                operator: 'included',
-                type: 'match',
-                value: 'some value',
-              },
-            ],
-            name: NON_EXPIRED_EXCEPTION_ITEM_NAME,
-            type: 'simple',
-            expire_time: futureDate,
-          },
-        ]);
-      }
-    );
+    cy.task('esArchiverResetKibana');
+    createRule(
+      getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false })
+    ).then((response) => {
+      createRuleExceptionItem(response.body.id, [
+        {
+          description: 'Exception item for rule default exception list',
+          entries: [
+            {
+              field: 'user.name',
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+          name: EXPIRED_EXCEPTION_ITEM_NAME,
+          type: 'simple',
+          expire_time: expiredDate,
+        },
+        {
+          description: 'Exception item for rule default exception list',
+          entries: [
+            {
+              field: 'user.name',
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+          name: NON_EXPIRED_EXCEPTION_ITEM_NAME,
+          type: 'simple',
+          expire_time: futureDate,
+        },
+      ]);
+    });
 
-    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-
-    waitForRulesTableToBeLoaded();
+    visitSecurityDetectionRulesPage();
+    disableAutoRefresh();
   });
 
   it('Duplicates rules', () => {
-    selectNumberOfRules(1);
+    selectAllRules();
     duplicateSelectedRulesWithoutExceptions();
     expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
   });
 
   describe('With exceptions', () => {
     it('Duplicates rules with expired exceptions', () => {
-      selectNumberOfRules(1);
+      selectAllRules();
       duplicateSelectedRulesWithExceptions();
       expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
       goToTheRuleDetailsOf(`${RULE_NAME} [Duplicate]`);
@@ -120,7 +114,7 @@ describe('Detection rules, bulk duplicate', () => {
     });
 
     it('Duplicates rules with exceptions, excluding expired exceptions', () => {
-      selectNumberOfRules(1);
+      selectAllRules();
       duplicateSelectedRulesWithNonExpiredExceptions();
       expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
       goToTheRuleDetailsOf(`${RULE_NAME} [Duplicate]`);

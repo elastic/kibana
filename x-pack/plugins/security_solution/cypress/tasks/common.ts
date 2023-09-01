@@ -117,7 +117,7 @@ export const deleteAlertsAndRules = () => {
 
   rootRequest({
     method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
     body: {
       query: {
         bool: {
@@ -137,7 +137,7 @@ export const deleteAlertsAndRules = () => {
     method: 'POST',
     url: `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/.lists-*,.items-*,.alerts-security.alerts-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
+    )}/.lists-*,.items-*,.alerts-security.alerts-*/_delete_by_query?conflicts=proceed&scroll_size=10000&refresh`,
     body: {
       query: {
         match_all: {},
@@ -150,7 +150,7 @@ export const deleteTimelines = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
   rootRequest({
     method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
     body: {
       query: {
         bool: {
@@ -180,7 +180,7 @@ export const deleteCases = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
   rootRequest({
     method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
     body: {
       query: {
         bool: {
@@ -201,7 +201,7 @@ export const deleteConnectors = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
   rootRequest({
     method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
     body: {
       query: {
         bool: {

@@ -16,13 +16,12 @@ import {
 } from '../../screens/alerts_detection_rules';
 import {
   filterByElasticRules,
-  selectNumberOfRules,
-  bulkExportRules,
   selectAllRules,
   waitForRuleExecution,
   exportRule,
   importRules,
   expectManagementTableRules,
+  bulkExportRules,
 } from '../../tasks/alerts_detection_rules';
 import { createExceptionList, deleteExceptionList } from '../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../objects/exception';
@@ -70,7 +69,7 @@ describe('Export rules', () => {
     // Prevent installation of whole prebuilt rules package, use mock prebuilt rules instead
     preventPrebuiltRulesPackageInstallation();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createRule(getNewRule({ name: 'Rule to export' })).as('ruleResponse');
+    createRule(getNewRule({ name: 'Rule to export', enabled: false })).as('ruleResponse');
   });
 
   it('exports a custom rule', function () {
@@ -102,7 +101,7 @@ describe('Export rules', () => {
     createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
 
     filterByElasticRules();
-    selectNumberOfRules(prebuiltRules.length);
+    selectAllRules();
     bulkExportRules();
 
     cy.get(MODAL_CONFIRMATION_BODY).contains(
@@ -156,6 +155,7 @@ describe('Export rules', () => {
               },
             ],
             rule_id: '2',
+            enabled: false,
           })
         )
       );

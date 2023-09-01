@@ -60,10 +60,9 @@ import {
   duplicateFirstRule,
   duplicateRuleFromMenu,
   goToRuleDetails,
-  selectNumberOfRules,
   checkDuplicatedRule,
   expectNumberOfRules,
-  duplicateSelectedRulesWithExceptions,
+  selectAllRules,
 } from '../../tasks/alerts_detection_rules';
 import { createRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
@@ -106,6 +105,7 @@ import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { goBackToRulesTable, getDetails } from '../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL, RULE_CREATION } from '../../urls/navigation';
+import { duplicateSelectedRulesWithExceptions } from '../../tasks/rules_bulk_actions';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
@@ -554,7 +554,7 @@ describe('indicator match', () => {
       });
 
       it("Allows the rule to be duplicated from the table's bulk actions", () => {
-        selectNumberOfRules(1);
+        selectAllRules();
         duplicateSelectedRulesWithExceptions();
         checkDuplicatedRule();
       });

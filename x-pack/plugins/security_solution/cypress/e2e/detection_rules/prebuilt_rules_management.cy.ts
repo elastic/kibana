@@ -7,27 +7,22 @@
 
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
-  COLLAPSED_ACTION_BTN,
   ELASTIC_RULES_BTN,
-  ADD_ELASTIC_RULES_BTN,
-  RULES_EMPTY_PROMPT,
   RULES_MONITORING_TAB,
-  RULES_ROW,
-  RULES_MANAGEMENT_TABLE,
-  RULE_SWITCH,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
+  COLLAPSED_ACTION_BTN,
+  ADD_ELASTIC_RULES_BTN,
   INSTALL_ALL_RULES_BUTTON,
+  RULES_EMPTY_PROMPT,
 } from '../../screens/alerts_detection_rules';
+import { RULE_SWITCH } from '../../screens/rule_details';
 import {
-  confirmRulesDelete,
-  deleteFirstRule,
-  deleteSelectedRules,
-  disableSelectedRules,
-  enableSelectedRules,
-  selectAllRules,
-  selectNumberOfRules,
   waitForPrebuiltDetectionRulesToBeLoaded,
+  getRulesManagementTableRows,
   waitForRuleToUpdate,
+  selectAllRules,
+  deleteFirstRule,
+  selectRulesByName,
 } from '../../tasks/alerts_detection_rules';
 import {
   createAndInstallMockedPrebuiltRules,
@@ -35,6 +30,11 @@ import {
 } from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana, deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
+import {
+  enableSelectedRules,
+  disableSelectedRules,
+  deleteSelectedRules,
+} from '../../tasks/rules_bulk_edit';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 const rules = Array.from(Array(5)).map((_, i) => {
@@ -62,7 +62,7 @@ describe('Prebuilt rules', () => {
   describe('Alerts rules, prebuilt rules', () => {
     it('Loads prebuilt rules', () => {
       // Check that the rules table contains rules
-      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length.gte', 1);
+      getRulesManagementTableRows().should('have.length.gte', 1);
 
       // Check the correct count of prebuilt rules is displayed
       getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
@@ -104,8 +104,7 @@ describe('Prebuilt rules', () => {
       });
 
       it('Does not allow to delete one rule when more than one is selected', () => {
-        const numberOfRulesToBeSelected = 2;
-        selectNumberOfRules(numberOfRulesToBeSelected);
+        selectAllRules();
 
         cy.get(COLLAPSED_ACTION_BTN).each((collapsedItemActionBtn) => {
           cy.wrap(collapsedItemActionBtn).should('have.attr', 'disabled');
@@ -146,16 +145,16 @@ describe('Prebuilt rules', () => {
 
       it('Deletes and recovers more than one rule', () => {
         getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-          const numberOfRulesToBeSelected = 2;
+          const rulesToDelete = ['Test rule 1', 'Test rule 2'] as const;
           const expectedNumberOfRulesAfterDeletion = availablePrebuiltRulesCount - 2;
           const expectedNumberOfRulesAfterRecovering = availablePrebuiltRulesCount;
 
-          selectNumberOfRules(numberOfRulesToBeSelected);
+          selectRulesByName(rulesToDelete);
           deleteSelectedRules();
 
           cy.get(ADD_ELASTIC_RULES_BTN).should(
             'have.text',
-            `Add Elastic rules${numberOfRulesToBeSelected}`
+            `Add Elastic rules${rulesToDelete.length}`
           );
           cy.get(ELASTIC_RULES_BTN).should(
             'have.text',
@@ -185,7 +184,6 @@ describe('Prebuilt rules', () => {
       it('Allows to delete all rules at once', () => {
         selectAllRules();
         deleteSelectedRules();
-        confirmRulesDelete();
         cy.get(RULES_EMPTY_PROMPT).should('be.visible');
       });
     });

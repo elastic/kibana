@@ -23,6 +23,9 @@ export const DISABLED_RULES_BTN = '[data-test-subj="showDisabledRulesFilterButto
 
 export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
 
+export const CONFIRM_DELETE_RULE_BTN =
+  '[data-test-subj="deleteRulesConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
+
 export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 
 export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
@@ -73,9 +76,6 @@ export const UPGRADE_ALL_RULES_BUTTON = '[data-test-subj="upgradeAllRulesButton"
 export const UPGRADE_SELECTED_RULES_BUTTON = '[data-test-subj="upgradeSelectedRulesButton"]';
 
 export const GO_BACK_TO_RULES_TABLE_BUTTON = '[data-test-subj="addRulesGoBackToRulesTableBtn"]';
-
-export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
-  '[data-test-subj="initialLoadingPanelAllRulesTable"]';
 
 export const RULES_TABLE_REFRESH_INDICATOR = '[data-test-subj="loading-spinner"]';
 

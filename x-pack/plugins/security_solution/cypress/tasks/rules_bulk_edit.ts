@@ -15,6 +15,15 @@ import {
   MODAL_CONFIRMATION_BODY,
   TOASTER_BODY,
   RULES_TAGS_FILTER_BTN,
+  CONFIRM_DELETE_RULE_BTN,
+  CONFIRM_DUPLICATE_RULE,
+  DELETE_RULE_BULK_BTN,
+  DISABLE_RULE_BULK_BTN,
+  DUPLICATE_RULE_BULK_BTN,
+  DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
+  DUPLICATE_WITH_EXCEPTIONS_OPTION,
+  DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
+  ENABLE_RULE_BULK_BTN,
 } from '../screens/alerts_detection_rules';
 
 import {
@@ -42,6 +51,51 @@ import {
   RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX,
 } from '../screens/rules_bulk_edit';
 import { SCHEDULE_DETAILS } from '../screens/rule_details';
+
+// DELETE
+export const deleteSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(DELETE_RULE_BULK_BTN).click();
+  cy.get(CONFIRM_DELETE_RULE_BTN).click();
+};
+
+// DUPLICATE
+export const duplicateSelectedRulesWithoutExceptions = () => {
+  cy.log('Bulk duplicate selected rules without exceptions');
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(DUPLICATE_RULE_BULK_BTN).click();
+  cy.get(DUPLICATE_WITHOUT_EXCEPTIONS_OPTION).click();
+  cy.get(CONFIRM_DUPLICATE_RULE).click();
+};
+
+export const duplicateSelectedRulesWithExceptions = () => {
+  cy.log('Bulk duplicate selected rules with exceptions');
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(DUPLICATE_RULE_BULK_BTN).click();
+  cy.get(DUPLICATE_WITH_EXCEPTIONS_OPTION).click();
+  cy.get(CONFIRM_DUPLICATE_RULE).click();
+};
+
+export const duplicateSelectedRulesWithNonExpiredExceptions = () => {
+  cy.log('Bulk duplicate selected rules with non expired exceptions');
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(DUPLICATE_RULE_BULK_BTN).click();
+  cy.get(DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION).click();
+  cy.get(CONFIRM_DUPLICATE_RULE).click();
+};
+
+// ENABLE/DISABLE
+export const enableSelectedRules = () => {
+  cy.log('Bulk enable selected rules');
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(ENABLE_RULE_BULK_BTN).click();
+};
+
+export const disableSelectedRules = () => {
+  cy.log('Bulk disable selected rules');
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(DISABLE_RULE_BULK_BTN).click();
+};
 
 export const clickApplyTimelineTemplatesMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();

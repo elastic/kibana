@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import { getNewRule } from '../../objects/rule';
 import {
-  RULE_CHECKBOX,
-  REFRESH_RULES_STATUS,
-  RULES_TABLE_AUTOREFRESH_INDICATOR,
   RULES_MANAGEMENT_TABLE,
+  RULES_TABLE_AUTOREFRESH_INDICATOR,
+  REFRESH_RULES_STATUS,
 } from '../../screens/alerts_detection_rules';
+import { EUI_CHECKBOX } from '../../screens/common/controls';
 import {
-  selectAllRules,
-  clearAllRuleSelection,
-  selectNumberOfRules,
   mockGlobalClock,
+  expectNumberOfRules,
+  selectRulesByName,
+  getRuleRow,
+  expectAutoRefreshIsEnabled,
+  selectAllRules,
+  expectAutoRefreshIsDeactivated,
+  clearAllRuleSelection,
   disableAutoRefresh,
   expectAutoRefreshIsDisabled,
-  expectAutoRefreshIsEnabled,
-  expectAutoRefreshIsDeactivated,
-  expectNumberOfRules,
 } from '../../tasks/alerts_detection_rules';
-import { login, visit, visitWithoutDateRange } from '../../tasks/login';
-
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-import { getNewRule } from '../../objects/rule';
+import { login, visitWithoutDateRange, visit } from '../../tasks/login';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 const NUM_OF_TEST_RULES = 6;
@@ -38,7 +38,7 @@ describe('Rules table: auto-refresh', () => {
     login();
 
     for (let i = 1; i <= NUM_OF_TEST_RULES; ++i) {
-      createRule(getNewRule({ name: `Test rule ${i}`, rule_id: `${i}` }));
+      createRule(getNewRule({ name: `Test rule ${i}`, rule_id: `${i}`, enabled: false }));
     }
   });
 
@@ -66,7 +66,7 @@ describe('Rules table: auto-refresh', () => {
 
     expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
 
-    selectNumberOfRules(1);
+    selectRulesByName(['Test rule 1']);
 
     // mock 1 minute passing to make sure refresh is not conducted
     cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
@@ -74,7 +74,7 @@ describe('Rules table: auto-refresh', () => {
     cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
 
     // ensure rule is still selected
-    cy.get(RULE_CHECKBOX).first().should('be.checked');
+    getRuleRow('Test rule 1').find(EUI_CHECKBOX).should('be.checked');
 
     cy.get(REFRESH_RULES_STATUS).should('have.not.text', 'Updated now');
   });
