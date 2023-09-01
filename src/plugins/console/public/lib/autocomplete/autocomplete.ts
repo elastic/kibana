@@ -1077,11 +1077,7 @@ export default function ({
     tracer('has started evaluating current token', currentToken);
 
     if (!currentToken) {
-      if (pos.lineNumber === 1) {
-        lastEvaluatedToken = null;
-        tracer('not starting autocomplete due to invalid current token at line 1');
-        return;
-      }
+      lastEvaluatedToken = null;
       currentToken = { position: { column: 0, lineNumber: 0 }, value: '', type: '' }; // empty row
     }
 
