@@ -8,7 +8,7 @@
 import type { EsqlResultRow, EsqlResultColumn } from '../esql_request';
 
 /**
- * transform ESQL result row to JSON object
+ * transform ES|QL result row to JSON object
  * @param columns
  * @param row
  * @returns Record<string, string | null>

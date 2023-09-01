@@ -652,13 +652,13 @@ export const schema: FormSchema<DefineStepRule> = {
       label: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlOptions.groupByFieldsLabel',
         {
-          defaultMessage: 'Select fields to suppress duplicate alerts',
+          defaultMessage: 'Select fields to suppress possibly duplicated alerts',
         }
       ),
       helpText: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlOptions.fieldGroupByFieldHelpText',
         {
-          defaultMessage: 'Select available field(s) to suppress ESQL alerts',
+          defaultMessage: 'Select available field(s) to suppress possibly duplicated ES|QL alerts',
         }
       ),
       validations: [
@@ -671,7 +671,7 @@ export const schema: FormSchema<DefineStepRule> = {
       label: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlSuppressionDurationLabel',
         {
-          defaultMessage: 'Configure suppression window for grouping ESQL alerts',
+          defaultMessage: 'Configure suppression window for ES|QL alerts',
         }
       ),
       value: {},

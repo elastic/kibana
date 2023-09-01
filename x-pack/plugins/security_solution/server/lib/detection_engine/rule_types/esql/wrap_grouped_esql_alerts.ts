@@ -8,6 +8,8 @@
 import objectHash from 'object-hash';
 import type { Moment } from 'moment';
 import { ALERT_SUPPRESSION_DOCS_COUNT, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
+
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -18,7 +20,6 @@ import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
 import type { EsqlTable } from './esql_request';
-
 import { rowToDocument, pickCells } from './utils';
 
 export const wrapGroupedEsqlAlerts = ({
@@ -52,13 +53,25 @@ export const wrapGroupedEsqlAlerts = ({
     .slice(0, completeRule.ruleParams.maxSignals)
     .reduce<Array<WrappedFieldsLatest<any>>>((acc, row, i) => {
       const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
-      const id = objectHash([
-        ruleRunId,
-        completeRule.ruleParams.query,
-        `${spaceId}:${completeRule.alertId}`,
-        //  i,
-        suppressionFields.length ? pickCells(results.columns, row, suppressionFields) : i,
-      ]);
+      const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
+
+      const document = rowToDocument(results.columns, row);
+
+      // for aggregating rules when metadata _id is present, generate alert based on ES document event id
+      const id =
+        isRuleAggregating && document._id
+          ? objectHash([
+              document._id,
+              document._version,
+              document._index,
+              `${spaceId}:${completeRule.alertId}`,
+            ])
+          : objectHash([
+              ruleRunId,
+              completeRule.ruleParams.query,
+              `${spaceId}:${completeRule.alertId}`,
+              suppressionFields.length ? pickCells(results.columns, row, suppressionFields) : i,
+            ]);
 
       if (duplicatesMap.has(id)) {
         duplicatesMap.set(id, (duplicatesMap.get(id) ?? 0) + 1);
@@ -67,19 +80,14 @@ export const wrapGroupedEsqlAlerts = ({
         duplicatesMap.set(id, 0);
       }
 
-      //   duplicatesMap.set(id, 0);
-
-      console.log('>>>> pickCells', pickCells(results.columns, row, suppressionFields));
+      // instance id needed for ES|QL suppression
       const instanceId = objectHash([
         completeRule.ruleParams.query,
         `${spaceId}:${completeRule.alertId}`,
         suppressionFields.length ? pickCells(results.columns, row, suppressionFields) : ruleRunId,
-        // row.slice(1),
-        //   pickCells(results.columns, row, ['destination.domain']).join(),
       ]);
 
-      const document = rowToDocument(results.columns, row);
-      // TODO: make it good looking
+      // metadata fields need to be deleted, otherwise alerts creation fails
       delete document._id;
       delete document._version;
       delete document._index;
@@ -113,12 +121,10 @@ export const wrapGroupedEsqlAlerts = ({
       return acc;
     }, []);
 
-  return wrapped.map((x) => {
-    if (duplicatesMap.has(x._id)) {
-      //  delete x._source[ALERT_SUPPRESSION_DOCS_COUNT];
-
-      x._source[ALERT_SUPPRESSION_DOCS_COUNT] = duplicatesMap.get(x._id);
+  return wrapped.map((alert) => {
+    if (duplicatesMap.has(alert._id)) {
+      alert._source[ALERT_SUPPRESSION_DOCS_COUNT] = duplicatesMap.get(alert._id);
     }
-    return x;
+    return alert;
   });
 };

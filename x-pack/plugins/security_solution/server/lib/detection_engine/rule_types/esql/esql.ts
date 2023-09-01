@@ -29,8 +29,6 @@ import {
 import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 
-import { computeIfGrouping } from './utils';
-
 export const esqlExecutor = async ({
   runOpts: {
     completeRule,
@@ -73,13 +71,11 @@ export const esqlExecutor = async ({
       exceptionFilter,
     });
 
-    ruleExecutionLogger.debug(`ESQL query request: ${JSON.stringify(esqlRequest)}`);
+    ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
     const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
     if (exceptionsWarning) {
       result.warningMessages.push(exceptionsWarning);
     }
-
-    const isGrouping = computeIfGrouping(completeRule.ruleParams.query);
 
     const esqlSignalSearchStart = performance.now();
 

@@ -256,7 +256,7 @@ export type EqlPatchParams = t.TypeOf<typeof EqlPatchParams>;
 export const EqlPatchParams = eqlSchema.patch;
 
 // -------------------------------------------------------------------------------------------------
-// ESQL rule schema
+// ES|QL rule schema
 
 export type EsqlQueryLanguage = t.TypeOf<typeof EsqlQueryLanguage>;
 export const EsqlQueryLanguage = t.literal('esql');

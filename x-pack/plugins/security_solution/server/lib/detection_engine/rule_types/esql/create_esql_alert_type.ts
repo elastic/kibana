@@ -20,7 +20,7 @@ export const createEsqlAlertType = (
   const { version } = createOptions;
   return {
     id: ESQL_RULE_TYPE_ID,
-    name: 'ESQL Rule',
+    name: 'ES|QL Rule',
     validate: {
       params: {
         validate: (object: unknown) => {

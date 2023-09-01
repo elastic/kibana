@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './src/add_remove_id_to_item';
-export * from './src/transform_data_to_ndjson';
-export * from './src/path_validations';
-export * from './src/esql';
+export * from './compute_if_esql_query_aggregating';

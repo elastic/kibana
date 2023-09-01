@@ -647,11 +647,11 @@ export const buildAlertEsqlDescription = (
   }
   return [
     {
-      title: 'ESQL group by fields',
+      title: 'ES|QL group by fields',
       description: esqlGroupByFields?.join(', '),
     },
     {
-      title: 'ESQL suppression window',
+      title: 'ES|QL suppression window',
       description: suppressionWindowDescription,
     },
   ];

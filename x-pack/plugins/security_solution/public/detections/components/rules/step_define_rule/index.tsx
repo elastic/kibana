@@ -449,7 +449,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             id: GroupByOptions.PerTimePeriod,
             label: (
               <>
-                {'Configure time window for grouping ESQL alerts'}
+                {'Configure time window for suppressing possible duplicated ES|QL alerts'}
                 <DurationInput
                   data-test-subj="esqlSuppressionDurationSelect"
                   durationValueField={esqlSuppressionDurationValue}
@@ -630,7 +630,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     () =>
       ({
         idAria: 'detectionEngineStepDefineRuleQueryBar',
-        // for ESQL rule index pattern property does not exist
+        // for ES|QL rule index pattern property does not exist
         indexPattern,
         isDisabled: isLoading,
         isLoading,
@@ -648,7 +648,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         config={{
           // TODO: use memo
           ...schema.queryBar,
-          label: 'ESQL query',
+          label: 'ES|QL query',
         }}
         component={QueryBarDefineRule}
         componentProps={queryBarProps}

@@ -53,7 +53,7 @@ export const EsqlFieldsSelectComponent: React.FC<EsqlFieldsSelectProps> = ({
       fullWidth: true,
       noSuggestions: false,
       options,
-      placeholder: 'all available fields from ESQL Query',
+      placeholder: 'all available fields from ES|QL Query',
       onCreateOption: undefined,
       style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
       onFocus: onFocusHandler,

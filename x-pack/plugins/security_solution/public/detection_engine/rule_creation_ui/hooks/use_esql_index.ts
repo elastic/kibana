@@ -12,7 +12,7 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isEsqlRule } from '../../../../common/detection_engine/utils';
 
 /**
- * parses ESQL query and returns memoized array of indices
+ * parses ES|QL query and returns memoized array of indices
  * @param query
  * @returns
  */

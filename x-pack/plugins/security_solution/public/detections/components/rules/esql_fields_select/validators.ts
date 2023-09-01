@@ -28,8 +28,8 @@ const constructValidationError = (error: Error) => {
   return {
     code: ERROR_CODES.INVALID_ESQL,
     message: error?.message
-      ? `Error validating ESQL: "${error?.message}"`
-      : 'Unknown error while validating ESQL',
+      ? `Error validating ES|QL: "${error?.message}"`
+      : 'Unknown error while validating ES|QL',
     error,
   };
 };
@@ -168,7 +168,7 @@ export const esqlGroupingFieldsValidator = async (
       return {
         code: ERROR_CODES.INVALID_ESQL_GROUPING_FIELDS,
         path,
-        message: `Fields are not available in ESQL response: ${errorFields.join(', ')}`,
+        message: `Fields are not available in ES|QL response: ${errorFields.join(', ')}`,
       };
     }
   } catch (error) {

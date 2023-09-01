@@ -195,9 +195,9 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
             <EuiFlexItem>
               <EuiCard
                 data-test-subj="esqRuleType"
-                title={'(POC) ESQL'}
+                title={'ES|QL'}
                 titleSize="xs"
-                description="Create rule using The Elasticsearch Query Language (ESQL)"
+                description="[Technical Preview] Create rule using The Elasticsearch Query Language (ES|QL)"
                 icon={<EuiIcon type="logoElasticsearch" size="l" />}
                 selectable={esqlSelectableConfig}
                 layout="horizontal"
