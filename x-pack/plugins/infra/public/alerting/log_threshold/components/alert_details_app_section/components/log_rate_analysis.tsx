@@ -230,7 +230,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
       Do not mention indidivual p-values from the analysis results. Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
 
-    const now = new Date().toString();
+    const now = new Date().toISOString();
 
     return [
       {
