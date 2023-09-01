@@ -359,8 +359,12 @@ describe('saved_visualize_utils', () => {
       expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
+            contentTypes: [
+              { contentTypeId: 'bazdoc' },
+              { contentTypeId: 'etc' },
+              { contentTypeId: 'visualization' },
+            ],
             options: {
-              types: ['bazdoc', 'etc', 'visualization'],
               searchFields: ['baz', 'bing', 'title^3', 'description'],
             },
           },
@@ -396,8 +400,13 @@ describe('saved_visualize_utils', () => {
       expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
+            contentTypes: [
+              { contentTypeId: 'bazdoc' },
+              { contentTypeId: 'bar' },
+              { contentTypeId: 'visualization' },
+              { contentTypeId: 'foo' },
+            ],
             options: {
-              types: ['bazdoc', 'bar', 'visualization', 'foo'],
               searchFields: ['baz', 'bing', 'barfield', 'foofield', 'title^3', 'description'],
             },
           },

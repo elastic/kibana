@@ -18,7 +18,10 @@ describe('LensStore', () => {
 
     return {
       client,
-      store: new SavedObjectIndexStore(client as unknown as ContentManagementPublicStart),
+      store: new SavedObjectIndexStore({
+        client,
+        registry: jest.fn(),
+      } as unknown as ContentManagementPublicStart),
     };
   }
 
