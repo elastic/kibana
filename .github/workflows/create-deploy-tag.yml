@@ -79,7 +79,7 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Commit:*\n<https://github.com/elastic/kibana/releases/tag/${{ env.COMMIT }}|${{ env.COMMIT }}>"
+                      "text": "*Commit:*\n<https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|${{ env.COMMIT }}>"
                     },
                     {
                       "type": "mrkdwn",
@@ -169,7 +169,7 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Commit:*\n<https://github.com/elastic/kibana/releases/tag/${{ env.COMMIT }}|${{ env.COMMIT }}>"
+                      "text": "*Commit:*\n<https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|${{ env.COMMIT }}>"
                     }
                   ]
                 },
