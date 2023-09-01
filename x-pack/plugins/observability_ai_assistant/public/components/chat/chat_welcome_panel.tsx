@@ -6,18 +6,19 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import ctaImage from '../../assets/elastic_ai_assistant.png';
+import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 
 const incorrectLicenseContainer = css`
   height: 100%;
   padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingMedium};
 `;
 
-export function ChatWelcomePanel() {
+export function ChatWelcomePanel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
       <EuiFlexGroup
@@ -26,7 +27,7 @@ export function ChatWelcomePanel() {
         justifyContent="center"
         className={incorrectLicenseContainer}
       >
-        <EuiImage src={ctaImage} alt="Elastic AI Assistant" size="l" />
+        <EuiImage src={ctaImage} alt="Elastic AI Assistant" size="m" />
         <EuiTitle>
           <h2>
             {i18n.translate('xpack.observabilityAiAssistant.chatWelcomePanel.title', {
@@ -36,12 +37,34 @@ export function ChatWelcomePanel() {
         </EuiTitle>
         <EuiText color="subdued" textAlign="center">
           <p>
-            {i18n.translate('xpack.observabilityAiAssistant.chatWelcomePanel.body', {
-              defaultMessage:
-                'Elastic AI Assistant is an experimental feature. Make sure to provide feedback when you interact with it.',
-            })}
+            {knowledgeBase.status.value?.ready
+              ? i18n.translate('xpack.observabilityAiAssistant.chatWelcomePanel.body', {
+                  defaultMessage:
+                    'Keep in mind that Elastic AI Assistant is a technical preview feature. Please provide feedback at any time.',
+                })
+              : i18n.translate('xpack.observabilityAiAssistant.chatWelcomePanel.body', {
+                  defaultMessage:
+                    'We recommend you enable the knowledge base for a better experience. It will provide the assistant with the ability to learn from your interaction with it. Keep in mind that Elastic AI Assistant is a technical preview feature. Please provide feedback at any time.',
+                })}
           </p>
         </EuiText>
+
+        {!knowledgeBase.status.value?.ready ? (
+          <EuiButton
+            color="primary"
+            fill
+            iconType={knowledgeBase.status.value?.ready ? 'checkInCircleFilled' : 'dotInCircle'}
+            isLoading={knowledgeBase.isInstalling || knowledgeBase.status.loading}
+            onClick={knowledgeBase.install}
+          >
+            {i18n.translate(
+              'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.buttonLabel.notInstalledYet',
+              {
+                defaultMessage: 'Set up knowledge base',
+              }
+            )}
+          </EuiButton>
+        ) : null}
       </EuiFlexGroup>
     </EuiPanel>
   );

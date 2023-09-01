@@ -24,18 +24,14 @@ import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { useTimeline } from '../../hooks/use_timeline';
 import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
-import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { ExperimentalFeatureBanner } from './experimental_feature_banner';
+import { InitialSetupPanel } from './initial_setup_panel';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
-
-const containerClassName = css`
-  max-height: 100%;
-  max-width: ${1200 - 250}px; // page template max width - conversation list width.
-`;
+import { getMarkdownFromConversation } from '../../utils/get_markdown_from_conversation';
 
 const timelineClassName = css`
   overflow-y: auto;
@@ -57,6 +53,7 @@ export function ChatBody({
   connectors,
   knowledgeBase,
   connectorsManagementHref,
+  modelsManagementHref,
   conversationId,
   currentUser,
   startedFrom,
@@ -70,6 +67,7 @@ export function ChatBody({
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
   connectorsManagementHref: string;
+  modelsManagementHref: string;
   conversationId?: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   startedFrom?: StartedFrom;
@@ -83,10 +81,10 @@ export function ChatBody({
   const chatService = useObservabilityAIAssistantChatService();
 
   const timeline = useTimeline({
-    messages,
+    chatService,
     connectors,
     currentUser,
-    chatService,
+    messages,
     startedFrom,
     onChatUpdate,
     onChatComplete,
@@ -99,6 +97,13 @@ export function ChatBody({
   const isLoading = Boolean(
     connectors.loading || knowledgeBase.status.loading || last(timeline.items)?.loading
   );
+
+  const containerClassName = css`
+    max-height: 100%;
+    max-width: ${startedFrom === 'conversationView'
+      ? 1200 - 250 + 'px' // page template max width - conversation list width.
+      : '100%'};
+  `;
 
   useEffect(() => {
     const parent = timelineContainerRef.current?.parentElement;
@@ -143,6 +148,12 @@ export function ChatBody({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timelineContainerRef.current]);
 
+  const handleCopyConversation = () => {
+    const content = getMarkdownFromConversation({ title, messages });
+
+    navigator.clipboard?.writeText(content || '');
+  };
+
   if (!hasCorrectLicense && !conversationId) {
     footer = (
       <>
@@ -166,12 +177,14 @@ export function ChatBody({
         <EuiLoadingSpinner />
       </EuiFlexItem>
     );
-  } else if (connectors.connectors?.length === 0) {
+  } else if (connectors.connectors?.length === 0 && !conversationId) {
     footer = (
-      <>
-        <EuiSpacer size="l" />
-        <MissingCredentialsCallout connectorsManagementHref={connectorsManagementHref} />
-      </>
+      <InitialSetupPanel
+        connectors={connectors}
+        connectorsManagementHref={connectorsManagementHref}
+        knowledgeBase={knowledgeBase}
+        startedFrom={startedFrom}
+      />
     );
   } else {
     footer = (
@@ -181,6 +194,7 @@ export function ChatBody({
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
               <ChatTimeline
                 items={timeline.items}
+                knowledgeBase={knowledgeBase}
                 onEdit={timeline.onEdit}
                 onFeedback={timeline.onFeedback}
                 onRegenerate={timeline.onRegenerate}
@@ -208,16 +222,24 @@ export function ChatBody({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
-      <EuiFlexItem grow={false}>
-        <ExperimentalFeatureBanner />
-      </EuiFlexItem>
+      {connectors.selectedConnector ? (
+        <EuiFlexItem grow={false}>
+          <ExperimentalFeatureBanner />
+        </EuiFlexItem>
+      ) : null}
+
       <EuiFlexItem grow={false}>
         <ChatHeader
           connectors={connectors}
+          conversationId={conversationId}
+          connectorsManagementHref={connectorsManagementHref}
+          modelsManagementHref={modelsManagementHref}
           knowledgeBase={knowledgeBase}
           licenseInvalid={!hasCorrectLicense && !conversationId}
           loading={loading}
+          startedFrom={startedFrom}
           title={title}
+          onCopyConversation={handleCopyConversation}
           onSaveTitle={onSaveTitle}
         />
       </EuiFlexItem>
