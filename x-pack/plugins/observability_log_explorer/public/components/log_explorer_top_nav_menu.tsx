@@ -6,13 +6,19 @@
  */
 
 import React from 'react';
-// import { TopNavMenu, type TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { AppMountParameters } from '@kbn/core-application-browser';
-import { EuiBetaBadge, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
-import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../../common/constants';
+import {
+  EuiBetaBadge,
+  EuiHeaderLink,
+  EuiHeaderLinks,
+  EuiHeaderSection,
+  EuiHeaderSectionItem,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
-import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
+import { betaBadgeDescription, betaBadgeTitle, discoverLinkTitle } from '../../common/translations';
 
 interface LogExplorerTopNavMenuProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -23,57 +29,36 @@ export const LogExplorerTopNavMenu = ({
   setHeaderActionMenu,
   theme$,
 }: LogExplorerTopNavMenuProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const {
     services: { discover },
   } = useKibanaContextForPlugin();
 
-  // const badges = [
-  //   {
-  //     badgeText: betaBadgeTitle,
-  //     toolTipProps: {
-  //       title: betaBadgeTitle,
-  //       content: betaBadgeDescription,
-  //     },
-  //   },
-  // ];
-
-  // const config = [
-  //   {
-  //     id: 'discover',
-  //     label: 'Discover',
-  //     description: 'Discover',
-  //     testId: 'discoverProfile',
-  //     iconType: 'discoverApp',
-  //     run: () => {
-  //       discover.locator?.navigate({});
-  //     },
-  //   },
-  // ];
-
-  // return (
-  //   <TopNavMenu
-  //     appName={OBSERVABILITY_LOG_EXPLORER_APP_ID}
-  //     badges={badges}
-  //     config={config}
-  //     setMenuMountPoint={setMenuMountPoint}
-  //   />
-  // );
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-      <EuiHeaderLinks gutterSize="xs">
-        <EuiBetaBadge
-          label={betaBadgeTitle}
-          tooltipContent={betaBadgeDescription}
-          alignment="middle"
-        />
-        <EuiHeaderLink
-          onClick={() => discover.locator?.navigate({})}
-          color="primary"
-          iconType="discoverApp"
-        >
-          Discover
-        </EuiHeaderLink>
-      </EuiHeaderLinks>
+      <EuiHeaderSection
+        css={css`
+          gap: ${euiTheme.size.m};
+        `}
+      >
+        <EuiHeaderSectionItem>
+          <EuiBetaBadge
+            label={betaBadgeTitle}
+            tooltipContent={betaBadgeDescription}
+            alignment="middle"
+          />
+        </EuiHeaderSectionItem>
+        <EuiHeaderLinks gutterSize="xs">
+          <EuiHeaderLink
+            onClick={() => discover.locator?.navigate({})}
+            color="primary"
+            iconType="discoverApp"
+          >
+            {discoverLinkTitle}
+          </EuiHeaderLink>
+        </EuiHeaderLinks>
+      </EuiHeaderSection>
     </HeaderMenuPortal>
   );
 };

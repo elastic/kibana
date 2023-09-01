@@ -21,3 +21,10 @@ export const betaBadgeDescription = i18n.translate(
     defaultMessage: 'This application is in beta and therefore subject to change.',
   }
 );
+
+export const discoverLinkTitle = i18n.translate(
+  'xpack.observabilityLogExplorer.discoverLinkTitle',
+  {
+    defaultMessage: 'Discover',
+  }
+);
