@@ -2,10 +2,9 @@
 
 set -euo pipefail
 
-echo "BUILDKITE_COMMAND: $BUILDKITE_COMMAND"
 if [[ "$BUILDKITE_COMMAND" =~ ^"buildkite-agent pipeline upload" ]]; then
   echo "Skipped pre-command when running the Upload pipeline"
-  exit 0
+  exit 
 fi
 
 source .buildkite/scripts/common/util.sh
