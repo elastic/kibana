@@ -79,7 +79,7 @@ export const FullPageView = () => {
           showNginxStubstatus={
             !!metadata?.features.find((feature) => feature.name === 'nginx.stubstatus')
           }
-          showNginxAccess={!!metadata?.features.find((feature) => feature.name === 'nginx.acces')}
+          showNginxAccess={!!metadata?.features.find((feature) => feature.name === 'nginx.access')}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

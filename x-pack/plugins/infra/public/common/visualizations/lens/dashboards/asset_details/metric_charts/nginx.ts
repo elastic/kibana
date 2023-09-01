@@ -53,3 +53,26 @@ export const nginxRequestsPerConnection: XYConfig = {
   ],
   dataViewOrigin: 'metrics',
 };
+
+export const nginxResponseStatusCodes: XYConfig = {
+  id: 'ResponseStatusCodes',
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.nginx.responseStatusCodes', {
+    defaultMessage: 'Response Status Codes',
+  }),
+
+  layers: [
+    {
+      data: [
+        hostLensFormulas.nginxSuccessStatusCodes,
+        hostLensFormulas.nginxRedirectStatusCodes,
+        hostLensFormulas.nginxClientErrorStatusCodes,
+        hostLensFormulas.nginxServerErrorStatusCodes,
+      ],
+      options: {
+        seriesType: 'area',
+      },
+      type: 'visualization',
+    },
+  ],
+  dataViewOrigin: 'metrics',
+};
