@@ -127,14 +127,17 @@ const ensureEndpointRuleAlertsIndexExists = async (esClient: Client): Promise<vo
     indexMappings.mappings._meta.kibana.version = kibanaPackageJson.version;
   }
 
+  const doesIndexExist = await esClient.indices.exists({ index: indexMappings.index });
+
+  if (doesIndexExist) {
+    return;
+  }
   try {
     await esClient.indices.create({
       index: indexMappings.index,
-      body: {
-        settings: indexMappings.settings,
-        mappings: indexMappings.mappings,
-        aliases: indexMappings.aliases,
-      },
+      settings: indexMappings.settings,
+      mappings: indexMappings.mappings,
+      aliases: indexMappings.aliases,
     });
   } catch (error) {
     // ignore error that indicate index is already created
