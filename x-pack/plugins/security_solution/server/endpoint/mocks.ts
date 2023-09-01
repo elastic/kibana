@@ -132,6 +132,7 @@ export const createMockEndpointAppContextServiceSetupContract =
   (): jest.Mocked<EndpointAppContextServiceSetupContract> => {
     return {
       securitySolutionRequestContextFactory: requestContextFactoryMock.create(),
+      cloud: cloudMock.createSetup(),
     };
   };
 
@@ -213,7 +214,6 @@ export const createMockEndpointAppContextServiceStartContract =
       >(),
       exceptionListsClient: listMock.getExceptionListClient(),
       cases: casesMock,
-      cloud: cloudMock.createSetup(),
       featureUsageService: createFeatureUsageServiceMock(),
       experimentalFeatures,
       messageSigningService: createMessageSigningServiceMock(),
