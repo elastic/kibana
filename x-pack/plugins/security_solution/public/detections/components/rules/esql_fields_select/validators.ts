@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
+import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
 import { KibanaServices } from '../../../../common/lib/kibana';
 import { securitySolutionQueryClient } from '../../../../common/containers/query_client/query_client_provider';
@@ -21,6 +22,7 @@ export type FieldType = 'string';
 
 export enum ERROR_CODES {
   INVALID_ESQL = 'ERR_INVALID_ESQL',
+  ERR_MISSING_ID_FIELD_FROM_RESULT = 'ERR_MISSING_ID_FIELD_FROM_RESULT',
   INVALID_ESQL_GROUPING_FIELDS = 'INVALID_ESQL_GROUPING_FIELDS',
 }
 
@@ -126,6 +128,17 @@ export const esqlValidator = async (
 
     if (data && 'error' in data) {
       return constructValidationError(data.error);
+    }
+
+    // for non-aggregating fields we want to disable queries w/o _id property
+    if (
+      !computeIsESQLQueryAggregating(query) &&
+      !(data?.columns ?? []).find(({ id }) => '_id' === id)
+    ) {
+      return {
+        code: ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
+        message: `For non-aggregating rules(that don't use STATS..BY function), please write query that returns _id field from [metadata _id, _version, _index] operator.`,
+      };
     }
   } catch (error) {
     return constructValidationError(error);

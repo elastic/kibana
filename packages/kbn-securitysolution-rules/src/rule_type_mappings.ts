@@ -22,12 +22,12 @@ import {
  */
 export const ruleTypeMappings = {
   eql: EQL_RULE_TYPE_ID,
-  esql: ESQL_RULE_TYPE_ID,
   machine_learning: ML_RULE_TYPE_ID,
   query: QUERY_RULE_TYPE_ID,
   saved_query: SAVED_QUERY_RULE_TYPE_ID,
   threat_match: INDICATOR_RULE_TYPE_ID,
   threshold: THRESHOLD_RULE_TYPE_ID,
+  esql: ESQL_RULE_TYPE_ID,
   new_terms: NEW_TERMS_RULE_TYPE_ID,
 };
 type RuleTypeMappings = typeof ruleTypeMappings;
