@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-if [[ "$BUILDKITE_COMMAND" =~ .*"upload".* ]]; then
+if [[ "$BUILDKITE_COMMAND" =~ ^"buildkite-agent pipeline upload" ]]; then
   echo "Skipped pre-command when running the Upload pipeline"
   exit 0
 fi
