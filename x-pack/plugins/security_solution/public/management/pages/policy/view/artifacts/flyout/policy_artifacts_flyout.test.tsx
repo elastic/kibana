@@ -254,6 +254,7 @@ describe('Policy details artifacts flyout', () => {
         });
         // second exception
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
+          version: '2023-10-31',
           body: JSON.stringify(
             getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
           ),

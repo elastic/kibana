@@ -153,6 +153,7 @@ describe('links', () => {
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
       expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
+        version: '2023-10-31',
         query: expect.objectContaining({
           list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
         }),
@@ -173,6 +174,7 @@ describe('links', () => {
 
       expect(filteredLinks).toEqual(links);
       expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
+        version: '2023-10-31',
         query: expect.objectContaining({
           list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
         }),

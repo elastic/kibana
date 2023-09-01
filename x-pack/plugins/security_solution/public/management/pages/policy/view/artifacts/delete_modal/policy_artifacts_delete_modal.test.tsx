@@ -103,6 +103,7 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
     userEvent.click(confirmButton);
     await waitFor(() => {
       expect(mockedApi.responseProvider.exceptionUpdate).toHaveBeenLastCalledWith({
+        version: '2023-10-31',
         body: JSON.stringify(
           ExceptionsListApiClient.cleanExceptionsBeforeUpdate({
             ...exception,

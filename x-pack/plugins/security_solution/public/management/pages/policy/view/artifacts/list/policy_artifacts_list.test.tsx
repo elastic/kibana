@@ -24,6 +24,7 @@ import { EventFiltersApiClient } from '../../../../event_filters/service/api_cli
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
+  version: '2023-10-31',
   path: '/api/exception_lists/items/_find',
   query: {
     filter: customFilter,
