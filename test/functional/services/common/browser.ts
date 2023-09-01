@@ -659,6 +659,8 @@ class BrowserService extends FtrService {
           this.log.error(
             `WebDriver session is no longer valid.\nProbably Chrome process crashed when it tried to use more memory than what was available.`
           );
+          // TODO: Remove this after a while. We are enabling richer logs in order to try catch the real error cause.
+          this.log.error(`Original Error Logging.\n Name: ${err.name};\n Message: ${err.message};\n Stack: ${err.stack}\n RemoteStack: ${(err as NoSuchSessionError).remoteStacktrace}`);
         }
         return false;
       }
