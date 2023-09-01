@@ -9,8 +9,11 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import {
+  StackTracesDisplayOption,
+  TopNType,
+} from '@kbn/profiling-data-access-plugin/common/stack_traces';
 import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
-import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
 import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,

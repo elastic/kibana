@@ -47,14 +47,6 @@ const VirtualizedRow: React.FC<{
   );
 };
 
-const CARD_CSS = css`
-  & > .euiPopover,
-  & > .euiPopover > .euiPopover__anchor,
-  & > .euiPopover > .euiPopover__anchor > .euiCard {
-    height: 100%;
-  }
-`;
-
 export const GridColumn = ({
   list,
   showMissingIntegrationMessage = false,
@@ -131,7 +123,13 @@ export const GridColumn = ({
                             <EuiFlexItem
                               key={item.id}
                               // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
-                              css={CARD_CSS}
+                              css={css`
+                                & > .euiPopover,
+                                & > .euiPopover > .euiPopover__anchor,
+                                & > .euiPopover > .euiPopover__anchor > .euiCard {
+                                  height: 100%;
+                                }
+                              `}
                             >
                               <PackageCard {...item} showLabels={showCardLabels} />
                             </EuiFlexItem>
