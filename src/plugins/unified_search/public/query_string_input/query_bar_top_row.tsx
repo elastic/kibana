@@ -12,7 +12,12 @@ import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } f
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
-import { getAggregateQueryMode, isOfQueryType, isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  getAggregateQueryMode,
+  isOfQueryType,
+  isOfAggregateQueryType,
+  getLanguageDisplayName,
+} from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -79,13 +84,14 @@ const getWrapperWithTooltip = (
 ) => {
   if (enableTooltip && query && isOfAggregateQueryType(query)) {
     const textBasedLanguage = getAggregateQueryMode(query);
+    const displayName = getLanguageDisplayName(textBasedLanguage);
     return (
       <EuiToolTip
         position="top"
         content={i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
           defaultMessage:
             'Date range selection for {language} queries requires the presence of an @timestamp field in the dataset.',
-          values: { language: textBasedLanguage },
+          values: { language: displayName },
         })}
       >
         {children}
