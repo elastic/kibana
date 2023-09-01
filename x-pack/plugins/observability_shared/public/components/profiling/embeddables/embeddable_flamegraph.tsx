@@ -23,9 +23,8 @@ export function EmbeddableFlamegraph({ data }: Props) {
 
   useEffect(() => {
     async function createEmbeddable() {
-      const fac = embeddablePlugin?.getEmbeddableFactory(EMBEDDABLE_FLAMEGRAPH);
-      const input = { id: 'profling', data };
-      const embeddableObject = await fac?.create(input);
+      const factory = embeddablePlugin?.getEmbeddableFactory(EMBEDDABLE_FLAMEGRAPH);
+      const embeddableObject = await factory?.create({ id: 'embeddable_profiling', data });
       setEmbeddable(embeddableObject);
     }
     createEmbeddable();
