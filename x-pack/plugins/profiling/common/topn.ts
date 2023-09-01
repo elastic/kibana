@@ -9,9 +9,9 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { InferSearchResponseOf } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
-import { ProfilingESField } from './elasticsearch';
+import { ProfilingESField } from '@kbn/profiling-data-access-plugin/common/elasticsearch';
+import { StackFrameMetadata } from '@kbn/profiling-data-access-plugin/common/profiling';
 import { createUniformBucketsForTimeRange } from './histogram';
-import { StackFrameMetadata } from './profiling';
 
 export const OTHER_BUCKET_LABEL = i18n.translate('xpack.profiling.topn.otherBucketLabel', {
   defaultMessage: 'Other',
