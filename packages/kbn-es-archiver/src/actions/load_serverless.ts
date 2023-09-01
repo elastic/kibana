@@ -8,9 +8,8 @@ import { readdir } from 'fs/promises';
 import * as fs from 'fs';
 import oboe from 'oboe';
 import { pipe } from 'fp-ts/function';
+import { resolve } from 'path';
 import { prioritizeMappings } from '../lib';
-import { relative, resolve } from "path";
-import { REPO_ROOT } from "@kbn/repo-info";
 
 type PredicateFunction = (a: string) => boolean;
 const doesNotStartWithADot: PredicateFunction = (x) => !x.startsWith('.');
@@ -54,7 +53,8 @@ const subscribeToStreamingJsonStream = (archivePath) => {
 
 type ArchivePathEntry = string;
 
-const resolveEntry = (archivePath: PathLikeOrString) => (x: ArchivePathEntry) => resolve(archivePath as string, x);
+const resolveEntry = (archivePath: PathLikeOrString) => (x: ArchivePathEntry) =>
+  resolve(archivePath as string, x);
 
 const mappingsAndArchiveFileNames = async (x: PathLikeOrString) =>
   await readDirectory(doesNotStartWithADot)(x);
@@ -64,7 +64,7 @@ export const begin = async (archivePath: PathLikeOrString): Promise<void> => {
   // subscribeToDecompressionStream(archivePath);
   // subscribeToStreamingJsonStream(archivePath);
 
-  const prioritized = (xs: PathLikeOrString[]) => from(pipe(xs as string[], prioritizeMappings))
+  const prioritized = (xs: PathLikeOrString[]) => from(pipe(xs as string[], prioritizeMappings));
   const resolved = (obs$) => obs$.pipe(map(resolveEntry(archivePath)));
 
   resolved(prioritized(await mappingsAndArchiveFileNames(archivePath))).subscribe({
