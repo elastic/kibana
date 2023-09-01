@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { SearchQuery } from '@kbn/content-management-plugin/common';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import {
+  ContentManagementCrudTypes,
+  SavedObjectCreateOptions,
+  SavedObjectUpdateOptions,
+} from '@kbn/content-management-utils';
 import type { SimpleSavedObject } from '@kbn/core/public';
 import { BaseVisType } from './base_vis_type';
 
@@ -27,9 +34,49 @@ export interface VisualizationListItem {
   type?: BaseVisType | string;
 }
 
+export interface SerializableAttributes {
+  [key: string]: unknown;
+}
+
+export type GenericVisualizationCrudTypes<
+  ContentType extends string,
+  Attr extends SerializableAttributes
+> = ContentManagementCrudTypes<
+  ContentType,
+  Attr,
+  Pick<SavedObjectCreateOptions, 'overwrite' | 'references'>,
+  Pick<SavedObjectUpdateOptions, 'overwrite' | 'references'>,
+  object
+>;
+
+export interface VisualizationClient<
+  ContentType extends string = string,
+  Attr extends SerializableAttributes = SerializableAttributes
+> {
+  get: (id: string) => Promise<GenericVisualizationCrudTypes<ContentType, Attr>['GetOut']>;
+  create: (
+    visualization: Omit<
+      GenericVisualizationCrudTypes<ContentType, Attr>['CreateIn'],
+      'contentTypeId'
+    >
+  ) => Promise<GenericVisualizationCrudTypes<ContentType, Attr>['CreateOut']>;
+  update: (
+    visualization: Omit<
+      GenericVisualizationCrudTypes<ContentType, Attr>['UpdateIn'],
+      'contentTypeId'
+    >
+  ) => Promise<GenericVisualizationCrudTypes<ContentType, Attr>['UpdateOut']>;
+  delete: (id: string) => Promise<GenericVisualizationCrudTypes<ContentType, Attr>['DeleteOut']>;
+  search: (
+    query: SearchQuery,
+    options?: object
+  ) => Promise<GenericVisualizationCrudTypes<ContentType, Attr>['SearchOut']>;
+}
+
 export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
+  client: (contentManagement: ContentManagementPublicStart) => VisualizationClient;
   toListItem: (savedObject: SimpleSavedObject<any>) => VisualizationListItem;
 }
 
