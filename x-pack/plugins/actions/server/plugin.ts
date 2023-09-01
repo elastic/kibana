@@ -179,6 +179,7 @@ export interface ActionsPluginsStart {
   eventLog: IEventLogClientService;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
+  serverless?: ServerlessPluginSetup;
 }
 
 const includedHiddenTypes = [
@@ -557,7 +558,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     }
 
-    this.validateEnabledConnectorTypes();
+    this.validateEnabledConnectorTypes(plugins);
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
@@ -712,7 +713,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     };
   };
 
-  private validateEnabledConnectorTypes = () => {
+  private validateEnabledConnectorTypes = (plugins: ActionsPluginsStart) => {
     if (
       !!plugins.serverless &&
       this.actionsConfig.enabledActionTypes.length > 0 &&
