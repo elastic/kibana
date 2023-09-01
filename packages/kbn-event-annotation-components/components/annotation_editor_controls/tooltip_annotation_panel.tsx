@@ -9,7 +9,7 @@
 import { htmlIdGenerator, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
-import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
+import { useExistingFieldsReader, getFieldIconType } from '@kbn/unified-field-list';
 import {
   FieldOption,
   FieldOptionValue,
@@ -139,7 +139,7 @@ export function TooltipSection({
           value: {
             type: 'field',
             field: field.name,
-            dataType: field.type,
+            dataType: getFieldIconType(field),
           },
           exists: dataView.id ? hasFieldData(dataView.id, field.name) : false,
           compatible: true,
