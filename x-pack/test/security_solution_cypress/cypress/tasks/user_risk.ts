@@ -8,6 +8,7 @@
 import {
   USER_BY_RISK_TABLE_FILTER,
   USER_BY_RISK_TABLE_FILTER_LOW,
+  RISK_SCORE_TAB,
 } from '../screens/users/user_risk_score';
 
 export const openUserRiskTableFilterAndSelectTheLowOption = () => {
@@ -18,4 +19,8 @@ export const openUserRiskTableFilterAndSelectTheLowOption = () => {
 export const removeLowFilterAndCloseUserRiskTableFilter = () => {
   cy.get(USER_BY_RISK_TABLE_FILTER_LOW).click();
   cy.get(USER_BY_RISK_TABLE_FILTER).first().click();
+};
+
+export const goToUserRiskScoreTab = () => {
+  cy.get(RISK_SCORE_TAB).click();
 };

@@ -12,6 +12,8 @@ import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
 
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
 
+import { goToUserRiskScoreTab } from '../../../tasks/user_risk';
+
 describe('User risk tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
@@ -30,7 +32,7 @@ describe('User risk tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   it('renders risk tab and alerts table', () => {
     visitUserDetailsPage('user1');
-    cy.get('[data-test-subj="navigation-userRisk"]').click();
+    goToUserRiskScoreTab();
     waitForTableToLoad();
 
     cy.get(ALERTS_COUNT).should('have.text', '1 alert');
