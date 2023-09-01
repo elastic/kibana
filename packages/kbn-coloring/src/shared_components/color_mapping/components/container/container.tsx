@@ -85,6 +85,7 @@ export function Container(props: {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSwitch
+          data-test-subj="lns-colorMapping-autoAssignSwitch"
           label="Auto assign categories to colors"
           checked={autoAssignmentMode}
           compressed
@@ -115,7 +116,7 @@ export function Container(props: {
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj="lns-colorMapping-assignmentsList">
               {assignments.map((assignment, i) => {
                 return (
                   <Assignment
@@ -136,7 +137,7 @@ export function Container(props: {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup direction="row" gutterSize="s">
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj="lns-colorMapping-specialAssignmentsList">
               {props.data.type === 'categories' && (
                 <>
                   <EuiSpacer size="xs" />
@@ -160,6 +161,7 @@ export function Container(props: {
       </EuiFlexItem>
       <EuiFlexItem style={{ display: 'block' }}>
         <EuiButtonEmpty
+          data-test-subj="lns-colorMapping-addNewAssignment"
           iconType="plusInCircleFilled"
           size="xs"
           onClick={() => {
@@ -183,6 +185,7 @@ export function Container(props: {
         </EuiButtonEmpty>
         {colorMode.type === 'gradient' && (
           <EuiButtonEmpty
+            data-test-subj="lns-colorMapping-invertGradient"
             iconType={colorMode.sort === 'asc' ? 'sortAscending' : 'sortDescending'}
             size="xs"
             onClick={() => {

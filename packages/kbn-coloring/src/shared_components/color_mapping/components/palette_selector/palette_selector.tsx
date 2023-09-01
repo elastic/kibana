@@ -177,6 +177,7 @@ export function PaletteSelector({
           <EuiFormRow label="Scale">
             <EuiButtonGroup
               legend="Scale"
+              data-test-subj="lns_colorMapping_scaleSwitch"
               options={[
                 {
                   id: `categorical`,
