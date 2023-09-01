@@ -79,6 +79,18 @@ describe('extract search response warnings', () => {
         },
       ]);
     });
+
+    it('should not include warnings when there are none', () => {
+      const warnings = extractWarnings({
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          total: 9000,
+        },
+      } as estypes.SearchResponse);
+
+      expect(warnings).toEqual([]);
+    });
   });
 
   describe('remote clusters', () => {
@@ -221,17 +233,52 @@ describe('extract search response warnings', () => {
         },
       ]);
     });
-  });
 
-  it('should not include warnings when there are none', () => {
-    const warnings = extractWarnings({
-      timed_out: false,
-      _shards: {
-        failed: 0,
-        total: 9000,
-      },
-    } as estypes.SearchResponse);
+    it('should not include warnings when there are none', () => {
+      const warnings = extractWarnings({
+        took: 10,
+        timed_out: false,
+        "_shards": {
+          "total": 4,
+          "successful": 4,
+          "skipped": 0,
+          "failed": 0
+        },
+        "_clusters": {
+          "total": 2,
+          "successful": 2,
+          "skipped": 0,
+          "details": {
+            "(local)": {
+              "status": "successful",
+              "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
+              "took": 0,
+              "timed_out": false,
+              "_shards": {
+                "total": 2,
+                "successful": 2,
+                "skipped": 0,
+                "failed": 0
+              }
+            },
+            "remote1": {
+              "status": "successful",
+              "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
+              "took": 1,
+              "timed_out": false,
+              "_shards": {
+                "total": 2,
+                "successful": 2,
+                "skipped": 0,
+                "failed": 0
+              }
+            }
+          }
+        },
+        hits: { hits: [] },
+      } as estypes.SearchResponse);
 
-    expect(warnings).toEqual([]);
+      expect(warnings).toEqual([]);
+    });
   });
 });
