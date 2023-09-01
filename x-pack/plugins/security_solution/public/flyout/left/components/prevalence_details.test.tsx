@@ -11,11 +11,18 @@ import { LeftPanelContext } from '../context';
 import { PrevalenceDetails } from './prevalence_details';
 import {
   PREVALENCE_DETAILS_LOADING_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
 } from './test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { TestProviders } from '../../../common/mock';
+import { licenseService } from '../../../common/hooks/use_license';
 
 jest.mock('../../shared/hooks/use_prevalence');
 
@@ -27,6 +34,17 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
+jest.mock('../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 const panelContextValue = {
   eventId: 'event id',
@@ -36,7 +54,13 @@ const panelContextValue = {
 } as unknown as LeftPanelContext;
 
 describe('PrevalenceDetails', () => {
-  it('should render the table', () => {
+  const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+  beforeEach(() => {
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+  });
+
+  it('should render the table with all columns if license is platinum', () => {
     const field1 = 'field1';
     const field2 = 'field2';
     (usePrevalence as jest.Mock).mockReturnValue({
@@ -62,7 +86,7 @@ describe('PrevalenceDetails', () => {
       ],
     });
 
-    const { getByTestId } = render(
+    const { getByTestId, getAllByTestId, queryByTestId } = render(
       <TestProviders>
         <LeftPanelContext.Provider value={panelContextValue}>
           <PrevalenceDetails />
@@ -71,6 +95,74 @@ describe('PrevalenceDetails', () => {
     );
 
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID).length).toBeGreaterThan(1);
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID).length).toBeGreaterThan(1);
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID).length).toBeGreaterThan(
+      1
+    );
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(queryByTestId(`${PREVALENCE_DETAILS_TABLE_TEST_ID}UpSell`)).not.toBeInTheDocument();
+  });
+
+  it('should render the table with only basic columns if license is not platinum', () => {
+    const field1 = 'field1';
+    const field2 = 'field2';
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          field: field1,
+          value: 'value1',
+          alertCount: 1,
+          docCount: 1,
+          hostPrevalence: 0.05,
+          userPrevalence: 0.1,
+        },
+        {
+          field: field2,
+          value: 'value2',
+          alertCount: 1,
+          docCount: 1,
+          hostPrevalence: 0.5,
+          userPrevalence: 0.05,
+        },
+      ],
+    });
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+
+    const { getByTestId, getAllByTestId } = render(
+      <TestProviders>
+        <LeftPanelContext.Provider value={panelContextValue}>
+          <PrevalenceDetails />
+        </LeftPanelContext.Provider>
+      </TestProviders>
+    );
+
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID).length).toBeGreaterThan(1);
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID).length).toBeGreaterThan(1);
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID).length).toBeGreaterThan(
+      1
+    );
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(getByTestId(`${PREVALENCE_DETAILS_TABLE_TEST_ID}UpSell`)).toBeInTheDocument();
   });
 
   it('should render loading', () => {
