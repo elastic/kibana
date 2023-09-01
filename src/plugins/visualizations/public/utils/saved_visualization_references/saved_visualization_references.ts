@@ -12,17 +12,17 @@ import {
   injectSearchSourceReferences,
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
 import { SavedVisState, VisSavedObject } from '../../types';
 
 import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
 import { extractControlsReferences, injectControlsReferences } from './controls_references';
+import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
 
 export function extractReferences({
   attributes,
   references = [],
 }: {
-  attributes: SerializableRecord;
+  attributes: SerializableAttributes;
   references: SavedObjectReference[];
 }) {
   const updatedAttributes = { ...attributes };

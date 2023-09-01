@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list-view';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 
-import type { MapItem } from '../../../common/content_management';
+import type { MapAttributes, MapItem } from '../../../common/content_management';
 import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';
 import {
   getMapsCapabilities,
@@ -97,7 +97,7 @@ function MapsListViewComp({ history }: Props) {
         referencesToExclude?: SavedObjectsFindOptionsReference[];
       } = {}
     ) => {
-      return getMapClient()
+      return getMapClient<MapAttributes>()
         .search({
           text: searchTerm ? `${searchTerm}*` : undefined,
           limit: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),

@@ -6,12 +6,18 @@
  */
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type {
+  SerializableAttributes,
+  VisualizationClient,
+} from '@kbn/visualizations-plugin/public/vis_types/vis_type_alias_registry';
 
 import type { MapCrudTypes } from '../../common/content_management';
 import { CONTENT_ID as contentTypeId } from '../../common/content_management';
 import { getContentManagement } from '../kibana_services';
 
-export function getMapClient(cm: ContentManagementPublicStart = getContentManagement()) {
+export function getMapClient<Attr extends SerializableAttributes = SerializableAttributes>(
+  cm: ContentManagementPublicStart = getContentManagement()
+): VisualizationClient<'map', Attr> {
   const get = async (id: string) => {
     return cm.client.get<MapCrudTypes['GetIn'], MapCrudTypes['GetOut']>({
       contentTypeId,
@@ -59,5 +65,5 @@ export function getMapClient(cm: ContentManagementPublicStart = getContentManage
     update,
     delete: deleteMap,
     search,
-  };
+  } as unknown as VisualizationClient<'map', Attr>;
 }

@@ -82,7 +82,7 @@ export function getMapAttributeService(): MapAttributeService {
       const {
         item: savedObject,
         meta: { outcome, aliasPurpose, aliasTargetId },
-      } = await getMapClient().get(savedObjectId);
+      } = await getMapClient<MapAttributes>().get(savedObjectId);
 
       if (savedObject.error) {
         throw savedObject.error;
