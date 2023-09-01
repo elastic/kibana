@@ -74,15 +74,13 @@ describe(`useActions`, () => {
       })
     );
     expect(result.current[0].id).toEqual('inspect');
-    expect(result.current[0].order).toEqual(4);
+    expect(result.current[0].order).toEqual(3);
     expect(result.current[1].id).toEqual('addToNewCase');
-    expect(result.current[1].order).toEqual(3);
+    expect(result.current[1].order).toEqual(2);
     expect(result.current[2].id).toEqual('addToExistingCase');
-    expect(result.current[2].order).toEqual(2);
-    expect(result.current[3].id).toEqual('saveToLibrary');
-    expect(result.current[3].order).toEqual(1);
-    expect(result.current[4].id).toEqual('openInLens');
-    expect(result.current[4].order).toEqual(0);
+    expect(result.current[2].order).toEqual(1);
+    expect(result.current[3].id).toEqual('openInLens');
+    expect(result.current[3].order).toEqual(0);
   });
 
   it('should render extra actions if available', () => {
@@ -120,16 +118,14 @@ describe(`useActions`, () => {
     );
 
     expect(result.current[0].id).toEqual('inspect');
-    expect(result.current[0].order).toEqual(5);
+    expect(result.current[0].order).toEqual(4);
     expect(result.current[1].id).toEqual('addToNewCase');
-    expect(result.current[1].order).toEqual(4);
+    expect(result.current[1].order).toEqual(3);
     expect(result.current[2].id).toEqual('addToExistingCase');
-    expect(result.current[2].order).toEqual(3);
-    expect(result.current[3].id).toEqual('saveToLibrary');
-    expect(result.current[3].order).toEqual(2);
-    expect(result.current[4].id).toEqual('openInLens');
-    expect(result.current[4].order).toEqual(1);
-    expect(result.current[5].id).toEqual('mockExtraAction');
-    expect(result.current[5].order).toEqual(0);
+    expect(result.current[2].order).toEqual(2);
+    expect(result.current[3].id).toEqual('openInLens');
+    expect(result.current[3].order).toEqual(1);
+    expect(result.current[4].id).toEqual('mockExtraAction');
+    expect(result.current[4].order).toEqual(0);
   });
 });

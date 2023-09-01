@@ -10,14 +10,8 @@ import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/publ
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useAddToNewCase } from './use_add_to_new_case';
-import { useSaveToLibrary } from './use_save_to_library';
 
-import {
-  ADDED_TO_LIBRARY,
-  ADD_TO_EXISTING_CASE,
-  ADD_TO_NEW_CASE,
-  OPEN_IN_LENS,
-} from './translations';
+import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE, OPEN_IN_LENS } from './translations';
 import type { LensAttributes } from './types';
 import { INSPECT } from '../inspect/translations';
 
@@ -42,7 +36,6 @@ export const useActions = ({
     'inspect',
     'addToNewCase',
     'addToExistingCase',
-    'saveToLibrary',
     'openInLens',
   ]);
 
@@ -79,7 +72,6 @@ export const useActions = ({
     lensAttributes: attributes,
   });
 
-  const { openSaveVisualizationFlyout, disableVisualizations } = useSaveToLibrary({ attributes });
   const actions = useMemo(
     () =>
       defaultActions?.reduce<Action[]>((acc, action) => {
@@ -114,16 +106,6 @@ export const useActions = ({
           return [...acc, getOpenInLensAction({ callback: onOpenInLens })];
         }
 
-        if (action === 'saveToLibrary') {
-          return [
-            ...acc,
-            getSaveToLibraryAction({
-              callback: openSaveVisualizationFlyout,
-              disabled: disableVisualizations,
-            }),
-          ];
-        }
-
         return acc;
       }, []),
     [
@@ -134,8 +116,6 @@ export const useActions = ({
       onAddToNewCaseClicked,
       isAddToNewCaseDisabled,
       onOpenInLens,
-      openSaveVisualizationFlyout,
-      disableVisualizations,
     ]
   );
 
@@ -171,33 +151,6 @@ const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => 
   };
 };
 
-const getSaveToLibraryAction = ({
-  callback,
-  disabled,
-}: {
-  callback: () => void;
-  disabled?: boolean;
-}): Action => {
-  return {
-    id: 'saveToLibrary',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return ADDED_TO_LIBRARY;
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'save';
-    },
-    type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-    },
-    disabled,
-    order: 1,
-  };
-};
-
 const getAddToExistingCaseAction = ({
   callback,
   disabled,
@@ -221,7 +174,7 @@ const getAddToExistingCaseAction = ({
       callback();
     },
     disabled,
-    order: 2,
+    order: 1,
   };
 };
 
@@ -248,7 +201,7 @@ const getAddToNewCaseAction = ({
       callback();
     },
     disabled,
-    order: 3,
+    order: 2,
   };
 };
 
@@ -275,6 +228,6 @@ const getInspectAction = ({
       callback();
     },
     disabled,
-    order: 4,
+    order: 3,
   };
 };

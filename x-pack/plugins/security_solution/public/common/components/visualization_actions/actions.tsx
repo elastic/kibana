@@ -10,7 +10,6 @@ import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/publ
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { ModalInspectQuery } from '../inspect/modal';
@@ -19,7 +18,6 @@ import { useInspect } from '../inspect/use_inspect';
 import { useLensAttributes } from './use_lens_attributes';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useAddToNewCase } from './use_add_to_new_case';
-import { useSaveToLibrary } from './use_save_to_library';
 import type { VisualizationActionsProps } from './types';
 import {
   ADD_TO_EXISTING_CASE,
@@ -27,11 +25,9 @@ import {
   INSPECT,
   MORE_ACTIONS,
   OPEN_IN_LENS,
-  ADDED_TO_LIBRARY,
 } from './translations';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useAppToasts } from '../../hooks/use_app_toasts';
 
 const Wrapper = styled.div`
   &.viz-actions {
@@ -66,12 +62,9 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
 }) => {
   const { lens } = useKibana().services;
 
-  const { canUseEditor, navigateToPrefilledEditor, SaveModalComponent } = lens;
+  const { canUseEditor, navigateToPrefilledEditor } = lens;
   const [isPopoverOpen, setPopover] = useState(false);
   const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
-  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const { addSuccess } = useAppToasts();
-  const hasPermission = canUseEditor();
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -123,10 +116,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     );
   }, [attributes, navigateToPrefilledEditor, timerange]);
 
-  const { openSaveVisualizationFlyout, disableVisualizations } = useSaveToLibrary({
-    attributes,
-  });
-
   const onOpenInspectModal = useCallback(() => {
     closePopover();
     setIsInspectModalOpen(true);
@@ -156,6 +145,11 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     onClick: onOpenInspectModal,
     queryId,
   });
+
+  const disabledOpenInLens = useMemo(
+    () => !canUseEditor() || attributes == null,
+    [attributes, canUseEditor]
+  );
 
   const items = useMemo(() => {
     const context = {} as ActionExecutionContext<object>;
@@ -203,24 +197,11 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
             >
               {ADD_TO_EXISTING_CASE}
             </EuiContextMenuItem>,
-            ...(hasPermission
-              ? [
-                  <EuiContextMenuItem
-                    icon="visArea"
-                    key="visualizationActionsSaveVisualization"
-                    data-test-subj="viz-actions-save-visualization"
-                    disabled={disableVisualizations}
-                    onClick={openSaveVisualizationFlyout}
-                  >
-                    {ADDED_TO_LIBRARY}
-                  </EuiContextMenuItem>,
-                ]
-              : []),
             <EuiContextMenuItem
               icon="visArea"
               key="visualizationActionsOpenInLens"
               data-test-subj="viz-actions-open-in-lens"
-              disabled={disableVisualizations}
+              disabled={disabledOpenInLens}
               onClick={onOpenInLens}
             >
               {OPEN_IN_LENS}
@@ -229,9 +210,8 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         : []),
     ];
   }, [
-    hasPermission,
     disableInspectButton,
-    disableVisualizations,
+    disabledOpenInLens,
     extraActions,
     handleInspectButtonClick,
     isAddToExistingCaseDisabled,
@@ -239,7 +219,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     onAddToExistingCaseClicked,
     onAddToNewCaseClicked,
     onOpenInLens,
-    openSaveVisualizationFlyout,
     withDefaultActions,
   ]);
 
@@ -280,16 +259,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
           request={request}
           response={response}
           title={inspectTitle}
-        />
-      )}
-      {isSaveModalVisible && hasPermission && (
-        <SaveModalComponent
-          initialInput={attributes as unknown as LensEmbeddableInput}
-          onSave={() => {
-            setIsSaveModalVisible(false);
-            addSuccess(ADDED_TO_LIBRARY);
-          }}
-          onClose={() => setIsSaveModalVisible(false)}
         />
       )}
     </Wrapper>
