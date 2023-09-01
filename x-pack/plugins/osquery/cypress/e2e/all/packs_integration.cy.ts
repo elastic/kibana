@@ -222,6 +222,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains(`Agent policy '${agentPolicy}' created`).click();
         cy.contains(agentPolicy).click();
         cy.contains('Add integration').click();
+        cy.getBySel('epmList.searchBar').type('osquery');
         cy.contains(integration).click();
         addIntegration(agentPolicy);
         cy.contains('Add Elastic Agent later').click();
