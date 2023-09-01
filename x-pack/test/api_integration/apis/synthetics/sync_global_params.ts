@@ -23,6 +23,7 @@ import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_pol
 
 export default function ({ getService }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/162594
+  // Failing: See https://github.com/elastic/kibana/issues/162594
   describe.skip('SyncGlobalParams', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertest');
