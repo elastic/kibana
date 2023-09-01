@@ -8,7 +8,10 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
-export function InfraSourceConfigurationFormProvider({ getService, getPageObject }: FtrProviderContext) {
+export function InfraSourceConfigurationFormProvider({
+  getService,
+  getPageObject,
+}: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
