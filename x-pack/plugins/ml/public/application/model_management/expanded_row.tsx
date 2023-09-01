@@ -151,7 +151,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       estimated_operations,
       estimated_heap_memory_usage_bytes,
       default_field_map,
-      license_level,
+      ...(isServerless ? {} : { license_level }),
     };
   }, [
     default_field_map,
@@ -161,6 +161,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     license_level,
     tags,
     version,
+    isServerless,
   ]);
 
   const deploymentStatItems: AllocatedModel[] = useMemo<AllocatedModel[]>(() => {
