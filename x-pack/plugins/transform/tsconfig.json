@@ -67,7 +67,8 @@
     "@kbn/saved-search-plugin",
     "@kbn/unified-field-list",
     "@kbn/ebt-tools",
-    "@kbn/content-management-plugin"
+    "@kbn/content-management-plugin",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": [
     "target/**/*",
