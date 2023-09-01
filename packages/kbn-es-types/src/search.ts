@@ -645,7 +645,7 @@ export type InferSearchResponseOf<
       };
   };
 
-export type ClusterDetails = {
+export interface ClusterDetails {
   status: 'running' | 'successful' | 'partial' | 'skipped' | 'failed';
   indices: string;
   took?: number;

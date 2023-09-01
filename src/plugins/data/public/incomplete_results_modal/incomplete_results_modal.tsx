@@ -19,7 +19,6 @@ import {
   EuiModalHeaderTitle,
   EuiModalFooter,
   EuiButtonEmpty,
-  EuiCallOut,
 } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SearchRequest } from '..';
@@ -50,12 +49,19 @@ export function IncompleteResultsModal({ request, response, warning, onClose }: 
     },
     {
       id: 'json-request',
-      name: i18n.translate('data.search.searchSource.fetch.incompleteResultsModal.tabHeaderRequest', {
-        defaultMessage: 'Request',
-        description: 'Name of the tab displaying the JSON request',
-      }),
+      name: i18n.translate(
+        'data.search.searchSource.fetch.incompleteResultsModal.tabHeaderRequest',
+        {
+          defaultMessage: 'Request',
+          description: 'Name of the tab displaying the JSON request',
+        }
+      ),
       content: (
-        <EuiCodeBlock language="json" isCopyable data-test-subj="incompleteResultsModalRequestBlock">
+        <EuiCodeBlock
+          language="json"
+          isCopyable
+          data-test-subj="incompleteResultsModalRequestBlock"
+        >
           {requestJSON}
         </EuiCodeBlock>
       ),
@@ -63,12 +69,19 @@ export function IncompleteResultsModal({ request, response, warning, onClose }: 
     },
     {
       id: 'json-response',
-      name: i18n.translate('data.search.searchSource.fetch.incompleteResultsModal.tabHeaderResponse', {
-        defaultMessage: 'Response',
-        description: 'Name of the tab displaying the JSON response',
-      }),
+      name: i18n.translate(
+        'data.search.searchSource.fetch.incompleteResultsModal.tabHeaderResponse',
+        {
+          defaultMessage: 'Response',
+          description: 'Name of the tab displaying the JSON response',
+        }
+      ),
       content: (
-        <EuiCodeBlock language="json" isCopyable data-test-subj="incompleteResultsModalResponseBlock">
+        <EuiCodeBlock
+          language="json"
+          isCopyable
+          data-test-subj="incompleteResultsModalResponseBlock"
+        >
           {responseJSON}
         </EuiCodeBlock>
       ),

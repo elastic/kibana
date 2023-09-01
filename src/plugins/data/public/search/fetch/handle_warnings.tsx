@@ -8,7 +8,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { debounce } from 'lodash';
-import { EuiSpacer, EuiTextAlign } from '@elastic/eui';
+import { EuiTextAlign } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React from 'react';

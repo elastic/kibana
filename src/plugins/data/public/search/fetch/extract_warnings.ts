@@ -20,7 +20,9 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
   let isPartial = false;
   let clusters: Record<string, ClusterDetails> = {};
   if (rawResponse._clusters) {
-    isPartial = Object.values(rawResponse._clusters.details).some(clusterDetails => clusterDetails.status !== 'successful');
+    isPartial = Object.values(rawResponse._clusters.details).some(
+      (clusterDetails) => clusterDetails.status !== 'successful'
+    );
     clusters = rawResponse._clusters.details;
   } else if (rawResponse._shards && (rawResponse.timed_out || rawResponse._shards.failed > 0)) {
     // local cluster only
@@ -36,11 +38,10 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
   if (isPartial) {
     warnings.push({
       type: 'incomplete',
-      message: i18n.translate(
-        'data.search.searchSource.fetch.incompleteResultsMessage',
-        { defaultMessage: 'The data might be incomplete or wrong.' }
-      ),
-      clusters
+      message: i18n.translate('data.search.searchSource.fetch.incompleteResultsMessage', {
+        defaultMessage: 'The data might be incomplete or wrong.',
+      }),
+      clusters,
     });
   }
 

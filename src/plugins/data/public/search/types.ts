@@ -125,8 +125,7 @@ export interface SearchResponseIncompleteWarning {
  * A warning object for a search response with warnings
  * @public
  */
-export type SearchResponseWarning =
-  | SearchResponseIncompleteWarning;
+export type SearchResponseWarning = SearchResponseIncompleteWarning;
 
 /**
  * A callback function which can intercept warnings when passed to {@link showWarnings}. Pass `true` from the

@@ -11,9 +11,7 @@ import type { OpenIncompleteResultsModalButtonProps } from './open_incomplete_re
 
 const Fallback = () => <div />;
 
-const LazyOpenModalButton = React.lazy(
-  () => import('./open_incomplete_results_modal_button')
-);
+const LazyOpenModalButton = React.lazy(() => import('./open_incomplete_results_modal_button'));
 export const OpenIncompleteResultsModalButton = (props: OpenIncompleteResultsModalButtonProps) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyOpenModalButton {...props} />
