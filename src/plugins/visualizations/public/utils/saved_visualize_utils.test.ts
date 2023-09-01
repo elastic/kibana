@@ -73,6 +73,7 @@ jest.mock('../services', () => ({
       update: mockUpdateContent,
       get: mockGetContent,
       search: mockFindContent,
+      mSearch: mockFindContent,
     },
   })),
 }));
