@@ -102,7 +102,7 @@ export const useFetchPrevalence = ({
     },
   } = useKibana();
 
-  // retrieves '.alerts-security.alerts-default' and 'logs-*' indices
+  // retrieves detections and non-detections indices (for example, the alert security index from the current space and 'logs-*' indices)
   const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(SourcererScopeName.default));
 
   const searchRequest = buildSearchRequest(highlightedFieldsFilters, from, to, selectedPatterns);
