@@ -109,13 +109,13 @@ export function InitialSetupPanel({
                   >
                     {knowledgeBase.isInstalling || knowledgeBase.status.loading
                       ? i18n.translate(
-                          'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.buttonLabel.notInstalledYet',
+                          'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.buttonLabel.installingKb',
                           {
                             defaultMessage: 'Installing knowledge base',
                           }
                         )
                       : i18n.translate(
-                          'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.buttonLabel.notInstalledYet',
+                          'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.buttonLabel.kbNotInstalledYet',
                           {
                             defaultMessage: 'Set up knowledge base',
                           }
@@ -159,7 +159,7 @@ export function InitialSetupPanel({
                         label=""
                         css={{ boxShadow: 'none' }}
                         tooltipContent={i18n.translate(
-                          'xpack.apm.technicalPreviewBadgeDescription',
+                          'xpack.observabilityAiAssistant.technicalPreviewBadgeDescription',
                           {
                             defaultMessage:
                               "GPT4 is required for a more consistent experience when using function calls (for example when performing root cause analysis, visualizing data and more). GPT3.5 can work for some of the simpler workflows, such as explaining errors or for a ChatGPT like experience within Kibana which don't require the use of frequent function calls.",

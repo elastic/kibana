@@ -140,7 +140,7 @@ export function ChatActionsMenu({
                   size="s"
                 >
                   {i18n.translate(
-                    'xpack.observabilityAiAssistant.chatHeader.actions.connectorManagement',
+                    'xpack.observabilityAiAssistant.chatHeader.actions.connectorManagement.button',
                     {
                       defaultMessage: 'Manage connectors',
                     }
