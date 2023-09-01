@@ -8,6 +8,7 @@ import React from 'react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const triggersActionsUiStartMock = {
   createStart() {
@@ -100,6 +101,7 @@ export const observabilityPublicPluginsStartMock = {
       dataViewEditor: dataViewEditor.createStart(),
       lens: null,
       discover: null,
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     };
   },
 };
