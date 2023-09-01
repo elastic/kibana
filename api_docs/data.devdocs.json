@@ -13680,6 +13680,10 @@
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
+              },
+              {
                 "plugin": "@kbn/event-annotation-components",
                 "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
               },
@@ -13690,10 +13694,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
-              },
-              {
-                "plugin": "@kbn/unified-field-list",
-                "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
               },
               {
                 "plugin": "lens",
@@ -21445,6 +21445,10 @@
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
+              },
+              {
                 "plugin": "@kbn/event-annotation-components",
                 "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
               },
@@ -21455,10 +21459,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
-              },
-              {
-                "plugin": "@kbn/unified-field-list",
-                "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
               },
               {
                 "plugin": "lens",
