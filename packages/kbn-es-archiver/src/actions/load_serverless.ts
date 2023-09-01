@@ -38,7 +38,7 @@ const subscribeToDecompressionStream = (archivePath) => {
 };
 const subscribeToStreamingJsonStream = (archivePath) => {
   const obj$ = (x) => oboe(fs.createReadStream(x));
-  const jsonStanza$ = (_) => obj$(archivePath).on('node', '!.*', _);
+  const jsonStanza$ = (_) => obj$(archivePath).on('done', _);
 
   fromEventPattern(jsonStanza$).subscribe({
     next: (x) => console.log(`\nλjs jsonStanzas stream - next, x: \n${JSON.stringify(x, null, 2)}`),
@@ -50,7 +50,7 @@ export const begin = (archivePath) => {
   archivePath =
     '/Users/trezworkbox/dev/scratches/src/js/streams/native-nodejs-streams/gunzip/someotherfile.txt.gz';
 
-  subscribeToDecompressionStream(archivePath);
+  // subscribeToDecompressionStream(archivePath);
   subscribeToStreamingJsonStream(archivePath);
   // return from(fs.createReadStream(archivePath).pipe(zlib.createGunzip()))
   //   .pipe(map(toStr))
