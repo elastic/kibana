@@ -18,7 +18,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const find = getService('find');
 
-  describe('persistable attachment', () => {
+  // Failing
+  // Issue: https://github.com/elastic/kibana/issues/165135
+  describe.skip('persistable attachment', () => {
     describe('lens visualization', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');

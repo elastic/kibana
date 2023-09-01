@@ -44,6 +44,45 @@ const getBootstrapScript = (isDev) => {
   }
 };
 
+const setServerlessKibanaDevServiceAccountIfPossible = (get, set, opts) => {
+  const esHosts = [].concat(
+    get('elasticsearch.hosts', []),
+    opts.elasticsearch ? opts.elasticsearch.split(',') : []
+  );
+
+  /*
+   * We only handle the service token if serverless ES is running locally.
+   * Example would be if the user is running SES in the cloud and KBN serverless
+   * locally, they would be expected to handle auth on their own and this token
+   * is likely invalid anyways.
+   */
+  const isESlocalhost = esHosts.length
+    ? esHosts.some((hostUrl) => {
+        const parsedUrl = url.parse(hostUrl);
+        return (
+          parsedUrl.hostname === 'localhost' ||
+          parsedUrl.hostname === '127.0.0.1' ||
+          parsedUrl.hostname === 'host.docker.internal'
+        );
+      })
+    : true; // default is localhost:9200
+
+  if (!opts.dev || !opts.serverless || !isESlocalhost) {
+    return;
+  }
+
+  const DEV_UTILS_PATH = '@kbn/dev-utils';
+
+  if (!canRequire(DEV_UTILS_PATH)) {
+    return;
+  }
+
+  // need dynamic require to exclude it from production build
+  // eslint-disable-next-line import/no-dynamic-require
+  const { kibanaDevServiceAccount } = require(DEV_UTILS_PATH);
+  set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
+};
+
 function pathCollector() {
   const paths = [];
   return function (path) {
@@ -68,6 +107,10 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   delete extraCliOptions.env;
 
   if (opts.dev) {
+    if (opts.serverless) {
+      setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
+    }
+
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
       if (!has('elasticsearch.username')) {
         set('elasticsearch.username', 'kibana_system');
@@ -98,7 +141,6 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('server.ssl.truststore.path');
       ensureNotDefined('server.ssl.certificateAuthorities');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
-
       const elasticsearchHosts = (
         (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
           'https://localhost:9200',

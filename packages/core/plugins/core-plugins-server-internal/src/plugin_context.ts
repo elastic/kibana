@@ -246,7 +246,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setSpacesExtension: deps.savedObjects.setSpacesExtension,
       registerType: deps.savedObjects.registerType,
       getDefaultIndex: deps.savedObjects.getDefaultIndex,
-      getAllIndices: deps.savedObjects.getAllIndices,
     },
     status: {
       core$: deps.status.core$,

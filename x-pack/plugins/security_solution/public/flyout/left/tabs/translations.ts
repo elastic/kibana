@@ -45,7 +45,7 @@ export const ENTITIES_BUTTON = i18n.translate(
 export const THREAT_INTELLIGENCE_BUTTON = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.threatIntelligenceButton',
   {
-    defaultMessage: 'Threat Intelligence',
+    defaultMessage: 'Threat intelligence',
   }
 );
 

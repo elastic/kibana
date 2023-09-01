@@ -26,6 +26,188 @@
     "interfaces": [
       {
         "parentPluginId": "discover",
+        "id": "def-public.DiscoverCustomizationService",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverCustomizationService",
+        "description": [],
+        "path": "src/plugins/discover/public/customizations/customization_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverCustomizationService.set",
+            "type": "Function",
+            "tags": [],
+            "label": "set",
+            "description": [],
+            "signature": [
+              "(customization: ",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverCustomization",
+                "text": "DiscoverCustomization"
+              },
+              ") => void"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.DiscoverCustomizationService.set.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "customization",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "discover",
+                    "scope": "public",
+                    "docId": "kibDiscoverPluginApi",
+                    "section": "def-public.DiscoverCustomization",
+                    "text": "DiscoverCustomization"
+                  }
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverCustomizationService.get$",
+            "type": "Function",
+            "tags": [],
+            "label": "get$",
+            "description": [],
+            "signature": [
+              "<TCustomizationId extends \"search_bar\" | \"top_nav\" | \"unified_histogram\">(id: TCustomizationId) => ",
+              "Observable",
+              "<Extract<",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.SearchBarCustomization",
+                "text": "SearchBarCustomization"
+              },
+              ", { id: TCustomizationId; }> | Extract<",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.TopNavCustomization",
+                "text": "TopNavCustomization"
+              },
+              ", { id: TCustomizationId; }> | Extract<",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.UnifiedHistogramCustomization",
+                "text": "UnifiedHistogramCustomization"
+              },
+              ", { id: TCustomizationId; }> | undefined>"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.DiscoverCustomizationService.get$.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "TCustomizationId"
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverCustomizationService.enable",
+            "type": "Function",
+            "tags": [],
+            "label": "enable",
+            "description": [],
+            "signature": [
+              "(id: \"search_bar\" | \"top_nav\" | \"unified_histogram\") => void"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.DiscoverCustomizationService.enable.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"search_bar\" | \"top_nav\" | \"unified_histogram\""
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverCustomizationService.disable",
+            "type": "Function",
+            "tags": [],
+            "label": "disable",
+            "description": [],
+            "signature": [
+              "(id: \"search_bar\" | \"top_nav\" | \"unified_histogram\") => void"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.DiscoverCustomizationService.disable.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"search_bar\" | \"top_nav\" | \"unified_histogram\""
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.DiscoverProfileOptions",
         "type": "Interface",
         "tags": [],
@@ -387,6 +569,153 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.SearchBarCustomization",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchBarCustomization",
+        "description": [],
+        "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchBarCustomization.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"search_bar\""
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchBarCustomization.CustomDataViewPicker",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "CustomDataViewPicker",
+            "description": [],
+            "signature": [
+              "React.ComponentType<{}> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchBarCustomization.PrependFilterBar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "PrependFilterBar",
+            "description": [],
+            "signature": [
+              "React.ComponentType<{}> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchBarCustomization.CustomSearchBar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "CustomSearchBar",
+            "description": [],
+            "signature": [
+              "React.ComponentType<",
+              {
+                "pluginId": "navigation",
+                "scope": "public",
+                "docId": "kibNavigationPluginApi",
+                "section": "def-public.TopNavMenuProps",
+                "text": "TopNavMenuProps"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              ">> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.TopNavCustomization",
+        "type": "Interface",
+        "tags": [],
+        "label": "TopNavCustomization",
+        "description": [],
+        "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.TopNavCustomization.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"top_nav\""
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.TopNavCustomization.defaultMenu",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultMenu",
+            "description": [],
+            "signature": [
+              "TopNavDefaultMenu",
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.TopNavCustomization.getMenuItems",
+            "type": "Function",
+            "tags": [],
+            "label": "getMenuItems",
+            "description": [],
+            "signature": [
+              "(() => ",
+              "TopNavMenuItem",
+              "[]) | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -433,7 +762,7 @@
         "label": "DiscoverContainerProps",
         "description": [],
         "signature": [
-          "{ overrideServices: Partial<",
+          "{ isLoading?: boolean | undefined; overrideServices: Partial<",
           "DiscoverServices",
           ">; scopedHistory: ",
           {
@@ -443,7 +772,7 @@
             "section": "def-common.ScopedHistory",
             "text": "ScopedHistory"
           },
-          "<unknown>; customize: ",
+          "<unknown>; customizationCallbacks: ",
           {
             "pluginId": "discover",
             "scope": "public",
@@ -451,9 +780,46 @@
             "section": "def-public.CustomizationCallback",
             "text": "CustomizationCallback"
           },
-          "; }"
+          "[]; }"
         ],
         "path": "src/plugins/discover/public/components/discover_container/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.DiscoverCustomization",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverCustomization",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.SearchBarCustomization",
+            "text": "SearchBarCustomization"
+          },
+          " | ",
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.TopNavCustomization",
+            "text": "TopNavCustomization"
+          },
+          " | ",
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.UnifiedHistogramCustomization",
+            "text": "UnifiedHistogramCustomization"
+          }
+        ],
+        "path": "src/plugins/discover/public/customizations/customization_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -588,6 +954,29 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.UnifiedHistogramCustomization",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedHistogramCustomization",
+        "description": [],
+        "signature": [
+          "UnifiedHistogramCustomizationId & Pick<",
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramContainerProps",
+            "text": "UnifiedHistogramContainerProps"
+          },
+          ", \"onBrushEnd\" | \"disabledActions\" | \"onFilter\" | \"withDefaultActions\">"
+        ],
+        "path": "src/plugins/discover/public/customizations/customization_types/histogram_customization.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -602,24 +991,6 @@
       "deprecated": false,
       "trackAdoption": false,
       "children": [
-        {
-          "parentPluginId": "discover",
-          "id": "def-public.DiscoverSetup.docViews",
-          "type": "Object",
-          "tags": [],
-          "label": "docViews",
-          "description": [],
-          "signature": [
-            "{ addDocView(docViewRaw: ",
-            "DocViewInput",
-            " | ",
-            "DocViewInputFn",
-            "): void; }"
-          ],
-          "path": "src/plugins/discover/public/plugin.tsx",
-          "deprecated": false,
-          "trackAdoption": false
-        },
         {
           "parentPluginId": "discover",
           "id": "def-public.DiscoverSetup.locator",
