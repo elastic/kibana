@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export interface MissingPrivileges {
-  [key: string]: string[] | undefined;
-}
-
-export interface Privileges {
-  hasAllPrivileges: boolean;
-  missingPrivileges: MissingPrivileges;
-}
+export const toArray = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
