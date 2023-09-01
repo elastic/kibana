@@ -122,6 +122,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
               name="indexName"
               value={indexName}
               onChange={(e) => onNameChange(e.target.value)}
+              data-test-subj="createIndexNameFieldText"
             />
           </EuiFormRow>
         </EuiForm>
@@ -130,6 +131,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
         <EuiButtonEmpty
           onClick={closeModal}
           disabled={isSaving}
+          data-test-subj="createIndexCancelButton"
           data-telemetry-id="idxMgmt-indexList-createIndex-cancelButton"
         >
           <FormattedMessage
@@ -144,6 +146,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
           type="submit"
           onClick={onSave}
           form="createIndexModalForm"
+          data-test-subj="createIndexSaveButton"
           data-telemetry-id="idxMgmt-indexList-createIndex-saveButton"
         >
           <FormattedMessage id="xpack.idxMgmt.createIndex.modal.saveButton" defaultMessage="Save" />
