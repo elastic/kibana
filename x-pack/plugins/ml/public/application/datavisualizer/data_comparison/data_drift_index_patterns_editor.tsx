@@ -47,6 +47,23 @@ export const canAppendWildcard = (keyPressed: string) => {
   return true;
 };
 
+const noTimeFieldLabel = i18n.translate(
+  'xpack.ml.dataDrift.indexPatternsEditor.noTimeFieldOptionLabel',
+  {
+    defaultMessage: "--- I don't want to use the time filter ---",
+  }
+);
+
+const noTimeFieldOption = {
+  label: noTimeFieldLabel,
+  value: '',
+};
+
+const getDefaultIndexPattern = (referenceIndexPattern: string, productionIndexPattern: string) =>
+  referenceIndexPattern === productionIndexPattern
+    ? referenceIndexPattern
+    : `${referenceIndexPattern},${productionIndexPattern}`;
+
 export function DataDriftIndexPatternsEditor({
   initialReferenceIndexPattern,
   initialProductionIndexPattern,
@@ -94,6 +111,9 @@ export function DataDriftIndexPatternsEditor({
     [dataViewEditorServiceFactory, initialProductionIndexPattern]
   );
 
+  // For the purpose of data drift, the two datasets need to have the same common timestamp field if they exist
+  // In data view management, creating a data view provides union of all the timestamp fields
+  // Here, we need the intersection of two sets instead
   const combinedTimeFieldOptions$: Observable<Array<EuiComboBoxOptionOption<string>>> =
     useMemo(() => {
       return combineLatest([
@@ -101,7 +121,7 @@ export function DataDriftIndexPatternsEditor({
         productionDataViewEditorService.timestampFieldOptions$,
       ]).pipe(
         map(([referenceTimeFieldOptions, productionTimeFieldOptions]) => {
-          return intersectionBy<TimestampOption, TimestampOption>(
+          const intersectedTimeFields = intersectionBy<TimestampOption, TimestampOption>(
             referenceTimeFieldOptions,
             productionTimeFieldOptions,
             (d) => d.fieldName
@@ -109,6 +129,9 @@ export function DataDriftIndexPatternsEditor({
             label: display,
             value: fieldName,
           }));
+          return intersectedTimeFields.length > 0
+            ? [...intersectedTimeFields, noTimeFieldOption]
+            : intersectedTimeFields;
         })
       );
     }, [referenceDataViewEditorService, productionDataViewEditorService]);
@@ -130,12 +153,14 @@ export function DataDriftIndexPatternsEditor({
       setDataViewMsg(undefined);
       setFoundDataViewId(undefined);
       if (!unmounted && referenceIndexPattern && productionIndexPattern) {
-        const indicesName = `${referenceIndexPattern},${productionIndexPattern}`;
+        const indicesName = getDefaultIndexPattern(referenceIndexPattern, productionIndexPattern);
 
         const matchingDataViews = await dataViews.find(indicesName);
 
         const timeFieldName =
-          Array.isArray(timeField) && timeField.length > 0 ? timeField[0].value : undefined;
+          Array.isArray(timeField) && timeField.length > 0 && timeField[0].value !== ''
+            ? timeField[0].value
+            : undefined;
 
         if (Array.isArray(matchingDataViews) && matchingDataViews.length > 0) {
           const foundDataView = matchingDataViews.find((d) => {
@@ -167,7 +192,7 @@ export function DataDriftIndexPatternsEditor({
   }, [referenceIndexPattern, productionIndexPattern, timeField, dataViews]);
   const createDataViewAndRedirectToDataComparisonPage = async (createAdHocDV = false) => {
     // Create adhoc data view
-    const indicesName = `${referenceIndexPattern},${productionIndexPattern}`;
+    const indicesName = getDefaultIndexPattern(referenceIndexPattern, productionIndexPattern);
 
     const timeFieldName =
       Array.isArray(timeField) && timeField.length > 0 ? timeField[0].value : undefined;
@@ -296,11 +321,22 @@ export function DataDriftIndexPatternsEditor({
               label={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.dataViewName', {
                 defaultMessage: 'Data view name',
               })}
-              helpText={`Optional data view name. ${
-                referenceIndexPattern && productionIndexPattern
-                  ? `Default to '${referenceIndexPattern},${productionIndexPattern}' if not set.`
-                  : ''
-              }`}
+              helpText={
+                i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.dataViewHelpText', {
+                  defaultMessage: 'Optional data view name.',
+                }) +
+                (referenceIndexPattern && productionIndexPattern
+                  ? i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.dataViewHelpText', {
+                      defaultMessage: 'Default to {defaultDataViewName} if not set.',
+                      values: {
+                        defaultDataViewName: getDefaultIndexPattern(
+                          referenceIndexPattern,
+                          productionIndexPattern
+                        ),
+                      },
+                    })
+                  : '')
+              }
               fullWidth
             >
               <EuiFieldText
@@ -326,17 +362,17 @@ export function DataDriftIndexPatternsEditor({
                     disabled={!productionIndexPattern || !referenceIndexPattern}
                     onClick={createDataViewAndRedirectToDataComparisonPage.bind(null, true)}
                     iconType="visTagCloud"
-                    data-test-subj="compareDataButton"
+                    data-test-subj="analyzeDataDriftButton"
                     aria-label={i18n.translate(
-                      'xpack.ml.dataDrift.indexPatternsEditor.compareDataWithoutSavingLabel',
+                      'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftWithoutSavingLabel',
                       {
                         defaultMessage: 'Analyze data drift without saving',
                       }
                     )}
                   >
                     <FormattedMessage
-                      id="xpack.ml.dataDrift.indexPatternsEditor.compareDataWithoutSavingLabel"
-                      defaultMessage="Compare without saving"
+                      id="xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftWithoutSavingLabel"
+                      defaultMessage="Analyze data drift saving"
                     />
                   </EuiButton>
                 </EuiFlexItem>
@@ -348,17 +384,17 @@ export function DataDriftIndexPatternsEditor({
                   fill
                   onClick={createDataViewAndRedirectToDataComparisonPage.bind(null, false)}
                   iconType="visTagCloud"
-                  data-test-subj="compareDataButton"
+                  data-test-subj="analyzeDataDriftButton"
                   aria-label={i18n.translate(
-                    'xpack.ml.dataDrift.indexPatternsEditor.compareDataLabel',
+                    'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel',
                     {
-                      defaultMessage: 'Compare',
+                      defaultMessage: 'Analyze data drift',
                     }
                   )}
                 >
                   <FormattedMessage
-                    id="xpack.ml.dataDrift.indexPatternsEditor.compareDataLabel"
-                    defaultMessage="Compare"
+                    id="xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel"
+                    defaultMessage="Analyze data drift"
                   />
                 </EuiButton>
               </EuiFlexItem>

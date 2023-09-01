@@ -9,8 +9,11 @@ import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
 import React, { ChangeEvent, ReactNode, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiBasicTable,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexItem,
   EuiFormRow,
@@ -28,6 +31,13 @@ interface DataViewEditorProps {
   indexPattern: string;
   setIndexPattern: (ip: string) => void;
 }
+
+const mustMatchError = i18n.translate(
+  'xpack.ml.dataDrift.indexPatternsEditor.createIndex.noMatch',
+  {
+    defaultMessage: 'Name must match one or more data streams, indices, or index aliases.',
+  }
+);
 
 export function DataViewEditor({
   label,
@@ -48,7 +58,9 @@ export function DataViewEditor({
   );
 
   const matchedReferenceIndices =
-    indexPattern === '' ? matchedIndices.allIndices : matchedIndices.exactMatchedIndices;
+    indexPattern === '' || (indexPattern !== '' && matchedIndices.exactMatchedIndices.length === 0)
+      ? matchedIndices.allIndices
+      : matchedIndices.exactMatchedIndices;
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
 
   const [pageState, updatePageState] = useState({
@@ -87,8 +99,12 @@ export function DataViewEditor({
       return i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.error.noEmptyIndexPattern', {
         defaultMessage: 'Index pattern must not be empty.',
       });
+    if (indexPattern !== '' && matchedIndices.exactMatchedIndices.length === 0) {
+      return mustMatchError;
+    }
     return undefined;
-  }, [indexPattern]);
+  }, [indexPattern, matchedIndices.exactMatchedIndices.length]);
+
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -129,6 +145,29 @@ export function DataViewEditor({
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem css={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
+        {errorMessage === mustMatchError ? (
+          <EuiCallOut color="warning">
+            <FormattedMessage
+              id="xpack.ml.dataDrift.indexPatternsEditor.notMatchDetail"
+              defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases.
+         You can match {strongIndices}."
+              values={{
+                strongIndices: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.ml.dataDrift.indexPatternsEditor.allIndicesLabel"
+                      defaultMessage="{indicesLength, plural,
+                one {# source}
+                other {# sources}
+              }"
+                      values={{ indicesLength: matchedIndices.allIndices.length }}
+                    />
+                  </strong>
+                ),
+              }}
+            />
+          </EuiCallOut>
+        ) : null}
         <EuiBasicTable<MatchedItem>
           items={pageOfItems}
           columns={columns}
