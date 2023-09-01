@@ -12,6 +12,10 @@ if [[ "$SERVERLESS_ENVIRONMENT" == "search" ]]; then
     "x-pack/test_serverless/api_integration/test_suites/search/config.feature_flags.ts"
     "x-pack/test_serverless/functional/test_suites/search/config.ts"
   )
+elif [[ "$SERVERLESS_ENVIRONMENT" == "search.examples" ]]; then
+  SERVERLESS_CONFIGS=(
+    "x-pack/test_serverless/functional/test_suites/search/config.examples.ts"
+  )
 elif [[ "$SERVERLESS_ENVIRONMENT" == "observability" ]]; then
   SERVERLESS_CONFIGS=(
     "x-pack/test_serverless/api_integration/test_suites/observability/config.ts"
@@ -19,11 +23,19 @@ elif [[ "$SERVERLESS_ENVIRONMENT" == "observability" ]]; then
     "x-pack/test_serverless/functional/test_suites/observability/config.ts"
     "x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts"
   )
+elif [[ "$SERVERLESS_ENVIRONMENT" == "observability.examples" ]]; then
+  SERVERLESS_CONFIGS=(
+    "x-pack/test_serverless/functional/test_suites/observability/config.examples.ts"
+  )
 elif [[ "$SERVERLESS_ENVIRONMENT" == "security" ]]; then
   SERVERLESS_CONFIGS=(
     "x-pack/test_serverless/api_integration/test_suites/security/config.ts"
     "x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts"
     "x-pack/test_serverless/functional/test_suites/security/config.ts"
+  )
+elif [[ "$SERVERLESS_ENVIRONMENT" == "security.examples" ]]; then
+  SERVERLESS_CONFIGS=(
+    "x-pack/test_serverless/functional/test_suites/security/config.examples.ts"
   )
 fi
 

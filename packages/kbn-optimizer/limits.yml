@@ -28,7 +28,7 @@ pageLoadAssetSize:
   dashboard: 82025
   dashboardEnhanced: 65646
   data: 454087
-  dataViewEditor: 13000
+  dataViewEditor: 28082
   dataViewFieldEditor: 27000
   dataViewManagement: 5000
   dataViews: 47000
@@ -36,7 +36,6 @@ pageLoadAssetSize:
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
-  discoverLogExplorer: 39045
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
@@ -87,6 +86,7 @@ pageLoadAssetSize:
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
+  logExplorer: 39045
   logsShared: 281060
   logstash: 53548
   management: 46112
@@ -99,6 +99,7 @@ pageLoadAssetSize:
   noDataPage: 5000
   observability: 115443
   observabilityAIAssistant: 25000
+  observabilityLogExplorer: 23686
   observabilityOnboarding: 19573
   observabilityShared: 52256
   osquery: 107090
@@ -121,7 +122,7 @@ pageLoadAssetSize:
   security: 81771
   securitySolution: 66738
   securitySolutionEss: 16573
-  securitySolutionServerless: 40000
+  securitySolutionServerless: 45000
   serverless: 16573
   serverlessObservability: 68747
   serverlessSearch: 71995
@@ -141,6 +142,7 @@ pageLoadAssetSize:
   triggersActionsUi: 135613
   uiActions: 35121
   uiActionsEnhanced: 38494
+  unifiedDocViewer: 25099
   unifiedHistogram: 19928
   unifiedSearch: 71059
   upgradeAssistant: 81241
