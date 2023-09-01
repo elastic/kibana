@@ -21,7 +21,7 @@ export const AnalyticsNoDataPage = ({
   allowAdHocDataView,
 }: AnalyticsNoDataPageProps) => {
   const services = useServices();
-  const { kibanaGuideDocLink, customBranding } = services;
+  const { kibanaGuideDocLink, customBranding, prependBasePath, pageFlavor } = services;
   const { hasCustomBranding$ } = customBranding;
   const showPlainSpinner = useObservable(hasCustomBranding$) ?? false;
 
@@ -32,6 +32,8 @@ export const AnalyticsNoDataPage = ({
         allowAdHocDataView,
         kibanaGuideDocLink,
         showPlainSpinner,
+        prependBasePath,
+        pageFlavor,
       }}
     />
   );

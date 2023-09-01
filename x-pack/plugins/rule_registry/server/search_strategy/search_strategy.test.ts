@@ -8,15 +8,14 @@ import { of } from 'rxjs';
 import { merge } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ALERT_EVENTS_FIELDS } from '@kbn/alerts-as-data-utils';
 import { ruleRegistrySearchStrategyProvider, EMPTY_RESPONSE } from './search_strategy';
-import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { RuleRegistrySearchRequest } from '../../common/search_strategy';
-import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import * as getAuthzFilterImport from '../lib/get_authz_filter';
 import { getIsKibanaRequest } from '../lib/get_is_kibana_request';
 
@@ -50,12 +49,12 @@ const getBasicResponse = (overwrites = {}) => {
 
 describe('ruleRegistrySearchStrategyProvider()', () => {
   const data = dataPluginMock.createStartContract();
-  const ruleDataService = ruleDataServiceMock.create();
   const alerting = alertsMock.createStart();
   const security = securityMock.createSetup();
   const spaces = spacesMock.createStart();
   const logger = loggerMock.create();
-
+  const getAuthorizedRuleTypesMock = jest.fn();
+  const getAlertIndicesAliasMock = jest.fn();
   const response = getBasicResponse({
     rawResponse: {
       hits: {
@@ -74,11 +73,13 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   const searchStrategySearch = jest.fn().mockImplementation(() => of(response));
 
   beforeEach(() => {
-    ruleDataService.findIndexByFeature.mockImplementation(() => {
-      return {
-        baseName: 'test',
-      } as IndexInfo;
-    });
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['test']);
+    const authorizationMock = {
+      getAuthorizedRuleTypes: getAuthorizedRuleTypesMock,
+    } as never;
+    alerting.getAlertingAuthorizationWithRequest.mockResolvedValue(authorizationMock);
+    alerting.getAlertIndicesAlias = getAlertIndicesAliasMock;
 
     data.search.getSearchStrategy.mockImplementation(() => {
       return {
@@ -102,7 +103,8 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   });
 
   afterEach(() => {
-    ruleDataService.findIndexByFeature.mockClear();
+    getAuthorizedRuleTypesMock.mockClear();
+    getAlertIndicesAliasMock.mockClear();
     data.search.getSearchStrategy.mockClear();
     (data.search.searchAsInternalUser.search as jest.Mock).mockClear();
     getAuthzFilterSpy.mockClear();
@@ -110,6 +112,8 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   });
 
   it('should handle a basic search request', async () => {
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['observability-logs']);
     const request: RuleRegistrySearchRequest = {
       featureIds: [AlertConsumers.LOGS],
     };
@@ -118,68 +122,13 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       request: {},
     };
 
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
     const result = await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
-    expect(result).toBe(response);
-  });
 
-  it('should use the active space in siem queries', async () => {
-    const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.SIEM],
-    };
-    const options = {};
-    const deps = {
-      request: {},
-    };
-
-    spaces.spacesService.getActiveSpace.mockImplementation(async () => {
-      return {
-        id: 'testSpace',
-        name: 'Test Space',
-        disabledFeatures: [],
-      };
-    });
-
-    ruleDataService.findIndexByFeature.mockImplementation(() => {
-      return {
-        baseName: 'myTestIndex',
-      } as unknown as IndexInfo;
-    });
-
-    let searchRequest: RuleRegistrySearchRequest = {} as unknown as RuleRegistrySearchRequest;
-    data.search.getSearchStrategy.mockImplementation(() => {
-      return {
-        search: (_request) => {
-          searchRequest = _request as unknown as RuleRegistrySearchRequest;
-          return of(response);
-        },
-      };
-    });
-
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
-
-    await strategy
-      .search(request, options, deps as unknown as SearchStrategyDependencies)
-      .toPromise();
-    spaces.spacesService.getActiveSpace.mockClear();
-    expect(searchRequest?.params?.index).toStrictEqual(['myTestIndex-testSpace*']);
+    expect(result).toEqual(response);
   });
 
   it('should return an empty response if no valid indices are found', async () => {
@@ -191,18 +140,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       request: {},
     };
 
-    ruleDataService.findIndexByFeature.mockImplementationOnce(() => {
-      return null;
-    });
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue([]);
 
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
     const result = await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
@@ -219,14 +160,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       request: {},
     };
 
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
@@ -243,14 +180,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       request: {},
     };
 
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem', 'o11y-logs']);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
     let err;
     try {
@@ -271,15 +204,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     const deps = {
       request: {},
     };
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['o11y-logs']);
 
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
@@ -297,14 +225,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       request: {},
     };
 
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
@@ -325,15 +249,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     const deps = {
       request: {},
     };
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['o11y-logs']);
 
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
@@ -362,15 +281,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     const deps = {
       request: {},
     };
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['o11y-logs']);
 
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
@@ -392,31 +306,39 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     const deps = {
       request: {},
     };
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
 
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
-    expect(searchStrategySearch).toHaveBeenCalledWith(
-      {
-        params: {
+    const arg0 = searchStrategySearch.mock.calls[0][0];
+    expect(arg0.params.body.fields.length).toEqual(
+      // +2 because of fields.push({ field: 'kibana.alert.*', include_unmapped: false }); and
+      // fields.push({ field: 'signal.*', include_unmapped: false });
+      ALERT_EVENTS_FIELDS.length + 2
+    );
+    expect.arrayContaining([
+      expect.objectContaining({
+        x: 2,
+        y: 3,
+      }),
+    ]);
+    expect(arg0).toEqual(
+      expect.objectContaining({
+        id: undefined,
+        params: expect.objectContaining({
           allow_no_indices: true,
-          body: {
+          body: expect.objectContaining({
             _source: false,
-            fields: [
-              {
-                field: '*',
+            fields: expect.arrayContaining([
+              expect.objectContaining({
+                field: '@timestamp',
                 include_unmapped: true,
-              },
-            ],
+              }),
+            ]),
             from: 0,
             query: {
               ids: {
@@ -425,13 +347,11 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
             },
             size: 1000,
             sort: [],
-          },
+          }),
           ignore_unavailable: true,
-          index: ['test-testSpace*'],
-        },
-      },
-      {},
-      { request: {} }
+          index: ['security-siem'],
+        }),
+      })
     );
   });
 
@@ -441,32 +361,40 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       query: {
         ids: { values: ['test-id'] },
       },
-      fields: [{ field: '@timestamp', include_unmapped: true }],
+      fields: [{ field: 'my-super-field', include_unmapped: true }],
     };
     const options = {};
     const deps = {
       request: {},
     };
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
 
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
     await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
-    expect(searchStrategySearch).toHaveBeenCalledWith(
-      {
-        params: {
+
+    const arg0 = searchStrategySearch.mock.calls[0][0];
+    expect(arg0.params.body.fields.length).toEqual(
+      // +2 because of fields.push({ field: 'kibana.alert.*', include_unmapped: false }); and
+      // fields.push({ field: 'signal.*', include_unmapped: false }); + my-super-field
+      ALERT_EVENTS_FIELDS.length + 3
+    );
+    expect(arg0).toEqual(
+      expect.objectContaining({
+        id: undefined,
+        params: expect.objectContaining({
           allow_no_indices: true,
-          body: {
+          body: expect.objectContaining({
             _source: false,
-            fields: [{ field: '@timestamp', include_unmapped: true }],
+            fields: expect.arrayContaining([
+              expect.objectContaining({
+                field: 'my-super-field',
+                include_unmapped: true,
+              }),
+            ]),
             from: 0,
             query: {
               ids: {
@@ -475,13 +403,11 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
             },
             size: 1000,
             sort: [],
-          },
+          }),
           ignore_unavailable: true,
-          index: ['test-testSpace*'],
-        },
-      },
-      {},
-      { request: {} }
+          index: ['security-siem'],
+        }),
+      })
     );
   });
 });

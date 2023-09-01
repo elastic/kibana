@@ -73,6 +73,11 @@ class BrowserService extends FtrService {
     return await this.driver.manage().window().getRect();
   }
 
+  public async getWindowInnerSize(): Promise<{ height: number; width: number }> {
+    const JS_GET_INNER_WIDTH = 'return { width: window.innerWidth, height: window.innerHeight };';
+    return await this.driver.executeScript(JS_GET_INNER_WIDTH);
+  }
+
   /**
    * Sets the dimensions of a window.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Window.html
@@ -658,6 +663,12 @@ class BrowserService extends FtrService {
           // https://developer.mozilla.org/en-US/docs/Web/WebDriver/Errors/InvalidSessionID
           this.log.error(
             `WebDriver session is no longer valid.\nProbably Chrome process crashed when it tried to use more memory than what was available.`
+          );
+          // TODO: Remove this after a while. We are enabling richer logs in order to try catch the real error cause.
+          this.log.error(
+            `Original Error Logging.\n Name: ${err.name};\n Message: ${err.message};\n Stack: ${
+              err.stack
+            }\n RemoteStack: ${(err as NoSuchSessionError).remoteStacktrace}`
           );
         }
         return false;

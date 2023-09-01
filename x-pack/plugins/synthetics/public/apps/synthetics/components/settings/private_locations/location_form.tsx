@@ -29,7 +29,7 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
   const { control, register, watch } = useFormContext<PrivateLocation>();
   const { errors } = useFormState();
   const selectedPolicyId = watch('agentPolicyId');
-  const selectedPolicy = data?.items.find((item) => item.id === selectedPolicyId);
+  const selectedPolicy = data?.find((item) => item.id === selectedPolicyId);
 
   const tagsList = privateLocations.reduce((acc, item) => {
     const tags = item.tags || [];
@@ -38,7 +38,7 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
 
   return (
     <>
-      {data?.items.length === 0 && <AgentPolicyNeeded />}
+      {data?.length === 0 && <AgentPolicyNeeded />}
       <EuiForm component="form" noValidate>
         <EuiFormRow
           fullWidth

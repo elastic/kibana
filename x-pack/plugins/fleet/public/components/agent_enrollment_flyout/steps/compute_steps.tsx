@@ -37,6 +37,7 @@ import {
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
   InstallCloudFormationManagedAgentStep,
+  InstallGoogleCloudShellManagedAgentStep,
   IncomingDataConfirmationStep,
 } from '.';
 
@@ -255,6 +256,15 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           cloudSecurityIntegration,
         })
       );
+    } else if (cloudSecurityIntegration?.cloudShellUrl) {
+      steps.push(
+        InstallGoogleCloudShellManagedAgentStep({
+          apiKeyData,
+          selectedApiKeyId,
+          cloudShellUrl: cloudSecurityIntegration.cloudShellUrl,
+          cloudShellCommand: installManagedCommands.googleCloudShell,
+        })
+      );
     } else {
       steps.push(
         InstallManagedAgentStep({
@@ -263,6 +273,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           isK8s,
           cloudSecurityIntegration,
+          fleetServerHost: fleetServerHosts?.[0],
           enrollToken,
         })
       );
@@ -300,16 +311,17 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     setSelectedPolicyId,
     refreshAgentPolicies,
     selectionType,
-    isK8s,
     cloudSecurityIntegration,
-    installManagedCommands,
     apiKeyData,
-    enrolledAgentIds,
     mode,
     setMode,
     enrollToken,
+    installManagedCommands,
+    isK8s,
+    fleetServerHosts,
     onClickViewAgents,
     link,
+    enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
   ]);

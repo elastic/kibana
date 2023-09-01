@@ -20,26 +20,48 @@ export function registerRecallFunction({
     {
       name: 'recall',
       contexts: ['core'],
-      description:
-        'Use this function to recall earlier learnings. Anything you will summarise can be retrieved again later via this function.',
+      description: `Use this function to recall earlier learnings. Anything you will summarise can be retrieved again later via this function. This is semantic/vector search so there's no need for an exact match.
+      
+      Make sure the query covers the following aspects:
+      - The user's prompt, verbatim
+      - Anything you've inferred from the user's request, but is not mentioned in the user's request
+      - The functions you think might be suitable for answering the user's request. If there are multiple functions that seem suitable, create multiple queries. Use the function name in the query.  
+      
+      Q: "can you visualise the average request duration for opbeans-go over the last 7 days?"
+      A: -"can you visualise the average request duration for opbeans-go over the last 7 days?"
+      - "APM service"
+      - "lens function usage"
+      - "get_apm_timeseries function usage"
+      
+      Q: "what alerts are active?"
+      A: - "what alerts are active?"
+      - "alerts function usage"
+      
+      `,
       descriptionForUser: 'This function allows the assistant to recall previous learnings.',
       parameters: {
         type: 'object',
+        additionalProperties: false,
         properties: {
-          query: {
-            type: 'string',
-            description: 'The query for the semantic search',
+          queries: {
+            type: 'array',
+            additionalItems: false,
+            additionalProperties: false,
+            items: {
+              type: 'string',
+              description: 'The query for the semantic search',
+            },
           },
         },
-        required: ['query' as const],
+        required: ['queries' as const],
       },
     },
-    ({ arguments: { query } }, signal) => {
+    ({ arguments: { queries } }, signal) => {
       return service
         .callApi('POST /internal/observability_ai_assistant/functions/recall', {
           params: {
             body: {
-              query,
+              queries,
             },
           },
           signal,

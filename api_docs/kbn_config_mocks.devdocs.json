@@ -344,7 +344,15 @@
             "section": "def-common.ChangedDeprecatedPaths",
             "text": "ChangedDeprecatedPaths"
           },
-          ">, [], unknown>; } & ",
+          ">, [], unknown>; addDynamicConfigPaths: jest.MockInstance<void, [configPath: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigPath",
+            "text": "ConfigPath"
+          },
+          ", dynamicConfigPaths: string[]], unknown>; setDynamicConfigOverrides: jest.MockInstance<void, [newOverrides: Record<string, unknown>], unknown>; } & ",
           "IConfigService"
         ],
         "path": "packages/kbn-config-mocks/src/config_service.mock.ts",

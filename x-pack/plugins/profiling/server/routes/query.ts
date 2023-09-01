@@ -7,7 +7,7 @@
 
 import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import { ProfilingESField } from '../../common/elasticsearch';
+import { ProfilingESField } from '@kbn/profiling-data-access-plugin/common/elasticsearch';
 
 export interface ProjectTimeQuery {
   bool: QueryDslBoolQuery;

@@ -6,6 +6,7 @@
  */
 
 import type { Plugin, CoreSetup } from '@kbn/core/server';
+import { getProductAppFeaturesConfigurator } from './app_features';
 import { DEFAULT_APP_FEATURES } from './constants';
 
 import type {
@@ -25,7 +26,8 @@ export class SecuritySolutionEssPlugin
     >
 {
   public setup(_coreSetup: CoreSetup, pluginsSetup: SecuritySolutionEssPluginSetupDeps) {
-    pluginsSetup.securitySolution.setAppFeatures(DEFAULT_APP_FEATURES);
+    const appFeaturesConfigurator = getProductAppFeaturesConfigurator(DEFAULT_APP_FEATURES);
+    pluginsSetup.securitySolution.setAppFeaturesConfigurator(appFeaturesConfigurator);
     return {};
   }
 

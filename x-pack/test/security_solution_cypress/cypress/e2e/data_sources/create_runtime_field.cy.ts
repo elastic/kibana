@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
@@ -27,33 +25,37 @@ import { GET_TIMELINE_HEADER } from '../../screens/timeline';
 const alertRunTimeField = 'field.name.alert.page';
 const timelineRuntimeField = 'field.name.timeline';
 
-describe('Create DataView runtime field', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  before(() => {
-    deleteRuntimeField('security-solution-default', alertRunTimeField);
-    deleteRuntimeField('security-solution-default', timelineRuntimeField);
-  });
+describe(
+  'Create DataView runtime field',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
+    before(() => {
+      deleteRuntimeField('security-solution-default', alertRunTimeField);
+      deleteRuntimeField('security-solution-default', timelineRuntimeField);
+    });
 
-  beforeEach(() => {
-    login();
-  });
+    beforeEach(() => {
+      login();
+    });
 
-  it('adds field to alert table', () => {
-    visit(ALERTS_URL);
-    createRule(getNewRule());
-    refreshPage();
-    waitForAlertsToPopulate();
-    openAlertsFieldBrowser();
-    createField(alertRunTimeField);
-    cy.get(GET_DATA_GRID_HEADER(alertRunTimeField)).should('exist');
-  });
+    it('adds field to alert table', () => {
+      visit(ALERTS_URL);
+      createRule(getNewRule());
+      refreshPage();
+      waitForAlertsToPopulate();
+      openAlertsFieldBrowser();
+      createField(alertRunTimeField);
+      cy.get(GET_DATA_GRID_HEADER(alertRunTimeField)).should('exist');
+    });
 
-  it('adds field to timeline', () => {
-    visit(HOSTS_URL);
-    openTimelineUsingToggle();
-    populateTimeline();
-    openTimelineFieldsBrowser();
+    it('adds field to timeline', () => {
+      visit(HOSTS_URL);
+      openTimelineUsingToggle();
+      populateTimeline();
+      openTimelineFieldsBrowser();
 
-    createField(timelineRuntimeField);
-    cy.get(GET_TIMELINE_HEADER(timelineRuntimeField)).should('exist');
-  });
-});
+      createField(timelineRuntimeField);
+      cy.get(GET_TIMELINE_HEADER(timelineRuntimeField)).should('exist');
+    });
+  }
+);

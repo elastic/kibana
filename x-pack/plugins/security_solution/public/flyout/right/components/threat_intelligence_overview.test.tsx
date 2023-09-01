@@ -16,15 +16,33 @@ import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligen
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 import {
   INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_LOADING_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TITLE_ICON_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEXT_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TOGGLE_ICON_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
 } from './test_ids';
+import {
+  EXPANDABLE_PANEL_CONTENT_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
+  EXPANDABLE_PANEL_LOADING_TEST_ID,
+  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
+} from '../../shared/components/test_ids';
 
 jest.mock('../hooks/use_fetch_threat_intelligence');
+
+const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
+);
+const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
+);
+const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
+);
+const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
+);
+const CONTENT_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(INSIGHTS_THREAT_INTELLIGENCE_TEST_ID);
+const LOADING_TEST_ID = EXPANDABLE_PANEL_LOADING_TEST_ID(INSIGHTS_THREAT_INTELLIGENCE_TEST_ID);
 
 const panelContextValue = {
   eventId: 'event id',
@@ -50,10 +68,10 @@ describe('<ThreatIntelligenceOverview />', () => {
       renderThreatIntelligenceOverview(panelContextValue)
     );
 
-    expect(queryByTestId(INSIGHTS_THREAT_INTELLIGENCE_TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_ICON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render 1 match detected and 1 field enriched', () => {
@@ -65,13 +83,9 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID)).toHaveTextContent(
-      'Threat Intelligence'
-    );
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
-      '1 threat match detected'
-    );
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Threat intelligence');
+    expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent('1 threat match detected');
+    expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent(
       '1 field enriched with threat intelligence'
     );
   });
@@ -85,13 +99,9 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID)).toHaveTextContent(
-      'Threat Intelligence'
-    );
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
-      '2 threat matches detected'
-    );
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Threat intelligence');
+    expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent('2 threat matches detected');
+    expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent(
       '2 fields enriched with threat intelligence'
     );
   });
@@ -105,7 +115,7 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent(
       '0 field enriched with threat intelligence'
     );
   });
@@ -119,9 +129,7 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
-      '0 threat match detected'
-    );
+    expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent('0 threat match detected');
   });
 
   it('should render loading', () => {
@@ -131,7 +139,7 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     const { getAllByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getAllByTestId(INSIGHTS_THREAT_INTELLIGENCE_LOADING_TEST_ID)).toHaveLength(2);
+    expect(getAllByTestId(LOADING_TEST_ID)).toHaveLength(2);
   });
 
   it('should render null when eventId is null', () => {
@@ -183,7 +191,7 @@ describe('<ThreatIntelligenceOverview />', () => {
       </TestProviders>
     );
 
-    getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID).click();
+    getByTestId(TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
       path: { tab: LeftPanelInsightsTab, subTab: THREAT_INTELLIGENCE_TAB_ID },

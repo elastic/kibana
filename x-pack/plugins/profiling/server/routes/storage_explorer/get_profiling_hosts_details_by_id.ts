@@ -6,7 +6,7 @@
  */
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
-import { ProfilingESField } from '../../../common/elasticsearch';
+import { ProfilingESField } from '@kbn/profiling-data-access-plugin/common/elasticsearch';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
 interface HostDetails {
