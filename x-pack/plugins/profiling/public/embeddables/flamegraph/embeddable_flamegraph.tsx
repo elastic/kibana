@@ -24,16 +24,7 @@ export class EmbeddableFlamegraph extends Embeddable<
     const { data, isLoading } = this.input;
     render(
       <AsyncEmbeddableComponent isLoading={isLoading}>
-        <>
-          {data && (
-            <FlameGraph
-              primaryFlamegraph={data}
-              showInformationWindow={false}
-              id="embddable_profiling"
-              toggleShowInformationWindow={() => {}}
-            />
-          )}
-        </>
+        <>{data && <FlameGraph primaryFlamegraph={data} id="embddable_profiling" isEmbedded />}</>
       </AsyncEmbeddableComponent>,
       domNode
     );

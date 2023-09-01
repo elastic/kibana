@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
 import { NormalizationMode, NormalizationOptions } from '../../../components/normalization_menu';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
-import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
+import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { DifferentialFlameGraphSearchPanel } from './differential_flame_graph_search_panel';
@@ -36,7 +36,6 @@ export function DifferentialFlameGraphsView() {
   } = useProfilingParams('/flamegraphs/differential');
   const routePath = useProfilingRoutePath();
   const profilingRouter = useProfilingRouter();
-  const [showInformationWindow, setShowInformationWindow] = useState(false);
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
@@ -105,10 +104,6 @@ export function DifferentialFlameGraphsView() {
 
   const isNormalizedByTime = normalizationMode === NormalizationMode.Time;
 
-  function toggleShowInformationWindow() {
-    setShowInformationWindow((prev) => !prev);
-  }
-
   function handleSearchTextChange(newSearchText: string) {
     // @ts-expect-error Code gets too complicated to satisfy TS constraints
     profilingRouter.push(routePath, { query: { ...query, searchText: newSearchText } });
@@ -134,8 +129,6 @@ export function DifferentialFlameGraphsView() {
             comparisonMode={comparisonMode}
             baseline={isNormalizedByTime ? baselineTime : baseline}
             comparison={isNormalizedByTime ? comparisonTime : comparison}
-            showInformationWindow={showInformationWindow}
-            toggleShowInformationWindow={toggleShowInformationWindow}
             searchText={searchText}
             onChangeSearchText={handleSearchTextChange}
           />

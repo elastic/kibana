@@ -121,6 +121,7 @@ export function UnifiedSearchBar({
   placeholder,
   value,
   showDatePicker = true,
+  showQueryInput = true,
   showSubmitButton = true,
   isClearable = true,
   boolFilter,
@@ -128,6 +129,7 @@ export function UnifiedSearchBar({
   placeholder?: string;
   value?: string;
   showDatePicker?: boolean;
+  showQueryInput?: boolean;
   showSubmitButton?: boolean;
   isClearable?: boolean;
   boolFilter?: QueryDslQueryContainer[];
@@ -290,7 +292,7 @@ export function UnifiedSearchBar({
       placeholder={searchbarPlaceholder}
       useDefaultBehaviors={true}
       indexPatterns={dataView ? [dataView] : undefined}
-      showQueryInput={true}
+      showQueryInput={showQueryInput}
       showQueryMenu={false}
       showFilterBar={false}
       showDatePicker={showDatePicker}
