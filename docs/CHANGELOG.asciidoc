@@ -174,6 +174,7 @@ Machine Learning::
 * Adds map view for models in Trained Models and expands support for models in Analytics map ({kibana-pull}162443[#162443]).
 * Adds new Data comparison view ({kibana-pull}161365[#161365]).
 Management::
+* Added ability to create a remote cluster with the API key based security model ({kibana-pull}161836[#161836]).
 * REST endpoint for swapping saved object references ({kibana-pull}157665[#157665]).
 Maps::
 * Maps tracks layer now uses group by time series logic ({kibana-pull}159267[#159267]).
@@ -202,8 +203,6 @@ APM::
 * Move to new plugin, update design and use connectors ({kibana-pull}162243[#162243]).
 * Adding endpoint to upload android map files ({kibana-pull}161252[#161252]).
 * Navigate from the transaction details view into the Profiling ({kibana-pull}159686[#159686]).
-Cases::
-* Hide cases in stack management UI ({kibana-pull}163037[#163037]).
 Dashboard::
 * Change badge color in options list ({kibana-pull}161401[#161401]).
 * Edit title, description, and tags from dashboard listing page ({kibana-pull}161399[#161399]).
@@ -268,7 +267,6 @@ Dashboard::
 Discover::
 * Fixes document failing to load when the ID contains a slash ({kibana-pull}160239[#160239]).
 * Fixes NoData screen in alignment with Dashboard and Lends behavior ({kibana-pull}160747[#160747]).
-* Fixes override parameter for create ({kibana-pull}160953[#160953]).
 Elastic Security::
 For the Elastic Security 8.10.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Enterprise Search::
@@ -284,6 +282,7 @@ Lens & Visualizations::
 * Fixes editing of multi values filters when adding a custom item ({kibana-pull}161940[#161940]).
 * Allow setting custom colors to be collapsed by slices pie's multiple metrics in *Lens* ({kibana-pull}160592[#160592]).
 * Fixes data table sorting for keyword values in *Lens* ({kibana-pull}160163[#160163]).
+* Fixes override parameter when creating data views ({kibana-pull}160953[#160953]).
 Logs::
 * Amend lazy imports in logs_shared plugin ({kibana-pull}164102[#164102]).
 Machine Learning::
@@ -295,8 +294,8 @@ Machine Learning::
 * AIOps: Uses Kibana's http service instead of fetch and fixes throttling ({kibana-pull}162335[#162335]).
 * Uses model supplied mask token for testing trained models ({kibana-pull}162168[#162168]).
 Management::
-* Fixes a problem in a way to process bulk request body with variables ({kibana-pull}162745[#162745]).
-* Improves a way of variable substitution and its documentation ({kibana-pull}162382[#162382]).
+* Fixes how a bulk request body with variables are processed in Console ({kibana-pull}162745[#162745]).
+* Improves a way of variable substitution and its documentation in Console ({kibana-pull}162382[#162382]).
 * Transforms: Reduces rerenders and multiple fetches of source index on transform wizard load ({kibana-pull}160979[#160979]).
 Maps::
 * Fixes Map layer preview blocks adding layer until all tiles are loaded ({kibana-pull}161994[#161994]).
