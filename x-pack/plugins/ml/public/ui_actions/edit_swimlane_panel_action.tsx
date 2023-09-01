@@ -14,7 +14,8 @@ import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, EditSwimlanePanelContext } from '../e
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
 export function createEditSwimlanePanelAction(
-  getStartServices: MlCoreSetup['getStartServices']
+  getStartServices: MlCoreSetup['getStartServices'],
+  isServerless: boolean
 ): UiActionsActionDefinition<EditSwimlanePanelContext> {
   return {
     id: 'edit-anomaly-swimlane',
@@ -38,7 +39,11 @@ export function createEditSwimlanePanelAction(
           '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
         );
 
-        const result = await resolveAnomalySwimlaneUserInput(coreStart, embeddable.getInput());
+        const result = await resolveAnomalySwimlaneUserInput(
+          coreStart,
+          isServerless,
+          embeddable.getInput()
+        );
         embeddable.updateInput(result);
       } catch (e) {
         return Promise.reject();

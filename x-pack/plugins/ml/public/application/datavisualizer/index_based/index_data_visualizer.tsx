@@ -15,14 +15,13 @@ import type {
   GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator, useIsServerless } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
-import { useIsServerless } from '../../capabilities/serverless';
 
 export const IndexDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });

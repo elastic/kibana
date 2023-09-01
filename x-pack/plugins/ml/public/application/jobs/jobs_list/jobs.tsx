@@ -40,7 +40,10 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
     getDefaultAnomalyDetectionJobsListState()
   );
   const {
-    services: { docLinks },
+    services: {
+      docLinks,
+      mlServices: { isServerless },
+    },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.anomalyDetection;
   return (
@@ -56,6 +59,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
         lastRefresh={lastRefresh}
         jobsViewState={pageState}
         onJobsViewStateUpdate={setPageState}
+        isServerless={isServerless}
       />
       <HelpMenu docLink={helpLink} />
     </>

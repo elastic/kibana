@@ -30,8 +30,6 @@ import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import type { PageDependencies } from './routing/router';
-import { isServerless } from './capabilities/serverless';
-import { type MlCapabilities } from '../shared';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -43,6 +41,7 @@ interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
   appMountParams: AppMountParameters;
+  isServerless: boolean;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -50,7 +49,11 @@ const localStorage = new Storage(window.localStorage);
 /**
  * Provides global services available across the entire ML app.
  */
-export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: UsageCollectionSetup) {
+export function getMlGlobalServices(
+  httpStart: HttpStart,
+  isServerless: boolean,
+  usageCollection?: UsageCollectionSetup
+) {
   const httpService = new HttpService(httpStart);
   const mlApiServices = mlApiServicesProvider(httpService);
 
@@ -60,6 +63,7 @@ export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: Usag
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
     mlCapabilities: new MlCapabilitiesService(mlApiServices),
     mlLicense: new MlLicense(),
+    isServerless,
   };
 }
 
@@ -69,7 +73,7 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
+const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
@@ -101,9 +105,9 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
       contentManagement: deps.contentManagement,
       presentationUtil: deps.presentationUtil,
       ...coreStart,
-      mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+      mlServices: getMlGlobalServices(coreStart.http, isServerless, deps.usageCollection),
     };
-  }, [deps, coreStart]);
+  }, [deps, coreStart, isServerless]);
 
   useLifecycles(
     function setupLicenseOnMount() {
@@ -127,7 +131,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
-    isServerless: isServerless(coreStart.application.capabilities.ml as MlCapabilities),
+    isServerless,
   };
 
   const I18nContext = coreStart.i18n.Context;
@@ -154,7 +158,8 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 export const renderApp = (
   coreStart: CoreStart,
   deps: MlDependencies,
-  appMountParams: AppMountParameters
+  appMountParams: AppMountParameters,
+  isServerless: boolean
 ) => {
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
@@ -183,7 +188,12 @@ export const renderApp = (
   appMountParams.onAppLeave((actions) => actions.default());
 
   ReactDOM.render(
-    <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
+    <App
+      coreStart={coreStart}
+      deps={deps}
+      appMountParams={appMountParams}
+      isServerless={isServerless}
+    />,
     appMountParams.element
   );
 

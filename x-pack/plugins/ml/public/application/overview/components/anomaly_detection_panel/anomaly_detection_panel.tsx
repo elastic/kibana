@@ -19,7 +19,7 @@ import {
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
 import { CollapsiblePanel } from '../../../components/collapsible_panel';
-import { useMlKibana, useMlLink } from '../../../contexts/kibana';
+import { useMlKibana, useMlLink, useIsServerless } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
@@ -31,7 +31,6 @@ import { AnomalyTimelineService } from '../../../services/anomaly_timeline_servi
 import type { OverallSwimlaneData } from '../../../explorer/explorer_utils';
 import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import { overviewPanelDefaultState } from '../../overview_page';
-import { useIsServerless } from '../../../capabilities/serverless';
 
 export type GroupsDictionary = Dictionary<Group>;
 

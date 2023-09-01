@@ -103,8 +103,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   private locator: undefined | MlLocator;
+  private isServerless: boolean = false;
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor(private initializerContext: PluginInitializerContext) {
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+  }
 
   setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
     core.application.register({
@@ -148,7 +151,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             contentManagement: pluginsStart.contentManagement,
             presentationUtil: pluginsStart.presentationUtil,
           },
-          params
+          params,
+          this.isServerless
         );
       },
     });
@@ -158,9 +162,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     }
 
     if (pluginsSetup.management) {
-      registerManagementSection(pluginsSetup.management, core, {
-        usageCollection: pluginsSetup.usageCollection,
-      }).enable();
+      registerManagementSection(
+        pluginsSetup.management,
+        core,
+        {
+          usageCollection: pluginsSetup.usageCollection,
+        },
+        this.isServerless
+      ).enable();
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -190,10 +199,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities);
 
         if (fullLicense) {
-          registerMlUiActions(pluginsSetup.uiActions, core);
+          registerMlUiActions(pluginsSetup.uiActions, core, this.isServerless);
 
           if (mlCapabilities.isADEnabled) {
-            registerEmbeddables(pluginsSetup.embeddable, core);
+            registerEmbeddables(pluginsSetup.embeddable, core, this.isServerless);
 
             if (pluginsSetup.cases) {
               registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);

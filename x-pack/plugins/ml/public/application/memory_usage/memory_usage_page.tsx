@@ -13,7 +13,7 @@ import { NodesList } from './nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { MemoryPage, JobMemoryTreeMap } from './memory_tree_map';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
-import { useIsServerless } from '../capabilities/serverless';
+import { useIsServerless } from '../contexts/kibana';
 
 enum TAB {
   NODES,

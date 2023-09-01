@@ -25,7 +25,7 @@ import { JobMessage } from '../../../../common/types/audit_message';
 import { blurButtonOnClick } from '../../util/component_utils';
 
 import { JobIcon } from '../job_message_icon';
-import { useIsServerless } from '../../capabilities/serverless';
+import { useIsServerless } from '../../contexts/kibana';
 
 interface JobMessagesProps {
   messages: JobMessage[];

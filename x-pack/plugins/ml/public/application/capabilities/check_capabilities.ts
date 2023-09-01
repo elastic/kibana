@@ -23,12 +23,12 @@ import { hasLicenseExpired } from '../license';
 
 import {
   getDefaultCapabilities,
-  MlCapabilities,
-  MlCapabilitiesKey,
+  type MlCapabilities,
+  type MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
-import { type MlApiServices } from '../services/ml_api_service';
-import { getMlGlobalServices } from '../app';
+import type { MlApiServices } from '../services/ml_api_service';
+import type { MlGlobalServices } from '../app';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 
@@ -137,9 +137,7 @@ export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesK
   }, [capabilities]);
 }
 
-export function checkGetManagementMlJobsResolver({
-  mlCapabilities,
-}: ReturnType<typeof getMlGlobalServices>) {
+export function checkGetManagementMlJobsResolver({ mlCapabilities }: MlGlobalServices) {
   return new Promise<void>(async (resolve, reject) => {
     try {
       firstValueFrom(mlCapabilities.getCapabilities$().pipe(filter((c) => !!c)))

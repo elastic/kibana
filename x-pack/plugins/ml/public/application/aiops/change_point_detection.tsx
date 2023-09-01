@@ -15,12 +15,11 @@ import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '../components/field_stats_flyout';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana, useIsServerless } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
 import { MlPageHeader } from '../components/page_header';
-import { useIsServerless } from '../capabilities/serverless';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();

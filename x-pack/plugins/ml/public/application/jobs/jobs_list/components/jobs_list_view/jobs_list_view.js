@@ -118,6 +118,7 @@ export class JobsListView extends Component {
             removeYourself={this.removeUpdateFunction}
             refreshJobList={this.onRefreshClick}
             showClearButton={showClearButton}
+            isServerless={this.props.isServerless}
           />
         );
       } else {
@@ -128,6 +129,7 @@ export class JobsListView extends Component {
             removeYourself={this.removeUpdateFunction}
             refreshJobList={this.onRefreshClick}
             showClearButton={showClearButton}
+            isServerless={this.props.isServerless}
           />
         );
       }
@@ -151,6 +153,7 @@ export class JobsListView extends Component {
                     removeYourself={this.removeUpdateFunction}
                     refreshJobList={this.onRefreshClick}
                     showClearButton={showClearButton}
+                    isServerless={this.props.isServerless}
                   />
                 );
               }
@@ -384,6 +387,7 @@ export class JobsListView extends Component {
 
   renderJobsListComponents() {
     const { isRefreshing, loading, jobsSummaryList, jobsAwaitingNodeCount } = this.state;
+    const { isServerless } = this.props;
     const jobIds = jobsSummaryList.map((j) => j.id);
 
     const noJobsFound = !loading && jobIds.length === 0;
@@ -408,7 +412,7 @@ export class JobsListView extends Component {
             <>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <JobStatsBar jobsSummaryList={jobsSummaryList} />
+                  <JobStatsBar jobsSummaryList={jobsSummaryList} isServerless={isServerless} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NewJobButton />

@@ -7,14 +7,13 @@
 
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../../common/constants/states';
 import { StatsBar } from '../../../../components/stats_bar';
-import { isServerless } from '../../../../capabilities/serverless';
 
 import PropTypes from 'prop-types';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-function createJobStats(jobsSummaryList) {
-  const displayNodeInfo = !isServerless();
+function createJobStats(jobsSummaryList, isServerless) {
+  const displayNodeInfo = isServerless === false;
 
   const jobStats = {
     ...(displayNodeInfo
@@ -108,12 +107,13 @@ function createJobStats(jobsSummaryList) {
   return jobStats;
 }
 
-export const JobStatsBar = ({ jobsSummaryList }) => {
-  const jobStats = createJobStats(jobsSummaryList);
+export const JobStatsBar = ({ jobsSummaryList, isServerless }) => {
+  const jobStats = createJobStats(jobsSummaryList, isServerless);
 
   return <StatsBar stats={jobStats} dataTestSub={'mlJobStatsBar'} />;
 };
 
 JobStatsBar.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
+  isServerless: PropTypes.bool.isRequired,
 };
