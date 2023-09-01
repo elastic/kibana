@@ -3477,11 +3477,11 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get.ts"
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector_types.ts"
+                "path": "x-pack/plugins/actions/server/routes/get.ts"
               },
               {
                 "plugin": "actions",
@@ -3622,62 +3622,6 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/get_aad_fields_by_rule_type.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/find_endpoint_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/find_exception_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/find_exception_list_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_item/find_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_index/find_list_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/internal/find_lists_by_size_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/read_endpoint_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/read_exception_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/read_exception_list_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_index/read_list_index_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_item/read_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list/read_list_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_privileges/read_list_privileges_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/summary_exception_list_route.ts"
               },
               {
                 "plugin": "savedObjectsTagging",
@@ -5029,22 +4973,6 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector_types.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector_types.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector_types.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector_types.test.ts"
-              },
-              {
-                "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/get.test.ts"
               },
               {
@@ -5626,6 +5554,22 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/connector/get_all/get_all.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
               },
               {
                 "plugin": "crossClusterReplication",
@@ -6468,62 +6412,6 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/get_alert_summary.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/create_endpoint_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/create_endpoint_list_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/create_exception_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/create_exception_list_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_index/create_list_index_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_item/create_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list/create_list_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/duplicate_exception_list_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/export_exception_list_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_index/export_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/internal/create_exception_filter_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/import_exceptions_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list/import_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/internal/create_exceptions_list_route.ts"
               },
               {
                 "plugin": "savedObjectsTagging",
@@ -8544,26 +8432,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/update_rule.ts"
               },
               {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/update_endpoint_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/update_exception_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/update_exception_list_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_item/update_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list/update_list_route.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
@@ -9286,14 +9154,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/bulk_disable_rules.ts"
               },
               {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_item/patch_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list/patch_list_route.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
@@ -9662,30 +9522,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/delete_maintenance_window.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/delete_endpoint_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/delete_exception_list_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/delete_exception_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_index/delete_list_index_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list_item/delete_list_item_route.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/routes/list/delete_list_route.ts"
               },
               {
                 "plugin": "savedObjectsTagging",
@@ -13746,6 +13582,62 @@
                 "path": "src/plugins/data/server/scripts/route.ts"
               },
               {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/find_endpoint_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/find_exception_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/find_exception_list_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_item/find_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_index/find_list_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/internal/find_lists_by_size_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/read_endpoint_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/read_exception_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/read_exception_list_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_index/read_list_index_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_item/read_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list/read_list_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_privileges/read_list_privileges_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/summary_exception_list_route.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_config.ts"
               },
@@ -14482,6 +14374,10 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "@kbn/core-apps-server-internal",
+                "path": "packages/core/apps/core-apps-server-internal/src/core_app.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/put_runtime_field.ts"
               },
@@ -14504,6 +14400,26 @@
               {
                 "plugin": "data",
                 "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/update_endpoint_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/update_exception_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/update_exception_list_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_item/update_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list/update_list_route.ts"
               },
               {
                 "plugin": "telemetry",
@@ -14620,6 +14536,14 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/update.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-server-internal",
+                "path": "packages/core/apps/core-apps-server-internal/src/core_app.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-server-internal",
+                "path": "packages/core/apps/core-apps-server-internal/src/core_app.test.ts"
               }
             ],
             "returnComment": [],
@@ -14772,6 +14696,62 @@
               {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/server/autocomplete/value_suggestions_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/create_endpoint_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/create_endpoint_list_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/create_exception_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/create_exception_list_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_index/create_list_index_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_item/create_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list/create_list_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/duplicate_exception_list_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/export_exception_list_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_index/export_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/internal/create_exception_filter_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/import_exceptions_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list/import_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/internal/create_exceptions_list_route.ts"
               },
               {
                 "plugin": "telemetry",
@@ -15418,6 +15398,14 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_item/patch_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list/patch_list_route.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_patch_rules/route.ts"
               },
@@ -15536,6 +15524,30 @@
               {
                 "plugin": "data",
                 "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/delete_endpoint_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/delete_exception_list_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/delete_exception_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_index/delete_list_index_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list_item/delete_list_item_route.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/routes/list/delete_list_route.ts"
               },
               {
                 "plugin": "ml",

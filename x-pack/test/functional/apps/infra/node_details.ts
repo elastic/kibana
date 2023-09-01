@@ -233,6 +233,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         describe('Processes Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickProcessesTab();
+            await pageObjects.header.waitUntilLoadingHasFinished();
           });
 
           it('should render processes tab and with Total Value summary', async () => {
@@ -260,6 +261,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               expect(await searchInput.getAttribute('value')).to.be('test');
             });
             await searchInput.clearValue();
+          });
+
+          it('shows an error message when typing invalid term into the search input', async () => {
+            const searchInput = await pageObjects.assetDetails.getProcessesSearchField();
+
+            await pageObjects.assetDetails.processesSearchInputErrorMissing();
+            await searchInput.type(',');
+            await pageObjects.assetDetails.processesSearchInputErrorExists();
           });
         });
 
