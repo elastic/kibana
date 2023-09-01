@@ -29,7 +29,7 @@ export const SAVED_QUERY_DETAILS = /^Saved query$/;
 
 export const SAVED_QUERY_FILTERS_DETAILS = 'Saved query filters';
 
-export const DATA_VIEW_DETAILS = 'Data View';
+export const DATA_VIEW_DETAILS = 'Data view';
 
 export const DEFINITION_DETAILS =
   '[data-test-subj=definitionRule] [data-test-subj="listItemColumnStepRuleDescription"]';
