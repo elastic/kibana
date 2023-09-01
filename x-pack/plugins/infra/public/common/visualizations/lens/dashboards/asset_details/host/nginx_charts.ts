@@ -8,6 +8,7 @@ import {
   nginxActiveConnections,
   nginxRequestRate,
   nginxRequestsPerConnection,
+  nginxResponseStatusCodes,
 } from '../metric_charts/nginx';
 import type { XYConfig } from '../metric_charts/types';
 
@@ -17,4 +18,4 @@ export const nginxStubstatusMetrics: XYConfig[] = [
   nginxRequestsPerConnection,
 ];
 
-export const nginxAccessMetrics: XYConfig[] = []; // TODO
+export const nginxAccessMetrics: XYConfig[] = [nginxResponseStatusCodes];

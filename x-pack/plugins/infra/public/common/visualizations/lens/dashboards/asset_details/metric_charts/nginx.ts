@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { hostLensFormulas } from '../../../../constants';
+import { XY_OVERRIDES } from '../../constants';
 import type { XYConfig } from './types';
 
 export const nginxRequestRate: XYConfig = {
@@ -51,5 +52,31 @@ export const nginxRequestsPerConnection: XYConfig = {
       type: 'visualization',
     },
   ],
+  dataViewOrigin: 'metrics',
+};
+
+export const nginxResponseStatusCodes: XYConfig = {
+  id: 'ResponseStatusCodes',
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.nginx.responseStatusCodes', {
+    defaultMessage: 'Response Status Codes',
+  }),
+
+  layers: [
+    {
+      data: [
+        hostLensFormulas.nginxSuccessStatusCodes,
+        hostLensFormulas.nginxRedirectStatusCodes,
+        hostLensFormulas.nginxClientErrorStatusCodes,
+        hostLensFormulas.nginxServerErrorStatusCodes,
+      ],
+      options: {
+        seriesType: 'area',
+      },
+      type: 'visualization',
+    },
+  ],
+  overrides: {
+    settings: XY_OVERRIDES.settings,
+  },
   dataViewOrigin: 'metrics',
 };
