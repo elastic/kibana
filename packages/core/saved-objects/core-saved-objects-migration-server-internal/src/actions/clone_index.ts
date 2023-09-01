@@ -18,7 +18,7 @@ import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound, AcknowledgeResponse, ActionNotSupported } from '.';
+import type { IndexNotFound, AcknowledgeResponse, OperationNotSupported } from '.';
 import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
 import {
   DEFAULT_TIMEOUT,
@@ -62,18 +62,19 @@ export const cloneIndex = ({
   | IndexNotFound
   | IndexNotGreenTimeout
   | ClusterShardLimitExceeded
-  | ActionNotSupported,
+  | OperationNotSupported,
   CloneIndexResponse
 > => {
   const cloneTask: TaskEither.TaskEither<
-    RetryableEsClientError | IndexNotFound | ClusterShardLimitExceeded | ActionNotSupported,
+    RetryableEsClientError | IndexNotFound | ClusterShardLimitExceeded | OperationNotSupported,
     AcknowledgeResponse
   > = () => {
     // clone is not supported on serverless
     if (esCapabilities.serverless) {
       return Promise.resolve(
         Either.left({
-          type: 'action_not_supported' as const,
+          type: 'operation_not_supported' as const,
+          operationName: 'clone',
         })
       );
     }

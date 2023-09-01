@@ -12,6 +12,7 @@ import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { Cluster } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+import { esTestConfig } from '@kbn/test';
 import { CliArgs } from '@kbn/config';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
@@ -24,6 +25,8 @@ export interface TestServerlessUtils {
   startES: () => Promise<TestServerlessESUtils>;
   startKibana: (abortSignal?: AbortSignal) => Promise<TestServerlessKibanaUtils>;
 }
+
+const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
 
 /**
  * See docs in {@link TestUtils}. This function provides the same utilities but
@@ -65,26 +68,30 @@ export function createTestServerlessInstances({
   };
 }
 
-const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
 function createServerlessES() {
   const log = new ToolingLog({
     level: 'info',
     writeTo: process.stdout,
   });
   const es = new Cluster({ log });
+  const esPort = esTestConfig.getPort();
   return {
     es,
     start: async () => {
       await es.runServerless({
         basePath: ES_BASE_PATH_DIR,
+        port: esPort,
         teardown: true,
         background: true,
         clean: true,
       });
+      const client = getServerlessESClient({ port: esPort });
+
       // runServerless doesn't wait until the nodes are up
-      await waitUntilClusterReady(getServerlessESClient());
+      await waitUntilClusterReady(client);
+
       return {
-        getClient: getServerlessESClient,
+        getClient: () => client,
         stop: async () => {
           await es.stop();
         },
@@ -109,10 +116,9 @@ const waitUntilClusterReady = async (client: Client, timeoutMs = 60 * 1000) => {
   }
 };
 
-const getServerlessESClient = () => {
+const getServerlessESClient = ({ port }: { port: number }) => {
   return new Client({
-    // master node port binding hardcoded on 9200 on host for now
-    node: 'http://localhost:9200',
+    node: `http://localhost:${port}`,
     Connection: HttpConnection,
   });
 };
@@ -152,6 +158,7 @@ const getServerlessDefault = () => {
     },
   };
 };
+
 function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
   return createRoot(defaultsDeep(settings, getServerlessDefault()), {
     ...cliArgs,

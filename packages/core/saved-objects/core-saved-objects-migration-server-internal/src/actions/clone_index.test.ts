@@ -73,7 +73,7 @@ describe('cloneIndex', () => {
     `);
   });
 
-  it('resolve left with action_not_supported for serverless ES', async () => {
+  it('resolve left with operation_not_supported for serverless ES', async () => {
     const statelessCapabilities = elasticsearchServiceMock.createCapabilities({ serverless: true });
     const task = cloneIndex({
       client,
@@ -86,7 +86,8 @@ describe('cloneIndex', () => {
       Object {
         "_tag": "Left",
         "left": Object {
-          "type": "action_not_supported",
+          "operationName": "clone",
+          "type": "operation_not_supported",
         },
       }
     `);
