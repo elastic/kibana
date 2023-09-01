@@ -410,6 +410,11 @@ export default function Expressions(props: Props) {
         dataTestSubj="thresholdRuleUnifiedSearchBar"
         query={ruleParams.searchConfiguration?.query as Query}
       />
+      {errors.filterQuery && (
+        <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
+          {errors.filterQuery}
+        </EuiFormErrorText>
+      )}
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h5>

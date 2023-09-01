@@ -129,17 +129,14 @@ export function thresholdRuleType(
             schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
           ),
           groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-          filterQuery: schema.maybe(
-            schema.string({
-              validate: validateKQLStringFilter,
-            })
-          ),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
           searchConfiguration: schema.object({
             index: schema.string(),
             query: schema.object({
-              language: schema.string(),
+              language: schema.string({
+                validate: validateKQLStringFilter,
+              }),
               query: schema.string(),
             }),
           }),
