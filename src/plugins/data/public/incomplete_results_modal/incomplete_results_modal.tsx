@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SearchRequest } from '..';
+import type { SearchResponseIncompleteWarning } from '../search';
 
 export interface Props {
   onClose: () => void;

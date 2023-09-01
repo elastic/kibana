@@ -15,6 +15,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { getOverlays } from '../services';
 import type { SearchRequest } from '..';
 import { IncompleteResultsModal } from './incomplete_results_modal';
+import type { SearchResponseIncompleteWarning } from '../search';
 
 // @internal
 export interface OpenIncompleteResultsModalButtonProps {
