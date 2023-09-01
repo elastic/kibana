@@ -1,19 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one * or more contributor license agreements. Licensed under the Elastic License * 2.0 and the Server Side Public License, v 1; you may not use this file except * in compliance with, at your election, the Elastic License 2.0 or the Server * Side Public License, v 1. */
 
-// import { Observable } from 'rxjs/Observable';
-// import 'rxjs/add/observable/of';
-// import 'rxjs/add/observable/from';
-// import oboe from 'oboe/dist/oboe-node';
-// import { createReadStream } from 'fs';
-// import readline from 'readline';
-
-import { from, fromEventPattern, concat } from 'rxjs';
+import { from, fromEventPattern } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as zlib from 'zlib';
 import { readdir } from 'fs/promises';
 import * as fs from 'fs';
 import oboe from 'oboe';
+import { pipe } from 'fp-ts/function';
+import { prioritizeMappings } from '../lib';
 
 type PredicateFunction = (a: string) => boolean;
 const doesNotStartWithADot: PredicateFunction = (x) => !x.startsWith('.');
@@ -55,16 +50,28 @@ const subscribeToStreamingJsonStream = (archivePath) => {
   });
 };
 
-export const begin = (archivePath: PathLikeOrString) => {
+export const begin = async (archivePath: PathLikeOrString) => {
+  // const archiveFilePath =
+  //   '/Users/trezworkbox/dev/scratches/src/js/streams/native-nodejs-streams/gunzip/someotherfile.txt.gz';
   // subscribeToDecompressionStream(archivePath);
   // subscribeToStreamingJsonStream(archivePath);
+  const mappingsAndArchiveFileNames = async (x: PathLikeOrString) =>
+    await readDirectory(doesNotStartWithADot)(x);
+  const twoFilesRelativePaths = (xs: PathLikeOrString[]) => {
+    return from(pipe(xs as string[], prioritizeMappings)).pipe(map((x) => x.toUpperCase()));
+  };
 
-  archivePath =
-    '/Users/trezworkbox/dev/scratches/src/js/streams/native-nodejs-streams/gunzip/someotherfile.txt.gz';
-
-  concat(decompressionObservable(archivePath), jsonStanzaObservable(archivePath)).subscribe({
+  twoFilesRelativePaths(await mappingsAndArchiveFileNames(archivePath)).subscribe({
     next: (x) => console.log('\nλjs next, x:', x),
     error: (err) => console.log('error:', err),
     complete: () => console.log('the end'),
   });
+
+  // concat(decompressionObservable(archiveFilePath), jsonStanzaObservable(archivePath)).subscribe({
+
+  // concat(decompressionObservable(archivePath), jsonStanzaObservable(archivePath)).subscribe({
+  //   next: (x) => console.log('\nλjs next, x:', x),
+  //   error: (err) => console.log('error:', err),
+  //   complete: () => console.log('the end'),
+  // });
 };

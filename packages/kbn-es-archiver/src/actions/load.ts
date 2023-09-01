@@ -51,7 +51,7 @@ export async function loadAction({
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
-  begin(name);
+  await begin(name);
   // process.exit(666); // Trez Exit Expression
   // await createPromiseFromStreams([
   //   // This used to be  const recordStream = concatStreamProviders()...
