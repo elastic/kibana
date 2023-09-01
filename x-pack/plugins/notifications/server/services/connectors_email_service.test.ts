@@ -23,12 +23,15 @@ describe('sendPlainTextEmail()', () => {
   describe('calls the provided ActionsClient#bulkEnqueueExecution() with the appropriate params', () => {
     it(`omits the 'relatedSavedObjects' field if no context is provided`, () => {
       const actionsClient = unsecuredActionsClientMock.create();
-      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-        {
-          id: CONNECTOR_ID,
-          response: ExecutionResponseType.SUCCESS,
-        },
-      ]);
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: false,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.SUCCESS,
+          },
+        ],
+      });
       const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
       const payload: PlainTextEmail = {
         to: ['user1@email.com'],
@@ -53,12 +56,15 @@ describe('sendPlainTextEmail()', () => {
 
     it(`populates the 'relatedSavedObjects' field if context is provided`, () => {
       const actionsClient = unsecuredActionsClientMock.create();
-      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-        {
-          id: CONNECTOR_ID,
-          response: ExecutionResponseType.SUCCESS,
-        },
-      ]);
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: false,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.SUCCESS,
+          },
+        ],
+      });
       const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
       const payload: PlainTextEmail = {
         to: ['user1@email.com', 'user2@email.com', 'user3@email.com'],
@@ -129,12 +135,15 @@ describe('sendPlainTextEmail()', () => {
 
     it(`logs an error when the maximum number of queued actions has been reached`, async () => {
       const actionsClient = unsecuredActionsClientMock.create();
-      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-        {
-          id: CONNECTOR_ID,
-          response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
-        },
-      ]);
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: true,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+          },
+        ],
+      });
       const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
       const payload: PlainTextEmail = {
         to: ['user1@email.com'],
@@ -158,12 +167,15 @@ describe('sendHTMLEmail()', () => {
   describe('calls the provided ActionsClient#bulkEnqueueExecution() with the appropriate params', () => {
     it(`omits the 'relatedSavedObjects' field if no context is provided`, () => {
       const actionsClient = unsecuredActionsClientMock.create();
-      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-        {
-          id: CONNECTOR_ID,
-          response: ExecutionResponseType.SUCCESS,
-        },
-      ]);
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: false,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.SUCCESS,
+          },
+        ],
+      });
       const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
       const payload: HTMLEmail = {
         to: ['user1@email.com'],
@@ -190,12 +202,15 @@ describe('sendHTMLEmail()', () => {
 
     it(`populates the 'relatedSavedObjects' field if context is provided`, () => {
       const actionsClient = unsecuredActionsClientMock.create();
-      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-        {
-          id: CONNECTOR_ID,
-          response: ExecutionResponseType.SUCCESS,
-        },
-      ]);
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: false,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.SUCCESS,
+          },
+        ],
+      });
       const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
       const payload: HTMLEmail = {
         to: ['user1@email.com', 'user2@email.com', 'user3@email.com'],
@@ -269,12 +284,15 @@ describe('sendHTMLEmail()', () => {
     });
     it(`logs an error when the maximum number of queued actions has been reached`, async () => {
       const actionsClient = unsecuredActionsClientMock.create();
-      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-        {
-          id: CONNECTOR_ID,
-          response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
-        },
-      ]);
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: true,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+          },
+        ],
+      });
       const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
       const payload: HTMLEmail = {
         to: ['user1@email.com'],

@@ -139,9 +139,8 @@ const defaultExecutionParams = {
 };
 
 const defaultExecutionResponse = {
-  actionTypeId: 'test',
-  id: '1',
-  response: ExecutionResponseType.SUCCESS,
+  errors: false,
+  items: [{ actionTypeId: 'test', id: '1', response: ExecutionResponseType.SUCCESS }],
 };
 
 let ruleRunMetricsStore: RuleRunMetricsStore;
@@ -230,7 +229,7 @@ describe('Execution Handler', () => {
       renderActionParameterTemplatesDefault
     );
     ruleRunMetricsStore = new RuleRunMetricsStore();
-    actionsClient.bulkEnqueueExecution.mockResolvedValue([defaultExecutionResponse]);
+    actionsClient.bulkEnqueueExecution.mockResolvedValue(defaultExecutionResponse);
   });
   beforeAll(() => {
     clock = sinon.useFakeTimers();
@@ -526,18 +525,21 @@ describe('Execution Handler', () => {
   });
 
   test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions', async () => {
-    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-      {
-        actionTypeId: 'test2',
-        id: '1',
-        response: ExecutionResponseType.SUCCESS,
-      },
-      {
-        actionTypeId: 'test2',
-        id: '2',
-        response: ExecutionResponseType.SUCCESS,
-      },
-    ]);
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'test2',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'test2',
+          id: '2',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     const actions = [
       {
         id: '1',
@@ -597,24 +599,27 @@ describe('Execution Handler', () => {
   });
 
   test('Skips triggering actions for a specific action type when it reaches the limit for that specific action type', async () => {
-    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-      defaultExecutionResponse,
-      {
-        actionTypeId: 'test-action-type-id',
-        id: '2',
-        response: ExecutionResponseType.SUCCESS,
-      },
-      {
-        actionTypeId: 'another-action-type-id',
-        id: '4',
-        response: ExecutionResponseType.SUCCESS,
-      },
-      {
-        actionTypeId: 'another-action-type-id',
-        id: '5',
-        response: ExecutionResponseType.SUCCESS,
-      },
-    ]);
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        { actionTypeId: 'test', id: '1', response: ExecutionResponseType.SUCCESS },
+        {
+          actionTypeId: 'test-action-type-id',
+          id: '2',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'another-action-type-id',
+          id: '4',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'another-action-type-id',
+          id: '5',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     const actions = [
       ...defaultExecutionParams.rule.actions,
       {
@@ -695,23 +700,26 @@ describe('Execution Handler', () => {
   });
 
   test('Stops triggering actions when the number of total queued actions is reached the number of max queued actions', async () => {
-    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-      {
-        actionTypeId: 'test',
-        id: '1',
-        response: ExecutionResponseType.SUCCESS,
-      },
-      {
-        actionTypeId: 'test',
-        id: '2',
-        response: ExecutionResponseType.SUCCESS,
-      },
-      {
-        actionTypeId: 'test',
-        id: '3',
-        response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
-      },
-    ]);
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: true,
+      items: [
+        {
+          actionTypeId: 'test',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'test',
+          id: '2',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'test',
+          id: '3',
+          response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+        },
+      ],
+    });
     const actions = [
       {
         id: '1',
@@ -963,13 +971,16 @@ describe('Execution Handler', () => {
   });
 
   test('triggers summary actions (per rule run)', async () => {
-    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-      {
-        actionTypeId: 'testActionTypeId',
-        id: '1',
-        response: ExecutionResponseType.SUCCESS,
-      },
-    ]);
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'testActionTypeId',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,
@@ -1089,13 +1100,16 @@ describe('Execution Handler', () => {
   });
 
   test('triggers summary actions (custom interval)', async () => {
-    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-      {
-        actionTypeId: 'testActionTypeId',
-        id: '1',
-        response: ExecutionResponseType.SUCCESS,
-      },
-    ]);
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'testActionTypeId',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,
@@ -1333,14 +1347,17 @@ describe('Execution Handler', () => {
   });
 
   test('schedules alerts with multiple recovered actions', async () => {
-    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-      defaultExecutionResponse,
-      {
-        actionTypeId: 'test',
-        id: '2',
-        response: ExecutionResponseType.SUCCESS,
-      },
-    ]);
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        { actionTypeId: 'test', id: '1', response: ExecutionResponseType.SUCCESS },
+        {
+          actionTypeId: 'test',
+          id: '2',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     const actions = [
       {
         id: '1',
@@ -1446,13 +1463,16 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule actions for the summarized alerts that are filtered out (for each alert)', async () => {
-    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-      {
-        actionTypeId: 'testActionTypeId',
-        id: '1',
-        response: ExecutionResponseType.SUCCESS,
-      },
-    ]);
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'testActionTypeId',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 0,
@@ -1516,13 +1536,16 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule actions for the summarized alerts that are filtered out (summary of alerts onThrottleInterval)', async () => {
-    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-      {
-        actionTypeId: 'testActionTypeId',
-        id: '1',
-        response: ExecutionResponseType.SUCCESS,
-      },
-    ]);
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'testActionTypeId',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 0,
@@ -1583,13 +1606,16 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule actions for the for-each type alerts that are filtered out', async () => {
-    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce([
-      {
-        actionTypeId: 'testActionTypeId',
-        id: '1',
-        response: ExecutionResponseType.SUCCESS,
-      },
-    ]);
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'testActionTypeId',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,

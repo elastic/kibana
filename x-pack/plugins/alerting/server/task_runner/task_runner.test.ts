@@ -238,7 +238,7 @@ describe('Task Runner', () => {
 
     ruleType.executor.mockResolvedValue({ state: {} });
 
-    actionsClient.bulkEnqueueExecution.mockResolvedValue([]);
+    actionsClient.bulkEnqueueExecution.mockResolvedValue({ errors: false, items: [] });
   });
 
   test('successfully executes the task', async () => {

@@ -115,7 +115,7 @@ export interface ConstructorOptions {
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
-  bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse[]>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
@@ -140,7 +140,7 @@ export interface ActionsClientContext {
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
-  bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse[]>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
@@ -769,7 +769,7 @@ export class ActionsClient {
 
   public async bulkEnqueueExecution(
     options: EnqueueExecutionOptions[]
-  ): Promise<ExecutionResponse[]> {
+  ): Promise<ExecutionResponse> {
     const sources: Array<ActionExecutionSource<unknown>> = [];
     options.forEach((option) => {
       if (option.source) {

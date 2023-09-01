@@ -8,12 +8,8 @@
 import { KibanaRequest } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import {
-  createBulkExecutionEnqueuerFunction,
-  hasReachedTheQueuedActionsLimit,
-} from './create_execute_function';
+import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
 import {
   asHttpRequestExecutionSource,
@@ -25,11 +21,16 @@ const mockTaskManager = taskManagerMock.createStart();
 const savedObjectsClient = savedObjectsClientMock.create();
 const request = {} as KibanaRequest;
 const mockActionsConfig = actionsConfigMock.create();
-const doc = {} as ConcreteTaskInstance;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  mockTaskManager.fetch.mockResolvedValue({ docs: [] });
+  mockTaskManager.aggregate.mockResolvedValue({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+    aggregations: {},
+  });
   mockActionsConfig.getMaxQueued.mockReturnValue(10);
 });
 
@@ -969,7 +970,13 @@ describe('bulkExecute()', () => {
   });
 
   test('returns queuedActionsLimitError response when the max number of queued actions has been reached', async () => {
-    mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc, doc] });
+    mockTaskManager.aggregate.mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 2, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: {},
+    });
     mockActionsConfig.getMaxQueued.mockReturnValueOnce(2);
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
@@ -997,13 +1004,16 @@ describe('bulkExecute()', () => {
         },
       ])
     ).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "actionTypeId": "mock-action",
-          "id": "123",
-          "response": "queuedActionsLimitError",
-        },
-      ]
+      Object {
+        "errors": true,
+        "items": Array [
+          Object {
+            "actionTypeId": "mock-action",
+            "id": "123",
+            "response": "queuedActionsLimitError",
+          },
+        ],
+      }
     `);
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
     expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1011,37 +1021,5 @@ describe('bulkExecute()', () => {
         Array [],
       ]
     `);
-  });
-});
-
-describe('hasReachedTheQueuedActionsLimit()', () => {
-  test('returns true if the number of queued actions is greater than the config limit', async () => {
-    mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc, doc, doc] });
-    mockActionsConfig.getMaxQueued.mockReturnValueOnce(2);
-
-    expect(await hasReachedTheQueuedActionsLimit(mockTaskManager, mockActionsConfig, 1)).toEqual({
-      hasReachedLimit: true,
-      numberOverLimit: 2,
-    });
-  });
-
-  test('returns true if the number of queued actions is equal the config limit', async () => {
-    mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc, doc] });
-    mockActionsConfig.getMaxQueued.mockReturnValueOnce(3);
-
-    expect(await hasReachedTheQueuedActionsLimit(mockTaskManager, mockActionsConfig, 1)).toEqual({
-      hasReachedLimit: true,
-      numberOverLimit: 0,
-    });
-  });
-
-  test('returns false if the number of queued actions is less than the config limit', async () => {
-    mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc] });
-    mockActionsConfig.getMaxQueued.mockReturnValueOnce(3);
-
-    expect(await hasReachedTheQueuedActionsLimit(mockTaskManager, mockActionsConfig, 1)).toEqual({
-      hasReachedLimit: false,
-      numberOverLimit: 0,
-    });
   });
 });

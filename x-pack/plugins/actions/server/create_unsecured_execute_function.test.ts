@@ -8,7 +8,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
 import {
@@ -20,11 +19,16 @@ import { actionsConfigMock } from './actions_config.mock';
 const mockTaskManager = taskManagerMock.createStart();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const mockActionsConfig = actionsConfigMock.create();
-const doc = {} as ConcreteTaskInstance;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  mockTaskManager.fetch.mockResolvedValue({ docs: [] });
+  mockTaskManager.aggregate.mockResolvedValue({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+    aggregations: {},
+  });
   mockActionsConfig.getMaxQueued.mockReturnValue(10);
 });
 
@@ -561,7 +565,13 @@ describe('bulkExecute()', () => {
   ])(
     'returns queuedActionsLimitError response when the max number of queued actions has been reached: %s, isSystemAction: %s',
     async (isPreconfigured, isSystemAction) => {
-      mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc, doc] });
+      mockTaskManager.aggregate.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 2, relation: 'eq' }, max_score: null, hits: [] },
+        aggregations: {},
+      });
       mockActionsConfig.getMaxQueued.mockReturnValueOnce(2);
       const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
         taskManager: mockTaskManager,
@@ -592,20 +602,13 @@ describe('bulkExecute()', () => {
             source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
           },
         ])
-      ).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "123",
-          "response": "queuedActionsLimitError",
-        },
-      ]
-    `);
+      ).toEqual({ errors: true, items: [{ id: '123', response: 'queuedActionsLimitError' }] });
       expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
       expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Array [],
-      ]
-    `);
+        Array [
+          Array [],
+        ]
+      `);
     }
   );
 });

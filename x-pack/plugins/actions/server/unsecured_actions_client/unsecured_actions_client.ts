@@ -25,19 +25,19 @@ const ALLOWED_REQUESTER_IDS = [
 
 export interface UnsecuredActionsClientOpts {
   internalSavedObjectsRepository: ISavedObjectsRepository;
-  executionEnqueuer: BulkUnsecuredExecutionEnqueuer<ExecutionResponse[]>;
+  executionEnqueuer: BulkUnsecuredExecutionEnqueuer<ExecutionResponse>;
 }
 
 export interface IUnsecuredActionsClient {
   bulkEnqueueExecution: (
     requesterId: string,
     actionsToExecute: ExecuteOptions[]
-  ) => Promise<ExecutionResponse[]>;
+  ) => Promise<ExecutionResponse>;
 }
 
 export class UnsecuredActionsClient {
   private readonly internalSavedObjectsRepository: ISavedObjectsRepository;
-  private readonly executionEnqueuer: BulkUnsecuredExecutionEnqueuer<ExecutionResponse[]>;
+  private readonly executionEnqueuer: BulkUnsecuredExecutionEnqueuer<ExecutionResponse>;
 
   constructor(params: UnsecuredActionsClientOpts) {
     this.executionEnqueuer = params.executionEnqueuer;
@@ -47,7 +47,7 @@ export class UnsecuredActionsClient {
   public async bulkEnqueueExecution(
     requesterId: string,
     actionsToExecute: ExecuteOptions[]
-  ): Promise<ExecutionResponse[]> {
+  ): Promise<ExecutionResponse> {
     // Check that requesterId is allowed
     if (!ALLOWED_REQUESTER_IDS.includes(requesterId)) {
       throw new Error(

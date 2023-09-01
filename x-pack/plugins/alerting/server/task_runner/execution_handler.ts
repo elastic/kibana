@@ -12,7 +12,7 @@ import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import {
   ExecuteOptions as EnqueueExecutionOptions,
-  ExecutionResponse,
+  ExecutionResponseItem,
   ExecutionResponseType,
 } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
@@ -194,7 +194,7 @@ export class ExecutionHandler<
 
       const logActions: Record<string, LogAction> = {};
       const bulkActions: EnqueueExecutionOptions[] = [];
-      let bulkActionsResponse: ExecutionResponse[] = [];
+      let bulkActionsResponse: ExecutionResponseItem[] = [];
 
       this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
@@ -349,7 +349,9 @@ export class ExecutionHandler<
       if (!!bulkActions.length) {
         for (const c of chunk(bulkActions, CHUNK_SIZE)) {
           const response = await this.actionsClient!.bulkEnqueueExecution(c);
-          bulkActionsResponse = bulkActionsResponse.concat(response);
+          if (response.errors) {
+            bulkActionsResponse = bulkActionsResponse.concat(response.items);
+          }
         }
       }
 

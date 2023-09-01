@@ -30,11 +30,13 @@ export class ConnectorsEmailService implements EmailService {
     }));
 
     const response = await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
-    for (const r of response) {
-      if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
-        this.logger.warn(
-          `Skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
-        );
+    if (response.errors) {
+      for (const r of response.items) {
+        if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
+          this.logger.warn(
+            `Skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
+          );
+        }
       }
     }
   }
@@ -52,11 +54,13 @@ export class ConnectorsEmailService implements EmailService {
     }));
 
     const response = await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
-    for (const r of response) {
-      if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
-        this.logger.warn(
-          `Skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
-        );
+    if (response.errors) {
+      for (const r of response.items) {
+        if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
+          this.logger.warn(
+            `Skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
+          );
+        }
       }
     }
   }
