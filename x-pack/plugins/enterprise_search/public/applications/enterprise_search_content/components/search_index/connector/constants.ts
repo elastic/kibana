@@ -7,7 +7,7 @@
 
 import dedent from 'dedent';
 
-import { CONNECTOR_DEFINITIONS } from '../../../../../../common/connectors/connectors';
+import { CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
 
 import { docLinks } from '../../../../shared/doc_links';
 import { CONNECTOR_ICONS } from '../../../../shared/icons/connector_icons';

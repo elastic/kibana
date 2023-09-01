@@ -7,19 +7,21 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CURRENT_CONNECTORS_INDEX } from '../..';
-import { ConnectorStatus } from '../../../common/types/connectors';
+import { CURRENT_CONNECTORS_INDEX, deleteConnectorById } from '@kbn/search-connectors';
+
+import { ConnectorStatus, fetchConnectorByIndexName } from '@kbn/search-connectors';
+
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { textAnalysisSettings } from '../indices/text_analysis';
 
 import { addConnector } from './add_connector';
-import { deleteConnectorById } from './delete_connector';
-import { fetchConnectorByIndexName } from './fetch_connectors';
 
-jest.mock('./fetch_connectors', () => ({ fetchConnectorByIndexName: jest.fn() }));
-jest.mock('./delete_connector', () => ({ deleteConnectorById: jest.fn() }));
+jest.mock('@kbn/search-connectors', () => ({
+  deleteConnectorById: jest.fn(),
+  fetchConnectorByIndexName: jest.fn(),
+}));
 jest.mock('../crawler/fetch_crawlers', () => ({ fetchCrawlerByIndexName: jest.fn() }));
 
 describe('addConnector lib function', () => {

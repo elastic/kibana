@@ -25,8 +25,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { DisplayType } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../../common/types/api';
-import { DisplayType } from '../../../../../../common/types/connectors';
 import { LicensingLogic } from '../../../../shared/licensing';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';

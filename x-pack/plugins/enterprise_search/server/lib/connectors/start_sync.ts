@@ -7,7 +7,16 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX, CURRENT_CONNECTORS_JOB_INDEX } from '../..';
+import {
+  ConnectorConfiguration,
+  ConnectorDocument,
+  SyncJobType,
+  SyncStatus,
+  TriggerMethod,
+  CONNECTORS_INDEX,
+  CURRENT_CONNECTORS_JOB_INDEX,
+} from '@kbn/search-connectors';
+
 import { isConfigEntry } from '../../../common/connectors/is_category_entry';
 
 import {
@@ -15,13 +24,6 @@ import {
   ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
 } from '../../../common/constants';
 
-import {
-  ConnectorConfiguration,
-  ConnectorDocument,
-  SyncJobType,
-  SyncStatus,
-  TriggerMethod,
-} from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { stripSearchPrefix } from '../../../common/utils/strip_search_prefix';
 

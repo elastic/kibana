@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
 import { RouteDependencies } from '../plugin';
 
-export const registerConnectorsRoutes = ({ router, search, security }: RouteDependencies) => {
+export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/serverless_search/connectors',
       validate: {},
     },
     async (context, request, response) => {
-      const connectors = await search.connectorsService.getConnectors(request);
+      const { client } = (await context.core).elasticsearch;
+      const connectors = await fetchConnectors(client.asCurrentUser);
 
       return response.ok({
         body: {
@@ -31,7 +33,14 @@ export const registerConnectorsRoutes = ({ router, search, security }: RouteDepe
       validate: {},
     },
     async (context, request, response) => {
-      const connectors = await search.connectorsService.getConnectorTypes();
+      const connectors = CONNECTOR_DEFINITIONS.map((connector) => ({
+        ...connector,
+        iconPath: connector.iconPath
+          ? http.basePath.prepend(
+              `/plugins/enterpriseSearch/assets/source_icons/${connector.iconPath}`
+            )
+          : 'logoEnterpriseSearch',
+      }));
 
       return response.ok({
         body: {

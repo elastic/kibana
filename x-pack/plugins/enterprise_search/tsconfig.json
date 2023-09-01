@@ -11,7 +11,6 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -63,5 +62,6 @@
     "@kbn/share-plugin",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/search-api-panels",
+    "@kbn/search-connectors"
   ]
 }

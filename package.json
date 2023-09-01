@@ -602,6 +602,7 @@
     "@kbn/screenshotting-example-plugin": "link:x-pack/examples/screenshotting_example",
     "@kbn/screenshotting-plugin": "link:x-pack/plugins/screenshotting",
     "@kbn/search-api-panels": "link:packages/kbn-search-api-panels",
+    "@kbn/search-connectors": "link:packages/kbn-search-connectors",
     "@kbn/search-examples-plugin": "link:examples/search_examples",
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
     "@kbn/searchprofiler-plugin": "link:x-pack/plugins/searchprofiler",

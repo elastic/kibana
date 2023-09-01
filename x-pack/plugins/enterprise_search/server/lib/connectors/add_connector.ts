@@ -7,30 +7,27 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CURRENT_CONNECTORS_INDEX } from '../..';
-import {
-  Connector,
-  ConnectorDocument,
-  IngestPipelineParams,
-} from '../../../common/types/connectors';
+import { createConnector, Connector, deleteConnectorById } from '@kbn/search-connectors';
+
+import { fetchConnectorByIndexName } from '@kbn/search-connectors/lib/fetch_connectors';
+
 import { ErrorCode } from '../../../common/types/error_codes';
-import { createConnectorDocument } from '../../utils/create_connector_document';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { createIndex } from '../indices/create_index';
 import { getDefaultPipeline } from '../pipelines/get_default_pipeline';
 
-import { deleteConnectorById } from './delete_connector';
-
-import { fetchConnectorByIndexName } from './fetch_connectors';
-
-const createConnector = async (
-  document: ConnectorDocument,
+export const addConnector = async (
   client: IScopedClusterClient,
-  language: string | null,
-  deleteExisting: boolean
+  input: {
+    deleteExistingConnector?: boolean;
+    indexName: string | null;
+    isNative: boolean;
+    language: string | null;
+    serviceType?: string | null;
+  }
 ): Promise<Connector> => {
-  const index = document.index_name;
+  const index = input.indexName;
   if (index) {
     const indexExists = await client.asCurrentUser.indices.exists({ index });
     if (indexExists) {
@@ -39,10 +36,10 @@ const createConnector = async (
       }
     }
 
-    const connector = await fetchConnectorByIndexName(client, index);
+    const connector = await fetchConnectorByIndexName(client.asCurrentUser, index);
     if (connector) {
-      if (deleteExisting) {
-        await deleteConnectorById(client, connector.id);
+      if (input.deleteExistingConnector) {
+        await deleteConnectorById(client.asCurrentUser, connector.id);
       } else {
         throw new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
       }
@@ -52,35 +49,11 @@ const createConnector = async (
     if (crawler) {
       throw new Error(ErrorCode.CRAWLER_ALREADY_EXISTS);
     }
-    await createIndex(client, index, language, false);
+    await createIndex(client, index, input.language, false);
   }
-  const result = await client.asCurrentUser.index({
-    document,
-    index: CURRENT_CONNECTORS_INDEX,
-    refresh: 'wait_for',
-  });
 
-  return { ...document, id: result._id };
-};
-
-export const addConnector = async (
-  client: IScopedClusterClient,
-  input: {
-    deleteExistingConnector?: boolean;
-    indexName: string | null;
-    isNative: boolean;
-    language: string | null;
-    pipeline?: IngestPipelineParams | null;
-    serviceType?: string | null;
-  }
-): Promise<Connector> => {
-  const pipeline = input.pipeline || (await getDefaultPipeline(client));
-
-  const document = createConnectorDocument({
+  return await createConnector(client.asCurrentUser, {
     ...input,
-    pipeline,
-    serviceType: input.serviceType || null,
+    pipeline: await getDefaultPipeline(client),
   });
-
-  return await createConnector(document, client, input.language, !!input.deleteExistingConnector);
 };

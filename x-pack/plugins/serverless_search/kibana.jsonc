@@ -7,14 +7,17 @@
     "id": "serverlessSearch",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "serverless", "search"],
+    "configPath": [
+      "xpack",
+      "serverless",
+      "search"
+    ],
     "requiredPlugins": [
       "cloud",
       "console",
       "dashboard",
       "devTools",
       "discover",
-      "enterpriseSearch",
       "grokdebugger",
       "management",
       "ml",
@@ -26,6 +29,8 @@
       "visualizations"
     ],
     "optionalPlugins": [],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorServerSideDefinition } from '../../../../../../common/connectors/connectors';
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 
 export interface ConnectorClientSideDefinition {
   docsUrl?: string;
