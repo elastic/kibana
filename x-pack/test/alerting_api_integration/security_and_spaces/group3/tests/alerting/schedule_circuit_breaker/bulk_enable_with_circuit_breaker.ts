@@ -59,7 +59,7 @@ export default function bulkEnableWithCircuitBreakerTests({ getService }: FtrPro
 
       expect(body.errors.length).eql(2);
       expect(body.errors[0].message).eql(
-        'Error validating enable rule data - Failed to validate schedule limit: limit reached, Remaining schedule allotment (4/min) < New schedules (9/min).'
+        'Error validating enable rule data - Run limit reached: The rule has 9 runs per minute; there are only 4 runs per minute available.'
       );
     });
   });

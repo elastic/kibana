@@ -327,11 +327,13 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
     .filter(isValidInterval);
 
   try {
-    await validateScheduleLimit({
-      context,
-      prevInterval,
-      updatedInterval,
-    });
+    if (operations.some((operation) => operation.field === 'schedule')) {
+      await validateScheduleLimit({
+        context,
+        prevInterval,
+        updatedInterval,
+      });
+    }
   } catch (error) {
     return {
       apiKeysToInvalidate: Array.from(apiKeysMap.values())

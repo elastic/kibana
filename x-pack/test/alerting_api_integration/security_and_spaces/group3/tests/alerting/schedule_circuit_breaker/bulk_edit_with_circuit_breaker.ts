@@ -62,7 +62,7 @@ export default function bulkEditWithCircuitBreakerTests({ getService }: FtrProvi
 
       expect(body.errors.length).eql(2);
       expect(body.errors[0].message).eql(
-        'Failed to bulk edit rule - Failed to validate schedule limit: limit reached, Remaining schedule allotment (1/min) < New schedules (12/min).'
+        'Failed to bulk edit rule - Run limit reached: The rule has 12 runs per minute; there are only 1 runs per minute available.'
       );
     });
 

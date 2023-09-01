@@ -84,6 +84,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
 };
 
+const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency');
+
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
@@ -3839,6 +3841,54 @@ describe('create()', () => {
       { apiKeys: [] },
       expect.any(Object),
       expect.any(Object)
+    );
+  });
+
+  test('creates a disabled rule if validate schedule limit throws', async () => {
+    validateScheduleLimit.mockRejectedValueOnce('error');
+
+    const data = getMockData();
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: false,
+        alertTypeId: '123',
+        schedule: { interval: 10000 },
+        params: {
+          bar: true,
+        },
+        running: false,
+        executionStatus: getRuleExecutionStatusPending(now),
+        createdAt: now,
+        updatedAt: now,
+        notifyWhen: null,
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    await rulesClient.create({ data });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      expect.objectContaining({
+        enabled: false,
+      }),
+      expect.anything()
     );
   });
 });

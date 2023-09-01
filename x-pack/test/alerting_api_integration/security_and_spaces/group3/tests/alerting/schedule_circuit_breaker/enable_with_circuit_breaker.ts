@@ -45,7 +45,7 @@ export default function enableWithCircuitBreakerTests({ getService }: FtrProvide
         .expect(400);
 
       expect(body.message).eql(
-        'Error validating enable rule data - Failed to validate schedule limit: limit reached, Remaining schedule allotment (4/min) < New schedules (12/min).'
+        'Error validating enable rule data - Run limit reached: The rule has 12 runs per minute; there are only 4 runs per minute available.'
       );
     });
   });

@@ -61,6 +61,12 @@ export async function createRule<Params extends RuleParams = never>(
 
   try {
     createRuleDataSchema.validate(data);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating create data - ${error.message}`);
+  }
+
+  let shouldCreateDisabledRule = false;
+  try {
     if (data.enabled) {
       await validateScheduleLimit({
         context,
@@ -68,7 +74,10 @@ export async function createRule<Params extends RuleParams = never>(
       });
     }
   } catch (error) {
-    throw Boom.badRequest(`Error validating create data - ${error.message}`);
+    shouldCreateDisabledRule = true;
+    context.logger.warn(
+      `Error validating rule schedule, rule will be disabled upon creation - ${error.message}`
+    );
   }
 
   try {
@@ -157,6 +166,7 @@ export async function createRule<Params extends RuleParams = never>(
       // Right now this works because the 2 types can interop but it's not ideal
       ...apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey),
       id,
+      enabled: shouldCreateDisabledRule ? false : data.enabled,
       createdBy: username,
       updatedBy: username,
       createdAt: new Date(createTime),

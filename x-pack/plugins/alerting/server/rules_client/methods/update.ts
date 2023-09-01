@@ -89,8 +89,11 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
   }
 
+  const {
+    attributes: { enabled, schedule },
+  } = alertSavedObject;
   try {
-    if (alertSavedObject.attributes.enabled) {
+    if (enabled && schedule.interval !== data.schedule.interval) {
       await validateScheduleLimit({
         context,
         prevInterval: alertSavedObject.attributes.schedule?.interval,

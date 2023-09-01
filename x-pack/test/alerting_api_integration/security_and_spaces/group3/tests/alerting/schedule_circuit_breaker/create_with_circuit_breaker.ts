@@ -19,7 +19,7 @@ export default function createWithCircuitBreakerTests({ getService }: FtrProvide
       await objectRemover.removeAll();
     });
 
-    it('should prevent rules from being created if max schedules have been reached', async () => {
+    it('should create disabled rules if max schedules have been reached', async () => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -31,14 +31,12 @@ export default function createWithCircuitBreakerTests({ getService }: FtrProvide
         .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData({ schedule: { interval: '10s' } }))
-        .expect(400);
+        .expect(200);
 
-      expect(body.message).eql(
-        'Error validating create data - Failed to validate schedule limit: limit reached, Remaining schedule allotment (4/min) < New schedules (6/min).'
-      );
+      expect(body.enabled).eql(false);
     });
 
-    it('should prevent rules from being created across spaces', async () => {
+    it('should create disabled rules across spaces if max schedules have been reached', async () => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -50,11 +48,9 @@ export default function createWithCircuitBreakerTests({ getService }: FtrProvide
         .post(`${getUrlPrefix('space2')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData({ schedule: { interval: '10s' } }))
-        .expect(400);
+        .expect(200);
 
-      expect(body.message).eql(
-        'Error validating create data - Failed to validate schedule limit: limit reached, Remaining schedule allotment (4/min) < New schedules (6/min).'
-      );
+      expect(body.enabled).eql(false);
     });
 
     it('should allow disabled rules to go over the circuit breaker', async () => {

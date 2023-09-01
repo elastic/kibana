@@ -65,6 +65,7 @@ jest.mock('../get_schedule_frequency', () => ({
 }));
 
 const { isSnoozeActive } = jest.requireMock('../../../../lib/snooze/is_snooze_active');
+const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency');
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -2505,6 +2506,66 @@ describe('bulkEdit()', () => {
       expect(result.errors[0].message).toBe(
         `Error updating rule with ID "${existingDecryptedRule.id}": the interval 10m is longer than the action frequencies`
       );
+    });
+
+    test('should only validate schedule limit if schedule is being modified', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              revision: 0,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(validateScheduleLimit).toHaveBeenCalledTimes(0);
+
+      await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: { interval: '2m' },
+          },
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(validateScheduleLimit).toHaveBeenCalledTimes(1);
     });
   });
 

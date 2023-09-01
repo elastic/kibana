@@ -53,7 +53,7 @@ export default function updateWithCircuitBreakerTests({ getService }: FtrProvide
         .expect(400);
 
       expect(body.message).eql(
-        'Error validating update data - Failed to validate schedule limit: limit reached, Remaining schedule allotment (7/min) < New schedules (12/min).'
+        'Error validating update data - Run limit reached: The rule has 12 runs per minute; there are only 7 runs per minute available.'
       );
     });
 

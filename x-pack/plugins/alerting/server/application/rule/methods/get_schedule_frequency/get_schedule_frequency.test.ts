@@ -196,8 +196,8 @@ describe('validateScheduleLimit', () => {
         context,
         updatedInterval: ['1m', '1m', '1m', '2m'],
       })
-    ).rejects.toThrowError(
-      'Failed to validate schedule limit: limit reached, Remaining schedule allotment (3/min) < New schedules (3.5/min)'
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Run limit reached: The rule has 3.5 runs per minute; there are only 3 runs per minute available."`
     );
   });
 
@@ -226,8 +226,8 @@ describe('validateScheduleLimit', () => {
         prevInterval: ['1m'],
         updatedInterval: ['30s'],
       })
-    ).rejects.toThrowError(
-      'Failed to validate schedule limit: limit reached, Remaining schedule allotment (1/min) < New schedules (2/min)'
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Run limit reached: The rule has 2 runs per minute; there are only 1 runs per minute available."`
     );
   });
 });
