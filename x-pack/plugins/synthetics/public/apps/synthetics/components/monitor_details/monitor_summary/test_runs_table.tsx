@@ -237,6 +237,7 @@ export const TestRunsTable = ({
         const targetElem = evt.target as HTMLElement;
         const isTableRow =
           targetElem.parentElement?.classList.contains('euiTableCellContent') ||
+          targetElem.parentElement?.classList.contains('euiTableCellContent__text') ||
           targetElem?.classList.contains('euiTableCellContent');
         // we dont want to capture image click event
         if (
