@@ -18,7 +18,10 @@ interface TechnicalPreviewBadgeProps {
   license: LicenseService;
 }
 
-export const TechnicalPreviewBadge = ({ label, license }: TechnicalPreviewBadgeProps) => (
+export const AlertSuppressionTechnicalPreviewBadge = ({
+  label,
+  license,
+}: TechnicalPreviewBadgeProps) => (
   <>
     {label}
     <EuiBetaBadge

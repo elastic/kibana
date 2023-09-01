@@ -853,7 +853,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <IntendedRuleTypeEuiFormRow
             $isVisible={isEsqlRule(ruleType) && isEsqlGrouping}
             data-test-subj="esqlSuppressionDuration"
-            label="Select time interval for deduplication"
+            label="Select time interval for suppression"
           >
             <UseMultiFields
               fields={{

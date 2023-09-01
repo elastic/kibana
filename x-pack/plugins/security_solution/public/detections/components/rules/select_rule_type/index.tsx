@@ -21,6 +21,7 @@ import {
 import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface SelectRuleTypeProps {
   describedByIds: string[];
@@ -195,7 +196,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
             <EuiFlexItem>
               <EuiCard
                 data-test-subj="esqRuleType"
-                title={'ES|QL'}
+                title={<TechnicalPreviewBadge label="ES|QL" />}
                 titleSize="xs"
                 description="[Technical Preview] Create rule using The Elasticsearch Query Language (ES|QL)"
                 icon={<EuiIcon type="logoElasticsearch" size="l" />}
