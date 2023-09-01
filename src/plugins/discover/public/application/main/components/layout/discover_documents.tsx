@@ -184,10 +184,11 @@ function DiscoverDocumentsComponent({
 
   const showTimeCol = useMemo(
     () =>
-      !isTextBasedQuery &&
+      // for ES|QL we want to show the time column only when is on Document view
+      (!isTextBasedQuery || !columns?.length) &&
       !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
       !!dataView.timeFieldName,
-    [isTextBasedQuery, uiSettings, dataView.timeFieldName]
+    [isTextBasedQuery, columns, uiSettings, dataView.timeFieldName]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -278,7 +279,7 @@ function DiscoverDocumentsComponent({
                 useNewFieldsApi={useNewFieldsApi}
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={onUpdateRowHeight}
-                isSortEnabled={true}
+                isSortEnabled={isTextBasedQuery ? Boolean(currentColumns.length) : true}
                 isPlainRecord={isTextBasedQuery}
                 query={query}
                 rowsPerPageState={rowsPerPage}

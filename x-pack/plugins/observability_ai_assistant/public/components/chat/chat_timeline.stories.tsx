@@ -48,6 +48,18 @@ const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) =>
 };
 
 const defaultProps: ComponentProps<typeof Component> = {
+  knowledgeBase: {
+    status: {
+      loading: false,
+      value: {
+        ready: true,
+      },
+      refresh: () => {},
+    },
+    isInstalling: false,
+    installError: undefined,
+    install: async () => {},
+  },
   items: [
     buildChatInitItem(),
     buildUserChatItem(),

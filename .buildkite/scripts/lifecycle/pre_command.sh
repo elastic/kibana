@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+echo "BUILDKITE_COMMAND: $BUILDKITE_COMMAND"
+if [[ "$BUILDKITE_COMMAND" =~ .*"upload".* ]]; then
+  echo "Skipped pre-command when running the Upload pipeline"
+  exit 0
+fi
+
 source .buildkite/scripts/common/util.sh
 
 echo '--- Setup environment vars'
