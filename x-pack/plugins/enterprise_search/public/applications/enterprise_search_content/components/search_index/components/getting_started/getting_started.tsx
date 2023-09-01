@@ -392,7 +392,11 @@ export const APIGettingStarted = () => {
               'buildSearchQuery',
               codeArgs
             )}
-            consoleRequest={getConsoleRequest('buildSearchQuery')}
+            consoleRequest={getLanguageDefinitionCodeSnippet(
+              consoleDefinition,
+              'buildSearchQuery',
+              codeArgs
+            )}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             assetBasePath={assetBasePath}

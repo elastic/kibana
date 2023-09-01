@@ -10,6 +10,14 @@ import { LanguageDefinition } from '@kbn/search-api-panels';
 import { ingestKeysToJSON } from './helpers';
 
 export const consoleDefinition: Partial<LanguageDefinition> = {
+  buildSearchQuery: ({ indexName }) => `POST /${indexName ?? 'books'}/_search?pretty
+  {
+    "query": {
+      "query_string": {
+        "query": "snow"
+      }
+    }
+  }`,
   ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
     const ingestDocumentKeys = ingestPipeline ? ingestKeysToJSON(extraIngestDocumentValues) : '';
     return `POST _bulk?pretty${ingestPipeline ? `&pipeline=${ingestPipeline}` : ''}
