@@ -98,12 +98,14 @@ steps:
   - label: ":argo: Update kibana image tag for kibana-controller using gpctl"
     async: true
     branches: main
-    trigger: gpctl-promote
+    trigger: gpctl-promote-with-e2e-tests
     build:
       env:
         SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
+        SERVICE: kibana-controller
+        NAMESPACE: kibana-ci
+        IMAGE_NAME: kibana-serverless
         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
-
 EOF
 
 else
