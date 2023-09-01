@@ -24,7 +24,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
-import { DocViewFilterFn } from '@kbn/discover-utils/types';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, GlobalState, isEqualFilters } from './services/context_state';

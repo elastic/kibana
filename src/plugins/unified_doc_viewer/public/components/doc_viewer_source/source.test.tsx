@@ -13,28 +13,10 @@ import { DocViewerSource } from './source';
 import * as hooks from '../../hooks/use_es_doc_search';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import { CodeEditorProps, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { JsonCodeEditorCommon } from '../json_code_editor';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { of } from 'rxjs';
-import { JSONCodeEditorCommonMemoized } from '@kbn/unified-data-table';
-
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-
-  const CodeEditorMock = (props: CodeEditorProps) => (
-    <input
-      data-test-subj={'mockCodeEditor'}
-      data-value={props.value}
-      value={props.value}
-      onChange={jest.fn()}
-    />
-  );
-
-  return {
-    ...original,
-    CodeEditor: CodeEditorMock,
-  };
-});
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
@@ -144,7 +126,7 @@ describe('Source Viewer component', () => {
         />
       </KibanaContextProvider>
     );
-    const jsonCodeEditor = comp.find(JSONCodeEditorCommonMemoized);
+    const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
     expect(jsonCodeEditor).not.toBe(null);
   });
 });

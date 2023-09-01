@@ -11,8 +11,6 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { chromeServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { LocalStorageMock } from './local_storage_mock';
 import { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -84,7 +82,12 @@ export function createServicesMock() {
       },
     } as unknown as DataViewFieldEditorStart,
     theme,
-    storage: new LocalStorageMock({}) as unknown as Storage,
+    storage: {
+      clear: jest.fn(),
+      get: jest.fn(),
+      set: jest.fn(),
+      remove: jest.fn(),
+    },
     toastNotifications: {
       addInfo: jest.fn(),
       addWarning: jest.fn(),

@@ -16,9 +16,9 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
-import { JSONCodeEditorCommonMemoized } from '@kbn/unified-data-table';
 import { useEsDocSearch, useUnifiedDocViewerServices } from '../../hooks';
 import { getHeight } from './get_height';
+import { JSONCodeEditorCommonMemoized } from '../json_code_editor';
 
 interface SourceViewerProps {
   id: string;

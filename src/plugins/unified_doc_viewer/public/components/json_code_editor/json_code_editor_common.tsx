@@ -72,7 +72,7 @@ export const JsonCodeEditorCommon = ({
     return codeEditor;
   }
   return (
-    <EuiFlexGroup className="unifiedDataTableJsonEditor" direction="column" gutterSize="s">
+    <EuiFlexGroup className="dscJsonCodeEditor" direction="column" gutterSize="s">
       <EuiFlexItem>
         <EuiSpacer size="s" />
         <div className="eui-textRight">

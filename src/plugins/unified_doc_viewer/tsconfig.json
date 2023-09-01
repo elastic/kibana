@@ -23,8 +23,7 @@
     "@kbn/core",
     "@kbn/shared-ux-utility",
     "@kbn/core-analytics-browser-mocks",
-    "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/unified-data-table"
+    "@kbn/core-ui-settings-browser-mocks"
   ],
   "exclude": [
     "target/**/*",

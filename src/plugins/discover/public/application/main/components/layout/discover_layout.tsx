@@ -29,7 +29,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
-import type { DocViewFilterFn } from '@kbn/discover-utils/types';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
