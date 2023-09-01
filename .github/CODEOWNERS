@@ -545,6 +545,7 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 src/plugins/presentation_util @elastic/kibana-presentation
+x-pack/plugins/profiling_data_access @elastic/profiling-ui
 x-pack/plugins/profiling @elastic/profiling-ui
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 packages/kbn-react-field @elastic/kibana-data-discovery
@@ -750,6 +751,9 @@ test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-core
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
+packages/kbn-unified-doc-viewer @elastic/kibana-data-discovery
+examples/unified_doc_viewer @elastic/kibana-core
+src/plugins/unified_doc_viewer @elastic/kibana-data-discovery
 packages/kbn-unified-field-list @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery

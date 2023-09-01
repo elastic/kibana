@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { AuthorizationContext } from '../../../../lib/authorization';
+import { useTransformCapabilities } from '../../../../hooks';
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { useScheduleNowTransforms } from '../../../../hooks';
 
@@ -21,8 +21,7 @@ import {
 
 export type ScheduleNowAction = ReturnType<typeof useScheduleNowAction>;
 export const useScheduleNowAction = (forceDisable: boolean, transformNodes: number) => {
-  const { canScheduleNowTransform } = useContext(AuthorizationContext).capabilities;
-
+  const { canScheduleNowTransform } = useTransformCapabilities();
   const scheduleNowTransforms = useScheduleNowTransforms();
 
   const action: TransformListAction = useMemo(
