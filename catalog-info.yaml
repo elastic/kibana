@@ -153,7 +153,6 @@ spec:
         # https://regex101.com/r/tY52jo/1
         filter_condition: 'build.tag =~ "/^deploy@\d+\$/"'
         filter_enabled: true
-        trigger_mode: none
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
