@@ -64,6 +64,8 @@ const connectorTypeSchema = schema.object({
   maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
 });
 
+// We leverage enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
+// The list can be overwritten only if it's not already been set in the config.
 const enabledConnectorTypesSchema = schema.arrayOf(
   schema.oneOf([schema.string(), schema.literal(EnabledActionTypes.Any)]),
   {
