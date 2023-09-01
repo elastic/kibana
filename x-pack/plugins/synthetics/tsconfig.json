@@ -79,7 +79,6 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/discover-utils",
-    "@kbn/unified-doc-viewer",
   ],
   "exclude": [
     "target/**/*",
