@@ -61,6 +61,7 @@ describe('Bulk delete artifact hook', () => {
           item_id: undefined,
           namespace_type: 'agnostic',
         },
+        version: '2023-10-31',
       });
       expect(fakeHttpServices.delete).toHaveBeenNthCalledWith(2, '/api/exception_lists/items', {
         query: {
@@ -68,6 +69,7 @@ describe('Bulk delete artifact hook', () => {
           item_id: 'fakeId-2',
           namespace_type: 'agnostic',
         },
+        version: '2023-10-31',
       });
     });
   });

@@ -78,6 +78,7 @@ describe('List artifact hook', () => {
         sort_field: 'created_at',
         sort_order: 'desc',
       },
+      version: '2023-10-31',
     });
     expect(onSuccessMock).toHaveBeenCalledTimes(1);
   });

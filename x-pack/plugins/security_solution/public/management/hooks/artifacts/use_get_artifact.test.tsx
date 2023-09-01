@@ -53,6 +53,7 @@ describe('Get artifact hook', () => {
         item_id: 'fakeId',
         namespace_type: 'agnostic',
       },
+      version: '2023-10-31',
     });
     expect(onSuccessMock).toHaveBeenCalledTimes(1);
   });

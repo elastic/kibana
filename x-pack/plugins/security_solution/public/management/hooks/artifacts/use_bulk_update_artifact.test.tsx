@@ -57,9 +57,11 @@ describe('Bulk update artifact hook', () => {
       expect(fakeHttpServices.put).toHaveBeenCalledTimes(2);
       expect(fakeHttpServices.put).toHaveBeenNthCalledWith(1, '/api/exception_lists/items', {
         body: JSON.stringify(ExceptionsListApiClient.cleanExceptionsBeforeUpdate(exceptionItem1)),
+        version: '2023-10-31',
       });
       expect(fakeHttpServices.put).toHaveBeenNthCalledWith(2, '/api/exception_lists/items', {
         body: JSON.stringify(ExceptionsListApiClient.cleanExceptionsBeforeUpdate(exceptionItem2)),
+        version: '2023-10-31',
       });
     });
   });

@@ -29,6 +29,7 @@ import { EventFiltersApiClient } from '../../../../event_filters/service/api_cli
 import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
 
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
+  version: '2023-10-31',
   path: '/api/exception_lists/items/_find',
   query: {
     filter: customFilter,
@@ -217,6 +218,7 @@ describe('Policy details artifacts flyout', () => {
       // verify the request with the new tag
       await waitFor(() => {
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
+          version: '2023-10-31',
           body: JSON.stringify(
             getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
           ),
@@ -244,6 +246,7 @@ describe('Policy details artifacts flyout', () => {
       await waitFor(() => {
         // first exception
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
+          version: '2023-10-31',
           body: JSON.stringify(
             getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
           ),

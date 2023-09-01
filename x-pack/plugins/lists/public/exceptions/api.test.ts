@@ -61,6 +61,7 @@ describe('Exceptions Lists API', () => {
         body: JSON.stringify(payload),
         method: 'POST',
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -109,6 +110,7 @@ describe('Exceptions Lists API', () => {
         body: JSON.stringify(payload),
         method: 'POST',
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -157,6 +159,7 @@ describe('Exceptions Lists API', () => {
         body: JSON.stringify(payload),
         method: 'PUT',
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -205,6 +208,7 @@ describe('Exceptions Lists API', () => {
         body: JSON.stringify(payload),
         method: 'PUT',
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -262,6 +266,7 @@ describe('Exceptions Lists API', () => {
           sort_order: 'desc',
         },
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -300,6 +305,7 @@ describe('Exceptions Lists API', () => {
           sort_order: 'desc',
         },
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
       expect(exceptionResponse.data).toEqual([getExceptionListSchemaMock()]);
     });
@@ -344,6 +350,7 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -402,6 +409,7 @@ describe('Exceptions Lists API', () => {
           sort_order: 'desc',
         },
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -430,6 +438,7 @@ describe('Exceptions Lists API', () => {
           sort_order: 'desc',
         },
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -458,6 +467,7 @@ describe('Exceptions Lists API', () => {
           sort_order: 'desc',
         },
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -519,6 +529,7 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -568,6 +579,7 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -617,6 +629,7 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -660,6 +673,7 @@ describe('Exceptions Lists API', () => {
       expect(httpMock.fetch).toHaveBeenCalledWith('/api/endpoint_list', {
         method: 'POST',
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -714,6 +728,7 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
 
@@ -752,6 +767,7 @@ describe('Exceptions Lists API', () => {
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
+        version: '2023-10-31',
       });
     });
   });

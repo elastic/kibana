@@ -55,6 +55,7 @@ describe('Create artifact hook', () => {
       expect(fakeHttpServices.post).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/exception_lists/items', {
         body: JSON.stringify(exceptionItem),
+        version: '2023-10-31',
       });
     });
   });

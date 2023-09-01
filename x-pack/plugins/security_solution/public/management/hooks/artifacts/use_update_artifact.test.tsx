@@ -55,6 +55,7 @@ describe('Update artifact hook', () => {
       expect(fakeHttpServices.put).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.put).toHaveBeenCalledWith('/api/exception_lists/items', {
         body: JSON.stringify(ExceptionsListApiClient.cleanExceptionsBeforeUpdate(exceptionItem)),
+        version: '2023-10-31',
       });
     });
   });

@@ -58,6 +58,7 @@ describe('Delete artifact hook', () => {
           id: 'fakeId',
           namespace_type: 'agnostic',
         },
+        version: '2023-10-31',
       });
     });
   });
