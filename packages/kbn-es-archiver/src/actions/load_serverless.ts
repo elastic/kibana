@@ -9,6 +9,8 @@ import * as fs from 'fs';
 import oboe from 'oboe';
 import { pipe } from 'fp-ts/function';
 import { prioritizeMappings } from '../lib';
+import { relative, resolve } from "path";
+import { REPO_ROOT } from "@kbn/repo-info";
 
 type PredicateFunction = (a: string) => boolean;
 const doesNotStartWithADot: PredicateFunction = (x) => !x.startsWith('.');
@@ -50,18 +52,22 @@ const subscribeToStreamingJsonStream = (archivePath) => {
   });
 };
 
-export const begin = async (archivePath: PathLikeOrString) => {
+type ArchivePathEntry = string;
+
+const resolveEntry = (archivePath: PathLikeOrString) => (x: ArchivePathEntry) => resolve(archivePath as string, x);
+
+const mappingsAndArchiveFileNames = async (x: PathLikeOrString) =>
+  await readDirectory(doesNotStartWithADot)(x);
+export const begin = async (archivePath: PathLikeOrString): Promise<void> => {
   // const archiveFilePath =
   //   '/Users/trezworkbox/dev/scratches/src/js/streams/native-nodejs-streams/gunzip/someotherfile.txt.gz';
   // subscribeToDecompressionStream(archivePath);
   // subscribeToStreamingJsonStream(archivePath);
-  const mappingsAndArchiveFileNames = async (x: PathLikeOrString) =>
-    await readDirectory(doesNotStartWithADot)(x);
-  const twoFilesRelativePaths = (xs: PathLikeOrString[]) => {
-    return from(pipe(xs as string[], prioritizeMappings)).pipe(map((x) => x.toUpperCase()));
-  };
 
-  twoFilesRelativePaths(await mappingsAndArchiveFileNames(archivePath)).subscribe({
+  const prioritized = (xs: PathLikeOrString[]) => from(pipe(xs as string[], prioritizeMappings))
+  const resolved = (obs$) => obs$.pipe(map(resolveEntry(archivePath)));
+
+  resolved(prioritized(await mappingsAndArchiveFileNames(archivePath))).subscribe({
     next: (x) => console.log('\nλjs next, x:', x),
     error: (err) => console.log('error:', err),
     complete: () => console.log('the end'),
