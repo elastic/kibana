@@ -12,12 +12,7 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { rawConnectorSchema } from './raw_connector_schema';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
-import {
-  getActionTypeFeatureUsageName,
-  TaskRunnerFactory,
-  ILicenseState,
-  ActionTypeDisabledError,
-} from './lib';
+import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
 import {
   ActionType,
   InMemoryConnector,
@@ -35,9 +30,6 @@ export interface ActionTypeRegistryOpts {
   inMemoryConnectors: InMemoryConnector[];
 }
 
-export const DEFAULT_ENABLED_CONNECTOR_TYPES = new Set(['*']);
-export type EnabledConnectorTypes = Set<string> | typeof DEFAULT_ENABLED_CONNECTOR_TYPES;
-
 export class ActionTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
   private readonly actionTypes: Map<string, ActionType> = new Map();
@@ -46,7 +38,6 @@ export class ActionTypeRegistry {
   private readonly licenseState: ILicenseState;
   private readonly inMemoryConnectors: InMemoryConnector[];
   private readonly licensing: LicensingPluginSetup;
-  private enabledConnectorTypes: EnabledConnectorTypes;
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
     this.taskManager = constructorParams.taskManager;
@@ -55,7 +46,6 @@ export class ActionTypeRegistry {
     this.licenseState = constructorParams.licenseState;
     this.inMemoryConnectors = constructorParams.inMemoryConnectors;
     this.licensing = constructorParams.licensing;
-    this.enabledConnectorTypes = DEFAULT_ENABLED_CONNECTOR_TYPES;
   }
 
   /**
@@ -69,18 +59,6 @@ export class ActionTypeRegistry {
    * Throws error if action type is not enabled.
    */
   public ensureActionTypeEnabled(id: string) {
-    if (!this.isConnectorTypeEnabled(id)) {
-      throw new ActionTypeDisabledError(
-        i18n.translate('xpack.actions.disabledConnectorTypeInRegistryError', {
-          defaultMessage: 'Connector type "{connectorType}" is not enabled in the registry',
-          values: {
-            connectorType: id,
-          },
-        }),
-        'not_in_enabled_types'
-      );
-    }
-
     this.actionsConfigUtils.ensureActionTypeEnabled(id);
     // Important to happen last because the function will notify of feature usage at the
     // same time and it shouldn't notify when the action type isn't enabled
@@ -96,8 +74,7 @@ export class ActionTypeRegistry {
   ) {
     return (
       this.actionsConfigUtils.isActionTypeEnabled(id) &&
-      this.licenseState.isLicenseValidForActionType(this.get(id), options).isValid === true &&
-      this.isConnectorTypeEnabled(id)
+      this.licenseState.isLicenseValidForActionType(this.get(id), options).isValid === true
     );
   }
 
@@ -271,37 +248,5 @@ export class ActionTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.list().map(({ id }) => id)];
-  }
-
-  public setEnabledConnectorTypes(connectorTypes: EnabledConnectorTypes) {
-    if (this.enabledConnectorTypes === DEFAULT_ENABLED_CONNECTOR_TYPES) {
-      this.enabledConnectorTypes = connectorTypes;
-    } else {
-      throw new Error(
-        i18n.translate('xpack.actions.actionTypeRegistry.register.setEnabledConnectorTypes', {
-          defaultMessage: 'Enabled connector types can be set only once',
-        })
-      );
-    }
-  }
-
-  public getEnabledConnectorTypes(): EnabledConnectorTypes {
-    return this.enabledConnectorTypes;
-  }
-
-  public validateEnabledConnectorTypes() {
-    if (this.enabledConnectorTypes !== DEFAULT_ENABLED_CONNECTOR_TYPES) {
-      this.enabledConnectorTypes.forEach((connectorType) => {
-        // Throws error if action type doesn't exist
-        this.get(connectorType);
-      });
-    }
-  }
-
-  private isConnectorTypeEnabled(id: string): boolean {
-    return (
-      this.enabledConnectorTypes === DEFAULT_ENABLED_CONNECTOR_TYPES ||
-      this.enabledConnectorTypes.has(id)
-    );
   }
 }

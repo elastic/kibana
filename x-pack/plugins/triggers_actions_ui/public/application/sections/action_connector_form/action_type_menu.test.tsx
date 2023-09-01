@@ -165,47 +165,6 @@ describe('connector_add_flyout', () => {
         wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"]').exists()
       ).toBeTruthy();
     });
-
-    it(`doesn't renders action types that are disabled in the registry`, async () => {
-      const onActionTypeChange = jest.fn();
-      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
-        id: 'my-action-type-2',
-        iconClass: 'test',
-        selectMessage: 'test',
-        validateParams: (): Promise<GenericValidationResult<unknown>> => {
-          const validationResult = { errors: {} };
-          return Promise.resolve(validationResult);
-        },
-        actionConnectorFields: null,
-      });
-      actionTypeRegistry.get.mockReturnValue(actionType);
-      loadActionTypes.mockResolvedValue([
-        {
-          id: actionType.id,
-          enabled: false,
-          name: 'Test',
-          enabledInConfig: true,
-          enabledInLicense: true,
-          minimumLicenseRequired: 'gold',
-          supportedFeatureIds: ['alerting'],
-        },
-      ]);
-
-      const wrapper = mountWithIntl(
-        <ActionTypeMenu
-          onActionTypeChange={onActionTypeChange}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      );
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      expect(
-        wrapper.find('EuiToolTip [data-test-subj="my-action-type-2-card"]').exists()
-      ).toBeFalsy();
-    });
   });
 
   describe('beta badge', () => {

@@ -97,31 +97,6 @@ describe('checkActionTypeEnabled', () => {
           }
       `);
   });
-
-  test('returns isEnabled:false when action type is disabled by registry', () => {
-    const actionType: ActionType = {
-      id: '1',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      name: 'my action',
-      enabled: false,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      isSystemActionType: false,
-    };
-
-    expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
-          Object {
-            "isEnabled": false,
-            "message": "This connector is disabled in the registry.",
-            "messageCard": <EuiCard
-              className="actCheckActionTypeEnabled__disabledActionWarningCard"
-              description=""
-              title="This feature is disabled in the registry."
-            />,
-          }
-      `);
-  });
 });
 
 describe('checkActionFormActionTypeEnabled', () => {
@@ -186,31 +161,6 @@ describe('checkActionFormActionTypeEnabled', () => {
               className="actCheckActionTypeEnabled__disabledActionWarningCard"
               description=""
               title="This feature is disabled by the Kibana configuration."
-            />,
-          }
-      `);
-  });
-
-  test('returns isEnabled:false when action type is disabled in the registry', async () => {
-    const actionType: ActionType = {
-      id: 'disabled-by-config',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      name: 'my action',
-      enabled: false,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      isSystemActionType: false,
-    };
-    expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
-      .toMatchInlineSnapshot(`
-          Object {
-            "isEnabled": false,
-            "message": "This connector is disabled in the registry.",
-            "messageCard": <EuiCard
-              className="actCheckActionTypeEnabled__disabledActionWarningCard"
-              description=""
-              title="This feature is disabled in the registry."
             />,
           }
       `);

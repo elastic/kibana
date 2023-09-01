@@ -64,6 +64,13 @@ const connectorTypeSchema = schema.object({
   maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
 });
 
+const enabledConnectorTypesSchema = schema.arrayOf(
+  schema.oneOf([schema.string(), schema.literal(EnabledActionTypes.Any)]),
+  {
+    defaultValue: [AllowedHosts.Any],
+  }
+);
+
 export const configSchema = schema.object({
   allowedHosts: schema.arrayOf(
     schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
@@ -71,12 +78,7 @@ export const configSchema = schema.object({
       defaultValue: [AllowedHosts.Any],
     }
   ),
-  enabledActionTypes: schema.arrayOf(
-    schema.oneOf([schema.string(), schema.literal(EnabledActionTypes.Any)]),
-    {
-      defaultValue: [AllowedHosts.Any],
-    }
-  ),
+  enabledActionTypes: enabledConnectorTypesSchema,
   preconfiguredAlertHistoryEsIndex: schema.boolean({ defaultValue: false }),
   preconfigured: schema.recordOf(schema.string(), preconfiguredActionSchema, {
     defaultValue: {},
@@ -129,6 +131,7 @@ export const configSchema = schema.object({
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
+export type EnabledConnectorTypes = TypeOf<typeof enabledConnectorTypesSchema>;
 
 // It would be nicer to add the proxyBypassHosts / proxyOnlyHosts restriction on
 // simultaneous usage in the config validator directly, but there's no good way to express

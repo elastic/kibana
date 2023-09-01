@@ -500,13 +500,6 @@ describe('actions_connectors_list', () => {
           referencedByCount: 1,
           config: {},
         },
-        {
-          id: '3',
-          actionTypeId: 'test3',
-          description: 'My test 4',
-          referencedByCount: 1,
-          config: {},
-        },
       ]);
       loadActionTypes.mockResolvedValueOnce([
         {
@@ -523,14 +516,6 @@ describe('actions_connectors_list', () => {
           enabled: false,
           enabledInConfig: true,
           enabledInLicense: false,
-          supportedFeatureIds: ['alerting'],
-        },
-        {
-          id: 'test3',
-          name: 'Test4',
-          enabled: false,
-          enabledInConfig: true,
-          enabledInLicense: true,
           supportedFeatureIds: ['alerting'],
         },
       ]);
@@ -566,14 +551,11 @@ describe('actions_connectors_list', () => {
     it('renders table of connectors', async () => {
       await setup();
       expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
-      expect(wrapper.find('EuiTableRow')).toHaveLength(3);
+      expect(wrapper.find('EuiTableRow')).toHaveLength(2);
       expect(wrapper.find('EuiTableRow').at(0).prop('className')).toEqual(
         'actConnectorsList__tableRowDisabled'
       );
       expect(wrapper.find('EuiTableRow').at(1).prop('className')).toEqual(
-        'actConnectorsList__tableRowDisabled'
-      );
-      expect(wrapper.find('EuiTableRow').at(2).prop('className')).toEqual(
         'actConnectorsList__tableRowDisabled'
       );
     });

@@ -40,10 +40,10 @@ import {
 } from '@kbn/event-log-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
-import { ActionsConfig, getValidatedConfig } from './config';
+import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client/actions_client';
-import { ActionTypeRegistry, DEFAULT_ENABLED_CONNECTOR_TYPES } from './action_type_registry';
+import { ActionTypeRegistry } from './action_type_registry';
 import {
   createEphemeralExecutionEnqueuerFunction,
   createBulkExecutionEnqueuerFunction,
@@ -128,7 +128,7 @@ export interface PluginSetupContract {
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
-  setEnabledConnectorTypes: (actionTypes: string[] | null) => void;
+  setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
 }
 
 export interface PluginStartContract {
@@ -374,12 +374,17 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         };
       },
       getActionsConfigurationUtilities: () => actionsConfigUtils,
-      setEnabledConnectorTypes: (actionTypes) => {
-        const [all] = DEFAULT_ENABLED_CONNECTOR_TYPES;
-        if (actionTypes === null || (actionTypes.length > 0 && actionTypes[0] === all)) {
-          actionTypeRegistry.setEnabledConnectorTypes(DEFAULT_ENABLED_CONNECTOR_TYPES);
+      setEnabledConnectorTypes: (connectorTypes) => {
+        if (
+          this.actionsConfig.enabledActionTypes.length === 1 &&
+          this.actionsConfig.enabledActionTypes[0] === AllowedHosts.Any
+        ) {
+          this.actionsConfig.enabledActionTypes.pop();
+          this.actionsConfig.enabledActionTypes.push(...connectorTypes);
         } else {
-          actionTypeRegistry.setEnabledConnectorTypes(new Set(actionTypes));
+          throw new Error(
+            "Enabled connector types can be set only if they haven't already been set in the config"
+          );
         }
       },
     };
@@ -548,8 +553,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         logger: this.logger,
       });
     }
-
-    actionTypeRegistry!.validateEnabledConnectorTypes();
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {

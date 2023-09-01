@@ -70,30 +70,6 @@ describe('action_form', () => {
     actionParamsFields: mockedActionParamsFields,
   };
 
-  const disabledInRegistryActionType = {
-    id: 'disabled-in-registry',
-    iconClass: 'test',
-    selectMessage: 'test',
-    validateParams: (): Promise<GenericValidationResult<unknown>> => {
-      const validationResult = { errors: {} };
-      return Promise.resolve(validationResult);
-    },
-    actionConnectorFields: null,
-    actionParamsFields: mockedActionParamsFields,
-  };
-
-  const disabledInRegistryPreconfiguredActionType = {
-    id: 'disabled-in-registry-preconfigured',
-    iconClass: 'test',
-    selectMessage: 'test',
-    validateParams: (): Promise<GenericValidationResult<unknown>> => {
-      const validationResult = { errors: {} };
-      return Promise.resolve(validationResult);
-    },
-    actionConnectorFields: null,
-    actionParamsFields: mockedActionParamsFields,
-  };
-
   const disabledByActionType = {
     id: '.jira',
     iconClass: 'test',
@@ -174,16 +150,6 @@ describe('action_form', () => {
     {
       secrets: {},
       isMissingSecrets: false,
-      id: 'test5',
-      actionTypeId: disabledInRegistryPreconfiguredActionType.id,
-      name: 'Preconfigured and disabled in registry',
-      config: {},
-      isPreconfigured: true,
-      isDeprecated: false,
-    },
-    {
-      secrets: {},
-      isMissingSecrets: false,
       id: '.servicenow',
       actionTypeId: '.servicenow',
       name: 'Non consumer connector',
@@ -249,8 +215,6 @@ describe('action_form', () => {
       disabledByLicenseActionType,
       disabledByActionType,
       preconfiguredOnly,
-      disabledInRegistryActionType,
-      disabledInRegistryPreconfiguredActionType,
     ]);
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(newActionType);
@@ -330,24 +294,6 @@ describe('action_form', () => {
         id: '.jira',
         name: 'Disabled by action type',
         enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-      },
-      {
-        id: 'disabled-in-registry',
-        name: 'Disabled in registry',
-        enabled: false,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-      },
-      {
-        id: 'disabled-in-registry-preconfigured',
-        name: 'Disabled in registry and preconfigured',
-        enabled: false,
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
@@ -445,18 +391,10 @@ describe('action_form', () => {
       );
     });
 
-    it('does not render action types disabled in config', async () => {
+    it('does not render action types disabled by config', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
         '[data-test-subj="disabled-by-config-alerting-ActionTypeSelectOption"]'
-      );
-      expect(actionOption.exists()).toBeFalsy();
-    });
-
-    it('does not render action types disabled in registry', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        '[data-test-subj="disabled-in-registry-alerting-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeFalsy();
     });
@@ -465,14 +403,6 @@ describe('action_form', () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
         '[data-test-subj="preconfigured-alerting-ActionTypeSelectOption"]'
-      );
-      expect(actionOption.exists()).toBeTruthy();
-    });
-
-    it('render action types which is preconfigured only (disabled in registry and with preconfigured connectors)', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        '[data-test-subj="disabled-in-registry-preconfigured-alerting-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeTruthy();
     });

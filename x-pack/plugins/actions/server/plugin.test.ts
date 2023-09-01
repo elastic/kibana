@@ -448,10 +448,6 @@ describe('Actions Plugin', () => {
         pluginSetup.setEnabledConnectorTypes(['*']);
         expect(pluginStart.isActionTypeEnabled('.server-log')).toBeTruthy();
         expect(pluginStart.isActionTypeEnabled('.index')).toBeTruthy();
-
-        pluginSetup.setEnabledConnectorTypes(null);
-        expect(pluginStart.isActionTypeEnabled('.server-log')).toBeTruthy();
-        expect(pluginStart.isActionTypeEnabled('.index')).toBeTruthy();
       });
 
       it('should set all the connector types disabled when [] passed', async () => {
@@ -495,6 +491,17 @@ describe('Actions Plugin', () => {
         pluginSetup.setEnabledConnectorTypes([]);
         expect(pluginStart.isActionTypeEnabled('.server-log')).toBeFalsy();
         expect(pluginStart.isActionTypeEnabled('.index')).toBeFalsy();
+      });
+
+      it('should throw if the enabledActionTypes is already set by the config', async () => {
+        setup({ ...getConfig(), enabledActionTypes: ['.email'] });
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        expect(() => pluginSetup.setEnabledConnectorTypes(['.index'])).toThrow(
+          "Enabled connector types can be set only if they haven't already been set in the config"
+        );
       });
     });
   });

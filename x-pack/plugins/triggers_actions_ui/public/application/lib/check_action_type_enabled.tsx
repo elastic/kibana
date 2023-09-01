@@ -85,24 +85,6 @@ const configurationCheckResult = {
   ),
 };
 
-const registryCheckResult = {
-  isEnabled: false,
-  message: i18n.translate(
-    'xpack.triggersActionsUI.checkActionTypeEnabled.actionTypeDisabledByRegistryMessage',
-    { defaultMessage: 'This connector is disabled in the registry.' }
-  ),
-  messageCard: (
-    <EuiCard
-      title={i18n.translate(
-        'xpack.triggersActionsUI.licenseCheck.actionTypeDisabledByRegistryMessageTitle',
-        { defaultMessage: 'This feature is disabled in the registry.' }
-      )}
-      description=""
-      className="actCheckActionTypeEnabled__disabledActionWarningCard"
-    />
-  ),
-};
-
 export function checkActionTypeEnabled(
   actionType?: ActionType
 ): IsEnabledResult | IsDisabledResult {
@@ -112,10 +94,6 @@ export function checkActionTypeEnabled(
 
   if (actionType?.enabledInConfig === false) {
     return configurationCheckResult;
-  }
-
-  if (isDisabledInRegistry(actionType)) {
-    return registryCheckResult;
   }
 
   return { isEnabled: true };
@@ -129,26 +107,15 @@ export function checkActionFormActionTypeEnabled(
     return getLicenseCheckResult(actionType);
   }
 
-  const isInPreconfiguredConnectors = preconfiguredConnectors.some(
-    (preconfiguredConnector) => preconfiguredConnector.actionTypeId === actionType.id
-  );
-
-  // do not disable action type if it contains preconfigured connectors (is preconfigured)
-  if (actionType?.enabledInConfig === false && !isInPreconfiguredConnectors) {
+  if (
+    actionType?.enabledInConfig === false &&
+    // do not disable action type if it contains preconfigured connectors (is preconfigured)
+    !preconfiguredConnectors.find(
+      (preconfiguredConnector) => preconfiguredConnector.actionTypeId === actionType.id
+    )
+  ) {
     return configurationCheckResult;
   }
 
-  if (isDisabledInRegistry(actionType) && !isInPreconfiguredConnectors) {
-    return registryCheckResult;
-  }
-
   return { isEnabled: true };
-}
-
-function isDisabledInRegistry(actionType?: ActionType): boolean {
-  return (
-    actionType?.enabledInConfig === true &&
-    actionType?.enabledInLicense === true &&
-    actionType?.enabled === false
-  );
 }

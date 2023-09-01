@@ -15,14 +15,11 @@ export const getValidConnectors = (
 ): ActionConnector[] => {
   const actionType = actionTypesIndex[actionItem.actionTypeId];
 
-  return connectors.filter((connector) => {
-    const disabledInRegistry =
-      actionType?.enabledInConfig && actionType?.enabledInLicense && !actionType?.enabled;
-    return (
+  return connectors.filter(
+    (connector) =>
       (allowGroupConnector.includes(connector.actionTypeId) ||
         connector.actionTypeId === actionItem.actionTypeId) &&
-      // include only enabled by config and registry connectors or preconfigured
-      ((actionType?.enabledInConfig && !disabledInRegistry) || connector.isPreconfigured)
-    );
-  });
+      // include only enabled by config connectors or preconfigured
+      (actionType?.enabledInConfig || connector.isPreconfigured)
+  );
 };
