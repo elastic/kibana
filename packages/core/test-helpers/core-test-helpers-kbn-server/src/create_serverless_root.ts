@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
 import { defaultsDeep } from 'lodash';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { Cluster } from '@kbn/es';
-import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
 import { CliArgs } from '@kbn/config';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
@@ -64,6 +63,7 @@ export function createTestServerlessInstances({
   };
 }
 
+const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
 function createServerlessES() {
   const log = new ToolingLog({
     level: 'info',
@@ -74,15 +74,17 @@ function createServerlessES() {
     es,
     start: async () => {
       await es.runServerless({
-        basePath: Path.join(REPO_ROOT, '.es/es_test_serverless'),
+        basePath: ES_BASE_PATH_DIR,
+        teardown: true,
+        background: true,
+        clean: true,
       });
       // runServerless doesn't wait until the nodes are up
       await waitUntilClusterReady(getServerlessESClient());
       return {
         getClient: getServerlessESClient,
         stop: async () => {
-          // hack to stop the ES cluster
-          await execa('docker', ['container', 'stop', 'es01', 'es02', 'es03']);
+          await es.stop();
         },
       };
     },
