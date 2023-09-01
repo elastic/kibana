@@ -14,10 +14,10 @@ import { PERFORM_RULE_INSTALLATION_URL } from '../../../../../../common/api/dete
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';
-import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings';
+import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings_query';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
 import { performInstallSpecificRules } from '../../api';
-import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview';
+import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
 
 export const PERFORM_SPECIFIC_RULES_INSTALLATION_KEY = [
   'POST',

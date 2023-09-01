@@ -24,6 +24,7 @@
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressions",
+      "unifiedDocViewer",
       "unifiedSearch",
       "unifiedHistogram",
       "contentManagement"

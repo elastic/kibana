@@ -9,13 +9,19 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
+import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
+  const index = watch('indicator.params.index');
+  const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
+    useFetchIndexPatternFields(index);
+  const partitionByFields = indexFields.filter((field) => field.aggregatable);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -118,6 +124,29 @@ export function ApmAvailabilityIndicatorTypeForm() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <IndexFieldSelector
+        indexFields={partitionByFields}
+        name="groupBy"
+        label={
+          <span>
+            {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
+              defaultMessage: 'Partition by',
+            })}{' '}
+            <EuiIconTip
+              content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
+                defaultMessage: 'Create individual SLOs for each value of the selected field.',
+              })}
+              position="top"
+            />
+          </span>
+        }
+        placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
+          defaultMessage: 'Select an optional field to partition by',
+        })}
+        isLoading={!!index && isIndexFieldsLoading}
+        isDisabled={!index}
+      />
 
       <DataPreviewChart />
     </EuiFlexGroup>
