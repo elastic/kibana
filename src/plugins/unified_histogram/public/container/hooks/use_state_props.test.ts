@@ -136,7 +136,7 @@ describe('useStateProps', () => {
     `);
   });
 
-  it('should return the correct props when an SQL query is used', () => {
+  it('should return the correct props when an ES|QL query is used', () => {
     const stateService = getStateService({ initialState });
     const { result } = renderHook(() =>
       useStateProps({
