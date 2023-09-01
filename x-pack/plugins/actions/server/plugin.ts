@@ -714,6 +714,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
   private validateEnabledConnectorTypes = () => {
     if (
+      !!plugins.serverless &&
       this.actionsConfig.enabledActionTypes.length > 0 &&
       this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any
     ) {
