@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SnoozeOptions } from '../../../../../../rules_client';
+import type { RuleSnoozeSchedule } from '../../../../../../application/rule/types';
 
-export const transformSnoozeBody: (opts: {
-  snooze_schedule: SnoozeOptions['snoozeSchedule'];
-}) => SnoozeOptions = ({ snooze_schedule: snoozeSchedule }) => ({
+export const transformSnoozeBody: (opts: { snooze_schedule: RuleSnoozeSchedule }) => {
+  snoozeSchedule: RuleSnoozeSchedule;
+} = ({ snooze_schedule: snoozeSchedule }) => ({
   snoozeSchedule,
 });

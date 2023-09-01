@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { RewriteRequestCase } from '../../../../../lib';
-
-export const transformUnsnoozeBody: RewriteRequestCase<{ scheduleIds?: string[] }> = ({
-  schedule_ids: scheduleIds,
-}) => (scheduleIds ? { scheduleIds } : {});
+export const transformUnsnoozeBody: (opts: { schedule_ids?: string[] }) => {
+  scheduleIds?: string[];
+} = ({ schedule_ids: scheduleIds }) => (scheduleIds ? { scheduleIds } : {});
