@@ -51,7 +51,7 @@ const DashboardToolBarComponent = ({
       if (props.destination === 'listing') {
         navigateTo({ url: dashboardListingUrl });
       }
-      if (props.destination === 'dashboard' && props.id) {
+      if (props.destination === 'dashboard') {
         navigateTo({ url: getEditOrCreateDashboardUrl(props.id) });
       }
     },
