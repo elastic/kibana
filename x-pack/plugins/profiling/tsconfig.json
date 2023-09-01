@@ -48,7 +48,8 @@
     "@kbn/utility-types",
     "@kbn/usage-collection-plugin",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/profiling-data-access-plugin"
+    "@kbn/profiling-data-access-plugin",
+    "@kbn/embeddable-plugin"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
