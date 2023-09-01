@@ -7,17 +7,25 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 
 export let core: CoreStart;
 
-const servicesReady$ = new BehaviorSubject<{ core: CoreStart; darkMode: boolean } | undefined>(
-  undefined
-);
+interface ServiceDeps {
+  core: CoreStart;
+  darkMode: boolean;
+  dataViews: DataViewsPublicPluginStart;
+  expressions: ExpressionsStart;
+  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
+}
+
+const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
 export const untilPluginStartServicesReady = () => {
   if (servicesReady$.value) return Promise.resolve(servicesReady$.value);
-  return new Promise<{ core: CoreStart; darkMode: boolean }>((resolve) => {
+  return new Promise<ServiceDeps>((resolve) => {
     const subscription = servicesReady$.subscribe((deps) => {
       if (deps) {
         subscription.unsubscribe();
@@ -27,9 +35,20 @@ export const untilPluginStartServicesReady = () => {
   });
 };
 
-export const setKibanaServices = (kibanaCore: CoreStart) => {
+export const setKibanaServices = (
+  kibanaCore: CoreStart,
+  dataViews: DataViewsPublicPluginStart,
+  expressions: ExpressionsStart,
+  indexManagement?: IndexManagementPluginSetup
+) => {
   core = kibanaCore;
   core.theme.theme$.subscribe(({ darkMode }) => {
-    servicesReady$.next({ core, darkMode });
+    servicesReady$.next({
+      core,
+      darkMode,
+      dataViews,
+      expressions,
+      indexManagementApiService: indexManagement?.apiService,
+    });
   });
 };
