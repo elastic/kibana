@@ -55,7 +55,9 @@ export class SavedObjectTaggingPlugin
 
     if (usageCollection) {
       const getKibanaIndices = () =>
-        getStartServices().then(([core]) => core.savedObjects.getAllIndices());
+        getStartServices()
+          .then(([core]) => core.savedObjects.getAllIndices())
+          .catch(() => []);
       usageCollection.registerCollector(
         createTagUsageCollector({
           usageCollection,
