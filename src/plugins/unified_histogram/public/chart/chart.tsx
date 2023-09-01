@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
@@ -69,6 +69,7 @@ export interface ChartProps {
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
   lensTablesAdapter?: Record<string, Datatable>;
+  isOnHistogramMode?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -78,6 +79,7 @@ export interface ChartProps {
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
+  withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -104,6 +106,7 @@ export function Chart({
   disabledActions,
   input$: originalInput$,
   lensTablesAdapter,
+  isOnHistogramMode,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -113,6 +116,7 @@ export function Chart({
   onChartLoad,
   onFilter,
   onBrushEnd,
+  withDefaultActions,
 }: ChartProps) {
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -425,10 +429,11 @@ export function Chart({
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
-              hasLensSuggestions={Boolean(currentSuggestion)}
+              hasLensSuggestions={!Boolean(isOnHistogramMode)}
               onChartLoad={onChartLoad}
               onFilter={onFilter}
               onBrushEnd={onBrushEnd}
+              withDefaultActions={withDefaultActions}
             />
           </section>
           {appendHistogram}

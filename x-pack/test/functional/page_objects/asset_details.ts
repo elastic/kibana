@@ -77,6 +77,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.existOrFail('infraAssetDetailsMetadataTable');
     },
 
+    async metadataTableMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsMetadataTable');
+    },
+
     async metadataRemovePinExists() {
       return testSubjects.exists('infraAssetDetailsMetadataRemovePin');
     },
@@ -90,6 +94,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async metadataRemoveFilterExists() {
       return testSubjects.exists('infraAssetDetailsMetadataRemoveFilterButton');
+    },
+
+    async getMetadataSearchField() {
+      return await testSubjects.find('infraAssetDetailsMetadataSearchBarInput');
     },
 
     // Processes
@@ -124,6 +132,18 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraProcessRowButton');
     },
 
+    async getProcessesSearchField() {
+      return await testSubjects.find('infraAssetDetailsProcessesSearchBarInput');
+    },
+
+    async processesSearchInputErrorMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsProcessesSearchInputError');
+    },
+
+    async processesSearchInputErrorExists() {
+      return await testSubjects.existOrFail('infraAssetDetailsProcessesSearchInputError');
+    },
+
     // Logs
     async clickLogsTab() {
       return testSubjects.click('infraAssetDetailsLogsTab');
@@ -131,6 +151,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async logsExists() {
       await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+    },
+
+    async getLogsSearchField() {
+      return await testSubjects.find('infraAssetDetailsLogsTabFieldSearch');
     },
 
     // Anomalies

@@ -210,6 +210,7 @@ export const schema = Joi.object()
             scheme: /https?/,
           }),
         }),
+        files: Joi.array().items(Joi.string()),
       })
       .default(),
 
