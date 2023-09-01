@@ -588,8 +588,10 @@ export const DiscoverGrid = ({
   );
 
   const inMemory = useMemo(() => {
-    return isPlainRecord ? ({ level: 'sorting' } as EuiDataGridInMemory) : undefined;
-  }, [isPlainRecord]);
+    return isPlainRecord && columns.length
+      ? ({ level: 'sorting' } as EuiDataGridInMemory)
+      : undefined;
+  }, [columns.length, isPlainRecord]);
 
   const toolbarVisibility = useMemo(
     () =>
