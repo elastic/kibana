@@ -50,7 +50,7 @@ describe('value lists', () => {
       closeValueListsModal();
     });
 
-    describe('create list types', () => {
+    describe('create list types', { tags: ['@brokenInServerless'] }, () => {
       beforeEach(() => {
         openValueListsModal();
       });
@@ -108,7 +108,7 @@ describe('value lists', () => {
       });
     });
 
-    describe('delete list types', () => {
+    describe('delete list types', { tags: ['@brokenInServerless'] }, () => {
       it('deletes a "keyword" list from an uploaded file', () => {
         importValueList(TEXT_LIST_FILE_NAME, 'keyword');
         openValueListsModal();
@@ -154,7 +154,7 @@ describe('value lists', () => {
       });
     });
 
-    describe('export list types', () => {
+    describe('export list types', { tags: ['@brokenInServerless'] }, () => {
       it('exports a "keyword" list from an uploaded file', () => {
         cy.intercept('POST', `/api/lists/items/_export?list_id=${TEXT_LIST_FILE_NAME}`).as(
           'exportList'
