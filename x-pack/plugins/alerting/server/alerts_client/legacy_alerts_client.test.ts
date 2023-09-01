@@ -110,7 +110,7 @@ const testAlert2 = {
   meta: {
     lastScheduledActions: {
       group: 'default',
-      date: new Date(),
+      date: new Date().toISOString(),
     },
     uuid: 'def',
   },

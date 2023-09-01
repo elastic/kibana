@@ -16,7 +16,9 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiToolTip,
 } from '@elastic/eui';
+import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
@@ -31,6 +33,10 @@ import {
   PREVALENCE_TABLE_FIELD_COLUMN_TITLE,
   USER_TITLE,
   PREVALENCE_NO_DATA_MESSAGE,
+  PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE_TOOLTIP,
+  PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE_TOOLTIP,
+  HOST_PREVALENCE_COLUMN_TITLE_TOOLTIP,
+  USER_PREVALENCE_COLUMN_TITLE_TOOLTIP,
 } from './translations';
 import {
   PREVALENCE_DETAILS_LOADING_TEST_ID,
@@ -46,6 +52,12 @@ import {
   PREVALENCE_DETAILS_TABLE_TEST_ID,
 } from './test_ids';
 import { useLeftPanelContext } from '../context';
+import {
+  getDataProvider,
+  getDataProviderAnd,
+} from '../../../common/components/event_details/table/use_action_cell_data_provider';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { IS_OPERATOR } from '../../../../common/types';
 
 export const PREVALENCE_TAB_ID = 'prevalence-details';
 const DEFAULT_FROM = 'now-30d';
@@ -63,34 +75,86 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   },
   {
-    field: 'alertCount',
     name: (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>{PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE}</EuiFlexItem>
-        <EuiFlexItem>{PREVALENCE_TABLE_COUNT_COLUMN_TITLE}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiToolTip content={PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE_TOOLTIP}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>{PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE}</EuiFlexItem>
+          <EuiFlexItem>{PREVALENCE_TABLE_COUNT_COLUMN_TITLE}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
+    render: (data: PrevalenceData) => {
+      const dataProviders = [
+        getDataProvider(data.field, `timeline-indicator-${data.field}-${data.value}`, data.value),
+      ];
+      return data.alertCount > 0 ? (
+        <InvestigateInTimelineButton
+          asEmptyButton={true}
+          dataProviders={dataProviders}
+          filters={[]}
+        >
+          <>{data.alertCount}</>
+        </InvestigateInTimelineButton>
+      ) : (
+        getEmptyTagValue()
+      );
+    },
     width: '10%',
   },
   {
-    field: 'docCount',
     name: (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>{PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE}</EuiFlexItem>
-        <EuiFlexItem>{PREVALENCE_TABLE_COUNT_COLUMN_TITLE}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiToolTip content={PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE_TOOLTIP}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>{PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE}</EuiFlexItem>
+          <EuiFlexItem>{PREVALENCE_TABLE_COUNT_COLUMN_TITLE}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
+    render: (data: PrevalenceData) => {
+      const dataProviders = [
+        {
+          ...getDataProvider(
+            data.field,
+            `timeline-indicator-${data.field}-${data.value}`,
+            data.value
+          ),
+          and: [
+            getDataProviderAnd(
+              'event.kind',
+              `timeline-indicator-event.kind-not-signal`,
+              'signal',
+              IS_OPERATOR,
+              true
+            ),
+          ],
+        },
+      ];
+      return data.docCount > 0 ? (
+        <InvestigateInTimelineButton
+          asEmptyButton={true}
+          dataProviders={dataProviders}
+          filters={[]}
+          keepDataView // changing dataview from only detections to include non-alerts docs
+        >
+          <>{data.docCount}</>
+        </InvestigateInTimelineButton>
+      ) : (
+        getEmptyTagValue()
+      );
+    },
     width: '10%',
   },
   {
     field: 'hostPrevalence',
     name: (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>{HOST_TITLE}</EuiFlexItem>
-        <EuiFlexItem>{PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiToolTip content={HOST_PREVALENCE_COLUMN_TITLE_TOOLTIP}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>{HOST_TITLE}</EuiFlexItem>
+          <EuiFlexItem>{PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
     render: (hostPrevalence: number) => (
@@ -104,10 +168,12 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
   {
     field: 'userPrevalence',
     name: (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>{USER_TITLE}</EuiFlexItem>
-        <EuiFlexItem>{PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiToolTip content={USER_PREVALENCE_COLUMN_TITLE_TOOLTIP}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>{USER_TITLE}</EuiFlexItem>
+          <EuiFlexItem>{PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
     render: (userPrevalence: number) => (
@@ -184,7 +250,6 @@ export const PrevalenceDetails: React.FC = () => {
             items={data}
             columns={columns}
             data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
-            tableLayout="auto"
           />
         ) : (
           <div data-test-subj={`${PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID}Error`}>

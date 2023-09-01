@@ -136,8 +136,6 @@ export const MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON = '[data-test-subj="addMitreAt
 export const REFERENCE_URLS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] input';
 
-export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
-
 export const DEFAULT_RISK_SCORE_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeInput';
 

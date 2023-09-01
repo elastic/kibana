@@ -98,6 +98,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.network_drive,
+    platinumOnly: true,
   },
   onedrive: {
     docsUrl: docLinks.connectorsOneDrive,
@@ -196,6 +197,6 @@ export const getConnectorTemplate = ({
 }
 
   elasticsearch:
-    host: "${host || 'https://locahost:9200'}"
+    host: "${host || 'http://localhost:9200'}"
     api_key: "${apiKeyData?.encoded || ''}"
 `;

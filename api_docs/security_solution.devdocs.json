@@ -101,7 +101,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; readonly protectionUpdatesEnabled: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -480,7 +480,7 @@
               "\nExperimental flag needed to enable the link"
             ],
             "signature": [
-              "\"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"alertsPreviewChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"alertDetailsPageEnabled\" | \"responseActionUploadEnabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"detectionsCoverageOverview\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"discoverInTimeline\" | undefined"
+              "\"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"alertsPreviewChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"alertDetailsPageEnabled\" | \"responseActionUploadEnabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"discoverInTimeline\" | \"protectionUpdatesEnabled\" | undefined"
             ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
@@ -560,7 +560,7 @@
               "\nExperimental flag needed to disable the link. Opposite of experimentalKey"
             ],
             "signature": [
-              "\"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"alertsPreviewChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"alertDetailsPageEnabled\" | \"responseActionUploadEnabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"detectionsCoverageOverview\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"discoverInTimeline\" | undefined"
+              "\"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"alertsPreviewChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"alertDetailsPageEnabled\" | \"responseActionUploadEnabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"discoverInTimeline\" | \"protectionUpdatesEnabled\" | undefined"
             ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
@@ -2792,22 +2792,16 @@
       "children": [
         {
           "parentPluginId": "securitySolution",
-          "id": "def-server.SecuritySolutionPluginSetup.setAppFeatures",
+          "id": "def-server.SecuritySolutionPluginSetup.setAppFeaturesConfigurator",
           "type": "Function",
           "tags": [],
-          "label": "setAppFeatures",
+          "label": "setAppFeaturesConfigurator",
           "description": [
-            "\nSets the app features that are available to the Security Solution"
+            "\nSets the configurations for app features that are available to the Security Solution"
           ],
           "signature": [
-            "(appFeatureKeys: ",
-            {
-              "pluginId": "securitySolution",
-              "scope": "common",
-              "docId": "kibSecuritySolutionPluginApi",
-              "section": "def-common.AppFeatureKeys",
-              "text": "AppFeatureKeys"
-            },
+            "(configurator: ",
+            "AppFeaturesConfigurator",
             ") => void"
           ],
           "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
@@ -2817,22 +2811,15 @@
           "children": [
             {
               "parentPluginId": "securitySolution",
-              "id": "def-server.SecuritySolutionPluginSetup.setAppFeatures.$1",
-              "type": "Array",
+              "id": "def-server.SecuritySolutionPluginSetup.setAppFeaturesConfigurator.$1",
+              "type": "Object",
               "tags": [],
-              "label": "appFeatureKeys",
+              "label": "configurator",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "securitySolution",
-                  "scope": "common",
-                  "docId": "kibSecuritySolutionPluginApi",
-                  "section": "def-common.AppFeatureKey",
-                  "text": "AppFeatureKey"
-                },
-                "[]"
+                "AppFeaturesConfigurator"
               ],
-              "path": "x-pack/plugins/security_solution/server/lib/app_features/app_features.ts",
+              "path": "x-pack/plugins/security_solution/server/lib/app_features_service/app_features_service.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2940,47 +2927,6 @@
       },
       {
         "parentPluginId": "securitySolution",
-        "id": "def-common.AppFeatureKey",
-        "type": "Type",
-        "tags": [],
-        "label": "AppFeatureKey",
-        "description": [],
-        "signature": [
-          "AppFeatureSecurityKey",
-          " | ",
-          "AppFeatureCasesKey",
-          " | ",
-          "AppFeatureAssistantKey"
-        ],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.AppFeatureKeys",
-        "type": "Type",
-        "tags": [],
-        "label": "AppFeatureKeys",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "securitySolution",
-            "scope": "common",
-            "docId": "kibSecuritySolutionPluginApi",
-            "section": "def-common.AppFeatureKey",
-            "text": "AppFeatureKey"
-          },
-          "[]"
-        ],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
         "id": "def-common.CASES_FEATURE_ID",
         "type": "string",
         "tags": [],
@@ -3019,7 +2965,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; readonly protectionUpdatesEnabled: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
@@ -3060,27 +3006,6 @@
     "objects": [
       {
         "parentPluginId": "securitySolution",
-        "id": "def-common.ALL_APP_FEATURE_KEYS",
-        "type": "Object",
-        "tags": [],
-        "label": "ALL_APP_FEATURE_KEYS",
-        "description": [],
-        "signature": [
-          "readonly (",
-          "AppFeatureSecurityKey",
-          " | ",
-          "AppFeatureCasesKey",
-          ".casesConnectors | ",
-          "AppFeatureAssistantKey",
-          ".assistant)[]"
-        ],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
         "id": "def-common.allowedExperimentalValues",
         "type": "Object",
         "tags": [],
@@ -3089,67 +3014,11 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; readonly protectionUpdatesEnabled: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.AppFeatureKey",
-        "type": "Object",
-        "tags": [],
-        "label": "AppFeatureKey",
-        "description": [],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.AppFeatureKey.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.AppFeatureKey.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.AppFeatureKey.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ]

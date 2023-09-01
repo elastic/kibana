@@ -7,12 +7,12 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { isEmpty } from 'lodash';
+import { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
 import { AlertHit, CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
   RawAlertInstance,
-  rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
   LastScheduledActions,
@@ -52,7 +52,7 @@ export class Alert<
   ActionGroupIds extends string = never
 > {
   private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
-  private meta: AlertInstanceMeta;
+  private meta: MutableAlertInstanceMeta;
   private state: State;
   private context: Context;
   private readonly id: string;
@@ -111,11 +111,13 @@ export class Alert<
             this.meta.lastScheduledActions.actions[uuid] ||
             this.meta.lastScheduledActions.actions[actionHash]; // actionHash must be removed once all the hash identifiers removed from the task state
           const lastTriggerDate = actionInState?.date;
-          return !!(lastTriggerDate && lastTriggerDate.getTime() + throttleMills > Date.now());
+          return !!(
+            lastTriggerDate && new Date(lastTriggerDate).getTime() + throttleMills > Date.now()
+          );
         }
         return false;
       } else {
-        return this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now();
+        return new Date(this.meta.lastScheduledActions.date).getTime() + throttleMills > Date.now();
       }
     }
     return false;
@@ -202,7 +204,7 @@ export class Alert<
     if (!this.meta.lastScheduledActions) {
       this.meta.lastScheduledActions = {} as LastScheduledActions;
     }
-    const date = new Date();
+    const date = new Date().toISOString();
     this.meta.lastScheduledActions.group = group;
     this.meta.lastScheduledActions.date = date;
 
@@ -224,7 +226,7 @@ export class Alert<
    * Used to serialize alert instance state
    */
   toJSON() {
-    return rawAlertInstance.encode(this.toRaw());
+    return this.toRaw();
   }
 
   toRaw(recovered: boolean = false): RawAlertInstance {
