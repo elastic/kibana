@@ -70,20 +70,15 @@ export class TLSRuleExecutor {
     const {
       allIds,
       enabledMonitorQueryIds,
-      listOfLocations,
+      monitorLocationIds,
       monitorLocationMap,
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
-    } = await processMonitors(
-      this.monitors,
-      this.server,
-      this.soClient,
-      this.syntheticsMonitorClient
-    );
+    } = processMonitors(this.monitors, this.server, this.soClient, this.syntheticsMonitorClient);
 
     return {
       enabledMonitorQueryIds,
-      listOfLocations,
+      monitorLocationIds,
       allIds,
       monitorLocationMap,
       projectMonitorsCount,
