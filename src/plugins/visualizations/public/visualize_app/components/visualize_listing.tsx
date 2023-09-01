@@ -109,6 +109,7 @@ const useTableListViewProps = (
       overlays,
       toastNotifications,
       visualizeCapabilities,
+      contentManagement,
     },
   } = useKibana<VisualizeServices>();
 
@@ -176,11 +177,16 @@ const useTableListViewProps = (
             description: args.description ?? '',
             tags: args.tags,
           },
-          { overlays, savedObjectsTagging }
+          {
+            overlays,
+            savedObjectsTagging,
+            typesService: getTypes(),
+            contentManagement,
+          }
         );
       }
     },
-    [overlays, savedObjectsTagging]
+    [overlays, savedObjectsTagging, contentManagement]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(

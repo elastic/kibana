@@ -7,7 +7,6 @@
 
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import type {
   SerializableAttributes,
   VisualizationClient,
@@ -27,11 +26,8 @@ import {
   LensUpdateOut,
 } from '../../common/content_management';
 
-export const [getContentManagement, setContentManagement] =
-  createGetterSetter<ContentManagementPublicStart>('SavedObjectsManagement');
-
 export function getLensClient<Attr extends SerializableAttributes = SerializableAttributes>(
-  cm: ContentManagementPublicStart = getContentManagement()
+  cm: ContentManagementPublicStart
 ): VisualizationClient<'lens', Attr> {
   const get = async (id: string) => {
     return cm.client.get<LensGetIn, LensGetOut>({

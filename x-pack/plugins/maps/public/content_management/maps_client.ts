@@ -39,7 +39,7 @@ export function getMapClient(cm: ContentManagementPublicStart = getContentManage
   };
 
   const deleteMap = async (id: string) => {
-    await cm.client.delete<MapCrudTypes['DeleteIn'], MapCrudTypes['DeleteOut']>({
+    return await cm.client.delete<MapCrudTypes['DeleteIn'], MapCrudTypes['DeleteOut']>({
       contentTypeId,
       id,
     });

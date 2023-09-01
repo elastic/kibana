@@ -67,10 +67,11 @@ const deleteVisualization = async (id: string) => {
 
 const search = async (query: SearchQuery = {}, options?: VisualizationSearchQuery) => {
   if (options && options.types && options.types.length > 1) {
+    const { types, ...rest } = options;
     return getContentManagement().client.mSearch<VisualizationSearchOut['hits'][number]>({
-      contentTypes: options.types.map((type) => ({ contentTypeId: type })),
+      contentTypes: types.map((type) => ({ contentTypeId: type })),
       query,
-      options,
+      options: rest,
     });
   }
   return getContentManagement().client.search<VisualizationSearchIn, VisualizationSearchOut>({

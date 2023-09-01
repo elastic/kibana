@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { SavedObjectIndexStore } from './saved_object_store';
 
 describe('LensStore', () => {
@@ -18,7 +18,7 @@ describe('LensStore', () => {
 
     return {
       client,
-      store: new SavedObjectIndexStore(client as unknown as ContentClient),
+      store: new SavedObjectIndexStore(client as unknown as ContentManagementPublicStart),
     };
   }
 

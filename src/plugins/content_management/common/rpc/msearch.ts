@@ -22,6 +22,7 @@ export const mSearchSchemas: ProcedureSchemas = {
         }
       ),
       query: searchQuerySchema,
+      options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
   ),
@@ -45,7 +46,8 @@ export interface MSearchIn {
 
 export type MSearchResult<T = unknown> = SearchResult<T>;
 
-export interface MSearchOut<T = unknown> {
+export interface MSearchIn<Options extends void | object = object> {
   contentTypes: Array<{ contentTypeId: string; version?: Version }>;
-  result: MSearchResult<T>;
+  query: MSearchQuery;
+  options?: Options;
 }
