@@ -39,7 +39,7 @@ import {
   TemplateListItem,
   DataStream,
   Index,
-  IndexSettings,
+  IndexSettingsResponse,
 } from '../../../common';
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
@@ -342,7 +342,7 @@ export function loadIndexStatistics(indexName: string) {
 }
 
 export function useLoadIndexSettings(indexName: string) {
-  return useRequest<{ settings: IndexSettings; defaults: IndexSettings }>({
+  return useRequest<IndexSettingsResponse>({
     path: `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
     method: 'get',
   });

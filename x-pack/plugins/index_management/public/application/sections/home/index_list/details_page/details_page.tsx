@@ -202,7 +202,7 @@ export const DetailsPage: React.FunctionComponent<
           <Route
             path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Settings}`}
             render={(props: RouteComponentProps<{ indexName: string }>) => (
-              <DetailsPageSettings {...props} isIndexOpen={index?.status === 'open'} />
+              <DetailsPageSettings {...props} isIndexOpen={index.status === INDEX_OPEN} />
             )}
           />
           <Route

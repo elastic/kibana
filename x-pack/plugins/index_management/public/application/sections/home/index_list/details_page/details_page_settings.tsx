@@ -78,5 +78,12 @@ export const DetailsPageSettings: FunctionComponent<
       />
     );
   }
-  return <DetailsPageSettingsContent isIndexOpen={isIndexOpen} data={data} indexName={indexName} />;
+  return (
+    <DetailsPageSettingsContent
+      isIndexOpen={isIndexOpen}
+      data={data}
+      indexName={indexName}
+      reloadIndexSettings={resendRequest}
+    />
+  );
 };

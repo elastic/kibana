@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent } from 'react';
+import React, { useState, FunctionComponent, useCallback } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -25,21 +25,13 @@ import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { IndexSettings } from '../../../../../../common';
+import { IndexSettingsResponse } from '../../../../../../common';
 import { Error } from '../../../../../shared_imports';
 import { documentationService, updateIndexSettings } from '../../../../services';
 import { notificationService } from '../../../../services/notification';
 import { flattenObject } from '../../../../lib/flatten_object';
 import { readOnlySettings, settingsToDisplay } from '../../../../lib/edit_settings';
 
-interface Props {
-  isIndexOpen: boolean;
-  data: {
-    settings: IndexSettings;
-    defaults: IndexSettings;
-  };
-  indexName: string;
-}
 const getEditableSettings = (
   data: Props['data'],
   isIndexOpen: boolean
@@ -60,10 +52,19 @@ const getEditableSettings = (
   const settingsString = JSON.stringify(newSettings, null, 2);
   return { originalSettings: newSettings, settingsString };
 };
+
+interface Props {
+  isIndexOpen: boolean;
+  data: IndexSettingsResponse;
+  indexName: string;
+  reloadIndexSettings: () => void;
+}
+
 export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
   isIndexOpen,
   data,
   indexName,
+  reloadIndexSettings,
 }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const onEditModeChange = (event: EuiSwitchEvent) => {
@@ -76,7 +77,12 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [updateError, setUpdateError] = useState<Error | null>(null);
 
-  const updateSettings = async () => {
+  const resetChanges = useCallback(() => {
+    setUpdateError(null);
+    setEditableSettings(settingsString);
+  }, [settingsString]);
+
+  const updateSettings = useCallback(async () => {
     setUpdateError(null);
     setIsLoading(true);
     try {
@@ -94,7 +100,6 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           setIsLoading(false);
           setUpdateError(error);
         } else {
-          // add a request to reload settings
           setIsLoading(false);
           setIsEditMode(false);
           notificationService.showSuccessToast(
@@ -103,6 +108,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
               values: { indexName },
             })
           );
+          reloadIndexSettings();
         }
       } else {
         setIsLoading(false);
@@ -121,7 +127,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
         }),
       });
     }
-  };
+  }, [originalSettings, editableSettings, indexName, reloadIndexSettings]);
   return (
     // using "rowReverse" to keep the card on the left side to be on top of the code block on smaller screens
     <EuiFlexGroup
@@ -165,16 +171,33 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
             onChange={onEditModeChange}
           />
           <EuiSpacer size="m" />
-          <EuiButton
-            fill
-            isDisabled={!isEditMode || isLoading || !editableSettings}
-            onClick={updateSettings}
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.indexDetails.settings.saveButtonLabel"
-              defaultMessage="Save"
-            />
-          </EuiButton>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={1}>
+              <EuiButton
+                fill
+                isDisabled={!isEditMode || !editableSettings}
+                isLoading={isLoading}
+                onClick={updateSettings}
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.settings.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiButton
+                isDisabled={!isEditMode || isLoading || settingsString === editableSettings}
+                onClick={resetChanges}
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.settings.resetChangesButtonLabel"
+                  defaultMessage="Reset changes"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           {updateError && (
             <>
               <EuiSpacer size="m" />
