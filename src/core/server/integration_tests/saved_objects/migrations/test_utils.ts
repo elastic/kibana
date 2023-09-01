@@ -44,9 +44,3 @@ export const parseLogFile = async (filePath: string): Promise<LogRecord[]> => {
     .filter(Boolean)
     .map((str) => JSON5.parse(str)) as LogRecord[];
 };
-
-interface EsServer {
-  stop: () => Promise<void>;
-}
-
-export type EsRunner = () => Promise<EsServer>;
