@@ -12,7 +12,7 @@ import { searchStackTraces } from '../search_stack_traces';
 import { createCalleeTree } from '../../../common/callee';
 import { createBaseFlameGraph, createFlameGraph } from '../../../common/flamegraph';
 
-interface FetchFlamechartParams {
+export interface FetchFlamechartParams {
   esClient: ElasticsearchClient;
   rangeFrom: number;
   rangeTo: number;

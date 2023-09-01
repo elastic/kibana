@@ -17,7 +17,6 @@
     "@kbn/core",
     "@kbn/es-query",
     "@kbn/es-types",
-    "@kbn/observability-plugin",
     "@kbn/apm-utils"
   ]
 }

@@ -95,7 +95,7 @@ export interface APMPluginSetupDependencies {
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
-  profilingDataAccess: ProfilingDataAccessPluginSetup;
+  profilingDataAccess?: ProfilingDataAccessPluginSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -121,5 +121,5 @@ export interface APMPluginStartDependencies {
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;
   customIntegrations?: CustomIntegrationsPluginStart;
-  profilingDataAccess: ProfilingDataAccessPluginStart;
+  profilingDataAccess?: ProfilingDataAccessPluginStart;
 }
