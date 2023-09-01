@@ -344,6 +344,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('Processes Tab', () => {
         it('should render processes tab and with Total Value summary', async () => {
           await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          await pageObjects.header.waitUntilLoadingHasFinished();
           const processesTotalValue =
             await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
           const processValue = await processesTotalValue.getVisibleText();
