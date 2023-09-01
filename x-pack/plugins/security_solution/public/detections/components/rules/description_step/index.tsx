@@ -72,6 +72,8 @@ const panelViewStyle = css`
   text-overflow: ellipsis;
 `;
 
+const DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = ['50%', '50%'];
+
 interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
@@ -151,7 +153,8 @@ export const StepRuleDescriptionComponent = <T,>({
           <DescriptionListContainer
             data-test-subj="singleSplitStepRuleDescriptionList"
             type="column"
-            columnWidths={[3, 7]}
+            columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+            rowGutterSize="m"
             listItems={listItems}
           />
         )}
