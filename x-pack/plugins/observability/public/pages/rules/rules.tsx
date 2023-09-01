@@ -177,7 +177,6 @@ export function RulesPage() {
 
       {addRuleFlyoutVisibility && (
         <AddRuleFlyout
-          consumer={ALERTS_FEATURE_ID}
           filteredRuleTypes={filteredRuleTypes}
           validConsumers={observabilityRuleCreationValidConsumers}
           onClose={() => {

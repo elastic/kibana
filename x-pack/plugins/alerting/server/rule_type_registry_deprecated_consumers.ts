@@ -81,8 +81,6 @@ const ruleTypeIdWithValidLegacyConsumers: Record<string, string[]> = {
 const getRuleTypeIdValidLegacyConsumers = (ruleTypeId: string): string[] => {
   if (ruleTypeIdWithValidLegacyConsumers[ruleTypeId]) {
     return ruleTypeIdWithValidLegacyConsumers[ruleTypeId];
-  } else if (ruleTypeId.startsWith('test.')) {
-    return [ALERTS_FEATURE_ID];
   }
   return [];
 };

@@ -444,7 +444,7 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
 }
 
 export interface RuleAddProps<MetaData = Record<string, any>> {
-  consumer: string;
+  consumer: string | 'UseRuleProducer';
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;

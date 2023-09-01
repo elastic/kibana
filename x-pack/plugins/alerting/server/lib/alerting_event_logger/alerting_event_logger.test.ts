@@ -46,6 +46,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   validate: {
     params: schema.any(),
   },
+  validLegacyConsumers: [],
 };
 
 const context: RuleContextOpts = {

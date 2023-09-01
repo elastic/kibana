@@ -27,6 +27,7 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       doesSetRecoveryContext,
       hasAlertsMappings,
       hasFieldsForAAD,
+      validLegacyConsumers,
       ...rest
     }) => ({
       ...rest,
@@ -43,6 +44,7 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       does_set_recovery_context: doesSetRecoveryContext,
       has_alerts_mappings: !!hasAlertsMappings,
       has_fields_for_a_a_d: !!hasFieldsForAAD,
+      valid_legacy_consumers: validLegacyConsumers,
     })
   );
 };

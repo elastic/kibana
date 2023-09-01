@@ -201,6 +201,7 @@ beforeEach(() => {
     validate: {
       params: schema.any(),
     },
+    validLegacyConsumers: [],
   }));
   features.getKibanaFeatures.mockReturnValue([
     myAppFeature,
@@ -764,6 +765,7 @@ describe('AlertingAuthorization', () => {
       enabledInLicense: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     };
     const myAppAlertType: RegistryRuleType = {
       actionGroups: [],
@@ -778,6 +780,7 @@ describe('AlertingAuthorization', () => {
       enabledInLicense: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     };
     const mySecondAppAlertType: RegistryRuleType = {
       actionGroups: [],
@@ -792,6 +795,7 @@ describe('AlertingAuthorization', () => {
       enabledInLicense: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
     test('omits filter when there is no authorization api', async () => {
@@ -1165,6 +1169,7 @@ describe('AlertingAuthorization', () => {
       enabledInLicense: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     };
     const myAppAlertType: RegistryRuleType = {
       actionGroups: [],
@@ -1179,6 +1184,7 @@ describe('AlertingAuthorization', () => {
       enabledInLicense: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
     beforeEach(() => {
@@ -1245,6 +1251,7 @@ describe('AlertingAuthorization', () => {
               "id": "recovered",
               "name": "Recovered",
             },
+            "validLegacyConsumers": Array [],
           },
           Object {
             "actionGroups": Array [],
@@ -1280,6 +1287,7 @@ describe('AlertingAuthorization', () => {
               "id": "recovered",
               "name": "Recovered",
             },
+            "validLegacyConsumers": Array [],
           },
         }
       `);
@@ -1347,6 +1355,10 @@ describe('AlertingAuthorization', () => {
                 "all": true,
                 "read": true,
               },
+              "myOtherApp": Object {
+                "all": true,
+                "read": true,
+              },
             },
             "defaultActionGroupId": "default",
             "enabledInLicense": true,
@@ -1361,15 +1373,12 @@ describe('AlertingAuthorization', () => {
               "id": "recovered",
               "name": "Recovered",
             },
+            "validLegacyConsumers": Array [],
           },
           Object {
             "actionGroups": Array [],
             "actionVariables": undefined,
             "authorizedConsumers": Object {
-              "alerts": Object {
-                "all": true,
-                "read": true,
-              },
               "myApp": Object {
                 "all": true,
                 "read": true,
@@ -1392,6 +1401,7 @@ describe('AlertingAuthorization', () => {
               "id": "recovered",
               "name": "Recovered",
             },
+            "validLegacyConsumers": Array [],
           },
         }
       `);
@@ -1442,10 +1452,6 @@ describe('AlertingAuthorization', () => {
             "actionGroups": Array [],
             "actionVariables": undefined,
             "authorizedConsumers": Object {
-              "alerts": Object {
-                "all": true,
-                "read": true,
-              },
               "myApp": Object {
                 "all": true,
                 "read": true,
@@ -1464,6 +1470,7 @@ describe('AlertingAuthorization', () => {
               "id": "recovered",
               "name": "Recovered",
             },
+            "validLegacyConsumers": Array [],
           },
         }
       `);
@@ -1548,10 +1555,6 @@ describe('AlertingAuthorization', () => {
             "actionGroups": Array [],
             "actionVariables": undefined,
             "authorizedConsumers": Object {
-              "alerts": Object {
-                "all": false,
-                "read": true,
-              },
               "myApp": Object {
                 "all": true,
                 "read": true,
@@ -1574,17 +1577,14 @@ describe('AlertingAuthorization', () => {
               "id": "recovered",
               "name": "Recovered",
             },
+            "validLegacyConsumers": Array [],
           },
           Object {
             "actionGroups": Array [],
             "actionVariables": undefined,
             "authorizedConsumers": Object {
-              "alerts": Object {
-                "all": false,
-                "read": true,
-              },
               "myApp": Object {
-                "all": false,
+                "all": true,
                 "read": true,
               },
               "myOtherApp": Object {
@@ -1605,6 +1605,7 @@ describe('AlertingAuthorization', () => {
               "id": "recovered",
               "name": "Recovered",
             },
+            "validLegacyConsumers": Array [],
           },
         }
       `);
@@ -1668,10 +1669,6 @@ describe('AlertingAuthorization', () => {
             "actionGroups": Array [],
             "actionVariables": undefined,
             "authorizedConsumers": Object {
-              "alerts": Object {
-                "all": true,
-                "read": true,
-              },
               "myApp": Object {
                 "all": true,
                 "read": true,
@@ -1694,6 +1691,7 @@ describe('AlertingAuthorization', () => {
               "id": "recovered",
               "name": "Recovered",
             },
+            "validLegacyConsumers": Array [],
           },
         }
       `);
@@ -1714,6 +1712,7 @@ describe('AlertingAuthorization', () => {
       isExportable: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     };
     const myAppAlertType: RegistryRuleType = {
       actionGroups: [],
@@ -1728,6 +1727,7 @@ describe('AlertingAuthorization', () => {
       isExportable: true,
       hasAlertsMappings: true,
       hasFieldsForAAD: true,
+      validLegacyConsumers: [],
     };
     const mySecondAppAlertType: RegistryRuleType = {
       actionGroups: [],
@@ -1742,6 +1742,7 @@ describe('AlertingAuthorization', () => {
       isExportable: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
     beforeEach(() => {
@@ -1806,6 +1807,7 @@ describe('AlertingAuthorization', () => {
                 "id": "recovered",
                 "name": "Recovered",
               },
+              "validLegacyConsumers": Array [],
             },
           },
           "hasAllRequested": false,
@@ -1881,6 +1883,7 @@ describe('AlertingAuthorization', () => {
                 "id": "recovered",
                 "name": "Recovered",
               },
+              "validLegacyConsumers": Array [],
             },
           },
           "hasAllRequested": false,

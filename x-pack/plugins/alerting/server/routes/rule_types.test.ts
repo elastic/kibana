@@ -62,6 +62,7 @@ describe('ruleTypesRoute', () => {
         doesSetRecoveryContext: false,
         hasAlertsMappings: true,
         hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
     const expectedResult: Array<AsApiContract<RegistryAlertTypeWithAuth>> = [
@@ -90,6 +91,7 @@ describe('ruleTypesRoute', () => {
         enabled_in_license: true,
         has_alerts_mappings: true,
         has_fields_for_a_a_d: false,
+        valid_legacy_consumers: [],
       },
     ];
     rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
@@ -127,6 +129,7 @@ describe('ruleTypesRoute', () => {
               "name": "Recovered",
             },
             "rule_task_timeout": "10m",
+            "valid_legacy_consumers": Array [],
           },
         ],
       }
@@ -172,6 +175,7 @@ describe('ruleTypesRoute', () => {
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
 
@@ -227,6 +231,7 @@ describe('ruleTypesRoute', () => {
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
 
