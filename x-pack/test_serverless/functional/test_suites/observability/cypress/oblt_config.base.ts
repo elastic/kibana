@@ -16,9 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...svlSharedConfig.getAll(),
     esTestCluster: {
       ...svlSharedConfig.get('esTestCluster'),
-      serverArgs: [
-        ...svlSharedConfig.get('esTestCluster.serverArgs'),
-      ],
+      serverArgs: [...svlSharedConfig.get('esTestCluster.serverArgs')],
     },
     kbnTestServer: {
       ...svlSharedConfig.get('kbnTestServer'),
