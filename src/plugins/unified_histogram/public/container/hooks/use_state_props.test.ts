@@ -136,13 +136,13 @@ describe('useStateProps', () => {
     `);
   });
 
-  it('should return the correct props when an SQL query is used', () => {
+  it('should return the correct props when an ES|QL query is used', () => {
     const stateService = getStateService({ initialState });
     const { result } = renderHook(() =>
       useStateProps({
         stateService,
         dataView: dataViewWithTimefieldMock,
-        query: { sql: 'SELECT * FROM index' },
+        query: { esql: 'FROM index' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
       })
@@ -222,7 +222,7 @@ describe('useStateProps', () => {
       useStateProps({
         stateService,
         dataView: dataViewWithTimefieldMock,
-        query: { sql: 'SELECT * FROM index' },
+        query: { esql: 'FROM index' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
       })

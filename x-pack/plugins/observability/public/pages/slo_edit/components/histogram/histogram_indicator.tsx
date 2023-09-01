@@ -25,7 +25,7 @@ import { createOptionsFromFields } from '../../helpers/create_options';
 
 interface HistogramIndicatorProps {
   type: 'good' | 'total';
-  indexFields: Field[] | undefined;
+  indexFields: Field[];
   isLoadingIndex: boolean;
 }
 
@@ -49,7 +49,7 @@ const AGGREGATION_OPTIONS = Object.values(AGGREGATIONS);
 export function HistogramIndicator({ type, indexFields, isLoadingIndex }: HistogramIndicatorProps) {
   const { control, watch } = useFormContext<CreateSLOForm>();
 
-  const histogramFields = (indexFields ?? []).filter((field) => field.type === 'histogram');
+  const histogramFields = indexFields.filter((field) => field.type === 'histogram');
   const indexPattern = watch('indicator.params.index');
   const aggregation = watch(`indicator.params.${type}.aggregation`);
 
