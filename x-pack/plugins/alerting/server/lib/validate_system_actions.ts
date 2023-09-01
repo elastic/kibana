@@ -29,7 +29,7 @@ export const validateSystemActions = async ({
   /**
    * When updating a rule the actions do not contain
    * the actionTypeId. We need to getBulk using the
-   * actionsClient to get actionTypeId of each action.
+   * actionsClient to get the actionTypeId of each action.
    * The actionTypeId is needed to get the schema of
    * the action params using the connector adapter registry
    */

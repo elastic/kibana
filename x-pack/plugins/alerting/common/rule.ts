@@ -109,7 +109,7 @@ export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionP
 
 /**
  * This enum is being used in versioned
- * route and rule client schemas. Renaming
+ * routes and rule client's schemas. Renaming
  * or removing a type will introduce a
  * breaking change
  */

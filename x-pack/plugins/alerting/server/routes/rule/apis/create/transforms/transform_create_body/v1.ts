@@ -34,7 +34,7 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleDa
       id: action.id,
       params: action.params,
       actionTypeId: action.actionTypeId,
-      type: action.type,
+      ...(action.type ? { type: action.type } : {}),
       ...(action.uuid ? { uuid: action.uuid } : {}),
       ...(frequency
         ? {

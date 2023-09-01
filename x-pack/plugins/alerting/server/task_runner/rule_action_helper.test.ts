@@ -181,11 +181,11 @@ describe('rule_action_helper', () => {
       const result = getSummaryActionsFromTaskState({
         actions: [mockSummaryAction, mockSystemAction],
         summaryActions: {
-          '111-111': { date: new Date('01.01.2020') },
-          '222-222': { date: new Date('01.01.2020') },
+          '111-111': { date: new Date('01.01.2020').toISOString() },
+          '222-222': { date: new Date('01.01.2020').toISOString() },
         },
       });
-      expect(result).toEqual({ '111-111': { date: new Date('01.01.2020') } });
+      expect(result).toEqual({ '111-111': { date: new Date('01.01.2020').toISOString() } });
     });
 
     test('should replace hash with uuid', () => {

@@ -37,6 +37,7 @@ jest.mock('./alerts_service/alerts_service', () => ({
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { generateAlertingConfig } from './test_utils';
+import { schema } from '@kbn/config-schema';
 
 const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recovered', {}> = {
   id: 'test',

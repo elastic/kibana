@@ -6,7 +6,7 @@
  */
 
 import { ActionsClient } from '@kbn/actions-plugin/server';
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { ConnectorAdapter } from '../connector_adapters/types';
