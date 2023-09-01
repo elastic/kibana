@@ -23,7 +23,7 @@ import {
   getUsageCollection,
   getServerless,
 } from '../../kibana_services';
-import { mapsClient } from '../../content_management';
+import { getMapClient } from '../../content_management';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -55,7 +55,7 @@ const toTableListViewSavedObject = (mapItem: MapItem): MapUserContent => {
 };
 
 async function deleteMaps(items: Array<{ id: string }>) {
-  await Promise.all(items.map(({ id }) => mapsClient.delete(id)));
+  await Promise.all(items.map(({ id }) => getMapClient().delete(id)));
 }
 
 interface Props {
@@ -97,7 +97,7 @@ function MapsListViewComp({ history }: Props) {
         referencesToExclude?: SavedObjectsFindOptionsReference[];
       } = {}
     ) => {
-      return mapsClient
+      return getMapClient()
         .search({
           text: searchTerm ? `${searchTerm}*` : undefined,
           limit: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),
