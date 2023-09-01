@@ -41,7 +41,6 @@ export const JsonCodeEditorCommon = ({
   if (jsonValue === '') {
     return null;
   }
-
   const codeEditor = (
     <CodeEditor
       languageId={XJsonLang.ID}
