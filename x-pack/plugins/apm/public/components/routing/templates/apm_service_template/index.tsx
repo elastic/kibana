@@ -48,6 +48,7 @@ import { AnalyzeDataButton } from './analyze_data_button';
 import { ServerlessType } from '../../../../../common/serverless';
 import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
 import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
+import { useProfilingPlugin } from '../../../../hooks/use_profiling_plugin';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -216,6 +217,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     plugins,
     capabilities
   );
+  const { isProfilingAvailable } = useProfilingPlugin();
 
   const router = useApmRouter();
   const isInfraTabAvailable = useApmFeatureFlag(
@@ -401,8 +403,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.profilingTabLabel', {
         defaultMessage: 'Profiling',
       }),
-      // TODO: add hasData check
-      // hidden: !(isAlertingAvailable && canReadAlerts),
+      hidden: !isProfilingAvailable,
     },
   ];
 
