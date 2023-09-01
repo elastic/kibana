@@ -58,7 +58,5 @@ export const getSearchResponseInterceptedWarnings = ({
     return true; // suppress the default behaviour
   });
 
-  console.log(interceptedWarnings);
-
   return interceptedWarnings;
 };
