@@ -136,13 +136,13 @@ export const MetricsGrid = React.memo(
               <EuiFlexGrid
                 columns={2}
                 gutterSize="s"
-                data-test-subj="infraAssetDetailsMetricsChartGrid"
+                data-test-subj="infraAssetDetailsNginxMetricsChartGrid"
               >
                 {[...nginxStubstatusCharts, ...nginxAccessCharts].map(
                   ({ dataViewOrigin, id, layers, title, overrides }, index) => (
                     <EuiFlexItem key={index} grow={false}>
                       <LensChart
-                        id={`infraAssetDetailsMetricsChart${id}`}
+                        id={`infraAssetDetailsNginxMetricsChart${id}`}
                         borderRadius="m"
                         dataView={getDataView(dataViewOrigin)}
                         dateRange={timeRange}
