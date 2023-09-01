@@ -31,7 +31,6 @@ import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
-import { getMarkdownFromConversation } from '../../utils/get_markdown_from_conversation';
 
 const timelineClassName = css`
   overflow-y: auto;
@@ -149,7 +148,7 @@ export function ChatBody({
   }, [timelineContainerRef.current]);
 
   const handleCopyConversation = () => {
-    const content = getMarkdownFromConversation({ title, messages });
+    const content = JSON.stringify({ title, messages });
 
     navigator.clipboard?.writeText(content || '');
   };
