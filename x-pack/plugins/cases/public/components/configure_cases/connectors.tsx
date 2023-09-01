@@ -45,7 +45,6 @@ export interface Props {
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
-  // handleAddCustomField: () => void;
   selectedConnector: { id: string; type: ConnectorTypes };
   updateConnectorDisabled: boolean;
 }
@@ -57,7 +56,6 @@ const ConnectorsComponent: React.FC<Props> = ({
   isLoading,
   mappings,
   onChangeConnector,
-  // handleAddCustomField,
   selectedConnector,
   updateConnectorDisabled,
 }) => {

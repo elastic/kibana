@@ -18,6 +18,7 @@ export interface CustomFieldBuilderArgs {
   customFieldType: CustomFieldTypesUI;
   component?: React.FunctionComponent<any>;
   componentProps?: Record<string, unknown>;
+  customFieldPath?: string;
 }
 
 export type CustomFieldBuilder = (args: CustomFieldBuilderArgs) => {

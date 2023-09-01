@@ -20,7 +20,6 @@ interface FieldTypeSelectorProps {
   idAria: string;
   isLoading: boolean;
   handleChange: (newValue: string) => void;
-  selectedType: string;
 }
 
 export const FieldTypeSelector = ({
@@ -31,7 +30,6 @@ export const FieldTypeSelector = ({
   idAria,
   isLoading = false,
   handleChange,
-  selectedType,
 }: FieldTypeSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const onChange = useCallback(

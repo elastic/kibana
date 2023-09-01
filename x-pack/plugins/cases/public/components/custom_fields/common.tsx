@@ -14,13 +14,14 @@ export const createCommonCustomFieldBuilder = ({
   customFieldType,
   component,
   componentProps,
+  customFieldPath,
 }: CustomFieldBuilderArgs): ReturnType<CustomFieldBuilder> => {
   return {
     build: () => [
       {
         customFieldType: component ? (
           <UseField
-            path={`${customFieldType}`}
+            path={`${customFieldPath ?? customFieldType}`}
             component={component}
             componentProps={{
               ...componentProps,

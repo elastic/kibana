@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { CustomFieldTypesUI } from '../types';
@@ -39,22 +39,25 @@ export const FieldOptionsSelector = ({
   );
 
   return (
-    <EuiFormRow
-      data-test-subj={dataTestSubj}
-      describedByIds={idAria ? [idAria] : undefined}
-      error={errorMessage}
-      fullWidth
-      helpText={field.helpText}
-      isInvalid={isInvalid}
-      label={field.label}
-      labelAppend={field.labelAppend}
-    >
-      <FieldOptions
-        selectedType={selectedType}
-        disabled={disabled || isLoading}
-        handleOptionChange={handleOptionChange}
-      />
-    </EuiFormRow>
+    <>
+      <EuiSpacer />
+      <EuiFormRow
+        data-test-subj={dataTestSubj}
+        describedByIds={idAria ? [idAria] : undefined}
+        error={errorMessage}
+        fullWidth
+        helpText={field.helpText}
+        isInvalid={isInvalid}
+        label={field.label}
+        labelAppend={field.labelAppend}
+      >
+        <FieldOptions
+          selectedType={selectedType}
+          disabled={disabled || isLoading}
+          handleOptionChange={handleOptionChange}
+        />
+      </EuiFormRow>
+    </>
   );
 };
 

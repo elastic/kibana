@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextAreaHeight } from './text_area_height';
@@ -21,7 +21,6 @@ interface TextAreaHeightSelectorProps {
   isLoading: boolean;
 }
 
-
 const TextAreaHeightSelector = ({
   dataTestSubj,
   disabled = false,
@@ -35,20 +34,25 @@ const TextAreaHeightSelector = ({
   };
 
   return (
-    <EuiFormRow
-      data-test-subj={dataTestSubj}
-      describedByIds={idAria ? [idAria] : undefined}
-      error={errorMessage}
-      fullWidth
-      helpText={field.helpText}
-      isInvalid={isInvalid}
-      label={field.label}
-      labelAppend={field.labelAppend}
-    >
-      <TextAreaHeight disabled={disabled} isLoading={isLoading} onChange={onChange} />
-    </EuiFormRow>
+    <>
+      <EuiSpacer />
+      <EuiFormRow
+        data-test-subj={dataTestSubj}
+        describedByIds={idAria ? [idAria] : undefined}
+        error={errorMessage}
+        fullWidth
+        helpText={field.helpText}
+        isInvalid={isInvalid}
+        label={field.label}
+        labelAppend={field.labelAppend}
+      >
+        <TextAreaHeight disabled={disabled} isLoading={isLoading} onChange={onChange} />
+      </EuiFormRow>
+    </>
   );
 };
+
+TextAreaHeightSelector.displayName = 'TextAreaHeightSelector';
 
 export const createTextAreaCustomFieldBuilder: CustomFieldBuilder = ({ customFieldType }) => ({
   build: () => {
@@ -58,8 +62,8 @@ export const createTextAreaCustomFieldBuilder: CustomFieldBuilder = ({ customFie
       componentProps: {
         dataTestSubj: 'textAreaHeight',
         idAria: 'textAreaHeight',
-        euiFieldProps: { defaultValue: '2' },
       },
+      customFieldPath: 'textAreaHeight',
     });
 
     return commonBuilder.build();

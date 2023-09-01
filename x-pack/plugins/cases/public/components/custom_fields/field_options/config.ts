@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as i18n from './translations';
+import * as i18n from '../translations';
 import type { CustomFieldTypesUI } from '../types';
 
 export interface Options {
@@ -30,7 +30,7 @@ export const getConfig = (selectedType: CustomFieldTypesUI) => {
   let config: BasicOptions = {
     required: {
       id: 'required_option',
-      label: i18n.REQUIRED,
+      label: i18n.FIELD_OPTION_REQUIRED,
     },
   };
 

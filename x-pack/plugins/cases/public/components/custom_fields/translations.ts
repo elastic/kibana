@@ -37,6 +37,10 @@ export const FIELD_LABEL = i18n.translate('xpack.cases.customFields.fieldLabel',
   defaultMessage: 'Field label',
 });
 
+export const FIELD_LABEL_HELP_TEXT = i18n.translate('xpack.cases.customFields.fieldLabelHelpText', {
+  defaultMessage: '50 characters max',
+});
+
 export const FIELD_TYPE = i18n.translate('xpack.cases.customFields.fieldType', {
   defaultMessage: 'Field type',
 });
@@ -50,9 +54,30 @@ export const FIELD_OPTIONS = i18n.translate('xpack.cases.customFields.fieldOptio
 });
 
 export const FIELD_OPTION_REQUIRED = i18n.translate(
-  'xpack.cases.customFields.fieldOptionRequired',
+  'xpack.cases.customFields.fieldOptions.Required',
   {
     defaultMessage: 'Make this field required',
+  }
+);
+
+export const CHARACTER_LIMIT = i18n.translate(
+  'xpack.cases.customFields.fieldOptions.characterLimit',
+  {
+    defaultMessage: 'Limit character count to 120',
+  }
+);
+
+export const MULTIPLE_SELECTIONS = i18n.translate(
+  'xpack.cases.configureCases.fieldOptions.multipleSelections',
+  {
+    defaultMessage: 'Allow multiple selections',
+  }
+);
+
+export const CUSTOM_VALUES = i18n.translate(
+  'xpack.cases.configureCases.fieldOptions.customValues',
+  {
+    defaultMessage: 'Allow custom values',
   }
 );
 
@@ -61,3 +86,14 @@ export const REQUIRED_FIELD = (fieldName: string): string =>
     values: { fieldName },
     defaultMessage: '{fieldName} is required.',
   });
+
+export const LIST_ADD_OPTION = i18n.translate('xpack.cases.customFields.list.addOption', {
+  defaultMessage: 'Add option',
+});
+
+export const LIST_OPTION_PLACEHOLDER = i18n.translate(
+  'xpack.cases.customFields.list.optionPlaceholder',
+  {
+    defaultMessage: 'Enter option',
+  }
+);
