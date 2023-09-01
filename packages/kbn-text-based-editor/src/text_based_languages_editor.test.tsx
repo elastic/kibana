@@ -188,8 +188,12 @@ describe('TextBasedLanguagesEditor', () => {
       isCodeEditorExpanded: true,
       hideMinimizeButton: true,
     };
+    let component: ReactWrapper;
     await act(async () => {
-      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    });
+    component!.update();
+    await act(async () => {
       expect(
         component.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
       ).not.toBe(0);
