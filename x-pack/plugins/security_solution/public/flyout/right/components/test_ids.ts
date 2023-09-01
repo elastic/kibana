@@ -83,6 +83,7 @@ export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSu
 /* Insights Entities */
 
 export const INSIGHTS_ENTITIES_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsEntities';
+export const INSIGHTS_ENTITIES_NO_DATA_TEST_ID = `${INSIGHTS_ENTITIES_TEST_ID}NoData` as const;
 export const ENTITIES_USER_OVERVIEW_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesUserOverview';
 export const ENTITIES_USER_OVERVIEW_LINK_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Link`;
@@ -95,8 +96,10 @@ export const ENTITIES_HOST_OVERVIEW_LINK_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TES
 export const ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}OsFamily`;
 export const ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}LastSeen`;
 export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}RiskLevel`;
+export const TECHNICAL_PREVIEW_ICON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutTechnicalPreviewIcon';
 
-/* Insights Threat Intelligence */
+/* Insights Threat intelligence */
 
 export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsThreatIntelligence';

@@ -24,6 +24,7 @@ export interface ProfilingStatusResponse {
   };
   resources: {
     created: boolean;
+    pre_8_9_1_data: boolean;
   };
 }
 

@@ -15,9 +15,6 @@ export type Start = jest.Mocked<DiscoverStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
-    docViews: {
-      addDocView: jest.fn(),
-    },
     locator: sharePluginMock.createLocator(),
   };
   return setupContract;

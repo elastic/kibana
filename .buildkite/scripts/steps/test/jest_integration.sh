@@ -8,7 +8,7 @@ is_test_execution_step
 
 .buildkite/scripts/bootstrap.sh
 
-# logins into docker for integration tests
+echo '--- Docker login'
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 trap 'docker logout docker.elastic.co' EXIT
 
