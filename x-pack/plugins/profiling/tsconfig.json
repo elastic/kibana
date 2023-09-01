@@ -47,7 +47,8 @@
     "@kbn/licensing-plugin",
     "@kbn/utility-types",
     "@kbn/usage-collection-plugin",
-    "@kbn/observability-ai-assistant-plugin"
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/profiling-data-access-plugin"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

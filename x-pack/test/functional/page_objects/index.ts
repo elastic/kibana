@@ -15,7 +15,6 @@ import { CanvasPageProvider } from './canvas_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
-import { DiscoverLogExplorerPageObject } from './discover_log_explorer';
 import { GeoFileUploadPageObject } from './geo_file_upload';
 import { GisPageObject } from './gis_page';
 import { GraphPageObject } from './graph_page';
@@ -34,6 +33,7 @@ import { LogstashPageObject } from './logstash_page';
 import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { MonitoringPageObject } from './monitoring_page';
 import { NavigationalSearchPageObject } from './navigational_search';
+import { ObservabilityLogExplorerPageObject } from './observability_log_explorer';
 import { ObservabilityPageProvider } from './observability_page';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { ReportingPageObject } from './reporting_page';
@@ -41,6 +41,7 @@ import { RoleMappingsPageProvider } from './role_mappings_page';
 import { RollupPageObject } from './rollup_page';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
 import { SecurityPageObject } from './security_page';
+import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
 import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { SpaceSelectorPageObject } from './space_selector_page';
 import { StatusPageObject } from './status_page';
@@ -61,7 +62,6 @@ export const pageObjects = {
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   crossClusterReplication: CrossClusterReplicationPageProvider,
   detections: DetectionsPageObject,
-  discoverLogExplorer: DiscoverLogExplorerPageObject,
   geoFileUpload: GeoFileUploadPageObject,
   graph: GraphPageObject,
   grokDebugger: GrokDebuggerPageObject,
@@ -80,6 +80,7 @@ export const pageObjects = {
   maps: GisPageObject,
   monitoring: MonitoringPageObject,
   navigationalSearch: NavigationalSearchPageObject,
+  observabilityLogExplorer: ObservabilityLogExplorerPageObject,
   observability: ObservabilityPageProvider,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,
@@ -87,6 +88,7 @@ export const pageObjects = {
   rollup: RollupPageObject,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
+  shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
   snapshotRestore: SnapshotRestorePageProvider,
   spaceSelector: SpaceSelectorPageObject,
   statusPage: StatusPageObject,

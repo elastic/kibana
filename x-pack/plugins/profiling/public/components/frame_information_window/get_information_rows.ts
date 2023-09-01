@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { describeFrameType } from '@kbn/profiling-data-access-plugin/common/profiling';
 import { NOT_AVAILABLE_LABEL } from '../../../common';
-import { describeFrameType } from '../../../common/profiling';
 
 export function getInformationRows({
   fileID,
@@ -33,6 +33,7 @@ export function getInformationRows({
 
   if (executable) {
     informationRows.push({
+      'data-test-subj': 'executable',
       label: i18n.translate('xpack.profiling.flameGraphInformationWindow.executableLabel', {
         defaultMessage: 'Executable',
       }),
@@ -40,6 +41,7 @@ export function getInformationRows({
     });
   } else {
     informationRows.push({
+      'data-test-subj': 'frameType',
       label: i18n.translate('xpack.profiling.flameGraphInformationWindow.frameTypeLabel', {
         defaultMessage: 'Frame type',
       }),
@@ -48,6 +50,7 @@ export function getInformationRows({
   }
 
   informationRows.push({
+    'data-test-subj': 'function',
     label: i18n.translate('xpack.profiling.flameGraphInformationWindow.functionLabel', {
       defaultMessage: 'Function',
     }),
@@ -55,6 +58,7 @@ export function getInformationRows({
   });
 
   informationRows.push({
+    'data-test-subj': 'sourceFile',
     label: i18n.translate('xpack.profiling.flameGraphInformationWindow.sourceFileLabel', {
       defaultMessage: 'Source file',
     }),

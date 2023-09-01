@@ -19,62 +19,69 @@ import {
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
 export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       options: {
         tags: ['access:lists-read'],
       },
       path: `${ENDPOINT_LIST_ITEM_URL}/_find`,
-      validate: {
-        query: buildRouteValidation<
-          typeof findEndpointListItemRequestQuery,
-          FindEndpointListItemRequestQueryDecoded
-        >(findEndpointListItemRequestQuery),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            query: buildRouteValidation<
+              typeof findEndpointListItemRequestQuery,
+              FindEndpointListItemRequestQueryDecoded
+            >(findEndpointListItemRequestQuery),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const exceptionLists = await getExceptionListClient(context);
-        const {
-          filter,
-          page,
-          per_page: perPage,
-          sort_field: sortField,
-          sort_order: sortOrder,
-        } = request.query;
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const exceptionLists = await getExceptionListClient(context);
+          const {
+            filter,
+            page,
+            per_page: perPage,
+            sort_field: sortField,
+            sort_order: sortOrder,
+          } = request.query;
 
-        const exceptionListItems = await exceptionLists.findEndpointListItem({
-          filter,
-          page,
-          perPage,
-          pit: undefined,
-          searchAfter: undefined,
-          sortField,
-          sortOrder,
-        });
-        if (exceptionListItems == null) {
-          // Although I have this line of code here, this is an incredibly rare thing to have
-          // happen as the findEndpointListItem tries to auto-create the endpoint list if
-          // does not exist.
+          const exceptionListItems = await exceptionLists.findEndpointListItem({
+            filter,
+            page,
+            perPage,
+            pit: undefined,
+            searchAfter: undefined,
+            sortField,
+            sortOrder,
+          });
+          if (exceptionListItems == null) {
+            // Although I have this line of code here, this is an incredibly rare thing to have
+            // happen as the findEndpointListItem tries to auto-create the endpoint list if
+            // does not exist.
+            return siemResponse.error({
+              body: `list id: "${ENDPOINT_LIST_ID}" does not exist`,
+              statusCode: 404,
+            });
+          }
+          const [validated, errors] = validate(exceptionListItems, findEndpointListItemResponse);
+          if (errors != null) {
+            return siemResponse.error({ body: errors, statusCode: 500 });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
-            body: `list id: "${ENDPOINT_LIST_ID}" does not exist`,
-            statusCode: 404,
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-        const [validated, errors] = validate(exceptionListItems, findEndpointListItemResponse);
-        if (errors != null) {
-          return siemResponse.error({ body: errors, statusCode: 500 });
-        } else {
-          return response.ok({ body: validated ?? {} });
-        }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

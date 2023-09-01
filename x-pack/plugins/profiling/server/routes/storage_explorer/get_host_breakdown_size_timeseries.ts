@@ -6,7 +6,7 @@
  */
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProfilingESField } from '../../../common/elasticsearch';
+import { ProfilingESField } from '@kbn/profiling-data-access-plugin/common/elasticsearch';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../../common/histogram';
 import {
   IndexLifecyclePhaseSelectOption,
@@ -115,7 +115,7 @@ export async function getHostBreakdownSizeTimeseries({
 
       return {
         hostId,
-        hostName: hostDetails.hostName,
+        hostName: hostDetails?.hostName || '',
         timeseries,
       };
     }) || []

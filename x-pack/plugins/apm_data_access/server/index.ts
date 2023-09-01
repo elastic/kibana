@@ -16,6 +16,7 @@ const configSchema = schema.object({
     error: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
     metric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
     onboarding: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
+    sourcemap: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
   }),
 });
 
@@ -23,7 +24,11 @@ const configSchema = schema.object({
 export const config: PluginConfigDescriptor<APMDataAccessConfig> = {
   deprecations: ({ renameFromRoot, unused, deprecate }) => [
     // deprecations
-    unused('indices.sourcemap', { level: 'warning' }),
+    deprecate('indices.sourcemap', 'a future version', {
+      level: 'warning',
+      message: `Configuring "xpack.apm.indices.sourcemap" is deprecated and will be removed in a future version. Please remove this setting.`,
+    }),
+
     deprecate('indices.onboarding', 'a future version', {
       level: 'warning',
       message: `Configuring "xpack.apm.indices.onboarding" is deprecated and will be removed in a future version. Please remove this setting.`,

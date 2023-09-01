@@ -140,6 +140,24 @@
       "prCreation": "immediate"
     },
     {
+      "groupName": "ansi-regex",
+      "matchPackageNames": [
+        "ansi-regex"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:skip"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "babel",
       "matchPackageNames": [
         "@types/babel__core"

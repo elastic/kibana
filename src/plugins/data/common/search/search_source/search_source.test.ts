@@ -94,6 +94,7 @@ describe('SearchSource', () => {
       getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: jest.fn().mockImplementation((_, res) => res),
+      scriptedFieldsEnabled: true,
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);
@@ -651,6 +652,22 @@ describe('SearchSource', () => {
         const request = searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {}, world: {} });
       });
+
+      test('ignores scripted fields when scripted fields are disabled', async () => {
+        searchSource.setField('index', {
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: { hello: {}, world: {} },
+            docvalueFields: [],
+          }),
+        } as unknown as DataView);
+        searchSourceDependencies.scriptedFieldsEnabled = false;
+        searchSource.setField('fields', ['timestamp', '*']);
+
+        const request = searchSource.getSearchRequestBody();
+        expect(request.script_fields).toEqual({});
+      });
     });
 
     describe('handling for when specific fields are provided', () => {
@@ -1087,32 +1104,6 @@ describe('SearchSource', () => {
         expect(complete).toBeCalledTimes(1);
         expect(complete2).toBeCalledTimes(1);
         expect(searchSourceDependencies.search).toHaveBeenCalledTimes(1);
-      });
-
-      test('should emit error on empty response', async () => {
-        searchSourceDependencies.search = mockSearchMethod = jest
-          .fn()
-          .mockReturnValue(
-            of({ rawResponse: { test: 1 }, isPartial: true, isRunning: true }, undefined)
-          );
-
-        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
-        const options = {};
-
-        const next = jest.fn();
-        const error = jest.fn();
-        const complete = jest.fn();
-        const res$ = searchSource.fetch$(options);
-        res$.subscribe({ next, error, complete });
-        await firstValueFrom(res$).catch((_) => {});
-
-        expect(next).toBeCalledTimes(1);
-        expect(error).toBeCalledTimes(1);
-        expect(complete).toBeCalledTimes(0);
-        expect(next.mock.calls[0][0].rawResponse).toStrictEqual({
-          test: 1,
-        });
-        expect(error.mock.calls[0][0]).toBe(undefined);
       });
     });
 

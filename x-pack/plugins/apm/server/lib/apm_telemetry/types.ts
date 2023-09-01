@@ -107,7 +107,7 @@ export interface APMUsage {
     max_transaction_groups_per_service: TimeframeMap1d;
     max_error_groups_per_service: TimeframeMap1d;
     traces: TimeframeMap;
-    services: TimeframeMap;
+    services: TimeframeMap1d;
     environments: TimeframeMap1d;
     span_destination_service_resource: TimeframeMap1d;
   };

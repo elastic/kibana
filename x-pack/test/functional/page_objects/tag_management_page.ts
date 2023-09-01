@@ -270,10 +270,7 @@ export class TagManagementPageObject extends FtrService {
    */
   async waitUntilTableIsLoaded() {
     return this.retry.try(async () => {
-      const isLoaded = await this.find.existsByDisplayedByCssSelector(
-        '*[data-test-subj="tagsManagementTable"]:not(.euiBasicTable-loading)'
-      );
-
+      const isLoaded = await this.testSubjects.exists('tagsManagementTable table-is-ready');
       if (isLoaded) {
         return true;
       } else {

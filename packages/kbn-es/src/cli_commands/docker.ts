@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
-import { DOCKER_IMG, DOCKER_REPO, DOCKER_TAG } from '../utils';
+import { DOCKER_IMG, DOCKER_REPO, DOCKER_TAG, DEFAULT_PORT } from '../utils';
 import { Command } from './types';
 
 export const docker: Command = {
@@ -27,8 +27,12 @@ export const docker: Command = {
       --tag               Image tag of ES to run from ${DOCKER_REPO} [default: ${DOCKER_TAG}]
       --image             Full path to image of ES to run, has precedence over tag. [default: ${DOCKER_IMG}]
       --password          Sets password for elastic user [default: ${password}]
+      --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
+      --ssl               Sets up SSL and enables security plugin on Elasticsearch
+      --kill              Kill running ES nodes if detected
       -E                  Additional key=value settings to pass to Elasticsearch
       -D                  Override Docker command
+      -F                  Absolute paths for files to mount into container
 
     Examples:
 
@@ -50,9 +54,11 @@ export const docker: Command = {
       alias: {
         esArgs: 'E',
         dockerCmd: 'D',
+        files: 'F',
       },
 
       string: ['tag', 'image', 'D'],
+      boolean: ['ssl', 'kill'],
 
       default: defaults,
     });
