@@ -242,4 +242,27 @@ describe('TextBasedLanguagesEditor', () => {
       ).toBe('1 line');
     });
   });
+
+  it('should render the run query text', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+    };
+    await act(async () => {
+      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).not.toBe(0);
+    });
+  });
+
+  it('should not render the run query text if the hideRunQueryText prop is set to true', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      hideRunQueryText: true,
+    };
+    await act(async () => {
+      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).toBe(0);
+    });
+  });
 });

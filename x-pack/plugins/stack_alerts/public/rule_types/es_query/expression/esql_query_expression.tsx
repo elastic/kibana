@@ -59,7 +59,6 @@ export const EsqlQueryExpression: React.FC<
     searchType: SearchType.esqlQuery,
   });
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
-  const [testQuery, setTestQuery] = useState<boolean>();
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectTimestamp, setDetectTimestamp] = useState<boolean>(false);
 
@@ -166,9 +165,10 @@ export const EsqlQueryExpression: React.FC<
           }}
           expandCodeEditor={() => true}
           isCodeEditorExpanded={true}
-          onTextLangQuerySubmit={() => setTestQuery(!testQuery)}
+          onTextLangQuerySubmit={() => {}}
           detectTimestamp={detectTimestamp}
           hideMinimizeButton={true}
+          hideRunQueryText={true}
         />
       </EuiFormRow>
       <EuiSpacer />
@@ -248,7 +248,6 @@ export const EsqlQueryExpression: React.FC<
       <TestQueryRow
         fetch={onTestQuery}
         hasValidationErrors={hasExpressionValidationErrors(currentRuleParams)}
-        triggerTestQuery={testQuery}
         showTable
       />
     </Fragment>
