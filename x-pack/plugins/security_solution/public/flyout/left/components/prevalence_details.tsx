@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiToolTip,
 } from '@elastic/eui';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
@@ -32,6 +33,10 @@ import {
   PREVALENCE_TABLE_FIELD_COLUMN_TITLE,
   USER_TITLE,
   PREVALENCE_NO_DATA_MESSAGE,
+  PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE_TOOLTIP,
+  PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE_TOOLTIP,
+  HOST_PREVALENCE_COLUMN_TITLE_TOOLTIP,
+  USER_PREVALENCE_COLUMN_TITLE_TOOLTIP,
 } from './translations';
 import {
   PREVALENCE_DETAILS_LOADING_TEST_ID,
@@ -71,10 +76,12 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
   },
   {
     name: (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>{PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE}</EuiFlexItem>
-        <EuiFlexItem>{PREVALENCE_TABLE_COUNT_COLUMN_TITLE}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiToolTip content={PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE_TOOLTIP}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>{PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE}</EuiFlexItem>
+          <EuiFlexItem>{PREVALENCE_TABLE_COUNT_COLUMN_TITLE}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceData) => {
@@ -97,10 +104,12 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
   },
   {
     name: (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>{PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE}</EuiFlexItem>
-        <EuiFlexItem>{PREVALENCE_TABLE_COUNT_COLUMN_TITLE}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiToolTip content={PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE_TOOLTIP}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>{PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE}</EuiFlexItem>
+          <EuiFlexItem>{PREVALENCE_TABLE_COUNT_COLUMN_TITLE}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
     render: (data: PrevalenceData) => {
@@ -140,10 +149,12 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
   {
     field: 'hostPrevalence',
     name: (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>{HOST_TITLE}</EuiFlexItem>
-        <EuiFlexItem>{PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiToolTip content={HOST_PREVALENCE_COLUMN_TITLE_TOOLTIP}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>{HOST_TITLE}</EuiFlexItem>
+          <EuiFlexItem>{PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
     render: (hostPrevalence: number) => (
@@ -157,10 +168,12 @@ const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
   {
     field: 'userPrevalence',
     name: (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>{USER_TITLE}</EuiFlexItem>
-        <EuiFlexItem>{PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiToolTip content={USER_PREVALENCE_COLUMN_TITLE_TOOLTIP}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>{USER_TITLE}</EuiFlexItem>
+          <EuiFlexItem>{PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
     render: (userPrevalence: number) => (
@@ -237,7 +250,6 @@ export const PrevalenceDetails: React.FC = () => {
             items={data}
             columns={columns}
             data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
-            tableLayout="auto"
           />
         ) : (
           <div data-test-subj={`${PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID}Error`}>
