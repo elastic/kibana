@@ -81,11 +81,6 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
       });
       if (isExpanded) {
         // It allows Only One step open at a time
-        dispatch({
-          type: GetStartedPageActions.AddFinishedStep,
-          payload: { stepId, cardId, sectionId },
-        });
-
         resetAllExpandedCardStepsToStorage();
         addExpandedCardStepToStorage(cardId, stepId);
       } else {
