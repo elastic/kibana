@@ -11,7 +11,7 @@ import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
-import { Cluster } from '../cluster';
+import { Cluster, type ServerlessOptions } from '../cluster';
 import { SERVERLESS_REPO, SERVERLESS_TAG, SERVERLESS_IMG, DEFAULT_PORT } from '../utils';
 import { Command } from './types';
 
@@ -58,7 +58,7 @@ export const serverless: Command = {
       boolean: ['clean', 'ssl', 'kill', 'background'],
 
       default: defaults,
-    });
+    }) as unknown as ServerlessOptions;
 
     const cluster = new Cluster();
     await cluster.runServerless({
