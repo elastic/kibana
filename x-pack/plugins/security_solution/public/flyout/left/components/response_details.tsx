@@ -69,7 +69,7 @@ export const ResponseDetails: React.FC = () => {
             values={{
               editRuleLink: (
                 <EuiLink
-                  href="https://www.elastic.co/guide/en/security/master/rules-ui-management.html#edit-rules-settings"
+                  href="https://www.elastic.co/guide/en/security/current/rules-ui-management.html#edit-rules-settings"
                   target="_blank"
                 >
                   <FormattedMessage
