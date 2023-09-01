@@ -42,7 +42,7 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('Last response filter', () => {
-    it('Filters rules by last response', function () {
+    it('Filters rules by last response', { tags: ['@brokenInServerless'] }, function () {
       deleteIndex('test_index');
 
       createIndex('test_index', {

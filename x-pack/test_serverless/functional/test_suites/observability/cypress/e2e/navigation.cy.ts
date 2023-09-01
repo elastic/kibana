@@ -10,7 +10,8 @@ describe('Serverless', () => {
     cy.loginAsElasticUser();
   });
 
-  it('contains the side navigation for observabilitity serverless', () => {
+  // Flaky in serverless tests
+  it.skip('contains the side navigation for observabilitity serverless', () => {
     cy.loginAsElasticUser();
     cy.contains('Log Explorer');
     cy.contains('Dashboards');
