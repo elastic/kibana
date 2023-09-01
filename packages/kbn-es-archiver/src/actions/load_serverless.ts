@@ -64,15 +64,15 @@ export const begin = async (archivePath: PathLikeOrString): Promise<void> => {
   // subscribeToDecompressionStream(archivePath);
   // subscribeToStreamingJsonStream(archivePath);
 
-  const prioritized = (xs: PathLikeOrString[]) => from(pipe(xs as string[], prioritizeMappings));
-  const resolved = (obs$) => obs$.pipe(map(resolveEntry(archivePath)));
-
   // resolved(prioritized(await mappingsAndArchiveFileNames(archivePath))).subscribe({
-  pipe(await mappingsAndArchiveFileNames(archivePath), prioritized, resolved).subscribe({
-    next: (x) => console.log('\nλjs next, x:', x),
-    error: (err) => console.log('error:', err),
-    complete: () => console.log('the end'),
-  });
+  // pipe(await mappingsAndArchiveFileNames(archivePath), prioritized, resolved).subscribe({
+  from(pipe(await mappingsAndArchiveFileNames(archivePath), prioritizeMappings))
+    .pipe(map(resolveEntry(archivePath)))
+    .subscribe({
+      next: (x) => console.log('\nλjs next, x:', x),
+      error: (err) => console.log('error:', err),
+      complete: () => console.log('the end'),
+    });
 
   // concat(decompressionObservable(archiveFilePath), jsonStanzaObservable(archivePath)).subscribe({
 
