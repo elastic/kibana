@@ -50,7 +50,7 @@ describe('Enable risk scores', { tags: ['@ess', '@serverless'] }, () => {
   it('user risk enable button should redirect to entity management page', () => {
     cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('exist');
 
-    clickEnableRiskScore(RiskScoreEntity.host);
+    clickEnableRiskScore(RiskScoreEntity.user);
 
     cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
   });

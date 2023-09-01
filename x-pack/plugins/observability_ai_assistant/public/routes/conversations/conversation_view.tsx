@@ -134,14 +134,6 @@ export function ConversationView() {
             loading={conversations.loading || isUpdatingList}
             error={conversations.error}
             conversations={displayedConversations}
-            onClickConversation={(nextConversationId) => {
-              observabilityAIAssistantRouter.push('/conversations/{conversationId}', {
-                path: {
-                  conversationId: nextConversationId,
-                },
-                query: {},
-              });
-            }}
             onClickNewChat={() => {
               observabilityAIAssistantRouter.push('/conversations/new', {
                 path: {},

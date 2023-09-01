@@ -102,7 +102,7 @@ steps:
     build:
       env:
         SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
-        REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/config.yaml
+        REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
 
 EOF
 

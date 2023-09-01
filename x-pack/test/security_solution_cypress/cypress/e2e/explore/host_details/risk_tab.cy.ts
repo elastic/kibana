@@ -11,9 +11,10 @@ import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
 import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 
-describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
+describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
+    // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
     cy.task('esArchiverLoad', { archiveName: 'risk_entities' });
     cy.task('esArchiverLoad', { archiveName: 'query_alert' });
   });
