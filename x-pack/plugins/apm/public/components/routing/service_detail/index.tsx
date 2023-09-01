@@ -37,6 +37,7 @@ import { TransactionOverview } from '../../app/transaction_overview';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
 import { ApmServiceWrapper } from './apm_service_wrapper';
 import { RedirectToDefaultServiceRouteView } from './redirect_to_default_service_route_view';
+import { ProfilingOverview } from '../../app/profiling_overview';
 
 function page({
   title,
@@ -363,6 +364,19 @@ export const serviceDetailRoute = {
               t.literal(ALERT_STATUS_ALL),
             ]),
           }),
+        }),
+      },
+      '/services/{serviceName}/profiling': {
+        ...page({
+          tab: 'profiling',
+          title: i18n.translate('xpack.apm.views.profiling.title', {
+            defaultMessage: 'Profiling',
+          }),
+          element: <ProfilingOverview />,
+          searchBarOptions: {
+            showTimeComparison: false,
+            showTransactionTypeSelector: false,
+          },
         }),
       },
       '/services/{serviceName}/': {

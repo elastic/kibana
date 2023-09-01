@@ -15,6 +15,7 @@ import { EmbeddableFlamegraph } from './embeddable_flamegraph';
 
 interface EmbeddableFlamegraphInput {
   data?: ElasticFlameGraph;
+  isLoading: boolean;
 }
 
 export type EmbeddableFlamegraphEmbeddableInput = EmbeddableFlamegraphInput & EmbeddableInput;

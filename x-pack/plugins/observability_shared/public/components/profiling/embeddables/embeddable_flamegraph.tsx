@@ -14,9 +14,11 @@ import { EMBEDDABLE_FLAMEGRAPH } from '.';
 
 interface Props {
   data?: ElasticFlameGraph;
+  height?: string;
+  isLoading: boolean;
 }
 
-export function EmbeddableFlamegraph({ data }: Props) {
+export function EmbeddableFlamegraph({ data, height, isLoading }: Props) {
   const { embeddable: embeddablePlugin } = useKibana<ObservabilitySharedStart>().services;
   const [embeddable, setEmbeddable] = useState<any>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
@@ -24,7 +26,8 @@ export function EmbeddableFlamegraph({ data }: Props) {
   useEffect(() => {
     async function createEmbeddable() {
       const factory = embeddablePlugin?.getEmbeddableFactory(EMBEDDABLE_FLAMEGRAPH);
-      const embeddableObject = await factory?.create({ id: 'embeddable_profiling', data });
+      const input = { id: 'embeddable_profiling', data, isLoading };
+      const embeddableObject = await factory?.create(input);
       setEmbeddable(embeddableObject);
     }
     createEmbeddable();
@@ -39,16 +42,16 @@ export function EmbeddableFlamegraph({ data }: Props) {
 
   useEffect(() => {
     if (embeddable) {
-      embeddable.updateInput({ data });
+      embeddable.updateInput({ data, isLoading });
       embeddable.reload();
     }
-  }, [data, embeddable]);
+  }, [data, embeddable, isLoading]);
 
   return (
     <div
       css={css`
         width: 100%;
-        height: 500px;
+        height: ${height};
         display: flex;
         flex: 1 1 100%;
         z-index: 1;

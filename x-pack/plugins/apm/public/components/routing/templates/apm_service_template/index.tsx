@@ -60,7 +60,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'infrastructure'
     | 'service-map'
     | 'logs'
-    | 'alerts';
+    | 'alerts'
+    | 'profiling';
   hidden?: boolean;
 };
 
@@ -390,6 +391,18 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Alerts',
       }),
       hidden: !(isAlertingAvailable && canReadAlerts),
+    },
+    {
+      key: 'profiling',
+      href: router.link('/services/{serviceName}/profiling', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.profilingTabLabel', {
+        defaultMessage: 'Profiling',
+      }),
+      // TODO: add hasData check
+      // hidden: !(isAlertingAvailable && canReadAlerts),
     },
   ];
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { Embeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
-import { EmbeddableFlamegraphEmbeddableInput } from './embeddable_flamegraph_factory';
 import { FlameGraph } from '../../components/flamegraph';
+import { EmbeddableFlamegraphEmbeddableInput } from './embeddable_flamegraph_factory';
+import { AsyncEmbeddableComponent } from '../async_embeddable_component';
 
 export class EmbeddableFlamegraph extends Embeddable<
   EmbeddableFlamegraphEmbeddableInput,
@@ -21,22 +21,20 @@ export class EmbeddableFlamegraph extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
-    const { data } = this.input;
+    const { data, isLoading } = this.input;
     render(
-      <EuiPanel>
-        <EuiFlexGroup direction="column" style={{ height: '100%' }}>
-          <EuiFlexItem>
-            {data && (
-              <FlameGraph
-                primaryFlamegraph={data}
-                showInformationWindow={false}
-                id="embddable_profiling"
-                toggleShowInformationWindow={() => {}}
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>,
+      <AsyncEmbeddableComponent isLoading={isLoading}>
+        <>
+          {data && (
+            <FlameGraph
+              primaryFlamegraph={data}
+              showInformationWindow={false}
+              id="embddable_profiling"
+              toggleShowInformationWindow={() => {}}
+            />
+          )}
+        </>
+      </AsyncEmbeddableComponent>,
       domNode
     );
   }
