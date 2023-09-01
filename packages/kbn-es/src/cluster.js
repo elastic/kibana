@@ -36,7 +36,7 @@ const DEFAULT_READY_TIMEOUT = parseTimeoutToMs('1m');
 
 /** @typedef {import('./cluster_exec_options').EsClusterExecOptions} ExecOptions */
 /** @typedef {import('./utils').DockerOptions} DockerOptions */
-/** @typedef {import('./utils').ServerlessOptions}ServerlessrOptions */
+/** @typedef {import('./utils').ServerlessOptions}ServerlessOptions */
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
@@ -579,8 +579,6 @@ exports.Cluster = class Cluster {
    * @param {ServerlessOptions} options
    */
   async runServerless(options = {}) {
-    // Ensure serverless ES nodes are not running
-    teardownServerlessClusterSync(this._log, options);
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
     }
