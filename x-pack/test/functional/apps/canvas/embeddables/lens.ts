@@ -49,7 +49,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
       it('renders lens visualization using savedLens expression', async () => {
         // load test workpad
-        await PageObjects.canvas.goToLoadingPage();
+        await PageObjects.canvas.goToListingPage();
         await PageObjects.canvas.loadFirstWorkpad('Test Workpad');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
