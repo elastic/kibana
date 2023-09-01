@@ -49,7 +49,7 @@ describe('extract search response warnings', () => {
               timed_out: false,
               _shards: response._shards,
               failures: response._shards.failures,
-            }
+            },
           },
         },
       ]);
@@ -74,7 +74,7 @@ describe('extract search response warnings', () => {
               timed_out: true,
               _shards: response._shards,
               failures: response._shards.failures,
-            }
+            },
           },
         },
       ]);
@@ -98,76 +98,80 @@ describe('extract search response warnings', () => {
       const response = {
         took: 25,
         timed_out: false,
-        "_shards": {
-          "total": 4,
-          "successful": 3,
-          "skipped": 0,
-          "failed": 1,
-          "failures": [
+        _shards: {
+          total: 4,
+          successful: 3,
+          skipped: 0,
+          failed: 1,
+          failures: [
             {
-              "shard": 0,
-              "index": "remote1:.ds-kibana_sample_data_logs-2023.08.21-000001",
-              "node": "NVzFRd6SS4qT9o0k2vIzlg",
-              "reason": {
-                "type": "query_shard_exception",
-                "reason": "failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
-                "index_uuid": "z1sPO8E4TdWcijNgsL_BxQ",
-                "index": "remote1:.ds-kibana_sample_data_logs-2023.08.21-000001",
-                "caused_by": {
-                  "type": "runtime_exception",
-                  "reason": "runtime_exception: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123"
-                }
-              }
-            }
-          ]
-        },
-        "_clusters": {
-          "total": 2,
-          "successful": 2,
-          "skipped": 0,
-          "details": {
-            "(local)": {
-              "status": "successful",
-              "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
-              "took": 1,
-              "timed_out": false,
-              "_shards": {
-                "total": 2,
-                "successful": 2,
-                "skipped": 0,
-                "failed": 0
-              }
-            },
-            "remote1": {
-              "status": "partial",
-              "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
-              "took": 5,
-              "timed_out": false,
-              "_shards": {
-                "total": 2,
-                "successful": 1,
-                "skipped": 0,
-                "failed": 1
+              shard: 0,
+              index: 'remote1:.ds-kibana_sample_data_logs-2023.08.21-000001',
+              node: 'NVzFRd6SS4qT9o0k2vIzlg',
+              reason: {
+                type: 'query_shard_exception',
+                reason:
+                  'failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+                index_uuid: 'z1sPO8E4TdWcijNgsL_BxQ',
+                index: 'remote1:.ds-kibana_sample_data_logs-2023.08.21-000001',
+                caused_by: {
+                  type: 'runtime_exception',
+                  reason:
+                    'runtime_exception: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+                },
               },
-              "failures": [
+            },
+          ],
+        },
+        _clusters: {
+          total: 2,
+          successful: 2,
+          skipped: 0,
+          details: {
+            '(local)': {
+              status: 'successful',
+              indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+              took: 1,
+              timed_out: false,
+              _shards: {
+                total: 2,
+                successful: 2,
+                skipped: 0,
+                failed: 0,
+              },
+            },
+            remote1: {
+              status: 'partial',
+              indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+              took: 5,
+              timed_out: false,
+              _shards: {
+                total: 2,
+                successful: 1,
+                skipped: 0,
+                failed: 1,
+              },
+              failures: [
                 {
-                  "shard": 0,
-                  "index": "remote1:.ds-kibana_sample_data_logs-2023.08.21-000001",
-                  "node": "NVzFRd6SS4qT9o0k2vIzlg",
-                  "reason": {
-                    "type": "query_shard_exception",
-                    "reason": "failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123",
-                    "index_uuid": "z1sPO8E4TdWcijNgsL_BxQ",
-                    "index": "remote1:.ds-kibana_sample_data_logs-2023.08.21-000001",
-                    "caused_by": {
-                      "type": "runtime_exception",
-                      "reason": "runtime_exception: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123"
-                    }
-                  }
-                }
-              ]
-            }
-          }
+                  shard: 0,
+                  index: 'remote1:.ds-kibana_sample_data_logs-2023.08.21-000001',
+                  node: 'NVzFRd6SS4qT9o0k2vIzlg',
+                  reason: {
+                    type: 'query_shard_exception',
+                    reason:
+                      'failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+                    index_uuid: 'z1sPO8E4TdWcijNgsL_BxQ',
+                    index: 'remote1:.ds-kibana_sample_data_logs-2023.08.21-000001',
+                    caused_by: {
+                      type: 'runtime_exception',
+                      reason:
+                        'runtime_exception: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+                    },
+                  },
+                },
+              ],
+            },
+          },
         },
         hits: { total: 18239, max_score: null, hits: [] },
         aggregations: {},
@@ -186,42 +190,43 @@ describe('extract search response warnings', () => {
       const response = {
         took: 999,
         timed_out: true,
-        "_shards": {
-          "total": 6,
-          "successful": 6,
-          "skipped": 0,
-          "failed": 0
+        _shards: {
+          total: 6,
+          successful: 6,
+          skipped: 0,
+          failed: 0,
         },
-        "_clusters": {
-          "total": 2,
-          "successful": 2,
-          "skipped": 0,
-          "details": {
-            "(local)": {
-              "status": "successful",
-              "indices": "kibana_sample_data_ecommerce,kibana_sample_data_logs,kibana_sample_data_flights",
-              "took": 0,
-              "timed_out": false,
-              "_shards": {
-                "total": 3,
-                "successful": 3,
-                "skipped": 0,
-                "failed": 0
-              }
+        _clusters: {
+          total: 2,
+          successful: 2,
+          skipped: 0,
+          details: {
+            '(local)': {
+              status: 'successful',
+              indices:
+                'kibana_sample_data_ecommerce,kibana_sample_data_logs,kibana_sample_data_flights',
+              took: 0,
+              timed_out: false,
+              _shards: {
+                total: 3,
+                successful: 3,
+                skipped: 0,
+                failed: 0,
+              },
             },
-            "remote1": {
-              "status": "partial",
-              "indices": "kibana_sample_data*",
-              "took": 10005,
-              "timed_out": true,
-              "_shards": {
-                "total": 3,
-                "successful": 3,
-                "skipped": 0,
-                "failed": 0
-              }
-            }
-          }
+            remote1: {
+              status: 'partial',
+              indices: 'kibana_sample_data*',
+              took: 10005,
+              timed_out: true,
+              _shards: {
+                total: 3,
+                successful: 3,
+                skipped: 0,
+                failed: 0,
+              },
+            },
+          },
         },
         hits: { hits: [] },
       };
@@ -238,42 +243,42 @@ describe('extract search response warnings', () => {
       const warnings = extractWarnings({
         took: 10,
         timed_out: false,
-        "_shards": {
-          "total": 4,
-          "successful": 4,
-          "skipped": 0,
-          "failed": 0
+        _shards: {
+          total: 4,
+          successful: 4,
+          skipped: 0,
+          failed: 0,
         },
-        "_clusters": {
-          "total": 2,
-          "successful": 2,
-          "skipped": 0,
-          "details": {
-            "(local)": {
-              "status": "successful",
-              "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
-              "took": 0,
-              "timed_out": false,
-              "_shards": {
-                "total": 2,
-                "successful": 2,
-                "skipped": 0,
-                "failed": 0
-              }
+        _clusters: {
+          total: 2,
+          successful: 2,
+          skipped: 0,
+          details: {
+            '(local)': {
+              status: 'successful',
+              indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+              took: 0,
+              timed_out: false,
+              _shards: {
+                total: 2,
+                successful: 2,
+                skipped: 0,
+                failed: 0,
+              },
             },
-            "remote1": {
-              "status": "successful",
-              "indices": "kibana_sample_data_logs,kibana_sample_data_flights",
-              "took": 1,
-              "timed_out": false,
-              "_shards": {
-                "total": 2,
-                "successful": 2,
-                "skipped": 0,
-                "failed": 0
-              }
-            }
-          }
+            remote1: {
+              status: 'successful',
+              indices: 'kibana_sample_data_logs,kibana_sample_data_flights',
+              took: 1,
+              timed_out: false,
+              _shards: {
+                total: 2,
+                successful: 2,
+                skipped: 0,
+                failed: 0,
+              },
+            },
+          },
         },
         hits: { hits: [] },
       } as estypes.SearchResponse);
