@@ -83,6 +83,12 @@ export function AskAssistantButton({
           )}
         >
           <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.observabilityAiAssistant.askAssistantButton.popoverTitle',
+              {
+                defaultMessage: 'Elastic Assistant',
+              }
+            )}
             iconType="sparkles"
             display={fill ? 'fill' : 'base'}
             size={size}
