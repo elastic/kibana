@@ -3477,11 +3477,11 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/get.ts"
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector_types.ts"
+                "path": "x-pack/plugins/actions/server/routes/get.ts"
               },
               {
                 "plugin": "actions",
@@ -5029,22 +5029,6 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector_types.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector_types.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector_types.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector_types.test.ts"
-              },
-              {
-                "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/get.test.ts"
               },
               {
@@ -5626,6 +5610,22 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/connector/get_all/get_all.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
               },
               {
                 "plugin": "crossClusterReplication",
