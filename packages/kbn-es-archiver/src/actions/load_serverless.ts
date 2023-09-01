@@ -8,7 +8,7 @@
 // import { createReadStream } from 'fs';
 // import readline from 'readline';
 
-import { from, fromEventPattern } from 'rxjs';
+import { from, fromEventPattern, concat } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as zlib from 'zlib';
 import { readdir } from 'fs/promises';
@@ -26,43 +26,45 @@ const readDirectory = (predicate: PredicateFunction) => {
 //   pipe(await mappingsAndArchiveFileNamesMaybeZipped(archivePath as string), prioritizeMappings)
 // )
 
+type PathLikeOrString = fs.PathLike | string;
+
 const toStr = (x: BufferSource) => `${x}`;
+const decompressionObservable = (x: PathLikeOrString) =>
+  from(fs.createReadStream(x).pipe(zlib.createGunzip())).pipe(map(toStr));
+
 const subscribeToDecompressionStream = (archivePath: PathLikeOrString) => {
-  from(fs.createReadStream(archivePath).pipe(zlib.createGunzip()))
-    .pipe(map(toStr))
-    .subscribe({
-      next: (x) => console.log('\nλjs decompression stream - next, x:', x),
-      error: (err) => console.log('error:', err),
-      complete: () => console.log('the end'),
-    });
+  decompressionObservable(archivePath).subscribe({
+    next: (x) => console.log('\nλjs decompression stream - next, x:', x),
+    error: (err) => console.log('error:', err),
+    complete: () => console.log('the end'),
+  });
 };
 
-type PlaceHolder = any;
-type PathLikeOrString = fs.PathLike | string;
-const jsonStanza$ = (pathToFile: PathLikeOrString) => (_: PlaceHolder) => oboe(fs.createReadStream(pathToFile)).on('done', _);
+const jsonStanza$ = (x) => (_) => oboe(fs.createReadStream(x)).on('done', _);
+const jsonStanzaObservable = (x) => fromEventPattern(jsonStanza$(x));
 
-const subscribeToStreamingJsonStream = (archivePath: PathLikeOrString) => {
+const subscribeToStreamingJsonStream = (archivePath) => {
   archivePath =
     '/Users/trezworkbox/dev/scratches/src/js/streams/native-nodejs-streams/gunzip/someotherfile.txt';
   console.log(`\nλjs archivePath: \n\t${archivePath}`);
 
-  fromEventPattern(jsonStanza$(archivePath)).subscribe({
+  jsonStanzaObservable(archivePath).subscribe({
     next: (x) => console.log(`\nλjs jsonStanzas stream - next, x: \n${JSON.stringify(x, null, 2)}`),
     error: (err) => console.log('error:', err),
     complete: () => console.log('the end'),
   });
 };
+
 export const begin = (archivePath: PathLikeOrString) => {
+  // subscribeToDecompressionStream(archivePath);
+  // subscribeToStreamingJsonStream(archivePath);
+
   archivePath =
     '/Users/trezworkbox/dev/scratches/src/js/streams/native-nodejs-streams/gunzip/someotherfile.txt.gz';
 
-  // subscribeToDecompressionStream(archivePath);
-  subscribeToStreamingJsonStream(archivePath);
-  // return from(fs.createReadStream(archivePath).pipe(zlib.createGunzip()))
-  //   .pipe(map(toStr))
-  //   .subscribe({
-  //     next: (x) => console.log("\nλjs next, x:", x),
-  //     error: (err) => console.log("error:", err),
-  //     complete: () => console.log("the end")
-  //   });
+  concat(decompressionObservable(archivePath), jsonStanzaObservable(archivePath)).subscribe({
+    next: (x) => console.log('\nλjs next, x:', x),
+    error: (err) => console.log('error:', err),
+    complete: () => console.log('the end'),
+  });
 };
