@@ -285,7 +285,7 @@ describe('Discover grid cell rendering', function () {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <JsonCodeEditor
+          <ForwardRef
             height={200}
             json={
               Object {
@@ -517,7 +517,7 @@ describe('Discover grid cell rendering', function () {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <JsonCodeEditor
+          <ForwardRef
             height={200}
             json={
               Object {
@@ -681,7 +681,7 @@ describe('Discover grid cell rendering', function () {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <JsonCodeEditor
+          <ForwardRef
             height={200}
             json={
               Object {
