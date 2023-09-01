@@ -139,7 +139,8 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
         </EuiButtonEmpty>
         <EuiButton
           fill
-          disabled={isSaving || indexNameError !== undefined}
+          disabled={indexNameError !== undefined}
+          isLoading={isSaving}
           type="submit"
           onClick={onSave}
           form="createIndexModalForm"
