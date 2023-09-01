@@ -26,7 +26,7 @@ export const InvestigationGuide: React.FC = () => {
     dataFormattedForFieldBrowser,
   });
 
-  if (!dataFormattedForFieldBrowser || error) {
+  if (error) {
     return null;
   }
 

@@ -11,6 +11,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
+import type { LeftPanelContext } from '../context';
 import { useLeftPanelContext } from '../context';
 import { useInvestigationTimeEnrichment } from '../../../common/containers/cti/event_enrichment';
 import { SecurityPageName } from '../../../../common/constants';
@@ -76,7 +77,7 @@ describe('useThreatIntelligenceDetails', () => {
       },
       dataAsNestedObject: null,
       investigationFields: [],
-    });
+    } as unknown as LeftPanelContext);
   });
 
   afterEach(() => {

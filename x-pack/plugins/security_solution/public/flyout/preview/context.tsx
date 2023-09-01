@@ -9,6 +9,9 @@ import React, { createContext, useContext, useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { FLYOUT_ERROR_TEST_ID } from '../shared/test_ids';
+import { ERROR_MESSAGE, ERROR_TITLE, FLYOUT_ERROR } from '../shared/translations';
 import type { PreviewPanelProps } from '.';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
@@ -41,7 +44,7 @@ export interface PreviewPanelContext {
   /**
    * An object with top level fields from the ECS object
    */
-  dataAsNestedObject: Ecs | null;
+  dataAsNestedObject: Ecs;
 }
 
 export const PreviewPanelContext = createContext<PreviewPanelContext | undefined>(undefined);
@@ -77,7 +80,7 @@ export const PreviewPanelProvider = ({
 
   const contextValue = useMemo(
     () =>
-      id && indexName && scopeId
+      id && indexName && scopeId && dataAsNestedObject
         ? {
             eventId: id,
             indexName,
@@ -89,6 +92,18 @@ export const PreviewPanelProvider = ({
         : undefined,
     [id, indexName, scopeId, ruleId, sourcererDataView.indexPattern, dataAsNestedObject]
   );
+
+  if (!contextValue) {
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={<h2>{ERROR_TITLE(FLYOUT_ERROR)}</h2>}
+        body={<p>{ERROR_MESSAGE(FLYOUT_ERROR)}</p>}
+        data-test-subj={FLYOUT_ERROR_TEST_ID}
+      />
+    );
+  }
 
   return (
     <PreviewPanelContext.Provider value={contextValue}>{children}</PreviewPanelContext.Provider>

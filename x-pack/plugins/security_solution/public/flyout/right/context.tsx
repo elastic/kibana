@@ -8,9 +8,11 @@
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { css } from '@emotion/react';
 import React, { createContext, useContext, useMemo } from 'react';
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
+import { FLYOUT_ERROR_TEST_ID } from '../shared/test_ids';
+import { ERROR_MESSAGE, ERROR_TITLE, FLYOUT_ERROR } from '../shared/translations';
 import type { SearchHit } from '../../../common/search_strategy';
 import { useTimelineEventsDetails } from '../../timelines/containers/details';
 import {
@@ -43,19 +45,19 @@ export interface RightPanelContext {
   /**
    * An object containing fields by type
    */
-  browserFields: BrowserFields | null;
+  browserFields: BrowserFields;
   /**
    * An object with top level fields from the ECS object
    */
-  dataAsNestedObject: Ecs | null;
+  dataAsNestedObject: Ecs;
   /**
    * An array of field objects with category and value
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
   /**
    * The actual raw document object
    */
-  searchHit: SearchHit | undefined;
+  searchHit: SearchHit;
   /**
    * User defined fields to highlight (defined on the rule)
    */
@@ -108,7 +110,7 @@ export const RightPanelProvider = ({
 
   const contextValue = useMemo(
     () =>
-      id && indexName && scopeId
+      id && indexName && scopeId && dataAsNestedObject && dataFormattedForFieldBrowser && searchHit
         ? {
             eventId: id,
             indexName,
@@ -146,6 +148,18 @@ export const RightPanelProvider = ({
       >
         <EuiLoadingSpinner size="xxl" />
       </EuiFlexItem>
+    );
+  }
+
+  if (!contextValue) {
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={<h2>{ERROR_TITLE(FLYOUT_ERROR)}</h2>}
+        body={<p>{ERROR_MESSAGE(FLYOUT_ERROR)}</p>}
+        data-test-subj={FLYOUT_ERROR_TEST_ID}
+      />
     );
   }
 

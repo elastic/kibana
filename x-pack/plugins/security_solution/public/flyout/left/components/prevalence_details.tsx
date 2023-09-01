@@ -208,8 +208,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
-  const { browserFields, dataFormattedForFieldBrowser, eventId, investigationFields } =
-    useLeftPanelContext();
+  const { dataFormattedForFieldBrowser, investigationFields } = useLeftPanelContext();
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
 
@@ -273,7 +272,7 @@ export const PrevalenceDetails: React.FC = () => {
     );
   }
 
-  if (!eventId || !dataFormattedForFieldBrowser || !browserFields || error) {
+  if (error) {
     return (
       <EuiEmptyPrompt
         iconType="error"

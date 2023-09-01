@@ -67,20 +67,6 @@ describe('<InvestigationGuide />', () => {
     expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should not render investigation guide button when dataFormattedForFieldBrowser is null', () => {
-    (useInvestigationGuide as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      show: false,
-    });
-    const mockContext = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: null,
-    };
-    const { container } = render(renderInvestigationGuide(mockContext));
-    expect(container).toBeEmptyDOMElement();
-  });
-
   it('should render null when useInvestigationGuide errors out', () => {
     (useInvestigationGuide as jest.Mock).mockReturnValue({
       loading: false,

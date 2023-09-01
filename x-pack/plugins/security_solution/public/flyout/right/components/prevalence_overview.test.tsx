@@ -129,54 +129,6 @@ describe('<PrevalenceOverview />', () => {
     expect(queryByTestId(valueDataTestSubj2)).not.toBeInTheDocument();
   });
 
-  it('should render null if eventId is null', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      data: [],
-    });
-    const contextValue = {
-      ...mockContextValue,
-      eventId: null,
-    } as unknown as RightPanelContext;
-
-    const { container } = render(renderPrevalenceOverview(contextValue));
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should render null if browserFields is null', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      data: [],
-    });
-    const contextValue = {
-      ...mockContextValue,
-      browserFields: null,
-    };
-
-    const { container } = render(renderPrevalenceOverview(contextValue));
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should render null if dataFormattedForFieldBrowser is null', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      data: [],
-    });
-    const contextValue = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: null,
-    };
-
-    const { container } = render(renderPrevalenceOverview(contextValue));
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
   it('should navigate to left section Insights tab when clicking on button', () => {
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
