@@ -535,7 +535,7 @@ storiesOf('SearchBar', module)
       ],
     } as unknown as SearchBarProps)
   )
-  .add('with dataviewPicker with SQL', () =>
+  .add('with dataviewPicker with ESQL', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -547,66 +547,66 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
     } as SearchBarProps)
   )
-  .add('with dataviewPicker with SQL and sql query', () =>
+  .add('with dataviewPicker with ESQL and ESQL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
+          label: 'ESQL',
+          title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
-      query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+      query: { esql: 'from dataview | project field1, field2' },
     } as unknown as SearchBarProps<Query>)
   )
-  .add('with dataviewPicker with SQL and large sql query', () =>
+  .add('with dataviewPicker with ESQL and large ESQL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
+          label: 'ESQL',
+          title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
       query: {
-        sql: 'SELECT field1, field2, field 3, field 4, field 5 FROM DATAVIEW WHERE field5 IS NOT NULL AND field4 IS NULL',
+        esql: 'from dataview | project field1, field2, field 3, field 4, field 5 | where field5 > 5 | stats var = avg(field3)',
       },
     } as unknown as SearchBarProps<Query>)
   )
-  .add('with dataviewPicker with SQL and errors in sql query', () =>
+  .add('with dataviewPicker with ESQL and errors in ESQL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
+          label: 'ESQL',
+          title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
       textBasedLanguageModeErrors: [
         new Error(
-          '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
+          '[esql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
         ),
       ],
-      query: { sql: 'SELECT field1, field10 FROM DATAVIEW' },
+      query: { esql: 'from dataview | project field10' },
     } as unknown as SearchBarProps<Query>)
   )
   .add('in disabled state', () =>
