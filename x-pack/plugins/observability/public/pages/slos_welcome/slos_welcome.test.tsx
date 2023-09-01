@@ -59,7 +59,9 @@ describe('SLOs Welcome Page', () => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       useGlobalDiagnosisMock.mockReturnValue({
-        isError: false,
+        data: {
+          userPrivileges: { write: { has_all_requested: true }, read: { has_all_requested: true } },
+        },
       });
 
       render(<SlosWelcomePage />);
@@ -104,7 +106,12 @@ describe('SLOs Welcome Page', () => {
           hasReadCapabilities: true,
         });
         useGlobalDiagnosisMock.mockReturnValue({
-          isError: true,
+          data: {
+            userPrivileges: {
+              write: { has_all_requested: false },
+              read: { has_all_requested: true },
+            },
+          },
         });
 
         render(<SlosWelcomePage />);
@@ -116,7 +123,12 @@ describe('SLOs Welcome Page', () => {
 
       it('should display the welcome message with a Create new SLO button which should navigate to the SLO Creation page', async () => {
         useGlobalDiagnosisMock.mockReturnValue({
-          isError: false,
+          data: {
+            userPrivileges: {
+              write: { has_all_requested: true },
+              read: { has_all_requested: true },
+            },
+          },
         });
 
         render(<SlosWelcomePage />);
@@ -136,7 +148,12 @@ describe('SLOs Welcome Page', () => {
       beforeEach(() => {
         useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
         useGlobalDiagnosisMock.mockReturnValue({
-          isError: false,
+          data: {
+            userPrivileges: {
+              write: { has_all_requested: true },
+              read: { has_all_requested: true },
+            },
+          },
         });
       });
 

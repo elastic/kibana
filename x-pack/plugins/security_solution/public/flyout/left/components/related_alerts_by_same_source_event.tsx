@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { RELATED_ALERTS_BY_SOURCE_EVENT_NO_DATA } from './translations';
 import { CORRELATIONS_SAME_SOURCE_ALERTS } from '../../shared/translations';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID } from './test_ids';
@@ -20,6 +21,10 @@ export interface RelatedAlertsBySameSourceEventProps {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * Id of the document
+   */
+  eventId: string;
 }
 
 /**
@@ -28,6 +33,7 @@ export interface RelatedAlertsBySameSourceEventProps {
 export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSourceEventProps> = ({
   originalEventId,
   scopeId,
+  eventId,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
     originalEventId,
@@ -44,6 +50,9 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
       title={title}
       loading={loading}
       alertIds={data}
+      scopeId={scopeId}
+      eventId={eventId}
+      noItemsMessage={RELATED_ALERTS_BY_SOURCE_EVENT_NO_DATA}
       data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}
     />
   );

@@ -7,10 +7,11 @@
 
 import { Index } from '../../../public';
 
+export const testIndexName = 'test_index';
 export const testIndexMock: Index = {
   health: 'green',
   status: 'open',
-  name: 'test_index',
+  name: testIndexName,
   uuid: 'test1234',
   primary: '1',
   replica: '1',
@@ -27,4 +28,42 @@ export const testIndexMock: Index = {
     managed: false,
   },
   isFollowerIndex: false,
+};
+
+export const testIndexMappings = {
+  mappings: {
+    dynamic: 'false',
+    dynamic_templates: [],
+    properties: {
+      '@timestamp': {
+        type: 'date',
+      },
+    },
+  },
+};
+
+// Mocking partial index stats response
+export const testIndexStats = {
+  _shards: {
+    total: 1,
+    successful: 1,
+    failed: 0,
+  },
+  stats: {
+    uuid: 'tQ-n6sriQzC84xn58VYONQ',
+    health: 'green',
+    status: 'open',
+    primaries: {
+      docs: {
+        count: 1000,
+        deleted: 0,
+      },
+    },
+    total: {
+      docs: {
+        count: 1000,
+        deleted: 0,
+      },
+    },
+  },
 };
