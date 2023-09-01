@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import { ViewDocument } from '../../common/components/view_document';
 import {
   ExpandRowColumn,
   toggleDetails,
@@ -206,6 +207,11 @@ export const TestRunsTable = ({
         show: false,
       },
     },
+    {
+      align: 'center',
+      name: 'Document',
+      render: (ping: Ping) => <ViewDocument ping={ping} />,
+    },
     ...(!isBrowserMonitor
       ? [
           {
@@ -229,11 +235,16 @@ export const TestRunsTable = ({
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
         const targetElem = evt.target as HTMLElement;
+        const isTableRow =
+          targetElem.parentElement?.classList.contains('euiTableCellContent') ||
+          targetElem?.classList.contains('euiTableCellContent');
         // we dont want to capture image click event
         if (
+          isTableRow &&
           targetElem.tagName !== 'IMG' &&
           targetElem.tagName !== 'path' &&
-          !targetElem.parentElement?.classList.contains('euiLink')
+          !targetElem.parentElement?.classList.contains('euiLink') &&
+          !targetElem.parentElement?.classList.contains('documentViewer')
         ) {
           if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
             toggleDetails(item, expandedRows, setExpandedRows);
