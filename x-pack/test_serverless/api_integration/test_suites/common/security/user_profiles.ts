@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/user_profiles', function () {
     describe('route access', () => {
       // FLAKY: https://github.com/elastic/kibana/issues/165391
-      describe.skip('internal', () => {
+      describe('internal', () => {
         // When we run tests on MKI, SAML realm is configured differently, and we cannot handcraft SAML responses to
         // log in as SAML users.
         this.tags(['skipMKI']);
