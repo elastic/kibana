@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-
-import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { APP_UI_ID, SecurityPageName } from '../../../common';
-import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
-import { useNavigateTo } from '../../common/lib/kibana';
+import { APP_UI_ID } from '../../../common';
+import { useRedirectToDashboardFromLens } from '../../common/components/visualization_actions/use_redirect_to_dashboard_from_lens';
 
 import { APP_NAME } from '../../../common/constants';
 
@@ -32,35 +29,7 @@ const DashboardToolBarComponent = ({
   const viewMode =
     dashboardContainer?.select((state) => state.explicitInput.viewMode) ?? ViewMode.VIEW;
 
-  const { navigateTo } = useNavigateTo();
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const dashboardListingUrl = useMemo(
-    () =>
-      `${getSecuritySolutionUrl({
-        deepLinkId: SecurityPageName.dashboards,
-      })}`,
-    [getSecuritySolutionUrl]
-  );
-  const getEditOrCreateDashboardUrl = useCallback(
-    (id: string | undefined) =>
-      `${getSecuritySolutionUrl({
-        deepLinkId: SecurityPageName.dashboards,
-        path: id ? `${id}/edit` : `/create`,
-      })}`,
-    [getSecuritySolutionUrl]
-  );
-
-  const redirectTo = useCallback(
-    (props) => {
-      if (props.destination === 'listing') {
-        navigateTo({ url: dashboardListingUrl });
-      }
-      if (props.destination === 'dashboard') {
-        navigateTo({ url: getEditOrCreateDashboardUrl(props.id) });
-      }
-    },
-    [dashboardListingUrl, getEditOrCreateDashboardUrl, navigateTo]
-  );
+  const redirectTo = useRedirectToDashboardFromLens();
 
   const originatingPath = dashboardId ? `dashboards/${dashboardId}/edit` : `dashboards/create`;
 

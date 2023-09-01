@@ -35,7 +35,7 @@ export interface Props {
 
   getAppNameFromId: () => string | undefined;
   returnToOriginSwitchLabel?: string;
-
+  redirectToOrigin?: boolean;
   onClose: () => void;
   onSave: (props: SaveProps, options: { saveToLibrary: boolean }) => void;
 }
@@ -54,6 +54,7 @@ export const SaveModal = (props: Props) => {
     getAppNameFromId,
     onClose,
     onSave,
+    redirectToOrigin,
   } = props;
 
   // Use the modal with return-to-origin features if we're in an app's edit flow or if by-value embeddables are disabled
