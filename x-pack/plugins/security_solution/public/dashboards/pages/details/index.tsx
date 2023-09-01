@@ -72,8 +72,14 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const dashboardExists = useMemo(() => dashboardDetails != null, [dashboardDetails]);
   const shouldShowControl =
     savedObjectId && dashboardExists
-      ? dashboardContainer && showWriteControls && !isManaged
-      : dashboardContainer && showWriteControls;
+      ? dashboardContainer && showWriteControls && isManaged === false // edit dashboard
+      : dashboardContainer && showWriteControls; // create dashboard
+  const dashboardTitle = useMemo(
+    () =>
+      dashboardContainer?.select((state) => state.explicitInput.title).trim() ??
+      dashboardDetails?.title,
+    [dashboardContainer, dashboardDetails]
+  );
 
   return (
     <>
@@ -88,7 +94,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
           data-test-subj="dashboard-view-wrapper"
         >
           <EuiFlexItem grow={false}>
-            <HeaderPage border title={dashboardDetails?.title ?? <EuiLoadingSpinner size="m" />}>
+            <HeaderPage border title={dashboardTitle ?? <EuiLoadingSpinner size="m" />}>
               {shouldShowControl && (
                 <DashboardToolBar
                   dashboardContainer={dashboardContainer}
