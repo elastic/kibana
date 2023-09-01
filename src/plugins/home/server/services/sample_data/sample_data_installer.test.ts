@@ -224,6 +224,7 @@ describe('SampleDataInstaller', () => {
 
     it('throws a SampleDataInstallError when the index creation fails', async () => {
       esClient.asCurrentUser.indices.create.mockImplementation(() => {
+        // eslint-disable-next-line no-throw-literal
         throw {
           message: 'Cannot create index',
           status: 500,
