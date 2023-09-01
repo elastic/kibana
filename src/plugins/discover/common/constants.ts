@@ -17,7 +17,6 @@ export enum VIEW_MODE {
   AGGREGATED_LEVEL = 'aggregated',
 }
 
-export const DISABLE_SHARD_FAILURE_WARNING = true;
 export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => {
   return parseInt(uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) || DEFAULT_ROWS_PER_PAGE;
 };
