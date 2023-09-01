@@ -203,15 +203,18 @@ export const UnifiedHistogramLayout = ({
   children,
   withDefaultActions,
 }: UnifiedHistogramLayoutProps) => {
-  const { allSuggestions, currentSuggestion, suggestionUnsupported } = useLensSuggestions({
-    dataView,
-    query,
-    originalSuggestion,
-    isPlainRecord,
-    columns,
-    lensSuggestionsApi,
-    onSuggestionChange,
-  });
+  const { allSuggestions, currentSuggestion, suggestionUnsupported, isOnHistogramMode } =
+    useLensSuggestions({
+      dataView,
+      query,
+      originalSuggestion,
+      isPlainRecord,
+      columns,
+      timeRange,
+      data: services.data,
+      lensSuggestionsApi,
+      onSuggestionChange,
+    });
 
   const chart = suggestionUnsupported ? undefined : originalChart;
 
@@ -287,6 +290,7 @@ export const UnifiedHistogramLayout = ({
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
           lensTablesAdapter={lensTablesAdapter}
+          isOnHistogramMode={isOnHistogramMode}
           withDefaultActions={withDefaultActions}
         />
       </InPortal>
