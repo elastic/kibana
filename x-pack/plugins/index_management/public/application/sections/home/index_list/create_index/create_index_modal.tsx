@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { createIndex } from '../../../../services';
+import { notificationService } from '../../../../services/notification';
 
 import { isValidIndexName } from './utils';
 
@@ -52,6 +53,12 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
       if (!error) {
         loadIndices();
         closeModal();
+        notificationService.showSuccessToast(
+          i18n.translate('xpack.idxMgmt.createIndex.successfullyCreatedIndexMessage', {
+            defaultMessage: 'Successfully created index: {indexName}',
+            values: { indexName },
+          })
+        );
         return;
       }
       setCreateError(error.message);
