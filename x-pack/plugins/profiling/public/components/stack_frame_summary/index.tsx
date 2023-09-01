@@ -6,7 +6,11 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
-import { getCalleeFunction, getCalleeSource, StackFrameMetadata } from '../../../common/profiling';
+import {
+  getCalleeFunction,
+  getCalleeSource,
+  StackFrameMetadata,
+} from '@kbn/profiling-data-access-plugin/common/profiling';
 
 interface Props {
   frame: StackFrameMetadata;
