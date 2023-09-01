@@ -111,7 +111,7 @@ export const HighlightedFields: FC = () => {
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
         <EuiPanel hasBorder hasShadow={false}>
-          <EuiInMemoryTable items={items} columns={columns} compressed tableLayout="auto" />
+          <EuiInMemoryTable items={items} columns={columns} compressed />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
