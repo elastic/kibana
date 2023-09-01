@@ -44,8 +44,30 @@ const getBootstrapScript = (isDev) => {
   }
 };
 
-const setServerlessKibanaDevServiceAccountIfPossible = (set, opts) => {
-  if (!opts.dev || !opts.serverless || process.env.isDevCliChild === 'true') {
+const setServerlessKibanaDevServiceAccountIfPossible = (get, set, opts) => {
+  const esHosts = [].concat(
+    get('elasticsearch.hosts', []),
+    opts.elasticsearch ? opts.elasticsearch.split(',') : []
+  );
+
+  /*
+   * We only handle the service token if serverless ES is running locally.
+   * Example would be if the user is running SES in the cloud and KBN serverless
+   * locally, they would be expected to handle auth on their own and this token
+   * is likely invalid anyways.
+   */
+  const isESlocalhost = esHosts.length
+    ? esHosts.some((hostUrl) => {
+        const parsedUrl = url.parse(hostUrl);
+        return (
+          parsedUrl.hostname === 'localhost' ||
+          parsedUrl.hostname === '127.0.0.1' ||
+          parsedUrl.hostname === 'host.docker.internal'
+        );
+      })
+    : true; // default is localhost:9200
+
+  if (!opts.dev || !opts.serverless || !isESlocalhost) {
     return;
   }
 
@@ -86,7 +108,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   if (opts.dev) {
     if (opts.serverless) {
-      setServerlessKibanaDevServiceAccountIfPossible(set, opts);
+      setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
