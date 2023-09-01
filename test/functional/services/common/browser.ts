@@ -73,6 +73,11 @@ class BrowserService extends FtrService {
     return await this.driver.manage().window().getRect();
   }
 
+  public async getWindowInnerSize(): Promise<{ height: number; width: number }> {
+    const JS_GET_INNER_WIDTH = 'return { width: window.innerWidth, height: window.innerHeight };';
+    return await this.driver.executeScript(JS_GET_INNER_WIDTH);
+  }
+
   /**
    * Sets the dimensions of a window.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Window.html

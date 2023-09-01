@@ -45,7 +45,7 @@ describe('processMonitors', () => {
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
   it('should return a processed data', async () => {
-    const result = await processMonitors(testMonitors, serverMock, soClient, monitorClient);
+    const result = processMonitors(testMonitors, serverMock, soClient, monitorClient);
     expect(result).toEqual({
       allIds: [
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
@@ -60,15 +60,15 @@ describe('processMonitors', () => {
         '7f796001-a795-4c0b-afdb-3ce74edea775',
       ],
       disabledMonitorQueryIds: ['test-project-id-default'],
-      listOfLocations: ['US Central QA', 'US Central Staging', 'North America - US Central'],
+      monitorLocationIds: ['us_central_qa', 'us_central_staging', 'us_central'],
       maxPeriod: 600000,
       monitorLocationMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': [
-          'US Central QA',
-          'North America - US Central',
-          'US Central Staging',
+          'us_central_qa',
+          'us_central',
+          'us_central_staging',
         ],
-        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['US Central QA', 'US Central Staging'],
+        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['us_central_qa', 'us_central_staging'],
       },
       monitorQueryIdToConfigIdMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': '7f796001-a795-4c0b-afdb-3ce74edea775',
@@ -81,7 +81,7 @@ describe('processMonitors', () => {
   it('should return a processed data where location label is missing', async () => {
     testMonitors[0].attributes.locations[0].label = undefined;
 
-    const result = await processMonitors(testMonitors, serverMock, soClient, monitorClient);
+    const result = processMonitors(testMonitors, serverMock, soClient, monitorClient);
     expect(result).toEqual({
       allIds: [
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
@@ -96,20 +96,15 @@ describe('processMonitors', () => {
         '7f796001-a795-4c0b-afdb-3ce74edea775',
       ],
       disabledMonitorQueryIds: ['test-project-id-default'],
-      listOfLocations: [
-        'US Central Staging',
-        'us_central_qa',
-        'US Central QA',
-        'North America - US Central',
-      ],
+      monitorLocationIds: ['us_central_qa', 'us_central_staging', 'us_central'],
       maxPeriod: 600000,
       monitorLocationMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': [
-          'US Central QA',
-          'North America - US Central',
-          'US Central Staging',
+          'us_central_qa',
+          'us_central',
+          'us_central_staging',
         ],
-        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['US Central Staging', 'us_central_qa'],
+        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['us_central_qa', 'us_central_staging'],
       },
       monitorQueryIdToConfigIdMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': '7f796001-a795-4c0b-afdb-3ce74edea775',
@@ -160,7 +155,7 @@ describe('processMonitors', () => {
       )
     );
 
-    const result = await processMonitors(testMonitors, serverMock, soClient, monitorClient);
+    const result = processMonitors(testMonitors, serverMock, soClient, monitorClient);
     expect(result).toEqual({
       allIds: [
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
@@ -175,15 +170,15 @@ describe('processMonitors', () => {
         '7f796001-a795-4c0b-afdb-3ce74edea775',
       ],
       disabledMonitorQueryIds: ['test-project-id-default'],
-      listOfLocations: ['US Central Staging', 'US Central QA', 'North America - US Central'],
+      monitorLocationIds: ['us_central_qa', 'us_central_staging', 'us_central'],
       maxPeriod: 600000,
       monitorLocationMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': [
-          'US Central QA',
-          'North America - US Central',
-          'US Central Staging',
+          'us_central_qa',
+          'us_central',
+          'us_central_staging',
         ],
-        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['US Central Staging', 'US Central QA'],
+        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['us_central_qa', 'us_central_staging'],
       },
       monitorQueryIdToConfigIdMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': '7f796001-a795-4c0b-afdb-3ce74edea775',

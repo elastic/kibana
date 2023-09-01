@@ -24,6 +24,11 @@ import {
   ESS_CONFIG_PATH,
   ESS_FILES_PATH,
 } from '../paths';
+import {
+  ELASTIC_SERVERLESS_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+} from './ess_file_realm';
+import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 
 interface BaseOptions {
   tag?: string;
@@ -320,10 +325,14 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
   log.info(chalk.bold(`Checking for image: ${image}`));
 
   await execa('docker', ['pull', image], {
-    // inherit is required to show Docker output
-    stdio: ['ignore', 'inherit', 'inherit'],
-  }).catch(({ message }) => {
-    throw createCliError(message);
+    // inherit is required to show Docker pull output
+    stdio: ['ignore', 'inherit', 'pipe'],
+  }).catch(({ message, stderr }) => {
+    throw createCliError(
+      stderr.includes('unauthorized: authentication required')
+        ? `Error authenticating with ${DOCKER_REGISTRY}. Visit https://docker-auth.elastic.co/github_auth to login.`
+        : message
+    );
   });
 }
 
@@ -393,6 +402,14 @@ export function resolveEsArgs(
 
     args.forEach((arg) => {
       const [key, ...value] = arg.split('=');
+
+      // Guide the user to use SSL flag instead of manual setup
+      if (key === 'xpack.security.enabled' && value?.[0] === 'true') {
+        throw createCliError(
+          'Use the --ssl flag to automatically enable and set up the security plugin.'
+        );
+      }
+
       esArgs.set(key.trim(), value.join('=').trim());
     });
   }
@@ -555,6 +572,20 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   log.success(`Serverless ES cluster running.
       Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
+
+  if (options.ssl) {
+    log.success(`SSL and Security have been enabled for ES.
+      Login through your browser with username ${chalk.bold.cyan(
+        ELASTIC_SERVERLESS_SUPERUSER
+      )} or ${chalk.bold.cyan(SYSTEM_INDICES_SUPERUSER)} and password ${chalk.bold.magenta(
+      ELASTIC_SERVERLESS_SUPERUSER_PASSWORD
+    )}.
+    `);
+
+    log.warning(`Kibana should be started with the SSL flag so that it can authenticate with ES.
+      See packages/kbn-es/src/ess_resources/README.md for additional information on authentication.    
+    `);
+  }
 
   if (!options.background) {
     // The ESS cluster has to be started detached, so we attach a logger afterwards for output
