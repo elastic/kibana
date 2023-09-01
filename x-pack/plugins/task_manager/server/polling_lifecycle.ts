@@ -41,6 +41,7 @@ import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
+import { createTaskMetricsCollector } from './metrics/collector/task_metrics_collector';
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
@@ -177,12 +178,20 @@ export class TaskPollingLifecycle {
     });
     this.subscribeToPoller(poller.events$);
 
+    const metricsCollector = createTaskMetricsCollector<string, any>({
+      logger,
+      pollInterval: 3000,
+      store: taskStore,
+    });
+
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable) {
         // start polling for work
         poller.start();
+        metricsCollector.start();
       } else if (!areESAndSOAvailable) {
         poller.stop();
+        metricsCollector.stop();
         this.pool.cancelRunningTasks();
       }
     });

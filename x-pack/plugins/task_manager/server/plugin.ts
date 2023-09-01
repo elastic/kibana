@@ -36,6 +36,7 @@ import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import { metricsStream, Metrics } from './metrics';
+import { createTaskMetricsCollector } from './metrics/collector/task_metrics_collector';
 
 export interface TaskManagerSetupContract {
   /**
