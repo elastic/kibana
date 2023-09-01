@@ -177,6 +177,7 @@
     "@kbn/core-application-common",
     "@kbn/openapi-generator",
     "@kbn/es",
+    "@kbn/subscription-tracking",
     "@kbn/react-kibana-mount"
   ]
 }
