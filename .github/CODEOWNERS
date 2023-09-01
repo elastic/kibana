@@ -750,6 +750,9 @@ test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-core
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
+packages/kbn-unified-doc-viewer @elastic/kibana-data-discovery
+examples/unified_doc_viewer @elastic/kibana-core
+src/plugins/unified_doc_viewer @elastic/kibana-data-discovery
 packages/kbn-unified-field-list @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
@@ -834,6 +837,13 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test_serverless/api_integration/test_suites/common/scripts_tests @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_oss @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_xpack @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/examples/data_view_field_editor_example @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/examples/discover_customization_examples @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/examples/field_formats @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/examples/partial_results @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/examples/search @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/examples/search_examples @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/examples/unified_field_list_examples @elastic/kibana-data-discovery
 
 # Visualizations
 /src/plugins/visualize/ @elastic/kibana-visualizations
