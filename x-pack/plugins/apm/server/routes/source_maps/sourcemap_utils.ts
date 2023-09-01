@@ -16,11 +16,8 @@ function asSha256Encoded(content: BinaryLike): string {
   return createHash('sha256').update(content).digest('hex');
 }
 
-export async function getEncodedSourceMapContent(sourceMapContent: SourceMap) {
-  return getEncodedContent(JSON.stringify(sourceMapContent));
-}
-export async function getEncodedContent(textContent: string) {
-  const contentBuffer = Buffer.from(textContent);
+export async function getEncodedContent(sourceMapContent: SourceMap) {
+  const contentBuffer = Buffer.from(JSON.stringify(sourceMapContent));
   const contentZipped = await deflateAsync(contentBuffer);
   const contentEncoded = contentZipped.toString('base64');
   const contentHash = asSha256Encoded(contentZipped);
