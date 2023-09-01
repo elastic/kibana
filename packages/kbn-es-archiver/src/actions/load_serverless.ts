@@ -67,7 +67,8 @@ export const begin = async (archivePath: PathLikeOrString): Promise<void> => {
   const prioritized = (xs: PathLikeOrString[]) => from(pipe(xs as string[], prioritizeMappings));
   const resolved = (obs$) => obs$.pipe(map(resolveEntry(archivePath)));
 
-  resolved(prioritized(await mappingsAndArchiveFileNames(archivePath))).subscribe({
+  // resolved(prioritized(await mappingsAndArchiveFileNames(archivePath))).subscribe({
+  pipe(await mappingsAndArchiveFileNames(archivePath), prioritized, resolved).subscribe({
     next: (x) => console.log('\nλjs next, x:', x),
     error: (err) => console.log('error:', err),
     complete: () => console.log('the end'),
