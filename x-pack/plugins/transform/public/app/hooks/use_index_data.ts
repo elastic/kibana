@@ -131,20 +131,17 @@ export const useIndexData = (
   }, [dataViewFieldsData, dataViewFieldsError, dataViewFieldsIsError, dataViewFieldsIsLoading]);
 
   const dataViewFields = useMemo(() => {
-    if (Array.isArray(populatedFields)) {
-      return populatedFields;
-    }
+    let allPopulatedFields = Array.isArray(populatedFields) ? populatedFields : [];
 
-    if (dataViewFieldsData) {
-      const docs = dataViewFieldsData.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
-
+    if (populatedFields === undefined && dataViewFieldsData) {
       // Get all field names for each returned doc and flatten it
       // to a list of unique field names used across all docs.
-      const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
-      return [...new Set(docs.map(Object.keys).flat(1))]
-        .filter((d) => allDataViewFields.includes(d))
-        .sort();
+      const docs = dataViewFieldsData.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+      allPopulatedFields = [...new Set(docs.map(Object.keys).flat(1))];
     }
+
+    const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
+    return allPopulatedFields.filter((d) => allDataViewFields.includes(d)).sort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewFieldsData, populatedFields]);
 
