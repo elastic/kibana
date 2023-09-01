@@ -349,7 +349,7 @@ describe('Actions Plugin', () => {
       });
     });
 
-    describe('setEnabledConnectorTypes', () => {
+    describe('setEnabledConnectorTypes (works only on serverless)', () => {
       function setup(config: ActionsConfig) {
         context = coreMock.createPluginInitializerContext<ActionsConfig>(config);
         plugin = new ActionsPlugin(context);
@@ -361,6 +361,7 @@ describe('Actions Plugin', () => {
           eventLog: eventLogMock.createSetup(),
           usageCollection: usageCollectionPluginMock.createSetupContract(),
           features: featuresPluginMock.createSetup(),
+          serverless: {},
         };
       }
 
@@ -559,6 +560,7 @@ describe('Actions Plugin', () => {
           ...pluginsSetup.encryptedSavedObjects,
           canEncrypt: true,
         },
+        serverless: {},
       });
 
       pluginSetup.registerType({

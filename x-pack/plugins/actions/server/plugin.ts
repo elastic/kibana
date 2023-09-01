@@ -40,6 +40,7 @@ import {
 } from '@kbn/event-log-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
+import { ServerlessPluginSetup } from '@kbn/serverless/server';
 import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client/actions_client';
@@ -168,6 +169,7 @@ export interface ActionsPluginsSetup {
   features: FeaturesPluginSetup;
   spaces?: SpacesPluginSetup;
   monitoringCollection?: MonitoringCollectionSetup;
+  serverless?: ServerlessPluginSetup;
 }
 
 export interface ActionsPluginsStart {
@@ -376,6 +378,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getActionsConfigurationUtilities: () => actionsConfigUtils,
       setEnabledConnectorTypes: (connectorTypes) => {
         if (
+          !!plugins.serverless &&
           this.actionsConfig.enabledActionTypes.length === 1 &&
           this.actionsConfig.enabledActionTypes[0] === AllowedHosts.Any
         ) {
