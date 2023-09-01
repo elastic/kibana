@@ -119,13 +119,7 @@ export const useActions = ({
     ]
   );
 
-  const withExtraActions = actions.concat(extraActions ?? []).map((a, i, totalActions) => {
-    const order = Math.max(totalActions.length - (1 + i), 0);
-    return {
-      ...a,
-      order,
-    };
-  });
+  const withExtraActions = actions.concat(extraActions ?? []);
 
   return withExtraActions;
 };
@@ -147,33 +141,6 @@ const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => 
     async execute(context: ActionExecutionContext<object>): Promise<void> {
       callback();
     },
-    order: 0,
-  };
-};
-
-const getAddToExistingCaseAction = ({
-  callback,
-  disabled,
-}: {
-  callback: () => void;
-  disabled?: boolean;
-}): Action => {
-  return {
-    id: 'addToExistingCase',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return ADD_TO_EXISTING_CASE;
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'casesApp';
-    },
-    type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-    },
-    disabled,
     order: 1,
   };
 };
@@ -201,7 +168,7 @@ const getAddToNewCaseAction = ({
       callback();
     },
     disabled,
-    order: 2,
+    order: 3,
   };
 };
 
@@ -228,6 +195,33 @@ const getInspectAction = ({
       callback();
     },
     disabled,
-    order: 3,
+    order: 4,
+  };
+};
+
+const getAddToExistingCaseAction = ({
+  callback,
+  disabled,
+}: {
+  callback: () => void;
+  disabled?: boolean;
+}): Action => {
+  return {
+    id: 'addToExistingCase',
+    getDisplayName(context: ActionExecutionContext<object>): string {
+      return ADD_TO_EXISTING_CASE;
+    },
+    getIconType(context: ActionExecutionContext<object>): string | undefined {
+      return 'casesApp';
+    },
+    type: 'actionButton',
+    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+      return true;
+    },
+    async execute(context: ActionExecutionContext<object>): Promise<void> {
+      callback();
+    },
+    disabled,
+    order: 2,
   };
 };
