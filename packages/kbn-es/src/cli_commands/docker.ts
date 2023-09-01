@@ -28,7 +28,7 @@ export const docker: Command = {
       --image             Full path to image of ES to run, has precedence over tag. [default: ${DOCKER_IMG}]
       --password          Sets password for elastic user [default: ${password}]
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
-      --ssl               Sets up SSL on Elasticsearch
+      --ssl               Sets up SSL and enables security plugin on Elasticsearch
       --kill              Kill running ES nodes if detected
       -E                  Additional key=value settings to pass to Elasticsearch
       -D                  Override Docker command
