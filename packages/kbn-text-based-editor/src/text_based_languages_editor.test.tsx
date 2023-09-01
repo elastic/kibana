@@ -16,6 +16,22 @@ import {
   TextBasedLanguagesEditor,
   TextBasedLanguagesEditorProps,
 } from './text_based_languages_editor';
+import { ReactWrapper } from 'enzyme';
+
+jest.mock('./helpers', () => {
+  const module = jest.requireActual('./helpers');
+  return {
+    ...module,
+    getDocumentationSections: () => ({
+      groups: [
+        {
+          label: 'How it works',
+          items: [],
+        },
+      ],
+    }),
+  };
+});
 import { of } from 'rxjs';
 
 describe('TextBasedLanguagesEditor', () => {
@@ -45,7 +61,7 @@ describe('TextBasedLanguagesEditor', () => {
   let props: TextBasedLanguagesEditorProps;
   beforeEach(() => {
     props = {
-      query: { sql: 'SELECT * FROM test' },
+      query: { esql: 'from test' },
       isCodeEditorExpanded: false,
       onTextLangQueryChange: jest.fn(),
       onTextLangQuerySubmit: jest.fn(),
@@ -108,14 +124,30 @@ describe('TextBasedLanguagesEditor', () => {
     });
   });
 
-  it('should render the correct buttons for the inline code editor mode', async () => {
+  it('should render the warnings badge for the inline mode by default if warning are provides', async () => {
+    const newProps = {
+      ...props,
+      warning: 'Line 1: 20: Warning',
+    };
     await act(async () => {
-      const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
-      expect(component.find('[data-test-subj="TextBasedLangEditor-expand"]').length).not.toBe(0);
+      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
       expect(
-        component.find('[data-test-subj="TextBasedLangEditor-inline-documentation"]').length
+        component.find('[data-test-subj="TextBasedLangEditor-inline-warning-badge"]').length
       ).not.toBe(0);
     });
+  });
+
+  it('should render the correct buttons for the inline code editor mode', async () => {
+    let component: ReactWrapper;
+
+    await act(async () => {
+      component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
+    });
+    component!.update();
+    expect(component!.find('[data-test-subj="TextBasedLangEditor-expand"]').length).not.toBe(0);
+    expect(
+      component!.find('[data-test-subj="TextBasedLangEditor-inline-documentation"]').length
+    ).not.toBe(0);
   });
 
   it('should call the expand editor function when expand button is clicked', async () => {
@@ -136,12 +168,36 @@ describe('TextBasedLanguagesEditor', () => {
       ...props,
       isCodeEditorExpanded: true,
     };
+    let component: ReactWrapper;
     await act(async () => {
-      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    });
+    component!.update();
+    expect(
+      component!.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
+    ).not.toBe(0);
+    expect(component!.find('[data-test-subj="TextBasedLangEditor-minimize"]').length).not.toBe(0);
+    expect(component!.find('[data-test-subj="TextBasedLangEditor-documentation"]').length).not.toBe(
+      0
+    );
+  });
+
+  it('should not render the minimize button for the expanded code editor mode if the prop is set to true', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      hideMinimizeButton: true,
+    };
+    let component: ReactWrapper;
+    await act(async () => {
+      component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    });
+    component!.update();
+    await act(async () => {
       expect(
         component.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
       ).not.toBe(0);
-      expect(component.find('[data-test-subj="TextBasedLangEditor-minimize"]').length).not.toBe(0);
+      expect(component.find('[data-test-subj="TextBasedLangEditor-minimize"]').length).toBe(0);
       expect(
         component.find('[data-test-subj="TextBasedLangEditor-documentation"]').length
       ).not.toBe(0);
