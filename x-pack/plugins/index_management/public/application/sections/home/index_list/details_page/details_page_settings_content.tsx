@@ -177,7 +177,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
               <EuiButton
                 data-test-subj="indexDetailsSettingsSave"
                 fill
-                isDisabled={!isEditMode || !editableSettings}
+                isDisabled={!isEditMode || !editableSettings || settingsString === editableSettings}
                 isLoading={isLoading}
                 onClick={updateSettings}
               >
