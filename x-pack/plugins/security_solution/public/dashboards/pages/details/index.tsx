@@ -11,7 +11,7 @@ import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 import { pick } from 'lodash/fp';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ViewMode } from '@kbn/embeddable-plugin/common';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
@@ -30,6 +30,7 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
+import { DashboardTitle } from '../../components/dashboard_title';
 
 interface DashboardViewProps {
   initialViewMode: ViewMode;
@@ -61,15 +62,17 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
+  const [dashboardTitle, setDashboardTitle] = useState<string>();
+
   const {
-    dashboard: { container: dashboardContainer, details: dashboardDetails, isManaged },
+    dashboard: { container: dashboardContainer, isManaged },
     handleDashboardLoaded,
-  } = useDashboardRenderer(savedObjectId);
+  } = useDashboardRenderer();
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
 
-  const dashboardExists = useMemo(() => dashboardDetails != null, [dashboardDetails]);
+  const dashboardExists = dashboardTitle != null;
   const shouldShowControl =
     savedObjectId && dashboardExists
       ? dashboardContainer && showWriteControls && isManaged === false // edit dashboard
@@ -88,7 +91,17 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
           data-test-subj="dashboard-view-wrapper"
         >
           <EuiFlexItem grow={false}>
-            <HeaderPage border title={dashboardDetails?.title ?? <EuiLoadingSpinner size="m" />}>
+            <HeaderPage
+              border
+              title={
+                dashboardContainer && (
+                  <DashboardTitle
+                    dashboardContainer={dashboardContainer}
+                    onTitleLoaded={setDashboardTitle}
+                  />
+                )
+              }
+            >
               {shouldShowControl && (
                 <DashboardToolBar
                   dashboardContainer={dashboardContainer}
@@ -120,7 +133,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
           )}
           <SpyRoute
             pageName={SecurityPageName.dashboards}
-            state={{ dashboardName: dashboardDetails?.title }}
+            state={{ dashboardName: dashboardTitle }}
           />
         </EuiFlexGroup>
       </SecuritySolutionPageWrapper>
