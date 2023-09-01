@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  title: Endpoint Policy Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/policy/summaries:
+    get:
+      summary: Get Agent Policy Summary schema
+      parameters:
+        - $ref: './get_agent_policy_summary.schema.yaml#/components/parameters/AgentPolicySummaryRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './get_agent_policy_summary.schema.yaml#/components/schemas/SuccessResponse'
+
+  /api/endpoint/policy_response:
+    get:
+      summary: Get Policy Response schema
+      parameters:
+        - $ref: './get_policy_response.schema.yaml#/components/parameters/PolicyResponseRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './get_policy_response.schema.yaml#/components/schemas/SuccessResponse'

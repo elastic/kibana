@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  title: List Metadata Schema
+  version: '2023-10-31'
+paths: { }
+components:
+  parameters:
+   ListRequestQueryParameter:
+      name: query
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/ListRequestQuery'
+
+  schemas:
+    ListRequestQuery:
+      type: object
+      properties:
+        page:
+          allOf:
+          - $ref: '../model/schema/common.yaml#/components/schemas/Page'
+          - minimum: 0
+          - default: 0
+        pageSize:
+          allOf:
+            - $ref: '../model/schema/common.yaml#/components/schemas/PageSize'
+            - default: 10
+            - minimum: 1
+            - maximum: 10000
+        kuery:
+            type: string
+            nullable: true
+        sortField:
+          type: string
+          enum:
+            - enrolled_at
+            - metadata.host.hostname
+            - host_status
+            - metadata.Endpoint.policy.applied.name
+            - metadata.Endpoint.policy.applied.status
+            - metadata.host.os.name
+            - metadata.host.ip
+            - metadata.agent.version
+            - last_checkin
+        sortDirection:
+          type: string
+          enum:
+            - 'asc'
+            - 'desc'
+          nullable: true
+        hostStatuses:
+          type: array
+          items:
+            enum:
+              - healthy
+              - offline
+              - updating
+              - inactive
+              - unenrolled
+
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed

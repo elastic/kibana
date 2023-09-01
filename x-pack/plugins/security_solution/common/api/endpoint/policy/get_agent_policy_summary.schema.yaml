@@ -5,15 +5,18 @@ info:
 paths: { }
 components:
   parameters:
-    GetActionStatusRequestQueryParameter:
+    AgentPolicySummaryRequestQueryParameter:
       name: query
       in: query
       required: true
       schema:
         type: object
         properties:
-          agent_ids:
-            $ref: '../model/schema/common.yaml#/components/schemas/AgentIds'
+          package_name:
+            type: string
+          policy_id:
+            type: string
+            nullable: true
 
   schemas:
     SuccessResponse:

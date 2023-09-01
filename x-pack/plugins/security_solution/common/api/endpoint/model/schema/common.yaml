@@ -33,19 +33,16 @@ components:
       description: Agent ID
 
     AgentIds:
-      type: object
-      properties:
-        agent_ids:
-          oneOf:
-            - type: array
-              items:
-                type: string
-                minLength: 1
-              minItems: 1
-              maxItems: 50
-            - type: string
-              minLength: 1
+      oneOf:
+        - type: array
+          items:
+            type: string
+            minLength: 1
+          minItems: 1
+          maxItems: 50
+        - type: string
           minLength: 1
+      minLength: 1
 
     Command:
       type: string

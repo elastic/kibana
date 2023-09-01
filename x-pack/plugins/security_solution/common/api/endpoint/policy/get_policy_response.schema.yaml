@@ -1,19 +1,19 @@
 openapi: 3.0.0
 info:
-  title: Get Action status schema
+  title: Get Policy Response schema
   version: '2023-10-31'
 paths: { }
 components:
   parameters:
-    GetActionStatusRequestQueryParameter:
+    PolicyResponseRequestQueryParameter:
       name: query
       in: query
       required: true
       schema:
         type: object
         properties:
-          agent_ids:
-            $ref: '../model/schema/common.yaml#/components/schemas/AgentIds'
+          agentId:
+            $ref: '../model/schema/common.yaml#/components/schemas/AgentId'
 
   schemas:
     SuccessResponse:
