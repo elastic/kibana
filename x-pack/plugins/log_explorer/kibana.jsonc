@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/log-explorer-plugin",
+  "owner": "@elastic/infra-monitoring-ui",
+  "description": "This plugin provides a LogExplorer component using the Discover customization framework, offering several affordances specifically designed for log consumption.",
+  "plugin": {
+    "id": "logExplorer",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "logExplorer"
+    ],
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "discover",
+      "fleet",
+      "kibanaReact",
+      "kibanaUtils",
+      "controls",
+      "embeddable"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

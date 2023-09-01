@@ -261,6 +261,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
             await searchInput.clearValue();
           });
+
+          it('shows an error message when typing invalid term into the search input', async () => {
+            const searchInput = await pageObjects.assetDetails.getProcessesSearchField();
+
+            await pageObjects.assetDetails.processesSearchInputErrorMissing();
+            await searchInput.type(',');
+            await pageObjects.assetDetails.processesSearchInputErrorExists();
+          });
         });
 
         describe('Logs Tab', () => {
