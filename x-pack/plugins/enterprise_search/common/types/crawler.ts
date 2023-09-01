@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorStatus, SyncStatus } from './connectors';
+import { ConnectorStatus, SyncStatus } from '@kbn/search-connectors';
 
 // See SharedTogo::Crawler::Status for details on how these are generated
 export enum CrawlerStatus {

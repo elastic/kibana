@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { DisplayType, FeatureName, FieldType, NativeConnector } from '../types/connectors';
+import { DisplayType, FeatureName, FieldType, NativeConnector } from '@kbn/search-connectors';
 
 const USERNAME_LABEL = i18n.translate('xpack.enterpriseSearch.nativeConnectors.usernameLabel', {
   defaultMessage: 'Username',

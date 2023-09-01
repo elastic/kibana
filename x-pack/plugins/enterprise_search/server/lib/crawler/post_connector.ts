@@ -7,12 +7,9 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { CONNECTORS_INDEX } from '../..';
+import { createConnectorDocument, CONNECTORS_INDEX, ConnectorStatus } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
-import { ConnectorStatus } from '../../../common/types/connectors';
-
-import { createConnectorDocument } from '../../utils/create_connector_document';
 
 export const recreateConnectorDocument = async (
   client: IScopedClusterClient,

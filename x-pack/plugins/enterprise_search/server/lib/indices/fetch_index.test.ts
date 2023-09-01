@@ -8,15 +8,15 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
-import { SyncStatus } from '../../../common/types/connectors';
+import { fetchConnectorByIndexName, SyncStatus } from '@kbn/search-connectors';
 
-import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
+
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
 import { fetchIndex } from './fetch_index';
 
-jest.mock('../connectors/fetch_connectors', () => ({
+jest.mock('@kbn/search-connectors', () => ({
   fetchConnectorByIndexName: jest.fn(),
 }));
 
