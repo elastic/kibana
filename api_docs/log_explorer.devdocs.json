@@ -1,0 +1,76 @@
+{
+  "id": "logExplorer",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "logExplorer",
+      "id": "def-public.LogExplorerPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "LogExplorerPluginSetup",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/log_explorer/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "logExplorer",
+      "id": "def-public.LogExplorerPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "LogExplorerPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/log_explorer/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "logExplorer",
+          "id": "def-public.LogExplorerPluginStart.LogExplorer",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "LogExplorer",
+          "description": [],
+          "signature": [
+            "React.ComponentClass<",
+            "LogExplorerProps",
+            ", any> | React.FunctionComponent<",
+            "LogExplorerProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/log_explorer/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
