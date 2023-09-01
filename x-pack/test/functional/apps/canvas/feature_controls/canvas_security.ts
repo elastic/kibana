@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
-  const PageObjects = getPageObjects(['canvas', 'error', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'canvas', 'error', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
