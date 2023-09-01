@@ -12,7 +12,7 @@ import { cleanKibana, deleteAlertsAndRules } from '../../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 
-describe('Rules table: links', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rules table: links', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
