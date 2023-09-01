@@ -24,7 +24,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     before(async () => {
       await kibanaServer.importExport.load(archive);
       // load test workpad
-      await PageObjects.canvas.goToLoadingPage();
+      await PageObjects.canvas.goToListingPage();
       await PageObjects.canvas.loadFirstWorkpad('Filter Debug Workpad');
     });
 
