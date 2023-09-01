@@ -34,3 +34,5 @@ export {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);
 }
+
+export { pluginServices } from './services/plugin_services';

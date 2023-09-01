@@ -20,6 +20,7 @@ import type {
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
 import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { pluginServices } from '@kbn/dashboard-plugin/public';
 import type { FormatFactory } from '../../../../common/types';
 import type { ColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
@@ -74,6 +75,8 @@ export const createGridColumns = (
     const cellContent = formatFactory(column?.meta?.params).convert(rowValue);
     return { rowValue, contentsIsDefined, cellContent };
   };
+
+  const { notifications } = pluginServices.getServices();
 
   return visibleColumns.map((field) => {
     const { name, index: colIndex } = columnsReverseLookup[field];
@@ -187,13 +190,29 @@ export const createGridColumns = (
         return null;
       }
 
+      const toastTitle = {
+        copyToClipboard: {
+          success: i18n.translate('xpack.lens.grid.copyValueToClipboard.toastTitle.success', {
+            defaultMessage: 'Copied to clipboard',
+          }),
+          error: i18n.translate('xpack.lens.grid.copyValueToClipboard.toastTitle.error', {
+            defaultMessage: 'Could not copy to clipboard',
+          }),
+        },
+      };
+
       return (
         <Component
           aria-label={copyForAriaLabel}
           data-test-subj="lensDatatableCopyToClipboard"
           onClick={() => {
-            copyToClipboard(cellContent);
-            closeCellPopover?.();
+            try {
+              copyToClipboard(cellContent);
+              notifications.toasts.addInfo(toastTitle.copyToClipboard.success);
+              closeCellPopover?.();
+            } catch (e) {
+              notifications.toasts.add(toastTitle.copyToClipboard.error);
+            }
           }}
           iconType="copyClipboard"
         >
