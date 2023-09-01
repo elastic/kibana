@@ -9,11 +9,12 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CommonlyUsed } from '../../page_objects/time_picker';
 
-export function DashboardCustomizePanelProvider({ getService }: FtrProviderContext) {
+export function DashboardCustomizePanelProvider({ getService, getPageObject }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const toasts = getService('toasts');
   const testSubjects = getService('testSubjects');
+  const common = getPageObject('common');
 
   return new (class DashboardCustomizePanel {
     public readonly FLYOUT_TEST_SUBJ = 'customizePanel';
@@ -115,6 +116,8 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
     public async clickToggleShowCustomTimeRange() {
       log.debug('clickToggleShowCustomTimeRange');
       await testSubjects.click(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
+      // give the toggle animation time to complete
+      await common.sleep(200);
     }
   })();
 }
