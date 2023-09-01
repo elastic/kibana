@@ -10,8 +10,8 @@ import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import expect from '@kbn/expect';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
+import { SecurityService } from '../../../../test/common/services/security/security';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { SecurityService } from 'test/common/services/security/security';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
