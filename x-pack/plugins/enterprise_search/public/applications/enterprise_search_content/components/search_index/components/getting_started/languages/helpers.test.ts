@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ingestKeysToJSON, ingestKeysToPHP } from './helpers';
+import { ingestKeysToJSON, ingestKeysToPHP, ingestKeysToRuby } from './helpers';
 
 describe('getting started language helpers', () => {
   describe('ingestKeysToJSON', () => {
@@ -26,6 +26,14 @@ describe('getting started language helpers', () => {
       expect(ingestKeysToPHP({ _foo: true, _bar: false })).toEqual(
         `\n    '_foo' => true,\n    '_bar' => false,`
       );
+    });
+  });
+  describe('ingestKeysToRuby', () => {
+    it('return empty string when given undefined', () => {
+      expect(ingestKeysToRuby(undefined)).toEqual('');
+    });
+    it('return json keys with quotes when given expected data', () => {
+      expect(ingestKeysToRuby({ _foo: true, _bar: false })).toEqual(', _foo: true, _bar: false');
     });
   });
 });

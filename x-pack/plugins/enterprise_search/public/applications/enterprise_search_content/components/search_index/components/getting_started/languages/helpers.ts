@@ -26,3 +26,13 @@ export const ingestKeysToPHP = (
         return result;
       }, '')
     : '';
+
+export const ingestKeysToRuby = (
+  extraIngestDocumentValues: LanguageDefinitionSnippetArguments['extraIngestDocumentValues']
+) =>
+  extraIngestDocumentValues
+    ? Object.entries(extraIngestDocumentValues).reduce((result, value) => {
+        result += `, ${value[0]}: ${value[1]}`;
+        return result;
+      }, '')
+    : '';

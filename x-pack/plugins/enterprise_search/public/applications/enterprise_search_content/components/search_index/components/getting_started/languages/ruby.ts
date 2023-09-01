@@ -10,7 +10,7 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../../../../../shared/doc_links';
 
-import { ingestKeysToJSON } from './helpers';
+import { ingestKeysToRuby } from './helpers';
 
 export const rubyDefinition: LanguageDefinition = {
   buildSearchQuery: ({ indexName }) => `client.search(index: '${indexName}', q: 'snow')`,
@@ -29,14 +29,14 @@ export const rubyDefinition: LanguageDefinition = {
   iconType: 'ruby.svg',
   id: Languages.RUBY,
   ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
-    const ingestDocumentKeys = ingestPipeline ? ingestKeysToJSON(extraIngestDocumentValues) : '';
+    const ingestDocumentKeys = ingestPipeline ? ingestKeysToRuby(extraIngestDocumentValues) : '';
     return `documents = [
-  { index: { _index: '${indexName}', data: {name: "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470${ingestDocumentKeys}} } },
-  { index: { _index: '${indexName}', data: {name: "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585${ingestDocumentKeys}} } },
-  { index: { _index: '${indexName}', data: {name: "1984", "author": "George Orwell", "release_date": "1985-06-01", "page_count": 328${ingestDocumentKeys}} } },
-  { index: { _index: '${indexName}', data: {name: "Fahrenheit 451", "author": "Ray Bradbury", "release_date": "1953-10-15", "page_count": 227${ingestDocumentKeys}} } },
-  { index: { _index: '${indexName}', data: {name: "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268${ingestDocumentKeys}} } },
-  { index: { _index: '${indexName}', data: {name: "The Handmaid's Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311${ingestDocumentKeys}} } }
+  { index: { _index: '${indexName}', data: {name: "Snow Crash", author: "Neal Stephenson", release_date: "1992-06-01", page_count: 470${ingestDocumentKeys}} } },
+  { index: { _index: '${indexName}', data: {name: "Revelation Space", author: "Alastair Reynolds", release_date: "2000-03-15", page_count: 585${ingestDocumentKeys}} } },
+  { index: { _index: '${indexName}', data: {name: "1984", author: "George Orwell", release_date: "1985-06-01", page_count: 328${ingestDocumentKeys}} } },
+  { index: { _index: '${indexName}', data: {name: "Fahrenheit 451", author: "Ray Bradbury", release_date: "1953-10-15", page_count: 227${ingestDocumentKeys}} } },
+  { index: { _index: '${indexName}', data: {name: "Brave New World", author: "Aldous Huxley", release_date: "1932-06-01", page_count: 268${ingestDocumentKeys}} } },
+  { index: { _index: '${indexName}', data: {name: "The Handmaid's Tale", author: "Margaret Atwood", release_date: "1985-06-01", page_count: 311${ingestDocumentKeys}} } }
 ]
 client.bulk(body: documents${ingestPipeline ? `, pipeline: "${ingestPipeline}"` : ''})`;
   },
