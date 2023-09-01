@@ -7,26 +7,29 @@
 
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
-  ELASTIC_RULES_BTN,
-  RULES_MONITORING_TAB,
-  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   COLLAPSED_ACTION_BTN,
+  ELASTIC_RULES_BTN,
   ADD_ELASTIC_RULES_BTN,
-  INSTALL_ALL_RULES_BUTTON,
   RULES_EMPTY_PROMPT,
+  RULES_MONITORING_TAB,
+  RULE_SWITCH,
+  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
+  INSTALL_ALL_RULES_BUTTON,
 } from '../../screens/alerts_detection_rules';
-import { RULE_SWITCH } from '../../screens/rule_details';
 import {
-  waitForPrebuiltDetectionRulesToBeLoaded,
-  getRulesManagementTableRows,
-  waitForRuleToUpdate,
-  selectAllRules,
+  confirmRulesDelete,
   deleteFirstRule,
+  disableAutoRefresh,
+  getRulesManagementTableRows,
+  selectAllRules,
   selectRulesByName,
+  waitForPrebuiltDetectionRulesToBeLoaded,
+  waitForRuleToUpdate,
 } from '../../tasks/alerts_detection_rules';
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana, deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -53,9 +56,11 @@ describe('Prebuilt rules', () => {
     login();
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
+    preventPrebuiltRulesPackageInstallation();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createAndInstallMockedPrebuiltRules({ rules });
     cy.reload();
+    disableAutoRefresh();
     waitForPrebuiltDetectionRulesToBeLoaded();
   });
 
@@ -184,6 +189,7 @@ describe('Prebuilt rules', () => {
       it('Allows to delete all rules at once', () => {
         selectAllRules();
         deleteSelectedRules();
+        confirmRulesDelete();
         cy.get(RULES_EMPTY_PROMPT).should('be.visible');
       });
     });
