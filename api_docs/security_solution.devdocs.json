@@ -2792,22 +2792,16 @@
       "children": [
         {
           "parentPluginId": "securitySolution",
-          "id": "def-server.SecuritySolutionPluginSetup.setAppFeatures",
+          "id": "def-server.SecuritySolutionPluginSetup.setAppFeaturesConfigurator",
           "type": "Function",
           "tags": [],
-          "label": "setAppFeatures",
+          "label": "setAppFeaturesConfigurator",
           "description": [
-            "\nSets the app features that are available to the Security Solution"
+            "\nSets the configurations for app features that are available to the Security Solution"
           ],
           "signature": [
-            "(appFeatureKeys: ",
-            {
-              "pluginId": "securitySolution",
-              "scope": "common",
-              "docId": "kibSecuritySolutionPluginApi",
-              "section": "def-common.AppFeatureKeys",
-              "text": "AppFeatureKeys"
-            },
+            "(configurator: ",
+            "AppFeaturesConfigurator",
             ") => void"
           ],
           "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
@@ -2817,22 +2811,15 @@
           "children": [
             {
               "parentPluginId": "securitySolution",
-              "id": "def-server.SecuritySolutionPluginSetup.setAppFeatures.$1",
-              "type": "Array",
+              "id": "def-server.SecuritySolutionPluginSetup.setAppFeaturesConfigurator.$1",
+              "type": "Object",
               "tags": [],
-              "label": "appFeatureKeys",
+              "label": "configurator",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "securitySolution",
-                  "scope": "common",
-                  "docId": "kibSecuritySolutionPluginApi",
-                  "section": "def-common.AppFeatureKey",
-                  "text": "AppFeatureKey"
-                },
-                "[]"
+                "AppFeaturesConfigurator"
               ],
-              "path": "x-pack/plugins/security_solution/server/lib/app_features/app_features.ts",
+              "path": "x-pack/plugins/security_solution/server/lib/app_features_service/app_features_service.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2940,47 +2927,6 @@
       },
       {
         "parentPluginId": "securitySolution",
-        "id": "def-common.AppFeatureKey",
-        "type": "Type",
-        "tags": [],
-        "label": "AppFeatureKey",
-        "description": [],
-        "signature": [
-          "AppFeatureSecurityKey",
-          " | ",
-          "AppFeatureCasesKey",
-          " | ",
-          "AppFeatureAssistantKey"
-        ],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.AppFeatureKeys",
-        "type": "Type",
-        "tags": [],
-        "label": "AppFeatureKeys",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "securitySolution",
-            "scope": "common",
-            "docId": "kibSecuritySolutionPluginApi",
-            "section": "def-common.AppFeatureKey",
-            "text": "AppFeatureKey"
-          },
-          "[]"
-        ],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
         "id": "def-common.CASES_FEATURE_ID",
         "type": "string",
         "tags": [],
@@ -3060,27 +3006,6 @@
     "objects": [
       {
         "parentPluginId": "securitySolution",
-        "id": "def-common.ALL_APP_FEATURE_KEYS",
-        "type": "Object",
-        "tags": [],
-        "label": "ALL_APP_FEATURE_KEYS",
-        "description": [],
-        "signature": [
-          "readonly (",
-          "AppFeatureSecurityKey",
-          " | ",
-          "AppFeatureCasesKey",
-          ".casesConnectors | ",
-          "AppFeatureAssistantKey",
-          ".assistant)[]"
-        ],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
         "id": "def-common.allowedExperimentalValues",
         "type": "Object",
         "tags": [],
@@ -3094,62 +3019,6 @@
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.AppFeatureKey",
-        "type": "Object",
-        "tags": [],
-        "label": "AppFeatureKey",
-        "description": [],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.AppFeatureKey.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.AppFeatureKey.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.AppFeatureKey.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ]
