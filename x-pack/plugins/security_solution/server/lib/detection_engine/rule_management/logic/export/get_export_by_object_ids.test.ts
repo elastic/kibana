@@ -28,7 +28,7 @@ import { mockRouter } from '@kbn/core-http-router-server-mocks';
 const exceptionsClient = getExceptionListClientMock();
 import type { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../../../routes/__mocks__/request_context';
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
 const connectors = [
   {
