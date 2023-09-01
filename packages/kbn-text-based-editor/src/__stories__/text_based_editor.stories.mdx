@@ -117,7 +117,7 @@ The editor also works on the expanded mode with the minimize button hidden:
         name='on expanded mode with hidden the minimize button'
         args={
             {
-                query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+                query: { esql: 'from dataview | keep field1, field2' },
                 isCodeEditorExpanded:true,
                 hideMinimizeButton: true,
                 'data-test-subj':'test-id',
