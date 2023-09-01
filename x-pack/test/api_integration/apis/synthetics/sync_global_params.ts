@@ -22,7 +22,8 @@ import { PrivateLocationTestService } from './services/private_location_test_ser
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('SyncGlobalParams', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/162594
+  describe.skip('SyncGlobalParams', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertest');
     const kServer = getService('kibanaServer');
