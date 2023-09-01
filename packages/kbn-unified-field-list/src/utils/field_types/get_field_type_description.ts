@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { KNOWN_FIELD_TYPES } from './field_types';
+import { KNOWN_FIELD_TYPES } from '@kbn/discover-utils';
 
 /**
  * A user-friendly description of an unknown field type

@@ -83,7 +83,7 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Threat Intelligence');
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Threat intelligence');
     expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent('1 threat match detected');
     expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent(
       '1 field enriched with threat intelligence'
@@ -99,7 +99,7 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Threat Intelligence');
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Threat intelligence');
     expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent('2 threat matches detected');
     expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent(
       '2 fields enriched with threat intelligence'

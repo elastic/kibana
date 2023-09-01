@@ -45,7 +45,7 @@ export interface InsightsSummaryRowProps {
 
 /**
  * Panel showing summary information as an icon, a count and text as well as a severity colored dot.
- * Should be used for Entities, Threat Intelligence, Prevalence, Correlations and Results components under the Insights section.
+ * Should be used for Entities, Threat intelligence, Prevalence, Correlations and Results components under the Insights section.
  * The colored dot is currently optional but will ultimately be mandatory (waiting on PM and UIUX).
  */
 export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
