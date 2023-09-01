@@ -69,13 +69,11 @@ import {
   MITRE_TACTIC,
   QUERY_BAR,
   REFERENCE_URLS_INPUT,
-  REFRESH_BUTTON,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
-  RULE_STATUS,
   RULE_TIMESTAMP_OVERRIDE,
   RULES_CREATION_FORM,
   RULES_CREATION_PREVIEW_BUTTON,
@@ -694,16 +692,6 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
     { interval: 500, timeout: 12000 }
   );
   waitForAlerts();
-};
-
-export const waitForTheRuleToBeExecuted = () => {
-  cy.waitUntil(() => {
-    cy.get(REFRESH_BUTTON).click({ force: true });
-    return cy
-      .get(RULE_STATUS)
-      .invoke('text')
-      .then((ruleStatus) => ruleStatus === 'succeeded');
-  });
 };
 
 export const selectAndLoadSavedQuery = (queryName: string, queryValue: string) => {

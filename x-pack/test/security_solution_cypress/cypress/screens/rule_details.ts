@@ -58,9 +58,9 @@ export const INDICATOR_INDEX_QUERY = 'Indicator index query';
 
 export const INDICATOR_MAPPING = 'Indicator mapping';
 
-export const INTEGRATIONS = '[data-test-subj="integrationLink"]';
+export const INTEGRATION_LINK = '[data-test-subj="integrationLink"]';
 
-export const INTEGRATIONS_STATUS = '[data-test-subj="statusBadge"]';
+export const INTEGRATION_STATUS = '[data-test-subj="statusBadge"]';
 
 export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
@@ -79,7 +79,8 @@ export const NEW_TERMS_HISTORY_WINDOW_DETAILS = 'History Window Size';
 export const FIELDS_BROWSER_BTN =
   '[data-test-subj="alertsTable"] [data-test-subj="show-field-browser"]';
 
-export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
+export const LAST_EXECUTION_STATUS_REFRESH_BUTTON =
+  '[data-test-subj="ruleLastExecutionStatusRefreshButton"]';
 
 export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
 

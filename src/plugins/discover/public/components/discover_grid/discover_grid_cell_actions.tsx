@@ -10,7 +10,7 @@ import React, { useContext } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridContext, GridContext } from './discover_grid_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { copyValueToClipboard } from '../../utils/copy_value_to_clipboard';
