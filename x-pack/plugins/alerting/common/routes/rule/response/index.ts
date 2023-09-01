@@ -19,7 +19,13 @@ export {
   scheduleIdsSchema,
 } from './schemas/latest';
 
-export type { RuleParams, RuleResponse, RuleSnoozeSchedule } from './types/latest';
+export type {
+  RuleParams,
+  RuleResponse,
+  RuleSnoozeSchedule,
+  RuleLastRun,
+  Monitoring,
+} from './types/latest';
 
 export {
   ruleParamsSchema as ruleParamsSchemaV1,
@@ -39,4 +45,6 @@ export type {
   RuleParams as RuleParamsV1,
   RuleResponse as RuleResponseV1,
   RuleSnoozeSchedule as RuleSnoozeScheduleV1,
+  RuleLastRun as RuleLastRunV1,
+  Monitoring as MonitoringV1,
 } from './types/v1';

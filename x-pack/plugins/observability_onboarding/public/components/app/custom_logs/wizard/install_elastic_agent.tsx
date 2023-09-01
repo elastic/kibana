@@ -38,6 +38,7 @@ import {
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from './back_button';
 import { getDiscoverNavigationParams } from '../../utils';
+import { WindowsInstallStep } from '../../../shared/windows_install_step';
 import { TroubleshootingLink } from '../../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
@@ -328,7 +329,10 @@ export function InstallElasticAgent() {
                 { defaultMessage: 'Windows' }
               ),
               id: 'windows',
-              isDisabled: true,
+              disableSteps: true,
+              children: (
+                <WindowsInstallStep docsLink="https://www.elastic.co/guide/en/observability/current/logs-stream.html" />
+              ),
             },
           ]}
           onSelectPlatform={(id) => setElasticAgentPlatform(id)}

@@ -78,7 +78,10 @@ const defaultProps: ComponentProps<typeof Component> = {
         trigger: MessageRole.Assistant,
       },
       actions: {
-        canEdit: true,
+        canEdit: false,
+        canCopy: true,
+        canGiveFeedback: true,
+        canRegenerate: true,
       },
     }),
     buildFunctionChatItem({
@@ -86,6 +89,9 @@ const defaultProps: ComponentProps<typeof Component> = {
       error: new Error(),
       actions: {
         canRegenerate: false,
+        canEdit: true,
+        canGiveFeedback: false,
+        canCopy: true,
       },
     }),
     buildAssistantChatItem({
@@ -98,6 +104,9 @@ const defaultProps: ComponentProps<typeof Component> = {
       },
       actions: {
         canEdit: true,
+        canCopy: true,
+        canGiveFeedback: true,
+        canRegenerate: true,
       },
     }),
     buildFunctionChatItem({

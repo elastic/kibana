@@ -18,7 +18,7 @@
     "../../typings/**/*",
     "../../packages/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
+  "exclude": ["security_solution_cypress/cypress/**/*", "target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*" ],
   "kbn_references": [
     { "path": "../../test/tsconfig.json" },
     "@kbn/core",
@@ -138,7 +138,7 @@
     "@kbn/ml-category-validator",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/stack-connectors-plugin",
+    "@kbn/aiops-utils",
     "@kbn/stack-alerts-plugin",
-    "@kbn/aiops-utils"
   ]
 }

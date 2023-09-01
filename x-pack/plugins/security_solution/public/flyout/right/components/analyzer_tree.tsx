@@ -9,9 +9,10 @@ import { EuiTreeView } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useRightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelVisualizeTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelVisualizeTab } from '../../left';
 import { ANALYZER_PREVIEW_TITLE } from './translations';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { ANALYZE_GRAPH_ID } from '../../left/components/analyze_graph';
 import type { StatsNode } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import { getTreeNodes } from '../utils/analyzer_helpers';
 
@@ -63,7 +64,10 @@ export const AnalyzerTree: React.FC<AnalyzerTreeProps> = ({
   const goToAnalyserTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelVisualizeTabPath,
+      path: {
+        tab: LeftPanelVisualizeTab,
+        subTab: ANALYZE_GRAPH_ID,
+      },
       params: {
         id: eventId,
         indexName,

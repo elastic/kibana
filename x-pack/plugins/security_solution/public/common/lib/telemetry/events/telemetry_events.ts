@@ -16,6 +16,11 @@ import {
   entityClickedEvent,
   entityRiskFilteredEvent,
 } from './entity_analytics';
+import {
+  assistantInvokedEvent,
+  assistantMessageSentEvent,
+  assistantQuickPrompt,
+} from './ai_assistant';
 import { dataQualityIndexCheckedEvent, dataQualityCheckAllClickedEvent } from './data_quality';
 
 const mlJobUpdateEvent: TelemetryEvent = {
@@ -130,6 +135,9 @@ export const telemetryEvents = [
   alertsGroupingToggledEvent,
   alertsGroupingChangedEvent,
   alertsGroupingTakeActionEvent,
+  assistantInvokedEvent,
+  assistantMessageSentEvent,
+  assistantQuickPrompt,
   entityClickedEvent,
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,

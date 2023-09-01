@@ -31,4 +31,7 @@ export interface ClientConfigType {
   };
   enableIndexActions?: boolean;
   enableLegacyTemplates?: boolean;
+  dev: {
+    enableIndexDetailsPage?: boolean;
+  };
 }

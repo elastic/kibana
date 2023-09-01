@@ -14,7 +14,10 @@ import {
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
 import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
-import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -139,6 +142,21 @@ export function registerTransactionErrorRateRuleType({
           ? indices.metric
           : indices.transaction;
 
+        const termFilterQuery = !ruleParams.kqlFilter
+          ? [
+              ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                queryEmptyString: false,
+              }),
+              ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+                queryEmptyString: false,
+              }),
+              ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+                queryEmptyString: false,
+              }),
+              ...environmentQuery(ruleParams.environment),
+            ]
+          : [];
+
         const searchParams = {
           index,
           body: {
@@ -165,16 +183,8 @@ export function registerTransactionErrorRateRuleType({
                       ],
                     },
                   },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
-                    queryEmptyString: false,
-                  }),
-                  ...environmentQuery(ruleParams.environment),
+                  ...termFilterQuery,
+                  ...getParsedFilterQuery(ruleParams.kqlFilter),
                 ],
               },
             },

@@ -50,7 +50,7 @@ export interface XYLayerOptions {
   seriesType?: SeriesType;
 }
 
-interface XYLayerConfig {
+export interface XYLayerConfig {
   data: FormulaValueConfig[];
   options?: XYLayerOptions;
   /**

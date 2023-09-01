@@ -171,3 +171,10 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.tran
     defaultMessage: 'Do not suppress alerts for events with missing fields',
   }
 );
+
+export const GROUP_BY_FIELD_LICENSE_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupBy.licenseWarning',
+  {
+    defaultMessage: 'Alert suppression is enabled with Platinum license or above',
+  }
+);

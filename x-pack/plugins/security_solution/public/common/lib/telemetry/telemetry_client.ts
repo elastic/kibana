@@ -20,6 +20,9 @@ import type {
   ReportDataQualityIndexCheckedParams,
   ReportDataQualityCheckAllCompletedParams,
   ReportBreadcrumbClickedParams,
+  ReportAssistantInvokedParams,
+  ReportAssistantMessageSentParams,
+  ReportAssistantQuickPromptParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -40,6 +43,33 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportAlertsGroupingTakeAction = (params: ReportAlertsTakeActionParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingTakeAction, params);
+  };
+
+  public reportAssistantInvoked = ({ conversationId, invokedBy }: ReportAssistantInvokedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantInvoked, {
+      conversationId,
+      invokedBy,
+    });
+  };
+
+  public reportAssistantMessageSent = ({
+    conversationId,
+    role,
+  }: ReportAssistantMessageSentParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantMessageSent, {
+      conversationId,
+      role,
+    });
+  };
+
+  public reportAssistantQuickPrompt = ({
+    conversationId,
+    promptTitle,
+  }: ReportAssistantQuickPromptParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantQuickPrompt, {
+      conversationId,
+      promptTitle,
+    });
   };
 
   public reportEntityDetailsClicked = ({ entity }: ReportEntityDetailsClickedParams) => {

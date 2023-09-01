@@ -2022,7 +2022,7 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; tooltip?: string | undefined; navLinkStatus?: ",
+          " | undefined; navLinkStatus?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2030,7 +2030,7 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; searchable?: boolean | undefined; tooltip?: string | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",

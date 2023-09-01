@@ -47,6 +47,7 @@ export interface AppDependencies {
   config: {
     enableIndexActions: boolean;
     enableLegacyTemplates: boolean;
+    enableIndexDetailsPage: boolean;
   };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];

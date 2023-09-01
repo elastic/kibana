@@ -1,0 +1,98 @@
+{{~#if type~}}
+  {{~> (concat "type_" type)~}}
+  {{~#if nullable}}.nullable(){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
+{{~/if~}}
+
+{{~#if $ref~}}
+  {{parseRef $ref}}
+  {{~#if nullable}}.nullable(){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
+{{~/if~}}
+
+{{~#if allOf~}}
+  {{~#each allOf~}}
+    {{~#if @first~}}
+      {{> schema_item }}
+    {{~else~}}
+      .and({{> schema_item }})
+    {{~/if~}}
+  {{~/each~}}
+{{~/if~}}
+
+{{~#if anyOf~}}
+  z.union([
+    {{~#each anyOf~}}
+    {{~> schema_item ~}},
+    {{~/each~}}
+  ])
+{{~/if~}}
+
+{{~#if oneOf~}}
+  z.union([
+    {{~#each oneOf~}}
+    {{~> schema_item ~}},
+    {{~/each~}}
+  ])
+{{~/if~}}
+
+{{#if (isUnknown .)}}
+z.unknown()
+{{/if}}
+
+{{~#*inline "type_array"~}}
+  {{~#if x-preprocess}}
+  z.preprocess({{x-preprocess}}, z.array({{~> schema_item items ~}}))
+  {{else}}
+  z.array({{~> schema_item items ~}})
+  {{~/if~}}
+  {{~#if minItems}}.min({{minItems}}){{/if~}}
+  {{~#if maxItems}}.max({{maxItems}}){{/if~}}
+{{~/inline~}}
+
+{{~#*inline "type_boolean"~}}
+  z.boolean()
+  {{~#if nullable}}.nullable(){{/if~}}
+{{~/inline~}}
+
+{{~#*inline "type_integer"~}}
+  {{~#if x-coerce}}
+  z.coerce.number()
+  {{~else~}}
+  z.number()
+  {{~/if~}}
+  {{~#if minimum includeZero=true}}.min({{minimum}}){{/if~}}
+  {{~#if maximum includeZero=true}}.max({{maximum}}){{/if~}}
+{{~/inline~}}
+
+{{~#*inline "type_object"~}}
+  z.object({
+    {{#each properties}}
+      {{#if description}}
+      /** 
+      * {{{description}}} 
+      */
+      {{/if}}
+      {{@key}}: {{> schema_item requiredBool=(includes ../required @key)}},
+    {{/each}}
+  })
+{{~/inline~}}
+
+{{~#*inline "type_string"~}}
+  {{~#if enum~}}
+  z.enum([
+    {{~#each enum~}}
+      "{{.}}",
+    {{~/each~}}
+  ])
+  {{~else~}}
+  z.string()
+  {{~#if minLength}}.min({{minLength}}){{/if~}}
+  {{~#if maxLength}}.max({{maxLength}}){{/if~}}
+  {{~#if (eq format 'date-time')}}.datetime(){{/if~}}
+  {{~/if~}}
+  {{#if transform}}.transform({{{transform}}}){{/if~}}
+{{~/inline~}}
+

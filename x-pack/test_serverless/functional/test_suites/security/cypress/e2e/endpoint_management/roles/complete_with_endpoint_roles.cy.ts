@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { pick } from 'lodash';
 import { login } from '../../../tasks/login';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
@@ -33,6 +32,10 @@ import {
   openConsoleHelpPanel,
 } from '../../../screens/endpoint_management/response_console';
 import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/endpoint_management/policy_details';
+import {
+  CyIndexEndpointHosts,
+  indexEndpointHosts,
+} from '../../../tasks/endpoint_management/index_endpoint_hosts';
 
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
@@ -51,17 +54,17 @@ describe(
     const pageById = getEndpointManagementPageMap();
     const consoleHelpPanelResponseActionsTestSubj = getConsoleHelpPanelResponseActionTestSubj();
 
-    let loadedEndpoints: IndexedHostsAndAlertsResponse;
+    let loadedEndpoints: CyIndexEndpointHosts;
 
     before(() => {
-      cy.task('indexEndpointHosts', {}, { timeout: 240000 }).then((response) => {
+      indexEndpointHosts().then((response) => {
         loadedEndpoints = response;
       });
     });
 
     after(() => {
       if (loadedEndpoints) {
-        cy.task('deleteIndexedEndpointHosts', loadedEndpoints);
+        loadedEndpoints.cleanup();
       }
     });
 
@@ -136,7 +139,11 @@ describe(
 
       it('should have read access to Endpoint Policy Management', () => {
         ensurePolicyListPageAuthzAccess('read', true);
-        ensurePolicyDetailsPageAuthzAccess(loadedEndpoints.integrationPolicies[0].id, 'read', true);
+        ensurePolicyDetailsPageAuthzAccess(
+          loadedEndpoints.data.integrationPolicies[0].id,
+          'read',
+          true
+        );
       });
 
       for (const { title, id } of artifactPagesFullAccess) {
