@@ -16,7 +16,7 @@ export interface BuildReasonMessageArgs {
 }
 
 export interface BuildReasonMessageUtilArgs extends BuildReasonMessageArgs {
-  type?: 'eql' | 'ml' | 'query' | 'threatMatch' | 'threshold' | 'new_terms';
+  type?: 'eql' | 'ml' | 'query' | 'threatMatch' | 'threshold' | 'new_terms' | 'esql';
 }
 
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
@@ -122,6 +122,9 @@ created {alertSeverity} alert {alertName}.`,
 
 export const buildReasonMessageForEqlAlert = (args: BuildReasonMessageArgs) =>
   buildReasonMessageUtil({ ...args, type: 'eql' });
+
+export const buildReasonMessageForEsqlAlert = (args: BuildReasonMessageArgs) =>
+  buildReasonMessageUtil({ ...args, type: 'esql' });
 
 export const buildReasonMessageForMlAlert = (args: BuildReasonMessageArgs) =>
   buildReasonMessageUtil({ ...args, type: 'ml' });

@@ -142,6 +142,13 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   groupByDuration: rule.alert_suppression?.duration ?? { value: 5, unit: 'm' },
   suppressionMissingFields:
     rule.alert_suppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  esqlOptions: {
+    suppressionDuration: rule.esql_params?.suppression_duration ?? { value: 5, unit: 'm' },
+    groupByFields: rule.esql_params?.group_by_fields ?? [],
+    suppressionMode: rule.esql_params?.suppression_duration
+      ? GroupByOptions.PerTimePeriod
+      : GroupByOptions.PerRuleExecution,
+  },
 });
 
 export const convertHistoryStartToSize = (relativeTime: string) => {
@@ -359,6 +366,7 @@ const commonRuleParamsKeys = [
   'version',
 ];
 const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id', 'response_actions'];
+const esqlRuleParams = ['filters', 'language', 'query', 'response_actions'];
 const machineLearningRuleParams = ['anomaly_threshold', 'machine_learning_job_id'];
 const thresholdRuleParams = ['threshold', ...queryRuleParams];
 
@@ -379,6 +387,8 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
       return machineLearningRuleParams;
     case 'threshold':
       return thresholdRuleParams;
+    case 'esql':
+      return esqlRuleParams;
     case 'new_terms':
     case 'threat_match':
     case 'query':

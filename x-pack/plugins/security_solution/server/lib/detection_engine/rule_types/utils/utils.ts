@@ -49,6 +49,7 @@ import type {
 import type { ShardError } from '../../../types';
 import type {
   EqlRuleParams,
+  EsqlRuleParams,
   MachineLearningRuleParams,
   QueryRuleParams,
   RuleParams,
@@ -833,6 +834,8 @@ export const calculateTotal = (
 };
 
 export const isEqlParams = (params: RuleParams): params is EqlRuleParams => params.type === 'eql';
+export const isEsqlParams = (params: RuleParams): params is EsqlRuleParams =>
+  params.type === 'esql';
 export const isThresholdParams = (params: RuleParams): params is ThresholdRuleParams =>
   params.type === 'threshold';
 export const isQueryParams = (params: RuleParams): params is QueryRuleParams =>

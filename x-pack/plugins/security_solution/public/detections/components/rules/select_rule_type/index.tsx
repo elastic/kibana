@@ -16,6 +16,7 @@ import {
   isQueryRule,
   isThreatMatchRule,
   isNewTermsRule,
+  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
@@ -44,6 +45,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
     const setThreshold = useCallback(() => setType('threshold'), [setType]);
     const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
     const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
+    const setEsql = useCallback(() => setType('esql'), [setType]);
 
     const eqlSelectableConfig = useMemo(
       () => ({
@@ -92,6 +94,14 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
         isSelected: isNewTermsRule(ruleType),
       }),
       [ruleType, setNewTerms]
+    );
+
+    const esqlSelectableConfig = useMemo(
+      () => ({
+        onClick: setEsql,
+        isSelected: isEsqlRule(ruleType),
+      }),
+      [ruleType, setEsql]
     );
 
     return (
@@ -177,6 +187,19 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 description={i18n.NEW_TERMS_TYPE_DESCRIPTION}
                 icon={<EuiIcon size="l" type="magnifyWithPlus" />}
                 selectable={newTermsSelectableConfig}
+                layout="horizontal"
+              />
+            </EuiFlexItem>
+          )}
+          {(!isUpdateView || esqlSelectableConfig.isSelected) && (
+            <EuiFlexItem>
+              <EuiCard
+                data-test-subj="esqRuleType"
+                title={'(POC) ESQL'}
+                titleSize="xs"
+                description="Create rule using The Elasticsearch Query Language (ESQL)"
+                icon={<EuiIcon type="logoElasticsearch" size="l" />}
+                selectable={esqlSelectableConfig}
                 layout="horizontal"
               />
             </EuiFlexItem>

@@ -22,6 +22,8 @@ import type {
   AlertSuppression,
   RuleResponse,
   AlertSuppressionCamel,
+  EsqlParamsCamel,
+  EsqlParams,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
@@ -378,5 +380,25 @@ export const convertAlertSuppressionToSnake = (
         group_by: input.groupBy,
         duration: input.duration,
         missing_fields_strategy: input.missingFieldsStrategy,
+      }
+    : undefined;
+
+export const convertEsqlParamsToCamel = (
+  input: EsqlParams | undefined
+): EsqlParamsCamel | undefined =>
+  input
+    ? {
+        suppressionDuration: input.suppression_duration,
+        groupByFields: input.group_by_fields,
+      }
+    : undefined;
+
+export const convertEsqlParamsToSnake = (
+  input: EsqlParamsCamel | undefined
+): EsqlParams | undefined =>
+  input
+    ? {
+        suppression_duration: input.suppressionDuration,
+        group_by_fields: input.groupByFields,
       }
     : undefined;

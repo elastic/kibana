@@ -12,7 +12,8 @@ import styled from 'styled-components';
 
 import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+
+import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type { RuleStepProps, AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
@@ -33,6 +34,7 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../../detection_engine/rule_management/logic/use_rule_indices';
+import { EsqlAutocomplete } from '../esql_autocomplete';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 
 const CommonUseField = getUseField({ component: Field });
@@ -44,7 +46,7 @@ interface StepAboutRuleProps extends RuleStepProps {
   dataViewId: string | undefined;
   timestampOverride: string;
   form: FormHook<AboutStepRule>;
-
+  esqlQuery?: string | undefined;
   // TODO: https://github.com/elastic/kibana/issues/161456
   // The About step page contains EuiRange component which does not work properly within memoized parents.
   // EUI team suggested not to memoize EuiRange/EuiDualRange: https://github.com/elastic/eui/issues/6846
@@ -83,10 +85,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   isUpdateView = false,
   isLoading,
   form,
+  esqlQuery,
 }) => {
   const { data } = useKibana().services;
 
   const isThreatMatchRuleValue = useMemo(() => isThreatMatchRule(ruleType), [ruleType]);
+  const isEsqlRuleValue = useMemo(() => isEsqlRule(ruleType), [ruleType]);
 
   const { ruleIndices } = useRuleIndices(machineLearningJobId, index);
 
@@ -327,18 +331,30 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               </>
             )}
             <EuiSpacer size="l" />
-            <UseField
-              path="ruleNameOverride"
-              component={AutocompleteField}
-              componentProps={{
-                dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
-                fieldType: 'string',
-                idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                indices: indexPattern,
-                isDisabled: isLoading || indexPatternLoading,
-                placeholder: '',
-              }}
-            />
+            {isEsqlRuleValue ? (
+              <UseField
+                path="ruleNameOverride"
+                component={EsqlAutocomplete}
+                componentProps={{
+                  esqlQuery,
+                  fieldType: 'string',
+                }}
+              />
+            ) : (
+              <UseField
+                path="ruleNameOverride"
+                component={AutocompleteField}
+                componentProps={{
+                  dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
+                  fieldType: 'string',
+                  idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
+                  indices: indexPattern,
+                  isDisabled: isLoading || indexPatternLoading,
+                  placeholder: '',
+                }}
+              />
+            )}
+
             <EuiSpacer size="l" />
             <UseField
               path="timestampOverride"

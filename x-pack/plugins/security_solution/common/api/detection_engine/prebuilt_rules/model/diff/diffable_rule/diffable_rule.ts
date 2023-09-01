@@ -53,6 +53,7 @@ import {
 import {
   BuildingBlockObject,
   RuleEqlQuery,
+  RuleEsqlQuery,
   InlineKqlQuery,
   RuleKqlQuery,
   RuleDataSource,
@@ -147,6 +148,17 @@ export const DiffableEqlFields = buildSchema({
   },
 });
 
+export type DiffableEsqlFields = t.TypeOf<typeof DiffableEsqlFields>;
+export const DiffableEsqlFields = buildSchema({
+  required: {
+    type: t.literal('esql'),
+    data_query: RuleEsqlQuery, // NOTE: new field
+  },
+  // this is a new type of rule, no prebuilt rules created yet.
+  // new properties might be added here during further rule type developmewnt
+  optional: {},
+});
+
 export type DiffableThreatMatchFields = t.TypeOf<typeof DiffableThreatMatchFields>;
 export const DiffableThreatMatchFields = buildSchema({
   required: {
@@ -232,6 +244,7 @@ export const DiffableRule = t.intersection([
     DiffableCustomQueryFields,
     DiffableSavedQueryFields,
     DiffableEqlFields,
+    DiffableEsqlFields,
     DiffableThreatMatchFields,
     DiffableThresholdFields,
     DiffableMachineLearningFields,

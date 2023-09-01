@@ -22,6 +22,7 @@ import {
   isQueryRule,
   isThreatMatchRule,
   isThresholdRule,
+  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -31,6 +32,7 @@ import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
+import { esqlValidator, esqlGroupingFieldsValidator } from '../esql_fields_select/validators';
 import {
   CUSTOM_QUERY_REQUIRED,
   EQL_QUERY_REQUIRED,
@@ -60,7 +62,9 @@ export const schema: FormSchema<DefineStepRule> = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
           const skipValidation =
-            isMlRule(formData.ruleType) || formData.dataSourceType !== DataSourceType.IndexPatterns;
+            isMlRule(formData.ruleType) ||
+            isEsqlRule(formData.ruleType) ||
+            formData.dataSourceType !== DataSourceType.IndexPatterns;
 
           if (skipValidation) {
             return;
@@ -129,6 +133,7 @@ export const schema: FormSchema<DefineStepRule> = {
   },
   eqlOptions: {},
   queryBar: {
+    fieldsToValidateOnChange: ['esqlOptions.groupByFields', 'queryBar'],
     validations: [
       {
         validator: (
@@ -180,6 +185,9 @@ export const schema: FormSchema<DefineStepRule> = {
       },
       {
         validator: debounceAsync(eqlValidator, 300),
+      },
+      {
+        validator: debounceAsync(esqlValidator, 300),
       },
     ],
   },
@@ -637,6 +645,39 @@ export const schema: FormSchema<DefineStepRule> = {
         defaultMessage: 'If a suppression field is missing',
       }
     ),
+  },
+  esqlOptions: {
+    groupByFields: {
+      type: FIELD_TYPES.COMBO_BOX,
+      label: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlOptions.groupByFieldsLabel',
+        {
+          defaultMessage: 'Select fields to suppress duplicate alerts',
+        }
+      ),
+      helpText: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlOptions.fieldGroupByFieldHelpText',
+        {
+          defaultMessage: 'Select available field(s) to suppress ESQL alerts',
+        }
+      ),
+      validations: [
+        {
+          validator: debounceAsync(esqlGroupingFieldsValidator, 300),
+        },
+      ],
+    },
+    suppressionDuration: {
+      label: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlSuppressionDurationLabel',
+        {
+          defaultMessage: 'Configure suppression window for grouping ESQL alerts',
+        }
+      ),
+      value: {},
+      unit: {},
+    },
+    suppressionMode: {},
   },
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,

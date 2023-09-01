@@ -449,6 +449,14 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         },
       ];
     }
+    case 'esql': {
+      return [
+        {
+          title: label,
+          description: i18n.ESQL_TYPE_DESCRIPTION,
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }
@@ -619,6 +627,32 @@ export const buildAlertSuppressionMissingFieldsDescription = (
     {
       title,
       description,
+    },
+  ];
+};
+
+export const buildAlertEsqlDescription = (
+  esqlSuppressionDuration: Duration,
+  esqlGroupByFields: string[],
+  suppressionMode: GroupByOptions
+): ListItems[] => {
+  const suppressionWindowDescription =
+    suppressionMode === GroupByOptions.PerTimePeriod
+      ? `${esqlSuppressionDuration?.value}${esqlSuppressionDuration?.unit}`
+      : 'Per rule execution';
+
+  const isSuppressionEnabled = esqlGroupByFields.length > 0;
+  if (!isSuppressionEnabled) {
+    return [];
+  }
+  return [
+    {
+      title: 'ESQL group by fields',
+      description: esqlGroupByFields?.join(', '),
+    },
+    {
+      title: 'ESQL suppression window',
+      description: suppressionWindowDescription,
     },
   ];
 };

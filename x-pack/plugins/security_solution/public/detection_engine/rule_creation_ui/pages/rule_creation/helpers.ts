@@ -84,6 +84,7 @@ export interface RuleFields {
   eqlOptions: unknown;
   newTermsFields?: unknown;
   historyWindowSize?: unknown;
+  esqlOptions: unknown;
 }
 
 type QueryRuleFields<T> = Omit<
@@ -97,6 +98,7 @@ type QueryRuleFields<T> = Omit<
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
+  | 'esqlOptions'
 >;
 type EqlQueryRuleFields<T> = Omit<
   T,
@@ -108,6 +110,7 @@ type EqlQueryRuleFields<T> = Omit<
   | 'threatMapping'
   | 'newTermsFields'
   | 'historyWindowSize'
+  | 'esqlOptions'
 >;
 type ThresholdRuleFields<T> = Omit<
   T,
@@ -119,6 +122,7 @@ type ThresholdRuleFields<T> = Omit<
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
+  | 'esqlOptions'
 >;
 type MlRuleFields<T> = Omit<
   T,
@@ -131,6 +135,7 @@ type MlRuleFields<T> = Omit<
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
+  | 'esqlOptions'
 >;
 type ThreatMatchRuleFields<T> = Omit<
   T,
@@ -140,6 +145,7 @@ type ThreatMatchRuleFields<T> = Omit<
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
+  | 'esqlOptions'
 >;
 type NewTermsRuleFields<T> = Omit<
   T,
@@ -150,6 +156,21 @@ type NewTermsRuleFields<T> = Omit<
   | 'threatQueryBar'
   | 'threatMapping'
   | 'eqlOptions'
+  | 'esqlOptions'
+>;
+type EsqlRuleFields<T> = Omit<
+  T,
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+  | 'eqlOptions'
+  | 'index'
+  | 'newTermsFields'
+  | 'historyWindowSize'
+  | 'dataViewId'
 >;
 
 const isMlFields = <T>(
@@ -160,6 +181,7 @@ const isMlFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
 
 const isThresholdFields = <T>(
@@ -170,6 +192,7 @@ const isThresholdFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
 const isThreatMatchFields = <T>(
@@ -180,6 +203,7 @@ const isThreatMatchFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is ThreatMatchRuleFields<T> => has('threatIndex', fields);
 
 const isNewTermsFields = <T>(
@@ -190,6 +214,7 @@ const isNewTermsFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is NewTermsRuleFields<T> => has('newTermsFields', fields);
 
 const isEqlFields = <T>(
@@ -200,7 +225,19 @@ const isEqlFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is EqlQueryRuleFields<T> => has('eqlOptions', fields);
+
+const isEsqlFields = <T>(
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
+    | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
+): fields is EsqlRuleFields<T> => has('esqlOptions', fields);
 
 export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   fields: T,
@@ -211,6 +248,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   | MlRuleFields<T>
   | ThresholdRuleFields<T>
   | ThreatMatchRuleFields<T>
+  | EsqlRuleFields<T>
   | NewTermsRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
@@ -224,6 +262,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         eqlOptions,
         newTermsFields,
         historyWindowSize,
+        esqlOptions,
         ...mlRuleFields
       } = fields;
       return mlRuleFields;
@@ -237,6 +276,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         eqlOptions: _eqlOptions,
         newTermsFields: removedNewTermsFields,
         historyWindowSize: removedHistoryWindowSize,
+        esqlOptions: removedEsqlOptions,
         ...thresholdRuleFields
       } = fields;
       return thresholdRuleFields;
@@ -248,6 +288,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         eqlOptions: __eqlOptions,
         newTermsFields: _removedNewTermsFields,
         historyWindowSize: _removedHistoryWindowSize,
+        esqlOptions: _removedEsqlOptions,
         ...threatMatchRuleFields
       } = fields;
       return threatMatchRuleFields;
@@ -263,6 +304,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         eqlOptions: ___eqlOptions,
         newTermsFields: __removedNewTermsFields,
         historyWindowSize: __removedHistoryWindowSize,
+        esqlOptions: __removedEsqlOptions,
         ...queryRuleFields
       } = fields;
       return queryRuleFields;
@@ -276,9 +318,11 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatMapping: ___removedThreatMapping,
         newTermsFields: ___removedNewTermsFields,
         historyWindowSize: ___removedHistoryWindowSize,
+        esqlOptions: ___removedEsqlOptions,
         ...eqlRuleFields
       } = fields;
       return eqlRuleFields;
+
     case 'new_terms':
       const {
         anomalyThreshold: ___a,
@@ -288,9 +332,27 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatQueryBar: ____removedThreatQueryBar,
         threatMapping: ____removedThreatMapping,
         eqlOptions: ____eqlOptions,
+        esqlOptions: ____removedEsqlOptions,
         ...newTermsRuleFields
       } = fields;
       return newTermsRuleFields;
+
+    case 'esql':
+      const {
+        anomalyThreshold: _esql_a,
+        machineLearningJobId: _esql_m,
+        threshold: _esql_t,
+        threatIndex: _esql_removedThreatIndex,
+        threatQueryBar: _esql_removedThreatQueryBar,
+        threatMapping: _esql_removedThreatMapping,
+        newTermsFields: _esql_removedNewTermsFields,
+        historyWindowSize: _esql_removedHistoryWindowSize,
+        eqlOptions: _esql__eqlOptions,
+        index: _esql_index,
+        dataViewId: _esql_dataViewId,
+        ...esqlRuleFields
+      } = fields;
+      return esqlRuleFields;
   }
   assertUnreachable(type);
 };
@@ -420,6 +482,21 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         new_terms_fields: ruleFields.newTermsFields,
         history_window_start: `now-${ruleFields.historyWindowSize}`,
       }
+    : isEsqlFields(ruleFields)
+    ? {
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        esql_params: ruleFields.esqlOptions
+          ? {
+              suppression_duration:
+                ruleFields.esqlOptions?.suppressionMode === GroupByOptions.PerTimePeriod
+                  ? ruleFields.esqlOptions?.suppressionDuration
+                  : undefined,
+              group_by_fields: ruleFields.esqlOptions?.groupByFields,
+            }
+          : undefined,
+      }
     : {
         ...(ruleFields.groupByFields.length > 0
           ? {
@@ -454,7 +531,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
   return {
     ...baseFields,
     ...typeFields,
-    data_view_id: ruleFields.dataViewId,
+    ...('dataViewId' in ruleFields ? { data_view_id: ruleFields.dataViewId } : {}),
   };
 };
 

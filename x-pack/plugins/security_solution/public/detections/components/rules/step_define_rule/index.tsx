@@ -65,6 +65,7 @@ import {
   isThreatMatchRule,
   isThresholdRule,
   isQueryRule,
+  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
@@ -75,6 +76,7 @@ import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
+import { EsqlFieldsSelect } from '../esql_fields_select/esql_fields_select';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
 import {
@@ -109,6 +111,7 @@ interface StepDefineRuleProps extends RuleStepProps {
   shouldLoadQueryDynamically: boolean;
   queryBarTitle: string | undefined;
   queryBarSavedId: string | null | undefined;
+  esqlGroupByFields?: string[];
 }
 
 interface StepDefineRuleReadOnlyProps {
@@ -167,6 +170,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   shouldLoadQueryDynamically,
   queryBarTitle,
   queryBarSavedId,
+  esqlGroupByFields,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -174,7 +178,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
 
-  const { getFields, reset, setFieldValue } = form;
+  const { getFields, reset, setFieldValue, getFormData } = form;
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
     field: 'ruleType',
@@ -310,6 +314,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         });
       }
     }
+
+    if (isEsqlRule(ruleType)) {
+      if (previousRuleType && !isEsqlRule(previousRuleType)) {
+        currentQuery.reset({
+          defaultValue: defaultCustomQuery.forEsqlRules,
+        });
+      }
+    }
   }, [ruleType, previousRuleType, getFields]);
 
   // if saved query failed to load:
@@ -415,6 +427,50 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       />
     ),
     [license, groupByFields]
+  );
+  const esqlQuery = '';
+  // const esqlQuery = useMemo(
+  //   () => (isEsqlRule(ruleType) && typeof query === 'string' ? query : undefined),
+  //   [query, ruleType]
+  // );
+  const isEsqlGrouping = true;
+
+  const EsqlDurationOptions = useCallback(
+    ({ esqlSuppressionDurationValue, esqlSuppressionDurationUnit, esqlSuppressionMode }) => (
+      <EuiRadioGroup
+        idSelected={esqlSuppressionMode.value ?? GroupByOptions.PerRuleExecution}
+        disabled={!esqlGroupByFields?.length}
+        options={[
+          {
+            id: GroupByOptions.PerRuleExecution,
+            label: 'Rule interval plus look back time',
+          },
+          {
+            id: GroupByOptions.PerTimePeriod,
+            label: (
+              <>
+                {'Configure time window for grouping ESQL alerts'}
+                <DurationInput
+                  data-test-subj="esqlSuppressionDurationSelect"
+                  durationValueField={esqlSuppressionDurationValue}
+                  durationUnitField={esqlSuppressionDurationUnit}
+                  minimumValue={1}
+                  isDisabled={
+                    esqlSuppressionMode.value === GroupByOptions.PerRuleExecution ||
+                    !esqlGroupByFields?.length
+                  }
+                />
+              </>
+            ),
+          },
+        ]}
+        onChange={(id: string) => {
+          esqlSuppressionMode.setValue(id);
+        }}
+        data-test-subj="esqlSuppressionOptions"
+      />
+    ),
+    [esqlGroupByFields?.length]
   );
 
   const AlertsSuppressionMissingFields = useCallback(
@@ -570,6 +626,37 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     handleResetIndices,
   ]);
 
+  const queryBarProps = useMemo(
+    () =>
+      ({
+        idAria: 'detectionEngineStepDefineRuleQueryBar',
+        // for ESQL rule index pattern property does not exist
+        indexPattern,
+        isDisabled: isLoading,
+        isLoading,
+        dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+        onValidityChange: setIsQueryBarValid,
+      } as QueryBarDefineRuleProps),
+    [indexPattern, isLoading, setIsQueryBarValid]
+  );
+
+  const EsqlQueryBarMemo = useMemo(
+    () => (
+      <UseField
+        key="QueryBarDefineRule"
+        path="queryBar"
+        config={{
+          // TODO: use memo
+          ...schema.queryBar,
+          label: 'ESQL query',
+        }}
+        component={QueryBarDefineRule}
+        componentProps={queryBarProps}
+      />
+    ),
+    [queryBarProps]
+  );
+
   const QueryBarMemo = useMemo(
     () => (
       <UseField
@@ -688,8 +775,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           />
           <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
-              <EuiSpacer size="s" />
-              {DataSource}
+              <StyledVisibleContainer isVisible={!isEsqlRule(ruleType)}>
+                <EuiSpacer size="s" />
+                {DataSource}
+              </StyledVisibleContainer>
               <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
                 <UseField
@@ -715,6 +804,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     label: i18n.EQL_QUERY_BAR_LABEL,
                   }}
                 />
+              ) : isEsqlRule(ruleType) ? (
+                EsqlQueryBarMemo
               ) : (
                 QueryBarMemo
               )}
@@ -745,6 +836,41 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </RuleTypeEuiFormRow>
             </>
           )}
+
+          <RuleTypeEuiFormRow
+            $isVisible={isEsqlRule(ruleType) && isEsqlGrouping}
+            data-test-subj="esqlSuppressionDuration"
+          >
+            <UseField
+              path="esqlOptions.groupByFields"
+              component={EsqlFieldsSelect}
+              componentProps={{
+                getFormData,
+              }}
+            />
+          </RuleTypeEuiFormRow>
+
+          <IntendedRuleTypeEuiFormRow
+            $isVisible={isEsqlRule(ruleType) && isEsqlGrouping}
+            data-test-subj="esqlSuppressionDuration"
+            label="Select time interval for deduplication"
+          >
+            <UseMultiFields
+              fields={{
+                esqlSuppressionMode: {
+                  path: 'esqlOptions.suppressionMode',
+                },
+                esqlSuppressionDurationValue: {
+                  path: 'esqlOptions.suppressionDuration.value',
+                },
+                esqlSuppressionDurationUnit: {
+                  path: 'esqlOptions.suppressionDuration.unit',
+                },
+              }}
+            >
+              {EsqlDurationOptions}
+            </UseMultiFields>
+          </IntendedRuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow
             $isVisible={isQueryRule(ruleType)}

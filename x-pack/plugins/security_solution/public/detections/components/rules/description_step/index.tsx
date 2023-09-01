@@ -47,6 +47,7 @@ import {
   buildAlertSuppressionDescription,
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
+  buildAlertEsqlDescription,
   buildHighlightedFieldsOverrideDescription,
 } from './helpers';
 import * as i18n from './translations';
@@ -250,6 +251,12 @@ export const getDescriptionItem = (
   } else if (field === 'eqlOptions') {
     const eqlOptions: EqlOptionsSelected = get(field, data);
     return buildEqlOptionsDescription(eqlOptions);
+  } else if (field === 'esqlOptions') {
+    const esqlSuppressionDuration = get('esqlOptions.suppressionDuration', data);
+    const esqlGroupByFields = get('esqlOptions.groupByFields', data);
+    const suppressionMode = get('esqlOptions.suppressionMode', data);
+
+    return buildAlertEsqlDescription(esqlSuppressionDuration, esqlGroupByFields, suppressionMode);
   } else if (field === 'threat') {
     const threats: Threats = get(field, data);
     return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });

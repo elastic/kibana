@@ -22,6 +22,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { useParams } from 'react-router-dom';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
 import type { RuleUpdateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -64,6 +65,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import { useRuleForms, useRuleIndexPattern } from '../form';
+import { useEsqlIndex } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 
 const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
@@ -144,11 +146,30 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
     actionsStepDefault: ruleActionsData,
   });
 
+  // if about step not active, passing query as undefined to prevent unnecessary re-renders
+  // esql query can change frequently when user types it in, so we don't want it trigger about form form re-render, when it is ot active
+  // when it is active, query would not change
+  const esqlQueryForAboutStep = useMemo(() => {
+    if (activeStep !== RuleStep.aboutRule) {
+      return undefined;
+    }
+    return typeof defineStepData.queryBar.query.query === 'string' &&
+      isEsqlRule(defineStepData.ruleType)
+      ? defineStepData.queryBar.query.query
+      : undefined;
+  }, [defineStepData.queryBar.query.query, defineStepData.ruleType, activeStep]);
+
+  const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, defineStepData.ruleType);
+  const memoizedIndex = useMemo(
+    () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
+    [defineStepData.index, esqlIndex, defineStepData.ruleType]
+  );
+
   const isPreviewDisabled = getIsRulePreviewDisabled({
     ruleType: defineStepData.ruleType,
     isQueryBarValid,
     isThreatQueryBarValid,
-    index: defineStepData.index,
+    index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
     dataSourceType: defineStepData.dataSourceType,
     threatIndex: defineStepData.threatIndex,
@@ -198,7 +219,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
 
   const { indexPattern, isIndexPatternLoading, browserFields } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
-    index: defineStepData.index,
+    index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
   });
 
@@ -236,13 +257,14 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   setIsQueryBarValid={setIsQueryBarValid}
                   setIsThreatQueryBarValid={setIsThreatQueryBarValid}
                   ruleType={defineStepData.ruleType}
-                  index={defineStepData.index}
+                  index={memoizedIndex}
                   threatIndex={defineStepData.threatIndex}
                   groupByFields={defineStepData.groupByFields}
                   dataSourceType={defineStepData.dataSourceType}
                   shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
                   queryBarTitle={defineStepData.queryBar.title}
                   queryBarSavedId={defineStepData.queryBar.saved_id}
+                  esqlGroupByFields={defineStepData.esqlOptions.groupByFields}
                 />
               )}
               <EuiSpacer />
@@ -270,10 +292,11 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   isActive={activeStep === RuleStep.aboutRule}
                   ruleType={defineStepData.ruleType}
                   machineLearningJobId={defineStepData.machineLearningJobId}
-                  index={defineStepData.index}
+                  index={memoizedIndex}
                   dataViewId={defineStepData.dataViewId}
                   timestampOverride={aboutStepData.timestampOverride}
                   form={aboutStepForm}
+                  esqlQuery={esqlQueryForAboutStep}
                   key="aboutStep"
                 />
               )}
@@ -365,6 +388,8 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
       actionsStepData,
       actionMessageParams,
       actionsStepForm,
+      memoizedIndex,
+      esqlQueryForAboutStep,
     ]
   );
 

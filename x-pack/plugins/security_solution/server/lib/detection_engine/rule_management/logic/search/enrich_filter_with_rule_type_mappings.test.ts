@@ -7,6 +7,7 @@
 
 import {
   EQL_RULE_TYPE_ID,
+  ESQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
@@ -17,7 +18,8 @@ import {
 
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 
-const allAlertTypeIds = `alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
+const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
+ OR alert.attributes.alertTypeId: ${ESQL_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${ML_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${QUERY_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${SAVED_QUERY_RULE_TYPE_ID}

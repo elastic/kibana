@@ -21,7 +21,11 @@ import styled from 'styled-components';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { isMlRule, isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import {
+  isMlRule,
+  isThreatMatchRule,
+  isEsqlRule,
+} from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -62,6 +66,7 @@ import {
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
 import { formatRule } from './helpers';
+import { useEsqlIndex } from '../../hooks';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import {
@@ -190,6 +195,11 @@ const CreateRulePageComponent: React.FC = () => {
     [defineStepData.ruleType]
   );
 
+  const isEsqlRuleValue = useMemo(
+    () => isEsqlRule(defineStepData.ruleType),
+    [defineStepData.ruleType]
+  );
+
   const [openSteps, setOpenSteps] = useState({
     [RuleStep.defineRule]: false,
     [RuleStep.aboutRule]: false,
@@ -206,11 +216,29 @@ const CreateRulePageComponent: React.FC = () => {
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
+  // if about step not active, passing query as undefined to prevent unnecessary re-renders
+  // esql query can change frequently when user types it in, so we don't want it trigger about form form re-render, when it is ot active
+  // when it is active, query would not change
+  const esqlQueryForAboutStep = useMemo(() => {
+    if (activeStep !== RuleStep.aboutRule) {
+      return undefined;
+    }
+    return typeof defineStepData.queryBar.query.query === 'string' &&
+      isEsqlRule(defineStepData.ruleType)
+      ? defineStepData.queryBar.query.query
+      : undefined;
+  }, [defineStepData.queryBar.query.query, defineStepData.ruleType, activeStep]);
+  const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, ruleType);
+  const memoizedIndex = useMemo(
+    () => (isEsqlRuleValue ? esqlIndex : defineStepData.index),
+    [defineStepData.index, esqlIndex, isEsqlRuleValue]
+  );
+
   const isPreviewDisabled = getIsRulePreviewDisabled({
     ruleType,
     isQueryBarValid,
     isThreatQueryBarValid,
-    index: defineStepData.index,
+    index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
     dataSourceType: defineStepData.dataSourceType,
     threatIndex: defineStepData.threatIndex,
@@ -250,7 +278,7 @@ const CreateRulePageComponent: React.FC = () => {
   }, [dataViews]);
   const { indexPattern, isIndexPatternLoading, browserFields } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
-    index: defineStepData.index,
+    index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
   });
 
@@ -494,13 +522,14 @@ const CreateRulePageComponent: React.FC = () => {
             setIsQueryBarValid={setIsQueryBarValid}
             setIsThreatQueryBarValid={setIsThreatQueryBarValid}
             ruleType={defineStepData.ruleType}
-            index={defineStepData.index}
+            index={memoizedIndex}
             threatIndex={defineStepData.threatIndex}
             groupByFields={defineStepData.groupByFields}
             dataSourceType={defineStepData.dataSourceType}
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
+            esqlGroupByFields={defineStepData.esqlOptions.groupByFields}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -518,9 +547,11 @@ const CreateRulePageComponent: React.FC = () => {
       defineRuleNextStep,
       defineStepData.dataSourceType,
       defineStepData.groupByFields,
-      defineStepData.index,
+      memoizedIndex,
       defineStepData.queryBar.saved_id,
       defineStepData.queryBar.title,
+      //   defineStepData.queryBar.query.query,
+      defineStepData.esqlOptions.groupByFields,
       defineStepData.ruleType,
       defineStepData.shouldLoadQueryDynamically,
       defineStepData.threatIndex,
@@ -575,12 +606,13 @@ const CreateRulePageComponent: React.FC = () => {
           <StepAboutRule
             ruleType={defineStepData.ruleType}
             machineLearningJobId={defineStepData.machineLearningJobId}
-            index={defineStepData.index}
+            index={memoizedIndex}
             dataViewId={defineStepData.dataViewId}
             timestampOverride={aboutStepData.timestampOverride}
             isLoading={isCreateRuleLoading || loading}
             isActive={activeStep === RuleStep.aboutRule}
             form={aboutStepForm}
+            esqlQuery={esqlQueryForAboutStep}
           />
 
           <NextStep
@@ -598,12 +630,13 @@ const CreateRulePageComponent: React.FC = () => {
       aboutStepForm,
       activeStep,
       defineStepData.dataViewId,
-      defineStepData.index,
+      memoizedIndex,
       defineStepData.machineLearningJobId,
       defineStepData.ruleType,
       isCreateRuleLoading,
       loading,
       memoAboutStepReadOnly,
+      esqlQueryForAboutStep,
     ]
   );
   const memoAboutStepExtraAction = useMemo(

@@ -10,6 +10,8 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type {
   EqlRule,
   EqlRuleCreateProps,
+  EsqlRule,
+  EsqlRuleCreateProps,
   MachineLearningRule,
   MachineLearningRuleCreateProps,
   NewTermsRule,
@@ -29,6 +31,7 @@ import type {
   DiffableCommonFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
+  DiffableEsqlFields,
   DiffableMachineLearningFields,
   DiffableNewTermsFields,
   DiffableRule,
@@ -40,6 +43,7 @@ import { extractBuildingBlockObject } from './extract_building_block_object';
 import {
   extractInlineKqlQuery,
   extractRuleEqlQuery,
+  extractRuleEsqlQuery,
   extractRuleKqlQuery,
 } from './extract_rule_data_query';
 import { extractRuleDataSource } from './extract_rule_data_source';
@@ -90,6 +94,11 @@ export const convertRuleToDiffable = (rule: RuleResponse | PrebuiltRuleAsset): D
       return {
         ...commonFields,
         ...extractDiffableNewTermsFieldsFromRuleObject(rule),
+      };
+    case 'esql':
+      return {
+        ...commonFields,
+        ...extractDiffableEsqlFieldsFromRuleObject(rule),
       };
     default:
       return assertUnreachable(rule, 'Unhandled rule type');
@@ -173,6 +182,15 @@ const extractDiffableEqlFieldsFromRuleObject = (
     event_category_override: rule.event_category_override,
     timestamp_field: rule.timestamp_field,
     tiebreaker_field: rule.tiebreaker_field,
+  };
+};
+
+const extractDiffableEsqlFieldsFromRuleObject = (
+  rule: EsqlRule | EsqlRuleCreateProps
+): DiffableEsqlFields => {
+  return {
+    type: rule.type,
+    data_query: extractRuleEsqlQuery(rule.query, rule.language, rule.filters),
   };
 };
 

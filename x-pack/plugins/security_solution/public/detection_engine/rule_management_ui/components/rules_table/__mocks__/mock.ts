@@ -238,6 +238,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
     unit: 'm',
     value: 5,
   },
+  esqlOptions: {},
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

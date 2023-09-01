@@ -14,6 +14,7 @@ import type {
   DiffableCommonFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
+  DiffableEsqlFields,
   DiffableMachineLearningFields,
   DiffableNewTermsFields,
   DiffableRule,
@@ -23,6 +24,7 @@ import type {
   CommonFieldsDiff,
   CustomQueryFieldsDiff,
   EqlFieldsDiff,
+  EsqlFieldsDiff,
   MachineLearningFieldsDiff,
   NewTermsFieldsDiff,
   RuleFieldsDiff,
@@ -142,6 +144,16 @@ export const calculateRuleFieldsDiff = (
         ...calculateNewTermsFieldsDiff({ base_version, current_version, target_version }),
       };
     }
+    case 'esql': {
+      if (hasBaseVersion) {
+        invariant(base_version.type === 'esql', BASE_TYPE_ERROR);
+      }
+      invariant(target_version.type === 'esql', TARGET_TYPE_ERROR);
+      return {
+        ...commonFieldsDiff,
+        ...calculateEsqlFieldsDiff({ base_version, current_version, target_version }),
+      };
+    }
     default: {
       return assertUnreachable(current_version, 'Unhandled rule type');
     }
@@ -224,6 +236,17 @@ const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
   event_category_override: simpleDiffAlgorithm,
   timestamp_field: simpleDiffAlgorithm,
   tiebreaker_field: simpleDiffAlgorithm,
+};
+
+const calculateEsqlFieldsDiff = (
+  ruleVersions: ThreeVersionsOf<DiffableEsqlFields>
+): EsqlFieldsDiff => {
+  return calculateFieldsDiffFor(ruleVersions, esqlFieldsDiffAlgorithms);
+};
+
+const esqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEsqlFields> = {
+  type: simpleDiffAlgorithm,
+  data_query: simpleDiffAlgorithm,
 };
 
 const calculateThreatMatchFieldsDiff = (

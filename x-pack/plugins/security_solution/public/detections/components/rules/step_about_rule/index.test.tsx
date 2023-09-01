@@ -69,6 +69,7 @@ export const stepDefineStepMLRule: DefineStepRule = {
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
+  esqlOptions: {},
 };
 
 describe('StepAboutRuleComponent', () => {

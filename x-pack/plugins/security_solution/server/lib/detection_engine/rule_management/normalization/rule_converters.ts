@@ -29,6 +29,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   EqlPatchParams,
+  EsqlPatchParams,
   MachineLearningPatchParams,
   NewTermsPatchParams,
   QueryPatchParams,
@@ -59,6 +60,8 @@ import type {
   BaseRuleParams,
   EqlRuleParams,
   EqlSpecificRuleParams,
+  EsqlRuleParams,
+  EsqlSpecificRuleParams,
   ThreatRuleParams,
   ThreatSpecificRuleParams,
   QueryRuleParams,
@@ -74,7 +77,12 @@ import type {
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
 import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
-import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
+import {
+  convertAlertSuppressionToCamel,
+  convertAlertSuppressionToSnake,
+  convertEsqlParamsToCamel,
+  convertEsqlParamsToSnake,
+} from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
 
@@ -105,6 +113,15 @@ export const typeSpecificSnakeToCamel = (
         timestampField: params.timestamp_field,
         eventCategoryOverride: params.event_category_override,
         tiebreakerField: params.tiebreaker_field,
+      };
+    }
+    case 'esql': {
+      return {
+        type: params.type,
+        language: params.language,
+        query: params.query,
+        filters: params.filters,
+        esqlParams: convertEsqlParamsToCamel(params.esql_params),
       };
     }
     case 'threat_match': {
@@ -203,6 +220,19 @@ const patchEqlParams = (
     timestampField: params.timestamp_field ?? existingRule.timestampField,
     eventCategoryOverride: params.event_category_override ?? existingRule.eventCategoryOverride,
     tiebreakerField: params.tiebreaker_field ?? existingRule.tiebreakerField,
+  };
+};
+
+const patchEsqlParams = (
+  params: EsqlPatchParams,
+  existingRule: EsqlRuleParams
+): EsqlSpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    language: params.language ?? existingRule.language,
+    query: params.query ?? existingRule.query,
+    filters: params.filters ?? existingRule.filters,
+    esqlParams: convertEsqlParamsToCamel(params.esql_params) ?? existingRule.esqlParams,
   };
 };
 
@@ -340,6 +370,13 @@ export const patchTypeSpecificSnakeToCamel = (
         throw parseValidationError(error);
       }
       return patchEqlParams(validated, existingRule);
+    }
+    case 'esql': {
+      const [validated, error] = validateNonExact(params, EsqlPatchParams);
+      if (validated == null) {
+        throw parseValidationError(error);
+      }
+      return patchEsqlParams(validated, existingRule);
     }
     case 'threat_match': {
       const [validated, error] = validateNonExact(params, ThreatMatchPatchParams);
@@ -524,6 +561,15 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): TypeSp
         timestamp_field: params.timestampField,
         event_category_override: params.eventCategoryOverride,
         tiebreaker_field: params.tiebreakerField,
+      };
+    }
+    case 'esql': {
+      return {
+        type: params.type,
+        language: params.language,
+        query: params.query,
+        filters: params.filters,
+        esql_params: convertEsqlParamsToSnake(params.esqlParams),
       };
     }
     case 'threat_match': {

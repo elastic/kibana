@@ -8,7 +8,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { TimeHistory } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -16,6 +16,16 @@ import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
+const convertToQueryType = (query: Query | AggregateQuery): Query => {
+  if ('esql' in query) {
+    return {
+      query: query.esql,
+      language: 'esql',
+    };
+  }
+
+  return query as Query;
+};
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
   dateRangeFrom?: string;
@@ -57,18 +67,21 @@ export const QueryBar = memo<QueryBarComponentProps>(
     isDisabled,
   }) => {
     const onQuerySubmit = useCallback(
-      (payload: { dateRange: TimeRange; query?: Query }) => {
+      (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
-          onSubmitQuery(payload.query);
+          const payloadQuery = convertToQueryType(payload.query);
+
+          onSubmitQuery(payloadQuery);
         }
       },
       [filterQuery, onSubmitQuery]
     );
 
     const onQueryChange = useCallback(
-      (payload: { dateRange: TimeRange; query?: Query }) => {
+      (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (onChangedQuery && payload.query != null && !deepEqual(payload.query, filterQuery)) {
-          onChangedQuery(payload.query);
+          const payloadQuery = convertToQueryType(payload.query);
+          onChangedQuery(payloadQuery);
         }
       },
       [filterQuery, onChangedQuery]
@@ -105,6 +118,13 @@ export const QueryBar = memo<QueryBarComponentProps>(
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
+    const query = useMemo(() => {
+      if (filterQuery?.language === 'esql') {
+        return { esql: filterQuery.query as string };
+      }
+      return filterQuery;
+    }, [filterQuery]);
+
     return (
       <SearchBar
         showSubmitButton={false}
@@ -114,7 +134,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         indexPatterns={indexPatterns as DataView[]}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
-        query={filterQuery}
+        query={query}
         onClearSavedQuery={onClearSavedQuery}
         onFiltersUpdated={onFiltersUpdated}
         onQueryChange={onQueryChange}

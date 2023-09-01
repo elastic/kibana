@@ -7,6 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -23,6 +24,7 @@ import { getScheduleNotificationResponseActionsService } from './lib/detection_e
 import { siemGuideConfig, siemGuideId } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
+  createEsqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
   createNewTermsAlertType,
@@ -263,6 +265,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createEsqlAlertType(ruleOptions)));
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
         createQueryAlertType({

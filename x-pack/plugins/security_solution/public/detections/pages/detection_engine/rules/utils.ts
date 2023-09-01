@@ -73,6 +73,11 @@ export const stepDefineDefaultValue: DefineStepRule = {
     unit: 'm',
   },
   suppressionMissingFields: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  esqlOptions: {
+    groupByFields: [],
+    suppressionMode: GroupByOptions.PerRuleExecution,
+    suppressionDuration: { value: 5, unit: 'm' },
+  },
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {
@@ -132,4 +137,9 @@ const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
 export const defaultCustomQuery = {
   forNormalRules: stepDefineDefaultValue.queryBar,
   forThreatMatchRules: threatQueryBarDefaultValue,
+  forEsqlRules: {
+    query: { query: '', language: 'esql' },
+    filters: [],
+    saved_id: null,
+  },
 };

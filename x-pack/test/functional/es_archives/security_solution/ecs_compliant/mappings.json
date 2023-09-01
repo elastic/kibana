@@ -23,6 +23,13 @@
             }
           }
         },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
         "container": {
           "properties": {
             "image": {
@@ -39,6 +46,9 @@
         },
         "event": {
           "properties": {
+            "ingested": {
+              "type": "date"
+            },
             "created": {
               "type": "keyword"
             }

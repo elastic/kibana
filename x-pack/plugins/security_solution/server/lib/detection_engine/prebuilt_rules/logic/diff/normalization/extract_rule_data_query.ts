@@ -7,6 +7,7 @@
 
 import type {
   EqlQueryLanguage,
+  EsqlQueryLanguage,
   KqlQueryLanguage,
   RuleFilterArray,
   RuleQuery,
@@ -14,6 +15,7 @@ import type {
 import type {
   InlineKqlQuery,
   RuleEqlQuery,
+  RuleEsqlQuery,
   RuleKqlQuery,
 } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { KqlQueryType } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -52,6 +54,18 @@ export const extractRuleEqlQuery = (
   language: EqlQueryLanguage,
   filters: RuleFilterArray | undefined
 ): RuleEqlQuery => {
+  return {
+    query,
+    language,
+    filters: filters ?? [],
+  };
+};
+
+export const extractRuleEsqlQuery = (
+  query: RuleQuery,
+  language: EsqlQueryLanguage,
+  filters: RuleFilterArray | undefined
+): RuleEsqlQuery => {
   return {
     query,
     language,

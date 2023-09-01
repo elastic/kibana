@@ -25,3 +25,5 @@ export const isJobFailed = (jobState: string, datafeedState: string): boolean =>
 };
 
 export const isMlRule = (ruleType: Type | undefined) => ruleType === 'machine_learning';
+
+export const isEsqlRule = (ruleType: Type | undefined) => ruleType === 'esql';

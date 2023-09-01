@@ -11,6 +11,7 @@ import agent from 'elastic-apm-node';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
+import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
@@ -24,6 +25,7 @@ import {
   hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
+  isEsqlParams,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
@@ -210,13 +212,18 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           /**
            * Data Views Logic
-           * Use of data views is supported for all rules other than ML.
+           * Use of data views is supported for all rules other than ML and Esql.
            * Rules can define both a data view and index pattern, but on execution:
            *  - Data view is used if it is defined
            *    - Rule exits early if data view defined is not found (ie: it's been deleted)
            *  - If no data view defined, falls to using existing index logic
+           * Esql rules has index in query, which can be retrieved
            */
-          if (!isMachineLearningParams(params)) {
+          if (isEsqlParams(params)) {
+            inputIndex = getIndexPatternFromESQLQuery(params.query)
+              .split(',')
+              .map((index) => index.trim());
+          } else if (!isMachineLearningParams(params)) {
             try {
               const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({
                 index: params.index,
@@ -315,7 +322,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           }
 
-          if (!isMachineLearningParams(params)) {
+          if (!isMachineLearningParams(params) && !isEsqlParams(params)) {
             inputIndexFields = await getFieldsForWildcard({
               index: inputIndex,
               dataViews: services.dataViews,

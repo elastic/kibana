@@ -8,6 +8,7 @@
 export * from './common_attributes';
 
 export * from './specific_attributes/eql_attributes';
+export * from './specific_attributes/esql_attributes';
 export * from './specific_attributes/new_terms_attributes';
 export * from './specific_attributes/query_attributes';
 export * from './specific_attributes/threshold_attributes';
