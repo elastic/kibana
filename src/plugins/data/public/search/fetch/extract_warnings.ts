@@ -18,9 +18,13 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
   const warnings: SearchResponseWarning[] = [];
 
   const isPartial = rawResponse._clusters
-    ? Object.values((rawResponse._clusters as estypes.ClusterStatistics & { details: Record<string, ClusterDetails> }).details).some(
-        (clusterDetails) => clusterDetails.status !== 'successful'
-      )
+    ? Object.values(
+        (
+          rawResponse._clusters as estypes.ClusterStatistics & {
+            details: Record<string, ClusterDetails>;
+          }
+        ).details
+      ).some((clusterDetails) => clusterDetails.status !== 'successful')
     : rawResponse.timed_out || rawResponse._shards.failed > 0;
   if (isPartial) {
     warnings.push({
@@ -29,7 +33,11 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
         defaultMessage: 'The data might be incomplete or wrong.',
       }),
       clusters: rawResponse._clusters
-        ? (rawResponse._clusters as estypes.ClusterStatistics & { details: Record<string, ClusterDetails> }).details
+        ? (
+            rawResponse._clusters as estypes.ClusterStatistics & {
+              details: Record<string, ClusterDetails>;
+            }
+          ).details
         : {
             '(local)': {
               status: 'partial',
@@ -38,7 +46,7 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
               timed_out: rawResponse.timed_out,
               _shards: rawResponse._shards,
               failures: rawResponse._shards.failures,
-            }
+            },
           },
     });
   }
