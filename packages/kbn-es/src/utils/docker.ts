@@ -52,7 +52,7 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   basePath: string;
   /** If this process exits, teardown the ES cluster as well */
   teardown?: boolean;
-  /** Start the ES cluster in the background instead of */
+  /** Start the ES cluster in the background instead of remaining attached: useful for running tests */
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
