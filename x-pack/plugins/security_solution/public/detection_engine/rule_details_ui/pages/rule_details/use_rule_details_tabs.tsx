@@ -8,11 +8,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { omit } from 'lodash/fp';
+import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import * as detectionI18n from '../../../../detections/pages/detection_engine/translations';
 import * as i18n from './translations';
 import type { Rule } from '../../../rule_management/logic';
 import type { NavTab } from '../../../../common/components/navigation/types';
 import { useRuleExecutionSettings } from '../../../rule_monitoring';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 export enum RuleDetailTabs {
   alerts = 'alerts',
@@ -80,8 +82,16 @@ export const useRuleDetailsTabs = ({
   );
 
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
-
   const ruleExecutionSettings = useRuleExecutionSettings();
+
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
+  const canReadEndpointExceptions = useHasSecurityCapability('crudEndpointExceptions');
+
+  const canWriteEndpointExceptions = useMemo(
+    () => !listsConfigLoading && !needsListsConfiguration && canReadEndpointExceptions,
+    [canReadEndpointExceptions, listsConfigLoading, needsListsConfiguration]
+  );
 
   useEffect(() => {
     const hiddenTabs = [];
@@ -91,6 +101,9 @@ export const useRuleDetailsTabs = ({
     }
     if (!ruleExecutionSettings.extendedLogging.isEnabled) {
       hiddenTabs.push(RuleDetailTabs.executionEvents);
+    }
+    if (!canWriteEndpointExceptions) {
+      hiddenTabs.push(RuleDetailTabs.endpointExceptions);
     }
     if (rule != null) {
       const hasEndpointList = (rule.exceptions_list ?? []).some(
@@ -104,7 +117,7 @@ export const useRuleDetailsTabs = ({
     const tabs = omit<Record<RuleDetailTabs, NavTab>>(hiddenTabs, ruleDetailTabs);
 
     setTabs(tabs);
-  }, [hasIndexRead, rule, ruleDetailTabs, ruleExecutionSettings]);
+  }, [canWriteEndpointExceptions, hasIndexRead, rule, ruleDetailTabs, ruleExecutionSettings]);
 
   return pageTabs;
 };

@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { renderHook, cleanup } from '@testing-library/react-hooks';
+import { cleanup, renderHook } from '@testing-library/react-hooks';
 import type { UseRuleDetailsTabsProps } from './use_rule_details_tabs';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
-
 import { useRuleExecutionSettings } from '../../../rule_monitoring';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
+
 jest.mock('../../../rule_monitoring');
+jest.mock('../../../../helper_hooks');
+jest.mock('../../../../detections/containers/detection_engine/lists/use_lists_config');
+
+const mockUseRuleExecutionSettings = useRuleExecutionSettings as jest.Mock;
+const mockUseHasSecurityCapability = useHasSecurityCapability as jest.Mock;
+const mockUseListsConfig = useListsConfig as jest.Mock;
 
 const mockRule: Rule = {
   id: 'myfakeruleid',
@@ -51,12 +59,17 @@ const mockRule: Rule = {
 
 describe('useRuleDetailsTabs', () => {
   beforeAll(() => {
-    (useRuleExecutionSettings as jest.Mock).mockReturnValue({
+    mockUseRuleExecutionSettings.mockReturnValue({
       extendedLogging: {
         isEnabled: false,
         minLevel: 'debug',
       },
     });
+    mockUseListsConfig.mockReturnValue({
+      loading: false,
+      needsConfiguration: false,
+    });
+    mockUseHasSecurityCapability.mockReturnValue(true);
   });
 
   beforeEach(() => {
@@ -119,6 +132,58 @@ describe('useRuleDetailsTabs', () => {
     expect(tabsNames).toContain(RuleDetailTabs.endpointExceptions);
   });
 
+  it('hides endpoint exceptions tab when rule includes endpoint list but no endpoint PLI', async () => {
+    mockUseHasSecurityCapability.mockReturnValue(false);
+    const tabs = render({
+      rule: {
+        ...mockRule,
+        outcome: 'conflict',
+        alias_target_id: 'aliased_rule_id',
+        alias_purpose: 'savedObjectConversion',
+        exceptions_list: [
+          {
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
+            type: 'endpoint',
+            namespace_type: 'agnostic',
+          },
+        ],
+      },
+      ruleId: mockRule.rule_id,
+      isExistingRule: true,
+      hasIndexRead: true,
+    });
+    const tabsNames = Object.keys(tabs.result.current);
+
+    expect(tabsNames).not.toContain(RuleDetailTabs.endpointExceptions);
+  });
+
+  it('hides endpoint exceptions tab when rule includes endpoint list, has endpoint PLI, but no index privilege', async () => {
+    mockUseListsConfig.mockReturnValue({ loading: false, needsConfiguration: true });
+    const tabs = render({
+      rule: {
+        ...mockRule,
+        outcome: 'conflict',
+        alias_target_id: 'aliased_rule_id',
+        alias_purpose: 'savedObjectConversion',
+        exceptions_list: [
+          {
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
+            type: 'endpoint',
+            namespace_type: 'agnostic',
+          },
+        ],
+      },
+      ruleId: mockRule.rule_id,
+      isExistingRule: true,
+      hasIndexRead: true,
+    });
+    const tabsNames = Object.keys(tabs.result.current);
+
+    expect(tabsNames).not.toContain(RuleDetailTabs.endpointExceptions);
+  });
+
   it('does not return the execution events tab if extended logging is disabled', async () => {
     const tabs = render({
       rule: mockRule,
@@ -132,7 +197,7 @@ describe('useRuleDetailsTabs', () => {
   });
 
   it('returns the execution events tab if extended logging is enabled', async () => {
-    (useRuleExecutionSettings as jest.Mock).mockReturnValue({
+    mockUseRuleExecutionSettings.mockReturnValue({
       extendedLogging: {
         isEnabled: true,
         minLevel: 'debug',
