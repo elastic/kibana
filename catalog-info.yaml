@@ -151,7 +151,7 @@ spec:
         build_pull_request_forks: false
         build_tags: true
         # https://regex101.com/r/tY52jo/1
-        filter_condition: 'build.tag =~ "/^deploy@\d+\$/"'
+        filter_condition: 'build.tag =~ /^deploy@\d+$/'
         filter_enabled: true
       teams:
         kibana-operations:
