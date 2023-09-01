@@ -132,6 +132,9 @@ const getServerlessDefault = () => {
         strictClientVersionCheck: false,
       },
     },
+    elasticsearch: {
+      hosts: [`http://localhost:${esTestConfig.getPort()}`],
+    },
     migrations: {
       algorithm: 'zdt',
       zdt: {
