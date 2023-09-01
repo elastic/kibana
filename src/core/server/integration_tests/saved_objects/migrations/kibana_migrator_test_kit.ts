@@ -16,7 +16,6 @@ import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   SavedObjectConfig,
   type SavedObjectsConfigType,
@@ -30,6 +29,7 @@ import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-inter
 import {
   ElasticsearchConfig,
   type ElasticsearchConfigType,
+  getCapabilitiesFromClient,
 } from '@kbn/core-elasticsearch-server-internal';
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
@@ -276,6 +276,7 @@ interface GetMigratorParams {
   kibanaBranch: string;
   nodeRoles: NodeRoles;
 }
+
 const getMigrator = async ({
   configService,
   client,
@@ -300,6 +301,8 @@ const getMigrator = async ({
     links: getDocLinks({ kibanaBranch }),
   };
 
+  const esCapabilities = await getCapabilitiesFromClient(client);
+
   return new KibanaMigrator({
     client,
     kibanaIndex,
@@ -311,7 +314,7 @@ const getMigrator = async ({
     docLinks,
     waitForMigrationCompletion: false, // ensure we have an active role in the migration
     nodeRoles,
-    esCapabilities: elasticsearchServiceMock.createCapabilities(),
+    esCapabilities,
   });
 };
 
