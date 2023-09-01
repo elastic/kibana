@@ -72,8 +72,8 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const dashboardExists = useMemo(() => dashboardDetails != null, [dashboardDetails]);
   const shouldShowControl =
     savedObjectId && dashboardExists
-      ? dashboardContainer && showWriteControls && !isManaged
-      : dashboardContainer && showWriteControls;
+      ? dashboardContainer && showWriteControls && isManaged === false // edit dashboard
+      : dashboardContainer && showWriteControls; // create dashboard
 
   return (
     <>

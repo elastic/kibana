@@ -43,6 +43,7 @@ import { BASE_SECURITY_QUICK_PROMPTS } from '../assistant/content/quick_prompts'
 import { BASE_SECURITY_SYSTEM_PROMPTS } from '../assistant/content/prompts/system';
 import { useAnonymizationStore } from '../assistant/use_anonymization_store';
 import { useAssistantAvailability } from '../assistant/use_assistant_availability';
+import { DashboardContextProvider } from '../dashboards/context/dashboard_context';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -127,13 +128,15 @@ const StartAppComponent: FC<StartAppComponent> = ({
                               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                             >
                               <UpsellingProvider upsellingService={upselling}>
-                                <PageRouter
-                                  history={history}
-                                  onAppLeave={onAppLeave}
-                                  setHeaderActionMenu={setHeaderActionMenu}
-                                >
-                                  {children}
-                                </PageRouter>
+                                <DashboardContextProvider>
+                                  <PageRouter
+                                    history={history}
+                                    onAppLeave={onAppLeave}
+                                    setHeaderActionMenu={setHeaderActionMenu}
+                                  >
+                                    {children}
+                                  </PageRouter>
+                                </DashboardContextProvider>
                               </UpsellingProvider>
                             </CellActionsProvider>
                           </ReactQueryClientProvider>

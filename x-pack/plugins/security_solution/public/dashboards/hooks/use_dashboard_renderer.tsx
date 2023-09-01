@@ -20,7 +20,7 @@ export const useDashboardRenderer = (savedObjectId: string | undefined) => {
 
   const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();
   const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails | undefined>();
-  const [isManaged, setIsManaged] = useState(false);
+  const [isManaged, setIsManaged] = useState<boolean>();
 
   const { fetch: fetchDashboardTags, data: dashboardTags } = useFetch(
     REQUEST_NAMES.FETCH_DASHBOARD_TAGS,
@@ -54,6 +54,8 @@ export const useDashboardRenderer = (savedObjectId: string | undefined) => {
         await fetchDashboardTags({ tagIds, savedObjectsTaggingClient: savedObjectsTagging.client });
         if (dashboardTags?.some(isManagedTag)) {
           setIsManaged(true);
+        } else {
+          setIsManaged(false);
         }
       }
     },
