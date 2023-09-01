@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { getBasePath, getEditPath } from '../common/constants';
+import { getLensClient } from './persistence/lens_client';
 
 export const getLensAliasConfig = (): VisTypeAlias => ({
   aliasPath: getBasePath(),
@@ -30,6 +31,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
     visualizations: {
       docTypes: ['lens'],
       searchFields: ['title^3'],
+      client: getLensClient,
       toListItem(savedObject) {
         const { id, type, updatedAt, attributes } = savedObject;
         const { title, description } = attributes as { title: string; description?: string };
