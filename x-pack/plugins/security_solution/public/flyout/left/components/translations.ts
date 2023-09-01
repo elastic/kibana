@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ENTITIES_NO_DATA_MESSAGE = i18n.translate(
   'xpack.securitySolution.flyout.entitiesNoDataMessage',
   {
-    defaultMessage: 'No user or host data available',
+    defaultMessage: 'Host and user information are unavailable for this alert.',
   }
 );
 
@@ -39,10 +39,17 @@ export const USER_TITLE = i18n.translate('xpack.securitySolution.flyout.entities
   defaultMessage: 'User',
 });
 
+export const USER_PREVALENCE_COLUMN_TITLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.flyout.entities.userPrevalenceColumTitleTooltip',
+  {
+    defaultMessage: 'Percentage of unique users with identical field value pairs',
+  }
+);
+
 export const USERS_INFO_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entities.usersInfoTitle',
   {
-    defaultMessage: 'User info',
+    defaultMessage: 'User information',
   }
 );
 
@@ -53,12 +60,19 @@ export const RELATED_HOSTS_TITLE = i18n.translate(
   }
 );
 
-export const RELATED_HOSTS_TOOL_TIP = i18n.translate(
-  'xpack.securitySolution.flyout.entities.relatedHostsToolTip',
+export const RELATED_HOSTS_TABLE_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.entities.relatedHostsTableNoData',
   {
-    defaultMessage: 'The user successfully authenticated to these hosts after the alert.',
+    defaultMessage: 'No hosts identified',
   }
 );
+
+export const RELATED_HOSTS_TOOL_TIP = (userName: string) =>
+  i18n.translate('xpack.securitySolution.flyout.entities.relatedHostsToolTip', {
+    defaultMessage:
+      'After this alert was generated, {userName} logged into these hosts. Check if this activity is normal.',
+    values: { userName },
+  });
 
 export const RELATED_ENTITIES_NAME_COLUMN_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entities.relatedEntitiesNameColumn',
@@ -78,10 +92,17 @@ export const HOST_TITLE = i18n.translate('xpack.securitySolution.flyout.entities
   defaultMessage: 'Host',
 });
 
+export const HOST_PREVALENCE_COLUMN_TITLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.flyout.entities.hostPrevalenceColumTitleTooltip',
+  {
+    defaultMessage: 'Percentage of unique hosts with identical field value pairs',
+  }
+);
+
 export const HOSTS_INFO_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entities.hostsInfoTitle',
   {
-    defaultMessage: 'Host info',
+    defaultMessage: 'Host information',
   }
 );
 
@@ -92,12 +113,19 @@ export const RELATED_USERS_TITLE = i18n.translate(
   }
 );
 
-export const RELATED_USERS_TOOL_TIP = i18n.translate(
-  'xpack.securitySolution.flyout.entities.relatedUsersToolTip',
+export const RELATED_USERS_TABLE_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.entities.relatedUsersTableNoData',
   {
-    defaultMessage: 'These users successfully authenticated to the affected host after the alert.',
+    defaultMessage: 'No users identified',
   }
 );
+
+export const RELATED_USERS_TOOL_TIP = (hostName: string) =>
+  i18n.translate('xpack.securitySolution.flyout.entities.relatedUsersToolTip', {
+    defaultMessage:
+      'After this alert was generated, these users logged into {hostName}. Check if this activity is normal.',
+    values: { hostName },
+  });
 
 export const PREVALENCE_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.flyout.prevalenceErrorMessage',
@@ -134,10 +162,24 @@ export const PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE = i18n.translate(
   }
 );
 
+export const PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTableAlertCountColumnTitleTooltip',
+  {
+    defaultMessage: 'Total number of alerts with identical field value pairs',
+  }
+);
+
 export const PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.prevalenceTableDocCountColumnTitle',
   {
     defaultMessage: 'Document',
+  }
+);
+
+export const PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.flyout.prevalenceTableDocCountColumnTitleTooltip',
+  {
+    defaultMessage: 'Total number of event documents with identical field value pairs',
   }
 );
 
@@ -157,10 +199,6 @@ export const PREVALENCE_TABLE_PREVALENCE_COLUMN_TITLE = i18n.translate(
 
 export const RESPONSE_TITLE = i18n.translate('xpack.securitySolution.flyout.response.title', {
   defaultMessage: 'Responses',
-});
-
-export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
-  defaultMessage: 'There are no response actions defined for this event.',
 });
 
 export const CORRELATIONS_TIMESTAMP_COLUMN_TITLE = i18n.translate(
@@ -209,5 +247,33 @@ export const CORRELATIONS_DETAILS_TABLE_FILTER = i18n.translate(
   'xpack.securitySolution.flyout.correlations.correlationsDetailsTableFilter',
   {
     defaultMessage: 'Correlations Details Table Alert IDs',
+  }
+);
+
+export const RELATED_ALERTS_BY_ANCESTRY_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.relatedAlertsByAncestryNoData',
+  {
+    defaultMessage: 'No alerts related by ancestry',
+  }
+);
+
+export const RELATED_ALERTS_BY_SOURCE_EVENT_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.relatedAlertsBySourceEventNoData',
+  {
+    defaultMessage: 'No related source events',
+  }
+);
+
+export const RELATED_ALERTS_BY_SESSION_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.relatedAlertsBySessionNoData',
+  {
+    defaultMessage: 'No alerts related by session',
+  }
+);
+
+export const RELATED_CASES_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.relatedCasesNoData',
+  {
+    defaultMessage: 'No related cases',
   }
 );

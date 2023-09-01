@@ -46,7 +46,6 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       );
 
       const baseFlamegraph = createBaseFlameGraph(tree, samplingRate, totalSeconds);
-
       return createFlameGraph(baseFlamegraph);
     });
 
