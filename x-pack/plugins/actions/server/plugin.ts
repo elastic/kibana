@@ -554,6 +554,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     }
 
+    this.validateEnabledConnectorTypes();
+
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
@@ -705,6 +707,18 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
       };
     };
+  };
+
+  private validateEnabledConnectorTypes = () => {
+    if (
+      this.actionsConfig.enabledActionTypes.length > 0 &&
+      this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any
+    ) {
+      this.actionsConfig.enabledActionTypes.forEach((connectorType) => {
+        // Throws error if action type doesn't exist
+        this.actionTypeRegistry?.get(connectorType);
+      });
+    }
   };
 
   public stop() {

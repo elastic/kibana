@@ -552,7 +552,7 @@ describe('Actions Plugin', () => {
       };
     });
 
-    it('should throw when there is an invalid connector type in enabledConnectorTypes', async () => {
+    it('should throw when there is an invalid connector type in enabledActionTypes', async () => {
       const pluginSetup = await plugin.setup(coreSetup, {
         ...pluginsSetup,
         encryptedSavedObjects: {
