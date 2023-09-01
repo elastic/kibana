@@ -202,14 +202,6 @@ describe('TextBasedLanguagesEditor', () => {
         component.find('[data-test-subj="TextBasedLangEditor-documentation"]').length
       ).not.toBe(0);
     });
-    component!.update();
-    expect(
-      component!.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
-    ).not.toBe(0);
-    expect(component!.find('[data-test-subj="TextBasedLangEditor-minimize"]').length).not.toBe(0);
-    expect(component!.find('[data-test-subj="TextBasedLangEditor-documentation"]').length).not.toBe(
-      0
-    );
   });
 
   it('should call the expand editor function when minimize button is clicked', async () => {

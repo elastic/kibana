@@ -83,12 +83,6 @@ interface TextBasedEditorDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
 }
 
-interface TextBasedEditorDeps {
-  dataViews: DataViewsPublicPluginStart;
-  expressions: ExpressionsStart;
-  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
-}
-
 const MAX_COMPACT_VIEW_LENGTH = 250;
 const FONT_WIDTH = 8;
 const EDITOR_ONE_LINER_UNUSED_SPACE = 180;

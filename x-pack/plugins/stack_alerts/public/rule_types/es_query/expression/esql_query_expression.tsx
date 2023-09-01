@@ -168,6 +168,7 @@ export const EsqlQueryExpression: React.FC<
           isCodeEditorExpanded={true}
           onTextLangQuerySubmit={() => setTestQuery(!testQuery)}
           detectTimestamp={detectTimestamp}
+          hideMinimizeButton={true}
         />
       </EuiFormRow>
       <EuiSpacer />
