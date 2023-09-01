@@ -13,10 +13,7 @@ import {
   createTestServerlessInstances,
 } from '@kbn/core-test-helpers-kbn-server';
 
-/**
- * Until we merge https://github.com/elastic/kibana/pull/162673 this test should remain skipped.
- */
-describe.skip('smoke', () => {
+describe('smoke', () => {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
   let root: TestServerlessKibanaUtils['root'];

@@ -4,36 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { last } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { Subscription } from 'rxjs';
 import { MessageRole, type Message } from '../../../common/types';
+import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
+import { useKibana } from '../../hooks/use_kibana';
+import { useAbortableAsync } from '../../hooks/use_abortable_async';
+import { useConversation } from '../../hooks/use_conversation';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
+import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
+import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import type { PendingMessage } from '../../types';
+import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
+import { StartChatButton } from '../buttons/start_chat_button';
+import { StopGeneratingButton } from '../buttons/stop_generating_button';
 import { ChatFlyout } from '../chat/chat_flyout';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
-import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
-import { StartChatButton } from '../buttons/start_chat_button';
-import { StopGeneratingButton } from '../buttons/stop_generating_button';
-import { InsightBase } from './insight_base';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
-import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
-import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
-import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
-import { useAbortableAsync } from '../../hooks/use_abortable_async';
-import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
+import { InsightBase } from './insight_base';
 
 function ChatContent({
-  title,
-  messages,
+  title: defaultTitle,
+  initialMessages,
   connectorId,
 }: {
   title: string;
-  messages: Message[];
+  initialMessages: Message[];
   connectorId: string;
 }) {
   const chatService = useObservabilityAIAssistantChatService();
@@ -42,42 +44,73 @@ function ChatContent({
   const [loading, setLoading] = useState(false);
   const [subscription, setSubscription] = useState<Subscription | undefined>();
 
+  const [conversationId, setConversationId] = useState<string>();
+
+  const { conversation, displayedMessages, setDisplayedMessages, save, saveTitle } =
+    useConversation({
+      conversationId,
+      connectorId,
+      chatService,
+    });
+
+  const conversationTitle = conversationId
+    ? conversation.value?.conversation.title || ''
+    : defaultTitle;
   const reloadReply = useCallback(() => {
     setLoading(true);
 
-    const nextSubscription = chatService.chat({ messages, connectorId }).subscribe({
-      next: (msg) => {
-        setPendingMessage(() => msg);
-      },
-      complete: () => {
-        setLoading(false);
-      },
-    });
+    let lastPendingMessage: PendingMessage | undefined;
+
+    const nextSubscription = chatService
+      .chat({ messages: initialMessages, connectorId, function: 'none' })
+      .subscribe({
+        next: (msg) => {
+          lastPendingMessage = msg;
+          setPendingMessage(() => msg);
+        },
+        complete: () => {
+          setDisplayedMessages((prevMessages) =>
+            prevMessages.concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
+                ...lastPendingMessage!.message,
+              },
+            })
+          );
+          setLoading(false);
+        },
+      });
 
     setSubscription(nextSubscription);
-  }, [messages, connectorId, chatService]);
+  }, [initialMessages, setDisplayedMessages, connectorId, chatService]);
 
   useEffect(() => {
     reloadReply();
   }, [reloadReply]);
 
+  useEffect(() => {
+    setDisplayedMessages(initialMessages);
+  }, [initialMessages, setDisplayedMessages]);
+
   const [isOpen, setIsOpen] = useState(false);
 
-  const displayedMessages = useMemo(() => {
+  const messagesWithPending = useMemo(() => {
     return pendingMessage
-      ? messages.concat({
+      ? displayedMessages.concat({
           '@timestamp': new Date().toISOString(),
           message: {
             ...pendingMessage.message,
           },
         })
-      : messages;
-  }, [pendingMessage, messages]);
+      : displayedMessages;
+  }, [pendingMessage, displayedMessages]);
+
+  const lastMessage = last(messagesWithPending);
 
   return (
     <>
       <MessagePanel
-        body={<MessageText content={pendingMessage?.message.content ?? ''} loading={loading} />}
+        body={<MessageText content={lastMessage?.message.content ?? ''} loading={loading} />}
         error={pendingMessage?.error}
         controls={
           loading ? (
@@ -85,6 +118,14 @@ function ChatContent({
               onClick={() => {
                 subscription?.unsubscribe();
                 setLoading(false);
+                setDisplayedMessages((prevMessages) =>
+                  prevMessages.concat({
+                    '@timestamp': new Date().toISOString(),
+                    message: {
+                      ...pendingMessage!.message,
+                    },
+                  })
+                );
                 setPendingMessage((prev) => ({
                   message: {
                     role: MessageRole.Assistant,
@@ -116,12 +157,27 @@ function ChatContent({
         }
       />
       <ChatFlyout
-        title={title}
+        title={conversationTitle}
         isOpen={isOpen}
         onClose={() => {
           setIsOpen(() => false);
         }}
         messages={displayedMessages}
+        conversationId={conversationId}
+        startedFrom="contextualInsight"
+        onChatComplete={(nextMessages) => {
+          save(nextMessages)
+            .then((nextConversation) => {
+              setConversationId(nextConversation.conversation.id);
+            })
+            .catch(() => {});
+        }}
+        onChatUpdate={(nextMessages) => {
+          setDisplayedMessages(nextMessages);
+        }}
+        onChatTitleSave={(newTitle) => {
+          saveTitle(newTitle);
+        }}
       />
     </>
   );
@@ -149,7 +205,11 @@ export function Insight({ messages, title }: { messages: Message[]; title: strin
 
   if (hasOpened && connectors.selectedConnector) {
     children = (
-      <ChatContent title={title} messages={messages} connectorId={connectors.selectedConnector} />
+      <ChatContent
+        title={title}
+        initialMessages={messages}
+        connectorId={connectors.selectedConnector}
+      />
     );
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (

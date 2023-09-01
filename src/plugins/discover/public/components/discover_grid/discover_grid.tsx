@@ -42,7 +42,7 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';
@@ -588,8 +588,10 @@ export const DiscoverGrid = ({
   );
 
   const inMemory = useMemo(() => {
-    return isPlainRecord ? ({ level: 'sorting' } as EuiDataGridInMemory) : undefined;
-  }, [isPlainRecord]);
+    return isPlainRecord && columns.length
+      ? ({ level: 'sorting' } as EuiDataGridInMemory)
+      : undefined;
+  }, [columns.length, isPlainRecord]);
 
   const toolbarVisibility = useMemo(
     () =>
@@ -621,7 +623,7 @@ export const DiscoverGrid = ({
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
     return (
-      <div className="euiDataGrid__loading">
+      <div className="euiDataGrid__loading" data-test-subj="discoverDataGridLoading">
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />

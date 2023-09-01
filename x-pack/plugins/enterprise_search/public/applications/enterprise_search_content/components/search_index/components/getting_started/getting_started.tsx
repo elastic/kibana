@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 
 import { css } from '@emotion/react';
+import dedent from 'dedent';
 import { useActions, useValues } from 'kea';
 
 import {
@@ -27,15 +28,16 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   SelectClientPanel,
+  LanguageDefinition,
   LanguageClientPanel,
   InstallClientPanel,
   OverviewPanel,
   CodeBox,
   getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
 } from '@kbn/search-api-panels';
 
-import { LanguageDefinition } from '@kbn/search-api-panels';
-
+import { PLUGIN_ID } from '../../../../../../../common/constants';
 import { KibanaDeps } from '../../../../../../../common/types';
 
 import { icons } from '../../../../../../assets/client_libraries';
@@ -50,7 +52,6 @@ import { GenerateApiKeyModal } from '../generate_api_key_modal/modal';
 
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { showTryInConsole } from './languages/utils';
 
 const DEFAULT_URL = 'https://localhost:9200';
 
@@ -60,14 +61,16 @@ export const APIGettingStarted = () => {
   const { openGenerateModal, closeGenerateModal } = useActions(OverviewLogic);
   const { indexName } = useValues(IndexViewLogic);
   const { services } = useKibana<KibanaDeps>();
-  const { isCloud } = useValues(KibanaLogic);
 
   const cloudContext = useCloudDetails();
 
   const codeArgs = {
     apiKey,
+    cloudId: cloudContext.cloudId,
+    indexName,
     url: cloudContext.elasticsearchUrl || DEFAULT_URL,
   };
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/client_libraries/`);
 
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
@@ -98,7 +101,6 @@ export const APIGettingStarted = () => {
               language={language}
               setSelectedLanguage={setSelectedLanguage}
               isSelectedLanguage={selectedLanguage === language}
-              http={http}
               src={icons[language.id]}
             />
           </EuiFlexItem>
@@ -106,12 +108,11 @@ export const APIGettingStarted = () => {
       </SelectClientPanel>
       <InstallClientPanel
         codeSnippet={getLanguageDefinitionCodeSnippet(selectedLanguage, 'installClient', codeArgs)}
-        showTryInConsole={showTryInConsole('installClient')}
+        consoleRequest={getConsoleRequest('installClient')}
         languages={languageDefinitions}
         language={selectedLanguage}
         setSelectedLanguage={setSelectedLanguage}
-        http={http}
-        pluginId={''}
+        assetBasePath={assetBasePath}
         application={services.application}
         sharePlugin={services.share}
         isPanelLeft={false}
@@ -207,39 +208,23 @@ export const APIGettingStarted = () => {
       />
 
       <OverviewPanel
-        description={
-          isCloud
-            ? i18n.translate(
-                'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.description',
-                {
-                  defaultMessage: "You'll need this to identify your deployment.",
-                }
-              )
-            : i18n.translate(
-                'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.descriptionElastic',
-                {
-                  defaultMessage: "You'll need this to connect your elasticsearch deployment.",
-                }
-              )
-        }
+        description={i18n.translate(
+          'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.description',
+          {
+            defaultMessage: "You'll need this to identify your deployment.",
+          }
+        )}
         rightPanelContent={
           <EuiSplitPanel.Outer>
             <EuiSplitPanel.Inner>
               <EuiTitle size="xs">
                 <h5>
-                  {isCloud
-                    ? i18n.translate(
-                        'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.cloudTitle',
-                        {
-                          defaultMessage: 'Store your unique Cloud ID',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.elasticTitle',
-                        {
-                          defaultMessage: 'Store your elasticsearch URL',
-                        }
-                      )}
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.elasticTitle',
+                    {
+                      defaultMessage: 'Store your Elasticsearch URL',
+                    }
+                  )}
                 </h5>
               </EuiTitle>
               <EuiText>
@@ -261,28 +246,24 @@ export const APIGettingStarted = () => {
                     overflow-wrap: anywhere;
                   `}
                 >
-                  {codeArgs.url}
+                  {codeArgs.cloudId
+                    ? dedent`{
+                    CloudID: "${codeArgs.cloudId}",
+                    Url: "${codeArgs.url}",
+                  }`
+                    : codeArgs.url}
                 </EuiCodeBlock>
               </EuiSplitPanel.Inner>
             </EuiThemeProvider>
           </EuiSplitPanel.Outer>
         }
         links={[]}
-        title={
-          isCloud
-            ? i18n.translate(
-                'xpack.enterpriseSearch.overview.gettingStarted.cloudId.panelTitleCloud',
-                {
-                  defaultMessage: 'Copy your Cloud ID',
-                }
-              )
-            : i18n.translate(
-                'xpack.enterpriseSearch.overview.gettingStarted.cloudId.panelTitleElastic',
-                {
-                  defaultMessage: 'Copy your elasticsearch URL',
-                }
-              )
-        }
+        title={i18n.translate(
+          'xpack.enterpriseSearch.overview.gettingStarted.cloudId.panelTitleElastic',
+          {
+            defaultMessage: 'Copy your Elasticsearch URL',
+          }
+        )}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
@@ -290,7 +271,7 @@ export const APIGettingStarted = () => {
         description={i18n.translate(
           'xpack.enterpriseSearch.overview.gettingStarted.configureClient.description',
           {
-            defaultMessage: 'Initialize your client with your unique API key and Cloud ID',
+            defaultMessage: 'Initialize your client with your unique API key',
           }
         )}
         rightPanelContent={
@@ -301,11 +282,10 @@ export const APIGettingStarted = () => {
               'configureClient',
               codeArgs
             )}
-            showTryInConsole={showTryInConsole('configureClient')}
+            consoleRequest={getConsoleRequest('configureClient')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />
@@ -336,11 +316,10 @@ export const APIGettingStarted = () => {
               'testConnection',
               codeArgs
             )}
-            showTryInConsole={showTryInConsole('testConnection')}
+            consoleRequest={getConsoleRequest('testConnection')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />
@@ -365,11 +344,10 @@ export const APIGettingStarted = () => {
           <CodeBox
             languages={languageDefinitions}
             codeSnippet={getLanguageDefinitionCodeSnippet(selectedLanguage, 'ingestData', codeArgs)}
-            showTryInConsole={showTryInConsole('ingestData')}
+            consoleRequest={getConsoleRequest('ingestData')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />
@@ -397,11 +375,10 @@ export const APIGettingStarted = () => {
               'buildSearchQuery',
               codeArgs
             )}
-            showTryInConsole={showTryInConsole('buildSearchQuery')}
+            consoleRequest={getConsoleRequest('buildSearchQuery')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={''}
+            assetBasePath={assetBasePath}
             application={services.application}
             sharePlugin={services.share}
           />
