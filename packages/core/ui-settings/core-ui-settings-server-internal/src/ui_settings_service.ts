@@ -16,6 +16,7 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type { UiSettingsParams, UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { ReadonlyModeType } from '@kbn/core-ui-settings-common/src/ui_settings';
 import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
 import type {
@@ -28,7 +29,6 @@ import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { registerRoutes, registerInternalRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
-import {ReadonlyModeType} from "@kbn/core-ui-settings-common/src/ui_settings";
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
