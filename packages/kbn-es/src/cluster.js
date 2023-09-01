@@ -579,6 +579,8 @@ exports.Cluster = class Cluster {
    * @param {ServerlessOptions} options
    */
   async runServerless(options = {}) {
+    // Ensure serverless ES nodes are not running
+    teardownServerlessClusterSync(this._log, options);
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
     }
