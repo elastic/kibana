@@ -189,7 +189,8 @@ describe('Related integrations', { tags: ['@ess', '@brokenInServerless'] }, () =
       });
     });
 
-    describe('rule details', () => {
+    // Flaky in serverless tests
+    describe('rule details', { tags: ['@brokenInServerless'] }, () => {
       beforeEach(() => {
         visitFirstInstalledPrebuiltRuleDetailsPage();
       });

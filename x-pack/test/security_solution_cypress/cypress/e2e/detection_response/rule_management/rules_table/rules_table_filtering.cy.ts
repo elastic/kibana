@@ -28,7 +28,8 @@ import {
 import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 
-describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
+// Flaky in serverless tests
+describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

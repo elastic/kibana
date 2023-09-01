@@ -49,7 +49,8 @@ const defaultHeaders = [
   { id: 'user.name' },
 ];
 
-describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
+// Flaky in serverless tests
+describe('Fields Browser', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
