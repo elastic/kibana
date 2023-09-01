@@ -25,7 +25,7 @@ import * as utils from '../utils';
 
 import { populateContext } from './engine';
 import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
-import { URL_PATH_END_MARKER } from './components';
+import { URL_PATH_END_MARKER, ConstantComponent } from './components';
 
 let lastEvaluatedToken: Token | null = null;
 
@@ -978,20 +978,35 @@ export default function ({
     context.method = ret.method?.toUpperCase();
     context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
-    context.urlTokenPath = _.clone(ret.urlTokenPath);
-    if (
-      context.autoCompleteType === 'path' &&
-      context.urlTokenPath?.length > 0 &&
-      Array.isArray(context.urlTokenPath) &&
-      Array.isArray(context.urlTokenPath[context.urlTokenPath.length - 1])
-    ) {
-      context.urlTokenPath.pop();
-    }
-    const components = getTopLevelUrlCompleteComponents(context.method);
-    populateContext(context.urlTokenPath, context, editor, true, components);
     context.urlTokenPath = ret.urlTokenPath;
 
-    context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet!, 'endpoint');
+    const components = getTopLevelUrlCompleteComponents(context.method);
+    const { tokenPath, predicate } = (() => {
+      const lastUrlTokenPath =
+        Array.isArray(context.urlTokenPath) && context.urlTokenPath.length !== 0
+          ? context.urlTokenPath[context.urlTokenPath.length - 1]
+          : null;
+      if (
+        Array.isArray(lastUrlTokenPath) &&
+        !_.find(
+          components,
+          (c) => c instanceof ConstantComponent && _.find(lastUrlTokenPath, (p) => c.name === p)
+        )
+      ) {
+        return {
+          tokenPath: context.urlTokenPath.slice(0, -1),
+          predicate: (term) => term.meta === 'index',
+        };
+      } else {
+        return { tokenPath: context.urlTokenPath, predicate: (term) => true };
+      }
+    })();
+
+    populateContext(tokenPath, context, editor, true, components);
+    context.autoCompleteSet = _.filter(
+      addMetaToTermsList(context.autoCompleteSet!, 'endpoint'),
+      predicate
+    );
   }
 
   function addUrlParamsAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {

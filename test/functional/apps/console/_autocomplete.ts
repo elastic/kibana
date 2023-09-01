@@ -147,6 +147,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
       });
+
+      it('should not activate auto-complete after comma following endpoint in URL', async () => {
+        await PageObjects.console.enterText('GET _search');
+
+        await PageObjects.console.sleepForDebouncePeriod();
+        log.debug('Key type ","');
+        await PageObjects.console.enterText(','); // i.e. 'GET _search,'
+
+        await PageObjects.console.sleepForDebouncePeriod();
+        log.debug('Key type Ctrl+SPACE');
+        await PageObjects.console.pressCtrlSpace();
+
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
     });
 
     describe('with a missing comma in query', () => {
