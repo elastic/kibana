@@ -200,7 +200,7 @@ describe('Discover flyout', function () {
 
   it('should not render single/surrounding views for text based', async () => {
     const { component } = await mountComponent({
-      query: { sql: 'Select * from indexpattern' },
+      query: { esql: 'FROM indexpattern' },
     });
     const singleDocumentView = findTestSubject(component, 'docTableRowAction');
     expect(singleDocumentView.length).toBeFalsy();
