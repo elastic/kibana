@@ -30,6 +30,7 @@ import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
+import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 
 const containerClassName = css`
   max-height: 100%;
@@ -58,6 +59,7 @@ export function ChatBody({
   connectorsManagementHref,
   conversationId,
   currentUser,
+  startedFrom,
   onChatUpdate,
   onChatComplete,
   onSaveTitle,
@@ -70,6 +72,7 @@ export function ChatBody({
   connectorsManagementHref: string;
   conversationId?: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  startedFrom?: StartedFrom;
   onChatUpdate: (messages: Message[]) => void;
   onChatComplete: (messages: Message[]) => void;
   onSaveTitle: (title: string) => void;
@@ -84,6 +87,7 @@ export function ChatBody({
     connectors,
     currentUser,
     chatService,
+    startedFrom,
     onChatUpdate,
     onChatComplete,
   });
@@ -210,8 +214,8 @@ export function ChatBody({
       <EuiFlexItem grow={false}>
         <ChatHeader
           connectors={connectors}
-          licenseInvalid={!hasCorrectLicense && !conversationId}
           knowledgeBase={knowledgeBase}
+          licenseInvalid={!hasCorrectLicense && !conversationId}
           loading={loading}
           title={title}
           onSaveTitle={onSaveTitle}
