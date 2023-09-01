@@ -42,6 +42,7 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('Last response filter', () => {
+    // Flaky in serverless tests
     it('Filters rules by last response', { tags: ['@brokenInServerless'] }, function () {
       deleteIndex('test_index');
 

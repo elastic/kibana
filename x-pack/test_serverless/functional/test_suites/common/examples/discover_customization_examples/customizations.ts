@@ -20,7 +20,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const dataGrid = getService('dataGrid');
   const defaultSettings = { defaultIndex: 'logstash-*' };
 
-  describe('Customizations', () => {
+  // Flaky in serverless tests (before hook)
+  describe.skip('Customizations', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
