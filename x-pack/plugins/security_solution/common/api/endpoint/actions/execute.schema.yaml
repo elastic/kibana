@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: Execute Action Schema
+  version: '2023-10-31'
+paths: { }
+components:
+  schemas:
+    ExecuteActionRequestBody:
+      allOf:
+        - $ref: '../model/schema/common.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              required:
+                - command
+              type: object
+              properties:
+                command:
+                  $ref: '../model/schema/common.yaml#/components/schemas/Command'
+
+                timeout:
+                  type: number
+                  minimum: 1
+                  description: The maximum timeout value in milliseconds (optional)
+
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed

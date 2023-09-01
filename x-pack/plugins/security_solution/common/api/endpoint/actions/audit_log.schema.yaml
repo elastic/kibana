@@ -1,0 +1,41 @@
+openapi: 3.0.0
+info:
+  title: Audit Log Schema
+  version: '2023-10-31'
+paths: { }
+components:
+  parameters:
+   AuditLogRequestQueryParameter:
+      name: query
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/AuditLogRequestQuery'
+   AuditLogRequestParameter:
+      name: query
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/AuditLogRequestParams'
+  schemas:
+    AuditLogRequestQuery:
+      type: object
+      properties:
+        page:
+          $ref: '../model/schema/common.yaml#/components/schemas/Page'
+        page_size:
+          $ref: '../model/schema/common.yaml#/components/schemas/PageSize'
+        start_date:
+          $ref: '../model/schema/common.yaml#/components/schemas/StartDate'
+        end_date:
+          $ref: '../model/schema/common.yaml#/components/schemas/EndDate'
+
+    AuditLogRequestParams:
+      type: object
+      properties:
+        agent_id:
+          $ref: '../model/schema/common.yaml#/components/schemas/AgentId'
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed

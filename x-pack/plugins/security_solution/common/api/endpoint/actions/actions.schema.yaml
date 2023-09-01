@@ -1,0 +1,214 @@
+openapi: 3.0.0
+info:
+  title: Endpoint Actions Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action:
+    get:
+      summary: Get Actions List schema
+      parameters:
+        - $ref: './list.schema.yaml#/components/parameters/ListRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './list.schema.yaml#/components/schemas/SuccessResponse'
+  /api/endpoint/action_status:
+    get:
+      summary: Get Actions status schema
+      parameters:
+        - $ref: './actions_status.schema.yaml#/components/parameters/GetActionStatusRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './actions_status.schema.yaml#/components/schemas/SuccessResponse'
+  /api/endpoint/{action_id}:
+    get:
+      summary: Get Action details schema
+      parameters:
+        - $ref: './details.schema.yaml#/components/parameters/DetailsRequestParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './details.schema.yaml#/components/schemas/SuccessResponse'
+  /api/endpoint/action_log/{agent_id}:
+    get:
+      summary: Get action audit log schema
+      parameters:
+        - $ref: './audit_log.schema.yaml#/components/parameters/AuditLogRequestParameter'
+        - $ref: './audit_log.schema.yaml#/components/parameters/AuditLogRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './audit_log.schema.yaml#/components/schemas/SuccessResponse'
+  /api/endpoint/execute:
+    post:
+      summary: Execute Action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+               $ref: './execute.schema.yaml#/components/schemas/ExecuteActionRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './execute.schema.yaml#/components/schemas/SuccessResponse'
+
+  /api/endpoint/{action_id}/file/{file_id}`:
+    get:
+      summary: File Info schema
+      parameters:
+        - $ref: './file_download.schema.yaml#/components/parameters/FileDownloadRequestParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './file_download.schema.yaml#/components/schemas/SuccessResponse'
+  /api/endpoint/{action_id}/file/{file_id}/download`:
+    get:
+      summary: File Download schema
+      parameters:
+        - $ref: './file_download.schema.yaml#/components/parameters/FileDownloadRequestParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './file_download.schema.yaml#/components/schemas/SuccessResponse'
+  /api/endpoint/upload:
+    post:
+      summary: Upload Action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './file_upload.schema.yaml#/components/schemas/FileUploadActionRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './file_upload.schema.yaml#/components/schemas/SuccessResponse'
+  /api/endpoint/get_file:
+    post:
+      summary: Get File Action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './get_file.schema.yaml#/components/schemas/GetFileActionRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './get_file.schema.yaml#/components/schemas/SuccessResponse'
+
+  /api/endpoint/running_procs:
+    post:
+      summary: Get Running Processes Action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../model/schema/common.yaml#/components/schemas/BaseActionSchema'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+
+  /api/endpoint/isolate:
+    post:
+      summary: Isolate host Action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../model/schema/common.yaml#/components/schemas/BaseActionSchema'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+
+  /api/endpoint/unisolate:
+    post:
+      summary: Unisolate host Action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../model/schema/common.yaml#/components/schemas/BaseActionSchema'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+
+  /api/endpoint/kill_process:
+    post:
+      summary: Kill process Action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../model/schema/common.yaml#/components/schemas/ProcessActionSchemas'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+
+
+  /api/endpoint/suspend_process:
+    post:
+      summary: Suspend process Action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../model/schema/common.yaml#/components/schemas/ProcessActionSchemas'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+

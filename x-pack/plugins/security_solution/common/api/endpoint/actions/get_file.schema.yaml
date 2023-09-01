@@ -1,0 +1,27 @@
+openapi: 3.0.0
+info:
+  title: Get File Schema
+  version: '2023-10-31'
+paths: { }
+components:
+  schemas:
+    GetFileActionRequestBody:
+      allOf:
+        - $ref: '../model/schema/common.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+            - file
+          properties:
+            parameters:
+              required:
+                - path
+              type: object
+              properties:
+                path:
+                  type: string
+
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed

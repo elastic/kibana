@@ -1,0 +1,23 @@
+openapi: 3.0.0
+info:
+  title: Details Schema
+  version: '2023-10-31'
+paths: { }
+components:
+  parameters:
+   DetailsRequestParameter:
+      name: query
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/DetailsRequestParams'
+  schemas:
+    DetailsRequestParams:
+      type: object
+      properties:
+        action_id:
+          type: string
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed

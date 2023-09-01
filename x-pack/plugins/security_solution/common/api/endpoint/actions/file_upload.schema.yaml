@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  title: File Upload Schema
+  version: '2023-10-31'
+paths: { }
+components:
+  schemas:
+    FileUploadActionRequestBody:
+      allOf:
+        - $ref: '../model/schema/common.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+            - file
+          properties:
+            parameters:
+              type: object
+              properties:
+                overwrite:
+                  type: boolean
+                  default: false
+            # TODO double check file type
+            file:
+              type: string
+              format: binary
+
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed

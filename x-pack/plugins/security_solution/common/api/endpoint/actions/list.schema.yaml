@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  title: Actions List Schema
+  version: '2023-10-31'
+paths: { }
+components:
+  parameters:
+   ListRequestQueryParameter:
+      name: query
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/ListRequestQuery'
+
+  schemas:
+    ListRequestQuery:
+      type: object
+      properties:
+        agentIds:
+          $ref: '../model/schema/common.yaml#/components/schemas/AgentIds'
+        commands:
+          $ref: '../model/schema/common.yaml#/components/schemas/Commands'
+        page:
+          $ref: '../model/schema/common.yaml#/components/schemas/Page'
+        pageSize:
+          allOf:
+            - $ref: '../model/schema/common.yaml#/components/schemas/PageSize'
+            - maximum: 10000
+        startDate:
+            $ref: '../model/schema/common.yaml#/components/schemas/StartDate'
+        endDate:
+          $ref: '../model/schema/common.yaml#/components/schemas/EndDate'
+        userIds:
+          $ref: '../model/schema/common.yaml#/components/schemas/UserIds'
+        types:
+          $ref: '../model/schema/common.yaml#/components/schemas/Types'
+        withOutputs:
+          $ref: '../model/schema/common.yaml#/components/schemas/WithOutputs'
+
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed
