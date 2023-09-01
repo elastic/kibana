@@ -109,7 +109,7 @@ export const validateScheduleLimit = async (params: ValidateScheduleLimitParams)
 
   if (computedRemainingSchedulesPerMinute < updatedSchedulesPerMinute) {
     throw new Error(
-      `Failed to validate schedule limit: limit reached, Remaining schedule allotment (${computedRemainingSchedulesPerMinute}/min) < New schedules (${updatedSchedulesPerMinute}/min).`
+      `Run limit reached: The rule has ${updatedSchedulesPerMinute} runs per minute; there are only ${computedRemainingSchedulesPerMinute} runs per minute available.`
     );
   }
 };
