@@ -8,10 +8,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { fetchConnectors, fetchConnectorTypes } from '../api';
+import { fetchConnectors } from '../api';
 import * as i18n from './translations';
 
-export const useFetchConnectors = () => {
+export const useFetchConnectorsQuery = () => {
   const { addError } = useAppToasts();
 
   return useQuery(
@@ -21,23 +21,6 @@ export const useFetchConnectors = () => {
       onError: (error) => {
         addError(error, {
           title: i18n.CONNECTORS_FETCH_ERROR,
-          toastMessage: i18n.ACTIONS_FETCH_ERROR_DESCRIPTION,
-        });
-      },
-    }
-  );
-};
-
-export const useFetchConnectorTypes = () => {
-  const { addError } = useAppToasts();
-
-  return useQuery(
-    ['GET', BASE_ACTION_API_PATH, 'connector_types', 'siem'],
-    ({ signal }) => fetchConnectorTypes(signal),
-    {
-      onError: (error) => {
-        addError(error, {
-          title: i18n.CONNECTOR_TYPES_FETCH_ERROR,
           toastMessage: i18n.ACTIONS_FETCH_ERROR_DESCRIPTION,
         });
       },

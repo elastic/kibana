@@ -43,7 +43,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { getDetails } from '../../../tasks/rule_details';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 import {
   expectNumberOfRules,
   goToRuleDetails,
@@ -57,7 +57,6 @@ import {
   fillScheduleRuleAndContinue,
   selectEqlRuleType,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
 import { login, visit } from '../../../tasks/login';
 
@@ -153,7 +152,7 @@ describe('EQL rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
     const rule = getEqlSequenceRule();
 
     beforeEach(() => {
-      cy.task('esArchiverLoad', 'auditbeat_big');
+      cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
     });
     afterEach(() => {
       cy.task('esArchiverUnload', 'auditbeat_big');

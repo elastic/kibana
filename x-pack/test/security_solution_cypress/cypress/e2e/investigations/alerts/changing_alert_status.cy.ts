@@ -41,7 +41,7 @@ import { ALERTS_URL } from '../../../urls/navigation';
 
 describe('Changing alert status', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', 'auditbeat_big');
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
     cleanKibana();
   });
 

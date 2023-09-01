@@ -62,11 +62,10 @@ import {
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
 
 import { login, visit } from '../../../tasks/login';
-import { getDetails } from '../../../tasks/rule_details';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
