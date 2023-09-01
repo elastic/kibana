@@ -119,6 +119,9 @@ ENV PATH=/usr/share/kibana/bin:$PATH
 
 # Set some Kibana configuration defaults.
 COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
+{{^opensslLegacyProvider}}
+RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
+{{/opensslLegacyProvider}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.

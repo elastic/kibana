@@ -46,7 +46,6 @@ const configuration: ConnectorConfiguration = {
 describe('useConfigure', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('init', async () => {

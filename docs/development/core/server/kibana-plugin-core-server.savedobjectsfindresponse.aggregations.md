@@ -4,7 +4,7 @@
 
 ## SavedObjectsFindResponse.aggregations property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 aggregations?: A;

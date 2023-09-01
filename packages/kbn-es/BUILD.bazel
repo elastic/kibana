@@ -29,7 +29,6 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "@npm//@elastic/elasticsearch",
-  "@npm//abort-controller",
   "@npm//chalk",
   "@npm//dedent",
   "@npm//del",

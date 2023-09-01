@@ -4,7 +4,7 @@
 
 ## SearchResponse.\_scroll\_id property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 _scroll_id?: string;

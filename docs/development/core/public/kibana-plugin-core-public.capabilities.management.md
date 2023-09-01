@@ -6,7 +6,7 @@
 
 Management section capabilities.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 management: {

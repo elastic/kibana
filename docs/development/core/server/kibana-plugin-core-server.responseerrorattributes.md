@@ -6,7 +6,7 @@
 
 Additional data to provide error details.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ResponseErrorAttributes = Record<string, any>;

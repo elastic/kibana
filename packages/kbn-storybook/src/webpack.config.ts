@@ -32,9 +32,11 @@ function isHtmlPlugin(plugin: any): plugin is { options: { template: string } } 
   return !!(typeof plugin.options?.template === 'string');
 }
 
-function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is webpack.RuleSetRule & {
+interface BabelLoaderRule extends webpack.RuleSetRule {
   use: webpack.RuleSetLoader[];
-} {
+}
+
+function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is BabelLoaderRule {
   return !!(
     rule.use &&
     Array.isArray(rule.use) &&
@@ -147,6 +149,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
 
       // move the plugins to the top of the preset array so they will run after the typescript preset
       options.presets = [
+        require.resolve('@kbn/babel-preset/common_preset'),
         {
           plugins,
         },

@@ -4,7 +4,7 @@
 
 ## PluginInitializerContext.config property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly config: {

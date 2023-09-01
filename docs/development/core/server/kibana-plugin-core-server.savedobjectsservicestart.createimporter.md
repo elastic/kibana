@@ -6,7 +6,7 @@
 
 Creates an [importer](./kibana-plugin-core-server.isavedobjectsimporter.md) bound to given client.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;

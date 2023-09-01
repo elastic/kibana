@@ -6,7 +6,7 @@
 
 Data send to the client as a response payload.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type HttpResponsePayload = undefined | string | Record<string, any> | Buffer | Stream;

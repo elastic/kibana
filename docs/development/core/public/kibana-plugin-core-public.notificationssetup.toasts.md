@@ -6,7 +6,7 @@
 
 [ToastsSetup](./kibana-plugin-core-public.toastssetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 toasts: ToastsSetup;

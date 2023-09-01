@@ -6,7 +6,7 @@
 
 If `destinationId` is specified, the new object has a new ID that is different from the import ID.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 destinationId?: string;

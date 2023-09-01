@@ -6,7 +6,7 @@
 
 Context passed to the plugins `start` method.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface CoreStart 
@@ -14,13 +14,13 @@ export interface CoreStart
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [capabilities](./kibana-plugin-core-server.corestart.capabilities.md) | CapabilitiesStart | [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md) |
-|  [elasticsearch](./kibana-plugin-core-server.corestart.elasticsearch.md) | ElasticsearchServiceStart | [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |
-|  [executionContext](./kibana-plugin-core-server.corestart.executioncontext.md) | ExecutionContextStart | [ExecutionContextStart](./kibana-plugin-core-server.executioncontextstart.md) |
-|  [http](./kibana-plugin-core-server.corestart.http.md) | HttpServiceStart | [HttpServiceStart](./kibana-plugin-core-server.httpservicestart.md) |
-|  [metrics](./kibana-plugin-core-server.corestart.metrics.md) | MetricsServiceStart | [MetricsServiceStart](./kibana-plugin-core-server.metricsservicestart.md) |
-|  [savedObjects](./kibana-plugin-core-server.corestart.savedobjects.md) | SavedObjectsServiceStart | [SavedObjectsServiceStart](./kibana-plugin-core-server.savedobjectsservicestart.md) |
-|  [uiSettings](./kibana-plugin-core-server.corestart.uisettings.md) | UiSettingsServiceStart | [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [capabilities](./kibana-plugin-core-server.corestart.capabilities.md) |  | CapabilitiesStart | [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md) |
+|  [elasticsearch](./kibana-plugin-core-server.corestart.elasticsearch.md) |  | ElasticsearchServiceStart | [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |
+|  [executionContext](./kibana-plugin-core-server.corestart.executioncontext.md) |  | ExecutionContextStart | [ExecutionContextStart](./kibana-plugin-core-server.executioncontextstart.md) |
+|  [http](./kibana-plugin-core-server.corestart.http.md) |  | HttpServiceStart | [HttpServiceStart](./kibana-plugin-core-server.httpservicestart.md) |
+|  [metrics](./kibana-plugin-core-server.corestart.metrics.md) |  | MetricsServiceStart | [MetricsServiceStart](./kibana-plugin-core-server.metricsservicestart.md) |
+|  [savedObjects](./kibana-plugin-core-server.corestart.savedobjects.md) |  | SavedObjectsServiceStart | [SavedObjectsServiceStart](./kibana-plugin-core-server.savedobjectsservicestart.md) |
+|  [uiSettings](./kibana-plugin-core-server.corestart.uisettings.md) |  | UiSettingsServiceStart | [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |
 

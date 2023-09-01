@@ -6,7 +6,7 @@
 
 Data to associate with an incoming request. Any downstream plugin may get access to the data.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 state?: Record<string, any>;

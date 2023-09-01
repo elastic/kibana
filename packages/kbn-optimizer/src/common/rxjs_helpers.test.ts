@@ -12,7 +12,7 @@ import { lastValueFrom } from '@kbn/std';
 
 import { pipeClosure, debounceTimeBuffer, maybeMap, maybe } from './rxjs_helpers';
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('pipeClosure()', () => {
   it('calls closure on each subscription to setup unique state', async () => {
@@ -71,7 +71,7 @@ describe('maybeMap()', () => {
 
 describe('debounceTimeBuffer()', () => {
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterEach(() => {

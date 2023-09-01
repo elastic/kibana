@@ -580,6 +580,7 @@ interface ECSMappingEditorFormRef {
   }>;
 }
 
+// eslint-disable-next-line react/display-name
 export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappingEditorFormProps>(
   ({ isDisabled, osquerySchemaOptions, defaultValue, onAdd, onChange, onDelete }, ref) => {
     const editForm = !!defaultValue;
@@ -802,6 +803,7 @@ interface OsqueryColumn {
   index: boolean;
 }
 
+// eslint-disable-next-line react/display-name
 export const ECSMappingEditorField = React.memo(
   ({ field, query, fieldRef, euiFieldProps }: ECSMappingEditorFieldProps) => {
     const { setValue, value = {} } = field;

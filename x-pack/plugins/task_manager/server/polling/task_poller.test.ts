@@ -15,7 +15,7 @@ import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
 
 describe('TaskPoller', () => {
-  beforeEach(() => jest.useFakeTimers('legacy'));
+  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
 
   test(
     'intializes the poller with the provided interval',

@@ -6,7 +6,7 @@
 
 if true, will not create a new history entry when navigating (using `replace` instead of `push`<!-- -->)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 replace?: boolean;

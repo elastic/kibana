@@ -6,7 +6,7 @@
 
 uptime of the kibana process
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 uptime_in_millis: number;

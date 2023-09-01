@@ -4,7 +4,7 @@
 
 ## NodesVersionCompatibility.warningNodes property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 warningNodes: NodeInfo[];

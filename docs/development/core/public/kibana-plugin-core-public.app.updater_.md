@@ -6,7 +6,7 @@
 
 An [AppUpdater](./kibana-plugin-core-public.appupdater.md) observable that can be used to update the application [AppUpdatableFields](./kibana-plugin-core-public.appupdatablefields.md) at runtime.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 updater$?: Observable<AppUpdater>;

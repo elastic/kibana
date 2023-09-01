@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportFailure.error property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;

@@ -6,7 +6,7 @@
 
 an IntervalHistogram object that samples and reports the event loop delay over time. The delays will be reported in milliseconds.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IntervalHistogram 
@@ -14,14 +14,14 @@ export interface IntervalHistogram
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [exceeds](./kibana-plugin-core-server.intervalhistogram.exceeds.md) | number |  |
-|  [fromTimestamp](./kibana-plugin-core-server.intervalhistogram.fromtimestamp.md) | string |  |
-|  [lastUpdatedAt](./kibana-plugin-core-server.intervalhistogram.lastupdatedat.md) | string |  |
-|  [max](./kibana-plugin-core-server.intervalhistogram.max.md) | number |  |
-|  [mean](./kibana-plugin-core-server.intervalhistogram.mean.md) | number |  |
-|  [min](./kibana-plugin-core-server.intervalhistogram.min.md) | number |  |
-|  [percentiles](./kibana-plugin-core-server.intervalhistogram.percentiles.md) | { 50: number; 75: number; 95: number; 99: number; } |  |
-|  [stddev](./kibana-plugin-core-server.intervalhistogram.stddev.md) | number |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [exceeds](./kibana-plugin-core-server.intervalhistogram.exceeds.md) |  | number |  |
+|  [fromTimestamp](./kibana-plugin-core-server.intervalhistogram.fromtimestamp.md) |  | string |  |
+|  [lastUpdatedAt](./kibana-plugin-core-server.intervalhistogram.lastupdatedat.md) |  | string |  |
+|  [max](./kibana-plugin-core-server.intervalhistogram.max.md) |  | number |  |
+|  [mean](./kibana-plugin-core-server.intervalhistogram.mean.md) |  | number |  |
+|  [min](./kibana-plugin-core-server.intervalhistogram.min.md) |  | number |  |
+|  [percentiles](./kibana-plugin-core-server.intervalhistogram.percentiles.md) |  | { 50: number; 75: number; 95: number; 99: number; } |  |
+|  [stddev](./kibana-plugin-core-server.intervalhistogram.stddev.md) |  | number |  |
 

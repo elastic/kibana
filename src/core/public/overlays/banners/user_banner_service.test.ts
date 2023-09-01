@@ -56,7 +56,7 @@ describe('OverlayBannersService', () => {
   });
 
   it('dismisses banner after timeout', async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     startService('testing banner!');
     expect(banners.remove).not.toHaveBeenCalled();
 

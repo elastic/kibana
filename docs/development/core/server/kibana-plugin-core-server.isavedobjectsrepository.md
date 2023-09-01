@@ -6,7 +6,7 @@
 
 See [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;

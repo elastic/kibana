@@ -5,7 +5,7 @@
 ## NotificationsSetup interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface NotificationsSetup 
@@ -13,7 +13,7 @@ export interface NotificationsSetup
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [toasts](./kibana-plugin-core-public.notificationssetup.toasts.md) | ToastsSetup | [ToastsSetup](./kibana-plugin-core-public.toastssetup.md) |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [toasts](./kibana-plugin-core-public.notificationssetup.toasts.md) |  | ToastsSetup | [ToastsSetup](./kibana-plugin-core-public.toastssetup.md) |
 

@@ -9,6 +9,8 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
+/** @type {JestConfig} */
 module.exports = {
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
@@ -77,6 +79,11 @@ module.exports = {
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/react_testing_library.js',
   ],
 
+  snapshotFormat: {
+    escapeString: true,
+    printBasicPrototype: true,
+  },
+
   // A list of paths to snapshot serializer modules Jest should use for snapshot testing
   snapshotSerializers: [
     '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
@@ -100,8 +107,8 @@ module.exports = {
   // A map from regular expressions to paths to transformers
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
-    '^.+\\.txt?$': 'jest-raw-loader',
-    '^.+\\.html?$': 'jest-raw-loader',
+    '^.+\\.txt?$': '<rootDir>/node_modules/@kbn/test/target_node/jest/raw_transform.js',
+    '^.+\\.html?$': '<rootDir>/node_modules/@kbn/test/target_node/jest/raw_transform.js',
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
@@ -123,5 +130,5 @@ module.exports = {
   ],
 
   // A custom resolver to preserve symlinks by default
-  resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
+  resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/resolver.js',
 };

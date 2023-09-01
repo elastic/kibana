@@ -6,7 +6,7 @@
 
 SavedObject fields to include in the response
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 fields?: string[];

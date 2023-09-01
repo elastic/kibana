@@ -5,7 +5,7 @@
 ## OverlayStart.openModal property
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 openModal: OverlayModalStart['open'];

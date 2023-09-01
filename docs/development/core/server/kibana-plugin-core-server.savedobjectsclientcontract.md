@@ -32,7 +32,7 @@ From my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The obje
 
 See [SavedObjectsClient](./kibana-plugin-core-server.savedobjectsclient.md) See [SavedObjectsErrorHelpers](./kibana-plugin-core-server.savedobjectserrorhelpers.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;

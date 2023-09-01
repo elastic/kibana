@@ -13,7 +13,11 @@ import type {
   TinymathNamedArgument,
   TinymathVariable,
 } from 'packages/kbn-tinymath';
-import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
+import type {
+  OperationDefinition,
+  GenericIndexPatternColumn,
+  GenericOperationDefinition,
+} from '../index';
 import type { GroupedNodes } from './types';
 
 export const unquotedStringRegex = /[^0-9A-Za-z._@\[\]/]/;
@@ -46,8 +50,8 @@ export function getValueOrName(node: TinymathAST) {
 
 export function getOperationParams(
   operation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   params: TinymathNamedArgument[] = []
 ): Record<string, string | number> {
   const formalArgs: Record<string, string> = (operation.operationParams || []).reduce(

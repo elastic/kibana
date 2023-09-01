@@ -15,7 +15,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
-  describe('Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/164452
+  // Failing: See https://github.com/elastic/kibana/issues/157767
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
@@ -47,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        await pageObjects.infraHome.getWaffleMapTooltips();
+        // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
 
       it('renders an empty data prompt for dates with no data', async () => {
@@ -86,14 +88,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/106650
-    describe.skip('Saved Views', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+    describe('Saved Views', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await pageObjects.infraHome.goToMetricExplorer();
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
       it('should have save and load controls', async () => {
-        await pageObjects.common.navigateToApp('infraOps');
-        await pageObjects.infraHome.waitForLoading();
-        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraSavedViews.getSavedViewsButton();
         await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
       });

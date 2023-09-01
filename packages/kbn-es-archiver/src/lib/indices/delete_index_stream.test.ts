@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { mockCleanSavedObjectIndices } from './create_index_stream.test.mock';
+
 import sinon from 'sinon';
 
 import { createListStream, createPromiseFromStreams } from '@kbn/utils';
@@ -20,6 +22,10 @@ import {
 } from './__mocks__/stubs';
 
 const log = createStubLogger();
+
+beforeEach(() => {
+  mockCleanSavedObjectIndices.mockClear();
+});
 
 describe('esArchiver: createDeleteIndexStream()', () => {
   it('deletes the index without checking if it exists', async () => {

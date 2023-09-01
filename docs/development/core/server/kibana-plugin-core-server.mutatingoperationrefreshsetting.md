@@ -6,7 +6,7 @@
 
 Elasticsearch Refresh setting for mutating operation
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type MutatingOperationRefreshSetting = boolean | 'wait_for';

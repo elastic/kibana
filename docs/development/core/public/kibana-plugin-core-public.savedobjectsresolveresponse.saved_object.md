@@ -6,7 +6,7 @@
 
 The saved object that was found.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 saved_object: SavedObject<T>;

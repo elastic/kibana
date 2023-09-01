@@ -45,7 +45,6 @@ describe('alert actions', () => {
     // spyOn. So now we're doing all three of these.
     // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
     jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;

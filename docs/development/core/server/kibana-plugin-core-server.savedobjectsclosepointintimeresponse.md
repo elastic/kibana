@@ -5,7 +5,7 @@
 ## SavedObjectsClosePointInTimeResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsClosePointInTimeResponse 
@@ -13,8 +13,8 @@ export interface SavedObjectsClosePointInTimeResponse
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [num\_freed](./kibana-plugin-core-server.savedobjectsclosepointintimeresponse.num_freed.md) | number | The number of search contexts that have been successfully closed. |
-|  [succeeded](./kibana-plugin-core-server.savedobjectsclosepointintimeresponse.succeeded.md) | boolean | If true, all search contexts associated with the PIT id are successfully closed. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [num\_freed](./kibana-plugin-core-server.savedobjectsclosepointintimeresponse.num_freed.md) |  | number | The number of search contexts that have been successfully closed. |
+|  [succeeded](./kibana-plugin-core-server.savedobjectsclosepointintimeresponse.succeeded.md) |  | boolean | If true, all search contexts associated with the PIT id are successfully closed. |
 

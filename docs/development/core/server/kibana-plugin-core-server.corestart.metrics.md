@@ -6,7 +6,7 @@
 
 [MetricsServiceStart](./kibana-plugin-core-server.metricsservicestart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 metrics: MetricsServiceStart;

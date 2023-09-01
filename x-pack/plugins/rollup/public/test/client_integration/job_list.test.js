@@ -38,7 +38,7 @@ describe('<JobList />', () => {
     let startMock;
 
     beforeAll(() => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
       startMock = coreMock.createStart();
       setHttp(startMock.http);
       initDocumentation(docLinksServiceMock.createStartContract());

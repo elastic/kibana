@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { AppState } from '../../state';
+import type { AppState } from '../../state';
 
 // UI Selectors
 export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;

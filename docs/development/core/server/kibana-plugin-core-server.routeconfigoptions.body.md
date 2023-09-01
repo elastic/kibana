@@ -6,7 +6,7 @@
 
 Additional body options [RouteConfigOptionsBody](./kibana-plugin-core-server.routeconfigoptionsbody.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;

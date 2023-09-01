@@ -34,13 +34,12 @@ RUNTIME_DEPS = [
   "@npm//@elastic/eui",
   "@npm//enzyme",
   "@npm//react",
-  "@npm//resize-observer-polyfill",
 ]
 
 TYPES_DEPS = [
   "//packages/kbn-i18n",
   "@npm//@elastic/eui",
-  "@npm//resize-observer-polyfill",
+  "@npm//tslib",
   "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/node",

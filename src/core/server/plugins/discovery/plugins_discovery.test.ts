@@ -179,7 +179,7 @@ describe('plugins discovery system', () => {
   afterEach(() => {
     mockFs.restore();
     // restore the console.log behavior
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('discovers plugins in the search locations', async () => {

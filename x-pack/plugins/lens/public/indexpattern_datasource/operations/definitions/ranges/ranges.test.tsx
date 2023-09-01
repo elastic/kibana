@@ -154,7 +154,7 @@ describe('ranges', () => {
             ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
             maxBars: 'auto',
           },
-        },
+        } as RangeIndexPatternColumn,
         col2: {
           label: 'Count',
           dataType: 'number',
@@ -167,7 +167,7 @@ describe('ranges', () => {
   }
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   beforeEach(() => {
@@ -385,10 +385,10 @@ describe('ranges', () => {
             col1: {
               ...layer.columns.col1,
               params: {
-                ...layer.columns.col1.params,
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                 maxBars: MAX_HISTOGRAM_VALUE,
               },
-            },
+            } as RangeIndexPatternColumn,
           },
         });
       });
@@ -424,7 +424,7 @@ describe('ranges', () => {
             col1: {
               ...layer.columns.col1,
               params: {
-                ...layer.columns.col1.params,
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                 maxBars: GRANULARITY_DEFAULT_VALUE - GRANULARITY_STEP,
               },
             },
@@ -448,7 +448,7 @@ describe('ranges', () => {
             col1: {
               ...layer.columns.col1,
               params: {
-                ...layer.columns.col1.params,
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                 maxBars: GRANULARITY_DEFAULT_VALUE,
               },
             },
@@ -511,7 +511,10 @@ describe('ranges', () => {
             currentColumn={
               {
                 ...layer.columns.col1,
-                params: { ...layer.columns.col1.params, parentFormat: undefined },
+                params: {
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                  parentFormat: undefined,
+                },
               } as RangeIndexPatternColumn
             }
           />
@@ -565,7 +568,7 @@ describe('ranges', () => {
               col1: {
                 ...layer.columns.col1,
                 params: {
-                  ...layer.columns.col1.params,
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                   ranges: [
                     { from: 0, to: DEFAULT_INTERVAL, label: '' },
                     { from: 50, to: Infinity, label: '' },
@@ -620,7 +623,7 @@ describe('ranges', () => {
               col1: {
                 ...layer.columns.col1,
                 params: {
-                  ...layer.columns.col1.params,
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                   ranges: [
                     { from: 0, to: DEFAULT_INTERVAL, label: '' },
                     { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
@@ -670,7 +673,7 @@ describe('ranges', () => {
               col1: {
                 ...layer.columns.col1,
                 params: {
-                  ...layer.columns.col1.params,
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                   ranges: [{ from: 0, to: 50, label: '' }],
                 },
               },

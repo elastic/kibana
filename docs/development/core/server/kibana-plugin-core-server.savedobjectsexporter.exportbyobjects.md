@@ -8,7 +8,7 @@ Generates an export stream for given object references.
 
 See the [options](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) for more detailed information.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<import("stream").Readable>;
@@ -20,7 +20,7 @@ exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<import("str
 |  --- | --- | --- |
 |  options | SavedObjectsExportByObjectOptions |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;import("stream").Readable&gt;
 

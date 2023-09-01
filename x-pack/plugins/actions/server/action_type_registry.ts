@@ -122,7 +122,7 @@ export class ActionTypeRegistry {
         )
       );
     }
-    this.actionTypes.set(actionType.id, { ...actionType } as ActionType);
+    this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
@@ -141,7 +141,7 @@ export class ActionTypeRegistry {
     // No need to notify usage on basic action types
     if (actionType.minimumLicenseRequired !== 'basic') {
       this.licensing.featureUsage.register(
-        getActionTypeFeatureUsageName(actionType as ActionType),
+        getActionTypeFeatureUsageName(actionType as unknown as ActionType),
         actionType.minimumLicenseRequired
       );
     }

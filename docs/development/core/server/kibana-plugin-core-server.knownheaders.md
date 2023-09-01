@@ -6,7 +6,7 @@
 
 Set of well-known HTTP headers.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type KnownHeaders = KnownKeys<IncomingHttpHeaders>;

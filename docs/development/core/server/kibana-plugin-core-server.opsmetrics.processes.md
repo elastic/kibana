@@ -6,7 +6,7 @@
 
 Process related metrics. Reports an array of objects for each kibana pid.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 processes: OpsProcessMetrics[];

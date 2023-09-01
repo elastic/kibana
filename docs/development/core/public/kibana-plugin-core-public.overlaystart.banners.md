@@ -6,7 +6,7 @@
 
 [OverlayBannersStart](./kibana-plugin-core-public.overlaybannersstart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 banners: OverlayBannersStart;

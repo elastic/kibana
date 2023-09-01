@@ -8,7 +8,7 @@ A map of [migration functions](./kibana-plugin-core-server.savedobjectmigrationf
 
 For a given document, only migrations with a higher version number than that of the document will be applied. Migrations are executed in order, starting from the lowest version and ending with the highest one.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectMigrationMap 

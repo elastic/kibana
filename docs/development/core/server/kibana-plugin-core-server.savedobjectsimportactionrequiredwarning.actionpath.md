@@ -6,7 +6,7 @@
 
 The path (without the basePath) that the user should be redirect to address this warning.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 actionPath: string;

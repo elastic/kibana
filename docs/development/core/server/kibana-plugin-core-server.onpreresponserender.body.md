@@ -6,7 +6,7 @@
 
 the body to use in the response
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 body: string;

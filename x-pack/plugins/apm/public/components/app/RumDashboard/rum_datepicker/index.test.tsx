@@ -147,7 +147,7 @@ describe('RumDatePicker', () => {
   });
 
   it('enables auto-refresh when refreshPaused is false', async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     const { wrapper } = mountDatePicker({
       refreshPaused: false,
       refreshInterval: 1000,
@@ -160,7 +160,7 @@ describe('RumDatePicker', () => {
   });
 
   it('disables auto-refresh when refreshPaused is true', async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     mountDatePicker({ refreshPaused: true, refreshInterval: 1000 });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1000);

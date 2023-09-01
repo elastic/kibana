@@ -42,7 +42,9 @@ run(
       clean();
     }
 
-    const env = {};
+    const env = {
+      NODE_OPTIONS: '--openssl-legacy-provider',
+    };
 
     if (!flags.dev) {
       env.NODE_ENV = 'production';

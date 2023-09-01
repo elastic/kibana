@@ -6,7 +6,7 @@
 
 Get the state of a navlink at this point in time.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get(id: string): ChromeNavLink | undefined;
@@ -18,7 +18,7 @@ get(id: string): ChromeNavLink | undefined;
 |  --- | --- | --- |
 |  id | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 ChromeNavLink \| undefined
 

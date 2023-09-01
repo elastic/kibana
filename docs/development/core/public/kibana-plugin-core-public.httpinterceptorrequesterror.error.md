@@ -4,7 +4,7 @@
 
 ## HttpInterceptorRequestError.error property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 error: Error;

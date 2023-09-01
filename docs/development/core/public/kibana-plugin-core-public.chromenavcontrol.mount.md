@@ -4,7 +4,7 @@
 
 ## ChromeNavControl.mount property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 mount: MountPoint;

@@ -6,7 +6,7 @@
 
 A function for making an HTTP requests to Kibana's backend. See [HttpFetchOptions](./kibana-plugin-core-public.httpfetchoptions.md) for options and [HttpResponse](./kibana-plugin-core-public.httpresponse.md) for the response.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpHandler 

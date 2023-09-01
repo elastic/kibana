@@ -6,12 +6,13 @@
  */
 
 import { ExceptionList } from '../../objects/exception';
+import { rootRequest } from '../common';
 
 export const createExceptionList = (
   exceptionList: ExceptionList,
   exceptionListId = 'exception_list_testing'
 ) =>
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: 'api/exception_lists',
     body: {

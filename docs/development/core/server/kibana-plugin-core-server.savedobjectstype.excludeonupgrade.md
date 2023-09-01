@@ -6,7 +6,7 @@
 
 If defined, allows a type to exclude unneeded documents from the migration process and effectively be deleted. See [SavedObjectTypeExcludeFromUpgradeFilterHook](./kibana-plugin-core-server.savedobjecttypeexcludefromupgradefilterhook.md) for more details.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 excludeOnUpgrade?: SavedObjectTypeExcludeFromUpgradeFilterHook;

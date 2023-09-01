@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+declare module 'find-cypress-specs';
 declare namespace Cypress {
   interface Chainable<Subject> {
     promisify(): Promise<Subject>;

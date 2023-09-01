@@ -4,7 +4,7 @@
 
 ## SimpleSavedObject.migrationVersion property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 migrationVersion: SavedObjectType<T>['migrationVersion'];

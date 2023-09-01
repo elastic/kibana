@@ -6,12 +6,12 @@
 
 Observable of the toast messages to show to the user.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get$(): Rx.Observable<Toast[]>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Rx.Observable&lt;Toast\[\]&gt;
 

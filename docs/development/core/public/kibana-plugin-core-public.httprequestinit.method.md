@@ -6,7 +6,7 @@
 
 HTTP method, which is "GET" by default.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 method?: string;

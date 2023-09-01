@@ -6,7 +6,7 @@
 
 Deletes an object
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
@@ -18,9 +18,9 @@ delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{
 |  --- | --- | --- |
 |  type | string |  |
 |  id | string |  |
-|  options | SavedObjectsDeleteOptions |  {<!-- -->string<!-- -->} \[options.namespace\] |
+|  options | SavedObjectsDeleteOptions | _(Optional)_  {<!-- -->string<!-- -->} \[options.namespace\] |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;{}&gt;
 

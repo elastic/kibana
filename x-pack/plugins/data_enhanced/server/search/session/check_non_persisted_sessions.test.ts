@@ -21,7 +21,7 @@ import {
   SavedObjectsClientContract,
 } from '../../../../../../src/core/server';
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 const checkNonPersistedSessions = (deps: CheckSearchSessionsDeps, config: SearchSessionsConfig) =>
   checkNonPersistedSessions$(deps, config).toPromise();

@@ -6,12 +6,12 @@
 
 Gets an Array of the current recently accessed history.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get(): ChromeRecentlyAccessedHistoryItem[];
 ```
-<b>Returns:</b>
+**Returns:**
 
 ChromeRecentlyAccessedHistoryItem\[\]
 

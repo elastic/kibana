@@ -10,6 +10,7 @@ import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
@@ -19,7 +20,14 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async clickSavedViewsButton() {
-      return await testSubjects.click('savedViews-openPopover');
+      const button = await testSubjects.find('savedViews-openPopover');
+
+      await retry.waitFor('Wait for button to be enabled', async () => {
+        const isDisabled = Boolean(await button.getAttribute('disabled'));
+        return !isDisabled;
+      });
+
+      return button.click();
     },
 
     async getSavedViewsPopoer() {
@@ -70,12 +78,17 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     async createNewSavedView(name: string) {
       await testSubjects.setValue('savedViewViweName', name);
       await testSubjects.click('createSavedViewButton');
-      await testSubjects.missingOrFail('savedViews-createModal');
+      await testSubjects.missingOrFail('createSavedViewButton', { timeout: 20000 });
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.missingOrFail('savedViews-upsertModal');
+      });
     },
 
     async ensureViewIsLoaded(name: string) {
-      const subject = await testSubjects.find('savedViews-openPopover');
-      expect(await subject.getVisibleText()).to.be(name);
+      await retry.try(async () => {
+        const subject = await testSubjects.find('savedViews-openPopover');
+        expect(await subject.getVisibleText()).to.be(name);
+      });
     },
 
     async ensureViewIsLoadable(name: string) {

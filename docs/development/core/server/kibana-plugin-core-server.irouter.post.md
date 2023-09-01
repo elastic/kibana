@@ -6,7 +6,7 @@
 
 Register a route handler for `POST` request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 post: RouteRegistrar<'post', Context>;

@@ -6,7 +6,7 @@
 
 A unique identifier for looking up links.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly id: string;

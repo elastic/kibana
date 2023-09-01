@@ -5,7 +5,7 @@
 ## SavedObjectsCreatePointInTimeFinderDependencies interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsCreatePointInTimeFinderDependencies 
@@ -13,7 +13,7 @@ export interface SavedObjectsCreatePointInTimeFinderDependencies
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [client](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.client.md) | Pick&lt;SavedObjectsClientContract, 'find' \| 'openPointInTimeForType' \| 'closePointInTime'&gt; |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [client](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.client.md) |  | Pick&lt;SavedObjectsClientContract, 'find' \| 'openPointInTimeForType' \| 'closePointInTime'&gt; |  |
 

@@ -5,7 +5,7 @@
 ## LoggerConfigType type
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type LoggerConfigType = TypeOf<typeof loggerSchema>;

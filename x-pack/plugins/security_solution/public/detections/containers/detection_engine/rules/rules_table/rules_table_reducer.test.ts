@@ -36,7 +36,7 @@ const initialState: RulesTableState = {
 
 describe('allRulesReducer', () => {
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     jest
       .spyOn(global.Date, 'now')
       .mockImplementationOnce(() => new Date('2020-10-31T11:01:58.135Z').valueOf());

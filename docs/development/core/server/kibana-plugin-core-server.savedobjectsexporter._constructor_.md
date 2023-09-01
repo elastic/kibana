@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `SavedObjectsExporter` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor({ savedObjectsClient, typeRegistry, exportSizeLimit, logger, }: {

@@ -6,7 +6,7 @@
 
 SessionStorage factory to bind one to an incoming request
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SessionStorageFactory<T> 
@@ -14,7 +14,7 @@ export interface SessionStorageFactory<T>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [asScoped](./kibana-plugin-core-server.sessionstoragefactory.asscoped.md) | (request: KibanaRequest) =&gt; SessionStorage&lt;T&gt; |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [asScoped](./kibana-plugin-core-server.sessionstoragefactory.asscoped.md) |  | (request: KibanaRequest) =&gt; SessionStorage&lt;T&gt; |  |
 

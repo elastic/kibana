@@ -6,7 +6,7 @@
 
 Register a route handler for `PUT` request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 put: RouteRegistrar<'put', Context>;

@@ -6,7 +6,7 @@
 
 A URL to open in a new tab about how to resolve or troubleshoot the problem.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 documentationUrl?: string;

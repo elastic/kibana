@@ -6,7 +6,7 @@
 
 The initial status of the application's navLink. Defaulting to `visible` if `status` is `accessible` and `hidden` if status is `inaccessible` See [AppNavLinkStatus](./kibana-plugin-core-public.appnavlinkstatus.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 navLinkStatus?: AppNavLinkStatus;

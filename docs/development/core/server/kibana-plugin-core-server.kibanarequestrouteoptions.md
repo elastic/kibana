@@ -6,7 +6,7 @@
 
 Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type KibanaRequestRouteOptions<Method extends RouteMethod> = Method extends 'get' | 'options' ? Required<Omit<RouteConfigOptions<Method>, 'body'>> : Required<RouteConfigOptions<Method>>;

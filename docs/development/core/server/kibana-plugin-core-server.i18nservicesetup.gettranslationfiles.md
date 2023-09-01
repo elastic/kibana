@@ -6,12 +6,12 @@
 
 Return the absolute paths to translation files currently in use.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getTranslationFiles(): string[];
 ```
-<b>Returns:</b>
+**Returns:**
 
 string\[\]
 

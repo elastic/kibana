@@ -6,7 +6,7 @@
 
 Status of core services.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface CoreStatus 
@@ -14,8 +14,8 @@ export interface CoreStatus
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [elasticsearch](./kibana-plugin-core-server.corestatus.elasticsearch.md) | ServiceStatus |  |
-|  [savedObjects](./kibana-plugin-core-server.corestatus.savedobjects.md) | ServiceStatus |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [elasticsearch](./kibana-plugin-core-server.corestatus.elasticsearch.md) |  | ServiceStatus |  |
+|  [savedObjects](./kibana-plugin-core-server.corestatus.savedobjects.md) |  | ServiceStatus |  |
 

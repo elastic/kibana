@@ -6,7 +6,7 @@
 
 An async generator which wraps calls to `savedObjectsClient.find` and iterates over multiple pages of results using `_pit` and `search_after`<!-- -->. This will open a new Point-In-Time (PIT), and continue paging until a set of results is received that's smaller than the designated `perPage` size.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 find: () => AsyncGenerator<SavedObjectsFindResponse<T, A>>;

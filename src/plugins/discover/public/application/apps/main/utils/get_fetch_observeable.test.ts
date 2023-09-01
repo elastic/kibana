@@ -67,7 +67,7 @@ describe('getFetchObservable', () => {
     refetch$.next();
   });
   test('getAutoRefreshFetch$ should trigger fetch$.next', async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     const searchSessionManagerMock = createSearchSessionMock();
     const autoRefreshFetch$ = new Subject();
 

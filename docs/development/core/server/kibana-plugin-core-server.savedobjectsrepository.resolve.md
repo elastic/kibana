@@ -6,7 +6,7 @@
 
 Resolves a single object, using any legacy URL alias if it exists
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
@@ -18,9 +18,9 @@ resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions
 |  --- | --- | --- |
 |  type | string |  |
 |  id | string |  |
-|  options | SavedObjectsBaseOptions |  {<!-- -->string<!-- -->} \[options.namespace\] |
+|  options | SavedObjectsBaseOptions | _(Optional)_  {<!-- -->string<!-- -->} \[options.namespace\] |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsResolveResponse&lt;T&gt;&gt;
 

@@ -6,7 +6,7 @@
 
 A function that should mount DOM content inside the provided container element and return a handler to unmount it.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;

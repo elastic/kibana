@@ -6,7 +6,7 @@
 
 The set of common HTTP methods supported by Kibana routing.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;

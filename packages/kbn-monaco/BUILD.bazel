@@ -71,10 +71,13 @@ webpack(
     "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
-   "--env",
+    "--env",
     "prod",
     "--stats=errors-only"
   ],
+  env = {
+    "NODE_OPTIONS": "--openssl-legacy-provider"
+  }
 )
 
 ts_config(

@@ -4,7 +4,7 @@
 
 ## KibanaRequest.params property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly params: Params;

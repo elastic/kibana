@@ -6,7 +6,7 @@
 
 An optional ES preference value to be used for the query \*
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 preference?: string;

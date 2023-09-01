@@ -43,7 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs'));
 
     describe('/log_entries/highlights', () => {
-      describe('with the default source', () => {
+      // FAILING ES 8.10 FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/163845
+      describe.skip('with the default source', () => {
         before(() => esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
         after(() => esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
 

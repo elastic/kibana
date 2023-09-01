@@ -8,7 +8,7 @@ A Promise that will resolve once this overlay is closed.
 
 Overlays can close from user interaction, calling `close()` on the overlay reference or another overlay replacing yours via `openModal` or `openFlyout`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 onClose: Promise<void>;

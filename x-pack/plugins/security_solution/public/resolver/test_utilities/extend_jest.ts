@@ -16,7 +16,7 @@ import type { MatcherHintOptions } from 'jest-matcher-utils';
 export {};
 
 declare global {
-  /* eslint-disable @typescript-eslint/no-namespace */
+  /* eslint-disable @typescript-eslint/no-namespace,@typescript-eslint/no-explicit-any */
   namespace jest {
     interface Matchers<R, T> {
       toYieldEqualTo(expectedYield: T extends AsyncIterable<infer E> ? E : never): Promise<R>;
@@ -84,7 +84,7 @@ expect.extend({
                   next,
                   'Expected',
                   'Received',
-                  this.expand
+                  this.expand as any
                 )}`
             )
             .join(`\n\n`)}`;
@@ -148,7 +148,7 @@ expect.extend({
                   next,
                   'Expected',
                   'Received',
-                  this.expand
+                  this.expand as any
                 )}`
             )
             .join(`\n\n`)}`;

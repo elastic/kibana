@@ -22,7 +22,7 @@ import { ApplicationUsageViews } from './types';
 import { SAVED_OBJECTS_DAILY_TYPE, SAVED_OBJECTS_TOTAL_TYPE } from './saved_objects_types';
 
 // use fake timers to avoid triggering rollups during tests
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('telemetry_application_usage', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

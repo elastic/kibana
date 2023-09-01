@@ -6,7 +6,7 @@
 
 List of configuration properties that will be available on the client-side plugin.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 exposeToBrowser?: ExposedToBrowserDescriptor<T>;

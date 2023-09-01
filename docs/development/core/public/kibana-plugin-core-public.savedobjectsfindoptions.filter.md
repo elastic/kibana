@@ -4,7 +4,7 @@
 
 ## SavedObjectsFindOptions.filter property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 filter?: string | KueryNode;

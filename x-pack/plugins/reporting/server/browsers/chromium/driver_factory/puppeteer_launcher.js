@@ -31,5 +31,6 @@ export async function launch(
     env: {
       TZ: browserTimezone,
     },
+    headless: 'new',
   });
 }

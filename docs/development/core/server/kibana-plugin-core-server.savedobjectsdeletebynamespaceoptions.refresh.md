@@ -6,7 +6,7 @@
 
 The Elasticsearch supports only boolean flag for this operation
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 refresh?: boolean;

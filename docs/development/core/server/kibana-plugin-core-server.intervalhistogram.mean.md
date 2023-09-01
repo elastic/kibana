@@ -4,7 +4,7 @@
 
 ## IntervalHistogram.mean property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 mean: number;

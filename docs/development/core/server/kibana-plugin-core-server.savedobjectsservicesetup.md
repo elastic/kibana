@@ -6,7 +6,7 @@
 
 Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for registering Saved Object types, creating and registering Saved Object client wrappers and factories.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsServiceSetup 
@@ -47,9 +47,9 @@ export class Plugin() {
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [addClientWrapper](./kibana-plugin-core-server.savedobjectsservicesetup.addclientwrapper.md) | (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) =&gt; void | Add a [client wrapper factory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) with the given priority. |
-|  [registerType](./kibana-plugin-core-server.savedobjectsservicesetup.registertype.md) | &lt;Attributes = any&gt;(type: SavedObjectsType&lt;Attributes&gt;) =&gt; void | Register a [savedObjects type](./kibana-plugin-core-server.savedobjectstype.md) definition.<!-- -->See the [mappings format](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) and [migration format](./kibana-plugin-core-server.savedobjectmigrationmap.md) for more details about these. |
-|  [setClientFactoryProvider](./kibana-plugin-core-server.savedobjectsservicesetup.setclientfactoryprovider.md) | (clientFactoryProvider: SavedObjectsClientFactoryProvider) =&gt; void | Set the default [factory provider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) for creating Saved Objects clients. Only one provider can be set, subsequent calls to this method will fail. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [addClientWrapper](./kibana-plugin-core-server.savedobjectsservicesetup.addclientwrapper.md) |  | (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) =&gt; void | Add a [client wrapper factory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) with the given priority. |
+|  [registerType](./kibana-plugin-core-server.savedobjectsservicesetup.registertype.md) |  | &lt;Attributes = any&gt;(type: SavedObjectsType&lt;Attributes&gt;) =&gt; void | <p>Register a [savedObjects type](./kibana-plugin-core-server.savedobjectstype.md) definition.</p><p>See the [mappings format](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) and [migration format](./kibana-plugin-core-server.savedobjectmigrationmap.md) for more details about these.</p> |
+|  [setClientFactoryProvider](./kibana-plugin-core-server.savedobjectsservicesetup.setclientfactoryprovider.md) |  | (clientFactoryProvider: SavedObjectsClientFactoryProvider) =&gt; void | Set the default [factory provider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) for creating Saved Objects clients. Only one provider can be set, subsequent calls to this method will fail. |
 

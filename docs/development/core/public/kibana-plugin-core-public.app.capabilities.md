@@ -6,7 +6,7 @@
 
 Custom capabilities defined by the app.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 capabilities?: Partial<Capabilities>;

@@ -28,6 +28,7 @@ import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   PieVisualizationState,
+  TermsIndexPatternColumn,
 } from '../../../lens/public';
 import { FilterStateStore, DataView } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
@@ -88,7 +89,7 @@ function getLensAttributes(
           },
           orderDirection: 'desc',
         },
-      },
+      } as TermsIndexPatternColumn,
       'ed999e9d-204c-465b-897f-fe1a125b39ed': {
         sourceField: 'Records',
         isBucketed: false,

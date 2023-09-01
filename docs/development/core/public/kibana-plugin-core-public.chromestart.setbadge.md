@@ -6,7 +6,7 @@
 
 Override the current badge
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setBadge(badge?: ChromeBadge): void;
@@ -16,9 +16,9 @@ setBadge(badge?: ChromeBadge): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  badge | ChromeBadge |  |
+|  badge | ChromeBadge | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

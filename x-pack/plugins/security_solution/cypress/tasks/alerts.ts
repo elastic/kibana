@@ -32,6 +32,7 @@ import {
   ENRICHMENT_QUERY_START_INPUT,
   THREAT_INTEL_TAB,
 } from '../screens/alerts_details';
+import { rootRequest } from './common';
 
 export const addExceptionFromFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
@@ -145,12 +146,12 @@ export const waitForAlerts = () => {
 };
 
 export const waitForAlertsIndexToBeCreated = () => {
-  cy.request({
+  rootRequest({
     url: '/api/detection_engine/index',
     failOnStatusCode: false,
   }).then((response) => {
     if (response.status !== 200) {
-      cy.request({
+      rootRequest({
         method: 'POST',
         url: `/api/detection_engine/index`,
         headers: { 'kbn-xsrf': 'create-signals-index' },

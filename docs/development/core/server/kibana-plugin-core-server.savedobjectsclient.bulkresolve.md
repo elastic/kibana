@@ -6,7 +6,7 @@
 
 Resolves an array of objects by id, using any legacy URL aliases if they exist
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 bulkResolve<T = unknown>(objects: SavedObjectsBulkResolveObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResolveResponse<T>>;
@@ -17,9 +17,9 @@ bulkResolve<T = unknown>(objects: SavedObjectsBulkResolveObject[], options?: Sav
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  objects | SavedObjectsBulkResolveObject\[\] | an array of objects containing id, type |
-|  options | SavedObjectsBaseOptions |  |
+|  options | SavedObjectsBaseOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsBulkResolveResponse&lt;T&gt;&gt;
 

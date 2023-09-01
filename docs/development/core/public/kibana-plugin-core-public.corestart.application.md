@@ -6,7 +6,7 @@
 
 [ApplicationStart](./kibana-plugin-core-public.applicationstart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 application: ApplicationStart;

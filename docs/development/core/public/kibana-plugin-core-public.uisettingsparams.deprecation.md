@@ -6,7 +6,7 @@
 
 optional deprecation information. Used to generate a deprecation warning.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 deprecation?: DeprecationSettings;

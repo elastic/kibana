@@ -4,7 +4,7 @@
 
 ## UserProvidedValues.isOverridden property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isOverridden?: boolean;

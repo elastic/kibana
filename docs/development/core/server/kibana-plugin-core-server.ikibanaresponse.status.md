@@ -4,7 +4,7 @@
 
 ## IKibanaResponse.status property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly status: number;

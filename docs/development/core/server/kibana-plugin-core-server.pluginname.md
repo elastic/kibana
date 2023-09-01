@@ -6,7 +6,7 @@
 
 Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays that use it as a key or value more obvious.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type PluginName = string;

@@ -6,7 +6,7 @@
 
 [SavedObjectsMigrationVersion](./kibana-plugin-core-server.savedobjectsmigrationversion.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 migrationVersion?: SavedObjectsMigrationVersion;

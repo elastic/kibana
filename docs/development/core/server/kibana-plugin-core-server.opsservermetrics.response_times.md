@@ -6,7 +6,7 @@
 
 server response time stats
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 response_times: {

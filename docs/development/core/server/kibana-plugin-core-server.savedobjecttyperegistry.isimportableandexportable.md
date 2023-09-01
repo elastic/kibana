@@ -6,7 +6,7 @@
 
 Returns the `management.importableAndExportable` property for given type, or `false` if the type is not registered or does not define a management section.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isImportableAndExportable(type: string): boolean;
@@ -18,7 +18,7 @@ isImportableAndExportable(type: string): boolean;
 |  --- | --- | --- |
 |  type | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

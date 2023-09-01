@@ -4,7 +4,7 @@
 
 ## IntervalHistogram.lastUpdatedAt property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 lastUpdatedAt: string;

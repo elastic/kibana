@@ -6,7 +6,7 @@
 
 Settled state between `url`<!-- -->, `baseUrl`<!-- -->, and `active`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly href: string;

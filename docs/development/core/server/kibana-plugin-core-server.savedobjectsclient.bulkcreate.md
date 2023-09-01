@@ -6,7 +6,7 @@
 
 Persists multiple documents batched together as a single request
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
@@ -17,9 +17,9 @@ bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  objects | Array&lt;SavedObjectsBulkCreateObject&lt;T&gt;&gt; |  |
-|  options | SavedObjectsCreateOptions |  |
+|  options | SavedObjectsCreateOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsBulkResponse&lt;T&gt;&gt;
 

@@ -6,7 +6,7 @@
 
 Represents a failure to import.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportFailure 
@@ -14,12 +14,12 @@ export interface SavedObjectsImportFailure
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [error](./kibana-plugin-core-public.savedobjectsimportfailure.error.md) | SavedObjectsImportConflictError \| SavedObjectsImportAmbiguousConflictError \| SavedObjectsImportUnsupportedTypeError \| SavedObjectsImportMissingReferencesError \| SavedObjectsImportUnknownError |  |
-|  [id](./kibana-plugin-core-public.savedobjectsimportfailure.id.md) | string |  |
-|  [meta](./kibana-plugin-core-public.savedobjectsimportfailure.meta.md) | { title?: string; icon?: string; } |  |
-|  [overwrite?](./kibana-plugin-core-public.savedobjectsimportfailure.overwrite.md) | boolean | <i>(Optional)</i> If <code>overwrite</code> is specified, an attempt was made to overwrite an existing object. |
-|  [title?](./kibana-plugin-core-public.savedobjectsimportfailure.title.md) | string | <i>(Optional)</i> |
-|  [type](./kibana-plugin-core-public.savedobjectsimportfailure.type.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [error](./kibana-plugin-core-public.savedobjectsimportfailure.error.md) |  | SavedObjectsImportConflictError \| SavedObjectsImportAmbiguousConflictError \| SavedObjectsImportUnsupportedTypeError \| SavedObjectsImportMissingReferencesError \| SavedObjectsImportUnknownError |  |
+|  [id](./kibana-plugin-core-public.savedobjectsimportfailure.id.md) |  | string |  |
+|  [meta](./kibana-plugin-core-public.savedobjectsimportfailure.meta.md) |  | { title?: string; icon?: string; } |  |
+|  [overwrite?](./kibana-plugin-core-public.savedobjectsimportfailure.overwrite.md) |  | boolean | _(Optional)_ If <code>overwrite</code> is specified, an attempt was made to overwrite an existing object. |
+|  [title?](./kibana-plugin-core-public.savedobjectsimportfailure.title.md) |  | string | _(Optional)_ |
+|  [type](./kibana-plugin-core-public.savedobjectsimportfailure.type.md) |  | string |  |
 

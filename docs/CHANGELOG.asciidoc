@@ -13,6 +13,8 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.12>>
+* <<release-notes-7.17.11>>
 * <<release-notes-7.17.10>>
 * <<release-notes-7.17.9>>
 * <<release-notes-7.17.8>>
@@ -80,6 +82,37 @@ Review important information about the {kib} 7.17.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.17.12]]
+== {kib} 7.17.12
+
+Review the following information about the {kib} 7.17.12 release. 
+
+[float]
+[[fixes-v7.17.12]]
+=== Bug Fixes
+
+Dashboard::
+* Fixes an issue with PDF reports not displaying full chart data when taken from the Dashboard app that use the "optimize-for-print" option {kibana-pull}161293[#161293]
+
+Lens & Visualizations::
+* Fixes an issue where when creating a table in *Lens*, if no data was returned, an error displayed instead of the no data view {kibana-pull}161953[#161953]
+
+[[release-notes-7.17.11]]
+== {kib} 7.17.11
+
+Review the following information about the {kib} 7.17.11 release.
+
+[float]
+[[fixes-v7.17.11]]
+=== Bug Fixes
+
+Operations::
+* Adjust CLI to treat extra options consistently {kibana-pull}158257[#158257]
+
+Platform::
+* Fixes a bug causing the latest timezone changes to not be taken into account for date formatting (e.g Mexico 2023) {kibana-pull}155832[#155832]
+* Upgrade Puppeteer dependency to v20.1.0 {kibana-pull}156766[#156766]
+
 [[release-notes-7.17.10]]
 == {kib} 7.17.10
 

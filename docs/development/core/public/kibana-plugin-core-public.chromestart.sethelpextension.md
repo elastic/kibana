@@ -6,7 +6,7 @@
 
 Override the current set of custom help content
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setHelpExtension(helpExtension?: ChromeHelpExtension): void;
@@ -16,9 +16,9 @@ setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  helpExtension | ChromeHelpExtension |  |
+|  helpExtension | ChromeHelpExtension | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

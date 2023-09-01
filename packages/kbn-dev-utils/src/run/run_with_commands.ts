@@ -8,7 +8,8 @@
 
 import { ToolingLog, pickLevelFromFlags } from '../tooling_log';
 import { RunContext, RunOptions } from './run';
-import { getFlags, FlagOptions, mergeFlagOptions } from './flags';
+import { getFlags, FlagOptions, mergeFlagOptions, DEFAULT_FLAG_ALIASES } from './flags';
+import { FlagsReader } from './flags_reader';
 import { Cleanup } from './cleanup';
 import { getHelpForAllCommands, getCommandLevelHelp } from './help';
 import { createFlagError } from './fail';
@@ -115,6 +116,12 @@ export class RunWithCommands<T> {
           procRunner,
           statsMeta: metrics.meta,
           addCleanupTask: cleanup.add.bind(cleanup),
+          flagsReader: new FlagsReader(commandFlags, {
+            aliases: {
+              ...commandFlagOptions.alias,
+              ...DEFAULT_FLAG_ALIASES,
+            },
+          }),
         };
 
         const extendedContext = {

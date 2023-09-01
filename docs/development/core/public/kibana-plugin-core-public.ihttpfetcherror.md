@@ -5,21 +5,21 @@
 ## IHttpFetchError interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IHttpFetchError extends Error 
 ```
-<b>Extends:</b> Error
+**Extends:** Error
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [body?](./kibana-plugin-core-public.ihttpfetcherror.body.md) | any | <i>(Optional)</i> |
-|  [name](./kibana-plugin-core-public.ihttpfetcherror.name.md) | string |  |
-|  [req](./kibana-plugin-core-public.ihttpfetcherror.req.md) | Request |  |
-|  [request](./kibana-plugin-core-public.ihttpfetcherror.request.md) | Request |  |
-|  [res?](./kibana-plugin-core-public.ihttpfetcherror.res.md) | Response | <i>(Optional)</i> |
-|  [response?](./kibana-plugin-core-public.ihttpfetcherror.response.md) | Response | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [body?](./kibana-plugin-core-public.ihttpfetcherror.body.md) | <code>readonly</code> | any | _(Optional)_ |
+|  [name](./kibana-plugin-core-public.ihttpfetcherror.name.md) | <code>readonly</code> | string |  |
+|  [req](./kibana-plugin-core-public.ihttpfetcherror.req.md) | <code>readonly</code> | Request |  |
+|  [request](./kibana-plugin-core-public.ihttpfetcherror.request.md) | <code>readonly</code> | Request |  |
+|  [res?](./kibana-plugin-core-public.ihttpfetcherror.res.md) | <code>readonly</code> | Response | _(Optional)_ |
+|  [response?](./kibana-plugin-core-public.ihttpfetcherror.response.md) | <code>readonly</code> | Response | _(Optional)_ |
 

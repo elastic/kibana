@@ -4,7 +4,7 @@
 
 ## SavedObjectsClient.errors property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static errors: typeof SavedObjectsErrorHelpers;

@@ -6,7 +6,7 @@
 
 Context passed down to a [export transform function](./kibana-plugin-core-server.savedobjectsexporttransform.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsExportTransformContext 
@@ -14,7 +14,7 @@ export interface SavedObjectsExportTransformContext
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [request](./kibana-plugin-core-server.savedobjectsexporttransformcontext.request.md) | KibanaRequest | The request that initiated the export request. Can be used to create scoped services or client inside the [transformation](./kibana-plugin-core-server.savedobjectsexporttransform.md) |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [request](./kibana-plugin-core-server.savedobjectsexporttransformcontext.request.md) |  | KibanaRequest | The request that initiated the export request. Can be used to create scoped services or client inside the [transformation](./kibana-plugin-core-server.savedobjectsexporttransform.md) |
 

@@ -6,7 +6,7 @@
 
 If true, will create new copies of import objects, each with a random `id` and undefined `originId`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createNewCopies: boolean;

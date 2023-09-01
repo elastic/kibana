@@ -17,6 +17,7 @@ import { PercentileIndexPatternColumn } from './percentile';
 import { EuiFieldNumber } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { EuiFormRow } from '@elastic/eui';
+import { TermsIndexPatternColumn } from './terms';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -58,7 +59,7 @@ describe('percentile', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: '23rd percentile of a',
           dataType: 'number',
@@ -68,7 +69,7 @@ describe('percentile', () => {
           params: {
             percentile: 23,
           },
-        },
+        } as PercentileIndexPatternColumn,
       },
     };
   });
@@ -272,7 +273,7 @@ describe('percentile', () => {
     });
 
     it('should update state on change', async () => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
       const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions

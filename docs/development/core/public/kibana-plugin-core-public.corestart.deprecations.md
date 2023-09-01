@@ -6,7 +6,7 @@
 
 [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 deprecations: DeprecationsServiceStart;

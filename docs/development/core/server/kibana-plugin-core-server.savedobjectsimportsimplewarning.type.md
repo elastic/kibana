@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportSimpleWarning.type property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 type: 'simple';

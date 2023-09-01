@@ -8,7 +8,7 @@ A warning meant to notify that a specific user action is required to finalize th
 
  The `actionUrl` must be a path relative to the basePath, and not include it.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportActionRequiredWarning 
@@ -16,10 +16,10 @@ export interface SavedObjectsImportActionRequiredWarning
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [actionPath](./kibana-plugin-core-public.savedobjectsimportactionrequiredwarning.actionpath.md) | string | The path (without the basePath) that the user should be redirect to address this warning. |
-|  [buttonLabel?](./kibana-plugin-core-public.savedobjectsimportactionrequiredwarning.buttonlabel.md) | string | <i>(Optional)</i> An optional label to use for the link button. If unspecified, a default label will be used. |
-|  [message](./kibana-plugin-core-public.savedobjectsimportactionrequiredwarning.message.md) | string | The translated message to display to the user. |
-|  [type](./kibana-plugin-core-public.savedobjectsimportactionrequiredwarning.type.md) | 'action\_required' |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [actionPath](./kibana-plugin-core-public.savedobjectsimportactionrequiredwarning.actionpath.md) |  | string | The path (without the basePath) that the user should be redirect to address this warning. |
+|  [buttonLabel?](./kibana-plugin-core-public.savedobjectsimportactionrequiredwarning.buttonlabel.md) |  | string | _(Optional)_ An optional label to use for the link button. If unspecified, a default label will be used. |
+|  [message](./kibana-plugin-core-public.savedobjectsimportactionrequiredwarning.message.md) |  | string | The translated message to display to the user. |
+|  [type](./kibana-plugin-core-public.savedobjectsimportactionrequiredwarning.type.md) |  | 'action\_required' |  |
 

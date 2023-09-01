@@ -4,7 +4,7 @@
 
 ## SearchResponse.timed\_out property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 timed_out: boolean;

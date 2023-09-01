@@ -6,7 +6,7 @@
 
 Creates an [exporter](./kibana-plugin-core-server.isavedobjectsexporter.md) bound to given client.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;

@@ -6,7 +6,7 @@
 
 Returns whether the type is multi-namespace (shareable \*or\* isolated); resolves to `false` if the type is not registered
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isMultiNamespace(type: string): boolean;
@@ -18,7 +18,7 @@ isMultiNamespace(type: string): boolean;
 |  --- | --- | --- |
 |  type | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

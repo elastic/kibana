@@ -34,7 +34,6 @@ RUNTIME_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
   "@npm//@emotion/react",
-  "@npm//abortcontroller-polyfill",
   "@npm//babel-loader",
   "@npm//babel-plugin-transform-react-remove-prop-types",
   "@npm//core-js",
@@ -53,7 +52,6 @@ RUNTIME_DEPS = [
   "@npm//react-router",
   "@npm//react",
   "@npm//regenerator-runtime",
-  "@npm//resize-observer-polyfill",
   "@npm//rison-node",
   "@npm//rxjs",
   "@npm//styled-components",
@@ -73,7 +71,6 @@ TYPES_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
   "@npm//@emotion/react",
-  "@npm//abortcontroller-polyfill",
   "@npm//babel-loader",
   "@npm//core-js",
   "@npm//css-loader",
@@ -91,7 +88,6 @@ TYPES_DEPS = [
   "@npm//react-router",
   "@npm//react-router-dom",
   "@npm//regenerator-runtime",
-  "@npm//resize-observer-polyfill",
   "@npm//rison-node",
   "@npm//rxjs",
   "@npm//styled-components",
@@ -148,6 +144,9 @@ webpack(
     "$(@D)",
     "--stats=errors-only"
   ],
+  env = {
+    "NODE_OPTIONS": "--openssl-legacy-provider"
+  }
 )
 
 js_library(

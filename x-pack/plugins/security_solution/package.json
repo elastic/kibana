@@ -8,19 +8,14 @@
     "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js && node ../../../scripts/eslint ./public/detections/mitre/mitre_tactics_techniques.ts --fix",
     "build-beat-doc": "node scripts/beat_docs/build.js && node ../../../scripts/eslint ./server/utils/beat_schema/fields.ts --fix",
     "cypress": "../../../node_modules/.bin/cypress",
-    "cypress:open": "yarn cypress open --config-file ./cypress/cypress.json",
-    "cypress:open:ccs": "yarn cypress:open --config integrationFolder=./cypress/ccs_integration",
-    "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/security_solution_cypress/visual_config.ts",
-    "cypress:open:upgrade": "yarn cypress:open --config integrationFolder=./cypress/upgrade_integration",
-    "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/integration/**/*.spec.ts'; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:firefox": "yarn cypress:run:reporter --browser firefox --spec './cypress/integration/**/*.spec.ts'; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:reporter": "yarn cypress run --config-file ./cypress/cypress.json --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
-    "cypress:run:respops": "yarn cypress:run:reporter --browser chrome --spec ./cypress/integration/detection_alerts/*.spec.ts,./cypress/integration/detection_rules/*.spec.ts,./cypress/integration/exceptions/*.spec.ts; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:ccs": "yarn cypress:run:reporter --browser chrome --config integrationFolder=./cypress/ccs_integration; status=$?; yarn junit:merge && exit $status",
-    "cypress:run-as-ci": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/security_solution_cypress/cli_config.ts",
-    "cypress:run-as-ci:firefox": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/security_solution_cypress/config.firefox.ts",
-    "cypress:run:upgrade": "yarn cypress:run:reporter --browser chrome --config integrationFolder=./cypress/upgrade_integration",
+    "cypress:burn": "yarn cypress:run:reporter --env burn=2 --concurrency=1 --headed",
+    "cypress:changed-specs-only": "yarn cypress:run:reporter --changed-specs-only --env burn=2",
+    "cypress:open": "TZ=UTC node ./scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ./cypress/cypress.config.ts --ftr-config-file ../../../../../../../x-pack/test/security_solution_cypress/cli_config",
+    "cypress:run": "yarn cypress:run:reporter --spec './cypress/e2e/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+    "cypress:run:reporter": "TZ=UTC node ./scripts/start_cypress_parallel run --config-file ./cypress/cypress_ci.config.ts --ftr-config-file ../../../../../../../x-pack/test/security_solution_cypress/cli_config --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
+    "cypress:run:respops": "yarn cypress:run:reporter --spec './cypress/e2e/(detection_alerts|detection_rules|exceptions)/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
     "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/",
-    "test:generate": "node scripts/endpoint/resolver_generator"
+    "test:generate": "node scripts/endpoint/resolver_generator",
+    "junit:transform": "node scripts/junit_transformer --pathPattern '../../../target/kibana-security-solution/cypress/results/*.xml' --rootDirectory ../../../ --reportName 'Security Solution Cypress' --writeInPlace"
   }
 }

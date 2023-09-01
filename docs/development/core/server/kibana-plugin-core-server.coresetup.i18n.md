@@ -6,7 +6,7 @@
 
 [I18nServiceSetup](./kibana-plugin-core-server.i18nservicesetup.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 i18n: I18nServiceSetup;

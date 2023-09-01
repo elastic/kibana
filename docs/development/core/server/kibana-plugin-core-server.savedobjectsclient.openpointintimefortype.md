@@ -8,7 +8,7 @@ Opens a Point In Time (PIT) against the indices for the specified Saved Object t
 
 Only use this API if you have an advanced use case that's not solved by the [SavedObjectsClient.createPointInTimeFinder()](./kibana-plugin-core-server.savedobjectsclient.createpointintimefinder.md) method.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 openPointInTimeForType(type: string | string[], options?: SavedObjectsOpenPointInTimeOptions): Promise<SavedObjectsOpenPointInTimeResponse>;
@@ -19,9 +19,9 @@ openPointInTimeForType(type: string | string[], options?: SavedObjectsOpenPointI
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  type | string \| string\[\] |  |
-|  options | SavedObjectsOpenPointInTimeOptions |  |
+|  options | SavedObjectsOpenPointInTimeOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsOpenPointInTimeResponse&gt;
 

@@ -11,7 +11,7 @@
 
 Metric to track once this property changes
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 metric?: {

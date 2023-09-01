@@ -6,7 +6,7 @@
 
 Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 keywords?: string[];

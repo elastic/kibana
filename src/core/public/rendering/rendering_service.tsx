@@ -16,7 +16,7 @@ import { InternalApplicationStart } from '../application';
 import { OverlayStart } from '../overlays';
 import { AppWrapper } from './app_containers';
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   overlays: OverlayStart;

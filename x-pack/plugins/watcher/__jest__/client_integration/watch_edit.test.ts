@@ -21,7 +21,7 @@ describe('<WatchEdit />', () => {
   let testBed: WatchEditTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

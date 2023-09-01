@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -66,6 +64,7 @@ const hoveredProcessBackgroundTitle = i18n.translate(
  * PaintServers: Where color palettes, gradients, patterns and other similar concerns
  * are exposed to the component
  */
+// eslint-disable-next-line react/display-name
 const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
   const paintServerIDs = usePaintServerIDs();
   return (
@@ -165,6 +164,7 @@ const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
 /**
  * Defs entries that define shapes, masks and other spatial elements
  */
+// eslint-disable-next-line react/display-name
 const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
   const symbolIDs = useSymbolIDs();
   const paintServerIDs = usePaintServerIDs();
@@ -433,6 +433,7 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
  *  2. Separation of concerns between creative assets and more functional areas of the app
  *  3. `<use>` elements can be handled by compositor (faster)
  */
+// eslint-disable-next-line react/display-name
 export const SymbolDefinitions = memo(() => {
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   return (

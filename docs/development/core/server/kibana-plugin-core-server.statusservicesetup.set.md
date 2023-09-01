@@ -6,7 +6,7 @@
 
 Allows a plugin to specify a custom status dependent on its own criteria. Completely overrides the default inherited status.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 set(status$: Observable<ServiceStatus>): void;
@@ -18,7 +18,7 @@ set(status$: Observable<ServiceStatus>): void;
 |  --- | --- | --- |
 |  status$ | Observable&lt;ServiceStatus&gt; |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

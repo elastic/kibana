@@ -127,13 +127,6 @@ export async function runDockerGenerator(
     dockerBuildDir
   );
 
-  if (flags.ironbank) {
-    await copyAll(
-      config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/ironbank'),
-      dockerBuildDir
-    );
-  }
-
   // Build docker image into the target folder
   // In order to do this we just call the file we
   // created from the templates/build_docker_sh.template.js

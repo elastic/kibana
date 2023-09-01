@@ -6,7 +6,7 @@
 
 Represents a failure to import due to having an unsupported saved object type.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsImportUnsupportedTypeError 
@@ -14,7 +14,7 @@ export interface SavedObjectsImportUnsupportedTypeError
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [type](./kibana-plugin-core-server.savedobjectsimportunsupportedtypeerror.type.md) | 'unsupported\_type' |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [type](./kibana-plugin-core-server.savedobjectsimportunsupportedtypeerror.type.md) |  | 'unsupported\_type' |  |
 

@@ -6,7 +6,7 @@
 
 Makes an HTTP request with the DELETE method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 delete: HttpHandler;

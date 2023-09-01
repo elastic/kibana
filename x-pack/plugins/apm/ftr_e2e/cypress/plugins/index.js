@@ -22,7 +22,9 @@
 /**
  * @type {Cypress.PluginConfig}
  */
-module.exports = () => {
+const plugin = () => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
 };
+
+module.exports = { plugin };

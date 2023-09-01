@@ -6,7 +6,7 @@
 
 Additional route options.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface RouteConfigOptions<Method extends RouteMethod> 
@@ -14,11 +14,11 @@ export interface RouteConfigOptions<Method extends RouteMethod>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [authRequired?](./kibana-plugin-core-server.routeconfigoptions.authrequired.md) | boolean \| 'optional' | <i>(Optional)</i> Defines authentication mode for a route: - true. A user has to have valid credentials to access a resource - false. A user can access a resource without any credentials. - 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid. Can be useful when we grant access to a resource but want to identify a user if possible.<!-- -->Defaults to <code>true</code> if an auth mechanism is registered. |
-|  [body?](./kibana-plugin-core-server.routeconfigoptions.body.md) | Method extends 'get' \| 'options' ? undefined : RouteConfigOptionsBody | <i>(Optional)</i> Additional body options [RouteConfigOptionsBody](./kibana-plugin-core-server.routeconfigoptionsbody.md)<!-- -->. |
-|  [tags?](./kibana-plugin-core-server.routeconfigoptions.tags.md) | readonly string\[\] | <i>(Optional)</i> Additional metadata tag strings to attach to the route. |
-|  [timeout?](./kibana-plugin-core-server.routeconfigoptions.timeout.md) | { payload?: Method extends 'get' \| 'options' ? undefined : number; idleSocket?: number; } | <i>(Optional)</i> Defines per-route timeouts. |
-|  [xsrfRequired?](./kibana-plugin-core-server.routeconfigoptions.xsrfrequired.md) | Method extends 'get' ? never : boolean | <i>(Optional)</i> Defines xsrf protection requirements for a route: - true. Requires an incoming POST/PUT/DELETE request to contain <code>kbn-xsrf</code> header. - false. Disables xsrf protection.<!-- -->Set to true by default |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [authRequired?](./kibana-plugin-core-server.routeconfigoptions.authrequired.md) |  | boolean \| 'optional' | <p>_(Optional)_ Defines authentication mode for a route: - true. A user has to have valid credentials to access a resource - false. A user can access a resource without any credentials. - 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid. Can be useful when we grant access to a resource but want to identify a user if possible.</p><p>Defaults to <code>true</code> if an auth mechanism is registered.</p> |
+|  [body?](./kibana-plugin-core-server.routeconfigoptions.body.md) |  | Method extends 'get' \| 'options' ? undefined : RouteConfigOptionsBody | _(Optional)_ Additional body options [RouteConfigOptionsBody](./kibana-plugin-core-server.routeconfigoptionsbody.md)<!-- -->. |
+|  [tags?](./kibana-plugin-core-server.routeconfigoptions.tags.md) |  | readonly string\[\] | _(Optional)_ Additional metadata tag strings to attach to the route. |
+|  [timeout?](./kibana-plugin-core-server.routeconfigoptions.timeout.md) |  | { payload?: Method extends 'get' \| 'options' ? undefined : number; idleSocket?: number; } | _(Optional)_ Defines per-route timeouts. |
+|  [xsrfRequired?](./kibana-plugin-core-server.routeconfigoptions.xsrfrequired.md) |  | Method extends 'get' ? never : boolean | <p>_(Optional)_ Defines xsrf protection requirements for a route: - true. Requires an incoming POST/PUT/DELETE request to contain <code>kbn-xsrf</code> header. - false. Disables xsrf protection.</p><p>Set to true by default</p> |
 

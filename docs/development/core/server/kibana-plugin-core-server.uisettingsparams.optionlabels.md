@@ -6,7 +6,7 @@
 
 text labels for 'select' type UI element
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 optionLabels?: Record<string, string>;

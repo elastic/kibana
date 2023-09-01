@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { useMemo, useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { resolverStoreFactory } from '../store';
@@ -19,6 +17,7 @@ import { ResolverWithoutProviders } from './resolver_without_providers';
 /**
  * The `Resolver` component to use. This sets up the DataAccessLayer provider. Use `ResolverWithoutProviders` in tests or in other scenarios where you want to provide a different (or fake) data access layer.
  */
+// eslint-disable-next-line react/display-name
 export const Resolver = React.memo((props: ResolverProps) => {
   const context = useKibana<StartServices>();
   const dataAccessLayer: DataAccessLayer = useMemo(

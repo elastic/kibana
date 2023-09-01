@@ -6,12 +6,12 @@
 
 Gets an Observable of the array of recently accessed history.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get$(): Observable<ChromeRecentlyAccessedHistoryItem[]>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Observable&lt;ChromeRecentlyAccessedHistoryItem\[\]&gt;
 

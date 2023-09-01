@@ -4,7 +4,7 @@
 
 ## SavedObjectsRepository.find() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 find<T = unknown, A = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>>;
@@ -16,7 +16,7 @@ find<T = unknown, A = unknown>(options: SavedObjectsFindOptions): Promise<SavedO
 |  --- | --- | --- |
 |  options | SavedObjectsFindOptions |  {<!-- -->(string\|Array<string>)<!-- -->} \[options.type\]  {<!-- -->string<!-- -->} \[options.search\]  {<!-- -->string<!-- -->} \[options.defaultSearchOperator\]  {<!-- -->Array<string>} \[options.searchFields\] - see Elasticsearch Simple Query String Query field argument for more information  {<!-- -->integer<!-- -->} \[options.page=1\]  {<!-- -->integer<!-- -->} \[options.perPage=20\]  {<!-- -->Array<unknown>} \[options.searchAfter\]  {<!-- -->string<!-- -->} \[options.sortField\]  {<!-- -->string<!-- -->} \[options.sortOrder\]  {<!-- -->Array<string>} \[options.fields\]  {<!-- -->string<!-- -->} \[options.namespace\]  {<!-- -->object<!-- -->} \[options.hasReference\] - { type, id }  {<!-- -->string<!-- -->} \[options.pit\]  {<!-- -->string<!-- -->} \[options.preference\] |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsFindResponse&lt;T, A&gt;&gt;
 

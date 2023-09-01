@@ -4,7 +4,7 @@
 
 ## IntervalHistogram.fromTimestamp property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 fromTimestamp: string;

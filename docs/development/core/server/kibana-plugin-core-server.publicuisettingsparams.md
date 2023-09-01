@@ -6,7 +6,7 @@
 
 A sub-set of [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md) exposed to the client-side.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;

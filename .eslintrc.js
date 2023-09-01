@@ -615,7 +615,6 @@ module.exports = {
         'test/*/config.ts',
         'test/*/config_open.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
-        'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
@@ -678,7 +677,7 @@ module.exports = {
       files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
         'prefer-destructuring': 'off',
@@ -711,7 +710,7 @@ module.exports = {
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
         'prefer-destructuring': 'off',
@@ -748,7 +747,7 @@ module.exports = {
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-restricted-syntax': [
           'error',
           'ImportDeclaration',
@@ -765,7 +764,7 @@ module.exports = {
     {
       files: ['**/*.test.{js,mjs,ts,tsx}'],
       rules: {
-        'jest/valid-describe': 'error',
+        'jest/valid-describe-callback': 'error',
       },
     },
 
@@ -1118,12 +1117,12 @@ module.exports = {
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
+        'react/sort-default-props': 'error',
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
-        'react/jsx-sort-default-props': 'error',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
@@ -1193,12 +1192,12 @@ module.exports = {
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-comp': 'error',
+        'react/sort-default-props': 'error',
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
-        'react/jsx-sort-default-props': 'error',
       },
     },
     {
@@ -1679,8 +1678,6 @@ module.exports = {
       files: ['**/*'],
       rules: {
         ...require('eslint-config-prettier').rules,
-        ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
       },
     },
     /**

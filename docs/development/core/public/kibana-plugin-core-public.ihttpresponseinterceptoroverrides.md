@@ -6,7 +6,7 @@
 
 Properties that can be returned by HttpInterceptor.request to override the response.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IHttpResponseInterceptorOverrides<TResponseBody = any> 
@@ -14,8 +14,8 @@ export interface IHttpResponseInterceptorOverrides<TResponseBody = any>
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [body?](./kibana-plugin-core-public.ihttpresponseinterceptoroverrides.body.md) | TResponseBody | <i>(Optional)</i> Parsed body received, may be undefined if there was an error. |
-|  [response?](./kibana-plugin-core-public.ihttpresponseinterceptoroverrides.response.md) | Readonly&lt;Response&gt; | <i>(Optional)</i> Raw response received, may be undefined if there was an error. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [body?](./kibana-plugin-core-public.ihttpresponseinterceptoroverrides.body.md) | <code>readonly</code> | TResponseBody | _(Optional)_ Parsed body received, may be undefined if there was an error. |
+|  [response?](./kibana-plugin-core-public.ihttpresponseinterceptoroverrides.response.md) | <code>readonly</code> | Readonly&lt;Response&gt; | _(Optional)_ Raw response received, may be undefined if there was an error. |
 

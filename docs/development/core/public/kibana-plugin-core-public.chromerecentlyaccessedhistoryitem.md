@@ -5,7 +5,7 @@
 ## ChromeRecentlyAccessedHistoryItem interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ChromeRecentlyAccessedHistoryItem 
@@ -13,9 +13,9 @@ export interface ChromeRecentlyAccessedHistoryItem
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.id.md) | string |  |
-|  [label](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.label.md) | string |  |
-|  [link](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.link.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.id.md) |  | string |  |
+|  [label](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.label.md) |  | string |  |
+|  [link](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.link.md) |  | string |  |
 

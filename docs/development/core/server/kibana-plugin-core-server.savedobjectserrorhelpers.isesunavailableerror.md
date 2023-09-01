@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isEsUnavailableError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isEsUnavailableError(error: Error | DecoratedError): boolean;
@@ -16,7 +16,7 @@ static isEsUnavailableError(error: Error | DecoratedError): boolean;
 |  --- | --- | --- |
 |  error | Error \| DecoratedError |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

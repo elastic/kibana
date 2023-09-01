@@ -57,26 +57,13 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   profile: Profile;
 }[T];
 
-type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<
-  TParams,
-  'apm'
-> & { index: string[] | string };
-
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
   InferSearchResponseOf<
     TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
-    ESSearchRequestOf<TParams>
+    TParams
   >;
 
-export type APMEventClient = ReturnType<typeof createApmEventClient>;
-
-export function createApmEventClient({
-  esClient,
-  debug,
-  request,
-  indices,
-  options: { includeFrozen } = { includeFrozen: false },
-}: {
+export interface APMEventClientConfig {
   esClient: ElasticsearchClient;
   debug: boolean;
   request: KibanaRequest;
@@ -84,92 +71,112 @@ export function createApmEventClient({
   options: {
     includeFrozen: boolean;
   };
-}) {
-  return {
-    async search<TParams extends APMEventESSearchRequest>(
-      operationName: string,
-      params: TParams
-    ): Promise<TypedSearchResponse<TParams>> {
-      const withProcessorEventFilter = unpackProcessorEvents(params, indices);
+}
 
-      const { includeLegacyData = false } = params.apm;
+export class APMEventClient {
+  private readonly esClient: ElasticsearchClient;
+  private readonly debug: boolean;
+  private readonly request: KibanaRequest;
+  private readonly indices: ApmIndicesConfig;
+  private readonly includeFrozen: boolean;
 
-      const withPossibleLegacyDataFilter = !includeLegacyData
-        ? addFilterToExcludeLegacyData(withProcessorEventFilter)
-        : withProcessorEventFilter;
+  constructor(config: APMEventClientConfig) {
+    this.esClient = config.esClient;
+    this.debug = config.debug;
+    this.request = config.request;
+    this.indices = config.indices;
+    this.includeFrozen = config.options.includeFrozen;
+  }
 
-      const searchParams = {
-        ...withPossibleLegacyDataFilter,
-        ...(includeFrozen ? { ignore_throttled: false } : {}),
-        ignore_unavailable: true,
-        preference: 'any',
-      };
+  async search<TParams extends APMEventESSearchRequest>(
+    operationName: string,
+    params: TParams
+  ): Promise<TypedSearchResponse<TParams>> {
+    const withProcessorEventFilter = unpackProcessorEvents(
+      params,
+      this.indices
+    );
 
-      // only "search" operation is currently supported
-      const requestType = 'search';
+    const { includeLegacyData = false } = params.apm;
 
-      return callAsyncWithDebug({
-        cb: () => {
-          const searchPromise = withApmSpan(operationName, () =>
-            cancelEsRequestOnAbort(esClient.search(searchParams), request)
+    const withPossibleLegacyDataFilter = !includeLegacyData
+      ? addFilterToExcludeLegacyData(withProcessorEventFilter)
+      : withProcessorEventFilter;
+
+    const searchParams = {
+      ...withPossibleLegacyDataFilter,
+      ...(this.includeFrozen ? { ignore_throttled: false } : {}),
+      ignore_unavailable: true,
+      preference: 'any',
+    };
+
+    // only "search" operation is currently supported
+    const requestType = 'search';
+
+    return callAsyncWithDebug({
+      cb: () => {
+        const searchPromise = withApmSpan(operationName, () => {
+          return cancelEsRequestOnAbort(
+            this.esClient.search(searchParams),
+            this.request
           );
+        });
 
-          return unwrapEsResponse(searchPromise);
-        },
-        getDebugMessage: () => ({
-          body: getDebugBody({
-            params: searchParams,
-            requestType,
-            operationName,
-          }),
-          title: getDebugTitle(request),
+        return unwrapEsResponse(searchPromise);
+      },
+      getDebugMessage: () => ({
+        body: getDebugBody({
+          params: searchParams,
+          requestType,
+          operationName,
         }),
-        isCalledWithInternalUser: false,
-        debug,
-        request,
-        requestType,
-        operationName,
-        requestParams: searchParams,
-      });
-    },
+        title: getDebugTitle(this.request),
+      }),
+      isCalledWithInternalUser: false,
+      debug: this.debug,
+      request: this.request,
+      requestType,
+      operationName,
+      requestParams: searchParams,
+    });
+  }
 
-    async termsEnum(
-      operationName: string,
-      params: APMEventESTermsEnumRequest
-    ): Promise<TermsEnumResponse> {
-      const requestType = 'terms_enum';
-      const { index } = unpackProcessorEvents(params, indices);
+  async termsEnum(
+    operationName: string,
+    params: APMEventESTermsEnumRequest
+  ): Promise<TermsEnumResponse> {
+    const requestType = 'terms_enum';
+    const { index } = unpackProcessorEvents(params, this.indices);
 
-      return callAsyncWithDebug({
-        cb: () => {
-          const { apm, ...rest } = params;
-          const termsEnumPromise = withApmSpan(operationName, () =>
-            cancelEsRequestOnAbort(
-              esClient.termsEnum({
-                index: Array.isArray(index) ? index.join(',') : index,
-                ...rest,
-              }),
-              request
-            )
+    return callAsyncWithDebug({
+      cb: () => {
+        const { apm, ...rest } = params;
+        const termsEnumPromise = withApmSpan(operationName, () => {
+          return cancelEsRequestOnAbort(
+            this.esClient.termsEnum({
+              index: Array.isArray(index) ? index.join(',') : index,
+              ...rest,
+            }),
+            this.request
           );
+        });
 
-          return unwrapEsResponse(termsEnumPromise);
-        },
-        getDebugMessage: () => ({
-          body: getDebugBody({
-            params,
-            requestType,
-            operationName,
-          }),
-          title: getDebugTitle(request),
+        return unwrapEsResponse(termsEnumPromise);
+      },
+      getDebugMessage: () => ({
+        body: getDebugBody({
+          params,
+          requestType,
+          operationName,
         }),
-        isCalledWithInternalUser: false,
-        debug,
-        request,
-        requestType,
-        operationName,
-        requestParams: params,
-      });
-    },
-  };
+        title: getDebugTitle(this.request),
+      }),
+      isCalledWithInternalUser: false,
+      debug: this.debug,
+      request: this.request,
+      requestType,
+      operationName,
+      requestParams: params,
+    });
+  }
 }

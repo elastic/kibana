@@ -6,7 +6,7 @@
 
 Allow to define the default path a user should be directed to when navigating to the app. When defined, this value will be used as a default for the `path` option when calling [navigateToApp](./kibana-plugin-core-public.applicationstart.navigatetoapp.md)<!-- -->\`<!-- -->, and will also be appended to the [application navLink](./kibana-plugin-core-public.chromenavlink.md) in the navigation bar.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 defaultPath?: string;

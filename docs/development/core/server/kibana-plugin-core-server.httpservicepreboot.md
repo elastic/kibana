@@ -6,7 +6,7 @@
 
 Kibana HTTP Service provides an abstraction to work with the HTTP stack at the `preboot` stage. This functionality allows Kibana to serve user requests even before Kibana becomes fully operational. Only Core and `preboot` plugins can define HTTP routes at this stage.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpServicePreboot 
@@ -67,10 +67,10 @@ httpPreboot.registerRoutes('my-plugin', (router) => {
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [basePath](./kibana-plugin-core-server.httpservicepreboot.basepath.md) | IBasePath | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
-|  [getServerInfo](./kibana-plugin-core-server.httpservicepreboot.getserverinfo.md) | () =&gt; HttpServerInfo | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running preboot http server. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [basePath](./kibana-plugin-core-server.httpservicepreboot.basepath.md) |  | IBasePath | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
+|  [getServerInfo](./kibana-plugin-core-server.httpservicepreboot.getserverinfo.md) |  | () =&gt; HttpServerInfo | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running preboot http server. |
 
 ## Methods
 

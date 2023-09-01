@@ -37,7 +37,7 @@ const defaultProps = {
 
 describe('FieldName', () => {
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   test('it renders the field name', () => {
@@ -61,7 +61,7 @@ describe('FieldName', () => {
     await waitFor(() => {
       wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
       wrapper.update();
-      jest.runAllTimers();
+      jest.advanceTimersByTime(500);
       wrapper.update();
       expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBe(true);
     });

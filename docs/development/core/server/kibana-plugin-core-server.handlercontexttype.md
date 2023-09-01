@@ -6,7 +6,7 @@
 
 Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md) to represent the type of the context.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;

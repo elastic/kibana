@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isInvalidVersionError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isInvalidVersionError(error: Error | DecoratedError): boolean;
@@ -16,7 +16,7 @@ static isInvalidVersionError(error: Error | DecoratedError): boolean;
 |  --- | --- | --- |
 |  error | Error \| DecoratedError |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

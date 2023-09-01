@@ -4,7 +4,7 @@
 
 ## ElasticsearchStatusMeta.incompatibleNodes property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];

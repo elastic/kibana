@@ -24,7 +24,7 @@ import { SessionTimeout, startTimer } from './session_timeout';
 
 jest.mock('broadcast-channel');
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 jest.spyOn(window, 'addEventListener');
 jest.spyOn(window, 'removeEventListener');

@@ -6,7 +6,7 @@
 
 Removes the user-defined value for a setting, causing it to revert to the default. This method behaves the same as calling `set(key, null)`<!-- -->, including the synchronization, custom setting, and error behavior of that method.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 remove: (key: string) => Promise<boolean>;

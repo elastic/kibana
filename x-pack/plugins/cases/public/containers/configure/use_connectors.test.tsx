@@ -16,7 +16,6 @@ jest.mock('../../common/lib/kibana');
 describe('useConnectors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('init', async () => {

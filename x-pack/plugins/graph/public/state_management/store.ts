@@ -83,7 +83,7 @@ function registerSagas(sagaMiddleware: SagaMiddleware<object>, deps: GraphStoreD
   sagaMiddleware.run(submitSearchSaga(deps));
 }
 
-export const createGraphStore = (deps: GraphStoreDependencies) => {
+export const createGraphStore = (deps: GraphStoreDependencies): Store => {
   const sagaMiddleware = createSagaMiddleware();
 
   const rootReducer = createRootReducer(deps.addBasePath);

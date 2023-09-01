@@ -15,7 +15,6 @@ module.exports = {
         '@babel',
         'import',
         'no-unsanitized',
-        'prefer-object-spread',
       ],
 
       settings: {
@@ -103,7 +102,7 @@ module.exports = {
         'import/no-duplicates': 'error',
         'import/no-dynamic-require': 'error',
 
-        'prefer-object-spread/prefer-object-spread': 'error',
+        'prefer-object-spread': 'error',
       }
     },
   ]

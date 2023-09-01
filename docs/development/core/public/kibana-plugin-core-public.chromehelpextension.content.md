@@ -6,7 +6,7 @@
 
 Custom content to occur below the list of links
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 content?: (element: HTMLDivElement) => () => void;

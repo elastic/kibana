@@ -6,7 +6,7 @@
 
 Creates multiple documents at once
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
@@ -17,9 +17,9 @@ bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  objects | Array&lt;SavedObjectsBulkCreateObject&lt;T&gt;&gt; | \[{ type, id, attributes, references, migrationVersion }<!-- -->\] |
-|  options | SavedObjectsCreateOptions |  {<!-- -->boolean<!-- -->} \[options.overwrite=false\] - overwrites existing documents  {<!-- -->string<!-- -->} \[options.namespace\] |
+|  options | SavedObjectsCreateOptions | _(Optional)_  {<!-- -->boolean<!-- -->} \[options.overwrite=false\] - overwrites existing documents  {<!-- -->string<!-- -->} \[options.namespace\] |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsBulkResponse&lt;T&gt;&gt;
 

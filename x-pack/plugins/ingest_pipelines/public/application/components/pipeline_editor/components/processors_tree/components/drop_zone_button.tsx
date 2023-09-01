@@ -37,15 +37,11 @@ export const DropZoneButton: FunctionComponent<Props> = (props) => {
   const { onClick, isDisabled, isVisible, compressed } = props;
   const isUnavailable = isVisible && isDisabled;
   const containerClasses = classNames({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'pipelineProcessorsEditor__tree__dropZoneContainer--visible': isVisible,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'pipelineProcessorsEditor__tree__dropZoneContainer--unavailable': isUnavailable,
   });
   const buttonClasses = classNames({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'pipelineProcessorsEditor__tree__dropZoneButton--visible': isVisible,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'pipelineProcessorsEditor__tree__dropZoneButton--compressed': compressed,
   });
 

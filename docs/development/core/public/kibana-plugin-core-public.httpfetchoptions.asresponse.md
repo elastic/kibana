@@ -6,7 +6,7 @@
 
 When `true` the return type of [HttpHandler](./kibana-plugin-core-public.httphandler.md) will be an [HttpResponse](./kibana-plugin-core-public.httpresponse.md) with detailed request and response information. When `false`<!-- -->, the return type will just be the parsed response body. Defaults to `false`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 asResponse?: boolean;

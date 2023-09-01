@@ -6,7 +6,7 @@
 
 To define custom logic to perform for incoming requests before the Auth interceptor performs a check that user has access to requested resources.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 registerOnPreAuth: (handler: OnPreAuthHandler) => void;

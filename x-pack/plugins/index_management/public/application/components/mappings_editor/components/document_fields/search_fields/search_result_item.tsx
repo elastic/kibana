@@ -91,11 +91,8 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
     <div className={classNames('mappingsEditor__fieldsListItem')} data-test-subj="fieldsListItem">
       <div
         className={classNames('mappingsEditor__fieldsListItem__field', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--selected': isHighlighted,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--dim': isDimmed,
         })}
       >
@@ -104,9 +101,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
             gutterSize="s"
             alignItems="center"
             className={classNames('mappingsEditor__fieldsListItem__content', {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'mappingsEditor__fieldsListItem__content--toggle': hasChildFields || hasMultiFields,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'mappingsEditor__fieldsListItem__content--multiField': isMultiField,
             })}
           >

@@ -6,7 +6,7 @@
 
 The number of search contexts that have been successfully closed.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 num_freed: number;

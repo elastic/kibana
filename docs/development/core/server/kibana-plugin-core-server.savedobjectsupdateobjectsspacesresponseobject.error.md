@@ -6,7 +6,7 @@
 
 Included if there was an error updating this object's spaces
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 error?: SavedObjectError;

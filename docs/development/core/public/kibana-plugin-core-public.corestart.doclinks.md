@@ -6,7 +6,7 @@
 
 [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 docLinks: DocLinksStart;

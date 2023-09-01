@@ -54,7 +54,6 @@ export const TableRow = ({
 }: TableRowProps) => {
   const [open, setOpen] = useState(false);
   const docTableRowClassName = classNames('kbnDocTable__row', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'kbnDocTable__row--highlight': row.isAnchor,
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
@@ -180,6 +179,7 @@ export const TableRow = ({
         // We should improve this and show a helpful tooltip why the filter buttons are not
         // there/disabled when there are ignored values.
         const isFilterable = Boolean(
+          // @ts-expect-error ts upgrade v4.7.4
           mapping(column)?.filterable && filter && !row._ignored?.includes(column)
         );
         rowCells.push(

@@ -6,7 +6,7 @@
 
 Returns the signal associated with request, which is an AbortSignal object indicating whether or not request has been aborted, and its abort event handler.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 signal?: AbortSignal | null;

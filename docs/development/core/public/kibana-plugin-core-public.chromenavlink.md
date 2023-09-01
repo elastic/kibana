@@ -5,7 +5,7 @@
 ## ChromeNavLink interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ChromeNavLink 
@@ -13,18 +13,18 @@ export interface ChromeNavLink
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [baseUrl](./kibana-plugin-core-public.chromenavlink.baseurl.md) | string | The base route used to open the root of an application. |
-|  [category?](./kibana-plugin-core-public.chromenavlink.category.md) | AppCategory | <i>(Optional)</i> The category the app lives in |
-|  [disabled?](./kibana-plugin-core-public.chromenavlink.disabled.md) | boolean | <i>(Optional)</i> Disables a link from being clickable. |
-|  [euiIconType?](./kibana-plugin-core-public.chromenavlink.euiicontype.md) | string | <i>(Optional)</i> A EUI iconType that will be used for the app's icon. This icon takes precedence over the <code>icon</code> property. |
-|  [hidden?](./kibana-plugin-core-public.chromenavlink.hidden.md) | boolean | <i>(Optional)</i> Hides a link from the navigation. |
-|  [href](./kibana-plugin-core-public.chromenavlink.href.md) | string | Settled state between <code>url</code>, <code>baseUrl</code>, and <code>active</code> |
-|  [icon?](./kibana-plugin-core-public.chromenavlink.icon.md) | string | <i>(Optional)</i> A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
-|  [id](./kibana-plugin-core-public.chromenavlink.id.md) | string | A unique identifier for looking up links. |
-|  [order?](./kibana-plugin-core-public.chromenavlink.order.md) | number | <i>(Optional)</i> An ordinal used to sort nav links relative to one another for display. |
-|  [title](./kibana-plugin-core-public.chromenavlink.title.md) | string | The title of the application. |
-|  [tooltip?](./kibana-plugin-core-public.chromenavlink.tooltip.md) | string | <i>(Optional)</i> A tooltip shown when hovering over an app link. |
-|  [url](./kibana-plugin-core-public.chromenavlink.url.md) | string | The route used to open the default path and the deep links of an application. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [baseUrl](./kibana-plugin-core-public.chromenavlink.baseurl.md) | <code>readonly</code> | string | The base route used to open the root of an application. |
+|  [category?](./kibana-plugin-core-public.chromenavlink.category.md) | <code>readonly</code> | AppCategory | _(Optional)_ The category the app lives in |
+|  [disabled?](./kibana-plugin-core-public.chromenavlink.disabled.md) | <code>readonly</code> | boolean | _(Optional)_ Disables a link from being clickable. |
+|  [euiIconType?](./kibana-plugin-core-public.chromenavlink.euiicontype.md) | <code>readonly</code> | string | _(Optional)_ A EUI iconType that will be used for the app's icon. This icon takes precedence over the <code>icon</code> property. |
+|  [hidden?](./kibana-plugin-core-public.chromenavlink.hidden.md) | <code>readonly</code> | boolean | _(Optional)_ Hides a link from the navigation. |
+|  [href](./kibana-plugin-core-public.chromenavlink.href.md) | <code>readonly</code> | string | Settled state between <code>url</code>, <code>baseUrl</code>, and <code>active</code> |
+|  [icon?](./kibana-plugin-core-public.chromenavlink.icon.md) | <code>readonly</code> | string | _(Optional)_ A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
+|  [id](./kibana-plugin-core-public.chromenavlink.id.md) | <code>readonly</code> | string | A unique identifier for looking up links. |
+|  [order?](./kibana-plugin-core-public.chromenavlink.order.md) | <code>readonly</code> | number | _(Optional)_ An ordinal used to sort nav links relative to one another for display. |
+|  [title](./kibana-plugin-core-public.chromenavlink.title.md) | <code>readonly</code> | string | The title of the application. |
+|  [tooltip?](./kibana-plugin-core-public.chromenavlink.tooltip.md) | <code>readonly</code> | string | _(Optional)_ A tooltip shown when hovering over an app link. |
+|  [url](./kibana-plugin-core-public.chromenavlink.url.md) | <code>readonly</code> | string | The route used to open the default path and the deep links of an application. |
 

@@ -6,7 +6,7 @@
 
 This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved object client wrapper. If this is defined, it supersedes the `type` and `namespaces` fields when building the Elasticsearch query. Any types that are not included in this map will be excluded entirely. If a type is included but its value is undefined, the operation will search for that type in the Default namespace.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 typeToNamespacesMap?: Map<string, string[] | undefined>;

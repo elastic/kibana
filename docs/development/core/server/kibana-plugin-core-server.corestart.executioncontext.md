@@ -6,7 +6,7 @@
 
 [ExecutionContextStart](./kibana-plugin-core-server.executioncontextstart.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 executionContext: ExecutionContextStart;

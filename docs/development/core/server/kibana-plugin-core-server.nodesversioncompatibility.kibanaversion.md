@@ -4,7 +4,7 @@
 
 ## NodesVersionCompatibility.kibanaVersion property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 kibanaVersion: string;

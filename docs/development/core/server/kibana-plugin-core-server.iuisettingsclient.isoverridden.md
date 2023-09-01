@@ -6,7 +6,7 @@
 
 Shows whether the uiSettings value set by the user.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isOverridden: (key: string) => boolean;

@@ -6,7 +6,7 @@
 
 An optional list of warnings to display in the UI when the import succeeds.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 warnings?: SavedObjectsImportWarning[];

@@ -4,7 +4,7 @@
 
 ## IHttpFetchError.body property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly body?: any;

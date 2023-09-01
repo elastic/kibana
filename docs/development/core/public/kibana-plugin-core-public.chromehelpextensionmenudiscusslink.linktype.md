@@ -6,7 +6,7 @@
 
 Creates a generic give feedback link with comment icon
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 linkType: 'discuss';

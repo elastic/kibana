@@ -4,7 +4,7 @@
 
 ## AsyncPlugin.setup() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
@@ -17,7 +17,7 @@ setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
 |  core | CoreSetup |  |
 |  plugins | TPluginsSetup |  |
 
-<b>Returns:</b>
+**Returns:**
 
 TSetup \| Promise&lt;TSetup&gt;
 

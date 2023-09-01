@@ -6,7 +6,7 @@
 
 EuiFlyout onClose handler. If provided the consumer is responsible for calling flyout.close() to close the flyout;
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 onClose?: (flyout: OverlayRef) => void;

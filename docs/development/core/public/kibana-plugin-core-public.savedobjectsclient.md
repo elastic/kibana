@@ -6,7 +6,7 @@
 
 Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing plugin state. The client-side SavedObjectsClient is a thin convenience library around the SavedObjects HTTP API for interacting with Saved Objects.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class SavedObjectsClient 
@@ -24,7 +24,7 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [bulkGet](./kibana-plugin-core-public.savedobjectsclient.bulkget.md) |  | (objects?: Array&lt;{ id: string; type: string; }&gt;) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt; | Returns an array of objects by id |
 |  [bulkResolve](./kibana-plugin-core-public.savedobjectsclient.bulkresolve.md) |  | &lt;T = unknown&gt;(objects?: Array&lt;{ id: string; type: string; }&gt;) =&gt; Promise&lt;{ resolved\_objects: ResolvedSimpleSavedObject&lt;T&gt;\[\]; }&gt; | Resolves an array of objects by id, using any legacy URL aliases if they exist |
 |  [create](./kibana-plugin-core-public.savedobjectsclient.create.md) |  | &lt;T = unknown&gt;(type: string, attributes: T, options?: SavedObjectsCreateOptions) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt; | Persists an object |
-|  [delete](./kibana-plugin-core-public.savedobjectsclient.delete.md) |  | (type: string, id: string, options?: SavedObjectsDeleteOptions \| undefined) =&gt; ReturnType&lt;SavedObjectsApi\['delete'\]&gt; | Deletes an object |
+|  [delete](./kibana-plugin-core-public.savedobjectsclient.delete.md) |  | (type: string, id: string, options?: SavedObjectsDeleteOptions) =&gt; ReturnType&lt;SavedObjectsApi\['delete'\]&gt; | Deletes an object |
 |  [find](./kibana-plugin-core-public.savedobjectsclient.find.md) |  | &lt;T = unknown, A = unknown&gt;(options: SavedObjectsFindOptions) =&gt; Promise&lt;SavedObjectsFindResponsePublic&lt;T, unknown&gt;&gt; | Search for objects |
 |  [get](./kibana-plugin-core-public.savedobjectsclient.get.md) |  | &lt;T = unknown&gt;(type: string, id: string) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt; | Fetches a single object |
 |  [resolve](./kibana-plugin-core-public.savedobjectsclient.resolve.md) |  | &lt;T = unknown&gt;(type: string, id: string) =&gt; Promise&lt;ResolvedSimpleSavedObject&lt;T&gt;&gt; | Resolves a single object |

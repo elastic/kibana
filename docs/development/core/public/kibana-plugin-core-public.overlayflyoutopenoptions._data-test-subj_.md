@@ -4,7 +4,7 @@
 
 ## OverlayFlyoutOpenOptions."data-test-subj" property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 'data-test-subj'?: string;

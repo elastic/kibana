@@ -72,7 +72,7 @@ init().catch((e) => {
     console.error(e.message);
   } else if (isAxiosError(e)) {
     console.error(
-      `${e.config.method?.toUpperCase() || 'GET'} ${e.config.url} (Code: ${
+      `${e.config?.method?.toUpperCase() || 'GET'} ${e.config?.url} (Code: ${
         e.response?.status
       })`
     );

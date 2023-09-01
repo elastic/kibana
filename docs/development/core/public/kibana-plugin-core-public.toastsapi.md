@@ -6,12 +6,12 @@
 
 Methods for adding and removing global toast messages.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class ToastsApi implements IToasts 
 ```
-<b>Implements:</b> IToasts
+**Implements:** IToasts
 
 ## Constructors
 

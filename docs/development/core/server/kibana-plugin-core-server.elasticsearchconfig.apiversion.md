@@ -6,7 +6,7 @@
 
 Version of the Elasticsearch (6.7, 7.1 or `master`<!-- -->) client will be connecting to.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly apiVersion: string;

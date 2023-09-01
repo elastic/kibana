@@ -6,7 +6,7 @@
 
 URL rewritten in onPreRouting request interceptor.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly rewrittenUrl?: URL;

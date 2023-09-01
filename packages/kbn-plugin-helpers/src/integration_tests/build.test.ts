@@ -39,6 +39,9 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
     {
+      env: {
+        NODE_OPTIONS: '--openssl-legacy-provider',
+      },
       cwd: REPO_ROOT,
       all: true,
     }
@@ -51,7 +54,8 @@ it('builds a generated plugin into a viable archive', async () => {
   };
 
   expect(filterLogs(generateProc.all)).toMatchInlineSnapshot(`
-    " succ 🎉
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/7.17/production.html#openssl-legacy-provider
+     succ 🎉
 
           Your plugin has been created in plugins/foo_test_plugin
     "
@@ -61,13 +65,17 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
     {
+      env: {
+        NODE_OPTIONS: '--openssl-legacy-provider',
+      },
       cwd: PLUGIN_DIR,
       all: true,
     }
   );
 
   expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
-    " info deleting the build and target directories
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/7.17/production.html#openssl-legacy-provider
+     info deleting the build and target directories
      info running @kbn/optimizer
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]

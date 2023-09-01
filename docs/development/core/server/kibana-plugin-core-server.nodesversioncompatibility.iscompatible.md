@@ -4,7 +4,7 @@
 
 ## NodesVersionCompatibility.isCompatible property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isCompatible: boolean;

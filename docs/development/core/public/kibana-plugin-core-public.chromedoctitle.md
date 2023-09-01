@@ -6,7 +6,7 @@
 
 APIs for accessing and updating the document title.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ChromeDocTitle 

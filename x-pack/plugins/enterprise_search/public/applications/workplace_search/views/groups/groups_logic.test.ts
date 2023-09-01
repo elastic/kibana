@@ -256,7 +256,7 @@ describe('GroupsLogic', () => {
       };
 
       beforeAll(() => {
-        jest.useFakeTimers('legacy');
+        jest.useFakeTimers({ legacyFakeTimers: true });
       });
 
       afterAll(() => {

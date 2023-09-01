@@ -32,6 +32,7 @@ RUNTIME_DEPS = [
   "@npm//utility-types",
   "@npm//io-ts",
   "@npm//query-string",
+  "@npm//react",
   "@npm//react-router-config",
   "@npm//react-router-dom",
 ]
@@ -41,7 +42,9 @@ TYPES_DEPS = [
   "@npm//query-string",
   "@npm//utility-types",
   "@npm//@types/jest",
+  "@npm//@types/history",
   "@npm//@types/node",
+  "@npm//@types/react",
   "@npm//@types/react-router-config",
   "@npm//@types/react-router-dom",
 ]

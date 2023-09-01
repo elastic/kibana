@@ -6,7 +6,7 @@
 
 Add a new fatal error. This will stop the Kibana Public Core and display a fatal error screen with details about the Kibana build and the error.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 add: (error: string | Error, source?: string) => never;

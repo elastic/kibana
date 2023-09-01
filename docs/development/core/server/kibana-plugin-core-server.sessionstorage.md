@@ -6,7 +6,7 @@
 
 Provides an interface to store and retrieve data across requests.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SessionStorage<T> 

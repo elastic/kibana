@@ -6,7 +6,7 @@
 
 Creates a [scoped cluster client](./kibana-plugin-core-server.iscopedclusterclient.md) bound to given [request](./kibana-plugin-core-server.scopeablerequest.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 asScoped: (request: ScopeableRequest) => IScopedClusterClient;

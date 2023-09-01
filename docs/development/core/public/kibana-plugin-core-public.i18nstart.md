@@ -6,7 +6,7 @@
 
 I18nStart.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface I18nStart 
@@ -14,7 +14,7 @@ export interface I18nStart
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [Context](./kibana-plugin-core-public.i18nstart.context.md) | ({ children }: { children: React.ReactNode; }) =&gt; JSX.Element | React Context provider required as the topmost component for any i18n-compatible React tree. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [Context](./kibana-plugin-core-public.i18nstart.context.md) |  | ({ children }: { children: React.ReactNode; }) =&gt; JSX.Element | React Context provider required as the topmost component for any i18n-compatible React tree. |
 

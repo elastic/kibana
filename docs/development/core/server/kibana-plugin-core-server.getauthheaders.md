@@ -6,7 +6,7 @@
 
 Get headers to authenticate a user against Elasticsearch.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type GetAuthHeaders = (request: KibanaRequest) => AuthHeaders | undefined;

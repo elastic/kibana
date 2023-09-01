@@ -6,7 +6,7 @@
 
 A key used to encrypt a cookie's value. Should be at least 32 characters long.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 encryptionKey: string;

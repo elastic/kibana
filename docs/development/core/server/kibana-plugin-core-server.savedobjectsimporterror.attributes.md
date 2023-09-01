@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportError.attributes property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly attributes?: Record<string, any> | undefined;

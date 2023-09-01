@@ -4,7 +4,7 @@
 
 ## OverlayModalOpenOptions.closeButtonAriaLabel property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 closeButtonAriaLabel?: string;

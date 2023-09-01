@@ -6,7 +6,7 @@
 
 A tool set defining an outcome of OnPreRouting interceptor for incoming request.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OnPreRoutingToolkit 
@@ -14,8 +14,8 @@ export interface OnPreRoutingToolkit
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [next](./kibana-plugin-core-server.onpreroutingtoolkit.next.md) | () =&gt; OnPreRoutingResult | To pass request to the next handler |
-|  [rewriteUrl](./kibana-plugin-core-server.onpreroutingtoolkit.rewriteurl.md) | (url: string) =&gt; OnPreRoutingResult | Rewrite requested resources url before is was authenticated and routed to a handler |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [next](./kibana-plugin-core-server.onpreroutingtoolkit.next.md) |  | () =&gt; OnPreRoutingResult | To pass request to the next handler |
+|  [rewriteUrl](./kibana-plugin-core-server.onpreroutingtoolkit.rewriteurl.md) |  | (url: string) =&gt; OnPreRoutingResult | Rewrite requested resources url before is was authenticated and routed to a handler |
 

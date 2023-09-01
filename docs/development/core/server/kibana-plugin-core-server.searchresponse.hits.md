@@ -4,7 +4,7 @@
 
 ## SearchResponse.hits property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 hits: {

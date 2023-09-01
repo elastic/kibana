@@ -6,7 +6,7 @@
 
 Extended set of [KibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) helpers used to respond with HTML or JS resource.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface HttpResourcesServiceToolkit 
@@ -14,10 +14,10 @@ export interface HttpResourcesServiceToolkit
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [renderAnonymousCoreApp](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderanonymouscoreapp.md) | (options?: HttpResourcesRenderOptions) =&gt; Promise&lt;IKibanaResponse&gt; | To respond with HTML page bootstrapping Kibana application without retrieving user-specific information. |
-|  [renderCoreApp](./kibana-plugin-core-server.httpresourcesservicetoolkit.rendercoreapp.md) | (options?: HttpResourcesRenderOptions) =&gt; Promise&lt;IKibanaResponse&gt; | To respond with HTML page bootstrapping Kibana application. |
-|  [renderHtml](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderhtml.md) | (options: HttpResourcesResponseOptions) =&gt; IKibanaResponse | To respond with a custom HTML page. |
-|  [renderJs](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderjs.md) | (options: HttpResourcesResponseOptions) =&gt; IKibanaResponse | To respond with a custom JS script file. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [renderAnonymousCoreApp](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderanonymouscoreapp.md) |  | (options?: HttpResourcesRenderOptions) =&gt; Promise&lt;IKibanaResponse&gt; | To respond with HTML page bootstrapping Kibana application without retrieving user-specific information. |
+|  [renderCoreApp](./kibana-plugin-core-server.httpresourcesservicetoolkit.rendercoreapp.md) |  | (options?: HttpResourcesRenderOptions) =&gt; Promise&lt;IKibanaResponse&gt; | To respond with HTML page bootstrapping Kibana application. |
+|  [renderHtml](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderhtml.md) |  | (options: HttpResourcesResponseOptions) =&gt; IKibanaResponse | To respond with a custom HTML page. |
+|  [renderJs](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderjs.md) |  | (options: HttpResourcesResponseOptions) =&gt; IKibanaResponse | To respond with a custom JS script file. |
 

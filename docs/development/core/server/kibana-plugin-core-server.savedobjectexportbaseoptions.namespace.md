@@ -6,7 +6,7 @@
 
 optional namespace to override the namespace used by the savedObjectsClient.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 namespace?: string;

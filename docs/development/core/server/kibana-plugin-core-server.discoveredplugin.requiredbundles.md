@@ -6,7 +6,7 @@
 
 List of plugin ids that this plugin's UI code imports modules from that are not in `requiredPlugins`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly requiredBundles: readonly PluginName[];

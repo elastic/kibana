@@ -15,7 +15,7 @@ import { ToolingLog, isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-
 
 const isConcliftOnGetError = (error: any) => {
   return (
-    isAxiosResponseError(error) && error.config.method === 'GET' && error.response.status === 409
+    isAxiosResponseError(error) && error.config?.method === 'GET' && error.response.status === 409
   );
 };
 

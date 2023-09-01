@@ -6,7 +6,7 @@
 
 Function returning the url to use to redirect to the editing page of this object. If not defined, editing will not be allowed.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getEditUrl?: (savedObject: SavedObject<Attributes>) => string;

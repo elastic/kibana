@@ -6,7 +6,7 @@
 
 Return type from a function to validate cookie contents.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SessionCookieValidationResult 
@@ -14,8 +14,8 @@ export interface SessionCookieValidationResult
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [isValid](./kibana-plugin-core-server.sessioncookievalidationresult.isvalid.md) | boolean | Whether the cookie is valid or not. |
-|  [path?](./kibana-plugin-core-server.sessioncookievalidationresult.path.md) | string | <i>(Optional)</i> The "Path" attribute of the cookie; if the cookie is invalid, this is used to clear it. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [isValid](./kibana-plugin-core-server.sessioncookievalidationresult.isvalid.md) |  | boolean | Whether the cookie is valid or not. |
+|  [path?](./kibana-plugin-core-server.sessioncookievalidationresult.path.md) |  | string | _(Optional)_ The "Path" attribute of the cookie; if the cookie is invalid, this is used to clear it. |
 

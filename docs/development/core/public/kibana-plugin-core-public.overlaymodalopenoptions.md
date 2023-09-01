@@ -5,7 +5,7 @@
 ## OverlayModalOpenOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface OverlayModalOpenOptions 
@@ -13,10 +13,10 @@ export interface OverlayModalOpenOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  ["data-test-subj"?](./kibana-plugin-core-public.overlaymodalopenoptions._data-test-subj_.md) | string | <i>(Optional)</i> |
-|  [className?](./kibana-plugin-core-public.overlaymodalopenoptions.classname.md) | string | <i>(Optional)</i> |
-|  [closeButtonAriaLabel?](./kibana-plugin-core-public.overlaymodalopenoptions.closebuttonarialabel.md) | string | <i>(Optional)</i> |
-|  [maxWidth?](./kibana-plugin-core-public.overlaymodalopenoptions.maxwidth.md) | boolean \| number \| string | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  ["data-test-subj"?](./kibana-plugin-core-public.overlaymodalopenoptions._data-test-subj_.md) |  | string | _(Optional)_ |
+|  [className?](./kibana-plugin-core-public.overlaymodalopenoptions.classname.md) |  | string | _(Optional)_ |
+|  [closeButtonAriaLabel?](./kibana-plugin-core-public.overlaymodalopenoptions.closebuttonarialabel.md) |  | string | _(Optional)_ |
+|  [maxWidth?](./kibana-plugin-core-public.overlaymodalopenoptions.maxwidth.md) |  | boolean \| number \| string | _(Optional)_ |
 

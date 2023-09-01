@@ -4,7 +4,7 @@
 
 ## IKibanaResponse.payload property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly payload?: T;

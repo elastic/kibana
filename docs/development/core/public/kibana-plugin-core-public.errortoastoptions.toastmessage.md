@@ -6,7 +6,7 @@
 
 The message to be shown in the toast. If this is not specified the error's message will be shown in the toast instead. Overwriting that message can be used to provide more user-friendly toasts. If you specify this, the error message will still be shown in the detailed error modal.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 toastMessage?: string;

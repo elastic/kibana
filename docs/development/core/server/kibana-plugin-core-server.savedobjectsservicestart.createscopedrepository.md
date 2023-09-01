@@ -6,7 +6,7 @@
 
 Creates a [Saved Objects repository](./kibana-plugin-core-server.isavedobjectsrepository.md) that uses the credentials from the passed in request to authenticate with Elasticsearch.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;

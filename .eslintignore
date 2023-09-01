@@ -25,6 +25,7 @@ snapshots.js
 /x-pack/plugins/canvas/canvas_plugin
 /x-pack/plugins/canvas/shareable_runtime/build
 /x-pack/plugins/canvas/storybook/build
+/x-pack/plugins/cloud/server/assets/fullstory_library.js
 /x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/**
 /x-pack/plugins/reporting/server/export_types/printable_pdf_v2/server/lib/pdf/assets/**
 

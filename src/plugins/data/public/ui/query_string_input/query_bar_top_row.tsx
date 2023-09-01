@@ -277,7 +277,6 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
       });
 
     const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'kbnQueryBar__datePickerWrapper-isHidden': isQueryInputFocused,
     });
 

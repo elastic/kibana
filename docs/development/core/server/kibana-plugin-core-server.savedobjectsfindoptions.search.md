@@ -6,7 +6,7 @@
 
 Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 search?: string;

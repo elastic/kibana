@@ -6,7 +6,7 @@
 
 (default='wait\_for') The Elasticsearch refresh setting for this operation. See [MutatingOperationRefreshSetting](./kibana-plugin-core-server.mutatingoperationrefreshsetting.md)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 refresh?: MutatingOperationRefreshSetting;

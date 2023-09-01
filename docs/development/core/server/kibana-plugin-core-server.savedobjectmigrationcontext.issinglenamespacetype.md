@@ -6,7 +6,7 @@
 
 Whether this is a single-namespace type or not
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly isSingleNamespaceType: boolean;

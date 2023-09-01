@@ -4,7 +4,7 @@
 
 ## RouteValidationResultFactory.badRequest property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 badRequest: (error: Error | string, path?: string[]) => {

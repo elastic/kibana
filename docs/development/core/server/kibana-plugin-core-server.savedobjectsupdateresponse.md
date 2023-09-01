@@ -5,17 +5,17 @@
 ## SavedObjectsUpdateResponse interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObject<T>, 'attributes' | 'references'> 
 ```
-<b>Extends:</b> Omit&lt;SavedObject&lt;T&gt;, 'attributes' \| 'references'&gt;
+**Extends:** Omit&lt;SavedObject&lt;T&gt;, 'attributes' \| 'references'&gt;
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [attributes](./kibana-plugin-core-server.savedobjectsupdateresponse.attributes.md) | Partial&lt;T&gt; |  |
-|  [references](./kibana-plugin-core-server.savedobjectsupdateresponse.references.md) | SavedObjectReference\[\] \| undefined |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [attributes](./kibana-plugin-core-server.savedobjectsupdateresponse.attributes.md) |  | Partial&lt;T&gt; |  |
+|  [references](./kibana-plugin-core-server.savedobjectsupdateresponse.references.md) |  | SavedObjectReference\[\] \| undefined |  |
 

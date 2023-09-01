@@ -6,7 +6,7 @@
 
 A function called when an application should be unmounted from the page. This function should be synchronous.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type AppUnmount = () => void;

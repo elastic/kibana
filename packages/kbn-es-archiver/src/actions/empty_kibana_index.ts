@@ -10,7 +10,7 @@ import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 
-import { migrateKibanaIndex, createStats, cleanKibanaIndices } from '../lib';
+import { migrateSavedObjectIndex, createStats, cleanSavedObjectIndices } from '../lib';
 
 export async function emptyKibanaIndexAction({
   client,
@@ -23,8 +23,8 @@ export async function emptyKibanaIndexAction({
 }) {
   const stats = createStats('emptyKibanaIndex', log);
 
-  await cleanKibanaIndices({ client, stats, log });
-  await migrateKibanaIndex({ kbnClient });
+  await cleanSavedObjectIndices({ client, stats, log });
+  await migrateSavedObjectIndex({ kbnClient });
   stats.createdIndex('.kibana');
   return stats.toJSON();
 }

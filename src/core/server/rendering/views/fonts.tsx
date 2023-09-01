@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable react/no-danger */
-
 import React, { FunctionComponent } from 'react';
 
 import { RenderingMetadata } from '../types';
@@ -379,6 +377,7 @@ export const Fonts: FunctionComponent<Props> = ({ url, themeVersion }) => {
   const sansFont = themeVersion === 'v7' ? getInterUi(url) : getInter(url);
   const codeFont = getRoboto(url);
 
+  /* eslint-disable react/no-danger */
   return (
     <style
       dangerouslySetInnerHTML={{
@@ -413,4 +412,5 @@ export const Fonts: FunctionComponent<Props> = ({ url, themeVersion }) => {
       }}
     />
   );
+  /* eslint-enable react/no-danger */
 };

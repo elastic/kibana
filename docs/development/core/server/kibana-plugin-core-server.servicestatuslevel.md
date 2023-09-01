@@ -6,7 +6,7 @@
 
 A convenience type that represents the union of each value in [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ServiceStatusLevel = typeof ServiceStatusLevels[keyof typeof ServiceStatusLevels];

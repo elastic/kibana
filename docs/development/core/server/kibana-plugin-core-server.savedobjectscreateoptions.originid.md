@@ -6,7 +6,7 @@
 
 Optional ID of the original saved object, if this object's `id` was regenerated
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 originId?: string;

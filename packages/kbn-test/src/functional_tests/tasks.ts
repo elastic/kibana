@@ -113,19 +113,26 @@ export async function runTests(options: RunTestsParams) {
           abortCtrl.abort();
         };
 
-        let es;
+        let shutdownEs;
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            es = await runElasticsearch({ config, options: { ...options, log }, onEarlyExit });
+            shutdownEs = await runElasticsearch({ ...options, config, log, onEarlyExit });
             if (abortCtrl.signal.aborted) {
               return;
             }
           }
-          await runKibanaServer({ procs, config, options, onEarlyExit });
+          await runKibanaServer({
+            procs,
+            config,
+            options: {
+              installDir: options.installDir,
+            },
+            onEarlyExit,
+          });
           if (abortCtrl.signal.aborted) {
             return;
           }
-          await runFtr({ configPath, options: { ...options, log } }, abortCtrl.signal);
+          await runFtr({ configPath, options: { ...options, log }, signal: abortCtrl.signal });
         } finally {
           try {
             const delay = config.get('kbnTestServer.delayShutdown');
@@ -136,8 +143,8 @@ export async function runTests(options: RunTestsParams) {
 
             await procs.stop('kibana');
           } finally {
-            if (es) {
-              await es.cleanup();
+            if (shutdownEs) {
+              await shutdownEs();
             }
           }
         }
@@ -177,7 +184,7 @@ export async function startServers({ ...options }: StartServerOptions) {
   await withProcRunner(log, async (procs) => {
     const config = await readConfigFile(log, options.esVersion, options.config);
 
-    const es = await runElasticsearch({ config, options: opts });
+    const shutdownEs = await runElasticsearch({ config, log, esFrom: options.esFrom });
     await runKibanaServer({
       procs,
       config,
@@ -201,7 +208,7 @@ export async function startServers({ ...options }: StartServerOptions) {
     log.success(makeSuccessMessage(options));
 
     await procs.waitForAllToStop();
-    await es.cleanup();
+    await shutdownEs();
   });
 }
 

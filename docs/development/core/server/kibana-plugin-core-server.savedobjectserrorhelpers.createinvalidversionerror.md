@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.createInvalidVersionError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static createInvalidVersionError(versionInput?: string): DecoratedError;
@@ -14,9 +14,9 @@ static createInvalidVersionError(versionInput?: string): DecoratedError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  versionInput | string |  |
+|  versionInput | string | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 DecoratedError
 

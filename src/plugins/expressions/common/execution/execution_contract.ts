@@ -23,7 +23,11 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
     return !finished;
   }
 
-  constructor(protected readonly execution: Execution<Input, Output, InspectorAdapters>) {}
+  protected readonly execution: Execution<Input, Output, InspectorAdapters>;
+
+  constructor(execution: Execution<Input, Output, InspectorAdapters>) {
+    this.execution = execution;
+  }
 
   /**
    * Cancel the execution of the expression. This will set abort signal

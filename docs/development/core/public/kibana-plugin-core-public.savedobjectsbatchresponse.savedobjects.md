@@ -4,7 +4,7 @@
 
 ## SavedObjectsBatchResponse.savedObjects property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 savedObjects: Array<SimpleSavedObject<T>>;

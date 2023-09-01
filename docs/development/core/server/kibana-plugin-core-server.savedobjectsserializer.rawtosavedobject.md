@@ -6,7 +6,7 @@
 
 Converts a document from the format that is stored in elasticsearch to the saved object client format.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 rawToSavedObject<T = unknown>(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): SavedObjectSanitizedDoc<T>;
@@ -17,9 +17,9 @@ rawToSavedObject<T = unknown>(doc: SavedObjectsRawDoc, options?: SavedObjectsRaw
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  doc | SavedObjectsRawDoc | The raw ES document to be converted to saved object format. |
-|  options | SavedObjectsRawDocParseOptions | Options for parsing the raw document. |
+|  options | SavedObjectsRawDocParseOptions | _(Optional)_ Options for parsing the raw document. |
 
-<b>Returns:</b>
+**Returns:**
 
 SavedObjectSanitizedDoc&lt;T&gt;
 

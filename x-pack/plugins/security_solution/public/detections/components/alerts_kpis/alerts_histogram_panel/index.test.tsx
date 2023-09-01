@@ -80,7 +80,6 @@ describe('AlertsHistogramPanel', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('renders correctly', () => {
@@ -148,6 +147,7 @@ describe('AlertsHistogramPanel', () => {
           expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBeTruthy();
         });
         wrapper.unmount();
+        spyOnBuildEsQuery.mockRestore();
       });
     });
   });
@@ -186,6 +186,7 @@ describe('AlertsHistogramPanel', () => {
         ]);
       });
       wrapper.unmount();
+      mockGetAlertsHistogramQuery.mockReset();
     });
   });
 

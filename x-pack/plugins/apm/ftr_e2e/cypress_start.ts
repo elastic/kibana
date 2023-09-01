@@ -61,7 +61,11 @@ async function cypressStart(
 
   const res = await cypressExecution({
     ...(spec !== undefined ? { spec } : {}),
-    config: { baseUrl: kibanaUrl },
+    config: {
+      e2e: {
+        baseUrl: kibanaUrl,
+      },
+    },
     env: {
       START_DATE: start,
       END_DATE: end,

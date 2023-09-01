@@ -5,7 +5,7 @@
 ## SavedObjectsFindOptionsReference interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsFindOptionsReference 
@@ -13,8 +13,8 @@ export interface SavedObjectsFindOptionsReference
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./kibana-plugin-core-public.savedobjectsfindoptionsreference.id.md) | string |  |
-|  [type](./kibana-plugin-core-public.savedobjectsfindoptionsreference.type.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./kibana-plugin-core-public.savedobjectsfindoptionsreference.id.md) |  | string |  |
+|  [type](./kibana-plugin-core-public.savedobjectsfindoptionsreference.type.md) |  | string |  |
 

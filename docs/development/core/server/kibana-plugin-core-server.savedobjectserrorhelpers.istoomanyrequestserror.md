@@ -4,7 +4,7 @@
 
 ## SavedObjectsErrorHelpers.isTooManyRequestsError() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static isTooManyRequestsError(error: Error | DecoratedError): boolean;
@@ -16,7 +16,7 @@ static isTooManyRequestsError(error: Error | DecoratedError): boolean;
 |  --- | --- | --- |
 |  error | Error \| DecoratedError |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

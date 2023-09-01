@@ -8,7 +8,7 @@ A function that can be used to set the mount point used to populate the applicat
 
 Calling the handler multiple time will erase the current content of the action menu with the mount from the latest call. Calling the handler with `undefined` will unmount the current mount point. Calling the handler after the application has been unmounted will have no effect.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;

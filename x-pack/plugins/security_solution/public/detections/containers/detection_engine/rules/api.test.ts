@@ -478,11 +478,12 @@ describe('Detections Rules API', () => {
       name: 'fileToImport',
       size: 89,
       type: 'json',
+      webkitRelativePath: '/webkitRelativePath',
       arrayBuffer: jest.fn(),
       slice: jest.fn(),
       stream: jest.fn(),
       text: jest.fn(),
-    } as File;
+    } as unknown as File;
     const formData = new FormData();
     formData.append('file', fileToImport);
 
@@ -544,7 +545,7 @@ describe('Detections Rules API', () => {
       slice: jest.fn(),
       stream: jest.fn(),
       text: jest.fn(),
-    } as Blob;
+    } as unknown as Blob;
 
     beforeEach(() => {
       fetchMock.mockClear();

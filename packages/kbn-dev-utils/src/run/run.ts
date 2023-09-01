@@ -8,11 +8,12 @@
 
 import { pickLevelFromFlags, ToolingLog, LogLevel } from '../tooling_log';
 import { createFlagError } from './fail';
-import { Flags, getFlags, FlagOptions } from './flags';
+import { Flags, getFlags, FlagOptions, DEFAULT_FLAG_ALIASES } from './flags';
 import { ProcRunner, withProcRunner } from '../proc_runner';
 import { getHelp } from './help';
 import { CleanupTask, Cleanup } from './cleanup';
 import { Metrics, MetricsMeta } from './metrics';
+import { FlagsReader } from './flags_reader';
 
 export interface RunContext {
   log: ToolingLog;
@@ -20,6 +21,7 @@ export interface RunContext {
   procRunner: ProcRunner;
   statsMeta: MetricsMeta;
   addCleanupTask: (task: CleanupTask) => void;
+  flagsReader: FlagsReader;
 }
 export type RunFn = (context: RunContext) => Promise<void> | void;
 
@@ -70,6 +72,12 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
         procRunner,
         statsMeta: metrics.meta,
         addCleanupTask: cleanup.add.bind(cleanup),
+        flagsReader: new FlagsReader(flags, {
+          aliases: {
+            ...options.flags?.alias,
+            ...DEFAULT_FLAG_ALIASES,
+          },
+        }),
       });
     });
   } catch (error) {

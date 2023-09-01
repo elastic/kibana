@@ -6,7 +6,7 @@
 
 Returns true if the key is a "known" uiSetting, meaning it is either registered by any plugin or was previously added as a custom setting via the `set()` method.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isDeclared: (key: string) => boolean;

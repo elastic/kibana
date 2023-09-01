@@ -15,8 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/132855
-  describe.skip('find', () => {
+  describe('find', () => {
     let KIBANA_VERSION: string;
 
     before(async () => {

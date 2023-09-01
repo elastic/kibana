@@ -6,7 +6,7 @@
 
 If `ignoreMissingReferences` is specified, reference validation will be skipped for this object.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 ignoreMissingReferences?: boolean;

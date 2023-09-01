@@ -6,7 +6,7 @@
 
 Opens a flyout panel with the given mount point inside. You can use `close()` on the returned FlyoutRef to close the flyout.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
@@ -17,9 +17,9 @@ open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  mount | MountPoint | [MountPoint](./kibana-plugin-core-public.mountpoint.md) - Mounts the children inside a flyout panel |
-|  options | OverlayFlyoutOpenOptions | [OverlayFlyoutOpenOptions](./kibana-plugin-core-public.overlayflyoutopenoptions.md) - options for the flyout  [OverlayRef](./kibana-plugin-core-public.overlayref.md) A reference to the opened flyout panel. |
+|  options | OverlayFlyoutOpenOptions | _(Optional)_ [OverlayFlyoutOpenOptions](./kibana-plugin-core-public.overlayflyoutopenoptions.md) - options for the flyout  [OverlayRef](./kibana-plugin-core-public.overlayref.md) A reference to the opened flyout panel. |
 
-<b>Returns:</b>
+**Returns:**
 
 OverlayRef
 

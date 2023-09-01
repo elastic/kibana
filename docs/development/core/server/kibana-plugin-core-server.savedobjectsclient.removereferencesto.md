@@ -6,7 +6,7 @@
 
 Updates all objects containing a reference to the given {<!-- -->type, id<!-- -->} tuple to remove the said reference.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
@@ -18,9 +18,9 @@ removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferen
 |  --- | --- | --- |
 |  type | string |  |
 |  id | string |  |
-|  options | SavedObjectsRemoveReferencesToOptions |  |
+|  options | SavedObjectsRemoveReferencesToOptions | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;SavedObjectsRemoveReferencesToResponse&gt;
 

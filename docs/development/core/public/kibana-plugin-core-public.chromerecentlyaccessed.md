@@ -6,7 +6,7 @@
 
 [APIs](./kibana-plugin-core-public.chromerecentlyaccessed.md) for recently accessed history.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ChromeRecentlyAccessed 

@@ -45,6 +45,7 @@ export interface SavedQueryFormRefObject {
   validateEcsMapping: ECSMappingEditorFieldRef['validate'];
 }
 
+// eslint-disable-next-line react/display-name
 const SavedQueryFormComponent = forwardRef<SavedQueryFormRefObject, SavedQueryFormProps>(
   ({ viewMode, hasPlayground, isValid }, ref) => {
     const [playgroundVisible, setPlaygroundVisible] = useState(false);

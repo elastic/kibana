@@ -5,7 +5,7 @@
 ## SavedObjectsCheckConflictsObject interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SavedObjectsCheckConflictsObject 
@@ -13,8 +13,8 @@ export interface SavedObjectsCheckConflictsObject
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectscheckconflictsobject.id.md) | string |  |
-|  [type](./kibana-plugin-core-server.savedobjectscheckconflictsobject.type.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./kibana-plugin-core-server.savedobjectscheckconflictsobject.id.md) |  | string |  |
+|  [type](./kibana-plugin-core-server.savedobjectscheckconflictsobject.type.md) |  | string |  |
 

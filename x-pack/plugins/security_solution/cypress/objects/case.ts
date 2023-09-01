@@ -57,7 +57,7 @@ export const getCase1 = (): TestCase => ({
   tags: ['Tag1', 'Tag2'],
   description: 'This is the case description',
   timeline: getTimeline(),
-  reporter: 'elastic',
+  reporter: 'system_indices_superuser',
   owner: 'securitySolution',
 });
 

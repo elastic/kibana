@@ -18,6 +18,8 @@ import {
 // @internal
 export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartServersCliOptions };
 
+export { runElasticsearch, runKibanaServer } from './functional_tests/lib';
+
 // @ts-ignore not typed yet
 // @internal
 export { runTests, startServers } from './functional_tests/tasks';
@@ -49,6 +51,8 @@ export {
 export { readConfigFile } from './functional_test_runner/lib/config/read_config_file';
 
 export { runFtrCli } from './functional_test_runner/cli';
+
+export { ProviderCollection, readProviderSpec } from './functional_test_runner/lib/providers';
 
 // @internal
 export { setupJUnitReportGeneration, escapeCdata } from './mocha';
