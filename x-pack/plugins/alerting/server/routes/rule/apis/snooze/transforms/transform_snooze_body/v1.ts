@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { RuleSnoozeSchedule } from '../../../../../../application/rule/types';
+import { TypeOf } from '@kbn/config-schema';
+import { snoozeBodySchemaV1 } from '../../../../../../../common/routes/rule/apis/snooze';
 
-export const transformSnoozeBody: (opts: { snooze_schedule: RuleSnoozeSchedule }) => {
-  snoozeSchedule: RuleSnoozeSchedule;
+type SnoozeBodySchema = TypeOf<typeof snoozeBodySchemaV1>;
+
+export const transformSnoozeBody: (opts: SnoozeBodySchema) => {
+  snoozeSchedule: SnoozeBodySchema['snooze_schedule'];
 } = ({ snooze_schedule: snoozeSchedule }) => ({
   snoozeSchedule,
 });
