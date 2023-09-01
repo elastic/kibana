@@ -137,13 +137,6 @@ export interface SavedObjectsServiceSetup {
    * Returns the default index used for saved objects.
    */
   getDefaultIndex: () => string;
-
-  /**
-   * Returns all (aliases to) kibana system indices used for saved object storage.
-   *
-   * @deprecated use the `start` contract counterpart.
-   */
-  getAllIndices: () => string[];
 }
 
 /**
@@ -235,6 +228,8 @@ export interface SavedObjectsServiceStart {
   getDefaultIndex: () => string;
   /**
    * Returns all (aliases to) kibana system indices used for saved object storage.
+   *
+   * @remarks Only the indices effectively present in the current running environment will be returned.
    */
   getAllIndices: () => string[];
 }
