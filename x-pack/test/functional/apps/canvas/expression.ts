@@ -15,7 +15,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects(['canvas', 'common']);
+  const PageObjects = getPageObjects(['canvas']);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
