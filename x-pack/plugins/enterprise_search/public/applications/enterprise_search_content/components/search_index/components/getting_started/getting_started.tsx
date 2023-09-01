@@ -51,6 +51,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { OverviewLogic } from '../../overview.logic';
 import { GenerateApiKeyModal } from '../generate_api_key_modal/modal';
 
+import { consoleDefinition } from './languages/console';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
 
@@ -356,7 +357,11 @@ export const APIGettingStarted = () => {
           <CodeBox
             languages={languageDefinitions}
             codeSnippet={getLanguageDefinitionCodeSnippet(selectedLanguage, 'ingestData', codeArgs)}
-            consoleRequest={getConsoleRequest('ingestData')}
+            consoleRequest={getLanguageDefinitionCodeSnippet(
+              consoleDefinition,
+              'ingestData',
+              codeArgs
+            )}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             assetBasePath={assetBasePath}
