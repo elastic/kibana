@@ -126,6 +126,7 @@ export interface AggregateOptions {
     id: string;
   };
   filter?: string | KueryNode;
+  filterConsumers?: string[];
   page?: number;
   perPage?: number;
 }

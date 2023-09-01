@@ -7,6 +7,7 @@
 
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isEmpty } from 'lodash';
 import { AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { buildKueryNodeFilter } from '../common';
@@ -25,13 +26,14 @@ export async function aggregate<T = Record<string, unknown>>(
   params: AggregateParams<T>
 ): Promise<T> {
   const { options = {}, aggs } = params;
-  const { filter, page = 1, perPage = 0, ...restOptions } = options;
+  const { filter, page = 1, perPage = 0, filterConsumers, ...restOptions } = options;
 
   let authorizationTuple;
   try {
     authorizationTuple = await context.authorization.getFindAuthorizationFilter(
       AlertingAuthorizationEntity.Rule,
-      alertingAuthorizationFilterOpts
+      alertingAuthorizationFilterOpts,
+      isEmpty(filterConsumers) ? undefined : new Set(filterConsumers)
     );
     validateRuleAggregationFields(aggs);
   } catch (error) {

@@ -31,10 +31,12 @@ import {
 } from '../../components/alert_search_bar/containers';
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
-import { observabilityAlertFeatureIds } from '../../../common/constants';
+import {
+  observabilityAlertFeatureIds,
+  observabilityRuleCreationValidConsumers,
+} from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
-import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -131,6 +133,7 @@ function InternalAlertsPage() {
       const response = await loadRuleAggregations({
         http,
         typesFilter: filteredRuleTypes,
+        filterConsumers: observabilityRuleCreationValidConsumers,
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;

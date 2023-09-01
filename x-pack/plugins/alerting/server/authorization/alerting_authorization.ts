@@ -177,13 +177,11 @@ export class AlertingAuthorization {
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // We have some rules with consumer of "alerts" which indirectly means the same as
     // a consumer of the rule type producer. Let's simplify the code and set it accordingly
-    const consumer = isEmpty(ruleType.legacyConsumers)
-      ? legacyConsumer === ALERTS_FEATURE_ID
-        ? ruleType.producer
-        : legacyConsumer
-      : ruleType.legacyConsumers.includes(legacyConsumer)
-      ? ruleType.producer
-      : legacyConsumer;
+    const consumer = getValidConsumer({
+      validLegacyConsumers: ruleType.validLegacyConsumers,
+      legacyConsumer,
+      producer: ruleType.producer,
+    });
 
     const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
@@ -367,23 +365,26 @@ export class AlertingAuthorization {
                   ruleTypeAuth.producer === feature,
                 ]
               );
-              if (!isEmpty(ruleTypeAuth.legacyConsumers)) {
-                ruleTypeAuth.legacyConsumers.forEach((consumer) => {
-                  if (!allPossibleConsumers[consumer]) {
-                    allPossibleConsumers[consumer] = {
-                      read: true,
-                      all: true,
-                    };
+              if (!isEmpty(ruleTypeAuth.validLegacyConsumers)) {
+                ruleTypeAuth.validLegacyConsumers.forEach((consumer) => {
+                  if (consumer === ALERTS_FEATURE_ID || isEmpty(featuresIds)) {
+                    if (!allPossibleConsumers[consumer]) {
+                      allPossibleConsumers[consumer] = {
+                        read: true,
+                        all: true,
+                      };
+                    }
+
+                    privilegeToRuleType.set(
+                      this.authorization!.actions.alerting.get(
+                        ruleTypeId,
+                        consumer,
+                        authorizationEntity,
+                        operation
+                      ),
+                      [ruleTypeAuth, consumer, hasPrivilegeByOperation(operation), false]
+                    );
                   }
-                  privilegeToRuleType.set(
-                    this.authorization!.actions.alerting.get(
-                      ruleTypeId,
-                      consumer,
-                      authorizationEntity,
-                      operation
-                    ),
-                    [ruleTypeAuth, consumer, hasPrivilegeByOperation(operation), false]
-                  );
                 });
               }
             }
@@ -418,11 +419,13 @@ export class AlertingAuthorization {
 
                     if (isAuthorizedAtProducerLevel) {
                       // granting privileges under the producer automatically authorized the Rules Management UI as well
-                      ruleType.legacyConsumers.forEach((consumer) => {
-                        ruleType.authorizedConsumers[consumer] = mergeHasPrivileges(
-                          hasPrivileges,
-                          ruleType.authorizedConsumers[consumer]
-                        );
+                      ruleType.validLegacyConsumers.forEach((consumer) => {
+                        if (consumer === ALERTS_FEATURE_ID || isEmpty(featuresIds)) {
+                          ruleType.authorizedConsumers[consumer] = mergeHasPrivileges(
+                            hasPrivileges,
+                            ruleType.authorizedConsumers[consumer]
+                          );
+                        }
                       });
                     }
                     authorizedRuleTypes.add(ruleType);
@@ -491,3 +494,16 @@ function getUnauthorizedMessage(
 ): string {
   return `Unauthorized by "${scope}" to ${operation} "${alertTypeId}" ${entity}`;
 }
+
+export const getValidConsumer = ({
+  validLegacyConsumers,
+  legacyConsumer,
+  producer,
+}: {
+  validLegacyConsumers: string[];
+  legacyConsumer: string;
+  producer: string;
+}): string =>
+  legacyConsumer === ALERTS_FEATURE_ID || validLegacyConsumers.includes(legacyConsumer)
+    ? producer
+    : legacyConsumer;

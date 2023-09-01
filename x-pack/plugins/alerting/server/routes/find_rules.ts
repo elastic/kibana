@@ -63,11 +63,11 @@ const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
   ...rest,
   defaultSearchOperator,
   perPage,
+  filterConsumers,
   ...(sortField ? { sortField } : {}),
   ...(sortOrder ? { sortOrder } : {}),
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
-  ...(filterConsumers ? { filterConsumers } : {}),
 });
 const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
   perPage,

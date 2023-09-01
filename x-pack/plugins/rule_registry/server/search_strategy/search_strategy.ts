@@ -72,20 +72,18 @@ export const ruleRegistrySearchStrategyProvider = (
           alerting.getAlertingAuthorizationWithRequest(deps.request),
         ]);
         let authzFilter;
-
+        const fIds = new Set(featureIds);
         if (!siemRequest) {
           authzFilter = (await getAuthzFilter(
             authorization,
-            ReadOperations.Find
+            ReadOperations.Find,
+            fIds
           )) as estypes.QueryDslQueryContainer;
         }
 
         const authorizedRuleTypes =
           featureIds.length > 0
-            ? await authorization.getAuthorizedRuleTypes(
-                AlertingAuthorizationEntity.Alert,
-                new Set(featureIds)
-              )
+            ? await authorization.getAuthorizedRuleTypes(AlertingAuthorizationEntity.Alert, fIds)
             : [];
         return { space, authzFilter, authorizedRuleTypes };
       };

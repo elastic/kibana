@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { pick } from 'lodash';
+import { isEmpty, pick } from 'lodash';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RawRule, RuleTypeParams, SanitizedRule, Rule } from '../../types';
@@ -74,7 +74,7 @@ export async function find<Params extends RuleTypeParams = never>(
     authorizationTuple = await context.authorization.getFindAuthorizationFilter(
       AlertingAuthorizationEntity.Rule,
       alertingAuthorizationFilterOpts,
-      Array.isArray(filterConsumers) ? new Set(filterConsumers) : undefined
+      isEmpty(filterConsumers) ? undefined : new Set(filterConsumers)
     );
   } catch (error) {
     context.auditLogger?.log(

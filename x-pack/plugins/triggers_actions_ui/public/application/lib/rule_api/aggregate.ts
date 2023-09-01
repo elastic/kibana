@@ -43,6 +43,7 @@ export async function loadRuleAggregations({
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
+  filterConsumers,
 }: LoadRuleAggregationsProps): Promise<RuleAggregationFormattedResult> {
   const filters = mapFiltersToKql({
     typesFilter,
@@ -59,6 +60,7 @@ export async function loadRuleAggregations({
         search: searchText,
         filter: filters.length ? filters.join(' and ') : undefined,
         default_search_operator: 'AND',
+        filter_consumers: filterConsumers,
       }),
     }
   );

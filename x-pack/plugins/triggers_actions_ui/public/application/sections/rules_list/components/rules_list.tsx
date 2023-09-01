@@ -278,6 +278,7 @@ export const RulesList = ({
   // Fetch status aggregation
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
     useLoadRuleAggregationsQuery({
+      filterConsumers,
       filters: computedFilter,
       enabled: canLoadRules,
       refresh,

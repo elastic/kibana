@@ -7,7 +7,7 @@
 
 import { ALERTS_FEATURE_ID } from './types';
 
-const ruleTypeIdWithLegacyConsumers: Record<string, string[]> = {
+const ruleTypeIdWithValidLegacyConsumers: Record<string, string[]> = {
   'example.always-firing': [ALERTS_FEATURE_ID],
   transform_health: [ALERTS_FEATURE_ID],
   '.index-threshold': [ALERTS_FEATURE_ID],
@@ -52,24 +52,39 @@ const ruleTypeIdWithLegacyConsumers: Record<string, string[]> = {
   'apm.anomaly': [ALERTS_FEATURE_ID],
   'apm.error_rate': [ALERTS_FEATURE_ID],
   'apm.transaction_error_rate': [ALERTS_FEATURE_ID],
+  'test.always-firing': [ALERTS_FEATURE_ID],
+  'test.always-firing-alert-as-data': [ALERTS_FEATURE_ID],
+  'test.authorization': [ALERTS_FEATURE_ID],
+  'test.cancellableRule': [ALERTS_FEATURE_ID],
+  'test.cumulative-firing': [ALERTS_FEATURE_ID],
+  'test.exceedsAlertLimit': [ALERTS_FEATURE_ID],
+  'test.failing': [ALERTS_FEATURE_ID],
+  'test.gold.noop': [ALERTS_FEATURE_ID],
+  'test.longRunning': [ALERTS_FEATURE_ID],
+  'test.multipleSearches': [ALERTS_FEATURE_ID],
+  'test.never-firing': [ALERTS_FEATURE_ID],
+  'test.noop': [ALERTS_FEATURE_ID],
+  'test.onlyContextVariables': [ALERTS_FEATURE_ID],
+  'test.onlyStateVariables': [ALERTS_FEATURE_ID],
+  'test.patternFiring': [ALERTS_FEATURE_ID],
+  'test.patternFiringAad': [ALERTS_FEATURE_ID],
+  'test.patternFiringAutoRecoverFalse': [ALERTS_FEATURE_ID],
+  'test.patternLongRunning': [ALERTS_FEATURE_ID],
+  'test.patternLongRunning.cancelAlertsOnRuleTimeout': [ALERTS_FEATURE_ID],
+  'test.patternSuccessOrFailure': [ALERTS_FEATURE_ID],
+  'test.restricted-noop': [ALERTS_FEATURE_ID],
+  'test.throw': [ALERTS_FEATURE_ID],
+  'test.unrestricted-noop': [ALERTS_FEATURE_ID],
+  'test.validation': [ALERTS_FEATURE_ID],
 };
 
-const isRuleTypeIdHasLegacyConsumers = (ruleTypeId: string): boolean => {
-  if (ruleTypeIdWithLegacyConsumers[ruleTypeId]) {
-    return true;
-  } else if (ruleTypeId.startsWith('test.')) {
-    return true;
-  }
-  return false;
-};
-
-const getRuleTypeIdLegacyConsumers = (ruleTypeId: string): string[] => {
-  if (ruleTypeIdWithLegacyConsumers[ruleTypeId]) {
-    return ruleTypeIdWithLegacyConsumers[ruleTypeId];
+const getRuleTypeIdValidLegacyConsumers = (ruleTypeId: string): string[] => {
+  if (ruleTypeIdWithValidLegacyConsumers[ruleTypeId]) {
+    return ruleTypeIdWithValidLegacyConsumers[ruleTypeId];
   } else if (ruleTypeId.startsWith('test.')) {
     return [ALERTS_FEATURE_ID];
   }
   return [];
 };
 
-export { isRuleTypeIdHasLegacyConsumers, getRuleTypeIdLegacyConsumers };
+export { getRuleTypeIdValidLegacyConsumers };
