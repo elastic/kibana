@@ -71,6 +71,7 @@ const findLists = async ({
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListSchema> => {
   return http.fetch(`${LIST_URL}/_find`, {
     method: 'GET',
+    version: '2023-10-31',
     query: {
       cursor,
       page,
@@ -162,6 +163,7 @@ const importList = async ({
   formData.append('file', file as Blob);
 
   return http.fetch<ListSchema>(`${LIST_ITEM_URL}/_import`, {
+    version: '2023-10-31',
     body: formData,
     headers: { 'Content-Type': undefined },
     method: 'POST',
@@ -204,6 +206,7 @@ const deleteList = async ({
   signal,
 }: ApiParams & DeleteListSchemaEncoded): Promise<ListSchema> =>
   http.fetch<ListSchema>(LIST_URL, {
+    version: '2023-10-31',
     method: 'DELETE',
     query: { deleteReferences, id, ignoreReferences },
     signal,
@@ -233,6 +236,7 @@ const exportList = async ({
   signal,
 }: ApiParams & ExportListItemQuerySchemaEncoded): Promise<Blob> =>
   http.fetch<Blob>(`${LIST_ITEM_URL}/_export`, {
+    version: '2023-10-31',
     method: 'POST',
     query: { list_id },
     signal,
@@ -254,6 +258,7 @@ export { exportListWithValidation as exportList };
 
 const readListIndex = async ({ http, signal }: ApiParams): Promise<ListItemIndexExistSchema> =>
   http.fetch<ListItemIndexExistSchema>(LIST_INDEX, {
+    version: '2023-10-31',
     method: 'GET',
     signal,
   });
@@ -280,6 +285,7 @@ export const readListPrivileges = async ({ http, signal }: ApiParams): Promise<u
 
 const createListIndex = async ({ http, signal }: ApiParams): Promise<AcknowledgeSchema> =>
   http.fetch<AcknowledgeSchema>(LIST_INDEX, {
+    version: '2023-10-31',
     method: 'POST',
     signal,
   });

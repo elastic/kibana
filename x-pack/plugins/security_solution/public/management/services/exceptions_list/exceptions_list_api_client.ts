@@ -184,6 +184,7 @@ export class ExceptionsListApiClient {
     const result = await this.http.get<FoundExceptionListItemSchema>(
       `${EXCEPTION_LIST_ITEM_URL}/_find`,
       {
+        version: '2023-10-31',
         query: {
           page,
           per_page: perPage,
@@ -214,6 +215,7 @@ export class ExceptionsListApiClient {
 
     await this.ensureListExists;
     let result = await this.http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      version: '2023-10-31',
       query: {
         id,
         item_id: itemId,
@@ -243,6 +245,7 @@ export class ExceptionsListApiClient {
     }
 
     return this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      version: '2023-10-31',
       body: JSON.stringify(transformedException),
     });
   }
@@ -260,6 +263,7 @@ export class ExceptionsListApiClient {
     }
 
     return this.http.put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      version: '2023-10-31',
       body: JSON.stringify(
         ExceptionsListApiClient.cleanExceptionsBeforeUpdate(transformedException)
       ),
@@ -277,6 +281,7 @@ export class ExceptionsListApiClient {
 
     await this.ensureListExists;
     return this.http.delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      version: '2023-10-31',
       query: {
         id,
         item_id: itemId,
@@ -292,6 +297,7 @@ export class ExceptionsListApiClient {
   async summary(filter?: string): Promise<ExceptionListSummarySchema> {
     await this.ensureListExists;
     return this.http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
+      version: '2023-10-31',
       query: {
         filter,
         list_id: this.listId,

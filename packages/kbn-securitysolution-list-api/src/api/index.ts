@@ -59,6 +59,7 @@ const addExceptionList = async ({
   signal,
 }: AddExceptionListProps): Promise<ExceptionListSchema> =>
   http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
+    version: '2023-10-31',
     body: JSON.stringify(list),
     method: 'POST',
     signal,
@@ -102,6 +103,7 @@ const addExceptionListItem = async ({
   signal,
 }: AddExceptionListItemProps): Promise<ExceptionListItemSchema> =>
   http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    version: '2023-10-31',
     body: JSON.stringify(listItem),
     method: 'POST',
     signal,
@@ -145,6 +147,7 @@ const updateExceptionList = async ({
   signal,
 }: UpdateExceptionListProps): Promise<ExceptionListSchema> =>
   http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
+    version: '2023-10-31',
     body: JSON.stringify(list),
     method: 'PUT',
     signal,
@@ -188,6 +191,7 @@ const updateExceptionListItem = async ({
   signal,
 }: UpdateExceptionListItemProps): Promise<ExceptionListItemSchema> =>
   http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    version: '2023-10-31',
     body: JSON.stringify(listItem),
     method: 'PUT',
     signal,
@@ -244,6 +248,7 @@ const fetchExceptionLists = async ({
   };
 
   return http.fetch<FoundExceptionListSchema>(`${EXCEPTION_LIST_URL}/_find`, {
+    version: '2023-10-31',
     method: 'GET',
     query,
     signal,
@@ -295,6 +300,7 @@ const fetchExceptionListById = async ({
   signal,
 }: ApiCallByIdProps): Promise<ExceptionListSchema> =>
   http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
+    version: '2023-10-31',
     method: 'GET',
     query: { id, namespace_type: namespaceType },
     signal,
@@ -358,6 +364,7 @@ const fetchExceptionListsItemsByListIds = async ({
   };
 
   return http.fetch<FoundExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+    version: '2023-10-31',
     method: 'GET',
     query,
     signal,
@@ -411,6 +418,7 @@ const fetchExceptionListItemById = async ({
   signal,
 }: ApiCallByIdProps): Promise<ExceptionListItemSchema> =>
   http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    version: '2023-10-31',
     method: 'GET',
     query: { id, namespace_type: namespaceType },
     signal,
@@ -447,6 +455,7 @@ const deleteExceptionListById = async ({
   signal,
 }: ApiCallByIdProps): Promise<ExceptionListSchema> =>
   http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
+    version: '2023-10-31',
     method: 'DELETE',
     query: { id, namespace_type: namespaceType },
     signal,
@@ -483,6 +492,7 @@ const deleteExceptionListItemById = async ({
   signal,
 }: ApiCallByIdProps): Promise<ExceptionListItemSchema> =>
   http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    version: '2023-10-31',
     method: 'DELETE',
     query: { id, namespace_type: namespaceType },
     signal,
@@ -516,6 +526,7 @@ const addEndpointExceptionList = async ({
   signal,
 }: AddEndpointExceptionListProps): Promise<CreateEndpointListSchema> =>
   http.fetch<ExceptionListItemSchema>(ENDPOINT_LIST_URL, {
+    version: '2023-10-31',
     method: 'POST',
     signal,
   });
@@ -553,6 +564,7 @@ export const exportExceptionList = async ({
   signal,
 }: ExportExceptionListProps): Promise<Blob> =>
   http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
+    version: '2023-10-31',
     method: 'POST',
     query: {
       id,
@@ -640,6 +652,7 @@ export const duplicateExceptionList = async ({
   signal,
 }: DuplicateExceptionListProps): Promise<ExceptionListSchema> =>
   http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}/_duplicate`, {
+    version: '2023-10-31',
     method: 'POST',
     query: {
       list_id: listId,

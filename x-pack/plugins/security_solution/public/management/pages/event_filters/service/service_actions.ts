@@ -23,6 +23,7 @@ import type { Immutable } from '../../../../../common/endpoint/types';
 async function createEventFilterList(http: HttpStart): Promise<void> {
   try {
     await http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
+      version: '2023-10-31',
       body: JSON.stringify(EVENT_FILTER_LIST_DEFINITION),
     });
   } catch (err) {
@@ -58,6 +59,7 @@ export async function getList({
 }): Promise<FoundExceptionListItemSchema> {
   await ensureEventFiltersListExists(http);
   return http.get(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+    version: '2023-10-31',
     query: {
       page,
       per_page: perPage,
@@ -79,6 +81,7 @@ export async function getSummary({
 }): Promise<ExceptionListSummarySchema> {
   await ensureEventFiltersListExists(http);
   return http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
+    version: '2023-10-31',
     query: {
       filter,
       list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
