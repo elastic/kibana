@@ -28,6 +28,7 @@ export const useDashboardRenderer = (savedObjectId: string | undefined) => {
     REQUEST_NAMES.FETCH_DASHBOARD_TAGS,
     fetchTags
   );
+
   const onDashboardContainerLoaded = useCallback(
     (dashboard: DashboardAPI) => {
       if (!savedObjectId) {
@@ -36,7 +37,10 @@ export const useDashboardRenderer = (savedObjectId: string | undefined) => {
       }
 
       if (dashboard) {
-        const title = dashboard.getTitle().trim();
+        const title =
+          dashboard?.select((state) => state.explicitInput.title).trim() ??
+          dashboard?.getTitle().trim() ??
+          DASHBOARD_NOT_FOUND_TITLE;
         if (title) {
           setDashboardDetails({ title });
         } else {
