@@ -5,7 +5,7 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "cypress": "NODE_OPTIONS=--openssl-legacy-provider &&  ../../../node_modules/.bin/cypress",
+    "cypress": "NODE_OPTIONS=--openssl-legacy-provider  ../../../node_modules/.bin/cypress",
     "cypress:open": "yarn cypress open --config-file ./cypress.config.ts",
     "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/fleet_cypress/visual_config.ts",
     "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
