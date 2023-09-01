@@ -59,7 +59,11 @@ const setServerlessKibanaDevServiceAccountIfPossible = (get, set, opts) => {
   const isESlocalhost = esHosts.length
     ? esHosts.some((hostUrl) => {
         const parsedUrl = url.parse(hostUrl);
-        return parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1';
+        return (
+          parsedUrl.hostname === 'localhost' ||
+          parsedUrl.hostname === '127.0.0.1' ||
+          parsedUrl.hostname === 'host.docker.internal'
+        );
       })
     : true; // default is localhost:9200
 
