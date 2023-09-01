@@ -8,7 +8,7 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
+export type { FieldTypeKnown, IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
 
 export interface EsHitRecord extends Omit<SearchHit, '_source'> {
   _source?: Record<string, unknown>;
@@ -35,18 +35,3 @@ export interface DataTableRecord {
    */
   isAnchor?: boolean;
 }
-
-export interface FieldMapping {
-  filterable?: boolean;
-  scripted?: boolean;
-  rowCount?: number;
-  type: string;
-  name: string;
-  displayName?: string;
-}
-
-export type DocViewFilterFn = (
-  mapping: FieldMapping | string | undefined,
-  value: unknown,
-  mode: '+' | '-'
-) => void;

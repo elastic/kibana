@@ -35,12 +35,13 @@ import {
 } from '@kbn/cell-actions';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
-import type { DataTableRecord, DocViewFilterFn } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { getShouldShowFieldHandler, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { UnifiedDataTableSettings, ValueToStringConverter } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -682,8 +683,10 @@ export const UnifiedDataTable = ({
   );
 
   const inMemory = useMemo(() => {
-    return isPlainRecord ? ({ level: 'sorting' } as EuiDataGridInMemory) : undefined;
-  }, [isPlainRecord]);
+    return isPlainRecord && columns.length
+      ? ({ level: 'sorting' } as EuiDataGridInMemory)
+      : undefined;
+  }, [columns.length, isPlainRecord]);
 
   const toolbarVisibility = useMemo(
     () =>

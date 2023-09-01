@@ -12,7 +12,7 @@ import React, { useCallback } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { DocViewFilterFn } from '@kbn/discover-utils/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';

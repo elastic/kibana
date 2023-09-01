@@ -311,7 +311,7 @@ describe('Unified data table cell rendering', function () {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <JsonCodeEditor
+          <ForwardRef
             height={200}
             json={
               Object {
@@ -546,7 +546,7 @@ describe('Unified data table cell rendering', function () {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <JsonCodeEditor
+          <ForwardRef
             height={200}
             json={
               Object {
@@ -713,7 +713,7 @@ describe('Unified data table cell rendering', function () {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <JsonCodeEditor
+          <ForwardRef
             height={200}
             json={
               Object {

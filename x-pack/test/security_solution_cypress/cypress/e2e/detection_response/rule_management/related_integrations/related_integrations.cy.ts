@@ -221,14 +221,29 @@ describe('Related integrations', { tags: ['@ess', '@brokenInServerless'] }, () =
         openTable();
         filterBy(RELATED_INTEGRATION_FIELD);
 
-        RULE_RELATED_INTEGRATIONS.forEach((integration) => {
-          cy.contains(
-            FIELD(RELATED_INTEGRATION_FIELD),
-            `{"package":"${integration.package}"${
-              integration.integration ? `,"integration":"${integration.integration}"` : ''
-            },"version":"${integration.version}"}`
-          );
-        });
+        cy.get(FIELD(RELATED_INTEGRATION_FIELD))
+          .invoke('text')
+          .then((stringValue) => {
+            // Integrations are displayed in the flyout as a string with a format like so:
+            // '{"package":"aws","version":"1.17.0","integration":"unknown"}{"package":"mock","version":"1.1.0"}{"package":"system","version":"1.17.0"}'
+            // We need to parse it to an array of valid objects before we can compare it to the expected value
+            // Otherwise, the test might fail because of the order of the properties in the objects in the string
+            const jsonStringArray = stringValue.split('}{');
+
+            const validJsonStringArray = createValidJsonStringArray(jsonStringArray);
+
+            const parsedIntegrations = validJsonStringArray.map((jsonString) =>
+              JSON.parse(jsonString)
+            );
+
+            RULE_RELATED_INTEGRATIONS.forEach((integration) => {
+              expect(parsedIntegrations).to.deep.include({
+                package: integration.package,
+                version: integration.version,
+                ...(integration.integration ? { integration: integration.integration } : {}),
+              });
+            });
+          });
       });
     });
   });
@@ -407,3 +422,14 @@ const AWS_PACKAGE_POLICY: PackagePolicyWithoutAgentPolicyId = {
     },
   },
 };
+
+const createValidJsonStringArray = (jsonStringArray: string[]) =>
+  jsonStringArray.map((jsonString, index) => {
+    if (index === 0) {
+      return `${jsonString}}`;
+    } else if (index === jsonStringArray.length - 1) {
+      return `{${jsonString}`;
+    } else {
+      return `{${jsonString}}`;
+    }
+  });

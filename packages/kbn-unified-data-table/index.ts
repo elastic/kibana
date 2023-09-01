@@ -10,7 +10,7 @@ export { UnifiedDataTable, DataLoadingState } from './src/components/data_table'
 export type { UnifiedDataTableProps } from './src/components/data_table';
 export { getDisplayedColumns } from './src/utils/columns';
 
-export { JsonCodeEditorCommon } from './src/components/json_code_editor/json_code_editor_common';
+export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';
 
 export * from './src/types';
 export * as columnActions from './src/components/actions/columns';

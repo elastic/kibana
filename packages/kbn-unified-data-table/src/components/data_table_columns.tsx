@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
-import type { DocViewFilterFn } from '@kbn/discover-utils/types';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
 import { UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter } from '../types';

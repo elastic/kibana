@@ -26,8 +26,9 @@ import {
   keys,
 } from '@elastic/eui';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import type { DataTableRecord, DocViewFilterFn } from '@kbn/discover-utils/types';
-import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
@@ -224,7 +225,7 @@ export function DiscoverGridFlyout({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <DocViewer
+          <UnifiedDocViewer
             hit={actualHit}
             columns={columns}
             dataView={dataView}

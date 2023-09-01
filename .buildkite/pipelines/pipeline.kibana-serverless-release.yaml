@@ -6,4 +6,4 @@ steps:
     build:
       env:
         SERVICE_COMMIT_HASH: "${BUILDKITE_COMMIT:0:12}"
-        REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/tagged-release.yaml
+        REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/config.yaml

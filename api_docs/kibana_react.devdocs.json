@@ -3327,14 +3327,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/components/assign_flyout/open_assign_flyout.tsx"
           },
           {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
-          },
-          {
             "plugin": "dataViewFieldEditor",
             "path": "src/plugins/data_view_field_editor/public/shared_imports.ts"
           },
@@ -3345,6 +3337,14 @@
           {
             "plugin": "dataViewFieldEditor",
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
           },
           {
             "plugin": "lens",

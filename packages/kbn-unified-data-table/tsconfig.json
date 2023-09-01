@@ -10,6 +10,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/data-views-plugin",
+    "@kbn/unified-doc-viewer",
     "@kbn/discover-utils",
     "@kbn/kibana-utils-plugin",
     "@kbn/expressions-plugin",

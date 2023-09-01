@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import type { DataTableRecord, DocViewFilterFn } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarnings } from '@kbn/search-response-warnings';
 import { DataLoadingState, UnifiedDataTable, useColumns } from '@kbn/unified-data-table';
 import {
@@ -33,6 +33,7 @@ import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -47,7 +48,6 @@ import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/docu
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
-import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 
@@ -188,10 +188,11 @@ function DiscoverDocumentsComponent({
 
   const showTimeCol = useMemo(
     () =>
-      !isTextBasedQuery &&
+      // for ES|QL we want to show the time column only when is on Document view
+      (!isTextBasedQuery || !columns?.length) &&
       !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
       !!dataView.timeFieldName,
-    [isTextBasedQuery, uiSettings, dataView.timeFieldName]
+    [isTextBasedQuery, columns, uiSettings, dataView.timeFieldName]
   );
 
   const renderDocumentView = useCallback(
@@ -259,7 +260,6 @@ function DiscoverDocumentsComponent({
             onSort={!isTextBasedQuery ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
-            DocViewer={DocViewer}
           />
         </>
       )}
@@ -301,6 +301,7 @@ function DiscoverDocumentsComponent({
                 useNewFieldsApi={useNewFieldsApi}
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={onUpdateRowHeight}
+                isSortEnabled={isTextBasedQuery ? Boolean(currentColumns.length) : true}
                 isPlainRecord={isTextBasedQuery}
                 rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}

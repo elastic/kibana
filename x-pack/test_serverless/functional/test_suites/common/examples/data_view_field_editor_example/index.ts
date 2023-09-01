@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
 
-  describe('data view field editor example', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165384
+  describe.skip('data view field editor example', function () {
     before(async () => {
       // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]",
