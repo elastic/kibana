@@ -6,25 +6,14 @@
  */
 
 import {
-  createStackFrameID,
   createStackFrameMetadata,
   FrameSymbolStatus,
   FrameType,
-  getAddressFromStackFrameID,
   getCalleeFunction,
   getCalleeSource,
-  getFileIDFromStackFrameID,
   getFrameSymbolStatus,
   getLanguageType,
 } from './profiling';
-
-describe('Stack frame operations', () => {
-  test('decode stack frame ID', () => {
-    const frameID = createStackFrameID('ABCDEFGHIJKLMNOPQRSTUw', 123456789);
-    expect(getAddressFromStackFrameID(frameID)).toEqual(123456789);
-    expect(getFileIDFromStackFrameID(frameID)).toEqual('ABCDEFGHIJKLMNOPQRSTUw');
-  });
-});
 
 describe('Stack frame metadata operations', () => {
   test('metadata has executable and function names', () => {

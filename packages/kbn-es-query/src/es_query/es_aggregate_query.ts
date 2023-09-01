@@ -28,7 +28,11 @@ export function getAggregateQueryMode(query: AggregateQuery): Language {
   return Object.keys(query)[0] as Language;
 }
 
-// retrieves the index pattern from the aggregate query
+export function getLanguageDisplayName(language: string): string {
+  return language === 'esql' ? 'es|ql' : language;
+}
+
+// retrieves the index pattern from the aggregate query for SQL
 export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
   let sql = sqlQuery?.replaceAll('"', '').replaceAll("'", '');
   const splitFroms = sql?.split(new RegExp(/FROM\s/, 'ig'));
@@ -39,6 +43,23 @@ export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
   // case insensitive match for the index pattern
   const regex = new RegExp(/FROM\s+([\w*-.!@$^()~;]+)/, 'i');
   const matches = sql?.match(regex);
+  if (matches) {
+    return matches[1];
+  }
+  return '';
+}
+
+// retrieves the index pattern from the aggregate query for ES|QL
+export function getIndexPatternFromESQLQuery(esql?: string): string {
+  const splitFroms = esql?.split(new RegExp(/FROM\s/, 'ig'));
+  const fromsLength = splitFroms?.length ?? 0;
+  if (splitFroms && splitFroms?.length > 2) {
+    esql = `${splitFroms[fromsLength - 2]} FROM ${splitFroms[fromsLength - 1]}`;
+  }
+  const parsedString = esql?.replaceAll('`', '');
+  // case insensitive match for the index pattern
+  const regex = new RegExp(/FROM\s+([\w*-.!@$^()~;]+)/, 'i');
+  const matches = parsedString?.match(regex);
   if (matches) {
     return matches[1];
   }
