@@ -10,7 +10,6 @@ import React from 'react';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { EuiBetaBadge, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
-import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../../common/constants';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
 
