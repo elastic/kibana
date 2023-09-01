@@ -387,7 +387,6 @@ export class JobsListView extends Component {
 
   renderJobsListComponents() {
     const { isRefreshing, loading, jobsSummaryList, jobsAwaitingNodeCount } = this.state;
-    const { isServerless } = this.props;
     const jobIds = jobsSummaryList.map((j) => j.id);
 
     const noJobsFound = !loading && jobIds.length === 0;
@@ -412,7 +411,10 @@ export class JobsListView extends Component {
             <>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <JobStatsBar jobsSummaryList={jobsSummaryList} isServerless={isServerless} />
+                  <JobStatsBar
+                    jobsSummaryList={jobsSummaryList}
+                    isServerless={this.props.isServerless}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NewJobButton />

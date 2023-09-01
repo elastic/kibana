@@ -57,7 +57,7 @@ export interface LogRateAnalysisContentWrapperProps {
    * @param d Log rate analysis results data
    */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
-  /** Optional flag to designate whether we're running in a serverless environment */
+  /** Optional flag to indicate whether kibana is running in serverless */
   isServerless?: boolean;
 }
 

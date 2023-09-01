@@ -8,8 +8,5 @@
 import { useMlKibana } from './kibana_context';
 
 export function useIsServerless(): boolean {
-  const {
-    services: { mlServices },
-  } = useMlKibana();
-  return mlServices.isServerless;
+  return useMlKibana().services.mlServices.isServerless;
 }

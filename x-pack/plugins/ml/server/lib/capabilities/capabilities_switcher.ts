@@ -67,23 +67,27 @@ function getSwitcher(
   };
 }
 
-function applyEnabledFeatures(mlCaps: MlCapabilities, enabledFeatures: MlFeatures) {
-  mlCaps.isADEnabled = enabledFeatures.ad;
-  mlCaps.isDFAEnabled = enabledFeatures.dfa;
-  mlCaps.isNLPEnabled = enabledFeatures.nlp;
+function applyEnabledFeatures(mlCaps: MlCapabilities, { ad, dfa, nlp }: MlFeatures) {
+  mlCaps.isADEnabled = ad;
+  mlCaps.isDFAEnabled = dfa;
+  mlCaps.isNLPEnabled = nlp;
+  mlCaps.canViewMlNodes = mlCaps.canViewMlNodes && ad && dfa && nlp;
 
-  mlCaps.canViewMlNodes =
-    mlCaps.canViewMlNodes && mlCaps.isADEnabled && mlCaps.isDFAEnabled && mlCaps.isNLPEnabled;
-
-  if (enabledFeatures.ad === false) {
-    featureCapabilities.ad.forEach((c) => (mlCaps[c] = false));
+  if (ad === false) {
+    for (const c of featureCapabilities.ad) {
+      mlCaps[c] = false;
+    }
   }
-  if (enabledFeatures.dfa === false) {
-    featureCapabilities.dfa.forEach((c) => (mlCaps[c] = false));
+  if (dfa === false) {
+    for (const c of featureCapabilities.dfa) {
+      mlCaps[c] = false;
+    }
   }
-  // if (enabledFeatures.nlp === false) {
-  //   featureCapabilities.nlp.forEach((c) => (mlCaps[c] = false));
-  // }
+  if (nlp === false && dfa === false) {
+    for (const c of featureCapabilities.nlp) {
+      mlCaps[c] = false;
+    }
+  }
 
   return mlCaps;
 }

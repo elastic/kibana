@@ -44,6 +44,9 @@ export interface DatePickerDependencies {
    * Internationalisation service
    */
   i18n: I18nStart;
+  /**
+   * Optional flag to indicate whether kibana is running in serverless
+   */
   isServerless?: boolean;
 }
 
