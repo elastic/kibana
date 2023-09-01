@@ -447,7 +447,7 @@ export class TaskManagerRunner implements TaskRunner {
       TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
       TASK_MANAGER_TRANSACTION_TYPE
     );
-    apmTrans?.addLabels({ entityId: this.taskType });
+    apmTrans.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {

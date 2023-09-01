@@ -83,7 +83,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
   ) => {
     const jobLogger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
-    const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
+    const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
     const { encryptionKey } = this.config;
 
@@ -100,7 +100,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         const [locatorParams] = payload.locatorParams;
 
         apmGetAssets?.end();
-        apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
+        apmGeneratePng = apmTrans.startSpan('generate-png-pipeline', 'execute');
 
         return generatePngObservable(
           () =>

@@ -322,10 +322,10 @@ export class TaskClaiming {
           max_docs: size,
         }
       );
-      apmTrans?.end('success');
+      apmTrans.end('success');
       return result;
     } catch (err) {
-      apmTrans?.end('failure');
+      apmTrans.end('failure');
       throw err;
     }
   }
