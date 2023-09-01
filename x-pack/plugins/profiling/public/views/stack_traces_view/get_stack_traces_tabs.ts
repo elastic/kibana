@@ -8,7 +8,7 @@
 import { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import { TopNType } from '../../../common/stack_traces';
+import { TopNType } from '@kbn/profiling-data-access-plugin/common/stack_traces';
 import { StatefulProfilingRouter } from '../../hooks/use_profiling_router';
 import { ProfilingRoutes } from '../../routing';
 

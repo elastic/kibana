@@ -18,9 +18,6 @@ import { getConfigFromFiles } from '@kbn/config';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
-const KIBANA_DEV_SERVICE_ACCOUNT_TOKEN =
-  process.env.TEST_KIBANA_SERVICE_ACCOUNT_TOKEN ||
-  'AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA';
 
 function canRequire(path) {
   try {
@@ -45,6 +42,45 @@ const getBootstrapScript = (isDev) => {
     const { bootstrap } = require('@kbn/core/server');
     return bootstrap;
   }
+};
+
+const setServerlessKibanaDevServiceAccountIfPossible = (get, set, opts) => {
+  const esHosts = [].concat(
+    get('elasticsearch.hosts', []),
+    opts.elasticsearch ? opts.elasticsearch.split(',') : []
+  );
+
+  /*
+   * We only handle the service token if serverless ES is running locally.
+   * Example would be if the user is running SES in the cloud and KBN serverless
+   * locally, they would be expected to handle auth on their own and this token
+   * is likely invalid anyways.
+   */
+  const isESlocalhost = esHosts.length
+    ? esHosts.some((hostUrl) => {
+        const parsedUrl = url.parse(hostUrl);
+        return (
+          parsedUrl.hostname === 'localhost' ||
+          parsedUrl.hostname === '127.0.0.1' ||
+          parsedUrl.hostname === 'host.docker.internal'
+        );
+      })
+    : true; // default is localhost:9200
+
+  if (!opts.dev || !opts.serverless || !isESlocalhost) {
+    return;
+  }
+
+  const DEV_UTILS_PATH = '@kbn/dev-utils';
+
+  if (!canRequire(DEV_UTILS_PATH)) {
+    return;
+  }
+
+  // need dynamic require to exclude it from production build
+  // eslint-disable-next-line import/no-dynamic-require
+  const { kibanaDevServiceAccount } = require(DEV_UTILS_PATH);
+  set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
 };
 
 function pathCollector() {
@@ -72,7 +108,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   if (opts.dev) {
     if (opts.serverless) {
-      set('elasticsearch.serviceAccountToken', KIBANA_DEV_SERVICE_ACCOUNT_TOKEN);
+      setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {

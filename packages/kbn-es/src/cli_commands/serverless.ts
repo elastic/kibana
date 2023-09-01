@@ -26,7 +26,7 @@ export const serverless: Command = {
       --image             Full path of ESS image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
       --clean             Remove existing file system object store before running
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
-      --ssl               Sets up SSL on Elasticsearch
+      --ssl               Sets up SSL and enables security plugin on Elasticsearch
       --kill              Kill running ESS nodes if detected
       --background        Start ESS without attaching to the first node's logs
       -E                  Additional key=value settings to pass to Elasticsearch
