@@ -264,6 +264,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         initialRender = false;
         updateLinesFromModel = true;
       });
+
+      editor1.current?.onKeyDown(() => {
+        setIsCompactFocused(true);
+        setIsCodeEditorExpandedFocused(true);
+        setShowLineNumbers(true);
+        setCodeOneLiner('');
+        clickedOutside = false;
+        initialRender = false;
+        updateLinesFromModel = true;
+      });
       // on CMD/CTRL + Enter submit the query
       // eslint-disable-next-line no-bitwise
       editor1.current?.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
@@ -364,8 +374,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const onQueryUpdate = useCallback(
     (value: string) => {
-      setCode(value);
-      onTextLangQueryChange({ [language]: value } as AggregateQuery);
+      if (editor1?.current) {
+        setCode(value);
+        onTextLangQueryChange({ [language]: value } as AggregateQuery);
+      }
     },
     [language, onTextLangQueryChange]
   );
