@@ -10,7 +10,6 @@ import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import expect from '@kbn/expect';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
-import { SecurityService } from '../../../../test/common/services/security/security';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
@@ -31,6 +30,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const config = getService('config');
+  const security = getService('security');
 
   return {
     DATA_ANALYST_PASSWORD,
@@ -41,7 +41,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     /**
      * Define a role that DOES NOT grant privileges to create any type of report.
      */
-    async createDataAnalystRole(security: SecurityService) {
+    async createDataAnalystRole() {
       await security.role.create(DATA_ANALYST_ROLE, {
         metadata: {},
         elasticsearch: {
@@ -65,7 +65,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       });
     },
 
-    async createDataAnalystUser(security: SecurityService) {
+    async createDataAnalystUser() {
       await security.user.create(DATA_ANALYST_USERNAME, {
         password: DATA_ANALYST_PASSWORD,
         roles: [DATA_ANALYST_ROLE],
@@ -76,7 +76,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     /**
      * Define a role that DOES grant privileges to create certain types of reports.
      */
-    async createReportingRole(security: SecurityService) {
+    async createReportingRole() {
       await security.role.create(REPORTING_ROLE, {
         metadata: {},
         elasticsearch: {
@@ -101,7 +101,6 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     },
 
     async createReportingUser(
-      security: SecurityService,
       username = REPORTING_USER_USERNAME,
       password = REPORTING_USER_PASSWORD
     ) {
