@@ -44,6 +44,17 @@ export interface IndexDetailsPageTestBed extends TestBed {
       isErrorDisplayed: () => boolean;
       clickErrorReloadButton: () => Promise<void>;
     };
+    settings: {
+      getCodeBlockContent: () => string;
+      getDocsLinkHref: () => string;
+      isErrorDisplayed: () => boolean;
+      clickErrorReloadButton: () => Promise<void>;
+      clickEditModeSwitch: () => Promise<void>;
+      getCodeEditorContent: () => string;
+      updateCodeEditorContent: (value: string) => Promise<void>;
+      saveSettings: () => Promise<void>;
+      resetChanges: () => Promise<void>;
+    };
     clickBackToIndicesButton: () => Promise<void>;
     discoverLinkExists: () => boolean;
     contextMenu: {
@@ -118,6 +129,52 @@ export const setup = async (
     clickErrorReloadButton: async () => {
       await act(async () => {
         find('indexDetailsMappingsReloadButton').simulate('click');
+      });
+      component.update();
+    },
+  };
+
+  const settings = {
+    getCodeBlockContent: () => {
+      return find('indexDetailsSettingsCodeBlock').text();
+    },
+    getDocsLinkHref: () => {
+      return find('indexDetailsSettingsDocsLink').prop('href');
+    },
+    isErrorDisplayed: () => {
+      return exists('indexDetailsSettingsError');
+    },
+    clickErrorReloadButton: async () => {
+      await act(async () => {
+        find('indexDetailsSettingsReloadButton').simulate('click');
+      });
+      component.update();
+    },
+    clickEditModeSwitch: async () => {
+      await act(async () => {
+        find('indexDetailsSettingsEditModeSwitch').simulate('click');
+      });
+      component.update();
+    },
+    getCodeEditorContent: () => {
+      return find('indexDetailsSettingsEditor').prop('data-currentvalue');
+    },
+    updateCodeEditorContent: async (value: string) => {
+      find('indexDetailsSettingsEditor').getDOMNode().setAttribute('data-currentvalue', value);
+      await act(async () => {
+        find('indexDetailsSettingsEditor').simulate('change');
+      });
+      component.update();
+    },
+    saveSettings: async () => {
+      await act(async () => {
+        find('indexDetailsSettingsSave').simulate('click');
+      });
+      component.update();
+    },
+    resetChanges: async () => {
+      await act(async () => {
+        find('indexDetailsSettingsResetChanges').simulate('click');
       });
       component.update();
     },
@@ -199,6 +256,7 @@ export const setup = async (
       clickIndexDetailsTab,
       getActiveTabContent,
       mappings,
+      settings,
       clickBackToIndicesButton,
       discoverLinkExists,
       contextMenu,

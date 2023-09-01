@@ -161,6 +161,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiSwitch
+            data-test-subj="indexDetailsSettingsEditModeSwitch"
             label={
               <FormattedMessage
                 id="xpack.idxMgmt.indexDetails.settings.editModeSwitchLabel"
@@ -174,6 +175,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           <EuiFlexGroup>
             <EuiFlexItem grow={1}>
               <EuiButton
+                data-test-subj="indexDetailsSettingsSave"
                 fill
                 isDisabled={!isEditMode || !editableSettings}
                 isLoading={isLoading}
@@ -187,6 +189,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <EuiButton
+                data-test-subj="indexDetailsSettingsResetChanges"
                 isDisabled={!isEditMode || isLoading || settingsString === editableSettings}
                 onClick={resetChanges}
               >

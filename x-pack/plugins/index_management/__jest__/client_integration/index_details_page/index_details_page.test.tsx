@@ -9,8 +9,33 @@ import { setupEnvironment } from '../helpers';
 import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
 import { IndexDetailsSection } from '../../../public/application/sections/home/index_list/details_page';
-import { testIndexMappings, testIndexMock, testIndexName, testIndexStats } from './mocks';
+import {
+  testIndexEditableSettings,
+  testIndexMappings,
+  testIndexMock,
+  testIndexName,
+  testIndexSettings,
+  testIndexStats,
+} from './mocks';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
+import React from 'react';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
 
 describe('<IndexDetailsPage />', () => {
   let testBed: IndexDetailsPageTestBed;
@@ -24,6 +49,7 @@ describe('<IndexDetailsPage />', () => {
     httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testIndexMock);
     httpRequestsMockHelpers.setLoadIndexStatsResponse(testIndexName, testIndexStats);
     httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, testIndexMappings);
+    httpRequestsMockHelpers.setLoadIndexSettingsResponse(testIndexName, testIndexSettings);
 
     await act(async () => {
       testBed = await setup(httpSetup, {
@@ -171,7 +197,7 @@ describe('<IndexDetailsPage />', () => {
     expect(tabContent).toEqual('Documents');
   });
 
-  describe('mappings tab', () => {
+  describe('Mappings tab', () => {
     it('loads mappings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
@@ -189,7 +215,7 @@ describe('<IndexDetailsPage />', () => {
       expect(tabContent).toEqual(JSON.stringify(testIndexMappings, null, 2));
     });
 
-    it('sets the docs link href from the documenation service', async () => {
+    it('sets the docs link href from the documentation service', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       const docsLinkHref = testBed.actions.mappings.getDocsLinkHref();
       // the url from the mocked docs mock
@@ -226,10 +252,112 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
-  it('settings tab', async () => {
-    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
-    const tabContent = testBed.actions.getActiveTabContent();
-    expect(tabContent).toEqual('Settings');
+  describe('Settings tab', () => {
+    it('loads settings from the API', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/settings/${testIndexName}`, {
+        asSystemRequest: undefined,
+        body: undefined,
+        query: undefined,
+        version: undefined,
+      });
+    });
+
+    it('displays the settings in the code block', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+
+      const tabContent = testBed.actions.settings.getCodeBlockContent();
+      expect(tabContent).toEqual(JSON.stringify(testIndexSettings, null, 2));
+    });
+
+    it('sets the docs link href from the documentation service', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+      const docsLinkHref = testBed.actions.settings.getDocsLinkHref();
+      // the url from the mocked docs mock
+      expect(docsLinkHref).toEqual(
+        'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/index-modules.html#index-modules-settings'
+      );
+    });
+
+    describe('error loading settings', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadIndexSettingsResponse(testIndexName, undefined, {
+          statusCode: 400,
+          message: `Was not able to load settings`,
+        });
+        await act(async () => {
+          testBed = await setup(httpSetup);
+        });
+
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+      });
+
+      it('there is an error prompt', async () => {
+        expect(testBed.actions.settings.isErrorDisplayed()).toBe(true);
+      });
+
+      it('resends a request when reload button is clicked', async () => {
+        // already sent 3 requests while setting up the component
+        const numberOfRequests = 3;
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+        await testBed.actions.settings.clickErrorReloadButton();
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+      });
+    });
+
+    describe('edit settings', () => {
+      beforeEach(async () => {
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+        await testBed.actions.settings.clickEditModeSwitch();
+      });
+
+      it('displays the editable settings (flattened and filtered)', () => {
+        const editorContent = testBed.actions.settings.getCodeEditorContent();
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettings, null, 2));
+      });
+
+      it('updates the settings', async () => {
+        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
+        await testBed.actions.settings.saveSettings();
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/settings/${testIndexName}`,
+          {
+            asSystemRequest: undefined,
+            body: JSON.stringify({ 'index.priority': '2' }),
+            query: undefined,
+            version: undefined,
+          }
+        );
+      });
+
+      it('reloads the settings after an update', async () => {
+        const numberOfRequests = 2;
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
+        await testBed.actions.settings.saveSettings();
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+        expect(httpSetup.get).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/settings/${testIndexName}`,
+          {
+            asSystemRequest: undefined,
+            body: undefined,
+            query: undefined,
+            version: undefined,
+          }
+        );
+      });
+
+      it('resets the changes in the editor', async () => {
+        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
+        await testBed.actions.settings.resetChanges();
+        const editorContent = testBed.actions.settings.getCodeEditorContent();
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettings, null, 2));
+      });
+    });
   });
 
   it('pipelines tab', async () => {

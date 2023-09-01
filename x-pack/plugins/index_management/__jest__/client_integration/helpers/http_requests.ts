@@ -94,8 +94,11 @@ const registerHttpRequestMockHelpers = (
   const setCreateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/index_templates`, response, error);
 
-  const setLoadIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/settings/:name`, response, error);
+  const setLoadIndexSettingsResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/settings/${indexName}`, response, error);
 
   const setLoadIndexMappingResponse = (
     indexName: string,
