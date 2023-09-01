@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { formatDate } from '@elastic/eui';
 import { Message } from '../../common';
 import { getRoleTranslation } from './get_role_translation';
 
@@ -19,15 +18,15 @@ export function getMarkdownFromConversation({
   return messages.reduce(
     (acc, curr) => {
       return `${acc}
-        **${getRoleTranslation(curr.message.role)} - ${formatDate(curr['@timestamp'], 'hh:mm A')}**
-        ${
-          curr.message.content
-            ? curr.message.name
-              ? `_responded with function response:_
+**${getRoleTranslation(curr.message.role)}**
+${
+  curr.message.content
+    ? curr.message.name
+      ? `_responded with function response:_
   \`\`\`${curr.message.content}\`\`\``
-              : curr.message.content
-            : ''
-        }${
+      : curr.message.content
+    : ''
+}${
         curr.message.function_call?.name
           ? `_Requested function '${curr.message.function_call.name}'_`
           : ''
@@ -41,7 +40,7 @@ export function getMarkdownFromConversation({
         -----      
         `;
     },
-    `# ${title} - ${formatDate(messages.at(0)?.['@timestamp'], 'DD MMM YYYY hh:mm A')}
+    `# ${title}
       `
   );
 }
