@@ -27,7 +27,7 @@ const readDirectory = (predicate: PredicateFunction) => {
 // )
 
 const toStr = (x: BufferSource) => `${x}`;
-const subscribeToDecompressionStream = (archivePath) => {
+const subscribeToDecompressionStream = (archivePath: PathLikeOrString) => {
   from(fs.createReadStream(archivePath).pipe(zlib.createGunzip()))
     .pipe(map(toStr))
     .subscribe({
@@ -36,17 +36,23 @@ const subscribeToDecompressionStream = (archivePath) => {
       complete: () => console.log('the end'),
     });
 };
-const subscribeToStreamingJsonStream = (archivePath) => {
-  const obj$ = (x) => oboe(fs.createReadStream(x));
-  const jsonStanza$ = (_) => obj$(archivePath).on('done', _);
 
-  fromEventPattern(jsonStanza$).subscribe({
+type PlaceHolder = any;
+type PathLikeOrString = fs.PathLike | string;
+const jsonStanza$ = (pathToFile: PathLikeOrString) => (_: PlaceHolder) => oboe(fs.createReadStream(pathToFile)).on('done', _);
+
+const subscribeToStreamingJsonStream = (archivePath: PathLikeOrString) => {
+  archivePath =
+    '/Users/trezworkbox/dev/scratches/src/js/streams/native-nodejs-streams/gunzip/someotherfile.txt';
+  console.log(`\nλjs archivePath: \n\t${archivePath}`);
+
+  fromEventPattern(jsonStanza$(archivePath)).subscribe({
     next: (x) => console.log(`\nλjs jsonStanzas stream - next, x: \n${JSON.stringify(x, null, 2)}`),
     error: (err) => console.log('error:', err),
     complete: () => console.log('the end'),
   });
 };
-export const begin = (archivePath) => {
+export const begin = (archivePath: PathLikeOrString) => {
   archivePath =
     '/Users/trezworkbox/dev/scratches/src/js/streams/native-nodejs-streams/gunzip/someotherfile.txt.gz';
 
