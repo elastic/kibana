@@ -26,6 +26,14 @@ export type UiSettingsType =
   | 'color';
 
 /**
+ * Type for the readonly mode of the readonly settings.
+ * 'strict' indicates that the value cannot be changed through API and is not displayed in the UI
+ * 'ui' indicates that the value is just not displayed in the UI
+ * @public
+ * */
+export type ReadonlyModeType = 'strict' | 'ui';
+
+/**
  * UiSettings deprecation field options.
  * @public
  * */
@@ -57,12 +65,8 @@ export interface UiSettingsParams<T = unknown> {
   requiresPageReload?: boolean;
   /** a flag indicating that value cannot be changed */
   readonly?: boolean;
-  /**
-   * a flag indicating the level of restriction of the readonly settings
-   * 'strict' indicates that the value cannot be changed through API and is not displayed in the UI
-   * 'ui' indicates that the value is just not displayed in the UI
-   * */
-  readonlyMode?: 'strict' | 'ui';
+  /** a flag indicating the level of restriction of the readonly settings {@link ReadonlyModeType} */
+  readonlyMode?: ReadonlyModeType;
   /**
    * a flag indicating that value might contain user sensitive data.
    * used by telemetry to mask the value of the setting when sent.

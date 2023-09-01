@@ -28,6 +28,7 @@ import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { registerRoutes, registerInternalRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
+import {ReadonlyModeType} from "@kbn/core-ui-settings-common/src/ui_settings";
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -50,7 +51,7 @@ export class UiSettingsService
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private readonly uiSettingsGlobalDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
-  private allowlist: string[] | null = null;
+  private allowlist: Set<string> | null = null;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
@@ -95,15 +96,14 @@ export class UiSettingsService
     return {
       register: this.register,
       registerGlobal: this.registerGlobal,
-      setAllowlist: (keys) => {
-        this.allowlist = keys;
-      },
+      setAllowlist: this.setAllowlist,
     };
   }
 
   public async start(): Promise<InternalUiSettingsServiceStart> {
     if (this.allowlist) {
-      this.applyAllowlist(this.allowlist);
+      this.validateAllowlist();
+      this.applyAllowlist();
     }
     this.validatesDefinitions();
     this.validatesOverrides();
@@ -155,18 +155,50 @@ export class UiSettingsService
     });
   };
 
-  private applyAllowlist(keys: string[]) {
-    const keySet = new Set(keys);
+  private setAllowlist = (keys: string[]) => {
+    if (this.allowlist) {
+      throw new Error(
+        `The uiSettings allowlist has already been set up. Instead of calling setAllowlist(), add your settings to packages/serverless/settings`
+      );
+    }
+    this.allowlist = new Set(keys);
+  };
+
+  private setReadonlyMode(key: string, mode: ReadonlyModeType, isGlobal: boolean) {
+    if (isGlobal) {
+      const definition = this.uiSettingsGlobalDefaults.get(key);
+      if (definition) {
+        this.uiSettingsGlobalDefaults.set(key, { ...definition, readonlyMode: mode });
+      }
+    } else {
+      const definition = this.uiSettingsDefaults.get(key);
+      if (definition) {
+        this.uiSettingsDefaults.set(key, { ...definition, readonlyMode: mode });
+      }
+    }
+  }
+
+  private validateAllowlist() {
+    this.allowlist?.forEach((key) => {
+      if (!this.uiSettingsDefaults.has(key) && !this.uiSettingsGlobalDefaults.has(key)) {
+        throw new Error(
+          `The uiSetting with key [${key}] is in the allowlist but is not registered. Make sure to remove it from the allowlist in /packages/serverless/settings`
+        );
+      }
+    });
+  }
+
+  private applyAllowlist() {
     for (const [key, definition] of this.uiSettingsDefaults) {
-      if (!keySet.has(key)) {
+      if (!this.allowlist?.has(key)) {
         definition.readonly = true;
-        definition.readonlyMode = 'strict';
+        this.setReadonlyMode(key, 'strict', false);
       }
     }
     for (const [key, definition] of this.uiSettingsGlobalDefaults) {
-      if (!keySet.has(key)) {
+      if (!this.allowlist?.has(key)) {
         definition.readonly = true;
-        definition.readonlyMode = 'strict';
+        this.setReadonlyMode(key, 'strict', true);
       }
     }
   }

@@ -12,7 +12,8 @@ export const SECURITY_PROJECT_SETTINGS = [
   'securitySolution:defaultIndex',
   'securitySolution:defaultThreatIndex',
   'securitySolution:defaultAnomalyScore',
-  'securitySolution:enableGroupedNav',
+  // This setting doesn't seem to be registered anywhere in serverless
+  // 'securitySolution:enableGroupedNav',
   'securitySolution:rulesTableRefresh',
   'securitySolution:ipReputationLinks',
   'securitySolution:enableCcsWarning',
