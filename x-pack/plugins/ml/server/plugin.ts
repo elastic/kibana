@@ -99,6 +99,7 @@ export class MlServerPlugin
     dfa: true,
     nlp: true,
   };
+  private registerCases: () => void = () => {};
   private registerSampleDatasetsIntegration: () => void = () => {};
   private registerKibanaSettings: () => void = () => {};
 
@@ -263,9 +264,11 @@ export class MlServerPlugin
       });
     }
 
-    if (plugins.cases) {
-      registerCasesPersistableState(plugins.cases);
-    }
+    this.registerCases = () => {
+      if (plugins.cases) {
+        registerCasesPersistableState(plugins.cases);
+      }
+    };
 
     this.registerSampleDatasetsIntegration = () => {
       // called in start once enabledFeatures is available
@@ -321,6 +324,7 @@ export class MlServerPlugin
       }
 
       if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
+        this.registerCases();
         this.registerSampleDatasetsIntegration();
         this.registerKibanaSettings();
       }
