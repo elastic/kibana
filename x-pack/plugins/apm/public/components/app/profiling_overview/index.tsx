@@ -13,23 +13,29 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function ProfilingOverview() {
   const {
-    query: { kuery, rangeFrom, rangeTo },
+    path: { serviceName },
+    query: { kuery, rangeFrom, rangeTo, environment },
   } = useApmParams('/services/{serviceName}/profiling');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { data, error, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi('GET /internal/apm/profiling/flamegraph', {
-        params: {
-          query: {
-            start,
-            end,
-            kuery,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
+        {
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              kuery,
+              environment,
+            },
           },
-        },
-      });
+        }
+      );
     },
-    [start, end, kuery]
+    [serviceName, start, end, kuery, environment]
   );
 
   return (

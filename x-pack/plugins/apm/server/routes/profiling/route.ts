@@ -8,23 +8,45 @@
 import * as t from 'io-ts';
 import { ElasticFlameGraph } from '@kbn/profiling-data-access-plugin/common/flamegraph';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { kueryRt, rangeRt } from '../default_api_types';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getServiceHostNames } from './get_service_host_names';
+import { hostNamesToKuery } from './utils';
 
 const profilingFlamegraphRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/profiling/flamegraph',
-  params: t.type({ query: t.intersection([rangeRt, kueryRt]) }),
+  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([rangeRt, kueryRt, environmentRt]),
+  }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ElasticFlameGraph> => {
     const { context, plugins, params } = resources;
-    const esClient = (await context.core).elasticsearch.client;
-    const { start, end, kuery } = params.query;
-    const profilingDataAccessStart = await plugins.profilingDataAccess.start();
+    const [esClient, apmEventClient, profilingDataAccessStart] =
+      await Promise.all([
+        (await context.core).elasticsearch.client,
+        await getApmEventClient(resources),
+        await plugins.profilingDataAccess.start(),
+      ]);
+
+    const { start, end, kuery, environment } = params.query;
+    const { serviceName } = params.path;
+
+    const serviceHostNames = await getServiceHostNames({
+      apmEventClient,
+      start,
+      end,
+      kuery,
+      environment,
+      serviceName,
+    });
+
     const flamegraph =
       await profilingDataAccessStart.services.fetchFlamechartData({
         esClient: esClient.asCurrentUser,
         rangeFrom: start / 1000,
         rangeTo: end / 1000,
-        kuery,
+        kuery: hostNamesToKuery(serviceHostNames),
       });
 
     return flamegraph;
