@@ -1311,8 +1311,12 @@ describe('Alerts Client', () => {
       expect(clusterClient.bulk).not.toHaveBeenCalled();
     });
   });
-
-  describe('getSummarizedAlerts', () => {
+  
+  // FLAKY: https://github.com/elastic/kibana/issues/163192
+  // FLAKY: https://github.com/elastic/kibana/issues/163193
+  // FLAKY: https://github.com/elastic/kibana/issues/163194
+  // FLAKY: https://github.com/elastic/kibana/issues/163195
+  describe.skip('getSummarizedAlerts', () => {
     beforeEach(() => {
       clusterClient.search.mockReturnValue({
         // @ts-ignore
