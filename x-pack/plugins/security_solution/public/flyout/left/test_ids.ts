@@ -8,4 +8,4 @@
 export const VISUALIZE_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutVisualizeTab';
 export const INSIGHTS_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsTab';
 export const INVESTIGATION_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInvestigationTab';
-export const HISTORY_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHistoryTab';
+export const RESPONSE_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutResponseTab';

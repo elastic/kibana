@@ -6,6 +6,14 @@
  */
 
 import { addFilterIn, addFilterOut, createFilterOutActionFactory } from '@kbn/cell-actions';
+import {
+  isTypeSupportedByDefaultActions,
+  isValueSupportedByDefaultActions,
+  valueToArray,
+  filterOutNullableValues,
+} from '@kbn/cell-actions/src/actions/utils';
+import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../common/store';
 import type { StartServices } from '../../../types';
@@ -25,12 +33,38 @@ export const createFilterOutCellActionFactory = ({
   const getTimelineById = timelineSelectors.getTimelineByIdSelector();
 
   const { filterManager } = services.data.query;
-  const genericFilterOutActionFactory = createFilterOutActionFactory({ filterManager });
+  const { notifications } = services;
+
+  const genericFilterOutActionFactory = createFilterOutActionFactory({
+    filterManager,
+    notifications,
+  });
 
   return genericFilterOutActionFactory.combine<SecurityCellAction>({
     type: SecurityCellActionType.FILTER,
-    isCompatible: async ({ field }) => fieldHasCellActions(field.name),
-    execute: async ({ field, metadata }) => {
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+
+      return (
+        data.length === 1 && // TODO Add support for multiple values
+        fieldHasCellActions(field.name) &&
+        isTypeSupportedByDefaultActions(field.type as KBN_FIELD_TYPES)
+      );
+    },
+    execute: async ({ data, metadata }) => {
+      const field = data[0]?.field;
+      const rawValue = data[0]?.value;
+      const value = filterOutNullableValues(valueToArray(rawValue));
+
+      if (!isValueSupportedByDefaultActions(value)) {
+        notifications.toasts.addWarning({
+          title: ACTION_INCOMPATIBLE_VALUE_WARNING,
+        });
+        return;
+      }
+
+      if (!field) return;
+
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterIn with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterIn : addFilterOut;
 
@@ -43,13 +77,13 @@ export const createFilterOutCellActionFactory = ({
         addFilter({
           filterManager: timelineFilterManager,
           fieldName: field.name,
-          value: field.value,
+          value,
         });
       } else {
         addFilter({
           filterManager,
           fieldName: field.name,
-          value: field.value,
+          value,
         });
       }
     },

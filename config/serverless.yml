@@ -1,8 +1,27 @@
+interactiveSetup.enabled: false
 newsfeed.enabled: false
-xpack.security.showNavLinks: false
 xpack.serverless.plugin.enabled: true
-xpack.fleet.enableExperimental: ['fleetServerStandalone']
+# Fleet settings
+xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.internal.disableILMPolicies: true
+xpack.fleet.internal.disableProxies: true
+xpack.fleet.internal.activeAgentsSoftLimit: 25000
+
+# Cloud links
+xpack.cloud.base_url: "https://cloud.elastic.co"
+
+# Enable ZDT migration algorithm
+migrations.algorithm: zdt
+
+# Limit batch size to reduce possibility of failures.
+# A longer migration time is acceptable due to the ZDT algorithm.
+migrations.batchSize: 250
+
+migrations.zdt:
+  metaPickupSyncDelaySec: 5
+
+# Ess plugins
+xpack.securitySolutionEss.enabled: false
 
 # Management team plugins
 xpack.upgrade_assistant.enabled: false
@@ -14,13 +33,34 @@ xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 
+# Management team UI configurations
+# Disable index actions from the Index Management UI
+xpack.index_management.enableIndexActions: false
+# Disable legacy index templates from Index Management UI
+xpack.index_management.enableLegacyTemplates: false
+# Disable index stats information from Index Management UI
+xpack.index_management.enableIndexStats: false
+
+# Keep deeplinks visible so that they are shown in the sidenav
+dev_tools.deeplinks.navLinkStatus: visible
+management.deeplinks.navLinkStatus: visible
+
 # Other disabled plugins
-#xpack.canvas.enabled: false #only disabable in dev-mode
-xpack.reporting.enabled: false
+xpack.canvas.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
+data.search.sessions.enabled: false
+advanced_settings.enabled: false
+
+# Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
+xpack.security.showInsecureClusterWarning: false
+
+# Disable UI of security management plugins
+xpack.security.ui.userManagementEnabled: false
+xpack.security.ui.roleManagementEnabled: false
+xpack.security.ui.roleMappingManagementEnabled: false
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
-# server.restrictInternalApis: true
+server.restrictInternalApis: true
 # Telemetry enabled by default and not disableable via UI
 telemetry.optIn: true
 telemetry.allowChangingOptInStatus: false
@@ -31,3 +71,61 @@ telemetry.allowChangingOptInStatus: false
 server.securityResponseHeaders.strictTransportSecurity: max-age=31536000; includeSubDomains
 # Disable embedding for serverless MVP
 server.securityResponseHeaders.disableEmbedding: true
+
+# default to newest routes
+server.versioned.versionResolution: newest
+# do not enforce client version check
+server.versioned.strictClientVersionCheck: false
+
+# Enforce single "default" space and disable feature visibility controls
+xpack.spaces.maxSpaces: 1
+xpack.spaces.allowFeatureVisibility: false
+
+# Only display console autocomplete suggestions for ES endpoints that are available in serverless
+console.autocompleteDefinitions.endpointsAvailability: serverless
+
+# Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
+elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]
+
+# Limit maxSockets to 800 as we do in ESS, which improves reliability under high loads.
+elasticsearch.maxSockets: 800
+
+# Enable dynamic config to be updated via the internal HTTP requests
+coreApp.allowDynamicConfigOverrides: true
+
+# Visualizations editors readonly settings
+vis_type_gauge.readOnly: true
+vis_type_heatmap.readOnly: true
+vis_type_metric.readOnly: true
+vis_type_pie.readOnly: true
+vis_type_table.readOnly: true
+vis_type_tagcloud.readOnly: true
+vis_type_timelion.readOnly: true
+vis_type_timeseries.readOnly: true
+vis_type_vislib.readOnly: true
+vis_type_xy.readOnly: true
+input_control_vis.readOnly: true
+xpack.graph.enabled: false
+
+# Disable cases in stack management
+xpack.cases.stack.enabled: false
+
+# Alerting and action circuit breakers
+xpack.alerting.rules.run.actions.max: 3000
+xpack.alerting.rules.run.timeout: 1m
+xpack.alerting.rules.run.ruleTypeOverrides:
+  - id: siem.indicatorRule
+    timeout: 1m
+xpack.alerting.rules.minimumScheduleInterval.enforce: true
+xpack.actions.run.maxAttempts: 10
+
+# Disables ESQL in advanced settings (hides it from the UI)
+uiSettings:
+  overrides:
+    discover:enableESQL: false
+
+# Task Manager
+xpack.task_manager.allow_reading_invalid_state: false
+
+## TaskManager requeue invalid tasks, supports ZDT
+xpack.task_manager.requeue_invalid_tasks.enabled: true

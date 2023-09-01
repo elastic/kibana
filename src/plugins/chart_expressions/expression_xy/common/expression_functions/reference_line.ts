@@ -108,7 +108,6 @@ export const referenceLineFunction: ReferenceLineFn = {
     forAccessor: {
       types: ['string'],
       help: '',
-      default: '',
     },
   },
   fn(table, args) {
@@ -119,11 +118,18 @@ export const referenceLineFunction: ReferenceLineFn = {
         ? false
         : args.textVisibility;
 
+    const valueMeta =
+      args.forAccessor && table
+        ? table.columns.find(({ id }) => id === args.forAccessor)?.meta
+        : undefined;
+
     return {
       type: REFERENCE_LINE,
       layerType: LayerTypes.REFERENCELINE,
       lineLength: table?.rows.length ?? 0,
-      decorations: [{ ...args, textVisibility, type: EXTENDED_REFERENCE_LINE_DECORATION_CONFIG }],
+      decorations: [
+        { ...args, textVisibility, type: EXTENDED_REFERENCE_LINE_DECORATION_CONFIG, valueMeta },
+      ],
     };
   },
 };

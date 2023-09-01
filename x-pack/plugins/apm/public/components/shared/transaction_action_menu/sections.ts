@@ -11,13 +11,16 @@ import { IBasePath } from '@kbn/core/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
+import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
+import type { ProfilingLocators } from '@kbn/profiling-plugin/public';
+import { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
 import { getInfraHref } from '../links/infra_link';
 import { fromQuery } from '../links/url_helpers';
 import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
-import { TRACE_ID } from '../../../../common/es_fields/apm';
+import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
 import { ApmRouter } from '../../routing/apm_route_config';
 
 function getInfraMetricsQuery(transaction: Transaction) {
@@ -35,27 +38,32 @@ export const getSections = ({
   basePath,
   location,
   apmRouter,
+  infraLocators,
   infraLinksAvailable,
+  profilingLocators,
+  rangeFrom,
+  rangeTo,
+  environment,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
   location: Location;
   apmRouter: ApmRouter;
+  infraLocators: InfraLocators;
   infraLinksAvailable: boolean;
+  profilingLocators?: ProfilingLocators;
+  rangeFrom: string;
+  rangeTo: string;
+  environment: Environment;
 }) => {
   if (!transaction) return [];
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
+  const { nodeLogsLocator, logsLocator } = infraLocators;
 
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
-
-  const routeParams = apmRouter.getParams(
-    '/services/{serviceName}/transactions/view',
-    location
-  );
-  const { rangeFrom, rangeTo, environment } = routeParams.query;
 
   const uptimeLink = url.format({
     pathname: basePath.prepend('/app/uptime'),
@@ -78,11 +86,10 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
         { defaultMessage: 'Pod logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/pod-logs/${podId}`,
-        query: { time },
+      href: nodeLogsLocator.getRedirectUrl({
+        nodeId: podId!,
+        nodeType: 'pod',
+        time,
       }),
       condition: !!podId,
     },
@@ -109,11 +116,10 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
         { defaultMessage: 'Container logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/container-logs/${containerId}`,
-        query: { time },
+      href: nodeLogsLocator.getRedirectUrl({
+        nodeId: containerId!,
+        nodeType: 'container',
+        time,
       }),
       condition: !!containerId,
     },
@@ -140,11 +146,10 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
         { defaultMessage: 'Host logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/host-logs/${hostName}`,
-        query: { time },
+      href: nodeLogsLocator.getRedirectUrl({
+        nodeId: hostName!,
+        nodeType: 'host',
+        time,
       }),
       condition: !!hostName,
     },
@@ -162,6 +167,42 @@ export const getSections = ({
       }),
       condition: !!hostName,
     },
+    {
+      key: 'hostProfilingFlamegraph',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostProfilingFlamegraphLinkLabel',
+        { defaultMessage: 'Host flamegraph' }
+      ),
+      href: profilingLocators?.flamegraphLocator.getRedirectUrl({
+        kuery: `${HOST_NAME}: "${hostName}"`,
+      }),
+      condition: !!hostName && !!profilingLocators,
+      showNewBadge: true,
+    },
+    {
+      key: 'hostProfilingTopNFunctions',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostProfilingTopNFunctionsLinkLabel',
+        { defaultMessage: 'Host topN functions' }
+      ),
+      href: profilingLocators?.topNFunctionsLocator.getRedirectUrl({
+        kuery: `${HOST_NAME}: "${hostName}"`,
+      }),
+      condition: !!hostName && !!profilingLocators,
+      showNewBadge: true,
+    },
+    {
+      key: 'hostProfilingStacktraces',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostProfilingStacktracesLinkLabel',
+        { defaultMessage: 'Host stacktraces' }
+      ),
+      href: profilingLocators?.stacktracesLocator.getRedirectUrl({
+        kuery: `${HOST_NAME}: "${hostName}"`,
+      }),
+      condition: !!hostName && !!profilingLocators,
+      showNewBadge: true,
+    },
   ];
 
   const logActions: Action[] = [
@@ -171,14 +212,9 @@ export const getSections = ({
         'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
         { defaultMessage: 'Trace logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/logs`,
-        query: {
-          time,
-          filter: `trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id}")`,
-        },
+      href: logsLocator.getRedirectUrl({
+        filter: `trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id}")`,
+        time,
       }),
       condition: true,
     },
@@ -324,7 +360,7 @@ export const getSections = ({
         title: i18n.translate(
           'xpack.apm.transactionActionMenu.serviceMap.title',
           {
-            defaultMessage: 'Service map',
+            defaultMessage: 'Service Map',
           }
         ),
         subtitle: i18n.translate(

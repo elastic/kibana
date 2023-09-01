@@ -10,12 +10,9 @@ import { PropTypes } from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import 'brace/mode/plain_text';
-import 'brace/theme/github';
-
 import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../../common/constants/tooltips';
-import { EuiCodeEditor } from '@kbn/es-ui-shared-plugin/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -324,18 +321,20 @@ class PipelineEditorUi extends React.Component {
               />
             }
           >
-            <div data-test-subj="acePipeline">
-              <EuiCodeEditor
-                mode="plain_text"
-                onChange={this.onPipelineChange}
-                setOptions={{
-                  minLines: 25,
-                  maxLines: Infinity,
-                  readOnly: this.props.licenseService.isReadOnly,
-                }}
-                theme="github"
+            <div data-test-subj="pipelineField">
+              <CodeEditor
+                languageId="text"
                 value={this.state.pipeline.pipeline}
-                width={'1017'}
+                height={500}
+                options={{
+                  lineNumbers: 'on',
+                  tabSize: 2,
+                  automaticLayout: true,
+                }}
+                aria-label={i18n.translate('xpack.logstash.pipelineEditor.pipelineEditorField', {
+                  defaultMessage: 'Pipeline editor',
+                })}
+                onChange={this.onPipelineChange}
               />
             </div>
           </EuiFormRow>

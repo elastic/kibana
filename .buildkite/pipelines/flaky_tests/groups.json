@@ -1,8 +1,16 @@
 {
   "groups": [
     {
+      "key": "cypress/security_solution_investigations",
+      "name": "Security Solution Investigations - Cypress"
+    },
+    {
       "key": "cypress/security_solution",
       "name": "Security Solution - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_explore",
+      "name": "Security Solution Explore - Cypress"
     },
     {
       "key": "cypress/osquery_cypress",

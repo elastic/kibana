@@ -11,7 +11,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleObjectId,
   RuleSignatureId,
-} from '../../../../../../common/detection_engine/rule_schema';
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { RuleParams } from '../../../rule_schema';
 import { isAlertType } from '../../../rule_schema';

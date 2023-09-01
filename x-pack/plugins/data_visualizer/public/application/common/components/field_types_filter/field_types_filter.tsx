@@ -8,7 +8,7 @@
 import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { getFieldTypeName } from '@kbn/unified-field-list-plugin/public';
+import { getFieldTypeName } from '@kbn/discover-utils';
 import { FieldTypesHelpPopover } from './field_types_help_popover';
 import { MultiSelectPicker, Option } from '../multi_select_picker';
 import type {

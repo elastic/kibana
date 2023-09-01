@@ -60,7 +60,11 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
       expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
     });
 
-    expect(renderResult.getByTestId('test-downloadButton')).not.toBeNull();
+    const downlaodButton = renderResult.getByTestId('test-downloadButton');
+
+    expect(downlaodButton.getAttribute('href')).toEqual(
+      '/api/endpoint/action/123/file/123.agent-a/download?apiVersion=2023-10-31'
+    );
     expect(renderResult.getByTestId('test-passcodeMessage')).toHaveTextContent(
       FILE_PASSCODE_INFO_MESSAGE
     );
@@ -95,6 +99,7 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123/file/123.agent-a',
+        version: '2023-10-31',
       });
     });
 

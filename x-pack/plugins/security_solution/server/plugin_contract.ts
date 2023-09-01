@@ -41,6 +41,7 @@ import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { AppFeaturesService } from './lib/app_features_service/app_features_service';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
@@ -81,8 +82,12 @@ export interface SecuritySolutionPluginStartDependencies {
   share: SharePluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SecuritySolutionPluginSetup {}
+export interface SecuritySolutionPluginSetup {
+  /**
+   * Sets the configurations for app features that are available to the Security Solution
+   */
+  setAppFeaturesConfigurator: AppFeaturesService['setAppFeaturesConfigurator'];
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionPluginStart {}

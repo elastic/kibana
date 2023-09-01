@@ -7,6 +7,7 @@
 
 import type { CellAction, CellActionExecutionContext, CellActionFactory } from '@kbn/cell-actions';
 import type { QueryOperator } from '../../common/types';
+export { DiscoverInTimelineAction, DiscoverInTimelineTrigger } from './constants';
 export interface AndFilter {
   field: string;
   value: string | string[];
@@ -54,14 +55,24 @@ export interface SecurityCellActionExecutionContext extends CellActionExecutionC
 export type SecurityCellAction = CellAction<SecurityCellActionExecutionContext>;
 
 export interface SecurityCellActions {
-  filterIn?: CellActionFactory;
-  filterOut?: CellActionFactory;
-  addToTimeline?: CellActionFactory;
-  investigateInNewTimeline?: CellActionFactory;
-  showTopN?: CellActionFactory;
-  copyToClipboard?: CellActionFactory;
-  toggleColumn?: CellActionFactory;
+  filterIn: CellActionFactory;
+  filterOut: CellActionFactory;
+  addToTimeline: CellActionFactory;
+  investigateInNewTimeline: CellActionFactory;
+  showTopN: CellActionFactory;
+  copyToClipboard: CellActionFactory;
+  toggleColumn: CellActionFactory;
 }
 
 // All security cell actions names
 export type SecurityCellActionName = keyof SecurityCellActions;
+
+export interface DiscoverCellActions {
+  filterIn: CellActionFactory;
+  filterOut: CellActionFactory;
+  addToTimeline: CellActionFactory;
+  copyToClipboard: CellActionFactory;
+}
+
+// All Discover search embeddable cell actions names
+export type DiscoverCellActionName = keyof DiscoverCellActions;

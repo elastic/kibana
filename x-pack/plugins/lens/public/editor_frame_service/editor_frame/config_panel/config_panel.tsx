@@ -13,9 +13,14 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import { LayerType } from '../../../../common/types';
-import { changeIndexPattern, removeDimension } from '../../../state_management/lens_slice';
-import { Visualization } from '../../../types';
+
+import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import {
+  changeIndexPattern,
+  onDropToDimension,
+  removeDimension,
+} from '../../../state_management/lens_slice';
+import { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps } from './types';
@@ -26,14 +31,13 @@ import {
   removeOrClearLayer,
   cloneLayer,
   addLayer as addLayerAction,
-  updateState,
   updateDatasourceState,
   updateVisualizationState,
   setToggleFullscreen,
   useLensSelector,
   selectVisualization,
+  registerLibraryAnnotationGroup,
 } from '../../../state_management';
-import { AddLayerButton } from './add_layer';
 import { getRemoveOperation } from '../../../utils';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -76,7 +80,7 @@ export function LayerPanels(
         })
       );
     },
-    [activeVisualization, dispatchLens]
+    [activeVisualization.id, dispatchLens]
   );
   const updateDatasource = useMemo(
     () =>
@@ -84,8 +88,10 @@ export function LayerPanels(
         if (datasourceId) {
           dispatchLens(
             updateDatasourceState({
-              updater: (prevState: unknown) =>
-                typeof newState === 'function' ? newState(prevState) : newState,
+              newDatasourceState:
+                typeof newState === 'function'
+                  ? newState(datasourceStates[datasourceId].state)
+                  : newState,
               datasourceId,
               clearStagedPreview: false,
               dontSyncLinkedDimensions,
@@ -93,7 +99,7 @@ export function LayerPanels(
           );
         }
       },
-    [dispatchLens]
+    [dispatchLens, datasourceStates]
   );
   const updateDatasourceAsync = useMemo(
     () => (datasourceId: string | undefined, newState: unknown) => {
@@ -101,7 +107,7 @@ export function LayerPanels(
       // which we don't want. The timeout lets user interaction have priority, then React updates.
       setTimeout(() => {
         updateDatasource(datasourceId, newState);
-      }, 0);
+      });
     },
     [updateDatasource]
   );
@@ -118,44 +124,42 @@ export function LayerPanels(
         // which we don't want. The timeout lets user interaction have priority, then React updates.
 
         setTimeout(() => {
+          const newDsState =
+            typeof newDatasourceState === 'function'
+              ? newDatasourceState(datasourceStates[datasourceId].state)
+              : newDatasourceState;
+
+          const newVisState =
+            typeof newVisualizationState === 'function'
+              ? newVisualizationState(visualization.state)
+              : newVisualizationState;
+
           dispatchLens(
-            updateState({
-              updater: (prevState) => {
-                const updatedDatasourceState =
-                  typeof newDatasourceState === 'function'
-                    ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
-                    : newDatasourceState;
-
-                const updatedVisualizationState =
-                  typeof newVisualizationState === 'function'
-                    ? newVisualizationState(prevState.visualization.state)
-                    : newVisualizationState;
-
-                return {
-                  ...prevState,
-                  datasourceStates: {
-                    ...prevState.datasourceStates,
-                    [datasourceId]: {
-                      state: updatedDatasourceState,
-                      isLoading: false,
-                    },
-                  },
-                  visualization: {
-                    ...prevState.visualization,
-                    state: updatedVisualizationState,
-                  },
-                };
-              },
+            updateVisualizationState({
+              visualizationId: activeVisualization.id,
+              newState: newVisState,
+              dontSyncLinkedDimensions: true, // TODO: to refactor: this is quite brittle, we avoid to sync linked dimensions because we do it with datasourceState update
+            })
+          );
+          dispatchLens(
+            updateDatasourceState({
+              newDatasourceState: newDsState,
+              datasourceId,
+              clearStagedPreview: false,
             })
           );
         }, 0);
       },
-    [dispatchLens]
+    [dispatchLens, visualization.state, datasourceStates, activeVisualization.id]
   );
 
-  const toggleFullscreen = useMemo(
-    () => () => {
-      dispatchLens(setToggleFullscreen());
+  const toggleFullscreen = useCallback(() => {
+    dispatchLens(setToggleFullscreen());
+  }, [dispatchLens]);
+
+  const handleDimensionDrop = useCallback(
+    (payload: { source: DragDropIdentifier; target: DragDropOperation; dropType: DropType }) => {
+      dispatchLens(onDropToDimension(payload));
     },
     [dispatchLens]
   );
@@ -188,6 +192,7 @@ export function LayerPanels(
           layerIds,
         })
       );
+
       removeLayerRef(layerToRemoveId);
     },
     [
@@ -214,28 +219,37 @@ export function LayerPanels(
       visualizationId?: string;
       layerId?: string;
     }) => {
-      const indexPatterns = await props.indexPatternService.ensureIndexPattern({
+      const indexPatterns = await props.indexPatternService?.ensureIndexPattern({
         id: indexPatternId,
         cache: props.framePublicAPI.dataViews.indexPatterns,
       });
-      dispatchLens(
-        changeIndexPattern({
-          indexPatternId,
-          datasourceIds: datasourceId ? [datasourceId] : [],
-          visualizationIds: visualizationId ? [visualizationId] : [],
-          layerId,
-          dataViews: { indexPatterns },
-        })
-      );
+      if (indexPatterns) {
+        dispatchLens(
+          changeIndexPattern({
+            indexPatternId,
+            datasourceIds: datasourceId ? [datasourceId] : [],
+            visualizationIds: visualizationId ? [visualizationId] : [],
+            layerId,
+            dataViews: { indexPatterns },
+          })
+        );
+      }
     },
     [dispatchLens, props.framePublicAPI.dataViews.indexPatterns, props.indexPatternService]
   );
 
-  const addLayer = (layerType: LayerType) => {
+  const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues) => {
     const layerId = generateId();
-    dispatchLens(addLayerAction({ layerId, layerType }));
+
+    dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues }));
+
     setNextFocusedLayerId(layerId);
   };
+
+  const registerLibraryAnnotationGroupFunction = useCallback(
+    (groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)),
+    [dispatchLens]
+  );
 
   const hideAddLayerButton = query && isOfAggregateQueryType(query);
 
@@ -252,6 +266,8 @@ export function LayerPanels(
           !hidden && (
             <LayerPanel
               {...props}
+              onDropToDimension={handleDimensionDrop}
+              registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
               dimensionGroups={groups}
               activeVisualization={activeVisualization}
               registerNewLayerRef={registerNewLayerRef}
@@ -262,6 +278,7 @@ export function LayerPanels(
               updateVisualization={setVisualizationState}
               updateDatasource={updateDatasource}
               updateDatasourceAsync={updateDatasourceAsync}
+              displayLayerSettings={!props.hideLayerHeader}
               onChangeIndexPattern={(args) => {
                 onChangeIndexPattern(args);
                 const layersToRemove =
@@ -314,14 +331,46 @@ export function LayerPanels(
           )
         );
       })}
-      {!hideAddLayerButton && (
-        <AddLayerButton
-          visualization={activeVisualization}
-          visualizationState={visualization.state}
-          layersMeta={props.framePublicAPI}
-          onAddLayerClick={(layerType) => addLayer(layerType)}
-        />
-      )}
+      {!hideAddLayerButton &&
+        activeVisualization?.getAddLayerButtonComponent?.({
+          supportedLayers: activeVisualization.getSupportedLayers(
+            visualization.state,
+            props.framePublicAPI
+          ),
+          addLayer,
+          ensureIndexPattern: async (specOrId) => {
+            let indexPatternId;
+
+            if (typeof specOrId === 'string') {
+              indexPatternId = specOrId;
+            } else {
+              const dataView = await props.dataViews.create(specOrId);
+
+              if (!dataView.id) {
+                return;
+              }
+
+              indexPatternId = dataView.id;
+            }
+
+            const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
+              id: indexPatternId,
+              cache: props.framePublicAPI.dataViews.indexPatterns,
+            });
+
+            if (newIndexPatterns) {
+              dispatchLens(
+                changeIndexPattern({
+                  dataViews: { indexPatterns: newIndexPatterns },
+                  datasourceIds: Object.keys(datasourceStates),
+                  visualizationIds: visualization.activeId ? [visualization.activeId] : [],
+                  indexPatternId,
+                })
+              );
+            }
+          },
+          registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
+        })}
     </EuiForm>
   );
 }

@@ -27,12 +27,17 @@ import {
   EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { CytoscapeContext } from './cytoscape';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
-import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
-import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { useMlLocator, useNotifications, useNavigateToPath } from '../../../../contexts/kibana';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
+import {
+  useMlLocator,
+  useNotifications,
+  useNavigateToPath,
+  useMlKibana,
+} from '../../../../contexts/kibana';
 import { getDataViewIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
@@ -79,8 +84,8 @@ export const Controls: FC<Props> = React.memo(
     const [isPopoverOpen, setPopover] = useState<boolean>(false);
     const [didUntag, setDidUntag] = useState<boolean>(false);
 
-    const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
-    const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
+    const canCreateDataFrameAnalytics: boolean = usePermissionCheck('canCreateDataFrameAnalytics');
+    const canDeleteDataFrameAnalytics: boolean = usePermissionCheck('canDeleteDataFrameAnalytics');
     const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
     const {
       closeDeleteJobCheckModal,
@@ -93,6 +98,17 @@ export const Controls: FC<Props> = React.memo(
       openModal,
       openDeleteJobCheckModal,
     } = deleteAction;
+
+    const {
+      services: {
+        share,
+        application: { navigateToUrl, capabilities },
+      },
+    } = useMlKibana();
+
+    const hasIngestPipelinesCapabilities =
+      capabilities.management?.ingest?.ingest_pipelines === true;
+
     const { toasts } = useNotifications();
     const mlLocator = useMlLocator()!;
     const navigateToPath = useNavigateToPath();
@@ -132,6 +148,19 @@ export const Controls: FC<Props> = React.memo(
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nodeLabel]);
+
+    const onManagePipeline = useCallback(async () => {
+      const ingestPipelineLocator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
+      if (ingestPipelineLocator && nodeLabel !== null) {
+        const path = await ingestPipelineLocator.getUrl({
+          page: 'pipeline_list',
+        });
+
+        // Passing pipelineId here because pipeline_list is not recognizing pipelineId params
+        await navigateToUrl(`${path}/?pipeline=${nodeLabel}`);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [share.url.locators, nodeLabel]);
 
     const onCloneJobClick = useCallback(async () => {
       navigateToWizardWithClonedJob({ config: details[nodeId], stats: details[nodeId]?.stats });
@@ -262,6 +291,22 @@ export const Controls: FC<Props> = React.memo(
             </EuiContextMenuItem>,
           ]
         : []),
+      ...(modelId !== nodeLabel &&
+      nodeType === JOB_MAP_NODE_TYPES.INGEST_PIPELINE &&
+      hasIngestPipelinesCapabilities
+        ? [
+            <EuiContextMenuItem
+              key={`${nodeId}-view-pipeline`}
+              icon="pipelineApp"
+              onClick={onManagePipeline}
+            >
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.flyout.viewIngestPipelineButton"
+                defaultMessage="View ingest pipeline"
+              />
+            </EuiContextMenuItem>,
+          ]
+        : []),
     ];
 
     return (
@@ -298,7 +343,7 @@ export const Controls: FC<Props> = React.memo(
             </EuiFlexGroup>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
-            {nodeType !== JOB_MAP_NODE_TYPES.TRAINED_MODEL && (
+            {nodeType !== JOB_MAP_NODE_TYPES.TRAINED_MODEL && items.length > 0 ? (
               <EuiPopover
                 button={button}
                 isOpen={isPopoverOpen}
@@ -308,7 +353,7 @@ export const Controls: FC<Props> = React.memo(
               >
                 <EuiContextMenuPanel items={items} />
               </EuiPopover>
-            )}
+            ) : null}
           </EuiFlyoutFooter>
         </EuiFlyout>
         {isDeleteJobCheckModalVisible && item && (

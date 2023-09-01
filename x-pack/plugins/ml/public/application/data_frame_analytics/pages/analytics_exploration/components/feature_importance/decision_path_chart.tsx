@@ -25,12 +25,12 @@ import { EuiIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
+import {
+  type FeatureImportanceBaseline,
+  isRegressionFeatureImportanceBaseline,
+} from '@kbn/ml-data-frame-analytics-utils';
 import type { DecisionPathPlotData } from './use_classification_path_data';
 import { formatSingleValue } from '../../../../../formatters/format_value';
-import {
-  FeatureImportanceBaseline,
-  isRegressionFeatureImportanceBaseline,
-} from '../../../../../../../common/types/feature_importance';
 const { euiColorFullShade, euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
 
@@ -39,12 +39,6 @@ const baselineStyle: LineAnnotationStyle = {
     strokeWidth: 1,
     stroke: euiColorFullShade,
     opacity: 0.75,
-  },
-  details: {
-    fontFamily: 'Arial',
-    fontSize: 10,
-    fill: euiColorMediumShade,
-    padding: 0,
   },
 };
 
@@ -157,7 +151,9 @@ export const DecisionPathChart = ({
               values: { predictionFieldName, xAxisLabel },
             }
           )}
-          showGridLines={false}
+          gridLine={{
+            visible: false,
+          }}
           position={Position.Top}
           showOverlappingTicks
           domain={
@@ -169,7 +165,13 @@ export const DecisionPathChart = ({
               : undefined
           }
         />
-        <Axis showGridLines={true} id="left" position={Position.Left} />
+        <Axis
+          gridLine={{
+            visible: true,
+          }}
+          id="left"
+          position={Position.Left}
+        />
         <LineSeries
           id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathLine'}
           name={xAxisLabel}

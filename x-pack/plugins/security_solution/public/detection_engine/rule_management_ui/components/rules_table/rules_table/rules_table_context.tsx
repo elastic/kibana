@@ -15,7 +15,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
+import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -39,7 +39,7 @@ import {
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
-interface RulesSnoozeSettingsState {
+interface RulesSnoozeSettings {
   /**
    * A map object using rule SO's id (not ruleId) as keys and snooze settings as values
    */
@@ -127,7 +127,7 @@ export interface RulesTableState {
   /**
    * Rules snooze settings for the current rules
    */
-  rulesSnoozeSettings: RulesSnoozeSettingsState;
+  rulesSnoozeSettings: RulesSnoozeSettings;
 }
 
 export type LoadingRuleAction =
@@ -206,7 +206,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     showElasticRules:
       savedFilter?.source === RuleSource.Prebuilt ?? DEFAULT_FILTER_OPTIONS.showElasticRules,
     enabled: savedFilter?.enabled,
+    ruleExecutionStatus:
+      savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
   });
+
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
     field: savedSorting?.field ?? DEFAULT_SORTING_OPTIONS.field,
     order: savedSorting?.order ?? DEFAULT_SORTING_OPTIONS.order,
@@ -248,6 +251,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
       tags: DEFAULT_FILTER_OPTIONS.tags,
       enabled: undefined,
+      ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
     });
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,
@@ -303,7 +307,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     isFetching: isSnoozeSettingsFetching,
     isError: isSnoozeSettingsFetchError,
     refetch: refetchSnoozeSettings,
-  } = useFetchRulesSnoozeSettings(
+  } = useFetchRulesSnoozeSettingsQuery(
     rules.map((x) => x.id),
     { enabled: rules.length > 0 }
   );
@@ -346,8 +350,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ]
   );
 
-  const providerValue = useMemo(
-    () => ({
+  const providerValue = useMemo(() => {
+    return {
       state: {
         rules,
         rulesSnoozeSettings: {
@@ -382,33 +386,32 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         }),
       },
       actions,
-    }),
-    [
-      rules,
-      rulesSnoozeSettingsMap,
-      isSnoozeSettingsLoading,
-      isSnoozeSettingsFetching,
-      isSnoozeSettingsFetchError,
-      page,
-      perPage,
-      total,
-      filterOptions,
-      isPreflightInProgress,
-      isActionInProgress,
-      isAllSelected,
-      isFetched,
-      isFetching,
-      isLoading,
-      isRefetching,
-      isRefreshOn,
-      dataUpdatedAt,
-      loadingRules.ids,
-      loadingRules.action,
-      selectedRuleIds,
-      sortingOptions,
-      actions,
-    ]
-  );
+    };
+  }, [
+    rules,
+    rulesSnoozeSettingsMap,
+    isSnoozeSettingsLoading,
+    isSnoozeSettingsFetching,
+    isSnoozeSettingsFetchError,
+    page,
+    perPage,
+    total,
+    filterOptions,
+    isPreflightInProgress,
+    isActionInProgress,
+    isAllSelected,
+    isFetched,
+    isFetching,
+    isLoading,
+    isRefetching,
+    isRefreshOn,
+    dataUpdatedAt,
+    loadingRules.ids,
+    loadingRules.action,
+    selectedRuleIds,
+    sortingOptions,
+    actions,
+  ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;
 };

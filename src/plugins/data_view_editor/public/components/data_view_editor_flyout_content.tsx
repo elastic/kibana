@@ -231,7 +231,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   return (
     <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-      <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
+      <FlyoutPanels.Item
+        className="fieldEditor__mainFlyoutPanel"
+        data-test-subj="indexPatternEditorFlyout"
+        border="right"
+      >
         <EuiTitle data-test-subj="flyoutTitle">
           <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
         </EuiTitle>
@@ -299,6 +303,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
               form.updateFieldValues({ name: formData.title });
               await form.getFields().name.validate();
             }
+            // Ensures timestamp field is validated against current set of options
+            form.validateFields(['timestampField']);
             form.setFieldValue('isAdHoc', adhoc || false);
             form.submit();
           }}

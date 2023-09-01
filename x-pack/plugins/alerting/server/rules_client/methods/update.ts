@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
-import type { ShouldIncrementRevision } from './bulk_edit';
 import {
   PartialRule,
   RawRule,
@@ -35,6 +34,8 @@ import {
   migrateLegacyActions,
 } from '../lib';
 
+type ShouldIncrementRevision = (params?: RuleTypeParams) => boolean;
+
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   data: {
@@ -47,7 +48,7 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     notifyWhen?: RuleNotifyWhenType | null;
   };
   allowMissingConnectorSecrets?: boolean;
-  shouldIncrementRevision?: ShouldIncrementRevision<Params>;
+  shouldIncrementRevision?: ShouldIncrementRevision;
 }
 
 export async function update<Params extends RuleTypeParams = never>(

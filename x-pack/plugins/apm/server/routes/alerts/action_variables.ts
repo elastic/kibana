@@ -13,7 +13,7 @@ export const apmActionVariables = {
       'xpack.apm.alerts.action_variables.alertDetailsUrl',
       {
         defaultMessage:
-          'Link to the view within Elastic that shows further details and context surrounding this alert',
+          'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
       }
     ),
     name: 'alertDetailsUrl' as const,
@@ -87,8 +87,7 @@ export const apmActionVariables = {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.viewInAppUrl',
       {
-        defaultMessage:
-          'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+        defaultMessage: 'Link to the alert source',
       }
     ),
     name: 'viewInAppUrl' as const,
@@ -102,5 +101,14 @@ export const apmActionVariables = {
       }
     ),
     name: 'errorGroupingKey' as const,
+  },
+  errorGroupingName: {
+    description: i18n.translate(
+      'xpack.apm.alerts.action_variables.errorGroupingName',
+      {
+        defaultMessage: 'The error grouping name the alert is created for',
+      }
+    ),
+    name: 'errorGroupingName' as const,
   },
 };

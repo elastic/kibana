@@ -7,8 +7,10 @@
 
 // / <reference types="cypress" />
 
-import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
+import { startRuntimeServices } from '../../../../scripts/endpoint/endpoint_agent_runner/runtime';
+import { runFleetServerIfNeeded } from '../../../../scripts/endpoint/endpoint_agent_runner/fleet_server';
 import {
   sendEndpointActionResponse,
   sendFleetActionResponse,
@@ -50,8 +52,8 @@ import {
   startEndpointHost,
   createAndEnrollEndpointHost,
   destroyEndpointHost,
-  getEndpointHosts,
   stopEndpointHost,
+  VAGRANT_CWD,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
 
 /**
@@ -71,8 +73,11 @@ export const dataLoaders = (
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    username: config.env.ELASTICSEARCH_USERNAME,
-    password: config.env.ELASTICSEARCH_PASSWORD,
+    fleetServerUrl: config.env.FLEET_SERVER_URL,
+    username: config.env.KIBANA_USERNAME,
+    password: config.env.KIBANA_PASSWORD,
+    esUsername: config.env.ELASTICSEARCH_USERNAME,
+    esPassword: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,
   });
 
@@ -83,7 +88,7 @@ export const dataLoaders = (
       agentPolicyName,
     }: {
       policyName: string;
-      endpointPackageVersion: string;
+      endpointPackageVersion?: string;
       agentPolicyName?: string;
     }) => {
       const { kbnClient } = await stackServicesPromise;
@@ -121,6 +126,7 @@ export const dataLoaders = (
         isolation,
         withResponseActions,
         numResponseActions,
+        alertIds,
       } = options;
 
       return cyLoadEndpointDataHandler(esClient, kbnClient, {
@@ -130,6 +136,7 @@ export const dataLoaders = (
         isolation,
         withResponseActions,
         numResponseActions,
+        alertIds,
       });
     },
 
@@ -201,12 +208,36 @@ export const dataLoadersForRealEndpoints = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
+  let fleetServerContainerId: string | undefined;
+
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    username: config.env.ELASTICSEARCH_USERNAME,
-    password: config.env.ELASTICSEARCH_PASSWORD,
+    fleetServerUrl: config.env.FLEET_SERVER_URL,
+    username: config.env.KIBANA_USERNAME,
+    password: config.env.KIBANA_PASSWORD,
+    esUsername: config.env.ELASTICSEARCH_USERNAME,
+    esPassword: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,
+  });
+
+  on('before:run', async () => {
+    await startRuntimeServices({
+      kibanaUrl: config.env.KIBANA_URL,
+      elasticUrl: config.env.ELASTICSEARCH_URL,
+      fleetServerUrl: config.env.FLEET_SERVER_URL,
+      username: config.env.KIBANA_USERNAME,
+      password: config.env.KIBANA_PASSWORD,
+      asSuperuser: true,
+    });
+    const data = await runFleetServerIfNeeded();
+    fleetServerContainerId = data?.fleetServerContainerId;
+  });
+
+  on('after:run', () => {
+    if (fleetServerContainerId) {
+      execa.sync('docker', ['kill', fleetServerContainerId]);
+    }
   });
 
   on('task', {
@@ -220,7 +251,7 @@ export const dataLoadersForRealEndpoints = (
         log,
         kbnClient,
       }).then((newHost) => {
-        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 120000).then(() => {
+        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000).then(() => {
           return newHost;
         });
       });
@@ -242,7 +273,15 @@ export const dataLoadersForRealEndpoints = (
       path: string;
       content: string;
     }): Promise<null> => {
-      await execa(`multipass`, ['exec', hostname, '--', 'sh', '-c', `echo ${content} > ${path}`]);
+      if (process.env.CI) {
+        await execa('vagrant', ['ssh', '--', `echo ${content} > ${path}`], {
+          env: {
+            VAGRANT_CWD,
+          },
+        });
+      } else {
+        await execa(`multipass`, ['exec', hostname, '--', 'sh', '-c', `echo ${content} > ${path}`]);
+      }
       return null;
     },
 
@@ -255,7 +294,16 @@ export const dataLoadersForRealEndpoints = (
       srcPath: string;
       destPath: string;
     }): Promise<null> => {
-      await execa(`multipass`, ['transfer', srcPath, `${hostname}:${destPath}`]);
+      if (process.env.CI) {
+        await execa('vagrant', ['upload', srcPath, destPath], {
+          env: {
+            VAGRANT_CWD,
+          },
+        });
+      } else {
+        await execa(`multipass`, ['transfer', srcPath, `${hostname}:${destPath}`]);
+      }
+
       return null;
     },
 
@@ -286,26 +334,37 @@ export const dataLoadersForRealEndpoints = (
       path: string;
       password?: string;
     }): Promise<string> => {
-      const result = await execa(`multipass`, [
-        'exec',
-        hostname,
-        '--',
-        'sh',
-        '-c',
-        `unzip -p ${password ? `-P ${password} ` : ''}${path}`,
-      ]);
+      let result;
+
+      if (process.env.CI) {
+        result = await execa(
+          `vagrant`,
+          ['ssh', '--', `unzip -p ${password ? `-P ${password} ` : ''}${path}`],
+          {
+            env: {
+              VAGRANT_CWD,
+            },
+          }
+        );
+      } else {
+        result = await execa(`multipass`, [
+          'exec',
+          hostname,
+          '--',
+          'sh',
+          '-c',
+          `unzip -p ${password ? `-P ${password} ` : ''}${path}`,
+        ]);
+      }
+
       return result.stdout;
     },
 
-    stopEndpointHost: async () => {
-      const hosts = await getEndpointHosts();
-      const hostName = hosts[0].name;
+    stopEndpointHost: async (hostName) => {
       return stopEndpointHost(hostName);
     },
 
-    startEndpointHost: async () => {
-      const hosts = await getEndpointHosts();
-      const hostName = hosts[0].name;
+    startEndpointHost: async (hostName) => {
       return startEndpointHost(hostName);
     },
   });

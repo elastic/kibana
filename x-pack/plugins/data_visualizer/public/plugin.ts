@@ -15,6 +15,7 @@ import { Plugin } from '@kbn/core/public';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
@@ -23,7 +24,11 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from './api';
+import {
+  getDataComparisonComponent,
+  getFileDataVisualizerComponent,
+  getIndexDataVisualizerComponent,
+} from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
@@ -51,6 +56,7 @@ export interface DataVisualizerStartDependencies {
   fieldFormats: FieldFormatsStart;
   uiActions?: UiActionsStart;
   cloud?: CloudStart;
+  savedSearch: SavedSearchPublicPluginStart;
 }
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
@@ -83,6 +89,7 @@ export class DataVisualizerPlugin
     return {
       getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,
+      getDataComparisonComponent,
       getMaxBytesFormatted,
     };
   }

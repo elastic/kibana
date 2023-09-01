@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elasti
 import isEmpty from 'lodash/isEmpty';
 import { EnrichmentRangePicker } from '../../../common/components/event_details/cti_details/enrichment_range_picker';
 import { ThreatDetailsView } from '../../../common/components/event_details/cti_details/threat_details_view';
-import { useThreatIntelligenceDetails } from './hooks/use_threat_intelligence_details';
+import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
 import { THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID } from './test_ids';
 
 export const THREAT_INTELLIGENCE_TAB_ID = 'threat-intelligence-details';

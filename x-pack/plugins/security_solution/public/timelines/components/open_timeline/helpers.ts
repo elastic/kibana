@@ -13,21 +13,18 @@ import type { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type {
-  ColumnHeaderOptions,
   TimelineResult,
   SingleTimelineResolveResponse,
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
-} from '../../../../common/types/timeline';
-import {
-  DataProviderType,
-  TimelineId,
-  TimelineStatus,
-  TimelineType,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+  PinnedEvent,
+  Note,
+} from '../../../../common/api/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 
 import {
   addNotes as dispatchAddNotes,
@@ -70,8 +67,6 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
-import type { NoteResult } from '../../../../common/types/timeline/note';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -148,10 +143,7 @@ const setTimelineFilters = (filter: FilterTimelineResult) => ({
   ...(filter.script != null ? { exists: parseString(filter.script) } : {}),
 });
 
-const setEventIdToNoteIds = (
-  duplicate: boolean,
-  eventIdToNoteIds: NoteResult[] | null | undefined
-) =>
+const setEventIdToNoteIds = (duplicate: boolean, eventIdToNoteIds: Note[] | null | undefined) =>
   duplicate
     ? {}
     : eventIdToNoteIds != null
@@ -310,7 +302,7 @@ export const formatTimelineResultToModel = (
   timelineToOpen: TimelineResult,
   duplicate: boolean = false,
   timelineType?: TimelineType
-): { notes: NoteResult[] | null | undefined; timeline: TimelineModel } => {
+): { notes: Note[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
     notes,
@@ -322,7 +314,7 @@ export interface QueryTimelineById<TCache> {
   activeTimelineTab?: TimelineTabs;
   duplicate?: boolean;
   graphEventId?: string;
-  timelineId: string;
+  timelineId?: string;
   timelineType?: TimelineType;
   onError?: TimelineErrorCallback;
   onOpenTimeline?: (timeline: TimelineModel) => void;
@@ -350,55 +342,73 @@ export const queryTimelineById = <TCache>({
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
   updateIsLoading({ id: TimelineId.active, isLoading: true });
-  Promise.resolve(resolveTimeline(timelineId))
-    .then((result) => {
-      const data: SingleTimelineResolveResponse['data'] | null = getOr(null, 'data', result);
-      if (!data) return;
+  if (timelineId == null) {
+    updateTimeline({
+      id: TimelineId.active,
+      duplicate: false,
+      notes: [],
+      from: DEFAULT_FROM_MOMENT.toISOString(),
+      to: DEFAULT_TO_MOMENT.toISOString(),
+      timeline: {
+        ...timelineDefaults,
+        id: TimelineId.active,
+        activeTab: activeTimelineTab,
+        show: openTimeline,
+        initialized: true,
+      },
+    })();
+    updateIsLoading({ id: TimelineId.active, isLoading: false });
+  } else {
+    Promise.resolve(resolveTimeline(timelineId))
+      .then((result) => {
+        const data: SingleTimelineResolveResponse['data'] | null = getOr(null, 'data', result);
+        if (!data) return;
 
-      const timelineToOpen = omitTypenameInTimeline(data.timeline);
+        const timelineToOpen = omitTypenameInTimeline(data.timeline);
 
-      const { timeline, notes } = formatTimelineResultToModel(
-        timelineToOpen,
-        duplicate,
-        timelineType
-      );
-
-      if (onOpenTimeline != null) {
-        onOpenTimeline(timeline);
-      } else if (updateTimeline) {
-        const { from, to } = normalizeTimeRange({
-          from: getOr(null, 'dateRange.start', timeline),
-          to: getOr(null, 'dateRange.end', timeline),
-        });
-        updateTimeline({
+        const { timeline, notes } = formatTimelineResultToModel(
+          timelineToOpen,
           duplicate,
-          from,
-          id: TimelineId.active,
-          notes,
-          resolveTimelineConfig: {
-            outcome: data.outcome,
-            alias_target_id: data.alias_target_id,
-            alias_purpose: data.alias_purpose,
-          },
-          timeline: {
-            ...timeline,
-            activeTab: activeTimelineTab,
-            graphEventId,
-            show: openTimeline,
-            dateRange: { start: from, end: to },
-          },
-          to,
-        })();
-      }
-    })
-    .catch((error) => {
-      if (onError != null) {
-        onError(error, timelineId);
-      }
-    })
-    .finally(() => {
-      updateIsLoading({ id: TimelineId.active, isLoading: false });
-    });
+          timelineType
+        );
+
+        if (onOpenTimeline != null) {
+          onOpenTimeline(timeline);
+        } else if (updateTimeline) {
+          const { from, to } = normalizeTimeRange({
+            from: getOr(null, 'dateRange.start', timeline),
+            to: getOr(null, 'dateRange.end', timeline),
+          });
+          updateTimeline({
+            duplicate,
+            from,
+            id: TimelineId.active,
+            notes,
+            resolveTimelineConfig: {
+              outcome: data.outcome,
+              alias_target_id: data.alias_target_id,
+              alias_purpose: data.alias_purpose,
+            },
+            timeline: {
+              ...timeline,
+              activeTab: activeTimelineTab,
+              graphEventId,
+              show: openTimeline,
+              dateRange: { start: from, end: to },
+            },
+            to,
+          })();
+        }
+      })
+      .catch((error) => {
+        if (onError != null) {
+          onError(error, timelineId);
+        }
+      })
+      .finally(() => {
+        updateIsLoading({ id: TimelineId.active, isLoading: false });
+      });
+  }
 };
 
 export const dispatchUpdateTimeline =
@@ -475,7 +485,7 @@ export const dispatchUpdateTimeline =
         dispatchAddNotes({
           notes:
             notes != null
-              ? notes.map((note: NoteResult) => ({
+              ? notes.map((note: Note) => ({
                   created: note.created != null ? new Date(note.created) : new Date(),
                   id: note.noteId,
                   lastEdit: note.updated != null ? new Date(note.updated) : new Date(),

@@ -25,16 +25,18 @@ import {
   EuiHideFor,
   keys,
 } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
-import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../types';
+import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
   filters?: Filter[];
+  query?: Query | AggregateQuery;
   columns: string[];
   hit: DataTableRecord;
   hits?: DataTableRecord[];
@@ -61,6 +63,7 @@ export function DiscoverGridFlyout({
   columns,
   savedSearchId,
   filters,
+  query,
   onFilter,
   onClose,
   onRemoveColumn,
@@ -68,6 +71,7 @@ export function DiscoverGridFlyout({
   setExpandedDoc,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
+  const isPlainRecord = isTextBasedQuery(query);
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
@@ -120,80 +124,88 @@ export function DiscoverGridFlyout({
             data-test-subj="docTableRowDetailsTitle"
           >
             <h2>
-              {i18n.translate('discover.grid.tableRow.detailHeading', {
-                defaultMessage: 'Expanded document',
-              })}
+              {isPlainRecord
+                ? i18n.translate('discover.grid.tableRow.textBasedDetailHeading', {
+                    defaultMessage: 'Expanded row',
+                  })
+                : i18n.translate('discover.grid.tableRow.detailHeading', {
+                    defaultMessage: 'Expanded document',
+                  })}
             </h2>
           </EuiTitle>
 
           <EuiSpacer size="s" />
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-            <EuiHideFor sizes={['xs', 's', 'm']}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate('discover.grid.tableRow.viewText', {
-                      defaultMessage: 'View:',
-                    })}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiHideFor>
-            <EuiFlexItem grow={false}>
-              {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
-              <EuiButtonEmpty
-                size="s"
-                iconSize="s"
-                iconType="document"
-                flush="left"
-                data-test-subj="docTableRowAction"
-                href={singleDocHref}
-                onClick={onOpenSingleDoc}
-              >
-                {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
-                  defaultMessage: 'Single document',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {dataView.isTimeBased() && dataView.id && (
-              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+            {!isPlainRecord && (
+              <>
+                <EuiHideFor sizes={['xs', 's', 'm']}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <strong>
+                        {i18n.translate('discover.grid.tableRow.viewText', {
+                          defaultMessage: 'View:',
+                        })}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiHideFor>
                 <EuiFlexItem grow={false}>
                   {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButtonEmpty
                     size="s"
                     iconSize="s"
-                    iconType="documents"
+                    iconType="document"
                     flush="left"
-                    onClick={onOpenContextView}
-                    href={contextViewHref}
                     data-test-subj="docTableRowAction"
+                    href={singleDocHref}
+                    onClick={onOpenSingleDoc}
                   >
-                    {i18n.translate(
-                      'discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple',
-                      {
-                        defaultMessage: 'Surrounding documents',
-                      }
-                    )}
+                    {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
+                      defaultMessage: 'Single document',
+                    })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    content={i18n.translate(
-                      'discover.grid.tableRow.viewSurroundingDocumentsHover',
-                      {
-                        defaultMessage:
-                          'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
-                      }
-                    )}
-                    type="questionInCircle"
-                    color="subdued"
-                    position="right"
-                    iconProps={{
-                      className: 'eui-alignTop',
-                    }}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                {dataView.isTimeBased() && dataView.id && (
+                  <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+                    <EuiFlexItem grow={false}>
+                      {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                      <EuiButtonEmpty
+                        size="s"
+                        iconSize="s"
+                        iconType="documents"
+                        flush="left"
+                        onClick={onOpenContextView}
+                        href={contextViewHref}
+                        data-test-subj="docTableRowAction"
+                      >
+                        {i18n.translate(
+                          'discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple',
+                          {
+                            defaultMessage: 'Surrounding documents',
+                          }
+                        )}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        content={i18n.translate(
+                          'discover.grid.tableRow.viewSurroundingDocumentsHover',
+                          {
+                            defaultMessage:
+                              'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
+                          }
+                        )}
+                        type="questionInCircle"
+                        color="subdued"
+                        position="right"
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+              </>
             )}
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
@@ -213,7 +225,7 @@ export function DiscoverGridFlyout({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <DocViewer
+          <UnifiedDocViewer
             hit={actualHit}
             columns={columns}
             dataView={dataView}
@@ -236,6 +248,7 @@ export function DiscoverGridFlyout({
                 })
               );
             }}
+            textBasedHits={isPlainRecord ? hits : undefined}
           />
         </EuiFlyoutBody>
       </EuiFlyout>

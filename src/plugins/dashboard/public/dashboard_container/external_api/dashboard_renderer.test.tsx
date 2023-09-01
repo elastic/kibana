@@ -10,6 +10,7 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 
 import { DashboardContainerFactory } from '..';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
@@ -17,6 +18,7 @@ import { DashboardRenderer } from './dashboard_renderer';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardCreationOptions } from '../embeddable/dashboard_container_factory';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
 describe('dashboard renderer', () => {
   let mockDashboardContainer: DashboardContainer;
@@ -26,7 +28,7 @@ describe('dashboard renderer', () => {
     mockDashboardContainer = {
       destroy: jest.fn(),
       render: jest.fn(),
-      isExpectingIdChange: jest.fn().mockReturnValue(false),
+      navigateToDashboard: jest.fn().mockResolvedValue({}),
     } as unknown as DashboardContainer;
     mockDashboardFactory = {
       create: jest.fn().mockReturnValue(mockDashboardContainer),
@@ -77,26 +79,136 @@ describe('dashboard renderer', () => {
     expect(mockDashboardContainer.destroy).toHaveBeenCalledTimes(1);
   });
 
-  test('destroys dashboard container on unexpected ID change', async () => {
+  test('calls navigate and does not destroy dashboard container on ID change', async () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = await mountWithIntl(<DashboardRenderer savedObjectId="saved_object_kibanana" />);
     });
-    await act(async () => {
-      await wrapper.setProps({ savedObjectId: 'saved_object_kibanakiwi' });
-    });
-    expect(mockDashboardContainer.destroy).toHaveBeenCalledTimes(1);
-  });
-
-  test('does not destroy dashboard container on expected ID change', async () => {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = await mountWithIntl(<DashboardRenderer savedObjectId="saved_object_kibanana" />);
-    });
-    mockDashboardContainer.isExpectingIdChange = jest.fn().mockReturnValue(true);
     await act(async () => {
       await wrapper.setProps({ savedObjectId: 'saved_object_kibanakiwi' });
     });
     expect(mockDashboardContainer.destroy).not.toHaveBeenCalled();
+    expect(mockDashboardContainer.navigateToDashboard).toHaveBeenCalledWith(
+      'saved_object_kibanakiwi'
+    );
+  });
+
+  test('renders and destroys an error embeddable when the dashboard factory create method throws an error', async () => {
+    const mockErrorEmbeddable = {
+      error: 'oh my goodness an error',
+      destroy: jest.fn(),
+      render: jest.fn(),
+    } as unknown as DashboardContainer;
+    mockDashboardFactory = {
+      create: jest.fn().mockReturnValue(mockErrorEmbeddable),
+    } as unknown as DashboardContainerFactory;
+    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+      .fn()
+      .mockReturnValue(mockDashboardFactory);
+
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(<DashboardRenderer savedObjectId="saved_object_kibanana" />);
+    });
+
+    expect(mockErrorEmbeddable.render).toHaveBeenCalled();
+    wrapper!.unmount();
+    expect(mockErrorEmbeddable.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  test('creates a new dashboard container when the ID changes, and the first created dashboard resulted in an error', async () => {
+    // ensure that the first attempt at creating a dashboard results in an error embeddable
+    const mockErrorEmbeddable = {
+      error: 'oh my goodness an error',
+      destroy: jest.fn(),
+      render: jest.fn(),
+    } as unknown as DashboardContainer;
+    const mockErrorFactory = {
+      create: jest.fn().mockReturnValue(mockErrorEmbeddable),
+    } as unknown as DashboardContainerFactory;
+    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+      .fn()
+      .mockReturnValue(mockErrorFactory);
+
+    // render the dashboard - it should run into an error and render the error embeddable.
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(<DashboardRenderer savedObjectId="saved_object_kibanana" />);
+    });
+    expect(mockErrorEmbeddable.render).toHaveBeenCalled();
+    expect(mockErrorFactory.create).toHaveBeenCalledTimes(1);
+
+    // ensure that the next attempt at creating a dashboard is successfull.
+    const mockSuccessEmbeddable = {
+      destroy: jest.fn(),
+      render: jest.fn(),
+      navigateToDashboard: jest.fn(),
+    } as unknown as DashboardContainer;
+    const mockSuccessFactory = {
+      create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
+    } as unknown as DashboardContainerFactory;
+    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+      .fn()
+      .mockReturnValue(mockSuccessFactory);
+
+    // update the saved object id to trigger another dashboard load.
+    await act(async () => {
+      await wrapper.setProps({ savedObjectId: 'saved_object_kibanakiwi' });
+    });
+
+    expect(mockErrorEmbeddable.destroy).toHaveBeenCalled();
+
+    // because a new dashboard container has been created, we should not call navigate.
+    expect(mockSuccessEmbeddable.navigateToDashboard).not.toHaveBeenCalled();
+
+    // instead we should call create on the factory again.
+    expect(mockSuccessFactory.create).toHaveBeenCalledTimes(1);
+  });
+
+  test('renders a 404 page when initial dashboard creation returns a savedObjectNotFound error', async () => {
+    // ensure that the first attempt at creating a dashboard results in a 404
+    const mockErrorEmbeddable = {
+      error: new SavedObjectNotFound('dashboard', 'gat em'),
+      destroy: jest.fn(),
+      render: jest.fn(),
+    } as unknown as DashboardContainer;
+    const mockErrorFactory = {
+      create: jest.fn().mockReturnValue(mockErrorEmbeddable),
+    } as unknown as DashboardContainerFactory;
+    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+      .fn()
+      .mockReturnValue(mockErrorFactory);
+
+    // render the dashboard - it should run into an error and render the error embeddable.
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(<DashboardRenderer savedObjectId="saved_object_kibanana" />);
+    });
+    await wrapper!.update();
+
+    // The shared UX not found prompt should be rendered.
+    expect(wrapper!.find(NotFoundPrompt).exists()).toBeTruthy();
+  });
+
+  test('renders a 404 page when dashboard navigation returns a savedObjectNotFound error', async () => {
+    mockDashboardContainer.navigateToDashboard = jest
+      .fn()
+      .mockRejectedValue(new SavedObjectNotFound('dashboard', 'gat em'));
+
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(<DashboardRenderer savedObjectId="saved_object_kibanana" />);
+    });
+    // The shared UX not found prompt should not be rendered.
+    expect(wrapper!.find(NotFoundPrompt).exists()).toBeFalsy();
+
+    expect(mockDashboardContainer.render).toHaveBeenCalled();
+    await act(async () => {
+      await wrapper.setProps({ savedObjectId: 'saved_object_kibanakiwi' });
+    });
+    await wrapper!.update();
+
+    // The shared UX not found prompt should be rendered.
+    expect(wrapper!.find(NotFoundPrompt).exists()).toBeTruthy();
   });
 });

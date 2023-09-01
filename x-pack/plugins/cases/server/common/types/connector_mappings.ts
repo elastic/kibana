@@ -6,10 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-
 import type { SavedObject } from '@kbn/core/server';
-import type { ConnectorMappings } from '../../../common/api';
-import { ConnectorMappingsRt } from '../../../common/api';
+import type { ConnectorMappingsAttributes } from '../../../common/types/domain';
+import { ConnectorMappingsAttributesRt } from '../../../common/types/domain';
 
 export interface ConnectorMappingsPersistedAttributes {
   mappings: Array<{
@@ -20,9 +19,12 @@ export interface ConnectorMappingsPersistedAttributes {
   owner: string;
 }
 
-export type ConnectorMappingsTransformed = ConnectorMappings;
-export type ConnectorMappingsSavedObjectTransformed = SavedObject<ConnectorMappingsTransformed>;
+export const ConnectorMappingsAttributesTransformedRt = ConnectorMappingsAttributesRt;
 
-export const ConnectorMappingsPartialRt = rt.exact(rt.partial(ConnectorMappingsRt.type.props));
+export type ConnectorMappingsAttributesTransformed = ConnectorMappingsAttributes;
+export type ConnectorMappingsSavedObjectTransformed =
+  SavedObject<ConnectorMappingsAttributesTransformed>;
 
-export const ConnectorMappingsTransformedRt = ConnectorMappingsRt;
+export const ConnectorMappingsAttributesPartialRt = rt.exact(
+  rt.partial(ConnectorMappingsAttributesRt.type.props)
+);

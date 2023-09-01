@@ -12,11 +12,12 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/api/detection_engine/rule_monitoring';
 import {
   getRuleExecutionEventsUrl,
   getRuleExecutionResultsUrl,
-} from '../../../../common/detection_engine/rule_monitoring';
+  SETUP_HEALTH_URL,
+} from '../../../../common/api/detection_engine/rule_monitoring';
 
 import type {
   FetchRuleExecutionEventsArgs,
@@ -25,6 +26,13 @@ import type {
 } from './api_client_interface';
 
 export const api: IRuleMonitoringApiClient = {
+  setupDetectionEngineHealthApi: async (): Promise<void> => {
+    await http().fetch(SETUP_HEALTH_URL, {
+      version: '1',
+      method: 'POST',
+    });
+  },
+
   fetchRuleExecutionEvents: (
     args: FetchRuleExecutionEventsArgs
   ): Promise<GetRuleExecutionEventsResponse> => {
@@ -34,6 +42,7 @@ export const api: IRuleMonitoringApiClient = {
 
     return http().fetch<GetRuleExecutionEventsResponse>(url, {
       method: 'GET',
+      version: '1',
       query: {
         event_types: eventTypes?.join(','),
         log_levels: logLevels?.join(','),
@@ -67,6 +76,7 @@ export const api: IRuleMonitoringApiClient = {
 
     return http().fetch<GetRuleExecutionResultsResponse>(url, {
       method: 'GET',
+      version: '1',
       query: {
         start: startDate?.utc().toISOString(),
         end: endDate?.utc().toISOString(),

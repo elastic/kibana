@@ -7,15 +7,22 @@
  */
 
 import { Subject } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs/operators';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
-import { connectToQueryState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
+import {
+  connectToQueryState,
+  GlobalQueryStateFromUrl,
+  waitUntilNextSessionCompletes$,
+} from '@kbn/data-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
 import { pluginServices } from '../../../../services/plugin_services';
+import { GLOBAL_STATE_STORAGE_KEY } from '../../../../dashboard_constants';
+import { areTimesEqual } from '../../../state/diffing/dashboard_diffing_utils';
 
 /**
  * Sets up syncing and subscriptions between the filter state from the Data plugin
@@ -69,13 +76,64 @@ export function syncUnifiedSearchState(
     }
   );
 
-  const timeUpdateSubscription = timefilterService
-    .getTimeUpdate$()
-    .subscribe(() => this.dispatch.setTimeRange(timefilterService.getTime()));
+  const timeUpdateSubscription = timefilterService.getTimeUpdate$().subscribe(() => {
+    const newTimeRange = (() => {
+      // if there is an override time range in the URL, use it.
+      const urlOverrideTimeRange =
+        kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY)?.time;
+      if (urlOverrideTimeRange) return urlOverrideTimeRange;
+
+      // if there is no url override time range, check if this dashboard uses time restore, and restore to that.
+      const timeRestoreTimeRange =
+        this.getState().explicitInput.timeRestore &&
+        this.getState().componentState.lastSavedInput.timeRange;
+      if (timeRestoreTimeRange) {
+        timefilterService.setTime(timeRestoreTimeRange);
+        return timeRestoreTimeRange;
+      }
+
+      // otherwise fall back to the time range from the time filter service
+      return timefilterService.getTime();
+    })();
+
+    const lastTimeRange = this.getState().explicitInput.timeRange;
+    if (
+      !areTimesEqual(newTimeRange.from, lastTimeRange?.from) ||
+      !areTimesEqual(newTimeRange.to, lastTimeRange?.to)
+    ) {
+      this.dispatch.setTimeRange(newTimeRange);
+    }
+  });
 
   const refreshIntervalSubscription = timefilterService
     .getRefreshIntervalUpdate$()
-    .subscribe(() => this.dispatch.setRefreshInterval(timefilterService.getRefreshInterval()));
+    .subscribe(() => {
+      const newRefreshInterval = (() => {
+        // if there is an override refresh interval in the URL, dispatch that to the dashboard.
+        const urlOverrideRefreshInterval =
+          kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(
+            GLOBAL_STATE_STORAGE_KEY
+          )?.refreshInterval;
+        if (urlOverrideRefreshInterval) return urlOverrideRefreshInterval;
+
+        // if there is no url override refresh interval, check if this dashboard uses time restore, and restore to that.
+        const timeRestoreRefreshInterval =
+          this.getState().explicitInput.timeRestore &&
+          this.getState().componentState.lastSavedInput.refreshInterval;
+        if (timeRestoreRefreshInterval) {
+          timefilterService.setRefreshInterval(timeRestoreRefreshInterval);
+          return timeRestoreRefreshInterval;
+        }
+
+        // otherwise fall back to the refresh interval from the time filter service
+        return timefilterService.getRefreshInterval();
+      })();
+
+      const lastRefreshInterval = this.getState().explicitInput.refreshInterval;
+      if (!fastIsEqual(newRefreshInterval, lastRefreshInterval)) {
+        this.dispatch.setRefreshInterval(newRefreshInterval);
+      }
+    });
 
   const autoRefreshSubscription = timefilterService
     .getAutoRefreshFetch$()

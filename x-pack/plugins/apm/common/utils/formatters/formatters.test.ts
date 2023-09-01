@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { asPercent, asDecimalOrInteger } from './formatters';
+import { asPercent, asDecimalOrInteger, asBigNumber } from './formatters';
 
 describe('formatters', () => {
   describe('asPercent', () => {
@@ -70,6 +70,55 @@ describe('formatters', () => {
       it('formats as decimal when number is below 1 ', () => {
         expect(asDecimalOrInteger(0.25435632645, 1)).toEqual('0.3');
       });
+    });
+  });
+});
+
+describe('asBigNumber', () => {
+  [
+    {
+      input: 0,
+      output: '0',
+    },
+    {
+      input: 999,
+      output: '999',
+    },
+    {
+      input: 999.999,
+      output: '1,000',
+    },
+    {
+      input: 449900,
+      output: '450k',
+    },
+    {
+      input: 450000,
+      output: '450k',
+    },
+    {
+      input: 450010,
+      output: '450k',
+    },
+    {
+      input: 2.4991e7,
+      output: '25m',
+    },
+    {
+      input: 9e9,
+      output: '9b',
+    },
+    {
+      input: 1e12,
+      output: '1t',
+    },
+    {
+      input: 1e15,
+      output: '1,000t',
+    },
+  ].forEach(({ input, output }) => {
+    it(`${input} becomes ${output}`, () => {
+      expect(asBigNumber(input)).toBe(output);
     });
   });
 });

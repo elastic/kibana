@@ -222,5 +222,6 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       label,
       append,
       isSelected: key === selectedTabKey,
+      'data-test-subj': `${key}Tab`,
     }));
 }

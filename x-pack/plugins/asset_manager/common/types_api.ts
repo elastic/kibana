@@ -5,16 +5,27 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import * as rt from 'io-ts';
 
-export const assetTypeRT = schema.oneOf([
-  schema.literal('k8s.pod'),
-  schema.literal('k8s.cluster'),
-  schema.literal('k8s.node'),
+export const assetTypeRT = rt.union([
+  rt.literal('k8s.pod'),
+  rt.literal('k8s.cluster'),
+  rt.literal('k8s.node'),
 ]);
-export type AssetType = typeof assetTypeRT.type;
 
-export type AssetKind = 'unknown' | 'node';
+export type AssetType = rt.TypeOf<typeof assetTypeRT>;
+
+export const assetKindRT = rt.union([
+  rt.literal('cluster'),
+  rt.literal('host'),
+  rt.literal('pod'),
+  rt.literal('container'),
+  rt.literal('service'),
+  rt.literal('alert'),
+]);
+
+export type AssetKind = rt.TypeOf<typeof assetKindRT>;
+
 export type AssetStatus =
   | 'CREATING'
   | 'ACTIVE'
@@ -46,17 +57,20 @@ export interface ECSDocument extends WithTimestamp {
   'orchestrator.cluster.version'?: string;
 
   'cloud.provider'?: CloudProviderName;
+  'cloud.instance.id'?: string;
   'cloud.region'?: string;
   'cloud.service.name'?: string;
+
+  'service.environment'?: string;
 }
 
 export interface Asset extends ECSDocument {
   'asset.collection_version'?: string;
   'asset.ean': string;
   'asset.id': string;
-  'asset.kind'?: AssetKind;
+  'asset.kind': AssetKind;
   'asset.name'?: string;
-  'asset.type': AssetType;
+  'asset.type'?: AssetType;
   'asset.status'?: AssetStatus;
   'asset.parents'?: string | string[];
   'asset.children'?: string | string[];
@@ -120,23 +134,24 @@ export interface K8sCluster extends WithTimestamp {
 
 export interface AssetFilters {
   type?: AssetType | AssetType[];
-  kind?: AssetKind;
+  kind?: AssetKind | AssetKind[];
   ean?: string | string[];
   id?: string;
   typeLike?: string;
+  kindLike?: string;
   eanLike?: string;
   collectionVersion?: number | 'latest' | 'all';
-  from?: string;
-  to?: string;
+  from?: string | number;
+  to?: string | number;
 }
 
-export const relationRT = schema.oneOf([
-  schema.literal('ancestors'),
-  schema.literal('descendants'),
-  schema.literal('references'),
+export const relationRT = rt.union([
+  rt.literal('ancestors'),
+  rt.literal('descendants'),
+  rt.literal('references'),
 ]);
 
-export type Relation = typeof relationRT.type;
+export type Relation = rt.TypeOf<typeof relationRT>;
 export type RelationField = keyof Pick<
   Asset,
   'asset.children' | 'asset.parents' | 'asset.references'

@@ -75,7 +75,7 @@ describe('useAddToCase', function () {
 
     expect(core.http?.post).toHaveBeenCalledTimes(1);
     expect(core.http?.post).toHaveBeenCalledWith('/api/cases/test/comments', {
-      body: '{"comment":"!{lens{\\"attributes\\":{\\"title\\":\\"Test lens attributes\\"},\\"timeRange\\":{\\"to\\":\\"now\\",\\"from\\":\\"now-5m\\"}}}","type":"user","owner":"observability"}',
+      body: '{"persistableStateAttachmentState":{"attributes":{"title":"Test lens attributes"},"timeRange":{"to":"now","from":"now-5m"}},"persistableStateAttachmentTypeId":".lens","type":"persistableState","owner":"observability"}',
     });
   });
 });

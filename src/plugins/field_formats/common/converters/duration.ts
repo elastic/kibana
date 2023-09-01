@@ -11,171 +11,22 @@ import moment, { unitOfTime, Duration } from 'moment';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import {
+  DEFAULT_DURATION_INPUT_FORMAT,
+  DEFAULT_DURATION_OUTPUT_FORMAT,
+  DURATION_INPUT_FORMATS,
+  DURATION_OUTPUT_FORMATS,
+} from '../constants/duration_formats';
 
 const ratioToSeconds: Record<string, number> = {
   picoseconds: 0.000000000001,
   nanoseconds: 0.000000001,
   microseconds: 0.000001,
 };
+
 const HUMAN_FRIENDLY = 'humanize';
 const HUMAN_FRIENDLY_PRECISE = 'humanizePrecise';
 const DEFAULT_OUTPUT_PRECISION = 2;
-const DEFAULT_INPUT_FORMAT = {
-  text: i18n.translate('fieldFormats.duration.inputFormats.seconds', {
-    defaultMessage: 'Seconds',
-  }),
-  kind: 'seconds',
-};
-const inputFormats = [
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.picoseconds', {
-      defaultMessage: 'Picoseconds',
-    }),
-    kind: 'picoseconds',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.nanoseconds', {
-      defaultMessage: 'Nanoseconds',
-    }),
-    kind: 'nanoseconds',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.microseconds', {
-      defaultMessage: 'Microseconds',
-    }),
-    kind: 'microseconds',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.milliseconds', {
-      defaultMessage: 'Milliseconds',
-    }),
-    kind: 'milliseconds',
-  },
-  { ...DEFAULT_INPUT_FORMAT },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.minutes', {
-      defaultMessage: 'Minutes',
-    }),
-    kind: 'minutes',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.hours', {
-      defaultMessage: 'Hours',
-    }),
-    kind: 'hours',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.days', {
-      defaultMessage: 'Days',
-    }),
-    kind: 'days',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.weeks', {
-      defaultMessage: 'Weeks',
-    }),
-    kind: 'weeks',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.months', {
-      defaultMessage: 'Months',
-    }),
-    kind: 'months',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.years', {
-      defaultMessage: 'Years',
-    }),
-    kind: 'years',
-  },
-];
-const DEFAULT_OUTPUT_FORMAT = {
-  text: i18n.translate('fieldFormats.duration.outputFormats.humanize.approximate', {
-    defaultMessage: 'Human-readable (approximate)',
-  }),
-  method: 'humanize',
-};
-const outputFormats = [
-  { ...DEFAULT_OUTPUT_FORMAT },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.humanize.precise', {
-      defaultMessage: 'Human-readable (precise)',
-    }),
-    method: 'humanizePrecise',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asMilliseconds', {
-      defaultMessage: 'Milliseconds',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asMilliseconds.short', {
-      defaultMessage: 'ms',
-    }),
-    method: 'asMilliseconds',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asSeconds', {
-      defaultMessage: 'Seconds',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asSeconds.short', {
-      defaultMessage: 's',
-    }),
-    method: 'asSeconds',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asMinutes', {
-      defaultMessage: 'Minutes',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asMinutes.short', {
-      defaultMessage: 'min',
-    }),
-    method: 'asMinutes',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asHours', {
-      defaultMessage: 'Hours',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asHours.short', {
-      defaultMessage: 'h',
-    }),
-    method: 'asHours',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asDays', {
-      defaultMessage: 'Days',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asDays.short', {
-      defaultMessage: 'd',
-    }),
-    method: 'asDays',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asWeeks', {
-      defaultMessage: 'Weeks',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asWeeks.short', {
-      defaultMessage: 'w',
-    }),
-    method: 'asWeeks',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asMonths', {
-      defaultMessage: 'Months',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asMonths.short', {
-      defaultMessage: 'mon',
-    }),
-    method: 'asMonths',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asYears', {
-      defaultMessage: 'Years',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asYears.short', {
-      defaultMessage: 'y',
-    }),
-    method: 'asYears',
-  },
-];
 
 function parseInputAsDuration(val: number, inputFormat: string) {
   const ratio = ratioToSeconds[inputFormat] || 1;
@@ -214,8 +65,8 @@ export class DurationFormat extends FieldFormat {
     defaultMessage: 'Duration',
   });
   static fieldType = KBN_FIELD_TYPES.NUMBER;
-  static inputFormats = inputFormats;
-  static outputFormats = outputFormats;
+  static inputFormats = DURATION_INPUT_FORMATS;
+  static outputFormats = DURATION_OUTPUT_FORMATS;
   allowsNumericalAggregations = true;
 
   isHuman() {
@@ -228,8 +79,8 @@ export class DurationFormat extends FieldFormat {
 
   getParamDefaults() {
     return {
-      inputFormat: DEFAULT_INPUT_FORMAT.kind,
-      outputFormat: DEFAULT_OUTPUT_FORMAT.method,
+      inputFormat: DEFAULT_DURATION_INPUT_FORMAT.kind,
+      outputFormat: DEFAULT_DURATION_OUTPUT_FORMAT.method,
       outputPrecision: DEFAULT_OUTPUT_PRECISION,
       includeSpaceWithSuffix: true,
     };
@@ -248,6 +99,12 @@ export class DurationFormat extends FieldFormat {
     const human = this.isHuman();
     const humanPrecise = this.isHumanPrecise();
 
+    if (human && val === 0) {
+      return i18n.translate('fieldFormats.duration.zeroSecondsLabel', {
+        defaultMessage: '0 seconds',
+      }); // Handle the case of 0 value for "Human Friendly"
+    }
+
     const prefix =
       val < 0 && human
         ? i18n.translate('fieldFormats.duration.negativeLabel', {
@@ -261,7 +118,7 @@ export class DurationFormat extends FieldFormat {
       : duration[outputFormat]();
 
     const precise = human || humanPrecise ? formatted : formatted.toFixed(outputPrecision);
-    const type = outputFormats.find(({ method }) => method === outputFormat);
+    const type = DURATION_OUTPUT_FORMATS.find(({ method }) => method === outputFormat);
 
     const unitText = useShortSuffix ? type?.shortText : type?.text.toLowerCase();
 
@@ -293,7 +150,7 @@ function formatDuration(
   ];
 
   const getUnitText = (method: string) => {
-    const type = outputFormats.find(({ method: methodT }) => method === methodT);
+    const type = DURATION_OUTPUT_FORMATS.find(({ method: methodT }) => method === methodT);
     return useShortSuffix ? type?.shortText : type?.text.toLowerCase();
   };
 

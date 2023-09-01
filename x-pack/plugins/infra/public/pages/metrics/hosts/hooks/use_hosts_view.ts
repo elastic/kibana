@@ -27,12 +27,13 @@ import {
 import { StringDateRange } from './use_unified_search_url_state';
 
 const HOST_TABLE_METRICS: Array<{ type: InfraAssetMetricType }> = [
+  { type: 'cpu' },
+  { type: 'diskSpaceUsage' },
+  { type: 'memory' },
+  { type: 'memoryFree' },
+  { type: 'normalizedLoad1m' },
   { type: 'rx' },
   { type: 'tx' },
-  { type: 'memory' },
-  { type: 'cpu' },
-  { type: 'diskLatency' },
-  { type: 'memoryTotal' },
 ];
 
 const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
@@ -42,18 +43,18 @@ export const useHostsView = () => {
   const {
     services: { http },
   } = useKibanaContextForPlugin();
-  const { buildQuery, getParsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const abortCtrlRef = useRef(new AbortController());
 
   const baseRequest = useMemo(
     () =>
       createInfraMetricsRequest({
-        dateRange: getParsedDateRange(),
+        dateRange: parsedDateRange,
         esQuery: buildQuery(),
         sourceId,
         limit: searchCriteria.limit,
       }),
-    [buildQuery, getParsedDateRange, sourceId, searchCriteria.limit]
+    [buildQuery, parsedDateRange, sourceId, searchCriteria.limit]
   );
 
   const [state, refetch] = useAsyncFn(

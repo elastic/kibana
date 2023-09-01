@@ -22,7 +22,7 @@ import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
-import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { HostsKpiComponent } from '../components/kpi_hosts';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -56,6 +56,7 @@ import { ID } from '../containers/hosts';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../common/hooks/use_license';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -156,6 +157,7 @@ const HostsComponent = () => {
   });
 
   const isEnterprisePlus = useLicense().isEnterprise();
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
@@ -212,10 +214,10 @@ const HostsComponent = () => {
 
               <EuiSpacer />
 
-              <TabNavigationWithBreadcrumbs
+              <TabNavigation
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: capabilities.isPlatinumOrTrialLicense,
+                  isRiskyHostsEnabled: hasEntityAnalyticsCapability,
                   isEnterprise: isEnterprisePlus,
                 })}
               />

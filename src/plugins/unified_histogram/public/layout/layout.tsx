@@ -11,8 +11,14 @@ import { PropsWithChildren, ReactElement, RefObject } from 'react';
 import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { LensEmbeddableInput, LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
+import type {
+  EmbeddableComponentProps,
+  LensEmbeddableInput,
+  LensSuggestionsApi,
+  Suggestion,
+} from '@kbn/lens-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
@@ -68,7 +74,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * The current columns
    */
-  columns?: string[];
+  columns?: DatatableColumn[];
   /**
    * Context object for requests made by Unified Histogram components -- optional
    */
@@ -77,6 +83,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Context object for the hits count -- leave undefined to hide the hits count
    */
   hits?: UnifiedHistogramHitsContext;
+  lensTablesAdapter?: Record<string, Datatable>;
   /**
    * Context object for the chart -- leave undefined to hide the chart
    */
@@ -154,6 +161,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Callback to pass to the Lens embeddable to handle brush events
    */
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
+  /**
+   * Allows users to enable/disable default actions
+   */
+  withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
 }
 
 export const UnifiedHistogramLayout = ({
@@ -169,6 +180,7 @@ export const UnifiedHistogramLayout = ({
   columns,
   request,
   hits,
+  lensTablesAdapter,
   chart: originalChart,
   breakdown,
   resizeRef,
@@ -189,16 +201,20 @@ export const UnifiedHistogramLayout = ({
   onFilter,
   onBrushEnd,
   children,
+  withDefaultActions,
 }: UnifiedHistogramLayoutProps) => {
-  const { allSuggestions, currentSuggestion, suggestionUnsupported } = useLensSuggestions({
-    dataView,
-    query,
-    originalSuggestion,
-    isPlainRecord,
-    columns,
-    lensSuggestionsApi,
-    onSuggestionChange,
-  });
+  const { allSuggestions, currentSuggestion, suggestionUnsupported, isOnHistogramMode } =
+    useLensSuggestions({
+      dataView,
+      query,
+      originalSuggestion,
+      isPlainRecord,
+      columns,
+      timeRange,
+      data: services.data,
+      lensSuggestionsApi,
+      onSuggestionChange,
+    });
 
   const chart = suggestionUnsupported ? undefined : originalChart;
 
@@ -273,6 +289,9 @@ export const UnifiedHistogramLayout = ({
           onChartLoad={onChartLoad}
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
+          lensTablesAdapter={lensTablesAdapter}
+          isOnHistogramMode={isOnHistogramMode}
+          withDefaultActions={withDefaultActions}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>

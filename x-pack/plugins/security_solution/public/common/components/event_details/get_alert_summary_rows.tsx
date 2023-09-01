@@ -216,18 +216,37 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
+ * Gets the fields to display based on custom rules and configuration
+ * @param customs The list of custom-defined fields to display
+ * @returns The list of custom-defined fields to display
+ */
+function getHighlightedFieldsOverride(customs: string[]): EventSummaryField[] {
+  return customs.map((field) => ({ id: field }));
+}
+
+/**
+  This function is exported because it is used in the Exception Component to
+  populate the conditions with the Highlighted Fields. Additionally, the new
+  Alert Summary Flyout also requires access to these fields.
+  As the Alert Summary components will undergo changes soon we will go with
+  exporting the function only for now.
+ */
+/**
  * Assembles a list of fields to display based on the event
  */
-function getEventFieldsToDisplay({
+export function getEventFieldsToDisplay({
   eventCategories,
   eventCode,
   eventRuleType,
+  highlightedFieldsOverride,
 }: {
   eventCategories: EventCategories;
   eventCode?: string;
   eventRuleType?: string;
+  highlightedFieldsOverride: string[];
 }): EventSummaryField[] {
   const fields = [
+    ...getHighlightedFieldsOverride(highlightedFieldsOverride),
     ...alwaysDisplayedFields,
     ...getFieldsByCategory(eventCategories),
     ...getFieldsByEventCode(eventCode, eventCategories),
@@ -248,7 +267,7 @@ interface EventCategories {
  * @param data The event details
  * @returns The event's primary category and all other categories in case there is more than one
  */
-function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCategories {
+export function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCategories {
   const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
 
   let primaryEventCategory: string | undefined;
@@ -274,11 +293,13 @@ export const getSummaryRows = ({
   eventId,
   isDraggable = false,
   isReadOnly = false,
+  investigationFields,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   scopeId: string;
   eventId: string;
+  investigationFields?: string[];
   isDraggable?: boolean;
   isReadOnly?: boolean;
 }) => {
@@ -299,6 +320,7 @@ export const getSummaryRows = ({
     eventCategories,
     eventCode,
     eventRuleType,
+    highlightedFieldsOverride: investigationFields ?? [],
   });
 
   return data != null

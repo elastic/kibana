@@ -7,6 +7,7 @@
 
 export const AGENT_NAME_DASHBOARD_FILE_MAPPING: Record<string, string> = {
   nodejs: 'nodejs',
+  java: 'java',
 };
 
 /**
@@ -19,6 +20,12 @@ export async function loadDashboardFile(filename: string): Promise<any> {
       return import(
         /* webpackChunkName: "lazyNodeJsDashboard" */
         './nodejs.json'
+      );
+    }
+    case 'java': {
+      return import(
+        /* webpackChunkName: "lazyJavaDashboard" */
+        './java.json'
       );
     }
     default: {

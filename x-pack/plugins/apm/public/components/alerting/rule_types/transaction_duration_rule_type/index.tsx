@@ -17,10 +17,16 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { EuiSwitchEvent } from '@elastic/eui';
+import { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import {
   getMaxY,
@@ -44,8 +50,14 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
+import {
+  ErrorState,
+  LoadingState,
+  NoDataState,
+} from '../../ui_components/chart_preview/chart_preview_helper';
+import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
 
-export interface RuleParams {
+export interface TransactionDurationRuleParams {
   aggregationType: AggregationType;
   environment: string;
   threshold: number;
@@ -55,6 +67,8 @@ export interface RuleParams {
   windowSize: number;
   windowUnit: string;
   groupBy?: string[] | undefined;
+  useKqlFilter?: boolean;
+  searchConfiguration?: SearchConfigurationType;
 }
 
 const TRANSACTION_ALERT_AGGREGATION_TYPES: Record<AggregationType, string> = {
@@ -73,7 +87,7 @@ const TRANSACTION_ALERT_AGGREGATION_TYPES: Record<AggregationType, string> = {
 };
 
 interface Props {
-  ruleParams: RuleParams;
+  ruleParams: TransactionDurationRuleParams;
   metadata?: AlertMetadata;
   setRuleParams: (key: string, value: any) => void;
   setRuleProperty: (key: string, value: any) => void;
@@ -101,13 +115,13 @@ export function TransactionDurationRuleType(props: Props) {
     }
   );
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
         windowUnit: params.windowUnit,
       });
-      if (interval && start && end) {
+      if (params.windowSize && start && end) {
         return callApmApi(
           'GET /internal/apm/rule_types/transaction_duration/chart_preview',
           {
@@ -121,6 +135,8 @@ export function TransactionDurationRuleType(props: Props) {
                 interval,
                 start,
                 end,
+                groupBy: params.groupBy,
+                searchConfiguration: JSON.stringify(params.searchConfiguration),
               },
             },
           }
@@ -135,28 +151,40 @@ export function TransactionDurationRuleType(props: Props) {
       params.transactionName,
       params.windowSize,
       params.windowUnit,
+      params.groupBy,
+      params.searchConfiguration,
     ]
   );
 
-  const latencyChartPreview = data?.latencyChartPreview ?? [];
+  const latencyChartPreview = data?.latencyChartPreview;
+  const series = latencyChartPreview?.series ?? [];
+  const hasData = series.length > 0;
+  const totalGroups = latencyChartPreview?.totalGroups ?? 0;
 
-  const maxY = getMaxY(latencyChartPreview);
+  const maxY = getMaxY(series);
   const formatter = getDurationFormatter(maxY);
   const yTickFormat = getResponseTimeTickFormatter(formatter);
 
   // The threshold from the form is in ms. Convert to µs.
   const thresholdMs = params.threshold * 1000;
 
-  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
-  const showChartPreview = false;
-  const chartPreview = showChartPreview ? (
+  const chartPreview = isPending(status) ? (
+    <LoadingState />
+  ) : !hasData ? (
+    <NoDataState />
+  ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
-      series={latencyChartPreview}
+      series={series}
       threshold={thresholdMs}
       yTickFormat={yTickFormat}
       uiSettings={services.uiSettings}
+      timeSize={params.windowSize}
+      timeUnit={params.windowUnit}
+      totalGroups={totalGroups}
     />
-  ) : null;
+  ) : (
+    <ErrorState />
+  );
 
   const onGroupByChange = useCallback(
     (group: string[] | null) => {
@@ -165,7 +193,7 @@ export function TransactionDurationRuleType(props: Props) {
     [setRuleParams]
   );
 
-  const fields = [
+  const filterFields = [
     <ServiceField
       allowAll={false}
       currentValue={params.serviceName}
@@ -198,6 +226,9 @@ export function TransactionDurationRuleType(props: Props) {
       onChange={(value) => setRuleParams('transactionName', value)}
       serviceName={params.serviceName}
     />,
+  ];
+
+  const criteriaFields = [
     <PopoverExpression
       value={params.aggregationType}
       title={i18n.translate('xpack.apm.transactionDurationRuleType.when', {
@@ -240,6 +271,11 @@ export function TransactionDurationRuleType(props: Props) {
     />,
   ];
 
+  const fields = [
+    ...(!ruleParams.useKqlFilter ? filterFields : []),
+    ...criteriaFields,
+  ];
+
   const groupAlertsBy = (
     <>
       <EuiFormRow
@@ -274,6 +310,27 @@ export function TransactionDurationRuleType(props: Props) {
     </>
   );
 
+  const onToggleKqlFilter = (e: EuiSwitchEvent) => {
+    setRuleParams('serviceName', undefined);
+    setRuleParams('transactionType', undefined);
+    setRuleParams('transactionName', undefined);
+    setRuleParams('environment', ENVIRONMENT_ALL.value);
+    setRuleParams('searchConfiguration', {
+      query: { query: '', language: 'kuery' },
+    });
+    setRuleParams('useKqlFilter', e.target.checked);
+  };
+
+  const kqlFilter = (
+    <>
+      <ApmRuleKqlFilter
+        ruleParams={ruleParams}
+        setRuleParams={setRuleParams}
+        onToggleKqlFilter={onToggleKqlFilter}
+      />
+    </>
+  );
+
   return (
     <ApmRuleParamsContainer
       minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
@@ -281,6 +338,7 @@ export function TransactionDurationRuleType(props: Props) {
       defaultParams={params}
       fields={fields}
       groupAlertsBy={groupAlertsBy}
+      kqlFilter={kqlFilter}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}
     />

@@ -14,13 +14,20 @@ import {
 } from '@kbn/rule-data-utils';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { ExecutorType } from '@kbn/alerting-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { IBasePath } from '@kbn/core/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 
-import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
-import { Duration, toDurationUnit } from '../../../domain/models';
-import { DefaultSLIClient, KibanaSavedObjectsSLORepository } from '../../../services/slo';
-import { computeBurnRate } from '../../../domain/services';
+import { upperCase } from 'lodash';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
+import {
+  SLO_ID_FIELD,
+  SLO_INSTANCE_ID_FIELD,
+  SLO_REVISION_FIELD,
+} from '../../../../common/field_names/slo';
+import { Duration } from '../../../domain/models';
+import { KibanaSavedObjectsSLORepository } from '../../../services/slo';
 import {
   AlertStates,
   BurnRateAlertContext,
@@ -28,15 +35,22 @@ import {
   BurnRateAllowedActionGroups,
   BurnRateRuleParams,
   BurnRateRuleTypeState,
+  WindowSchema,
 } from './types';
-
-const SHORT_WINDOW = 'SHORT_WINDOW';
-const LONG_WINDOW = 'LONG_WINDOW';
+import {
+  ALERT_ACTION,
+  HIGH_PRIORITY_ACTION,
+  MEDIUM_PRIORITY_ACTION,
+  LOW_PRIORITY_ACTION,
+} from '../../../../common/constants';
+import { evaluate } from './lib/evaluate';
 
 export const getRuleExecutor = ({
   basePath,
+  alertsLocator,
 }: {
   basePath: IBasePath;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }): LifecycleRuleExecutor<
   BurnRateRuleParams,
   BurnRateRuleTypeState,
@@ -63,121 +77,174 @@ export const getRuleExecutor = ({
       savedObjectsClient: soClient,
       scopedClusterClient: esClient,
       alertFactory,
+      getAlertStartedDate,
+      getAlertUuid,
     } = services;
 
     const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
-    const summaryClient = new DefaultSLIClient(esClient.asCurrentUser);
     const slo = await sloRepository.findById(params.sloId);
 
     if (!slo.enabled) {
       return { state: {} };
     }
 
-    const longWindowDuration = new Duration(
-      params.longWindow.value,
-      toDurationUnit(params.longWindow.unit)
-    );
-    const shortWindowDuration = new Duration(
-      params.shortWindow.value,
-      toDurationUnit(params.shortWindow.unit)
-    );
+    const results = await evaluate(esClient.asCurrentUser, slo, params, startedAt);
 
-    const sliData = await summaryClient.fetchSLIDataFrom(slo, [
-      { name: LONG_WINDOW, duration: longWindowDuration.add(slo.settings.syncDelay) },
-      { name: SHORT_WINDOW, duration: shortWindowDuration.add(slo.settings.syncDelay) },
-    ]);
+    if (results.length > 0) {
+      for (const result of results) {
+        const {
+          instanceId,
+          shouldAlert,
+          longWindowDuration,
+          longWindowBurnRate,
+          shortWindowDuration,
+          shortWindowBurnRate,
+          window: windowDef,
+        } = result;
 
-    const longWindowBurnRate = computeBurnRate(slo, sliData[LONG_WINDOW]);
-    const shortWindowBurnRate = computeBurnRate(slo, sliData[SHORT_WINDOW]);
+        const urlQuery = instanceId === ALL_VALUE ? '' : `?instanceId=${instanceId}`;
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          `/app/observability/slos/${slo.id}${urlQuery}`
+        );
+        if (shouldAlert) {
+          const reason = buildReason(
+            instanceId,
+            windowDef.actionGroup,
+            longWindowDuration,
+            longWindowBurnRate,
+            shortWindowDuration,
+            shortWindowBurnRate,
+            windowDef
+          );
 
-    const shouldAlert =
-      longWindowBurnRate >= params.burnRateThreshold &&
-      shortWindowBurnRate >= params.burnRateThreshold;
+          const alertId = instanceId;
+          const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+          const alertUuid = getAlertUuid(alertId);
+          const alertDetailsUrl = await getAlertUrl(
+            alertUuid,
+            spaceId,
+            indexedStartedAt,
+            alertsLocator,
+            basePath.publicBaseUrl
+          );
 
-    const viewInAppUrl = addSpaceIdToPath(
-      basePath.publicBaseUrl,
-      spaceId,
-      `/app/observability/slos/${slo.id}`
-    );
+          const context = {
+            alertDetailsUrl,
+            reason,
+            longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
+            shortWindow: { burnRate: shortWindowBurnRate, duration: shortWindowDuration.format() },
+            burnRateThreshold: windowDef.burnRateThreshold,
+            timestamp: startedAt.toISOString(),
+            viewInAppUrl,
+            sloId: slo.id,
+            sloName: slo.name,
+            sloInstanceId: instanceId,
+          };
 
-    if (shouldAlert) {
-      const reason = buildReason(
-        longWindowDuration,
-        longWindowBurnRate,
-        shortWindowDuration,
-        shortWindowBurnRate,
-        params
-      );
+          const alert = alertWithLifecycle({
+            id: alertId,
 
-      const context = {
-        longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
-        reason,
-        shortWindow: { burnRate: shortWindowBurnRate, duration: shortWindowDuration.format() },
-        burnRateThreshold: params.burnRateThreshold,
-        timestamp: startedAt.toISOString(),
-        viewInAppUrl,
-        sloId: slo.id,
-        sloName: slo.name,
-      };
+            fields: {
+              [ALERT_REASON]: reason,
+              [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
+              [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
+              [SLO_ID_FIELD]: slo.id,
+              [SLO_REVISION_FIELD]: slo.revision,
+              [SLO_INSTANCE_ID_FIELD]: instanceId,
+            },
+          });
 
-      const alert = alertWithLifecycle({
-        id: `alert-${slo.id}-${slo.revision}`,
-        fields: {
-          [ALERT_REASON]: reason,
-          [ALERT_EVALUATION_THRESHOLD]: params.burnRateThreshold,
-          [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
-          [SLO_ID_FIELD]: slo.id,
-          [SLO_REVISION_FIELD]: slo.revision,
-        },
-      });
+          alert.scheduleActions(windowDef.actionGroup, context);
+          alert.replaceState({ alertState: AlertStates.ALERT });
+        }
+      }
 
-      alert.scheduleActions(ALERT_ACTION.id, context);
-      alert.replaceState({ alertState: AlertStates.ALERT });
-    }
+      const { getRecoveredAlerts } = alertFactory.done();
+      const recoveredAlerts = getRecoveredAlerts();
+      for (const recoveredAlert of recoveredAlerts) {
+        const alertId = recoveredAlert.getId();
+        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+        const alertUuid = recoveredAlert.getUuid();
+        const alertDetailsUrl = await getAlertUrl(
+          alertUuid,
+          spaceId,
+          indexedStartedAt,
+          alertsLocator,
+          basePath.publicBaseUrl
+        );
 
-    const { getRecoveredAlerts } = alertFactory.done();
-    const recoveredAlerts = getRecoveredAlerts();
-    for (const recoveredAlert of recoveredAlerts) {
-      const context = {
-        longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
-        shortWindow: { burnRate: shortWindowBurnRate, duration: shortWindowDuration.format() },
-        burnRateThreshold: params.burnRateThreshold,
-        timestamp: startedAt.toISOString(),
-        viewInAppUrl,
-        sloId: slo.id,
-        sloName: slo.name,
-      };
+        const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          `/app/observability/slos/${slo.id}${urlQuery}`
+        );
 
-      recoveredAlert.setContext(context);
+        const context = {
+          timestamp: startedAt.toISOString(),
+          viewInAppUrl,
+          alertDetailsUrl,
+          sloId: slo.id,
+          sloName: slo.name,
+          sloInstanceId: alertId,
+        };
+
+        recoveredAlert.setContext(context);
+      }
     }
 
     return { state: {} };
   };
 
-const ALERT_ACTION_ID = 'slo.burnRate.alert';
-export const ALERT_ACTION = {
-  id: ALERT_ACTION_ID,
-  name: i18n.translate('xpack.observability.slo.alerting.burnRate.alertAction', {
-    defaultMessage: 'Alert',
-  }),
-};
+function getActionGroupName(id: string) {
+  switch (id) {
+    case HIGH_PRIORITY_ACTION.id:
+      return HIGH_PRIORITY_ACTION.name;
+    case MEDIUM_PRIORITY_ACTION.id:
+      return MEDIUM_PRIORITY_ACTION.name;
+    case LOW_PRIORITY_ACTION.id:
+      return LOW_PRIORITY_ACTION.name;
+    default:
+      return ALERT_ACTION.name;
+  }
+}
 
 function buildReason(
+  instanceId: string,
+  actionGroup: string,
   longWindowDuration: Duration,
   longWindowBurnRate: number,
   shortWindowDuration: Duration,
   shortWindowBurnRate: number,
-  params: BurnRateRuleParams
+  windowDef: WindowSchema
 ) {
-  return i18n.translate('xpack.observability.slo.alerting.burnRate.reason', {
+  if (instanceId === ALL_VALUE) {
+    return i18n.translate('xpack.observability.slo.alerting.burnRate.reason', {
+      defaultMessage:
+        '{actionGroupName}: The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate}. Alert when above {burnRateThreshold} for both windows',
+      values: {
+        actionGroupName: upperCase(getActionGroupName(actionGroup)),
+        longWindowDuration: longWindowDuration.format(),
+        longWindowBurnRate: numeral(longWindowBurnRate).format('0.[00]'),
+        shortWindowDuration: shortWindowDuration.format(),
+        shortWindowBurnRate: numeral(shortWindowBurnRate).format('0.[00]'),
+        burnRateThreshold: windowDef.burnRateThreshold,
+      },
+    });
+  }
+  return i18n.translate('xpack.observability.slo.alerting.burnRate.reasonForInstanceId', {
     defaultMessage:
-      'The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate}. Alert when above {burnRateThreshold} for both windows',
+      '{actionGroupName}: The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate} for {instanceId}. Alert when above {burnRateThreshold} for both windows',
     values: {
+      actionGroupName: upperCase(getActionGroupName(actionGroup)),
       longWindowDuration: longWindowDuration.format(),
       longWindowBurnRate: numeral(longWindowBurnRate).format('0.[00]'),
       shortWindowDuration: shortWindowDuration.format(),
       shortWindowBurnRate: numeral(shortWindowBurnRate).format('0.[00]'),
-      burnRateThreshold: params.burnRateThreshold,
+      burnRateThreshold: windowDef.burnRateThreshold,
+      instanceId,
     },
   });
 }

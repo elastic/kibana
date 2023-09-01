@@ -109,6 +109,7 @@ jest.mock('../../../../common/components/search_bar', () => ({
 jest.mock('../../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
+jest.mock('../../../../common/components/landing_page');
 
 const getMockHistory = (ip: string) => ({
   length: 2,
@@ -160,6 +161,10 @@ describe('Network Details', () => {
 
   test('it renders', () => {
     const ip = '123.456.78.90';
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      indicesExist: true,
+      indexPattern: {},
+    });
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
@@ -196,5 +201,25 @@ describe('Network Details', () => {
         .find('[data-test-subj="network-details-headline"] h1[data-test-subj="header-page-title"]')
         .text()
     ).toEqual('fe80::24ce:f7ff:fede:a571');
+  });
+
+  test('it renders landing page component when no indices exist', () => {
+    const ip = '123.456.78.90';
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      indicesExist: false,
+      indexPattern: {},
+    });
+    (useParams as jest.Mock).mockReturnValue({
+      detailName: ip,
+      flowTarget: FlowTargetSourceDest.source,
+    });
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={getMockHistory(ip)}>
+          <NetworkDetails />
+        </Router>
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="siem-landing-page"]').exists()).toBe(true);
   });
 });

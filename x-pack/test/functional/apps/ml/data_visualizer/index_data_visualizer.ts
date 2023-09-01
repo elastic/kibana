@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
@@ -34,6 +34,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
         testData.sourceIndexOrSavedSearch
       );
+      await headerPage.waitUntilLoadingHasFinished();
     });
 
     it(`${testData.suiteTitle} displays index details`, async () => {
@@ -140,9 +141,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/137032
-  // Failing: See https://github.com/elastic/kibana/issues/154452
-  describe.skip('index based', function () {
+  describe('index based', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

@@ -15,7 +15,6 @@ import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { cloneRuleRoute } from './clone_rule';
 import { SanitizedRule } from '../types';
 import { AsApiContract } from './lib';
-import { CreateOptions } from '../rules_client';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -68,7 +67,7 @@ describe('cloneRuleRoute', () => {
     revision: 0,
   };
 
-  const ruleToClone: AsApiContract<CreateOptions<{ bar: boolean }>['data']> = {
+  const ruleToClone = {
     ...pick(mockedRule, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedRule.alertTypeId,
     notify_when: mockedRule.notifyWhen,

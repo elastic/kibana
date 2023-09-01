@@ -410,9 +410,11 @@ responses to the client from the {kib} server, and specifies what value is used.
 `unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"no-referrer-when-downgrade"`
 
 [[server-securityResponseHeaders-permissionsPolicy]] `server.securityResponseHeaders.permissionsPolicy`::
-experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy[`Permissions-Policy`] header
+experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy`] header
 is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
-To disable, set to `null`. *Default:* `null`
+Refer to the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy` documentation] for defined
+directives, values, and text format. To disable, set to `null`.
+*Default:* `camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()`
 
 [[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`::
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
@@ -557,14 +559,13 @@ setting this to `true` enables unauthenticated users to access the {kib}
 server status API and status page. *Default: `false`*
 
 [[telemetry-allowChangingOptInStatus]] `telemetry.allowChangingOptInStatus`::
-When `true`, users are able to change the telemetry setting at a later time in
-<<advanced-options, Advanced Settings>>.  When `false`, users cannot change the opt-in status through *Advanced Settings*, and
+When `false`, users cannot change the opt-in status through <<advanced-options, Advanced Settings>>, and
 {kib} only looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send telemetry data or not. *Default: `true`*.
 
 [[settings-telemetry-optIn]] `telemetry.optIn`::
+Set to `false` to stop sending any telemetry data to Elastic.
 Reporting your cluster statistics helps
 us improve your user experience.
-Set to `true` to allow telemetry data to be sent to Elastic.
 When `false`, the telemetry data is never sent to Elastic. +
 +
 This setting can be changed at any time in <<advanced-options, Advanced Settings>>.

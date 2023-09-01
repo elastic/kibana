@@ -18,29 +18,31 @@ export interface UseFetchDataViewsResponse {
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
-  dataViews: DataView[] | undefined;
+  data: DataView[] | undefined;
   refetch: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<Index[], unknown>>;
-}
-export interface Index {
-  name: string;
+  ) => Promise<QueryObserverResult<DataView[], unknown>>;
 }
 
-export function useFetchDataViews(): UseFetchDataViewsResponse {
+interface Params {
+  name?: string;
+  size?: number;
+}
+
+export function useFetchDataViews({ name = '', size = 10 }: Params): UseFetchDataViewsResponse {
   const { dataViews } = useKibana().services;
+  const search = name.endsWith('*') ? name : `${name}*`;
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: ['fetchDataViews'],
+    queryKey: ['fetchDataViews', search],
     queryFn: async () => {
       try {
-        const response = await dataViews.find('');
-        return response;
+        return await dataViews.find(search, size);
       } catch (error) {
         throw new Error(`Something went wrong. Error: ${error}`);
       }
     },
   });
 
-  return { isLoading, isError, isSuccess, dataViews: data, refetch };
+  return { isLoading, isError, isSuccess, data, refetch };
 }

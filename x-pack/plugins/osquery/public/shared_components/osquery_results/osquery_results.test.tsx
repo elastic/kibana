@@ -32,7 +32,7 @@ const enablePrivileges = () => {
 };
 
 const defaultProps: OsqueryActionResultsProps = {
-  ruleName: ['Test-rule'],
+  ruleName: 'Test-rule',
   actionItems: [
     {
       _id: 'test',
@@ -47,6 +47,7 @@ const defaultProps: OsqueryActionResultsProps = {
   ],
   ecsData: {
     _id: 'test',
+    _index: 'test',
   },
 };
 

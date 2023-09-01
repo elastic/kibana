@@ -6,10 +6,17 @@
  */
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
-import type { RouteRepositoryClient } from '@kbn/server-route-repository';
+import type {
+  ClientRequestParamsOf,
+  ReturnOf,
+  RouteRepositoryClient,
+} from '@kbn/server-route-repository';
 import { formatRequest } from '@kbn/server-route-repository';
 import { FetchOptions } from '../../../common/fetch_options';
-import type { ObservabilityOnboardingServerRouteRepository } from '../../../server/routes';
+import type {
+  APIEndpoint,
+  ObservabilityOnboardingServerRouteRepository,
+} from '../../../server/routes';
 import { CallApi, callApi } from './call_api';
 
 export type ObservabilityOnboardingClientOptions = Omit<
@@ -28,6 +35,17 @@ export type AutoAbortedObservabilityClient = RouteRepositoryClient<
   ObservabilityOnboardingServerRouteRepository,
   Omit<ObservabilityOnboardingClientOptions, 'signal'>
 >;
+
+export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
+  ObservabilityOnboardingServerRouteRepository,
+  TEndpoint
+>;
+
+export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
+  ClientRequestParamsOf<
+    ObservabilityOnboardingServerRouteRepository,
+    TEndpoint
+  >;
 
 export let callObservabilityOnboardingApi: ObservabilityOnboardingClient =
   () => {

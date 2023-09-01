@@ -26,7 +26,6 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const ref = useRef<HTMLDivElement>(null);
-
   const timeline = useMemo(
     () => (
       <StatefulTimeline
@@ -47,8 +46,9 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
           data-test-subj="timeline-flyout"
           css={css`
             min-width: 150px;
-            height: calc(100% - 96px);
-            top: 96px;
+            height: 100%;
+            top: 0;
+            left: 0;
             background: ${useEuiBackgroundColor('plain')};
             position: fixed;
             width: 100%;

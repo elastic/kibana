@@ -7,12 +7,15 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
+import {
+  JOB_MAP_NODE_TYPES,
+  type DeleteDataFrameAnalyticsWithIndexStatus,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import type { RouteInitialization } from '../types';
-import { JOB_MAP_NODE_TYPES } from '../../common/constants/data_frame_analytics';
-import type { Field, Aggregation } from '../../common/types/fields';
 import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsJobUpdateSchema,
@@ -27,15 +30,11 @@ import {
   analyticsNewJobCapsParamsSchema,
   analyticsNewJobCapsQuerySchema,
 } from './schemas/data_analytics_schema';
-import type {
-  GetAnalyticsMapArgs,
-  ExtendAnalyticsMapArgs,
-} from '../models/data_frame_analytics/types';
+import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { DataViewHandler } from '../models/data_frame_analytics/index_patterns';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
 import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
-import type { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
 
@@ -49,15 +48,6 @@ function deleteDestDataViewById(dataViewsService: DataViewsService, dataViewId: 
   return iph.deleteDataViewById(dataViewId);
 }
 
-function getAnalyticsMap(
-  mlClient: MlClient,
-  client: IScopedClusterClient,
-  idOptions: GetAnalyticsMapArgs
-) {
-  const analytics = new AnalyticsManager(mlClient, client);
-  return analytics.getAnalyticsMap(idOptions);
-}
-
 function getExtendedMap(
   mlClient: MlClient,
   client: IScopedClusterClient,
@@ -65,6 +55,23 @@ function getExtendedMap(
 ) {
   const analytics = new AnalyticsManager(mlClient, client);
   return analytics.extendAnalyticsMapForAnalyticsJob(idOptions);
+}
+
+function getExtendedModelsMap(
+  mlClient: MlClient,
+  client: IScopedClusterClient,
+  idOptions: {
+    analyticsId?: string;
+    modelId?: string;
+  }
+) {
+  const analytics = new AnalyticsManager(mlClient, client);
+  return analytics.extendModelsMap(idOptions);
+}
+
+export function getAnalyticsManager(mlClient: MlClient, client: IScopedClusterClient) {
+  const analytics = new AnalyticsManager(mlClient, client);
+  return analytics;
 }
 
 // replace the recursive field and agg references with a
@@ -766,6 +773,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/map/{analyticsId}`,
       access: 'internal',
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     })
     .addVersion(
       {
@@ -791,8 +801,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
               index: type === JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
             });
           } else {
-            // @ts-expect-error never used as analyticsId
-            results = await getAnalyticsMap(mlClient, client, {
+            results = await getExtendedModelsMap(mlClient, client, {
               analyticsId: type !== JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
               modelId: type === JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
             });

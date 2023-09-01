@@ -10,6 +10,11 @@ jest.mock('fs', () => ({
   readFileSync: jest.fn(),
   existsSync: jest.fn().mockImplementation(() => true),
   writeFileSync: jest.fn(),
+  statSync: jest.fn((fileName) => {
+    return {
+      isFile: () => fileName.endsWith('.yml'),
+    };
+  }),
 }));
 
 const { extractConfigFiles } = require('./extract_config_files');
@@ -62,4 +67,11 @@ test('ignores directories', () => {
   const config = extractConfigFiles(['path=/data/foo.yml', 'foo.bar=/data/bar'], '/es');
 
   expect(config).toEqual(['path=foo.yml', 'foo.bar=/data/bar']);
+});
+
+test('ignores directories with dots in their names', () => {
+  fs.existsSync = () => true;
+  const config = extractConfigFiles(['path=/data/foo.yml', 'foo.bar=/data/ba/r.baz'], '/es');
+
+  expect(config).toEqual(['path=foo.yml', 'foo.bar=/data/ba/r.baz']);
 });

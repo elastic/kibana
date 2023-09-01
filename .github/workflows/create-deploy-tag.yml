@@ -1,0 +1,187 @@
+---
+# - This workflow creates a tag with the format "deploy@<timestamp>" on the main branch.
+# - It is triggered manually from the GitHub Actions UI.
+# - It is only allowed to run on the main branch and ensures that the tag is created
+#   on the main branch only in a verification step.
+#   This is only to prevent accidental creation of the tag on other branches and cannot be used to prevent malicious creation of the tag.
+
+name: "Serverless: Promote to QA"
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit to promote (default: latest commit on main)"
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  create-deploy-tag:
+    # Temporary, we need a way to limit this to a GitHub team instead of specific users
+    if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck"]', github.triggering_actor)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Select commit to be tagged
+        run: |
+          commit="${{ github.event.inputs.commit || github.sha }}"
+          echo "COMMIT=${commit}" >> "${GITHUB_ENV}"
+      - name: Verify selected or newer commit isn't already tagged
+        run: |
+          git tag --contains ${COMMIT} | grep -P "^deploy@\d+$" && {
+            echo "A deploy-tag already exists on the selected or newer commit!"
+            exit 1
+          } || true
+      - name: Verify branch
+        run: |
+          if [[ "${GITHUB_REF}" != "refs/heads/main" ]]; then
+            echo "This workflow can only be run on the main branch"
+            exit 1
+          fi
+      - name: Prepare tag
+        run: |
+          tag_name="deploy@$(date +%s)"
+          echo "TAG_NAME=${tag_name}" >> "${GITHUB_ENV}"
+      - name: Create tag
+        run: |
+          git tag ${TAG_NAME} ${COMMIT}
+          git push origin "refs/tags/${TAG_NAME}"
+      - name: Post Slack success message
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "A new <https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|commit> has been promoted to QA 🎉\n\nOnce promotion is complete, please begin any required manual testing.\n\n*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA."
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Initiated by:*\n<https://github.com/${{ github.triggering_actor }}|${{ github.triggering_actor }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit:*\n<https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|${{ env.COMMIT }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Git tag:*\n<https://github.com/elastic/kibana/releases/tag/${{ env.TAG_NAME }}|${{ env.TAG_NAME }}>"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Expected Staging promotion date:"
+                  },
+                  "accessory": {
+                    "type": "datepicker",
+                    "placeholder": {
+                      "type": "plain_text",
+                      "text": "Select a date",
+                      "emoji": true
+                    },
+                    "action_id": "datepicker-action"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Useful links:*\n\n • <https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr|Release process playbook>\n • <https://example.com|QA Quality Gate pipeline>"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Day 1 to-do list*"
+                  },
+                  "accessory": {
+                    "type": "checkboxes",
+                    "options": [
+                      {
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "Verify successful promotion to QA"
+                        },
+                        "value": "value-0"
+                      },
+                      {
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "Notify Security Solution team to beging manual testing"
+                        },
+                        "value": "value-1"
+                      }
+                    ],
+                    "action_id": "checkboxes-action"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_TAGGER_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      - name: Post Slack failure message
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Promotion of <https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|commit> to QA failed ⛔️"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Initiated by:*\n<https://github.com/${{ github.triggering_actor }}|${{ github.triggering_actor }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit:*\n<https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|${{ env.COMMIT }}>"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Useful links:*\n\n • <https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr|Release process playbook>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_TAGGER_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

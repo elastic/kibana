@@ -25,9 +25,9 @@ export default ({ getService }: FtrProviderContext) => {
     return `transform-by-${username}`;
   }
 
-  function generateHeaders(apiKey: SecurityCreateApiKeyResponse) {
+  function generateHeaders(apiKey: SecurityCreateApiKeyResponse, version?: string) {
     return {
-      ...getCommonRequestHeader(),
+      ...getCommonRequestHeader(version),
       'es-secondary-authorization': `ApiKey ${apiKey.encoded}`,
     };
   }
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   // If transform was created with sufficient permissions -> should create and start
   // If transform was created with insufficient permissions -> should create but not start
-  describe('/api/transform/reauthorize_transforms', function () {
+  describe('/internal/transform/reauthorize_transforms', function () {
     const apiKeysForTransformUsers = new Map<USER, SecurityCreateApiKeyResponse>();
 
     async function expectUnauthorizedTransform(transformId: string, createdByUser: USER) {
@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await createTransform(
           transformCreatedByViewerId,
-          generateHeaders(apiKeysForTransformUsers.get(USER.TRANSFORM_VIEWER)!)
+          generateHeaders(apiKeysForTransformUsers.get(USER.TRANSFORM_VIEWER)!, '1')
         );
       });
       afterEach(async () => {
@@ -132,12 +132,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not reauthorize transform created by transform_viewer for transform_unauthorized', async () => {
         const reqBody: ReauthorizeTransformsRequestSchema = [{ id: transformCreatedByViewerId }];
         const { body, status } = await supertest
-          .post(`/api/transform/reauthorize_transforms`)
+          .post(`/internal/transform/reauthorize_transforms`)
           .auth(
             USER.TRANSFORM_UNAUTHORIZED,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_UNAUTHORIZED)
           )
-          .set(getCommonRequestHeader())
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
         expect(body[transformCreatedByViewerId].success).to.eql(
@@ -152,12 +152,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not reauthorize transform created by transform_viewer for transform_viewer', async () => {
         const reqBody: ReauthorizeTransformsRequestSchema = [{ id: transformCreatedByViewerId }];
         const { body, status } = await supertest
-          .post(`/api/transform/reauthorize_transforms`)
+          .post(`/internal/transform/reauthorize_transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
-          .set(getCommonRequestHeader())
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
         expect(body[transformCreatedByViewerId].success).to.eql(
@@ -172,12 +172,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should reauthorize transform created by transform_viewer with new api key of poweruser and start the transform', async () => {
         const reqBody: ReauthorizeTransformsRequestSchema = [{ id: transformCreatedByViewerId }];
         const { body, status } = await supertest
-          .post(`/api/transform/reauthorize_transforms`)
+          .post(`/internal/transform/reauthorize_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(getCommonRequestHeader())
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
         expect(body[transformCreatedByViewerId].success).to.eql(
@@ -201,12 +201,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return 200 with error in response if invalid transformId', async () => {
         const reqBody: ReauthorizeTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
         const { body, status } = await supertest
-          .post(`/api/transform/reauthorize_transforms`)
+          .post(`/internal/transform/reauthorize_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(getCommonRequestHeader())
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -227,7 +227,7 @@ export default ({ getService }: FtrProviderContext) => {
           [USER.TRANSFORM_VIEWER, USER.TRANSFORM_POWERUSER].map((user) =>
             createTransform(
               getTransformIdByUser(user),
-              generateHeaders(apiKeysForTransformUsers.get(user)!)
+              generateHeaders(apiKeysForTransformUsers.get(user)!, '1')
             )
           )
         );
@@ -247,12 +247,12 @@ export default ({ getService }: FtrProviderContext) => {
         const invalidTransformId = 'invalid_transform_id';
 
         const { body, status } = await supertest
-          .post(`/api/transform/reauthorize_transforms`)
+          .post(`/internal/transform/reauthorize_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(getCommonRequestHeader())
+          .set(getCommonRequestHeader('1'))
           .send([...reqBody, { id: invalidTransformId }]);
         transform.api.assertResponseStatusCode(200, status, body);
 

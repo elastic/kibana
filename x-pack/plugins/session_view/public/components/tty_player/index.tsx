@@ -5,19 +5,12 @@
  * 2.0.
  */
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiButton,
-  EuiBetaBadge,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButton } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import useResizeObserver from 'use-resize-observer';
 import { throttle } from 'lodash';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import type { ProcessEvent } from '../../../common';
 import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
 import { useStyles } from './styles';
@@ -28,9 +21,10 @@ import {
   POLICIES_PAGE_PATH,
   SECURITY_APP_ID,
 } from '../../../common/constants';
+import { SessionViewTelemetryKey } from '../../types';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
-import { BETA, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
+import { TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
 
 export interface TTYPlayerDeps {
   index: string;
@@ -41,7 +35,8 @@ export interface TTYPlayerDeps {
   isFullscreen: boolean;
   onJumpToEvent(event: ProcessEvent): void;
   autoSeekToEntityId?: string;
-  canAccessEndpointManagement?: boolean;
+  canReadPolicyManagement?: boolean;
+  trackEvent(name: SessionViewTelemetryKey): void;
 }
 
 export const TTYPlayer = ({
@@ -53,7 +48,8 @@ export const TTYPlayer = ({
   isFullscreen,
   onJumpToEvent,
   autoSeekToEntityId,
-  canAccessEndpointManagement,
+  canReadPolicyManagement,
+  trackEvent,
 }: TTYPlayerDeps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { ref: scrollRef, height: containerHeight = 1 } = useResizeObserver<HTMLDivElement>({});
@@ -71,10 +67,8 @@ export const TTYPlayer = ({
   const { getUrlForApp } = useKibana<CoreStart>().services.application;
   const policiesUrl = useMemo(
     () =>
-      canAccessEndpointManagement
-        ? getUrlForApp(SECURITY_APP_ID, { path: POLICIES_PAGE_PATH })
-        : '',
-    [canAccessEndpointManagement, getUrlForApp]
+      canReadPolicyManagement ? getUrlForApp(SECURITY_APP_ID, { path: POLICIES_PAGE_PATH }) : '',
+    [canReadPolicyManagement, getUrlForApp]
   );
 
   const { search, currentLine, seekToLine } = useXtermPlayer({
@@ -155,7 +149,13 @@ export const TTYPlayer = ({
       seekToLine(0);
     }
     setIsPlaying(!isPlaying);
-  }, [currentLine, isPlaying, lines.length, seekToLine]);
+
+    if (isPlaying) {
+      trackEvent('tty_playback_started');
+    } else {
+      trackEvent('tty_playback_stopped');
+    }
+  }, [currentLine, isPlaying, lines.length, seekToLine, trackEvent]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -167,9 +167,6 @@ export const TTYPlayer = ({
     <div css={styles.container}>
       <EuiPanel hasShadow={false} borderRadius="none" hasBorder={false} css={styles.header}>
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
-          </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:TTYSearch">
             <TTYSearchBar
               lines={lines}

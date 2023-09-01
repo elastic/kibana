@@ -24,13 +24,10 @@ export const useFindCaseUserActions = (
   isEnabled: boolean
 ) => {
   const { showErrorToast } = useCasesToast();
-  const abortCtrlRef = new AbortController();
 
   return useQuery<FindCaseUserActions, ServerError>(
     casesQueriesKeys.caseUserActions(caseId, params),
-    async () => {
-      return findCaseUserActions(caseId, params, abortCtrlRef.signal);
-    },
+    async ({ signal }) => findCaseUserActions(caseId, params, signal),
     {
       enabled: isEnabled,
       onError: (error: ServerError) => {

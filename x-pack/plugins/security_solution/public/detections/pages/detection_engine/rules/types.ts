@@ -34,13 +34,14 @@ import type {
   SetupGuide,
   TimestampOverride,
   AlertSuppressionMissingFields,
-} from '../../../../../common/detection_engine/rule_schema';
-import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
+  InvestigationFields,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import type {
   RuleResponseAction,
   ResponseAction,
-} from '../../../../../common/detection_engine/rule_response_actions/schemas';
+} from '../../../../../common/api/detection_engine/model/rule_response_actions';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -71,33 +72,11 @@ export type RuleStepsOrder = [
   RuleStep.ruleActions
 ];
 
-export interface RuleStepsData {
-  [RuleStep.defineRule]: DefineStepRule;
-  [RuleStep.aboutRule]: AboutStepRule;
-  [RuleStep.scheduleRule]: ScheduleStepRule;
-  [RuleStep.ruleActions]: ActionsStepRule;
-}
-
-export type RuleStepsFormData = {
-  [K in keyof RuleStepsData]: {
-    data: RuleStepsData[K] | undefined;
-    isValid: boolean;
-  };
-};
-
-export type RuleStepsFormHooks = {
-  [K in keyof RuleStepsData]: () => Promise<RuleStepsFormData[K] | undefined>;
-};
-
 export interface RuleStepProps {
-  addPadding?: boolean;
-  descriptionColumns?: 'multi' | 'single' | 'singleSplit';
-  isReadOnlyView: boolean;
   isUpdateView?: boolean;
   isLoading: boolean;
   onSubmit?: () => void;
   resizeParentContainer?: (height: number) => void;
-  setForm?: <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => void;
   kibanaDataViews?: { [x: string]: DataViewListItem };
 }
 
@@ -111,6 +90,7 @@ export interface AboutStepRule {
   riskScore: AboutStepRiskScore;
   references: string[];
   falsePositives: string[];
+  investigationFields: string[];
   license: string;
   ruleNameOverride: string;
   tags: string[];
@@ -178,6 +158,18 @@ export interface DefineStepRule {
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
   suppressionMissingFields?: AlertSuppressionMissingFields;
+}
+
+export interface QueryDefineStep {
+  ruleType: 'query' | 'saved_query';
+  index: string[];
+  indexPattern?: DataViewBase;
+  queryBar: FieldValueQueryBar;
+  dataViewId?: string;
+  dataViewTitle?: string;
+  timeline: FieldValueTimeline;
+  dataSourceType: DataSourceType;
+  shouldLoadQueryDynamically: boolean;
 }
 
 export interface Duration {
@@ -248,6 +240,7 @@ export interface AboutStepRuleJson {
   timestamp_override?: TimestampOverride;
   timestamp_override_fallback_disabled?: boolean;
   note?: string;
+  investigation_fields?: InvestigationFields;
 }
 
 export interface ScheduleStepRuleJson {

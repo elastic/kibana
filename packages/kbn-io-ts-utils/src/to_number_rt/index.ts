@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-export const toNumberRt = new t.Type<number, unknown, unknown>(
+export const toNumberRt = new t.Type<number, number, unknown>(
   'ToNumber',
   t.number.is,
   (input, context) => {

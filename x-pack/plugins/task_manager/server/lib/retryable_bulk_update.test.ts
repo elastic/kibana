@@ -32,25 +32,26 @@ describe('retryableBulkUpdate()', () => {
   });
 
   it('should call getTasks with taskIds', async () => {
-    await retryableBulkUpdate({ taskIds, getTasks, filter, map, store });
+    await retryableBulkUpdate({ taskIds, getTasks, filter, map, store, validate: false });
     expect(getTasks).toHaveBeenCalledWith(taskIds);
   });
 
   it('should filter tasks returned from getTasks', async () => {
     filter.mockImplementation((task) => task.id === '2');
-    await retryableBulkUpdate({ taskIds, getTasks, filter, map, store });
+    await retryableBulkUpdate({ taskIds, getTasks, filter, map, store, validate: false });
     expect(filter).toHaveBeenCalledTimes(3);
     // Map happens after filter
     expect(map).toHaveBeenCalledTimes(1);
-    expect(store.bulkUpdate).toHaveBeenCalledWith([tasks[1]]);
+    expect(store.bulkUpdate).toHaveBeenCalledWith([tasks[1]], { validate: false });
   });
 
   it('should map tasks returned from getTasks', async () => {
     map.mockImplementation((task) => ({ ...task, status: TaskStatus.Claiming }));
-    await retryableBulkUpdate({ taskIds, getTasks, filter, map, store });
+    await retryableBulkUpdate({ taskIds, getTasks, filter, map, store, validate: false });
     expect(map).toHaveBeenCalledTimes(3);
     expect(store.bulkUpdate).toHaveBeenCalledWith(
-      tasks.map((task) => ({ ...task, status: TaskStatus.Claiming }))
+      tasks.map((task) => ({ ...task, status: TaskStatus.Claiming })),
+      { validate: false }
     );
   });
 
@@ -71,9 +72,9 @@ describe('retryableBulkUpdate()', () => {
     ]);
     getTasks.mockResolvedValueOnce([tasks[0]].map((task) => asOk(task)));
     store.bulkUpdate.mockResolvedValueOnce(tasks.map((task) => asOk(task)));
-    await retryableBulkUpdate({ taskIds, getTasks, filter, map, store });
+    await retryableBulkUpdate({ taskIds, getTasks, filter, map, store, validate: false });
     expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
-    expect(store.bulkUpdate).toHaveBeenNthCalledWith(2, [tasks[0]]);
+    expect(store.bulkUpdate).toHaveBeenNthCalledWith(2, [tasks[0]], { validate: false });
   });
 
   it('should skip updating tasks that cannot be found', async () => {
@@ -86,7 +87,7 @@ describe('retryableBulkUpdate()', () => {
       }),
       asOk(tasks[2]),
     ]);
-    await retryableBulkUpdate({ taskIds, getTasks, filter, map, store });
-    expect(store.bulkUpdate).toHaveBeenCalledWith([tasks[0], tasks[2]]);
+    await retryableBulkUpdate({ taskIds, getTasks, filter, map, store, validate: false });
+    expect(store.bulkUpdate).toHaveBeenCalledWith([tasks[0], tasks[2]], { validate: false });
   });
 });

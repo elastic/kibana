@@ -28,7 +28,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const Emtpy: Story<void> = () => {
+export const Empty: Story<void> = () => {
   const contextValue = {
     getFieldsData: () => {},
   } as unknown as RightPanelContext;

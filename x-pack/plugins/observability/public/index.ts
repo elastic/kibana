@@ -33,6 +33,7 @@ export const plugin: PluginInitializer<
 };
 
 export {
+  enableLegacyUptimeApp,
   syntheticsThrottlingEnabled,
   enableInspectEsQueries,
   enableComparisonByDefault,
@@ -40,10 +41,19 @@ export {
   enableInfrastructureHostsView,
   enableAgentExplorerView,
 } from '../common/ui_settings_keys';
-export { uptimeOverviewLocatorID } from '../common';
+export {
+  alertsLocatorID,
+  ruleDetailsLocatorID,
+  rulesLocatorID,
+  sloDetailsLocatorID,
+  sloEditLocatorID,
+  uptimeOverviewLocatorID,
+} from '../common';
 
-export type { UXMetrics } from './components/core_web_vitals/core_vitals';
-export { getCoreVitalsComponent } from './components/core_web_vitals/get_core_web_vitals_lazy';
+export type { SloEditLocatorParams } from './locators/slo_edit';
+
+export type { UXMetrics } from './pages/overview/components/sections/ux/core_web_vitals/core_vitals';
+export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 
 export { DatePicker } from './pages/overview/components/date_picker/date_picker';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
@@ -60,6 +70,7 @@ export { observabilityFeatureId, observabilityAppId } from '../common';
 
 export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
+export { useSummaryTimeRange } from './hooks/use_summary_time_range';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 
@@ -78,3 +89,6 @@ export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate
 
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';
+export { WithKueryAutocompletion } from './components/rule_kql_filter/with_kuery_autocompletion';
+export { AutocompleteField } from './components/rule_kql_filter/autocomplete_field';
+export { RuleFlyoutKueryBar } from './components/rule_kql_filter/kuery_bar';

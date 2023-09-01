@@ -15,3 +15,5 @@ export const PREVIEW_SECTION = 'previewSection';
 export const PREVIEW_SECTION_CLOSE_BUTTON = 'previewSectionCloseButton';
 
 export const PREVIEW_SECTION_BACK_BUTTON = 'previewSectionBackButton';
+
+export const PREVIEW_SECTION_HEADER = 'previewSectionHeader';

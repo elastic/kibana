@@ -318,6 +318,7 @@ describe('actions_connectors_list', () => {
           description: `My test ${index}`,
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
           config: {},
         }))

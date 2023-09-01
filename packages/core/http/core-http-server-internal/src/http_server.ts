@@ -399,8 +399,10 @@ export class HttpServer {
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
-      const { message, meta } = getEcsResponseLog(request, this.log);
-      log.debug(message!, meta);
+      if (log.isLevelEnabled('debug')) {
+        const { message, meta } = getEcsResponseLog(request, this.log);
+        log.debug(message!, meta);
+      }
     };
 
     this.server.events.on('response', this.handleServerResponseEvent);
@@ -587,6 +589,7 @@ export class HttpServer {
         },
       },
       options: {
+        app: { access: 'public' },
         auth: false,
         cache: {
           privacy: 'public',
@@ -606,7 +609,7 @@ export class HttpServer {
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
-      access: route.options.access ?? (route.path.startsWith('/internal') ? 'internal' : 'public'),
+      access: route.options.access ?? 'internal',
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(

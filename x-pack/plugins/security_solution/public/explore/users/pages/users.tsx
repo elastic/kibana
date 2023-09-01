@@ -18,7 +18,7 @@ import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
-import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -52,6 +52,7 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { userNameExistsFilter } from './details/helpers';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const ID = 'UsersQueryId';
 
@@ -175,10 +176,10 @@ const UsersComponent = () => {
   );
 
   const capabilities = useMlCapabilities();
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const navTabs = useMemo(
-    () => navTabsUsers(hasMlUserPermissions(capabilities), isPlatinumOrTrialLicense),
-    [capabilities, isPlatinumOrTrialLicense]
+    () => navTabsUsers(hasMlUserPermissions(capabilities), hasEntityAnalyticsCapability),
+    [capabilities, hasEntityAnalyticsCapability]
   );
 
   return (
@@ -211,7 +212,7 @@ const UsersComponent = () => {
 
             <EuiSpacer />
 
-            <TabNavigationWithBreadcrumbs navTabs={navTabs} />
+            <TabNavigation navTabs={navTabs} />
 
             <EuiSpacer />
 

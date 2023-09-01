@@ -37,6 +37,7 @@ import {
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
   InstallCloudFormationManagedAgentStep,
+  InstallGoogleCloudShellManagedAgentStep,
   IncomingDataConfirmationStep,
 } from '.';
 
@@ -200,7 +201,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
-  cloudFormationTemplateUrl,
 }) => {
   const kibanaVersion = useKibanaVersion();
   const core = useStartServices();
@@ -247,13 +247,22 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
       );
     }
 
-    if (cloudFormationTemplateUrl) {
+    if (cloudSecurityIntegration?.isCloudFormation) {
       steps.push(
         InstallCloudFormationManagedAgentStep({
           apiKeyData,
           selectedApiKeyId,
           enrollToken,
-          cloudFormationTemplateUrl,
+          cloudSecurityIntegration,
+        })
+      );
+    } else if (cloudSecurityIntegration?.cloudShellUrl) {
+      steps.push(
+        InstallGoogleCloudShellManagedAgentStep({
+          apiKeyData,
+          selectedApiKeyId,
+          cloudShellUrl: cloudSecurityIntegration.cloudShellUrl,
+          cloudShellCommand: installManagedCommands.googleCloudShell,
         })
       );
     } else {
@@ -264,6 +273,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           isK8s,
           cloudSecurityIntegration,
+          fleetServerHost: fleetServerHosts?.[0],
           enrollToken,
         })
       );
@@ -301,19 +311,19 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     setSelectedPolicyId,
     refreshAgentPolicies,
     selectionType,
-    isK8s,
     cloudSecurityIntegration,
-    installManagedCommands,
     apiKeyData,
-    enrolledAgentIds,
     mode,
     setMode,
     enrollToken,
+    installManagedCommands,
+    isK8s,
+    fleetServerHosts,
     onClickViewAgents,
     link,
+    enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
-    cloudFormationTemplateUrl,
   ]);
 
   return <EuiSteps steps={instructionsSteps} />;

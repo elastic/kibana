@@ -84,7 +84,7 @@ Note that you can select the browser you want to use on the top right side of th
 
 ## Folder Structure
 
-### integration/
+### e2e/
 
 Cypress convention. Contains the specs that are going to be executed.
 

@@ -27,6 +27,5 @@ export async function updateHtmlExtraction(
     },
     id: connector.id,
     index: CONNECTORS_INDEX,
-    refresh: 'wait_for',
   });
 }

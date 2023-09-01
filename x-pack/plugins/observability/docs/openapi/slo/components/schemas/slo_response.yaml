@@ -1,5 +1,22 @@
-title: SLO Response
+title: SLO response
 type: object
+required:
+  - id
+  - name
+  - description
+  - indicator
+  - timeWindow
+  - budgetingMethod
+  - objective
+  - settings
+  - revision
+  - summary
+  - enabled
+  - groupBy
+  - instanceId
+  - tags
+  - createdAt
+  - updatedAt
 properties:
   id:
     description: The identifier of the SLO.
@@ -14,31 +31,51 @@ properties:
     type: string
     example: My SLO description
   indicator:
+    discriminator:
+      propertyName: type
+      mapping:
+        sli.apm.transactionErrorRate: './indicator_properties_apm_availability.yaml'
+        sli.kql.custom: './indicator_properties_custom_kql.yaml'
+        sli.apm.transactionDuration: './indicator_properties_apm_latency.yaml'
+        sli.metric.custom: 'indicator_properties_custom_metric.yaml'
+        sli.histogram.custom: 'indicator_properties_histogram.yaml'
     oneOf:
-      - $ref: 'indicator_properties_custom_kql.yaml'
-      - $ref: 'indicator_properties_apm_availability.yaml'
-      - $ref: 'indicator_properties_apm_latency.yaml'
-      - $ref: 'indicator_properties_custom_metric.yaml'
+      - $ref: "indicator_properties_custom_kql.yaml"
+      - $ref: "indicator_properties_apm_availability.yaml"
+      - $ref: "indicator_properties_apm_latency.yaml"
+      - $ref: "indicator_properties_custom_metric.yaml"
+      - $ref: "indicator_properties_histogram.yaml"
   timeWindow:
-    oneOf:
-      - $ref: 'time_window_rolling.yaml'
-      - $ref: 'time_window_calendar_aligned.yaml'
+    $ref: "time_window.yaml"
   budgetingMethod:
-    $ref: 'budgeting_method.yaml'
+    $ref: "budgeting_method.yaml"
   objective:
-    $ref: 'objective.yaml'
+    $ref: "objective.yaml"
   settings:
-    $ref: 'settings.yaml'
+    $ref: "settings.yaml"
   revision:
     description: The SLO revision
     type: number
     example: 2
   summary:
-    $ref: 'summary.yaml'
+    $ref: "summary.yaml"
   enabled:
     description: Indicate if the SLO is enabled
     type: boolean
     example: true
+  groupBy:
+    description: optional group by field to use to generate an SLO per distinct value
+    type: string
+    example: "some.field"
+  instanceId:
+    description: the value derived from the groupBy field, if present, otherwise '*'
+    type: string
+    example: 'host-abcde'
+  tags:
+    description: List of tags
+    type: array
+    items:
+      type: string
   createdAt:
     description: The creation date
     type: string

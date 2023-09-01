@@ -14,6 +14,7 @@ import type {
 import { EsQueryConfig } from '@kbn/es-query';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { actions, ActorRefFrom, createMachine, SpecialTargets, send } from 'xstate';
+import { DEFAULT_REFRESH_INTERVAL } from '@kbn/logs-shared-plugin/common';
 import { OmitDeprecatedState, sendIfDefined } from '../../xstate_helpers';
 import { logStreamQueryNotificationEventSelectors } from './notifications';
 import {
@@ -50,7 +51,7 @@ import {
   updateTimeContextFromUrl,
 } from './time_filter_state_service';
 import { showValidationErrorToast, validateQuery } from './validate_query_service';
-import { DEFAULT_REFRESH_INTERVAL, DEFAULT_REFRESH_TIME_RANGE } from './defaults';
+import { DEFAULT_REFRESH_TIME_RANGE } from './defaults';
 
 export const createPureLogStreamQueryStateMachine = (
   initialContext: LogStreamQueryContextWithDataViews & LogStreamQueryContextWithTime

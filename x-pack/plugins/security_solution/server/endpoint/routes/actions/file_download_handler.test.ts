@@ -11,13 +11,13 @@ import {
 } from './file_download_handler';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
-import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
 import { validateActionId as _validateActionId } from '../../services';
 import { EndpointAuthorizationError, NotFoundError } from '../../errors';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import type { FleetFileClientInterface } from '@kbn/fleet-plugin/server';
+import type { FleetFromHostFileClientInterface } from '@kbn/fleet-plugin/server';
+import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
 
 jest.mock('../../services');
 
@@ -50,7 +50,11 @@ describe('Response Actions file download API', () => {
 
     it('should register the route', () => {
       expect(
-        apiTestSetup.getRegisteredRouteHandler('get', ACTION_AGENT_FILE_DOWNLOAD_ROUTE)
+        apiTestSetup.getRegisteredVersionedRoute(
+          'get',
+          ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
+          '2023-10-31'
+        )
       ).toBeDefined();
     });
 
@@ -59,11 +63,9 @@ describe('Response Actions file download API', () => {
         (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
       ).mockResolvedValue(getEndpointAuthzInitialStateMock({ canWriteFileOperations: false }));
 
-      await apiTestSetup.getRegisteredRouteHandler('get', ACTION_AGENT_FILE_DOWNLOAD_ROUTE)(
-        httpHandlerContextMock,
-        httpRequestMock,
-        httpResponseMock
-      );
+      await apiTestSetup
+        .getRegisteredVersionedRoute('get', ACTION_AGENT_FILE_DOWNLOAD_ROUTE, '2023-10-31')
+        .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(httpResponseMock.forbidden).toHaveBeenCalledWith({
         body: expect.any(EndpointAuthorizationError),
@@ -73,16 +75,15 @@ describe('Response Actions file download API', () => {
 
   describe('Route handler', () => {
     let fileDownloadHandler: ReturnType<typeof getActionFileDownloadRouteHandler>;
-    let fleetFilesClientMock: jest.Mocked<FleetFileClientInterface>;
+    let fleetFilesClientMock: jest.Mocked<FleetFromHostFileClientInterface>;
 
     beforeEach(async () => {
       fileDownloadHandler = getActionFileDownloadRouteHandler(apiTestSetup.endpointAppContextMock);
 
       validateActionIdMock.mockImplementation(async () => {});
 
-      fleetFilesClientMock = (await apiTestSetup.endpointAppContextMock.service.getFleetFilesClient(
-        'from-host'
-      )) as jest.Mocked<FleetFileClientInterface>;
+      fleetFilesClientMock =
+        (await apiTestSetup.endpointAppContextMock.service.getFleetFromHostFilesClient()) as jest.Mocked<FleetFromHostFileClientInterface>;
     });
 
     it('should error if action ID is invalid', async () => {

@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'animals-*'
         );
         await testSubjects.missingOrFail('field-picker-select-isDog');
-        await dashboardControls.controlEditorCancel(true);
+        await dashboardControls.controlEditorCancel();
       });
     });
   });

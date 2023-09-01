@@ -9,6 +9,8 @@ import type { EndpointAuthzKeyList } from '../../types/authz';
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
 export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
 
+export const RESPONSE_ACTION_TYPE = ['automated', 'manual'] as const;
+export type ResponseActionType = typeof RESPONSE_ACTION_TYPE[number];
 /**
  * The Command names that are used in the API payload for the `{ command: '' }` attribute
  */
@@ -25,9 +27,10 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
 
 export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
 
-export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
-  'isolate',
-];
+export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS = ['isolate'] as const;
+
+export type EnabledAutomatedResponseActionsCommands =
+  typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS[number];
 
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document
@@ -63,6 +66,7 @@ export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMA
 
 export type ResponseConsoleRbacControls =
   | 'writeHostIsolation'
+  | 'writeHostIsolationRelease'
   | 'writeProcessOperations'
   | 'writeFileOperations'
   | 'writeExecuteOperations';
@@ -75,7 +79,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   ResponseConsoleRbacControls
 > = Object.freeze({
   isolate: 'writeHostIsolation',
-  release: 'writeHostIsolation',
+  release: 'writeHostIsolationRelease',
   'kill-process': 'writeProcessOperations',
   'suspend-process': 'writeProcessOperations',
   processes: 'writeProcessOperations',

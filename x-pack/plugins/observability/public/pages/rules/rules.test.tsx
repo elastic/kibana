@@ -31,7 +31,9 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 }));
 
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-  appMountParameters: {} as AppMountParameters,
+  appMountParameters: {
+    setHeaderActionMenu: () => {},
+  } as unknown as AppMountParameters,
   config: {
     unsafe: {
       slo: { enabled: false },
@@ -40,7 +42,12 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
         logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
+        observability: { enabled: false },
       },
+      thresholdRule: { enabled: false },
+    },
+    compositeSlo: {
+      enabled: false,
     },
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),

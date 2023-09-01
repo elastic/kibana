@@ -198,9 +198,6 @@ describe('Response actions history', () => {
       (renderResult = mockedContext.render(
         <ResponseActionsLog data-test-subj={testPrefix} {...(props ?? {})} />
       ));
-    reactTestingLibrary.act(() => {
-      history.push(`${MANAGEMENT_PATH}/response_actions`);
-    });
 
     useGetEndpointActionListMock.mockReturnValue({
       ...getBaseMockedActionList(),
@@ -227,6 +224,29 @@ describe('Response actions history', () => {
   afterEach(() => {
     useGetEndpointActionListMock.mockReturnValue(getBaseMockedActionList());
     useUserPrivilegesMock.mockReset();
+  });
+
+  it('should call API with default date range', () => {
+    reactTestingLibrary.act(() => {
+      history.push(`${MANAGEMENT_PATH}/response_actions_history`);
+    });
+
+    render();
+    expect(useGetEndpointActionListMock).toHaveBeenCalledWith(
+      {
+        page: 1,
+        pageSize: 10,
+        agentIds: undefined,
+        commands: [],
+        statuses: [],
+        types: [],
+        userIds: [],
+        withOutputs: [],
+        startDate: 'now-24h/h',
+        endDate: 'now',
+      },
+      { retry: false }
+    );
   });
 
   describe('When index does not exist yet', () => {
@@ -292,9 +312,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1069,14 +1089,14 @@ describe('Response actions history', () => {
         RESPONSE_ACTION_API_COMMANDS_NAMES.length
       );
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
-        'isolate',
-        'release',
-        'kill-process',
-        'suspend-process',
-        'processes',
-        'get-file',
-        'execute',
-        'upload',
+        'isolate. To check this option, press Enter.',
+        'release. To check this option, press Enter.',
+        'kill-process. To check this option, press Enter.',
+        'suspend-process. To check this option, press Enter.',
+        'processes. To check this option, press Enter.',
+        'get-file. To check this option, press Enter.',
+        'execute. To check this option, press Enter.',
+        'upload. To check this option, press Enter.',
       ]);
     });
 
@@ -1140,9 +1160,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: ['failed', 'pending'],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1342,9 +1362,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );

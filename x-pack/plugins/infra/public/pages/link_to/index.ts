@@ -7,5 +7,6 @@
 
 export { LinkToLogsPage } from './link_to_logs';
 export { LinkToMetricsPage } from './link_to_metrics';
-export { getNodeLogsUrl, RedirectToNodeLogs } from './redirect_to_node_logs';
-export { getNodeDetailUrl, RedirectToNodeDetail } from './redirect_to_node_detail';
+export { RedirectToNodeLogs } from './redirect_to_node_logs';
+export { RedirectToNodeDetail } from './redirect_to_node_detail';
+export { useNodeDetailsRedirect } from './use_node_details_redirect';

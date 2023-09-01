@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { XyPublicConfig } from '../config';
 import { setUISettings, setPalettesService, setDataViewsStart } from './services';
 
 import { visTypesDefinitions } from './vis_types';
@@ -37,6 +38,12 @@ export class VisTypeXyPlugin
   implements
     Plugin<VisTypeXyPluginSetup, VisTypeXyPluginStart, VisTypeXyPluginSetupDependencies, {}>
 {
+  initializerContext: PluginInitializerContext<XyPublicConfig>;
+
+  constructor(initializerContext: PluginInitializerContext<XyPublicConfig>) {
+    this.initializerContext = initializerContext;
+  }
+
   public setup(
     core: VisTypeXyCoreSetup,
     { visualizations, charts }: VisTypeXyPluginSetupDependencies
@@ -44,7 +51,14 @@ export class VisTypeXyPlugin
     setUISettings(core.uiSettings);
     setPalettesService(charts.palettes);
 
-    visTypesDefinitions.forEach(visualizations.createBaseVisualization);
+    const { readOnly } = this.initializerContext.config.get<XyPublicConfig>();
+    visTypesDefinitions.forEach((visTypeDefinition) =>
+      visualizations.createBaseVisualization({
+        ...visTypeDefinition,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      })
+    );
     return {};
   }
 

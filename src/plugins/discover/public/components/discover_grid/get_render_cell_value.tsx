@@ -21,15 +21,16 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type {
+  DataTableRecord,
+  EsHitRecord,
+  ShouldShowFieldInTableHandler,
+} from '@kbn/discover-utils/types';
+import { MAX_DOC_FIELDS_DISPLAYED, formatFieldValue, formatHit } from '@kbn/discover-utils';
+import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
-import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
-import { formatFieldValue } from '../../utils/format_value';
-import { formatHit } from '../../utils/format_hit';
-import { DataTableRecord, EsHitRecord } from '../../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
-import { type ShouldShowFieldInTableHandler } from '../../utils/get_should_show_field_handler';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
 

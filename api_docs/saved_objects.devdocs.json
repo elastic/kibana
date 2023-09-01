@@ -59,6 +59,14 @@
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
           },
@@ -148,6 +156,17 @@
                 "type": "string",
                 "tags": [],
                 "label": "visualizationDescription",
+                "description": [],
+                "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObjectSaveModal.state.hasAttemptedSubmit",
+                "type": "boolean",
+                "tags": [],
+                "label": "hasAttemptedSubmit",
                 "description": [],
                 "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
                 "deprecated": false,
@@ -970,18 +989,6 @@
           {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           }
         ],
         "children": [
@@ -2187,6 +2194,17 @@
             "type": "string",
             "tags": [],
             "label": "visualizationDescription",
+            "description": [],
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.SaveModalState.hasAttemptedSubmit",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasAttemptedSubmit",
             "description": [],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false,

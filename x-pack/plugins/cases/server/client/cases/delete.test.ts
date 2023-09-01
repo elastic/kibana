@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MAX_FILES_PER_CASE } from '../../../common/constants';
+import { MAX_DELETE_IDS_LENGTH, MAX_FILES_PER_CASE } from '../../../common/constants';
 import type { FindFileArgs } from '@kbn/files-plugin/server';
 import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
@@ -93,6 +93,22 @@ describe('delete', () => {
         expect(clientArgs.services.alertsService.removeCaseIdsFromAllAlerts).toHaveBeenCalledWith({
           caseIds,
         });
+      });
+    });
+
+    describe('errors', () => {
+      it(`throws 400 when trying to delete more than ${MAX_DELETE_IDS_LENGTH} cases at a time`, async () => {
+        const caseIds = new Array(MAX_DELETE_IDS_LENGTH + 1).fill('id');
+
+        await expect(deleteCases(caseIds, clientArgs)).rejects.toThrowError(
+          'Error: The length of the field ids is too long. Array must be of length <= 100.'
+        );
+      });
+
+      it('throws 400 when no id is passed to delete', async () => {
+        await expect(deleteCases([], clientArgs)).rejects.toThrowError(
+          'Error: The length of the field ids is too short. Array must be of length >= 1.'
+        );
       });
     });
   });

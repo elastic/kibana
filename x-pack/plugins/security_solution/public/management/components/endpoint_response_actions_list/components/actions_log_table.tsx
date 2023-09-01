@@ -28,7 +28,7 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../../common/api/endpoint';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { TABLE_COLUMN_NAMES, UX_MESSAGES, ARIA_LABELS } from '../translations';
 import { getActionStatus, getUiCommand } from './hooks';
@@ -212,11 +212,12 @@ const getResponseActionListTableColumns = ({
       },
     },
     {
+      field: 'status',
       name: TABLE_COLUMN_NAMES.status,
       width: !showHostNames ? '15%' : '10%',
-      render: (action: ActionListApiResponse['data'][number]) => {
-        const _status = action.errors?.length ? 'failed' : action.status;
+      render: (_status: ActionListApiResponse['data'][number]['status']) => {
         const status = getActionStatus(_status);
+
         return (
           <EuiToolTip content={status} anchorClassName="eui-textTruncate">
             <StatusBadge

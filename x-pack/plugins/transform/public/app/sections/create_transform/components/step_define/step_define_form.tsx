@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { DataGrid } from '@kbn/ml-data-grid';
 import {
   mlTimefilterRefresh$,
   useTimefilter,
@@ -98,9 +99,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { searchItems } = props;
   const { dataView } = searchItems;
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
-  const {
-    ml: { DataGrid },
-  } = useAppDependencies();
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     TransformStorageKey,
     TransformStorageMapped<typeof TRANSFORM_FROZEN_TIER_PREFERENCE>
@@ -122,8 +120,20 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { transformConfigQuery } = stepDefineForm.searchBar.state;
   const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
 
+  const appDependencies = useAppDependencies();
+  const {
+    ml: { useFieldStatsFlyoutContext },
+  } = appDependencies;
+
+  const fieldStatsContext = useFieldStatsFlyoutContext();
   const indexPreviewProps = {
-    ...useIndexData(dataView, transformConfigQuery, runtimeMappings, timeRangeMs),
+    ...useIndexData(
+      dataView,
+      transformConfigQuery,
+      runtimeMappings,
+      timeRangeMs,
+      fieldStatsContext?.populatedFields ?? null
+    ),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };

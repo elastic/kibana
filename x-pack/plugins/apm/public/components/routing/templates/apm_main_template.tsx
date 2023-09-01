@@ -18,9 +18,10 @@ import { ServiceGroupSaveButton } from '../../app/service_groups';
 import { ServiceGroupsButtonGroup } from '../../app/service_groups/service_groups_button_group';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 // Paths that must skip the no data screen
-const bypassNoDataScreenPaths = ['/settings'];
+const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
 
 /*
  * This template contains:
@@ -56,6 +57,7 @@ export function ApmMainTemplate({
   const { services } = useKibana<ApmPluginStartDeps>();
   const { http, docLinks, observabilityShared, application } = services;
   const basePath = http?.basePath.get();
+  const { config } = useApmPluginContext();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -101,6 +103,7 @@ export function ApmMainTemplate({
     hasApmIntegrations: fleetApmPoliciesData?.hasApmPolicies,
     shouldBypassNoDataScreen,
     loading: isLoading,
+    isServerless: config?.serverlessOnboarding,
   });
 
   const rightSideItems = [

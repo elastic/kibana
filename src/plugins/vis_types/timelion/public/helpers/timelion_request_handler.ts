@@ -105,7 +105,7 @@ export function getTimelionRequestHandler({
     const doSearch = async (
       searchOptions: ReturnType<typeof dataSearch.session.getSearchOptions>
     ): Promise<TimelionSuccessResponse> => {
-      return await http.post('/api/timelion/run', {
+      return await http.post('/internal/timelion/run', {
         body: JSON.stringify({
           sheet: [expression],
           extended: {

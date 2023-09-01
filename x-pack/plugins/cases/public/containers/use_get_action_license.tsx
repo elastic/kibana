@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useToasts } from '../common/lib/kibana';
 import { getActionLicense } from './api';
 import * as i18n from './translations';
-import { ConnectorTypes } from '../../common/api';
+import { ConnectorTypes } from '../../common/types/domain';
 import { casesQueriesKeys } from './constants';
 import type { ServerError } from '../types';
 
@@ -19,9 +19,8 @@ export const useGetActionLicense = () => {
   const toasts = useToasts();
   return useQuery(
     casesQueriesKeys.license(),
-    async () => {
-      const abortCtrl = new AbortController();
-      const response = await getActionLicense(abortCtrl.signal);
+    async ({ signal }) => {
+      const response = await getActionLicense(signal);
       return response.find((l) => l.id === MINIMUM_LICENSE_REQUIRED_CONNECTOR) ?? null;
     },
     {

@@ -3,14 +3,13 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
+source .buildkite/scripts/steps/functional/common_cypress.sh
 
 export JOB=kibana-security-solution-chrome
-export CLI_NUMBER=${CLI_NUMBER:-$((BUILDKITE_PARALLEL_JOB+1))}
-export CLI_COUNT=${CLI_COUNT:-$BUILDKITE_PARALLEL_JOB_COUNT}
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-echo "--- Security Solution tests (Chrome)"
+echo "--- Security Solution Cypress tests (Chrome)"
 
-node scripts/functional_tests \
-  --debug --bail \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-  --config x-pack/test/security_solution_cypress/cli_config_parallel.ts
+cd x-pack/test/security_solution_cypress
+
+yarn cypress:run:ess; status=$?; yarn junit:merge && exit $status

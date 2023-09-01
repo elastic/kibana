@@ -96,6 +96,10 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
       const managedPolicies = agentPoliciesResponse.data?.items ?? [];
 
+      if (managedPolicies.length === 0) {
+        return [];
+      }
+
       // find all the agents that have those policies and are not unenrolled
       const policiesKuery = managedPolicies
         .map((policy) => `policy_id:"${policy.id}"`)
@@ -126,7 +130,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   // update the query removing the "managed" agents
   const selectionQuery = useMemo(() => {
-    if (managedAgents) {
+    if (managedAgents.length) {
       const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${managedAgents
         .map((id) => `"${id}"`)
         .join(' or ')})`;

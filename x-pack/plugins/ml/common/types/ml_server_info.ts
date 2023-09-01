@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CategorizationAnalyzer } from './categories';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface MlServerDefaults {
   anomaly_detectors: {
     categorization_examples_limit?: number;
     model_memory_limit?: string;
     model_snapshot_retention_days?: number;
-    categorization_analyzer?: CategorizationAnalyzer;
+    categorization_analyzer?: estypes.MlCategorizationAnalyzerDefinition;
   };
   datafeeds: { scroll_size?: number };
 }

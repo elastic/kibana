@@ -7,8 +7,8 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [
-      "advancedSettings",
-      "telemetry"
+      "telemetry",
+      "advancedSettings"
     ],
     "optionalPlugins": [
       "usageCollection"

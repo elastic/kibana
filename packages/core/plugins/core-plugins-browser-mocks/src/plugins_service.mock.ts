@@ -10,6 +10,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type { PluginsService, PluginsServiceSetup } from '@kbn/core-plugins-browser-internal';
+import type { BuildFlavor } from '@kbn/config/src/types';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<PluginsServiceSetup> = {
@@ -27,7 +28,10 @@ const createStartContractMock = () => {
   return startContract as PluginsServiceSetup;
 };
 
-const createPluginInitializerContextMock = (config: unknown = {}) => {
+const createPluginInitializerContextMock = (
+  config: unknown = {},
+  { buildFlavor = 'serverless' }: { buildFlavor?: BuildFlavor } = {}
+) => {
   const mock: PluginInitializerContext = {
     opaqueId: Symbol(),
     env: {
@@ -42,6 +46,8 @@ const createPluginInitializerContextMock = (config: unknown = {}) => {
         buildNum: 100,
         buildSha: 'buildSha',
         dist: false,
+        buildDate: new Date('2023-05-15T23:12:09.000Z'),
+        buildFlavor,
       },
     },
     logger: loggerMock.create(),

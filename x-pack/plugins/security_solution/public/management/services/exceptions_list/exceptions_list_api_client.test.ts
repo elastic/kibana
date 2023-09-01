@@ -69,6 +69,7 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.post).toHaveBeenCalledWith(
         INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
         {
+          version: '1',
           body: JSON.stringify(getFakeListDefinition()),
         }
       );

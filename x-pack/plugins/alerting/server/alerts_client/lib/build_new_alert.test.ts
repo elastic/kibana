@@ -7,6 +7,7 @@
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { buildNewAlert } from './build_new_alert';
 import type { AlertRule } from '../types';
+import { Alert } from '@kbn/alerts-as-data-utils';
 
 const rule = {
   category: 'My test rule',
@@ -43,13 +44,19 @@ describe('buildNewAlert', () => {
         legacyAlert,
         rule: alertRule,
         timestamp: '2023-03-28T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-28T12:27:28.159Z',
+      event: {
+        action: 'open',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
           action_group: 'default',
           flapping: false,
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
@@ -57,9 +64,12 @@ describe('buildNewAlert', () => {
           rule,
           status: 'active',
           uuid: legacyAlert.getUuid(),
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
+      tags: ['rule-', '-tags'],
     });
   });
 
@@ -73,9 +83,14 @@ describe('buildNewAlert', () => {
         legacyAlert,
         rule: alertRule,
         timestamp: '2023-03-28T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-28T12:27:28.159Z',
+      event: {
+        action: 'open',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
           action_group: 'default',
@@ -83,6 +98,7 @@ describe('buildNewAlert', () => {
             us: '0',
           },
           flapping: false,
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
@@ -90,10 +106,16 @@ describe('buildNewAlert', () => {
           start: now,
           rule,
           status: 'active',
+          time_range: {
+            gte: now,
+          },
           uuid: legacyAlert.getUuid(),
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
+      tags: ['rule-', '-tags'],
     });
   });
 
@@ -108,9 +130,14 @@ describe('buildNewAlert', () => {
         legacyAlert,
         rule: alertRule,
         timestamp: '2023-03-28T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-28T12:27:28.159Z',
+      event: {
+        action: 'open',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
           action_group: 'default',
@@ -123,9 +150,226 @@ describe('buildNewAlert', () => {
           rule,
           status: 'active',
           uuid: legacyAlert.getUuid(),
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
+      tags: ['rule-', '-tags'],
+    });
+  });
+
+  test('should include alert payload if specified', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+    legacyAlert.scheduleActions('default');
+
+    expect(
+      buildNewAlert<
+        { count: number; url: string; kibana: { alert: { nested_field: number } } },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        legacyAlert,
+        rule: alertRule,
+        timestamp: '2023-03-28T12:27:28.159Z',
+        payload: { count: 1, url: `https://url1`, kibana: { alert: { nested_field: 2 } } },
+        kibanaVersion: '8.9.0',
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-28T12:27:28.159Z',
+      count: 1,
+      event: {
+        action: 'open',
+        kind: 'signal',
+      },
+      kibana: {
+        alert: {
+          action_group: 'default',
+          flapping: false,
+          flapping_history: [],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: [],
+          nested_field: 2,
+          rule,
+          status: 'active',
+          uuid: legacyAlert.getUuid(),
+          workflow_status: 'open',
+        },
+        space_ids: ['default'],
+        version: '8.9.0',
+      },
+      tags: ['rule-', '-tags'],
+      url: `https://url1`,
+    });
+  });
+
+  test('should use workflow status from alert payload if set', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+    legacyAlert.scheduleActions('default');
+
+    expect(
+      buildNewAlert<
+        Alert & { count: number; url: string; kibana: { alert: { nested_field: number } } },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        legacyAlert,
+        rule: alertRule,
+        timestamp: '2023-03-28T12:27:28.159Z',
+        payload: {
+          count: 1,
+          url: `https://url1`,
+          kibana: { alert: { nested_field: 2, workflow_status: 'custom_workflow' } },
+        },
+        kibanaVersion: '8.9.0',
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-28T12:27:28.159Z',
+      count: 1,
+      event: {
+        action: 'open',
+        kind: 'signal',
+      },
+      kibana: {
+        alert: {
+          action_group: 'default',
+          flapping: false,
+          flapping_history: [],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: [],
+          nested_field: 2,
+          rule,
+          status: 'active',
+          uuid: legacyAlert.getUuid(),
+          workflow_status: 'custom_workflow',
+        },
+        space_ids: ['default'],
+        version: '8.9.0',
+      },
+      tags: ['rule-', '-tags'],
+      url: `https://url1`,
+    });
+  });
+
+  test('should overwrite any framework fields included in payload', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+    legacyAlert.scheduleActions('default');
+
+    expect(
+      buildNewAlert<
+        {
+          count: number;
+          url: string;
+          kibana: { alert: { action_group: string; nested_field: number } };
+        },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        legacyAlert,
+        rule: alertRule,
+        timestamp: '2023-03-28T12:27:28.159Z',
+        payload: {
+          count: 1,
+          url: `https://url1`,
+          kibana: { alert: { action_group: 'bad action group', nested_field: 2 } },
+        },
+        kibanaVersion: '8.9.0',
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-28T12:27:28.159Z',
+      count: 1,
+      event: {
+        action: 'open',
+        kind: 'signal',
+      },
+      kibana: {
+        alert: {
+          action_group: 'default',
+          flapping: false,
+          flapping_history: [],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: [],
+          nested_field: 2,
+          rule,
+          status: 'active',
+          uuid: legacyAlert.getUuid(),
+          workflow_status: 'open',
+        },
+        space_ids: ['default'],
+        version: '8.9.0',
+      },
+      tags: ['rule-', '-tags'],
+      url: `https://url1`,
+    });
+  });
+
+  test('should merge and de-dupe rule tags and any tags from payload', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+    legacyAlert.scheduleActions('default');
+
+    expect(
+      buildNewAlert<
+        {
+          count: number;
+          url: string;
+          kibana: { alert: { action_group: string; nested_field: number } };
+          tags: string[];
+        },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        legacyAlert,
+        rule: alertRule,
+        timestamp: '2023-03-28T12:27:28.159Z',
+        payload: {
+          count: 1,
+          url: `https://url1`,
+          kibana: { alert: { action_group: 'bad action group', nested_field: 2 } },
+          tags: ['custom-tag1', '-tags'],
+        },
+        kibanaVersion: '8.9.0',
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-28T12:27:28.159Z',
+      count: 1,
+      event: {
+        action: 'open',
+        kind: 'signal',
+      },
+      kibana: {
+        alert: {
+          action_group: 'default',
+          flapping: false,
+          flapping_history: [],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: [],
+          nested_field: 2,
+          rule,
+          status: 'active',
+          uuid: legacyAlert.getUuid(),
+          workflow_status: 'open',
+        },
+        space_ids: ['default'],
+        version: '8.9.0',
+      },
+      tags: ['custom-tag1', '-tags', 'rule-'],
+      url: `https://url1`,
     });
   });
 });

@@ -7,7 +7,13 @@
 
 import React from 'react';
 
-import { EuiFilterGroup, EuiPopover, EuiPopoverTitle, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiFilterGroup,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiButtonEmpty,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ContentSource } from '../../../types';
@@ -29,6 +35,8 @@ export const GroupRowSourcesDropdown: React.FC<GroupRowSourcesDropdownProps> = (
   onButtonClick,
   closePopover,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const toggleLink = (
     <EuiButtonEmpty className="user-group-source--additional" onClick={onButtonClick}>
       + {numOptions}
@@ -58,7 +66,9 @@ export const GroupRowSourcesDropdown: React.FC<GroupRowSourcesDropdownProps> = (
         panelPaddingSize="none"
       >
         <EuiPopoverTitle>{contentSourceCountHeading}</EuiPopoverTitle>
-        <div className="euiFilterSelect__items">{sources}</div>
+        <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
+          {sources}
+        </div>
       </EuiPopover>
     </EuiFilterGroup>
   );

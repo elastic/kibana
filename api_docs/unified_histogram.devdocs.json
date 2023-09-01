@@ -468,7 +468,7 @@
           },
           " | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\"> & React.RefAttributes<",
+          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\"> & React.RefAttributes<",
           {
             "pluginId": "unifiedHistogram",
             "scope": "public",
@@ -593,52 +593,6 @@
           },
           {
             "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramServices.theme",
-            "type": "Object",
-            "tags": [],
-            "label": "theme",
-            "description": [],
-            "signature": [
-              "{ readonly chartsDefaultTheme: ",
-              "RecursivePartial",
-              "<",
-              "Theme",
-              ">; readonly chartsDefaultBaseTheme: ",
-              "Theme",
-              "; chartsTheme$: ",
-              "Observable",
-              "<",
-              "RecursivePartial",
-              "<",
-              "Theme",
-              ">>; chartsBaseTheme$: ",
-              "Observable",
-              "<",
-              "Theme",
-              ">; readonly darkModeEnabled$: ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
-                "text": "CoreTheme"
-              },
-              ">; useDarkMode: () => boolean; useChartsTheme: () => ",
-              "RecursivePartial",
-              "<",
-              "Theme",
-              ">; useChartsBaseTheme: () => ",
-              "Theme",
-              "; }"
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
             "id": "def-public.UnifiedHistogramServices.uiActions",
             "type": "Object",
             "tags": [],
@@ -671,10 +625,10 @@
               },
               "<Context>; readonly registerTrigger: (trigger: ",
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Trigger",
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
                 "text": "Trigger"
               },
               ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
@@ -826,6 +780,26 @@
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramServices.capabilities",
+            "type": "Object",
+            "tags": [],
+            "label": "capabilities",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              }
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -913,6 +887,30 @@
                 "text": "RequestAdapter"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramState.lensTablesAdapter",
+            "type": "Object",
+            "tags": [],
+            "label": "lensTablesAdapter",
+            "description": [
+              "\nThe current Lens request table"
+            ],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              "> | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
@@ -1180,7 +1178,7 @@
           },
           " | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\">"
+          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\">"
         ],
         "path": "src/plugins/unified_histogram/public/container/container.tsx",
         "deprecated": false,

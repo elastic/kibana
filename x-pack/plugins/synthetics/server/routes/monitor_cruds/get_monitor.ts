@@ -6,30 +6,24 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   MonitorOverviewItem,
 } from '../../../common/runtime_types';
-import { UMServerLibs } from '../../legacy_uptime/lib/lib';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import {
-  getMonitorFilters,
-  getMonitors,
-  isMonitorsQueryFiltered,
-  MonitorsQuery,
-  QuerySchema,
-  SEARCH_FIELDS,
-} from '../common';
+import { getMonitorFilters, MonitorsQuery, QuerySchema, SEARCH_FIELDS } from '../common';
+import { mapSavedObjectToMonitor } from './helper';
+import { getSyntheticsMonitor } from '../../legacy_uptime/lib/requests/get_monitor';
 
-export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.GET_SYNTHETICS_MONITOR,
+  path: SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR,
   validate: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
@@ -49,9 +43,11 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: U
       const { decrypted } = request.query;
 
       if (!decrypted) {
-        return await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
-          syntheticsMonitorType,
-          monitorId
+        return mapSavedObjectToMonitor(
+          await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
+            syntheticsMonitorType,
+            monitorId
+          )
         );
       } else {
         // only user with write permissions can decrypt the monitor
@@ -62,7 +58,8 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: U
         }
 
         const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
-        return await libs.requests.getSyntheticsMonitor({
+
+        return await getSyntheticsMonitor({
           monitorId,
           encryptedSavedObjectsClient,
           savedObjectsClient,
@@ -75,43 +72,6 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: U
 
       throw getErr;
     }
-  },
-});
-
-export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
-  method: 'GET',
-  path: API_URLS.SYNTHETICS_MONITORS,
-  validate: {
-    query: QuerySchema,
-  },
-  handler: async (routeContext): Promise<any> => {
-    const { request, savedObjectsClient, syntheticsMonitorClient } = routeContext;
-    const totalCountQuery = async () => {
-      if (isMonitorsQueryFiltered(request.query)) {
-        return savedObjectsClient.find({
-          type: syntheticsMonitorType,
-          perPage: 0,
-          page: 1,
-        });
-      }
-    };
-
-    const [queryResult, totalCount] = await Promise.all([
-      getMonitors(routeContext),
-      totalCountQuery(),
-    ]);
-
-    const absoluteTotal = totalCount?.total ?? queryResult.total;
-
-    const { saved_objects: monitors, per_page: perPageT, ...rest } = queryResult;
-
-    return {
-      ...rest,
-      monitors,
-      absoluteTotal,
-      perPage: perPageT,
-      syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
-    };
   },
 });
 
@@ -131,7 +91,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       locations: queriedLocations,
     } = request.query as MonitorsQuery;
 
-    const filtersStr = await getMonitorFilters({
+    const { filtersStr } = await getMonitorFilters({
       ...request.query,
       context: routeContext,
     });
@@ -166,9 +126,9 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
   },
 });
 
-function getOverviewConfigsPerLocation(
-  attributes: EncryptedSyntheticsMonitor,
-  queriedLocations: string | string[] | undefined
+export function getOverviewConfigsPerLocation(
+  attributes: EncryptedSyntheticsMonitorAttributes,
+  queriedLocations?: string | string[]
 ) {
   const id = attributes[ConfigKey.MONITOR_QUERY_ID];
   const configId = attributes[ConfigKey.CONFIG_ID];
@@ -192,6 +152,7 @@ function getOverviewConfigsPerLocation(
     configId,
     location,
     name: attributes[ConfigKey.NAME],
+    schedule: attributes[ConfigKey.SCHEDULE].number,
     tags: attributes[ConfigKey.TAGS],
     isEnabled: attributes[ConfigKey.ENABLED],
     type: attributes[ConfigKey.MONITOR_TYPE],

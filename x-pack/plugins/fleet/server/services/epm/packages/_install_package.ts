@@ -37,7 +37,6 @@ import type {
   PackageVerificationResult,
   IndexTemplateEntry,
 } from '../../../types';
-import { ensureFileUploadWriteIndices } from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
 import { isTopLevelPipeline, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
@@ -145,6 +144,7 @@ export async function _installPackage({
         installedPkg,
         logger,
         spaceId,
+        assetTags: packageInfo?.asset_tags,
       })
     );
     // Necessary to avoid async promise rejection warning
@@ -234,15 +234,6 @@ export async function _installPackage({
       await removeLegacyTemplates({ packageInfo, esClient, logger });
     } catch (e) {
       logger.warn(`Error removing legacy templates: ${e.message}`);
-    }
-
-    const { diagnosticFileUploadEnabled } = appContextService.getExperimentalFeatures();
-    if (diagnosticFileUploadEnabled) {
-      await ensureFileUploadWriteIndices({
-        integrationNames: [packageInfo.name],
-        esClient,
-        logger,
-      });
     }
 
     // update current backing indices of each data stream

@@ -4,13 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
+import deepmerge from 'deepmerge';
+import { get } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
+import { stripFrameworkFields } from './strip_framework_fields';
 
 interface BuildNewAlertOpts<
+  AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -18,7 +23,9 @@ interface BuildNewAlertOpts<
 > {
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
+  payload?: DeepPartial<AlertData>;
   timestamp: string;
+  kibanaVersion: string;
 }
 
 /**
@@ -36,30 +43,61 @@ export const buildNewAlert = <
   legacyAlert,
   rule,
   timestamp,
-}: BuildNewAlertOpts<LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>): Alert &
-  AlertData => {
-  return {
-    '@timestamp': timestamp,
-    kibana: {
-      alert: {
-        action_group: legacyAlert.getScheduledActionOptions()?.actionGroup,
-        flapping: legacyAlert.getFlapping(),
-        instance: {
-          id: legacyAlert.getId(),
+  payload,
+  kibanaVersion,
+}: BuildNewAlertOpts<
+  AlertData,
+  LegacyState,
+  LegacyContext,
+  ActionGroupIds,
+  RecoveryActionGroupId
+>): Alert & AlertData => {
+  const cleanedPayload = stripFrameworkFields(payload);
+  return deepmerge.all(
+    [
+      cleanedPayload,
+      {
+        '@timestamp': timestamp,
+        event: {
+          action: 'open',
+          kind: 'signal',
         },
-        maintenance_window_ids: legacyAlert.getMaintenanceWindowIds(),
-        rule: rule.kibana?.alert.rule,
-        status: 'active',
-        uuid: legacyAlert.getUuid(),
-        ...(legacyAlert.getState().duration
-          ? { duration: { us: legacyAlert.getState().duration } }
-          : {}),
-        ...(!isEmpty(legacyAlert.getFlappingHistory())
-          ? { flapping_history: legacyAlert.getFlappingHistory() }
-          : {}),
-        ...(legacyAlert.getState().start ? { start: legacyAlert.getState().start } : {}),
+        kibana: {
+          alert: {
+            action_group: legacyAlert.getScheduledActionOptions()?.actionGroup,
+            flapping: legacyAlert.getFlapping(),
+            flapping_history: legacyAlert.getFlappingHistory(),
+            instance: {
+              id: legacyAlert.getId(),
+            },
+            maintenance_window_ids: legacyAlert.getMaintenanceWindowIds(),
+            rule: rule.kibana?.alert.rule,
+            status: 'active',
+            uuid: legacyAlert.getUuid(),
+            workflow_status: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
+            ...(legacyAlert.getState().duration
+              ? { duration: { us: legacyAlert.getState().duration } }
+              : {}),
+            ...(legacyAlert.getState().start
+              ? {
+                  start: legacyAlert.getState().start,
+                  time_range: {
+                    gte: legacyAlert.getState().start,
+                  },
+                }
+              : {}),
+          },
+          space_ids: rule.kibana?.space_ids,
+          version: kibanaVersion,
+        },
+        tags: Array.from(
+          new Set([
+            ...((cleanedPayload?.tags as string[]) ?? []),
+            ...(rule.kibana?.alert.rule.tags ?? []),
+          ])
+        ),
       },
-      space_ids: rule.kibana?.space_ids,
-    },
-  } as Alert & AlertData;
+    ],
+    { arrayMerge: (_, sourceArray) => sourceArray }
+  ) as Alert & AlertData;
 };

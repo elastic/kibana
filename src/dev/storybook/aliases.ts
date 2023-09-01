@@ -7,6 +7,9 @@
  */
 
 // Please also add new aliases to test/scripts/jenkins_storybook.sh
+//
+// If you wish for your Storybook to be built and included in CI, also add your
+// alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 export const storybookAliases = {
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
@@ -17,7 +20,6 @@ export const storybookAliases = {
   coloring: 'packages/kbn-coloring/.storybook',
   language_documentation_popover: 'packages/kbn-language-documentation-popover/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
-  content_management: 'packages/content-management/.storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
   controls: 'src/plugins/controls/storybook',
   custom_integrations: 'src/plugins/custom_integrations/storybook',
@@ -25,6 +27,7 @@ export const storybookAliases = {
   dashboard: 'src/plugins/dashboard/.storybook',
   data: 'src/plugins/data/.storybook',
   discover: 'src/plugins/discover/.storybook',
+  log_explorer: 'x-pack/plugins/log_explorer/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
   es_ui_shared: 'src/plugins/es_ui_shared/.storybook',
   expression_error: 'src/plugins/expression_error/.storybook',
@@ -42,7 +45,9 @@ export const storybookAliases = {
   infra: 'x-pack/plugins/infra/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
+  management: 'packages/kbn-management/storybook/config',
   observability: 'x-pack/plugins/observability/.storybook',
+  observability_ai_assistant: 'x-pack/plugins/observability_ai_assistant/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
   text_based_editor: 'packages/kbn-text-based-editor/.storybook',

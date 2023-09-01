@@ -9,7 +9,6 @@ import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type {
   IUiSettingsClient,
   ChromeStart,
-  SavedObjectsClientContract,
   ApplicationStart,
   HttpStart,
   I18nStart,
@@ -29,6 +28,7 @@ import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -42,7 +42,7 @@ export interface DependencyCache {
   fieldFormats: FieldFormatsStart | null;
   autocomplete: UnifiedSearchPublicPluginStart['autocomplete'] | null;
   basePath: IBasePath | null;
-  savedObjectsClient: SavedObjectsClientContract | null;
+  savedSearch: SavedSearchPublicPluginStart | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
   security: SecurityPluginStart | undefined | null;
@@ -67,7 +67,7 @@ const cache: DependencyCache = {
   fieldFormats: null,
   autocomplete: null,
   basePath: null,
-  savedObjectsClient: null,
+  savedSearch: null,
   application: null,
   http: null,
   security: null,
@@ -92,7 +92,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.fieldFormats = deps.fieldFormats || null;
   cache.autocomplete = deps.autocomplete || null;
   cache.basePath = deps.basePath || null;
-  cache.savedObjectsClient = deps.savedObjectsClient || null;
+  cache.savedSearch = deps.savedSearch || null;
   cache.application = deps.application || null;
   cache.http = deps.http || null;
   cache.security = deps.security || null;
@@ -185,13 +185,6 @@ export function getBasePath() {
     throw new Error("basePath hasn't been initialized");
   }
   return cache.basePath;
-}
-
-export function getSavedObjectsClient() {
-  if (cache.savedObjectsClient === null) {
-    throw new Error("savedObjectsClient hasn't been initialized");
-  }
-  return cache.savedObjectsClient;
 }
 
 export function getApplication() {

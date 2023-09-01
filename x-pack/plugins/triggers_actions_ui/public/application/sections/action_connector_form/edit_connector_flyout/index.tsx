@@ -260,7 +260,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         />
         <EuiFlyoutBody>
           {selectedTab === EditConnectorTabs.Configuration ? (
-            !connector.isPreconfigured ? (
+            !connector.isPreconfigured && !connector.isSystemAction ? (
               <>
                 {isEdit && (
                   <>

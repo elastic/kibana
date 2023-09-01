@@ -7,12 +7,13 @@
 
 import { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import type { SavedObjectsClientContract, ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { GraphStore } from '../state_management';
 import { GraphWorkspaceSavedObject, Workspace } from '../types';
 import { getEmptyWorkspace, getSavedWorkspace } from './saved_workspace_utils';
@@ -21,7 +22,7 @@ import { getEditUrl } from '../services/url';
 export interface UseWorkspaceLoaderProps {
   store: GraphStore;
   workspaceRef: React.MutableRefObject<Workspace | undefined>;
-  savedObjectsClient: SavedObjectsClientContract;
+  contentClient: ContentClient;
   coreStart: CoreStart;
   spaces?: SpacesApi;
   data: DataPublicPluginStart;
@@ -47,7 +48,7 @@ export const useWorkspaceLoader = ({
   spaces,
   workspaceRef,
   store,
-  savedObjectsClient,
+  contentClient,
   data,
 }: UseWorkspaceLoaderProps) => {
   const [state, setState] = useState<WorkspaceLoadedState>();
@@ -85,7 +86,7 @@ export const useWorkspaceLoader = ({
       sharingSavedObjectProps?: SharingSavedObjectProps;
     }> {
       return id
-        ? await getSavedWorkspace(savedObjectsClient, id).catch(function (e) {
+        ? await getSavedWorkspace(contentClient, id).catch(function (e) {
             coreStart.notifications.toasts.addError(e, {
               title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
                 defaultMessage: "Couldn't load graph with ID",
@@ -141,7 +142,7 @@ export const useWorkspaceLoader = ({
     search,
     store,
     historyReplace,
-    savedObjectsClient,
+    contentClient,
     setState,
     coreStart,
     workspaceRef,

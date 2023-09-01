@@ -18,4 +18,9 @@ export {
   setMetaMappingMigrationComplete,
   setMetaDocMigrationStarted,
   setMetaDocMigrationComplete,
+  removePropertiesFromV2,
 } from './update_index_meta';
+export {
+  checkIndexCurrentAlgorithm,
+  type CheckCurrentAlgorithmResult,
+} from './check_index_algorithm';

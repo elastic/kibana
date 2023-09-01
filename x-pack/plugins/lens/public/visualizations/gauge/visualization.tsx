@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
@@ -400,26 +398,12 @@ export const getGaugeVisualization = ({
     return update;
   },
 
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <GaugeDimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorComponent(props) {
+    return <GaugeDimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <GaugeToolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <GaugeToolbar {...props} />;
   },
 
   getSupportedLayers(state, frame) {

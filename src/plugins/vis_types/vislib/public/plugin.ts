@@ -16,6 +16,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '@kbn/vis-type-heatmap-plugin/common';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
+import { VislibPublicConfig } from '../config';
 import { setUsageCollectionStart } from './services';
 import { heatmapVisTypeDefinition } from './heatmap';
 
@@ -52,20 +53,32 @@ export class VisTypeVislibPlugin
     core: VisTypeVislibCoreSetup,
     { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
   ) {
-    // register vislib XY axis charts
-
     expressions.registerRenderer(getVislibVisRenderer(core, charts));
     expressions.registerFunction(createVisTypeVislibVisFn());
 
+    const { readOnly } = this.initializerContext.config.get<VislibPublicConfig>();
+
     if (core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
       // register vislib heatmap chart
-      visualizations.createBaseVisualization(heatmapVisTypeDefinition);
+      visualizations.createBaseVisualization({
+        ...heatmapVisTypeDefinition,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
     }
 
     if (core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
       // register vislib gauge and goal charts
-      visualizations.createBaseVisualization(gaugeVisTypeDefinition);
-      visualizations.createBaseVisualization(goalVisTypeDefinition);
+      visualizations.createBaseVisualization({
+        ...gaugeVisTypeDefinition,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
+      visualizations.createBaseVisualization({
+        ...goalVisTypeDefinition,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
     }
   }
 

@@ -27,6 +27,15 @@ export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
   NOT_DEPLOYED: 'agent-not-deployed-vuln-mgmt',
   UNPRIVILEGED: 'status-api-vuln-mgmt-unprivileged',
   NO_VULNERABILITIES: 'no-vulnerabilities-vuln-mgmt-found',
+  INDEX_TIMEOUT: 'vulnerabilities-timeout',
 };
+export const CNVM_NOT_INSTALLED_ACTION_SUBJ = 'cnvm-not-installed-action';
+export const CSPM_NOT_INSTALLED_ACTION_SUBJ = 'cspm-not-installed-action';
+export const KSPM_NOT_INSTALLED_ACTION_SUBJ = 'kspm-not-installed-action';
 
 export const VULNERABILITIES_CONTAINER_TEST_SUBJ = 'vulnerabilities_container';
+
+export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vulnerabilities_cvss_score_badge';
+
+export const TAKE_ACTION_SUBJ = 'csp:take_action';
+export const CREATE_RULE_ACTION_SUBJ = 'csp:create_rule';

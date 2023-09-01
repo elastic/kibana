@@ -122,7 +122,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               >
                 <EnterpriseSearchCronEditor
                   disabled={!crawlAutomatically || !useConnectorSchedule}
-                  scheduling={index.connector.scheduling}
+                  scheduling={index.connector.scheduling.full}
                   onChange={(newScheduling) =>
                     submitConnectorSchedule({
                       ...newScheduling,

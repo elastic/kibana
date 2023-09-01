@@ -284,7 +284,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
   return (
     <>
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
       <EuiText size="xs">
         <h4>
           <FormattedMessage
@@ -293,7 +293,7 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         </h4>
       </EuiText>
-      <EuiSpacer size={'xs'} />
+      <EuiSpacer size="xs" />
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
@@ -330,14 +330,14 @@ export const Expressions: React.FC<Props> = (props) => {
         />
       </div>
 
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
       <div>
         <EuiButtonEmpty
           data-test-subj="infraExpressionsAddConditionButton"
-          color={'primary'}
-          iconSide={'left'}
-          flush={'left'}
-          iconType={'plusInCircleFilled'}
+          color="primary"
+          iconSide="left"
+          flush="left"
+          iconType="plusInCircleFilled"
           onClick={addExpression}
         >
           <FormattedMessage
@@ -347,7 +347,7 @@ export const Expressions: React.FC<Props> = (props) => {
         </EuiButtonEmpty>
       </div>
 
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
       <EuiAccordion
         id="advanced-options-accordion"
         buttonContent={i18n.translate('xpack.infra.metrics.alertFlyout.advancedOptions', {
@@ -381,7 +381,7 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         </EuiPanel>
       </EuiAccordion>
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
 
       <EuiFormRow
         label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
@@ -410,7 +410,7 @@ export const Expressions: React.FC<Props> = (props) => {
         )}
       </EuiFormRow>
 
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
           defaultMessage: 'Group alerts by (optional)',
@@ -458,7 +458,7 @@ export const Expressions: React.FC<Props> = (props) => {
           </EuiText>
         </>
       )}
-      <EuiSpacer size={'s'} />
+      <EuiSpacer size="s" />
       <EuiCheckbox
         id="metrics-alert-group-disappear-toggle"
         label={
@@ -483,7 +483,7 @@ export const Expressions: React.FC<Props> = (props) => {
         checked={Boolean(hasGroupBy && ruleParams.alertOnGroupDisappear)}
         onChange={(e) => setRuleParams('alertOnGroupDisappear', e.target.checked)}
       />
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
     </>
   );
 };

@@ -6,15 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import { LandingCards } from '../landing_cards';
-import { SecuritySolutionPageWrapper } from '../page_wrapper';
+import useObservable from 'react-use/lib/useObservable';
+import { useKibana } from '../../lib/kibana';
 
 export const LandingPageComponent = memo(() => {
-  return (
-    <SecuritySolutionPageWrapper>
-      <LandingCards />
-    </SecuritySolutionPageWrapper>
-  );
+  const { getStartedComponent$ } = useKibana().services;
+  const GetStartedComponent = useObservable(getStartedComponent$);
+  return <>{GetStartedComponent}</>;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';

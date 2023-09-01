@@ -22,7 +22,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/cloud-plugin",
     "@kbn/cloud-chat-plugin",
-    "@kbn/infra-plugin",
     "@kbn/features-plugin",
     "@kbn/lens-plugin",
     "@kbn/licensing-plugin",
@@ -60,5 +59,9 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/global-search-plugin",
+    "@kbn/logs-shared-plugin",
+    "@kbn/share-plugin",
+    "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/search-api-panels",
   ]
 }

@@ -12,13 +12,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsRefreshContext } from '../../contexts';
 import { cleanMonitorListState, selectServiceLocationsState } from '../../state';
 import { showSyncErrors } from '../monitors_page/management/show_sync_errors';
-import { fetchCreateMonitor } from '../../state';
+import { createGettingStartedMonitor, UpsertMonitorResponse } from '../../state';
 import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
 import {
   DataStream,
+  EncryptedSyntheticsSavedMonitor,
   ServiceLocationErrors,
-  SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import {
   MONITOR_SUCCESS_LABEL,
@@ -41,7 +41,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
     }
     const { urls, locations } = monitorData;
 
-    return fetchCreateMonitor({
+    return createGettingStartedMonitor({
       monitor: {
         ...DEFAULT_FIELDS.browser,
         'source.inline.script': `step('Go to ${urls}', async () => {
@@ -56,7 +56,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
   }, [monitorData]);
 
   useEffect(() => {
-    const newMonitor = data as SyntheticsMonitorWithId;
+    const newMonitor = data as UpsertMonitorResponse;
     const hasErrors = data && 'attributes' in data && data.attributes.errors?.length > 0;
     if (hasErrors && !loading) {
       showSyncErrors(
@@ -71,7 +71,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
         title: MONITOR_FAILURE_LABEL,
         toastLifeTimeMs: 3000,
       });
-    } else if (!loading && newMonitor?.id) {
+    } else if (!loading && (newMonitor as EncryptedSyntheticsSavedMonitor)?.id) {
       kibanaService.toasts.addSuccess({
         title: MONITOR_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
@@ -82,5 +82,5 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
     }
   }, [application, data, status, dispatch, loading, refreshApp, serviceLocations]);
 
-  return { data: data as SyntheticsMonitorWithId, loading };
+  return { data: data as EncryptedSyntheticsSavedMonitor, loading };
 };

@@ -12,7 +12,13 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'header',
+    'unifiedFieldList',
+  ]);
 
   describe('discover drag and drop', function describeIndexTests() {
     before(async function () {
@@ -33,15 +39,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
-      await PageObjects.discover.cleanSidebarLocalStorage();
+      await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
     });
 
     describe('should add fields as columns via drag and drop', function () {
       it('should support dragging and dropping a field onto the grid', async function () {
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSidebarHasLoaded();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '53 available fields. 0 empty fields. 3 meta fields.'
         );
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
@@ -54,17 +60,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '@timestamp, extension'
         );
 
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('selected')).join(', ')
+        ).to.be('extension');
+      });
+
+      it('should support dragging and dropping a field onto the grid (with keyboard)', async function () {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+        expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
+          '@timestamp, Document'
+        );
+
         await PageObjects.discover.dragFieldWithKeyboardToTable('@message');
 
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
-          '@timestamp, extension, @message'
+          '@timestamp, @message'
         );
 
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         expect(
-          (await PageObjects.discover.getSidebarSectionFieldNames('selected')).join(', ')
-        ).to.be('extension, @message');
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('selected')).join(', ')
+        ).to.be('@message');
       });
     });
   });

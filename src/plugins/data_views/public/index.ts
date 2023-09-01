@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
+
 export {
   ILLEGAL_CHARACTERS_KEY,
   CONTAINS_SPACES_KEY,
@@ -19,7 +21,7 @@ export type {
   DataViewSpec,
   FieldSpec,
   DataViewAttributes,
-  SavedObjectsClientCommon,
+  PersistenceAPI,
   RuntimeField,
 } from '../common';
 export {
@@ -48,7 +50,6 @@ export type {
 export { DataViewsApiClient, DataViewsService, DataView } from './data_views';
 export type { DataViewListItem } from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
-export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
 
 /*
  * Plugin setup
@@ -56,8 +57,8 @@ export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper
 
 import { DataViewsPublicPlugin } from './plugin';
 
-export function plugin() {
-  return new DataViewsPublicPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DataViewsPublicPlugin(initializerContext);
 }
 
 export type {

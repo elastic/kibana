@@ -70,7 +70,15 @@
             "label": "migration",
             "description": [],
             "signature": [
-              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnNonMigratorNodes: boolean; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnRoles: string[]; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              "; readonly maxReadBatchSizeBytes: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -129,7 +137,15 @@
                 "label": "rawMigrationConfig",
                 "description": [],
                 "signature": [
-                  "Readonly<{ discardUnknownObjects?: string | undefined; discardCorruptObjects?: string | undefined; } & { skip: boolean; pollInterval: number; algorithm: \"v2\" | \"zdt\"; zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnNonMigratorNodes: boolean; }>; batchSize: number; maxBatchSizeBytes: ",
+                  "Readonly<{ discardUnknownObjects?: string | undefined; discardCorruptObjects?: string | undefined; } & { skip: boolean; pollInterval: number; algorithm: \"v2\" | \"zdt\"; zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnRoles: string[]; }>; batchSize: number; maxBatchSizeBytes: ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
+                  "; maxReadBatchSizeBytes: ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -868,8 +884,6 @@
         "description": [],
         "signature": [
           "(mappings: ",
-          "IndexMapping",
-          " | ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
             "scope": "common",
@@ -877,6 +891,8 @@
             "section": "def-common.SavedObjectsFieldMapping",
             "text": "SavedObjectsFieldMapping"
           },
+          " | ",
+          "IndexMapping",
           ", path: string | string[]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
@@ -899,15 +915,15 @@
             "label": "mappings",
             "description": [],
             "signature": [
-              "IndexMapping",
-              " | ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
                 "section": "def-common.SavedObjectsFieldMapping",
                 "text": "SavedObjectsFieldMapping"
-              }
+              },
+              " | ",
+              "IndexMapping"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_property.ts",
             "deprecated": false,
@@ -1498,6 +1514,23 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.globalSwitchToModelVersionAt",
+        "type": "string",
+        "tags": [],
+        "label": "globalSwitchToModelVersionAt",
+        "description": [
+          "\nThe stack version where all types will be forced to switch to using the model version system."
+        ],
+        "signature": [
+          "\"8.10.0\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.ModelVersionMap",
         "type": "Type",
         "tags": [],
@@ -1561,7 +1594,15 @@
         "label": "SavedObjectsMigrationConfigType",
         "description": [],
         "signature": [
-          "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnNonMigratorNodes: boolean; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+          "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnRoles: string[]; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          "; readonly maxReadBatchSizeBytes: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1595,6 +1636,50 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.DEFAULT_INDEX_TYPES_MAP",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_INDEX_TYPES_MAP",
+        "description": [
+          "\nThis map holds the default breakdown of SO types per index (pre 8.8.0)"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.DEFAULT_INDEX_TYPES_MAP..kibana_task_manager",
+            "type": "Array",
+            "tags": [],
+            "label": "'.kibana_task_manager'",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.DEFAULT_INDEX_TYPES_MAP..kibana",
+            "type": "Array",
+            "tags": [],
+            "label": "'.kibana'",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.savedObjectsConfig",
@@ -1742,6 +1827,22 @@
                 "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
+              ">; maxReadBatchSizeBytes: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
               ">; discardUnknownObjects: ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -1806,7 +1907,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<number>; runOnNonMigratorNodes: ",
+              "<number>; runOnRoles: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -1814,7 +1915,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<boolean>; }>; }>"
+              "<string[]>; }>; }>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,

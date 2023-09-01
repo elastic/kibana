@@ -101,6 +101,7 @@ interface AgentBase {
   local_metadata: AgentMetadata;
   tags?: string[];
   components?: FleetServerAgentComponent[];
+  agent?: FleetServerAgentMetadata;
 }
 
 export interface AgentMetrics {
@@ -108,18 +109,20 @@ export interface AgentMetrics {
   memory_size_byte_avg?: number;
 }
 
+export interface OutputMap {
+  [key: string]: {
+    api_key_id: string;
+    type: string;
+    to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
+  };
+}
+
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
   // @deprecated
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
-  outputs?: Record<
-    string,
-    {
-      api_key_id: string;
-      to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
-    }
-  >;
+  outputs?: OutputMap;
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
@@ -199,7 +202,8 @@ export interface FleetServerAgentComponent {
   type: string;
   status: FleetServerAgentComponentStatus;
   message: string;
-  units: FleetServerAgentComponentUnit[];
+  // In some case units could be missing
+  units?: FleetServerAgentComponentUnit[];
 }
 
 /**
@@ -318,6 +322,11 @@ export interface FleetServerAgent {
    * Components array
    */
   components?: FleetServerAgentComponent[];
+
+  /**
+   * Outputs map
+   */
+  outputs?: OutputMap;
 }
 /**
  * An Elastic Agent metadata
@@ -398,5 +407,17 @@ export interface FleetServerAgentAction {
   /** Trace id */
   traceparent?: string | null;
 
+  // signed data + signature
+  signed?: {
+    data: string;
+    signature: string;
+  };
+
   [k: string]: unknown;
+}
+
+export interface ActionStatusOptions {
+  errorSize: number;
+  page?: number;
+  perPage?: number;
 }

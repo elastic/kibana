@@ -7,7 +7,7 @@
 
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
-import type { UploadActionApiRequestBody } from '../../../../common/endpoint/schema/actions';
+import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
 import type { getActionFileUploadHandler } from './file_upload_handler';
 import { registerActionFileUploadRoute } from './file_upload_handler';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
@@ -19,7 +19,7 @@ import { EndpointActionGenerator } from '../../../../common/endpoint/data_genera
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { omit } from 'lodash';
-import type { FleetFileClientInterface } from '@kbn/fleet-plugin/server';
+import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
 
 describe('Upload response action create API handler', () => {
   type UploadHttpApiTestSetupMock = HttpApiTestSetupMock<never, never, UploadActionApiRequestBody>;
@@ -29,7 +29,7 @@ describe('Upload response action create API handler', () => {
   let httpHandlerContextMock: UploadHttpApiTestSetupMock['httpHandlerContextMock'];
   let httpResponseMock: UploadHttpApiTestSetupMock['httpResponseMock'];
 
-  let fleetFilesClientMock: jest.Mocked<FleetFileClientInterface>;
+  let fleetFilesClientMock: jest.Mocked<FleetToHostFileClientInterface>;
 
   beforeEach(async () => {
     testSetup = createHttpApiTestSetupMock<never, never, UploadActionApiRequestBody>();
@@ -37,16 +37,17 @@ describe('Upload response action create API handler', () => {
     ({ httpHandlerContextMock, httpResponseMock } = testSetup);
     httpRequestMock = testSetup.createRequestMock();
 
-    fleetFilesClientMock = (await testSetup.endpointAppContextMock.service.getFleetFilesClient(
-      'from-host'
-    )) as jest.Mocked<FleetFileClientInterface>;
+    fleetFilesClientMock =
+      (await testSetup.endpointAppContextMock.service.getFleetToHostFilesClient()) as jest.Mocked<FleetToHostFileClientInterface>;
   });
 
   describe('registerActionFileUploadRoute()', () => {
     it('should register the route', () => {
       registerActionFileUploadRoute(testSetup.routerMock, testSetup.endpointAppContextMock);
 
-      expect(testSetup.getRegisteredRouteHandler('post', UPLOAD_ROUTE)).toBeDefined();
+      expect(
+        testSetup.getRegisteredVersionedRoute('post', UPLOAD_ROUTE, '2023-10-31')
+      ).toBeDefined();
     });
 
     it('should NOT register route if feature flag is false', () => {
@@ -54,9 +55,9 @@ describe('Upload response action create API handler', () => {
       testSetup.endpointAppContextMock.experimentalFeatures.responseActionUploadEnabled = false;
       registerActionFileUploadRoute(testSetup.routerMock, testSetup.endpointAppContextMock);
 
-      expect(() => testSetup.getRegisteredRouteHandler('post', UPLOAD_ROUTE)).toThrow(
-        'Handler for [post][/api/endpoint/action/upload] not found'
-      );
+      expect(() =>
+        testSetup.getRegisteredVersionedRoute('post', UPLOAD_ROUTE, '2023-10-31')
+      ).toThrow('No routes registered for [POST /api/endpoint/action/upload]');
     });
 
     it('should use maxUploadResponseActionFileBytes config value', () => {
@@ -64,7 +65,10 @@ describe('Upload response action create API handler', () => {
       testSetup.endpointAppContextMock.serverConfig.maxUploadResponseActionFileBytes = 999;
       registerActionFileUploadRoute(testSetup.routerMock, testSetup.endpointAppContextMock);
 
-      expect(testSetup.getRegisteredRouteConfig('post', UPLOAD_ROUTE)?.options?.body).toEqual({
+      expect(
+        testSetup.getRegisteredVersionedRoute('post', UPLOAD_ROUTE, '2023-10-31').routeConfig
+          ?.options?.body
+      ).toEqual({
         accepts: ['multipart/form-data'],
         maxBytes: 999,
         output: 'stream',
@@ -76,11 +80,9 @@ describe('Upload response action create API handler', () => {
         (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
       ).mockResolvedValue(getEndpointAuthzInitialStateMock({ canWriteFileOperations: false }));
       registerActionFileUploadRoute(testSetup.routerMock, testSetup.endpointAppContextMock);
-      await testSetup.getRegisteredRouteHandler('post', UPLOAD_ROUTE)(
-        httpHandlerContextMock,
-        httpRequestMock,
-        httpResponseMock
-      );
+      await testSetup
+        .getRegisteredVersionedRoute('post', UPLOAD_ROUTE, '2023-10-31')
+        .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(httpResponseMock.forbidden).toHaveBeenCalledWith({
         body: expect.any(EndpointAuthorizationError),
@@ -115,8 +117,22 @@ describe('Upload response action create API handler', () => {
         testSetup.endpointAppContextMock.service.getActionCreateService().createAction as jest.Mock
       ).mockResolvedValue(createdUploadAction);
 
+      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          getMetadataForEndpoints: jest.fn().mockResolvedValue([
+            {
+              elastic: {
+                agent: {
+                  id: '123-456',
+                },
+              },
+            },
+          ]),
+        });
+
       const handler: ReturnType<typeof getActionFileUploadHandler> =
-        testSetup.getRegisteredRouteHandler('post', UPLOAD_ROUTE);
+        testSetup.getRegisteredVersionedRoute('post', UPLOAD_ROUTE, '2023-10-31').routeHandler;
 
       callHandler = () => handler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
     });
@@ -133,8 +149,7 @@ describe('Upload response action create API handler', () => {
 
     it('should create the action using parameters with stored file info', async () => {
       await callHandler();
-      const casesClientMock =
-        testSetup.endpointAppContextMock.service.getCasesClient(httpRequestMock);
+
       const createActionMock = testSetup.endpointAppContextMock.service.getActionCreateService()
         .createAction as jest.Mock;
 
@@ -151,7 +166,7 @@ describe('Upload response action create API handler', () => {
           },
           user: undefined,
         },
-        { casesClient: casesClientMock }
+        ['123-456']
       );
     });
 

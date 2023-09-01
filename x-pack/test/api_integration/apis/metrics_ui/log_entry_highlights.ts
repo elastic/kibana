@@ -17,7 +17,7 @@ import {
   LOG_ENTRIES_HIGHLIGHTS_PATH,
   logEntriesHighlightsRequestRT,
   logEntriesHighlightsResponseRT,
-} from '@kbn/infra-plugin/common/http_api';
+} from '@kbn/logs-shared-plugin/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -32,6 +32,7 @@ const KEY_AFTER_END = {
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
+  'Elastic-Api-Version': '1',
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -118,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
           entries.forEach((entry) => {
             entry.columns.forEach((column) => {
               if ('message' in column && 'highlights' in column.message[0]) {
-                expect(column.message[0].highlights).to.eql(['message', 'of', 'document', '0']);
+                expect(column.message[0].highlights).to.eql(['message of document 0']);
               }
             });
           });

@@ -94,7 +94,9 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
   return (
     <React.Fragment>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="shardFailureModalTitle">{title}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle data-test-subj="shardFailureModalTitle" size="xs">
+          {title}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />

@@ -84,6 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
         await ml.api.deleteAnomalyDetectionJobES(job.job_id);
       }
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('succeeds for ML Poweruser and keeps user annotations', async () => {

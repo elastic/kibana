@@ -38,7 +38,7 @@ export type {
   OnNotification,
   OnError,
   UiSettingsCommon,
-  SavedObjectsClientCommon,
+  PersistenceAPI,
   GetFieldsOptions,
   IDataViewsApiClient,
   SavedObject,

@@ -81,7 +81,7 @@ export const FilterGroup = ({
   } = useContext(FiltersBuilderContextType);
 
   const pathInArray = getPathInArray(path);
-  const isDepthReached = maxDepth <= pathInArray.length;
+  const isDepthReached = maxDepth <= pathInArray.length && renderedLevel > 0;
   const orDisabled = hideOr || (isDepthReached && booleanRelation === BooleanRelation.AND);
   const andDisabled = isDepthReached && booleanRelation === BooleanRelation.OR;
 

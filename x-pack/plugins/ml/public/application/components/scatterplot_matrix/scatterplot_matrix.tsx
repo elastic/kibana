@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useState, FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -28,15 +28,14 @@ import { Query } from '@kbn/data-plugin/common/query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  getCombinedRuntimeMappings,
+  isRuntimeMappings,
+  type RuntimeMappings,
+} from '@kbn/ml-runtime-field-utils';
+import { getProcessedFields } from '@kbn/ml-data-grid';
 
-import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
-import { RuntimeMappings } from '../../../../common/types/fields';
-
-import { getCombinedRuntimeMappings } from '../data_grid';
-import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
-
-import { getProcessedFields } from '../data_grid';
-import { useCurrentEuiTheme } from '../color_range_legend';
+import { useCurrentThemeVars, useMlApiContext, useMlKibana } from '../../contexts/kibana';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../vega_chart';
@@ -149,7 +148,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     { items: any[]; backgroundItems: any[]; columns: string[]; messages: string[] } | undefined
   >();
 
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentThemeVars();
 
   // formats the array of field names for EuiComboBox
   const fieldOptions = useMemo(

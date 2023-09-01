@@ -6,33 +6,36 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
+import type { AttachmentTotals, Case, CaseAttributes, User } from '../../../common/types/domain';
 import type {
-  Case,
-  CaseResolveResponse,
-  User,
-  AllTagsFindRequest,
+  AllCategoriesFindRequest,
   AllReportersFindRequest,
+  AllTagsFindRequest,
+  CaseResolveResponse,
   CasesByAlertIDRequest,
-  CasesByAlertId,
-  CaseAttributes,
-  AttachmentTotals,
-} from '../../../common/api';
+  GetRelatedCasesByAlertResponse,
+} from '../../../common/types/api';
 import {
-  CaseRt,
-  CaseResolveResponseRt,
-  AllTagsFindRequestRt,
-  decodeWithExcessOrThrow,
+  AllCategoriesFindRequestRt,
   AllReportersFindRequestRt,
+  AllTagsFindRequestRt,
+  CaseResolveResponseRt,
   CasesByAlertIDRequestRt,
-  CasesByAlertIdRt,
-} from '../../../common/api';
+  GetCategoriesResponseRt,
+  GetRelatedCasesByAlertResponseRt,
+  GetReportersResponseRt,
+  GetTagsResponseRt,
+} from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
+import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { CaseRt } from '../../../common/types/domain';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -57,7 +60,7 @@ export interface CasesByAlertIDParams {
 export const getCasesByAlertID = async (
   { alertID, options }: CasesByAlertIDParams,
   clientArgs: CasesClientArgs
-): Promise<CasesByAlertId> => {
+): Promise<GetRelatedCasesByAlertResponse> => {
   const {
     services: { caseService, attachmentService },
     logger,
@@ -119,16 +122,16 @@ export const getCasesByAlertID = async (
       }))
     );
 
-    return CasesByAlertIdRt.encode(
-      validCasesInfo.map((caseInfo) => ({
-        id: caseInfo.id,
-        title: caseInfo.attributes.title,
-        description: caseInfo.attributes.description,
-        status: caseInfo.attributes.status,
-        createdAt: caseInfo.attributes.created_at,
-        totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
-      }))
-    );
+    const res = validCasesInfo.map((caseInfo) => ({
+      id: caseInfo.id,
+      title: caseInfo.attributes.title,
+      description: caseInfo.attributes.description,
+      status: caseInfo.attributes.status,
+      createdAt: caseInfo.attributes.created_at,
+      totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
+    }));
+
+    return decodeOrThrow(GetRelatedCasesByAlertResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get case IDs using alert ID: ${alertID} options: ${JSON.stringify(
@@ -183,7 +186,7 @@ export const get = async (
     });
 
     if (!includeComments) {
-      return CaseRt.encode(
+      return decodeOrThrow(CaseRt)(
         flattenCaseSavedObject({
           savedObject: theCase,
         })
@@ -198,14 +201,14 @@ export const get = async (
       },
     });
 
-    return CaseRt.encode(
-      flattenCaseSavedObject({
-        savedObject: theCase,
-        comments: theComments.saved_objects,
-        totalComment: theComments.total,
-        totalAlerts: countAlertsForID({ comments: theComments, id }),
-      })
-    );
+    const res = flattenCaseSavedObject({
+      savedObject: theCase,
+      comments: theComments.saved_objects,
+      totalComment: countUserAttachments(theComments.saved_objects),
+      totalAlerts: countAlertsForID({ comments: theComments, id }),
+    });
+
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
@@ -245,7 +248,7 @@ export const resolve = async (
     });
 
     if (!includeComments) {
-      return CaseResolveResponseRt.encode({
+      return decodeOrThrow(CaseResolveResponseRt)({
         ...resolveData,
         case: flattenCaseSavedObject({
           savedObject: resolvedSavedObject,
@@ -261,7 +264,7 @@ export const resolve = async (
       },
     });
 
-    return CaseResolveResponseRt.encode({
+    const res = {
       ...resolveData,
       case: flattenCaseSavedObject({
         savedObject: resolvedSavedObject,
@@ -269,7 +272,9 @@ export const resolve = async (
         totalComment: theComments.total,
         totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
       }),
-    });
+    };
+
+    return decodeOrThrow(CaseResolveResponseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to resolve case id: ${id}: ${error}`, error, logger });
   }
@@ -294,7 +299,7 @@ export async function getTags(
     const queryParams = decodeWithExcessOrThrow(AllTagsFindRequestRt)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
-      Operations.findCases
+      Operations.getTags
     );
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
@@ -304,7 +309,7 @@ export async function getTags(
       filter,
     });
 
-    return tags;
+    return decodeOrThrow(GetTagsResponseRt)(tags);
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });
   }
@@ -338,8 +343,42 @@ export async function getReporters(
       filter,
     });
 
-    return reporters;
+    return decodeOrThrow(GetReportersResponseRt)(reporters);
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
+  }
+}
+
+/**
+ * Retrieves the categories from all the cases.
+ */
+export async function getCategories(
+  params: AllCategoriesFindRequest,
+  clientArgs: CasesClientArgs
+): Promise<string[]> {
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
+
+  try {
+    const queryParams = decodeWithExcessOrThrow(AllCategoriesFindRequestRt)(params);
+
+    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
+      Operations.getCategories
+    );
+
+    const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
+
+    const categories = await caseService.getCategories({
+      unsecuredSavedObjectsClient,
+      filter,
+    });
+
+    return decodeOrThrow(GetCategoriesResponseRt)(categories);
+  } catch (error) {
+    throw createCaseError({ message: `Failed to get categories: ${error}`, error, logger });
   }
 }

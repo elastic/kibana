@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -14,28 +13,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Controller, useFormContext, useFieldArray } from 'react-hook-form';
-import { CreateSLOInput } from '@kbn/slo-schema';
-import { range, first, xor } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { first, range, xor } from 'lodash';
+import React from 'react';
+import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-
-interface Option {
-  label: string;
-  value: string;
-}
+import { createOptionsFromFields } from '../../helpers/create_options';
+import { CreateSLOForm } from '../../types';
+import { QueryBuilder } from '../common/query_builder';
 
 interface MetricIndicatorProps {
   type: 'good' | 'total';
-  indexFields: Field[] | undefined;
+  indexFields: Field[];
   isLoadingIndex: boolean;
-  metricLabel: string;
-  equationLabel: string;
-  metricTooltip: ReactNode;
-  equationTooltip: ReactNode;
 }
 
 export const NEW_CUSTOM_METRIC = { name: 'A', aggregation: 'sum' as const, field: '' };
@@ -49,51 +43,65 @@ const validateEquation = (value: string) => {
   return result === null;
 };
 
-function createOptions(fields: Field[]): Option[] {
-  return fields
-    .map((field) => ({ label: field.name, value: field.name }))
-    .sort((a, b) => String(a.label).localeCompare(b.label));
-}
-
 function createEquationFromMetric(names: string[]) {
   return names.join(' + ');
 }
 
-export function MetricIndicator({
-  type,
-  indexFields,
-  isLoadingIndex,
-  metricLabel,
-  equationLabel,
-  metricTooltip,
-  equationTooltip,
-}: MetricIndicatorProps) {
-  const { control, watch, setValue } = useFormContext<CreateSLOInput>();
+const SUPPORTED_FIELD_TYPES = ['number', 'histogram'];
 
-  const metricFields = (indexFields ?? []).filter((field) => field.type === 'number');
+export function MetricIndicator({ type, indexFields, isLoadingIndex }: MetricIndicatorProps) {
+  const metricLabel = i18n.translate(
+    'xpack.observability.slo.sloEdit.sliType.customMetric.metricLabel',
+    { defaultMessage: 'Metric' }
+  );
 
-  const {
-    fields: metrics,
-    append,
-    remove,
-  } = useFieldArray({
+  const filterLabel = i18n.translate(
+    'xpack.observability.slo.sloEdit.sliType.customMetric.filterLabel',
+    { defaultMessage: 'Filter' }
+  );
+
+  const metricTooltip = (
+    <EuiIconTip
+      content={i18n.translate(
+        'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetric.tooltip',
+        {
+          defaultMessage:
+            'This data from this field will be aggregated with the "sum" aggregation.',
+        }
+      )}
+      position="top"
+    />
+  );
+
+  const equationLabel = i18n.translate(
+    'xpack.observability.slo.sloEdit.sliType.customMetric.equationLabel',
+    { defaultMessage: 'Equation' }
+  );
+
+  const equationTooltip = (
+    <EuiIconTip
+      content={i18n.translate(
+        'xpack.observability.slo.sloEdit.sliType.customMetric.totalEquation.tooltip',
+        {
+          defaultMessage: 'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
+        }
+      )}
+      position="top"
+    />
+  );
+
+  const { control, watch, setValue, register } = useFormContext<CreateSLOForm>();
+  const metricFields = indexFields.filter((field) => SUPPORTED_FIELD_TYPES.includes(field.type));
+
+  const { fields, append, remove } = useFieldArray({
     control,
     name: `indicator.params.${type}.metrics`,
   });
   const equation = watch(`indicator.params.${type}.equation`);
   const indexPattern = watch('indicator.params.index');
 
-  // Without this, the hidden fields for metric.name and metric.aggregation will
-  // not be included in the JSON when the form is submitted.
-  useEffect(() => {
-    metrics.forEach((metric, index) => {
-      setValue(`indicator.params.${type}.metrics.${index}.name`, metric.name);
-      setValue(`indicator.params.${type}.metrics.${index}.aggregation`, metric.aggregation);
-    });
-  }, [metrics, setValue, type]);
-
-  const disableAdd = metrics?.length === MAX_VARIABLES;
-  const disableDelete = metrics?.length === 1;
+  const disableAdd = fields?.length === MAX_VARIABLES;
+  const disableDelete = fields?.length === 1;
 
   const setDefaultEquationIfUnchanged = (previousNames: string[], nextNames: string[]) => {
     const defaultEquation = createEquationFromMetric(previousNames);
@@ -103,14 +111,14 @@ export function MetricIndicator({
   };
 
   const handleDeleteMetric = (index: number) => () => {
-    const currentVars = metrics.map((m) => m.name) ?? ['A'];
+    const currentVars = fields.map((m) => m.name) ?? ['A'];
     const deletedVar = currentVars[index];
     setDefaultEquationIfUnchanged(currentVars, xor(currentVars, [deletedVar]));
     remove(index);
   };
 
   const handleAddMetric = () => {
-    const currentVars = metrics.map((m) => m.name) ?? ['A'];
+    const currentVars = fields.map((m) => m.name) ?? ['A'];
     const name = first(xor(VAR_NAMES, currentVars))!;
     setDefaultEquationIfUnchanged(currentVars, [...currentVars, name]);
     append({ ...NEW_CUSTOM_METRIC, name });
@@ -119,21 +127,21 @@ export function MetricIndicator({
   return (
     <>
       <EuiFlexItem>
-        {metrics?.map((metric, index) => (
-          <EuiFormRow
-            fullWidth
-            label={
-              <span>
-                {metricLabel} {metric.name} {metricTooltip}
-              </span>
-            }
-            key={metric.id}
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <EuiFlexItem>
+        {fields?.map((metric, index) => (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" key={metric.id}>
+            <input hidden {...register(`indicator.params.${type}.metrics.${index}.name`)} />
+            <input hidden {...register(`indicator.params.${type}.metrics.${index}.aggregation`)} />
+            <EuiFlexItem>
+              <EuiFormRow
+                fullWidth
+                label={
+                  <span>
+                    {metricLabel} {metric.name} {metricTooltip}
+                  </span>
+                }
+              >
                 <Controller
                   name={`indicator.params.${type}.metrics.${index}.field`}
-                  shouldUnregister
                   defaultValue=""
                   rules={{ required: true }}
                   control={control}
@@ -172,35 +180,55 @@ export function MetricIndicator({
                               {
                                 value: field.value,
                                 label: field.value,
-                                'data-test-subj': `customMetricIndicatorFormMetricFieldSelectedValue`,
                               },
                             ]
                           : []
                       }
-                      options={createOptions(metricFields)}
+                      options={createOptionsFromFields(metricFields)}
                     />
                   )}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={0}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  style={{ marginBottom: '0.2em' }}
-                  onClick={handleDeleteMetric(index)}
-                  disabled={disableDelete}
-                  title={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
-                    { defaultMessage: 'Delete metric' }
-                  )}
-                  aria-label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
-                    { defaultMessage: 'Delete metric' }
-                  )}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <QueryBuilder
+                dataTestSubj="customKqlIndicatorFormGoodQueryInput"
+                indexPatternString={watch('indicator.params.index')}
+                label={`${filterLabel} ${metric.name}`}
+                name={`indicator.params.${type}.metrics.${index}.filter`}
+                placeholder=""
+                required={false}
+                tooltip={
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.observability.slo.sloEdit.sliType.customMetric.goodQuery.tooltip',
+                      {
+                        defaultMessage: 'This KQL query should return a subset of events.',
+                      }
+                    )}
+                    position="top"
+                  />
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={0}>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                style={{ marginTop: '1.5em' }}
+                onClick={handleDeleteMetric(index)}
+                disabled={disableDelete}
+                title={i18n.translate(
+                  'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
+                  { defaultMessage: 'Delete metric' }
+                )}
+                aria-label={i18n.translate(
+                  'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
+                  { defaultMessage: 'Delete metric' }
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ))}
         <EuiFlexGroup>
           <EuiFlexItem grow={0}>
@@ -229,7 +257,6 @@ export function MetricIndicator({
       <EuiFlexItem>
         <Controller
           name={`indicator.params.${type}.equation`}
-          shouldUnregister
           defaultValue=""
           rules={{
             required: true,

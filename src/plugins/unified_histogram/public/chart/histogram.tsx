@@ -10,11 +10,11 @@ import { useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState, useRef, useEffect } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
 import {
@@ -40,6 +40,7 @@ export interface HistogramProps {
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
   isPlainRecord?: boolean;
+  hasLensSuggestions: boolean;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
   lensAttributesContext: LensAttributesContext;
@@ -49,7 +50,31 @@ export interface HistogramProps {
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
+  withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
+
+const computeTotalHits = (
+  hasLensSuggestions: boolean,
+  adapterTables:
+    | {
+        [key: string]: Datatable;
+      }
+    | undefined,
+  isPlainRecord?: boolean
+) => {
+  if (isPlainRecord && hasLensSuggestions) {
+    return Object.values(adapterTables ?? {})?.[0]?.rows?.length;
+  } else if (isPlainRecord && !hasLensSuggestions) {
+    // ES|QL histogram case
+    let rowsCount = 0;
+    Object.values(adapterTables ?? {})?.[0]?.rows.forEach((r) => {
+      rowsCount += r.rows;
+    });
+    return rowsCount;
+  } else {
+    return adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
+  }
+};
 
 export function Histogram({
   services: { data, lens, uiSettings },
@@ -58,6 +83,7 @@ export function Histogram({
   hits,
   chart: { timeInterval },
   isPlainRecord,
+  hasLensSuggestions,
   getTimeRange,
   refetch$,
   lensAttributesContext: attributesContext,
@@ -67,6 +93,7 @@ export function Histogram({
   onChartLoad,
   onFilter,
   onBrushEnd,
+  withDefaultActions,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
   const [chartSize, setChartSize] = useState('100%');
@@ -99,19 +126,17 @@ export function Histogram({
         | undefined;
       const response = json?.rawResponse;
 
-      // Lens will swallow shard failures and return `isLoading: false` because it displays
-      // its own errors, but this causes us to emit onTotalHitsChange(UnifiedHistogramFetchStatus.complete, 0).
-      // This is incorrect, so we check for request failures and shard failures here, and emit an error instead.
-      if (requestFailed || response?._shards.failed) {
+      // The response can have `response?._shards.failed` but we should still be able to show hits number
+      // TODO: show shards warnings as a badge next to the total hits number
+
+      if (requestFailed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
         return;
       }
 
       const adapterTables = adapters?.tables?.tables;
-      const totalHits = isPlainRecord
-        ? Object.values(adapterTables ?? {})?.[0]?.rows?.length
-        : adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
+      const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
 
       onTotalHitsChange?.(
         isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
@@ -146,6 +171,7 @@ export function Histogram({
   const chartCss = css`
     position: relative;
     flex-grow: 1;
+    margin-block: ${euiTheme.size.xs};
 
     & > div {
       height: 100%;
@@ -185,6 +211,7 @@ export function Histogram({
           disabledActions={disabledActions}
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
+          withDefaultActions={withDefaultActions}
         />
       </div>
       {timeRangeDisplay}

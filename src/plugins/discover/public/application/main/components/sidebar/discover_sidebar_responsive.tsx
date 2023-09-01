@@ -7,29 +7,18 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiHideFor,
-  EuiIcon,
-  EuiLink,
-  EuiPortal,
-  EuiShowFor,
-  EuiTitle,
-} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import {
-  useExistingFieldsFetcher,
-  useQuerySubscriber,
-} from '@kbn/unified-field-list-plugin/public';
-import { VIEW_MODE } from '../../../../../common/constants';
+  UnifiedFieldListSidebarContainer,
+  type UnifiedFieldListSidebarContainerProps,
+  type UnifiedFieldListSidebarContainerApi,
+  FieldsGroupNames,
+} from '@kbn/unified-field-list';
+import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DiscoverSidebar } from './discover_sidebar';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -38,22 +27,58 @@ import {
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
-import { getRawRecordType } from '../../utils/get_raw_record_type';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { getUiActions } from '../../../../kibana_services';
 import {
   discoverSidebarReducer,
   getInitialState,
   DiscoverSidebarReducerActionType,
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
+import { useDiscoverCustomization } from '../../../../customizations';
 
 const EMPTY_FIELD_COUNTS = {};
 
+const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
+  return {
+    originatingApp: PLUGIN_ID,
+    localStorageKeyPrefix: 'discover',
+    disableFieldsExistenceAutoFetching: true,
+    buttonPropsToTriggerFlyout: {
+      contentProps: {
+        id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
+      },
+    },
+    buttonAddFieldToWorkspaceProps: {
+      'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+        defaultMessage: 'Add field as column',
+      }),
+    },
+    buttonRemoveFieldFromWorkspaceProps: {
+      'aria-label': i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
+        defaultMessage: 'Remove field from table',
+      }),
+    },
+    onOverrideFieldGroupDetails: (groupName) => {
+      if (groupName === FieldsGroupNames.AvailableFields) {
+        return {
+          helpText: i18n.translate('discover.fieldChooser.availableFieldsTooltip', {
+            defaultMessage: 'Fields available for display in the table.',
+          }),
+        };
+      }
+    },
+    dataTestSubj: {
+      fieldListAddFieldButtonTestSubj: 'dataView-add-field_btn',
+      fieldListSidebarDataTestSubj: 'discover-sidebar',
+      fieldListItemStatsDataTestSubj: 'dscFieldStats',
+      fieldListItemDndDataTestSubjPrefix: 'dscFieldListPanelField',
+      fieldListItemPopoverDataTestSubj: 'discoverFieldListPanelPopover',
+      fieldListItemPopoverHeaderDataTestSubjPrefix: 'discoverFieldListPanel',
+    },
+  };
+};
+
 export interface DiscoverSidebarResponsiveProps {
-  /**
-   * Determines whether add/remove buttons are displayed non only when focused
-   */
-  alwaysShowActionButtons?: boolean;
   /**
    * the selected columns displayed in the doc table in discover
    */
@@ -94,10 +119,6 @@ export interface DiscoverSidebarResponsiveProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   /**
-   * Read from the Fields API
-   */
-  useNewFieldsApi: boolean;
-  /**
    * callback to execute on edit runtime field
    */
   onFieldEdited: (options?: { removedFieldName?: string }) => Promise<void>;
@@ -106,13 +127,13 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onDataViewCreated: (dataView: DataView) => void;
   /**
-   * Discover view mode
-   */
-  viewMode: VIEW_MODE;
-  /**
    * list of available fields fetched from ES
    */
   availableFields$: AvailableFields$;
+  /**
+   * For customization and testing purposes
+   */
+  fieldListVariant?: UnifiedFieldListSidebarContainerProps['variant'];
 }
 
 /**
@@ -122,12 +143,18 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const { data, dataViews, core } = services;
-  const isPlainRecord = useAppStateSelector(
-    (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
-  );
-  const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const {
+    fieldListVariant,
+    selectedDataView,
+    columns,
+    trackUiMetric,
+    onAddFilter,
+    onFieldEdited,
+    onDataViewCreated,
+    onChangeDataView,
+    onAddField,
+    onRemoveField,
+  } = props;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
     selectedDataView,
@@ -135,6 +162,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
+  const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
+    useState<UnifiedFieldListSidebarContainerApi | null>(null);
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
@@ -199,38 +228,50 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     }
   }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);
 
-  const querySubscriberResult = useQuerySubscriber({ data });
-  const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
-  const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
-    disableAutoFetching: true,
-    dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
-    query: querySubscriberResult.query,
-    filters: querySubscriberResult.filters,
-    fromDate: querySubscriberResult.fromDate,
-    toDate: querySubscriberResult.toDate,
-    services: {
-      data,
-      dataViews,
-      core,
-    },
-  });
+  const refetchFieldsExistenceInfo =
+    unifiedFieldListSidebarContainerApi?.refetchFieldsExistenceInfo;
+  const scheduleFieldsExistenceInfoFetchRef = useRef<boolean>(false);
 
+  // Refetch fields existence info only after the fetch completes
   useEffect(() => {
-    if (sidebarState.status === DiscoverSidebarReducerStatus.COMPLETED) {
-      refetchFieldsExistenceInfo();
-    }
-    // refetching only if status changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sidebarState.status]);
+    scheduleFieldsExistenceInfoFetchRef.current = false;
 
-  const closeFieldEditor = useRef<() => void | undefined>();
+    if (sidebarState.status !== DiscoverSidebarReducerStatus.COMPLETED) {
+      return;
+    }
+
+    // refetching info only if status changed to completed
+
+    if (refetchFieldsExistenceInfo) {
+      refetchFieldsExistenceInfo();
+    } else {
+      scheduleFieldsExistenceInfoFetchRef.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sidebarState.status, scheduleFieldsExistenceInfoFetchRef]);
+
+  // As unifiedFieldListSidebarContainerRef ref can be empty in the beginning,
+  // we need to fetch the data once API becomes available and after documents are fetched
+  const initializeUnifiedFieldListSidebarContainerApi = useCallback(
+    (api) => {
+      if (!api) {
+        return;
+      }
+
+      if (scheduleFieldsExistenceInfoFetchRef.current) {
+        scheduleFieldsExistenceInfoFetchRef.current = false;
+        api.refetchFieldsExistenceInfo();
+      }
+
+      setUnifiedFieldListSidebarContainerApi(api);
+    },
+    [setUnifiedFieldListSidebarContainerApi, scheduleFieldsExistenceInfoFetchRef]
+  );
+
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   useEffect(() => {
     const cleanup = () => {
-      if (closeFieldEditor?.current) {
-        closeFieldEditor?.current();
-      }
       if (closeDataViewEditor?.current) {
         closeDataViewEditor?.current();
       }
@@ -241,23 +282,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     };
   }, []);
 
-  const setFieldEditorRef = useCallback((ref: () => void | undefined) => {
-    closeFieldEditor.current = ref;
-  }, []);
-
   const setDataViewEditorRef = useCallback((ref: () => void | undefined) => {
     closeDataViewEditor.current = ref;
   }, []);
 
-  const closeFlyout = useCallback(() => {
-    setIsFlyoutVisible(false);
-  }, []);
-
-  const { dataViewFieldEditor, dataViewEditor } = services;
+  const { dataViewEditor } = services;
   const { availableFields$ } = props;
-
-  const canEditDataView =
-    Boolean(dataViewEditor?.userPermissions.editDataView()) || !selectedDataView?.isPersisted();
 
   useEffect(() => {
     // For an external embeddable like the Field stats
@@ -272,140 +302,96 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     });
   }, [selectedDataView, sidebarState.fieldCounts, props.columns, availableFields$]);
 
-  const editField = useMemo(
+  const canEditDataView =
+    Boolean(dataViewEditor?.userPermissions.editDataView()) ||
+    Boolean(selectedDataView && !selectedDataView.isPersisted());
+  const closeFieldListFlyout = unifiedFieldListSidebarContainerApi?.closeFieldListFlyout;
+  const createNewDataView = useMemo(
     () =>
-      !isPlainRecord && canEditDataView && selectedDataView
-        ? (fieldName?: string) => {
-            const ref = dataViewFieldEditor.openEditor({
-              ctx: {
-                dataView: selectedDataView,
-              },
-              fieldName,
-              onSave: async () => {
-                await onFieldEdited();
+      canEditDataView
+        ? () => {
+            const ref = dataViewEditor.openEditor({
+              onSave: async (dataView) => {
+                onDataViewCreated(dataView);
               },
             });
-            if (setFieldEditorRef) {
-              setFieldEditorRef(ref);
+            if (setDataViewEditorRef) {
+              setDataViewEditorRef(ref);
             }
-            if (closeFlyout) {
-              closeFlyout();
-            }
+            closeFieldListFlyout?.();
           }
         : undefined,
-    [
-      isPlainRecord,
-      canEditDataView,
-      dataViewFieldEditor,
-      selectedDataView,
-      setFieldEditorRef,
-      closeFlyout,
-      onFieldEdited,
-    ]
+    [canEditDataView, dataViewEditor, setDataViewEditorRef, onDataViewCreated, closeFieldListFlyout]
   );
 
-  const createNewDataView = useCallback(() => {
-    const ref = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        onDataViewCreated(dataView);
-      },
-    });
-    if (setDataViewEditorRef) {
-      setDataViewEditorRef(ref);
-    }
-    if (closeFlyout) {
-      closeFlyout();
-    }
-  }, [dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]);
+  const fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'] = useMemo(
+    () => ({
+      ...services,
+      uiActions: getUiActions(),
+    }),
+    [services]
+  );
+
+  const searchBarCustomization = useDiscoverCustomization('search_bar');
+  const CustomDataViewPicker = searchBarCustomization?.CustomDataViewPicker;
+
+  const createField = unifiedFieldListSidebarContainerApi?.createField;
+  const prependDataViewPickerForMobile = useCallback(() => {
+    return selectedDataView ? (
+      CustomDataViewPicker ? (
+        <CustomDataViewPicker />
+      ) : (
+        <DataViewPicker
+          currentDataViewId={selectedDataView.id}
+          onChangeDataView={onChangeDataView}
+          onAddField={createField}
+          onDataViewCreated={createNewDataView}
+          trigger={{
+            label: selectedDataView?.getName() || '',
+            'data-test-subj': 'dataView-switch-link',
+            title: selectedDataView?.getIndexPattern() || '',
+            fullWidth: true,
+          }}
+        />
+      )
+    ) : null;
+  }, [selectedDataView, createNewDataView, onChangeDataView, createField, CustomDataViewPicker]);
+
+  const onAddFieldToWorkspace = useCallback(
+    (field: DataViewField) => {
+      onAddField(field.name);
+    },
+    [onAddField]
+  );
+
+  const onRemoveFieldFromWorkspace = useCallback(
+    (field: DataViewField) => {
+      onRemoveField(field.name);
+    },
+    [onRemoveField]
+  );
 
   if (!selectedDataView) {
     return null;
   }
 
   return (
-    <>
-      {!props.isClosed && (
-        <EuiHideFor sizes={['xs', 's']}>
-          <DiscoverSidebar
-            {...props}
-            isProcessing={isProcessing}
-            onFieldEdited={onFieldEdited}
-            allFields={sidebarState.allFields}
-            editField={editField}
-            createNewDataView={createNewDataView}
-            showFieldList={showFieldList}
-            isAffectedByGlobalFilter={isAffectedByGlobalFilter}
-          />
-        </EuiHideFor>
-      )}
-      <EuiShowFor sizes={['xs', 's']}>
-        <div className="dscSidebar__mobile">
-          <EuiButton
-            contentProps={{
-              className: 'dscSidebar__mobileButton',
-              id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
-            }}
-            fullWidth
-            onClick={() => setIsFlyoutVisible(true)}
-          >
-            <FormattedMessage
-              id="discover.fieldChooser.fieldsMobileButtonLabel"
-              defaultMessage="Fields"
-            />
-            <EuiBadge
-              className="dscSidebar__mobileBadge"
-              color={props.columns[0] === '_source' ? 'default' : 'accent'}
-            >
-              {props.columns[0] === '_source' ? 0 : props.columns.length}
-            </EuiBadge>
-          </EuiButton>
-        </div>
-        {isFlyoutVisible && (
-          <EuiPortal>
-            <EuiFlyout
-              size="s"
-              onClose={() => setIsFlyoutVisible(false)}
-              aria-labelledby="flyoutTitle"
-              ownFocus
-            >
-              <EuiFlyoutHeader hasBorder>
-                <EuiTitle size="s">
-                  <h2 id="flyoutTitle">
-                    <EuiLink color="text" onClick={() => setIsFlyoutVisible(false)}>
-                      <EuiIcon
-                        className="eui-alignBaseline"
-                        aria-label={i18n.translate('discover.fieldList.flyoutBackIcon', {
-                          defaultMessage: 'Back',
-                        })}
-                        type="arrowLeft"
-                      />{' '}
-                      <strong>
-                        {i18n.translate('discover.fieldList.flyoutHeading', {
-                          defaultMessage: 'Field list',
-                        })}
-                      </strong>
-                    </EuiLink>
-                  </h2>
-                </EuiTitle>
-              </EuiFlyoutHeader>
-              <DiscoverSidebar
-                {...props}
-                isProcessing={isProcessing}
-                onFieldEdited={onFieldEdited}
-                allFields={sidebarState.allFields}
-                alwaysShowActionButtons={true}
-                setFieldEditorRef={setFieldEditorRef}
-                closeFlyout={closeFlyout}
-                editField={editField}
-                createNewDataView={createNewDataView}
-                showDataViewPicker={true}
-                showFieldList={showFieldList}
-                isAffectedByGlobalFilter={isAffectedByGlobalFilter}
-              />
-            </EuiFlyout>
-          </EuiPortal>
-        )}
-      </EuiShowFor>
-    </>
+    <UnifiedFieldListSidebarContainer
+      ref={initializeUnifiedFieldListSidebarContainerApi}
+      variant={fieldListVariant}
+      getCreationOptions={getCreationOptions}
+      isSidebarCollapsed={props.isClosed}
+      services={fieldListSidebarServices}
+      dataView={selectedDataView}
+      trackUiMetric={trackUiMetric}
+      allFields={sidebarState.allFields}
+      showFieldList={showFieldList}
+      workspaceSelectedFieldNames={columns}
+      onAddFieldToWorkspace={onAddFieldToWorkspace}
+      onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+      onAddFilter={onAddFilter}
+      onFieldEdited={onFieldEdited}
+      prependInFlyout={prependDataViewPickerForMobile}
+    />
   );
 }

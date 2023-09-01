@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/module_migration
+import type { ExtractRouteParams } from 'react-router';
 import { generatePath } from 'react-router-dom';
 import {
   CASES_CREATE_PATH,
@@ -39,18 +41,24 @@ export const getCaseViewWithCommentPath = (casesBasePath: string) =>
 
 export const generateCaseViewPath = (params: CaseViewPathParams): string => {
   const { commentId, tabId } = params;
-  // Cast for generatePath argument type constraint
-  const pathParams = params as unknown as { [paramName: string]: string };
-
   // paths with commentId have their own specific path.
   // Effectively overwrites the tabId
   if (commentId) {
-    return normalizePath(generatePath(CASE_VIEW_COMMENT_PATH, pathParams));
+    return normalizePath(
+      generatePath(
+        CASE_VIEW_COMMENT_PATH,
+        params as ExtractRouteParams<typeof CASE_VIEW_COMMENT_PATH>
+      )
+    );
   }
 
   if (tabId !== undefined) {
-    return normalizePath(generatePath(CASE_VIEW_TAB_PATH, pathParams));
+    return normalizePath(
+      generatePath(CASE_VIEW_TAB_PATH, params as ExtractRouteParams<typeof CASE_VIEW_TAB_PATH>)
+    );
   }
 
-  return normalizePath(generatePath(CASE_VIEW_PATH, pathParams));
+  return normalizePath(
+    generatePath(CASE_VIEW_PATH, params as ExtractRouteParams<typeof CASE_VIEW_PATH>)
+  );
 };

@@ -27,6 +27,7 @@ export const ResultFields: React.FC<Props> = ({ fields, isExpanded }) => {
             fieldName={field.fieldName}
             fieldValue={field.fieldValue}
             fieldType={field.fieldType}
+            key={field.fieldName}
           />
         ))}
       </EuiTableBody>

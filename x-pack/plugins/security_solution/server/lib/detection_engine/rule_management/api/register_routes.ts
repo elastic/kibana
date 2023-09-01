@@ -25,7 +25,7 @@ import { patchRuleRoute } from './rules/patch_rule/route';
 import { readRuleRoute } from './rules/read_rule/route';
 import { updateRuleRoute } from './rules/update_rule/route';
 import { readTagsRoute } from './tags/read_tags/route';
-import { getRulesDashboardDataRoute } from './rules/dashboard/route';
+import { getCoverageOverviewRoute } from './rules/coverage_overview/route';
 
 export const registerRuleManagementRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -62,8 +62,6 @@ export const registerRuleManagementRoutes = (
   // Rules filters
   getRuleManagementFilters(router);
 
-  // Rules dashboard
-  if (config.experimentalFeatures.detectionsCoverageOverview) {
-    getRulesDashboardDataRoute();
-  }
+  // Rules coverage overview
+  getCoverageOverviewRoute(router);
 };

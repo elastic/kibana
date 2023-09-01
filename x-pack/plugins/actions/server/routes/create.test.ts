@@ -9,9 +9,9 @@ import { createActionRoute, bodySchema } from './create';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
-import { actionsClientMock } from '../actions_client.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { omit } from 'lodash';
+import { actionsClientMock } from '../actions_client/actions_client.mock';
 
 jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -41,6 +41,7 @@ describe('createActionRoute', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isMissingSecrets: false,
+      isSystemAction: false,
     };
 
     const createApiResult = {
@@ -49,11 +50,13 @@ describe('createActionRoute', () => {
         'isPreconfigured',
         'isDeprecated',
         'isMissingSecrets',
+        'isSystemAction',
       ]),
       connector_type_id: createResult.actionTypeId,
       is_preconfigured: createResult.isPreconfigured,
       is_deprecated: createResult.isDeprecated,
       is_missing_secrets: createResult.isMissingSecrets,
+      is_system_action: createResult.isSystemAction,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -113,6 +116,7 @@ describe('createActionRoute', () => {
       config: { foo: true },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     });
 
     const [context, req, res] = mockHandlerArguments(
@@ -153,6 +157,7 @@ describe('createActionRoute', () => {
       isMissingSecrets: false,
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     });
 
     const [context, req, res] = mockHandlerArguments(

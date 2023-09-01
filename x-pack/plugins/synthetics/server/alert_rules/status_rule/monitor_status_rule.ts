@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEmpty } from 'lodash';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
 import {
   SyntheticsCommonState,
   SyntheticsMonitorStatusAlertState,
 } from '../../../common/runtime_types/alert_rules/common';
-import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { OverviewStatus } from '../../../common/runtime_types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { StatusRulePramsSchema } from '../../../common/rules/status_rule';
@@ -27,23 +30,17 @@ import {
   getViewInAppUrl,
   getRelativeViewInAppUrl,
   getFullViewInAppMessage,
+  UptimeRuleTypeAlertDefinition,
 } from '../common';
-import { getActionVariables } from '../action_variables';
+import { ALERT_DETAILS_URL, getActionVariables, VIEW_IN_APP_URL } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
-import {
-  ALERT_DETAILS_URL,
-  VIEW_IN_APP_URL,
-} from '../../legacy_uptime/lib/alerts/action_variables';
-import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { UptimeRuleTypeAlertDefinition } from '../../legacy_uptime/lib/alerts/common';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 
 export const registerSyntheticsStatusCheckRule = (
-  server: UptimeServerSetup,
-  libs: UMServerLibs,
-  plugins: UptimeCorePluginsSetup,
+  server: SyntheticsServerSetup,
+  plugins: SyntheticsPluginsSetupDependencies,
   syntheticsMonitorClient: SyntheticsMonitorClient,
   ruleDataClient: IRuleDataClient
 ) => {
@@ -96,7 +93,7 @@ export const registerSyntheticsStatusCheckRule = (
       );
 
       Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {
-        const locationId = statusRule.getLocationId(ping.observer?.geo?.name!) ?? '';
+        const locationId = ping.observer.name ?? '';
         const alertId = idWithLocation;
         const monitorSummary = getMonitorSummary(
           ping,
@@ -161,5 +158,7 @@ export const registerSyntheticsStatusCheckRule = (
       };
     },
     alerts: UptimeRuleTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 };

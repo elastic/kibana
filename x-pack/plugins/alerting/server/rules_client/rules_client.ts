@@ -10,7 +10,7 @@ import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions, MuteOptions } from './types';
 
 import { clone, CloneArguments } from './methods/clone';
-import { create, CreateOptions } from './methods/create';
+import { createRule, CreateRuleParams } from '../application/rule/methods/create';
 import { get, GetParams } from './methods/get';
 import { resolve, ResolveParams } from './methods/resolve';
 import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
@@ -37,7 +37,10 @@ import { aggregate, AggregateParams } from './methods/aggregate';
 import { deleteRule } from './methods/delete';
 import { update, UpdateOptions } from './methods/update';
 import { bulkDeleteRules } from './methods/bulk_delete';
-import { bulkEdit, BulkEditOptions } from './methods/bulk_edit';
+import {
+  bulkEditRules,
+  BulkEditOptions,
+} from '../application/rule/methods/bulk_edit/bulk_edit_rules';
 import { bulkEnableRules } from './methods/bulk_enable';
 import { bulkDisableRules } from './methods/bulk_disable';
 import { updateApiKey } from './methods/update_api_key';
@@ -53,6 +56,7 @@ import { unmuteInstance } from './methods/unmute_instance';
 import { runSoon } from './methods/run_soon';
 import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
+import { getTags, GetTagsParams } from './methods/get_tags';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -106,8 +110,8 @@ export class RulesClient {
     aggregate<T>(this.context, params);
   public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
     clone<Params>(this.context, ...args);
-  public create = <Params extends RuleTypeParams = never>(params: CreateOptions<Params>) =>
-    create<Params>(this.context, params);
+  public create = <Params extends RuleTypeParams = never>(params: CreateRuleParams<Params>) =>
+    createRule<Params>(this.context, params);
   public delete = (params: { id: string }) => deleteRule(this.context, params);
   public find = <Params extends RuleTypeParams = never>(params?: FindParams) =>
     find<Params>(this.context, params);
@@ -135,7 +139,7 @@ export class RulesClient {
 
   public bulkDeleteRules = (options: BulkOptions) => bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
-    bulkEdit<Params>(this.context, options);
+    bulkEditRules<Params>(this.context, options);
   public bulkEnableRules = (options: BulkOptions) => bulkEnableRules(this.context, options);
   public bulkDisableRules = (options: BulkOptions) => bulkDisableRules(this.context, options);
 
@@ -147,8 +151,10 @@ export class RulesClient {
   public snooze = (options: SnoozeParams) => snooze(this.context, options);
   public unsnooze = (options: UnsnoozeParams) => unsnooze(this.context, options);
 
-  public clearExpiredSnoozes = (options: { id: string }) =>
-    clearExpiredSnoozes(this.context, options);
+  public clearExpiredSnoozes = (options: {
+    rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'snoozeSchedule'>;
+    version?: string;
+  }) => clearExpiredSnoozes(this.context, options);
 
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
@@ -162,6 +168,16 @@ export class RulesClient {
   public getSpaceId(): string | undefined {
     return this.context.spaceId;
   }
+
+  public getAuthorization() {
+    return this.context.authorization;
+  }
+
+  public getAuditLogger() {
+    return this.context.auditLogger;
+  }
+
+  public getTags = (params: GetTagsParams) => getTags(this.context, params);
 
   public getAlertFromRaw = (params: GetAlertFromRawParams) =>
     getAlertFromRaw(

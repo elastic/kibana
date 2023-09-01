@@ -11,6 +11,10 @@ export const LABEL = i18n.translate('xpack.securitySolution.markdown.insight.lab
   defaultMessage: 'Label',
 });
 
+export const INVESTIGATE = i18n.translate('xpack.securitySolution.markdown.insight.title', {
+  defaultMessage: 'Investigate',
+});
+
 export const LABEL_TEXT = i18n.translate('xpack.securitySolution.markdown.insight.labelText', {
   defaultMessage: 'Label on the query button.',
 });
@@ -71,13 +75,6 @@ export const CANCEL_FORM_BUTTON = i18n.translate(
   'xpack.securitySolution.markdown.insight.modalCancelButtonLabel',
   {
     defaultMessage: 'Cancel',
-  }
-);
-
-export const TECH_PREVIEW = i18n.translate(
-  'xpack.securitySolution.markdown.insight.technicalPreview',
-  {
-    defaultMessage: 'Technical Preview',
   }
 );
 

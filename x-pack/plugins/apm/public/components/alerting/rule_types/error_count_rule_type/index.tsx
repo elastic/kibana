@@ -16,9 +16,15 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { EuiSwitchEvent } from '@elastic/eui';
+import { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { ChartPreview } from '../../ui_components/chart_preview';
 import {
@@ -35,9 +41,16 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
 } from '../../../../../common/es_fields/apm';
+import {
+  ErrorState,
+  LoadingState,
+  NoDataState,
+} from '../../ui_components/chart_preview/chart_preview_helper';
+import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
 
-export interface RuleParams {
+export interface ErrorCountRuleParams {
   windowSize?: number;
   windowUnit?: TIME_UNITS;
   threshold?: number;
@@ -45,10 +58,12 @@ export interface RuleParams {
   environment?: string;
   groupBy?: string[] | undefined;
   errorGroupingKey?: string;
+  useKqlFilter?: boolean;
+  searchConfiguration?: SearchConfigurationType;
 }
 
 interface Props {
-  ruleParams: RuleParams;
+  ruleParams: ErrorCountRuleParams;
   metadata?: AlertMetadata;
   setRuleParams: (key: string, value: any) => void;
   setRuleProperty: (key: string, value: any) => void;
@@ -72,13 +87,13 @@ export function ErrorCountRuleType(props: Props) {
     }
   );
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
         windowUnit: params.windowUnit,
       });
-      if (interval && start && end) {
+      if (params.windowSize && start && end) {
         return callApmApi(
           'GET /internal/apm/rule_types/error_count/chart_preview',
           {
@@ -90,6 +105,8 @@ export function ErrorCountRuleType(props: Props) {
                 interval,
                 start,
                 end,
+                groupBy: params.groupBy,
+                searchConfiguration: JSON.stringify(params.searchConfiguration),
               },
             },
           }
@@ -102,6 +119,8 @@ export function ErrorCountRuleType(props: Props) {
       params.environment,
       params.serviceName,
       params.errorGroupingKey,
+      params.groupBy,
+      params.searchConfiguration,
     ]
   );
 
@@ -112,7 +131,7 @@ export function ErrorCountRuleType(props: Props) {
     [setRuleParams]
   );
 
-  const fields = [
+  const filterFields = [
     <ServiceField
       currentValue={params.serviceName}
       onChange={(value) => {
@@ -138,7 +157,9 @@ export function ErrorCountRuleType(props: Props) {
       onChange={(value) => setRuleParams('errorGroupingKey', value)}
       serviceName={params.serviceName}
     />,
+  ];
 
+  const criteriaFields = [
     <IsAboveField
       value={params.threshold}
       unit={i18n.translate('xpack.apm.errorCountRuleType.errors', {
@@ -162,16 +183,33 @@ export function ErrorCountRuleType(props: Props) {
     />,
   ];
 
-  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
-  const showChartPreview = false;
-  const chartPreview = showChartPreview ? (
+  const fields = [
+    ...(!ruleParams.useKqlFilter ? filterFields : []),
+    ...criteriaFields,
+  ];
+
+  const errorCountChartPreview = data?.errorCountChartPreview;
+  const series = errorCountChartPreview?.series ?? [];
+  const hasData = series.length > 0;
+  const totalGroups = errorCountChartPreview?.totalGroups ?? 0;
+
+  const chartPreview = isPending(status) ? (
+    <LoadingState />
+  ) : !hasData ? (
+    <NoDataState />
+  ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
-      series={[{ data: data?.errorCountChartPreview ?? [] }]}
+      series={series}
       threshold={params.threshold}
       yTickFormat={asInteger}
       uiSettings={services.uiSettings}
+      timeSize={params.windowSize}
+      timeUnit={params.windowUnit}
+      totalGroups={totalGroups}
     />
-  ) : null;
+  ) : (
+    <ErrorState />
+  );
 
   const groupAlertsBy = (
     <>
@@ -195,11 +233,31 @@ export function ErrorCountRuleType(props: Props) {
         <APMRuleGroupBy
           onChange={onGroupByChange}
           options={{ groupBy: ruleParams.groupBy }}
-          fields={[TRANSACTION_NAME, ERROR_GROUP_ID]}
+          fields={[TRANSACTION_NAME, ERROR_GROUP_ID, ERROR_GROUP_NAME]}
           preSelectedOptions={[SERVICE_NAME, SERVICE_ENVIRONMENT]}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
+    </>
+  );
+
+  const onToggleKqlFilter = (e: EuiSwitchEvent) => {
+    setRuleParams('serviceName', undefined);
+    setRuleParams('errorGroupingKey', undefined);
+    setRuleParams('environment', ENVIRONMENT_ALL.value);
+    setRuleParams('searchConfiguration', {
+      query: { query: '', language: 'kuery' },
+    });
+    setRuleParams('useKqlFilter', e.target.checked);
+  };
+
+  const kqlFilter = (
+    <>
+      <ApmRuleKqlFilter
+        ruleParams={ruleParams}
+        setRuleParams={setRuleParams}
+        onToggleKqlFilter={onToggleKqlFilter}
+      />
     </>
   );
 
@@ -209,6 +267,7 @@ export function ErrorCountRuleType(props: Props) {
       defaultParams={params}
       fields={fields}
       groupAlertsBy={groupAlertsBy}
+      kqlFilter={kqlFilter}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}
       chartPreview={chartPreview}

@@ -12,17 +12,21 @@ properties:
     type: string
   indicator:
     oneOf:
-      - $ref: 'indicator_properties_custom_kql.yaml'
-      - $ref: 'indicator_properties_apm_availability.yaml'
-      - $ref: 'indicator_properties_apm_latency.yaml'
-      - $ref: 'indicator_properties_custom_metric.yaml'
+      - $ref: "indicator_properties_custom_kql.yaml"
+      - $ref: "indicator_properties_apm_availability.yaml"
+      - $ref: "indicator_properties_apm_latency.yaml"
+      - $ref: "indicator_properties_custom_metric.yaml"
+      - $ref: "indicator_properties_histogram.yaml"
   timeWindow:
-    oneOf:
-      - $ref: 'time_window_rolling.yaml'
-      - $ref: 'time_window_calendar_aligned.yaml'
+    $ref: "time_window.yaml"
   budgetingMethod:
-    $ref: 'budgeting_method.yaml'
+    $ref: "budgeting_method.yaml"
   objective:
-    $ref: 'objective.yaml'
+    $ref: "objective.yaml"
   settings:
-    $ref: 'settings.yaml'
+    $ref: "settings.yaml"
+  tags:
+    description: List of tags
+    type: array
+    items:
+      type: string

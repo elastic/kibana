@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 
 import type { GetOneAgentResponse } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
@@ -24,7 +25,10 @@ export const useAgentDetails = ({ agentId, silent, skip }: UseAgentDetails) => {
 
   return useQuery<GetOneAgentResponse, unknown, GetOneAgentResponse['item']>(
     ['agentDetails', agentId],
-    () => http.get(`/internal/osquery/fleet_wrapper/agents/${agentId}`),
+    () =>
+      http.get(`/internal/osquery/fleet_wrapper/agents/${agentId}`, {
+        version: API_VERSIONS.internal.v1,
+      }),
     {
       enabled: !skip,
       retry: false,

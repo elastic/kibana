@@ -1,0 +1,46 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../typings/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/management-plugin",
+    "@kbn/security-plugin",
+    "@kbn/security-solution-ess",
+    "@kbn/security-solution-plugin",
+    "@kbn/serverless",
+    "@kbn/shared-ux-page-solution-nav",
+    "@kbn/security-solution-side-nav",
+    "@kbn/security-solution-navigation",
+    "@kbn/security-solution-upselling",
+    "@kbn/default-nav-ml",
+    "@kbn/default-nav-devtools",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/features-plugin",
+    "@kbn/ml-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/cloud-security-posture-plugin",
+    "@kbn/security-solution-features",
+    "@kbn/cases-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/usage-collection-plugin"
+  ]
+}

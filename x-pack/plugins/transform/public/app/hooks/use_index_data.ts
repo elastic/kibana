@@ -5,14 +5,29 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
-
+import {
+  getFieldType,
+  getDataGridSchemaFromKibanaFieldType,
+  getDataGridSchemaFromESFieldType,
+  getFieldsFromKibanaIndexPattern,
+  showDataGridColumnChartErrorMessageToast,
+  useDataGrid,
+  useRenderCellValue,
+  getProcessedFields,
+  type EsSorting,
+  type UseIndexDataReturnType,
+  INDEX_STATUS,
+} from '@kbn/ml-data-grid';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+
 import {
   isEsSearchResponse,
   isFieldHistogramsResponseSchema,
@@ -23,12 +38,9 @@ import {
   removeKeywordPostfix,
 } from '../../../common/utils/field_utils';
 import { getErrorMessage } from '../../../common/utils/errors';
-import { isRuntimeMappings } from '../../../common/shared_imports';
-
-import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
 import { isDefaultQuery, matchAllQuery, TransformConfigQuery } from '../common';
-import { useAppDependencies, useToastNotifications } from '../app_dependencies';
+import { useToastNotifications, useAppDependencies } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 
 import { SearchItems } from './use_search_items';
@@ -39,26 +51,20 @@ export const useIndexData = (
   dataView: SearchItems['dataView'],
   query: TransformConfigQuery,
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
-  timeRangeMs?: TimeRangeMs
+  timeRangeMs?: TimeRangeMs,
+  populatedFields?: Set<string> | null
 ): UseIndexDataReturnType => {
+  const { analytics } = useAppDependencies();
+
+  // Store the performance metric's start time using a ref
+  // to be able to track it across rerenders.
+  const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
+
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
 
   const api = useApi();
   const dataSearch = useDataSearch();
   const toastNotifications = useToastNotifications();
-  const {
-    ml: {
-      getFieldType,
-      getDataGridSchemaFromKibanaFieldType,
-      getDataGridSchemaFromESFieldType,
-      getFieldsFromKibanaIndexPattern,
-      showDataGridColumnChartErrorMessageToast,
-      useDataGrid,
-      useRenderCellValue,
-      getProcessedFields,
-      INDEX_STATUS,
-    },
-  } = useAppDependencies();
 
   const [dataViewFields, setDataViewFields] = useState<string[]>();
 
@@ -81,6 +87,9 @@ export const useIndexData = (
   };
 
   useEffect(() => {
+    if (dataView.timeFieldName !== undefined && timeRangeMs === undefined) {
+      return;
+    }
     const abortController = new AbortController();
 
     // Fetch 500 random documents to determine populated fields.
@@ -88,47 +97,53 @@ export const useIndexData = (
     // (for example, as part of filebeat/metricbeat/ECS based indices)
     // to the data grid component which would significantly slow down the page.
     const fetchDataGridSampleDocuments = async function () {
-      setErrorMessage('');
-      setStatus(INDEX_STATUS.LOADING);
+      let populatedDataViewFields = populatedFields ? [...populatedFields] : [];
+      let isMissingFields = populatedDataViewFields.length === 0;
 
-      const esSearchRequest = {
-        index: indexPattern,
-        body: {
-          fields: ['*'],
-          _source: false,
-          query: {
-            function_score: {
-              query: defaultQuery,
-              random_score: {},
+      // If populatedFields are not provided, make own request to calculate
+      if (populatedFields === undefined) {
+        setErrorMessage('');
+        setStatus(INDEX_STATUS.LOADING);
+
+        const esSearchRequest = {
+          index: indexPattern,
+          body: {
+            fields: ['*'],
+            _source: false,
+            query: {
+              function_score: {
+                query: defaultQuery,
+                random_score: {},
+              },
             },
+            size: 500,
           },
-          size: 500,
-        },
-      };
+        };
 
-      const resp = await dataSearch(esSearchRequest, abortController.signal);
+        const resp = await dataSearch(esSearchRequest, abortController.signal);
 
-      if (!isEsSearchResponse(resp)) {
-        setErrorMessage(getErrorMessage(resp));
-        setStatus(INDEX_STATUS.ERROR);
-        return;
+        if (!isEsSearchResponse(resp)) {
+          setErrorMessage(getErrorMessage(resp));
+          setStatus(INDEX_STATUS.ERROR);
+          return;
+        }
+        const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+        isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
+
+        populatedDataViewFields = [...new Set(docs.map(Object.keys).flat(1))];
       }
-
       const isCrossClusterSearch = indexPattern.includes(':');
-      const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
-
-      const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
       // Get all field names for each returned doc and flatten it
       // to a list of unique field names used across all docs.
       const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
-      const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
+      const filteredDataViewFields = populatedDataViewFields
         .filter((d) => allDataViewFields.includes(d))
         .sort();
 
       setCcsWarning(isCrossClusterSearch && isMissingFields);
       setStatus(INDEX_STATUS.LOADED);
-      setDataViewFields(populatedFields);
+      setDataViewFields(filteredDataViewFields);
     };
 
     fetchDataGridSampleDocuments();
@@ -137,7 +152,7 @@ export const useIndexData = (
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeRangeMs]);
+  }, [timeRangeMs, populatedFields?.size]);
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
     if (typeof dataViewFields === 'undefined') {
@@ -150,7 +165,6 @@ export const useIndexData = (
     if (combinedRuntimeMappings !== undefined) {
       result = Object.keys(combinedRuntimeMappings).map((fieldName) => {
         const field = combinedRuntimeMappings[fieldName];
-        // @ts-expect-error @elastic/elasticsearch does not support yet "composite" type for runtime fields
         const schema = getDataGridSchemaFromESFieldType(field.type);
         return { id: fieldName, schema };
       });
@@ -166,13 +180,7 @@ export const useIndexData = (
     });
 
     return result.sort((a, b) => a.id.localeCompare(b.id));
-  }, [
-    dataViewFields,
-    dataView.fields,
-    combinedRuntimeMappings,
-    getDataGridSchemaFromESFieldType,
-    getDataGridSchemaFromKibanaFieldType,
-  ]);
+  }, [dataViewFields, dataView.fields, combinedRuntimeMappings]);
 
   // EuiDataGrid State
 
@@ -199,6 +207,9 @@ export const useIndexData = (
   }, [JSON.stringify([query, timeRangeMs])]);
 
   useEffect(() => {
+    if (typeof dataViewFields === 'undefined') {
+      return;
+    }
     const abortController = new AbortController();
 
     const fetchDataGridData = async function () {
@@ -323,6 +334,22 @@ export const useIndexData = (
   ]);
 
   const renderCellValue = useRenderCellValue(dataView, pagination, tableItems);
+
+  if (
+    dataGrid.status === INDEX_STATUS.LOADED &&
+    dataViewFields !== undefined &&
+    loadIndexDataStartTime.current !== undefined
+  ) {
+    const loadIndexDataDuration = window.performance.now() - loadIndexDataStartTime.current;
+
+    // Set this to undefined so reporting the metric gets triggered only once.
+    loadIndexDataStartTime.current = undefined;
+
+    reportPerformanceMetricEvent(analytics, {
+      eventName: 'transformLoadIndexPreview',
+      duration: loadIndexDataDuration,
+    });
+  }
 
   return {
     ...dataGrid,

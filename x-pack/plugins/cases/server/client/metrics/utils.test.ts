@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { CasesMetricsFeatureField } from '../../../common/types/api';
+import { CaseMetricsFeature } from '../../../common/types/api';
 import { createMockClient, createMockClientArgs } from './test_utils/client';
 import { buildHandlers } from './utils';
 
@@ -12,16 +14,16 @@ describe('utils', () => {
   describe('buildHandlers', () => {
     const casesClient = createMockClient();
     const clientArgs = createMockClientArgs();
-    const SINGLE_CASE_FEATURES = [
-      'alerts.count',
-      'alerts.users',
-      'alerts.hosts',
-      'actions.isolateHost',
-      'connectors',
-      'lifespan',
+    const SINGLE_CASE_FEATURES: CasesMetricsFeatureField[] = [
+      CaseMetricsFeature.ALERTS_COUNT,
+      CaseMetricsFeature.ALERTS_HOSTS,
+      CaseMetricsFeature.ALERTS_USERS,
+      CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
+      CaseMetricsFeature.CONNECTORS,
+      CaseMetricsFeature.LIFESPAN,
     ];
 
-    const CASES_FEATURES = ['mttr'];
+    const CASES_FEATURES: CasesMetricsFeatureField[] = [CaseMetricsFeature.MTTR];
 
     it('returns the correct single case handlers', async () => {
       const handlers = buildHandlers(
@@ -86,6 +88,7 @@ describe('utils', () => {
         buildHandlers(
           {
             ...opts,
+            // @ts-expect-error
             features: ['not-exists'],
           },
           casesClient,
@@ -98,7 +101,7 @@ describe('utils', () => {
       const handlers = buildHandlers(
         {
           caseId: 'test-case-id',
-          features: ['alerts.count'],
+          features: [CaseMetricsFeature.ALERTS_COUNT],
         },
         casesClient,
         clientArgs.clientArgs
@@ -107,14 +110,14 @@ describe('utils', () => {
       const handler = Array.from(handlers)[0];
       // @ts-expect-error
       expect(handler.caseId).toBe('test-case-id');
-      expect(Array.from(handler.getFeatures().values())).toEqual(['alerts.count']);
+      expect(Array.from(handler.getFeatures().values())).toEqual([CaseMetricsFeature.ALERTS_COUNT]);
     });
 
     it('set up the feature correctly', async () => {
       const handlers = buildHandlers(
         {
           caseId: 'test-case-id',
-          features: ['alerts.hosts'],
+          features: [CaseMetricsFeature.ALERTS_HOSTS],
         },
         casesClient,
         clientArgs.clientArgs

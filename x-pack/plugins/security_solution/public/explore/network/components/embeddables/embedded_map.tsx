@@ -12,8 +12,11 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 import type { Filter, Query } from '@kbn/es-query';
-import type { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddablePanel,
+  isErrorEmbeddable,
+  type ErrorEmbeddable,
+} from '@kbn/embeddable-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
 import { isEqual } from 'lodash/fp';
 import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
@@ -279,14 +282,14 @@ export const EmbeddedMapComponent = ({
           {isIndexError ? (
             <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
           ) : embeddable != null ? (
-            <services.embeddable.EmbeddablePanel embeddable={embeddable} />
+            <EmbeddablePanel embeddable={embeddable} />
           ) : (
             <Loader data-test-subj="loading-panel" overlay size="xl" />
           )}
         </EmbeddableMap>
       </Embeddable>
     );
-  }, [embeddable, isIndexError, portalNode, services, storageValue]);
+  }, [embeddable, isIndexError, portalNode, storageValue]);
 
   return isError ? null : (
     <StyledEuiAccordion

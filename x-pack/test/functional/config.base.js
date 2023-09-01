@@ -35,11 +35,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [
-        'path.repo=/tmp/',
-        'xpack.security.authc.api_key.enabled=true',
-        'cluster.routing.allocation.disk.threshold_enabled=true', // make sure disk thresholds are enabled for UA cluster testing
-      ],
+      serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
     },
 
     kbnTestServer: {
@@ -172,6 +168,9 @@ export default async function ({ readConfigFile }) {
       observability: {
         pathname: '/app/observability',
       },
+      observabilityLogExplorer: {
+        pathname: '/app/observability-log-explorer',
+      },
       connectors: {
         pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
       },
@@ -181,6 +180,11 @@ export default async function ({ readConfigFile }) {
       maintenanceWindows: {
         pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
       },
+    },
+
+    suiteTags: {
+      ...kibanaCommonConfig.get('suiteTags'),
+      exclude: [...kibanaCommonConfig.get('suiteTags').exclude, 'upgradeAssistant'],
     },
 
     // choose where screenshots should be saved
@@ -636,6 +640,45 @@ export default async function ({ readConfigFile }) {
             },
           ],
           elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+
+        slo_all: {
+          kibana: [
+            {
+              feature: {
+                slo: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+        slo_read_only: {
+          kibana: [
+            {
+              feature: {
+                slo: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
             indices: [
               {
                 names: ['*'],

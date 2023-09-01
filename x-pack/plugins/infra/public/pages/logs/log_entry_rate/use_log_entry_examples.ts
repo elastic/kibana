@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import { PersistedLogViewReference } from '../../../../common/log_views';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 
 import { LogEntryExample } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';

@@ -46,9 +46,9 @@ interface TestDataLatest {
 
 type TestData = TestDataPivot | TestDataLatest;
 
-function generateHeaders(apiKey: SecurityCreateApiKeyResponse) {
+function generateHeaders(apiKey: SecurityCreateApiKeyResponse, version?: string) {
   return {
-    ...getCommonRequestHeader(),
+    ...getCommonRequestHeader(version),
     'es-secondary-authorization': `ApiKey ${apiKey.encoded}`,
   };
 }
@@ -144,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.api.createTransform(testData.originalConfig.id, testData.originalConfig, {
           deferValidation: true,
           // Create transforms with secondary authorization headers
-          headers: generateHeaders(apiKeysForTransformUsers.get(testData.created_by_user)!),
+          headers: generateHeaders(apiKeysForTransformUsers.get(testData.created_by_user)!, '1'),
         });
         // For transforms created with insufficient permissions, they can be created but not started
         // so we should not assert that the api call is successful here

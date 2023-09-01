@@ -7,9 +7,9 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { Type } from 'io-ts';
-import { exact, partial } from 'io-ts';
-import type { CaseAttributes } from '../../../common/api';
-import { CaseAttributesRt } from '../../../common/api';
+import { exact, partial, strict, string } from 'io-ts';
+import type { CaseAttributes } from '../../../common/types/domain';
+import { CaseAttributesRt } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { ExternalServicePersisted } from './external_service';
 import type { User, UserProfile } from './user';
@@ -47,6 +47,7 @@ export interface CasePersistedAttributes {
   total_comments: number;
   updated_at: string | null;
   updated_by: User | null;
+  category?: string | null;
 }
 
 export type CaseTransformedAttributes = CaseAttributes;
@@ -64,3 +65,5 @@ export const getPartialCaseTransformedAttributesRt = (): Type<Partial<CaseAttrib
 
 export type CaseSavedObject = SavedObject<CasePersistedAttributes>;
 export type CaseSavedObjectTransformed = SavedObject<CaseTransformedAttributes>;
+
+export const OwnerRt = strict({ owner: string });

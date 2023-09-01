@@ -23,11 +23,12 @@ import {
   getSeverityColor,
   showActualForFunction,
   showTypicalForFunction,
+  type MlAnomaliesTableRecord,
+  type MlAnomalyRecordDoc,
+  ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
-import type { MlAnomaliesTableRecord, MLAnomalyDoc } from '@kbn/ml-anomaly-utils';
-import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { EntityCell, EntityCellFilter } from '../entity_cell';
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { formatValue } from '../../formatters/format_value';
 import { useMlKibana } from '../../contexts/kibana';
 
@@ -617,7 +618,7 @@ const RecordScore: FC<{ score: number }> = ({ score }) => {
   );
 };
 
-function getAnomalyType(explanation: MLAnomalyDoc['anomaly_score_explanation']) {
+function getAnomalyType(explanation: MlAnomalyRecordDoc['anomaly_score_explanation']) {
   if (
     explanation === undefined ||
     explanation.anomaly_length === undefined ||

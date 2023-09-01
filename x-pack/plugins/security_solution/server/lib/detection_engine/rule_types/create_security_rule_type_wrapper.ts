@@ -11,11 +11,12 @@ import agent from 'elastic-apm-node';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
-
+import type { DataViewFieldBase } from '@kbn/es-query';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -33,7 +34,7 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
-import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from './saved_object_references';
@@ -41,6 +42,7 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 import { getInputIndex, DataViewError } from './utils/get_input_output_index';
 import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
+import { getFieldsForWildcard } from './utils/get_fields_for_wildcard';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 
 const aliasesFieldMap: FieldMap = {};
@@ -70,6 +72,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     ruleExecutionLoggerFactory,
     version,
     isPreview,
+    experimentalFeatures,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -78,6 +81,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
       logger,
       formatAlert: formatAlertForNotificationActions,
     });
+
     return persistenceRuleType({
       ...type,
       cancelAlertsOnRuleTimeout: false,
@@ -109,8 +113,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           from: fromInMs,
           to: toInMs,
           id: rule.id,
-          kibanaSiemAppUrl: (rule.params?.meta as { kibana_siem_app_url?: string } | undefined)
-            ?.kibana_siem_app_url,
         });
       },
       async executor(options) {
@@ -128,6 +130,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           } = options;
           let runState = state;
           let inputIndex: string[] = [];
+          let inputIndexFields: DataViewFieldBase[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
             params;
@@ -312,6 +315,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           }
 
+          if (!isMachineLearningParams(params)) {
+            inputIndexFields = await getFieldsForWildcard({
+              index: inputIndex,
+              dataViews: services.dataViews,
+              language: params.language,
+              ruleExecutionLogger,
+            });
+          }
+
           try {
             const { listClient, exceptionsClient } = getListClient({
               esClient: services.scopedClusterClient.asCurrentUser,
@@ -329,7 +341,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const bulkCreate = bulkCreateFactory(
               alertWithPersistence,
               refresh,
-              ruleExecutionLogger
+              ruleExecutionLogger,
+              experimentalFeatures
             );
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
@@ -376,6 +389,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     inputIndex,
                     exceptionFilter,
                     unprocessedExceptions,
+                    inputIndexFields,
                     runtimeMappings: {
                       ...runtimeMappings,
                       ...timestampRuntimeMappings,
@@ -505,6 +519,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         useLegacyAlerts: true,
         isSpaceAware: true,
         secondaryAlias: config.signalsIndex,
+        formatAlert: formatAlertForNotificationActions as unknown as FormatAlert<never>,
       },
     });
   };

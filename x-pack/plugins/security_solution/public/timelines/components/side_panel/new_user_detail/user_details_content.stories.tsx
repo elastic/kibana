@@ -27,6 +27,7 @@ storiesOf('UserDetailsContent', module)
       observedUser={mockObservedUser}
       riskScoreState={mockRiskScoreState}
       contextID={'test-user-details'}
+      scopeId={'test-scopeId'}
       isDraggable={false}
     />
   ))
@@ -49,6 +50,7 @@ storiesOf('UserDetailsContent', module)
       observedUser={mockObservedUser}
       riskScoreState={mockRiskScoreState}
       contextID={'test-user-details'}
+      scopeId={'test-scopeId'}
       isDraggable={false}
     />
   ))
@@ -71,6 +73,7 @@ storiesOf('UserDetailsContent', module)
       observedUser={mockObservedUser}
       riskScoreState={mockRiskScoreState}
       contextID={'test-user-details'}
+      scopeId={'test-scopeId'}
       isDraggable={false}
     />
   ))
@@ -105,6 +108,7 @@ storiesOf('UserDetailsContent', module)
       }}
       riskScoreState={mockRiskScoreState}
       contextID={'test-user-details'}
+      scopeId={'test-scopeId'}
       isDraggable={false}
     />
   ))
@@ -151,6 +155,7 @@ storiesOf('UserDetailsContent', module)
       }}
       riskScoreState={mockRiskScoreState}
       contextID={'test-user-details'}
+      scopeId={'test-scopeId'}
       isDraggable={false}
     />
   ));

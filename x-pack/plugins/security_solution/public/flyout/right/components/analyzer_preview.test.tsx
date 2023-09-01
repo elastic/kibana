@@ -9,10 +9,11 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
-import { mockContextValue, mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockContextValue } from '../mocks/mock_right_panel_context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_context';
 import { RightPanelContext } from '../context';
 import { AnalyzerPreview } from './analyzer_preview';
-import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_TREE_TEST_ID } from './test_ids';
+import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import * as mock from '../mocks/mock_analyzer_data';
 
 jest.mock('../../../common/containers/alerts/use_alert_prevalence_from_process_tree', () => ({
@@ -59,13 +60,11 @@ describe('<AnalyzerPreview />', () => {
     );
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      processEntityId: '',
       isActiveTimeline: false,
       documentId: 'ancestors-id',
-      indices: ['rule-parameters-index'],
+      indices: ['rule-indices'],
     });
     expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByTestId(ANALYZER_TREE_TEST_ID)).toBeInTheDocument();
   });
 
   it('does not show analyzer preview when documentid and index are not present', () => {
@@ -84,11 +83,10 @@ describe('<AnalyzerPreview />', () => {
     );
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      processEntityId: '',
       isActiveTimeline: false,
       documentId: '',
       indices: [],
     });
-    expect(queryByTestId(ANALYZER_TREE_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(ANALYZER_PREVIEW_TEST_ID)).not.toBeInTheDocument();
   });
 });

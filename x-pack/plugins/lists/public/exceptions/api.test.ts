@@ -689,7 +689,7 @@ describe('Exceptions Lists API', () => {
       stream: jest.fn(),
       text: jest.fn(),
       type: 'json',
-    } as Blob;
+    } as unknown as Blob;
 
     beforeEach(() => {
       httpMock.fetch.mockResolvedValue(blob);

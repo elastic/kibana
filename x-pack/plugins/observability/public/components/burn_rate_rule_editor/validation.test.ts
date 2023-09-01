@@ -5,85 +5,101 @@
  * 2.0.
  */
 
-import { BurnRateRuleParams } from '../../typings';
+import { ALERT_ACTION } from '../../../common/constants';
+import { BurnRateRuleParams, WindowSchema } from '../../typings';
 import { validateBurnRateRule } from './validation';
 
-const VALID_PARAMS: BurnRateRuleParams = {
+const createTestParams = (windowOverride: Partial<WindowSchema> = {}): BurnRateRuleParams => ({
   sloId: 'irrelevant',
-  shortWindow: { value: 5, unit: 'm' },
-  longWindow: { value: 1, unit: 'h' },
-  maxBurnRateThreshold: 720,
-  burnRateThreshold: 14.4,
-};
+  windows: [
+    {
+      id: '000-000-000',
+      shortWindow: { value: 5, unit: 'm' },
+      longWindow: { value: 1, unit: 'h' },
+      maxBurnRateThreshold: 720,
+      burnRateThreshold: 14.4,
+      actionGroup: ALERT_ACTION.id,
+      ...windowOverride,
+    },
+  ],
+});
 
 describe('ValidateBurnRateRule', () => {
   it('requires a selected slo', () => {
-    const { errors } = validateBurnRateRule({ ...VALID_PARAMS, sloId: undefined });
+    const { errors } = validateBurnRateRule({ ...createTestParams(), sloId: undefined });
     expect(errors.sloId).toHaveLength(1);
   });
 
   it('requires a burn rate threshold', () => {
-    const { errors } = validateBurnRateRule({ ...VALID_PARAMS, burnRateThreshold: undefined });
-    expect(errors.burnRateThreshold).toHaveLength(1);
+    const { errors } = validateBurnRateRule(
+      createTestParams({ burnRateThreshold: undefined as unknown as number })
+    );
+    expect(errors.windows[0].burnRateThreshold).toHaveLength(1);
   });
 
   it('requires a max burn rate threshold', () => {
-    const { errors } = validateBurnRateRule({ ...VALID_PARAMS, maxBurnRateThreshold: undefined });
-    expect(errors.burnRateThreshold).toHaveLength(1);
+    const { errors } = validateBurnRateRule(
+      createTestParams({ maxBurnRateThreshold: undefined as unknown as number })
+    );
+    expect(errors.windows[0].burnRateThreshold).toHaveLength(1);
   });
 
   it('validates burnRateThreshold is between 1 and maxBurnRateThreshold', () => {
     expect(
-      validateBurnRateRule({
-        ...VALID_PARAMS,
-        burnRateThreshold: 10.1,
-        maxBurnRateThreshold: 10,
-      }).errors.burnRateThreshold
+      validateBurnRateRule(
+        createTestParams({
+          burnRateThreshold: 10.1,
+          maxBurnRateThreshold: 10,
+        })
+      ).errors.windows[0].burnRateThreshold
     ).toHaveLength(1);
 
     expect(
-      validateBurnRateRule({
-        ...VALID_PARAMS,
-        burnRateThreshold: 0.99,
-      }).errors.burnRateThreshold
+      validateBurnRateRule(createTestParams({ burnRateThreshold: 0.99 })).errors.windows[0]
+        .burnRateThreshold
     ).toHaveLength(1);
 
     expect(
-      validateBurnRateRule({
-        ...VALID_PARAMS,
-        burnRateThreshold: 10,
-        maxBurnRateThreshold: 10,
-      }).errors.burnRateThreshold
+      validateBurnRateRule(
+        createTestParams({
+          burnRateThreshold: 10,
+          maxBurnRateThreshold: 10,
+        })
+      ).errors.windows[0].burnRateThreshold
     ).toHaveLength(0);
   });
 
-  it('validates longWindow is between 1 and 24hours', () => {
+  it('validates longWindow is between 1 and 72 hours', () => {
     expect(
-      validateBurnRateRule({
-        ...VALID_PARAMS,
-        longWindow: { value: 0, unit: 'h' },
-      }).errors.longWindow.length
+      validateBurnRateRule(
+        createTestParams({
+          longWindow: { value: 0, unit: 'h' },
+        })
+      ).errors.windows[0].longWindow.length
     ).toBe(1);
 
     expect(
-      validateBurnRateRule({
-        ...VALID_PARAMS,
-        longWindow: { value: 25, unit: 'h' },
-      }).errors.longWindow.length
+      validateBurnRateRule(
+        createTestParams({
+          longWindow: { value: 73, unit: 'h' },
+        })
+      ).errors.windows[0].longWindow.length
     ).toBe(1);
 
     expect(
-      validateBurnRateRule({
-        ...VALID_PARAMS,
-        longWindow: { value: 24, unit: 'h' },
-      }).errors.longWindow.length
+      validateBurnRateRule(
+        createTestParams({
+          longWindow: { value: 72, unit: 'h' },
+        })
+      ).errors.windows[0].longWindow.length
     ).toBe(0);
 
     expect(
-      validateBurnRateRule({
-        ...VALID_PARAMS,
-        longWindow: { value: 1, unit: 'h' },
-      }).errors.longWindow.length
+      validateBurnRateRule(
+        createTestParams({
+          longWindow: { value: 1, unit: 'h' },
+        })
+      ).errors.windows[0].longWindow.length
     ).toBe(0);
   });
 });

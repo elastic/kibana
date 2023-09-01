@@ -12,7 +12,6 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/std",
     "@kbn/utility-types",
     "@kbn/core-capabilities-browser-internal"
   ],

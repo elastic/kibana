@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsResponse } from '../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../common/types/api';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import { createCaseError } from '../../../common/error';
 
 import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';
@@ -17,8 +18,8 @@ export class AlertDetails extends SingleCaseAggregationHandler {
     super(
       options,
       new Map<string, AggregationBuilder<SingleCaseMetricsResponse>>([
-        ['alerts.hosts', new AlertHosts()],
-        ['alerts.users', new AlertUsers()],
+        [CaseMetricsFeature.ALERTS_HOSTS, new AlertHosts()],
+        [CaseMetricsFeature.ALERTS_USERS, new AlertUsers()],
       ])
     );
   }

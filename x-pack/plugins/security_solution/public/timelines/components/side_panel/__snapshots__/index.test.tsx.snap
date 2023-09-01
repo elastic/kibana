@@ -57,7 +57,7 @@ Array [
         >
           <button
             aria-label="close"
-            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             type="button"
           >
             <span
@@ -67,6 +67,13 @@ Array [
               data-euiicon-type="cross"
             />
           </button>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+          />
         </div>
       </div>
     </div>
@@ -181,7 +188,15 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       >
         <div
           class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
-        />
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>

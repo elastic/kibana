@@ -15,6 +15,7 @@ import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { TTYPlayerDeps, TTYPlayer } from '.';
 import userEvent from '@testing-library/user-event';
+import { ResizeObserver } from '@juggle/resize-observer';
 
 describe('TTYPlayer component', () => {
   beforeAll(() => {
@@ -34,7 +35,7 @@ describe('TTYPlayer component', () => {
       })),
     });
 
-    global.ResizeObserver = require('resize-observer-polyfill');
+    global.ResizeObserver = ResizeObserver;
   });
 
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -61,6 +62,7 @@ describe('TTYPlayer component', () => {
       onClose: jest.fn(),
       onJumpToEvent: jest.fn(),
       isFullscreen: false,
+      trackEvent: jest.fn(),
     };
   });
 
@@ -106,9 +108,7 @@ describe('TTYPlayer component', () => {
     });
 
     it('renders a message warning when max_bytes exceeded with link to policies page', async () => {
-      renderResult = mockedContext.render(
-        <TTYPlayer {...props} canAccessEndpointManagement={true} />
-      );
+      renderResult = mockedContext.render(<TTYPlayer {...props} canReadPolicyManagement={true} />);
 
       await waitForApiCall();
       await new Promise((r) => setTimeout(r, 10));

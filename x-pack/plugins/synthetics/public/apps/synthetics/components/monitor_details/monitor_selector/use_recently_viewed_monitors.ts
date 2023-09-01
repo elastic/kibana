@@ -5,75 +5,109 @@
  * 2.0.
  */
 
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useParams } from 'react-router-dom';
-import { useEffect, useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { MonitorFields } from '../../../../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../../../../common/types/saved_objects';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { fetchMonitorManagementList, getMonitorListPageStateWithDefaults } from '../../../state';
+
+const HISTORY_LENGTH = 5;
+
+interface RecentMonitorSelectableOption {
+  key: string;
+  monitorQueryId: string;
+  label: string;
+  locationIds: string[];
+  isGroupLabel: boolean;
+}
 
 export const useRecentlyViewedMonitors = () => {
-  const [recentlyViewed, setRecentlyViewed] = useLocalStorage<string[]>(
-    'xpack.synthetics.recentlyViewedMonitors',
-    []
-  );
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const [recentlyViewedMonitorQueryIds, setRecentlyViewedMonitorQueryIds] = useLocalStorage<
+    string[]
+  >('xpack.synthetics.recentlyViewedMonitors', []);
+  const fetchedMonitorsRef = useRef<RecentMonitorSelectableOption[]>([]);
+  const monitorQueryId = useMonitorQueryId();
 
-  const { savedObjects } = useKibana().services;
+  const fetchedMonitorQueryIdsSnap = JSON.stringify(
+    [...fetchedMonitorsRef.current.map(({ key }) => key)].sort()
+  );
+
+  const updateRecentlyViewed = useCallback(() => {
+    const updatedIdsToPersist = fetchedMonitorsRef.current.length
+      ? fetchedMonitorsRef.current.map(({ monitorQueryId: id }) => id)
+      : recentlyViewedMonitorQueryIds ?? [];
+
+    if (monitorQueryId) {
+      setRecentlyViewedMonitorQueryIds(
+        [monitorQueryId, ...updatedIdsToPersist]
+          .filter((id, index, arr) => arr.indexOf(id) === index)
+          .slice(0, HISTORY_LENGTH)
+      );
+    }
+    // Exclude `recentlyViewedMonitorQueryIds`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setRecentlyViewedMonitorQueryIds, monitorQueryId, fetchedMonitorQueryIdsSnap]);
 
   useEffect(() => {
-    const newRecentlyViewed = [
-      ...new Set([...(monitorId ? [monitorId] : []), ...(recentlyViewed ?? [])]),
-    ].slice(0, 5);
+    updateRecentlyViewed();
+  }, [updateRecentlyViewed, monitorQueryId]);
 
-    if (
-      newRecentlyViewed?.[0] !== recentlyViewed?.[0] ||
-      newRecentlyViewed.length !== recentlyViewed?.length
-    ) {
-      setRecentlyViewed(newRecentlyViewed);
-    }
-  }, [monitorId, recentlyViewed, setRecentlyViewed]);
-
-  const { data } = useFetcher(async () => {
-    const monitorsList = recentlyViewed ?? [];
-
-    const { resolved_objects: monitorObjects } = await savedObjects!.client.bulkResolve(
-      monitorsList.map((monId) => ({
-        type: syntheticsMonitorType,
-        id: monId,
-      }))
+  const { loading } = useFetcher(async () => {
+    const monitorQueryIdsToFetch = (recentlyViewedMonitorQueryIds ?? []).filter(
+      (id) => id !== monitorQueryId
     );
+    if (
+      monitorQueryId &&
+      monitorQueryIdsToFetch.length &&
+      JSON.stringify([...monitorQueryIdsToFetch].sort()) !== fetchedMonitorQueryIdsSnap
+    ) {
+      const fetchedResult = await fetchMonitorManagementList(
+        getMonitorListPageStateWithDefaults({
+          pageSize: HISTORY_LENGTH,
+          monitorQueryIds: monitorQueryIdsToFetch,
+        })
+      );
 
-    const missingMonitors = monitorObjects
-      .filter((mon) => mon.saved_object.error?.statusCode === 404)
-      .map((mon) => mon.saved_object.id);
+      if (fetchedResult?.monitors?.length) {
+        const persistedOrderHash = monitorQueryIdsToFetch.reduce(
+          (acc, cur, index) => ({ ...acc, [cur]: index }),
+          {} as Record<string, number>
+        );
 
-    if (missingMonitors.length > 0) {
-      setRecentlyViewed(monitorsList.filter((monId) => !missingMonitors.includes(monId)));
+        // Reorder fetched monitors as per the persisted order
+        const fetchedMonitorsInPersistedOrder = [...fetchedResult?.monitors].sort(
+          (a, b) => persistedOrderHash[a.id] - persistedOrderHash[b.id]
+        );
+        fetchedMonitorsRef.current = fetchedMonitorsInPersistedOrder.map((mon) => {
+          return {
+            key: mon.id,
+            monitorQueryId: mon.id,
+            label: mon.name,
+            locationIds: (mon.locations ?? []).map(({ id }) => id),
+            isGroupLabel: false,
+          };
+        });
+
+        updateRecentlyViewed();
+      }
     }
+  }, [monitorQueryId]);
 
-    return monitorObjects
-      .filter(
-        ({ saved_object: monitor }) => Boolean(monitor.attributes) && monitor.id !== monitorId
-      )
-      .map(({ saved_object: monitor }) => ({
-        key: monitor.id,
-        label: (monitor.attributes as MonitorFields).name,
-        locationIds: (monitor.attributes as MonitorFields).locations.map((location) => location.id),
-      }));
-  }, [monitorId, recentlyViewed]);
-
-  return useMemo(() => {
-    if ((data ?? []).length === 0) {
-      return [];
-    }
-    return [
-      { key: 'recently_viewed', label: RECENTLY_VIEWED, isGroupLabel: true },
-      ...(data ?? []),
-    ];
-  }, [data]);
+  return useMemo(
+    () => ({
+      loading,
+      recentMonitorOptions: fetchedMonitorsRef.current.length
+        ? [
+            { key: 'recently_viewed', label: RECENTLY_VIEWED, isGroupLabel: true },
+            ...fetchedMonitorsRef.current,
+          ]
+        : [],
+    }),
+    // Make it also depend on `fetchedMonitorQueryIdsSnap`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [loading, fetchedMonitorQueryIdsSnap]
+  );
 };
 
 const RECENTLY_VIEWED = i18n.translate('xpack.synthetics.monitorSummary.recentlyViewed', {

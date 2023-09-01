@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -13,8 +14,9 @@ export default function ({ getService }) {
   describe('index settings', () => {
     it('should return default index settings when max_result_window and max_inner_result_window are not set', async () => {
       const resp = await supertest
-        .get(`/api/maps/indexSettings?indexPatternTitle=logstash*`)
+        .get(`/internal/maps/indexSettings?indexPatternTitle=logstash*`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(200);
 
       expect(resp.body.maxResultWindow).to.be(10000);
@@ -23,8 +25,9 @@ export default function ({ getService }) {
 
     it('should return index settings', async () => {
       const resp = await supertest
-        .get(`/api/maps/indexSettings?indexPatternTitle=geo_shape*`)
+        .get(`/internal/maps/indexSettings?indexPatternTitle=geo_shape*`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(200);
 
       expect(resp.body.maxResultWindow).to.be(10001);

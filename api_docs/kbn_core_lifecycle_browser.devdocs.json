@@ -562,16 +562,8 @@
                 "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/plugin.ts"
-              },
-              {
                 "plugin": "home",
                 "path": "src/plugins/home/public/plugin.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/public/search/expressions/kibana_context.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -587,123 +579,23 @@
               },
               {
                 "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/utils/get_visualization_instance.ts"
-              },
-              {
-                "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/plugin.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/services/dashboard_saved_object/dashboard_saved_object_service.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/datasources/form_based/form_based.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/datasources/form_based/form_based.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/datasources/form_based/form_based.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/search_embeddable_factory.ts"
               },
               {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/public/kibana_services.ts"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/app.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/app.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/assets/assets.tsx"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/services/kibana/platform.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/services/kibana/platform.ts"
-              },
-              {
                 "plugin": "dashboardEnhanced",
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
               },
               {
                 "plugin": "dashboardEnhanced",
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/plugin.ts"
-              },
-              {
-                "plugin": "monitoring",
-                "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_details/monitor_selector/use_recently_viewed_monitors.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/private_locations/hooks/use_location_monitors.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_name.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/plugin.ts"
               },
               {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/mount_management_section.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.test.ts"
               },
               {
                 "plugin": "discover",
@@ -724,14 +616,6 @@
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
-              },
-              {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
               }
             ]
           },

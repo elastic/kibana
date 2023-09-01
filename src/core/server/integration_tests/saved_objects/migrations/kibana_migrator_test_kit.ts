@@ -16,7 +16,7 @@ import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   SavedObjectConfig,
   type SavedObjectsConfigType,
@@ -24,6 +24,7 @@ import {
   SavedObjectTypeRegistry,
   type IKibanaMigrator,
   type MigrationResult,
+  type IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
@@ -73,6 +74,7 @@ export interface KibanaMigratorTestKitParams {
   nodeRoles?: NodeRoles;
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
+  defaultIndexTypesMap?: IndexTypesMap;
   logFilePath?: string;
 }
 
@@ -87,12 +89,14 @@ export interface KibanaMigratorTestKit {
 export const startElasticsearch = async ({
   basePath,
   dataArchive,
+  timeout,
 }: {
   basePath?: string;
   dataArchive?: string;
+  timeout?: number;
 } = {}) => {
   const { startES } = createTestServers({
-    adjustTimeout: (t: number) => jest.setTimeout(t),
+    adjustTimeout: (t: number) => jest.setTimeout(t + (timeout ?? 0)),
     settings: {
       es: {
         license: 'basic',
@@ -124,6 +128,7 @@ export const getEsClient = async ({
 export const getKibanaMigratorTestKit = async ({
   settings = {},
   kibanaIndex = defaultKibanaIndex,
+  defaultIndexTypesMap = {}, // do NOT assume any types are stored in any index by default
   kibanaVersion = currentVersion,
   kibanaBranch = currentBranch,
   types = [],
@@ -147,16 +152,17 @@ export const getKibanaMigratorTestKit = async ({
   // types must be registered before instantiating the migrator
   registerTypes(typeRegistry, types);
 
-  const migrator = await getMigrator(
+  const migrator = await getMigrator({
     configService,
     client,
     typeRegistry,
     loggerFactory,
     kibanaIndex,
+    defaultIndexTypesMap,
     kibanaVersion,
     kibanaBranch,
-    nodeRoles
-  );
+    nodeRoles,
+  });
 
   const runMigrations = async () => {
     if (hasRun) {
@@ -259,16 +265,28 @@ const getElasticsearchClient = async (
   });
 };
 
-const getMigrator = async (
-  configService: ConfigService,
-  client: ElasticsearchClient,
-  typeRegistry: ISavedObjectTypeRegistry,
-  loggerFactory: LoggerFactory,
-  kibanaIndex: string,
-  kibanaVersion: string,
-  kibanaBranch: string,
-  nodeRoles: NodeRoles
-) => {
+interface GetMigratorParams {
+  configService: ConfigService;
+  client: ElasticsearchClient;
+  kibanaIndex: string;
+  typeRegistry: ISavedObjectTypeRegistry;
+  defaultIndexTypesMap: IndexTypesMap;
+  loggerFactory: LoggerFactory;
+  kibanaVersion: string;
+  kibanaBranch: string;
+  nodeRoles: NodeRoles;
+}
+const getMigrator = async ({
+  configService,
+  client,
+  kibanaIndex,
+  typeRegistry,
+  defaultIndexTypesMap,
+  loggerFactory,
+  kibanaVersion,
+  kibanaBranch,
+  nodeRoles,
+}: GetMigratorParams) => {
   const savedObjectsConf = await firstValueFrom(
     configService.atPath<SavedObjectsConfigType>('savedObjects')
   );
@@ -284,14 +302,16 @@ const getMigrator = async (
 
   return new KibanaMigrator({
     client,
-    typeRegistry,
     kibanaIndex,
+    typeRegistry,
+    defaultIndexTypesMap,
     soMigrationsConfig: soConfig.migration,
     kibanaVersion,
     logger: loggerFactory.get('savedobjects-service'),
     docLinks,
     waitForMigrationCompletion: false, // ensure we have an active role in the migration
     nodeRoles,
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   });
 };
 
@@ -366,6 +386,16 @@ export const createBaseline = async () => {
   const { client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
     kibanaIndex: defaultKibanaIndex,
     types: baselineTypes,
+  });
+
+  // remove the testing index (current and next minor)
+  await client.indices.delete({
+    index: [
+      defaultKibanaIndex,
+      `${defaultKibanaIndex}_${currentVersion}_001`,
+      `${defaultKibanaIndex}_${nextMinor}_001`,
+    ],
+    ignore_unavailable: true,
   });
 
   await runMigrations();

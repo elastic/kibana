@@ -89,12 +89,6 @@ export const isEsSearchResponseWithAggregations = (
   return isEsSearchResponse(arg) && {}.hasOwnProperty.call(arg, 'aggregations');
 };
 
-export const isMultiBucketAggregate = <TBucket = unknown>(
-  arg: unknown
-): arg is estypes.AggregationsMultiBucketAggregateBase<TBucket> => {
-  return isPopulatedObject(arg, ['buckets']);
-};
-
 export const isFieldHistogramsResponseSchema = (
   arg: unknown
 ): arg is FieldHistogramsResponseSchema => {

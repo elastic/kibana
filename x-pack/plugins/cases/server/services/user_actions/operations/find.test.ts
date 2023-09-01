@@ -16,7 +16,7 @@ import {
   createUserActionFindSO,
   createUserActionSO,
 } from '../test_utils';
-import { createSOFindResponse } from '../../test_utils';
+import { createSOFindResponse, mockPointInTimeFinder } from '../../test_utils';
 import { omit } from 'lodash';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
@@ -46,23 +46,14 @@ describe('UserActionsService: Finder', () => {
     unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
   };
 
-  const mockPointInTimeFinder = (soFindRes: SavedObjectsFindResponse) => {
-    unsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
-      close: jest.fn(),
-      // @ts-expect-error
-      find: function* asyncGenerator() {
-        yield {
-          ...soFindRes,
-        };
-      },
-    });
-  };
+  const mockFinder = (soFindRes: SavedObjectsFindResponse) =>
+    mockPointInTimeFinder(unsecuredSavedObjectsClient)(soFindRes);
 
   const decodingTests: Array<
     [keyof UserActionFinder, (soFindRes: SavedObjectsFindResponse) => void]
   > = [
     ['find', mockFind],
-    ['findStatusChanges', mockPointInTimeFinder],
+    ['findStatusChanges', mockFinder],
   ];
 
   describe('find', () => {
@@ -84,7 +75,7 @@ describe('UserActionsService: Finder', () => {
       const userAction = createUserActionSO();
       const attributes = omit({ ...userAction.attributes }, 'comment_id');
       const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
-      mockPointInTimeFinder(soFindRes);
+      mockFinder(soFindRes);
 
       const res = await finder.findStatusChanges({ caseId: '1' });
       const commentId = res[0].attributes.comment_id;
@@ -144,16 +135,13 @@ describe('UserActionsService: Finder', () => {
       );
     });
 
-    // TODO: Unskip when all types are converted to strict
-    it.skip('strips out excess attributes', async () => {
+    it('strips out excess attributes', async () => {
       const userAction = createUserActionSO();
       const attributes = { ...userAction.attributes, 'not-exists': 'not-exists' };
       const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
       method(soFindRes);
 
-      await expect(finder[soMethodName]({ caseId: '1' })).resolves.toEqual({
-        attributes: userAction.attributes,
-      });
+      await expect(finder[soMethodName]({ caseId: '1' })).resolves.toMatchSnapshot();
     });
   });
 });

@@ -5,20 +5,39 @@ enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.securitySolution.enabled: false
 
-## Enable the Serverless Obsersability plugin
+## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true
-
-# Onboarding
-xpack.observability_onboarding.ui.enabled: true
 
 ## Configure plugins
 xpack.infra.logs.app_target: discover
 
 ## Set the home route
-uiSettings.overrides.defaultRoute: /app/observability/overview
+uiSettings.overrides.defaultRoute: /app/observability/landing
 
 ## Set the dev project switch current type
 xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
 
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
+
+## APM Serverless Onboarding flow
+xpack.apm.serverlessOnboarding: true
+
+# Fleet specific configuration
+xpack.fleet.internal.capabilities: ['apm', 'uptime', 'observability']
+
+## Required for force installation of APM Package
+xpack.fleet.packages:
+  - name: apm
+    version: latest
+## Disable APM UI components and API calls
+xpack.apm.featureFlags.agentConfigurationAvailable: false
+xpack.apm.featureFlags.configurableIndicesAvailable: false
+xpack.apm.featureFlags.infrastructureTabAvailable: false
+xpack.apm.featureFlags.infraUiAvailable: false
+xpack.apm.featureFlags.migrationToFleetAvailable: false
+xpack.apm.featureFlags.sourcemapApiAvailable: false
+xpack.apm.featureFlags.storageExplorerAvailable: false
+
+# Specify in telemetry the project type
+telemetry.labels.serverless: observability

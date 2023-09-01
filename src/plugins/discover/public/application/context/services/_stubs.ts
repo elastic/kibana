@@ -11,7 +11,7 @@ import moment from 'moment';
 import { of } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import { EsHitRecord } from '../../../types';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 type SortHit = {
   [key in string]: number; // timeField name

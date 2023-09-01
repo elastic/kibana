@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "../../../typings/**/*",
@@ -13,7 +13,7 @@
     "jest.config.js",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json",
-    "server/**/*.json",
+    "server/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -30,6 +30,7 @@
     "@kbn/features-plugin",
     "@kbn/infra-plugin",
     "@kbn/licensing-plugin",
+    "@kbn/license-management-plugin",
     "@kbn/maps-plugin",
     "@kbn/ml-plugin",
     "@kbn/observability-plugin",
@@ -62,7 +63,6 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/es-ui-shared-plugin",
     "@kbn/es-types",
-    "@kbn/unified-field-list-plugin",
     "@kbn/analytics",
     "@kbn/rison",
     "@kbn/config-schema",
@@ -76,7 +76,6 @@
     "@kbn/babel-register",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
@@ -88,11 +87,16 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/ui-actions-plugin",
     "@kbn/observability-alert-details",
+    "@kbn/custom-integrations-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/controls-plugin",
     "@kbn/core-http-server",
+    "@kbn/profiling-plugin",
+    "@kbn/logs-shared-plugin",
+    "@kbn/unified-field-list",
+    "@kbn/discover-plugin",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/apm-data-access-plugin"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

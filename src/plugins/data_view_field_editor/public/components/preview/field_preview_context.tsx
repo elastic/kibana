@@ -26,15 +26,7 @@ import { useStateSelector } from '../../state_utils';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
 import { useFieldEditorContext } from '../field_editor_context';
-import type {
-  PainlessExecuteContext,
-  Context,
-  Params,
-  EsDocument,
-  FetchDocError,
-  FieldPreview,
-  PreviewState,
-} from './types';
+import type { PainlessExecuteContext, Context, Params, FieldPreview, PreviewState } from './types';
 import type { PreviewController } from './preview_controller';
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
@@ -69,7 +61,6 @@ const documentsSelector = (state: PreviewState) => {
     totalDocs: state.documents.length,
     currentDocIndex: currentDocument?._index,
     currentDocId: currentDocument?._id,
-    currentIdx: state.currentIdx,
   };
 };
 
@@ -77,25 +68,9 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   controller,
   children,
 }) => {
-  const previewCount = useRef(0);
-
-  // We keep in cache the latest params sent to the _execute API so we don't make unecessary requests
-  // when changing parameters that don't affect the preview result (e.g. changing the "name" field).
-  const lastExecutePainlessRequestParams = useRef<{
-    type: Params['type'];
-    script: string | undefined;
-    documentId: string | undefined;
-  }>({
-    type: null,
-    script: undefined,
-    documentId: undefined,
-  });
-
   const {
     dataView,
-    fieldTypeToProcess,
     services: {
-      search,
       notifications,
       api: { getFieldPreview },
     },
@@ -104,10 +79,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
   const fieldPreview$ = useRef(new BehaviorSubject<FieldPreview[] | undefined>(undefined));
 
-  const [initialPreviewComplete, setInitialPreviewComplete] = useState(false);
-
-  /** Possible error while fetching sample documents */
-  const [fetchDocError, setFetchDocError] = useState<FetchDocError | null>(null);
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
 
@@ -117,224 +88,16 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     message: string | null;
   }>({ isValidating: false, isValid: true, message: null });
 
-  /** Flag to show/hide the preview panel */
-  const [isPanelVisible, setIsPanelVisible] = useState(true);
-  /** Flag to indicate if we are loading document from cluster */
-  const [isFetchingDocument, setIsFetchingDocument] = useState(false);
-  /** Flag to indicate if we are calling the _execute API */
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
-
-  /** Flag to indicate if we are loading a single document by providing its ID */
-  const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
-
-  const { currentDocument, currentDocIndex, currentDocId, totalDocs, currentIdx } =
-    useStateSelector(controller.state$, documentsSelector);
-
-  let isPreviewAvailable = true;
-
-  // If no documents could be fetched from the cluster (and we are not trying to load
-  // a custom doc ID) then we disable preview as the script field validation expect the result
-  // of the preview to before resolving. If there are no documents we can't have a preview
-  // (the _execute API expects one) and thus the validation should not expect a value.
-  if (!isFetchingDocument && !customDocIdToLoad && totalDocs === 0) {
-    isPreviewAvailable = false;
-  }
+  const { currentDocument, currentDocIndex, currentDocId } = useStateSelector(
+    controller.state$,
+    documentsSelector
+  );
 
   const { name, document, script, format, type, parentName } = params;
 
   const updateParams: Context['params']['update'] = useCallback((updated) => {
     setParams((prev) => ({ ...prev, ...updated }));
   }, []);
-
-  const allParamsDefined = useMemo(() => {
-    if (!currentDocIndex || !script?.source || !type) {
-      return false;
-    }
-    return true;
-  }, [currentDocIndex, script?.source, type]);
-
-  const hasSomeParamsChanged = useMemo(() => {
-    return (
-      lastExecutePainlessRequestParams.current.type !== type ||
-      lastExecutePainlessRequestParams.current.script !== script?.source ||
-      lastExecutePainlessRequestParams.current.documentId !== currentDocId
-    );
-  }, [type, script, currentDocId]);
-
-  const fetchSampleDocuments = useCallback(
-    async (limit: number = 50) => {
-      if (typeof limit !== 'number') {
-        // We guard ourself from passing an <input /> event accidentally
-        throw new Error('The "limit" option must be a number');
-      }
-
-      lastExecutePainlessRequestParams.current.documentId = undefined;
-      setIsFetchingDocument(true);
-      controller.setPreviewResponse({ fields: [], error: null });
-
-      const [response, searchError] = await search
-        .search({
-          params: {
-            index: dataView.getIndexPattern(),
-            body: {
-              fields: ['*'],
-              size: limit,
-            },
-          },
-        })
-        .toPromise()
-        .then((res) => [res, null])
-        .catch((err) => [null, err]);
-
-      setIsFetchingDocument(false);
-      setCustomDocIdToLoad(null);
-
-      const error: FetchDocError | null = Boolean(searchError)
-        ? {
-            code: 'ERR_FETCHING_DOC',
-            error: {
-              message: searchError.toString(),
-              reason: i18n.translate(
-                'indexPatternFieldEditor.fieldPreview.error.errorLoadingSampleDocumentsDescription',
-                {
-                  defaultMessage: 'Error loading sample documents.',
-                }
-              ),
-            },
-          }
-        : null;
-
-      setFetchDocError(error);
-
-      if (error === null) {
-        controller.setDocuments(response ? response.rawResponse.hits.hits : []);
-      }
-    },
-    [dataView, search, controller]
-  );
-
-  const loadDocument = useCallback(
-    async (id: string) => {
-      if (!Boolean(id.trim())) {
-        return;
-      }
-
-      lastExecutePainlessRequestParams.current.documentId = undefined;
-      setIsFetchingDocument(true);
-
-      const [response, searchError] = await search
-        .search({
-          params: {
-            index: dataView.getIndexPattern(),
-            body: {
-              size: 1,
-              fields: ['*'],
-              query: {
-                ids: {
-                  values: [id],
-                },
-              },
-            },
-          },
-        })
-        .toPromise()
-        .then((res) => [res, null])
-        .catch((err) => [null, err]);
-
-      setIsFetchingDocument(false);
-
-      const isDocumentFound = response?.rawResponse.hits.total > 0;
-      const loadedDocuments: EsDocument[] = isDocumentFound ? response.rawResponse.hits.hits : [];
-      const error: FetchDocError | null = Boolean(searchError)
-        ? {
-            code: 'ERR_FETCHING_DOC',
-            error: {
-              message: searchError.toString(),
-              reason: i18n.translate(
-                'indexPatternFieldEditor.fieldPreview.error.errorLoadingDocumentDescription',
-                {
-                  defaultMessage: 'Error loading document.',
-                }
-              ),
-            },
-          }
-        : isDocumentFound === false
-        ? {
-            code: 'DOC_NOT_FOUND',
-            error: {
-              message: i18n.translate(
-                'indexPatternFieldEditor.fieldPreview.error.documentNotFoundDescription',
-                {
-                  defaultMessage: 'Document ID not found',
-                }
-              ),
-            },
-          }
-        : null;
-
-      setFetchDocError(error);
-
-      if (error === null) {
-        controller.setDocuments(loadedDocuments);
-      } else {
-        // Make sure we disable the "Updating..." indicator as we have an error
-        // and we won't fetch the preview
-        setIsLoadingPreview(false);
-      }
-    },
-    [dataView, search, controller]
-  );
-
-  const updateSingleFieldPreview = useCallback(
-    (fieldName: string, values: unknown[]) => {
-      const [value] = values;
-      const formattedValue = controller.valueFormatter({ value, type, format });
-
-      controller.setPreviewResponse({
-        fields: [{ key: fieldName, value, formattedValue }],
-        error: null,
-      });
-    },
-    [controller, type, format]
-  );
-
-  const updateCompositeFieldPreview = useCallback(
-    (compositeValues: Record<string, unknown[]>) => {
-      const updatedFieldsInScript: string[] = [];
-      // if we're displaying a composite subfield, filter results
-      const filterSubfield = parentName ? (field: FieldPreview) => field.key === name : () => true;
-
-      const fields = Object.entries(compositeValues)
-        .map<FieldPreview>(([key, values]) => {
-          // The Painless _execute API returns the composite field values under a map.
-          // Each of the key is prefixed with "composite_field." (e.g. "composite_field.field1: ['value']")
-          const { 1: fieldName } = key.split('composite_field.');
-          updatedFieldsInScript.push(fieldName);
-
-          const [value] = values;
-          const formattedValue = controller.valueFormatter({ value, type, format });
-
-          return {
-            key: parentName
-              ? `${parentName ?? ''}.${fieldName}`
-              : `${fieldName$.getValue() ?? ''}.${fieldName}`,
-            value,
-            formattedValue,
-            type: valueTypeToSelectedType(value),
-          };
-        })
-        .filter(filterSubfield)
-        // ...and sort alphabetically
-        .sort((a, b) => a.key.localeCompare(b.key));
-
-      fieldPreview$.current.next(fields);
-      controller.setPreviewResponse({
-        fields,
-        error: null,
-      });
-    },
-    [parentName, name, fieldPreview$, fieldName$, controller, type, format]
-  );
 
   const updatePreview = useCallback(async () => {
     // don't prevent rendering if we're working with a composite subfield (has parentName)
@@ -344,19 +107,28 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
     if (
       !parentName &&
-      (!allParamsDefined || !hasSomeParamsChanged || scriptEditorValidation.isValid === false)
+      (!controller.allParamsDefined(type, script?.source, currentDocIndex) ||
+        !controller.hasSomeParamsChanged(type, script?.source, currentDocId) ||
+        scriptEditorValidation.isValid === false)
     ) {
-      setIsLoadingPreview(false);
+      controller.setIsLoadingPreview(false);
       return;
     }
 
-    lastExecutePainlessRequestParams.current = {
+    // Not sure why this is getting called without currentDocIndex
+    // would be much better to prevent this function from being called at all
+    if (!currentDocIndex) {
+      controller.setIsLoadingPreview(false);
+      return;
+    }
+
+    controller.setLastExecutePainlessRequestParams({
       type,
       script: script?.source,
       documentId: currentDocId,
-    };
+    });
 
-    const currentApiCall = ++previewCount.current;
+    const currentApiCall = controller.incrementPreviewCount(); // ++previewCount.current;
 
     const previewScript = (parentName && dataView.getRuntimeField(parentName)?.script) || script!;
 
@@ -367,7 +139,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       script: previewScript,
     });
 
-    if (currentApiCall !== previewCount.current) {
+    if (currentApiCall !== controller.getPreviewCount()) {
       // Discard this response as there is another one inflight
       // or we have called reset() and no longer need the response.
       return;
@@ -382,7 +154,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       });
       notifications.toasts.addError(serverError, { title });
 
-      setIsLoadingPreview(false);
+      controller.setIsLoadingPreview(false);
       return;
     }
 
@@ -402,15 +174,23 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         });
       } else {
         if (!Array.isArray(values)) {
-          updateCompositeFieldPreview(values);
+          controller.updateCompositeFieldPreview(
+            values,
+            parentName,
+            name!,
+            fieldName$.getValue(),
+            type,
+            format,
+            (value: FieldPreview[] | undefined) => fieldPreview$.current.next(value)
+          );
         } else {
-          updateSingleFieldPreview(name!, values);
+          controller.updateSingleFieldPreview(name!, values, type, format);
         }
       }
     }
 
-    setInitialPreviewComplete(true);
-    setIsLoadingPreview(false);
+    controller.setInitialPreviewComplete(true);
+    controller.setIsLoadingPreview(false);
   }, [
     name,
     type,
@@ -421,108 +201,40 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     currentDocId,
     getFieldPreview,
     notifications.toasts,
-    allParamsDefined,
     scriptEditorValidation,
-    hasSomeParamsChanged,
-    updateSingleFieldPreview,
-    updateCompositeFieldPreview,
     currentDocIndex,
     controller,
+    format,
+    fieldName$,
   ]);
-
-  const reset = useCallback(() => {
-    // By resetting the previewCount we will discard previous inflight
-    // API call response coming in after calling reset() was called
-    previewCount.current = 0;
-
-    controller.setDocuments([]);
-    controller.setPreviewResponse({ fields: [], error: null });
-    setIsLoadingPreview(false);
-    setIsFetchingDocument(false);
-  }, [controller]);
 
   const ctx = useMemo<Context>(
     () => ({
       controller,
       fieldPreview$: fieldPreview$.current,
-      isPreviewAvailable,
-      isLoadingPreview,
-      initialPreviewComplete,
       params: {
         value: params,
         update: updateParams,
       },
-      documents: {
-        loadSingle: setCustomDocIdToLoad,
-        loadFromCluster: fetchSampleDocuments,
-        fetchDocError,
-      },
-      navigation: {
-        isFirstDoc: currentIdx === 0,
-        isLastDoc: currentIdx >= totalDocs - 1,
-      },
-      panel: {
-        isVisible: isPanelVisible,
-        setIsVisible: setIsPanelVisible,
-      },
       validation: {
+        // todo do this next
         setScriptEditorValidation,
       },
-      reset,
     }),
-    [
-      controller,
-      currentIdx,
-      fieldPreview$,
-      fetchDocError,
-      params,
-      isPreviewAvailable,
-      isLoadingPreview,
-      updateParams,
-      fetchSampleDocuments,
-      totalDocs,
-      isPanelVisible,
-      reset,
-      initialPreviewComplete,
-    ]
+    [controller, fieldPreview$, params, updateParams]
   );
-
-  /**
-   * In order to immediately display the "Updating..." state indicator and not have to wait
-   * the 500ms of the debounce, we set the isLoadingPreview state in this effect whenever
-   * one of the _execute API param changes
-   */
-  useEffect(() => {
-    if (allParamsDefined && hasSomeParamsChanged) {
-      setIsLoadingPreview(true);
-    }
-  }, [allParamsDefined, hasSomeParamsChanged, script?.source, type, currentDocId]);
 
   /**
    * In order to immediately display the "Updating..." state indicator and not have to wait
    * the 500ms of the debounce, we set the isFetchingDocument state in this effect whenever
    * "customDocIdToLoad" changes
    */
-  useEffect(() => {
-    controller.setCustomId(customDocIdToLoad || undefined);
-    if (customDocIdToLoad !== null && Boolean(customDocIdToLoad.trim())) {
-      setIsFetchingDocument(true);
-    }
-  }, [customDocIdToLoad, controller]);
-
-  /**
-   * Whenever we show the preview panel we will update the documents from the cluster
-   */
-  useEffect(() => {
-    if (isPanelVisible) {
-      fetchSampleDocuments();
-    }
-  }, [isPanelVisible, fetchSampleDocuments, fieldTypeToProcess]);
 
   /**
    * Each time the current document changes we update the parameters
    * that will be sent in the _execute HTTP request.
    */
+  // This game me problems
   useEffect(() => {
     updateParams({
       document: currentDocument,
@@ -594,7 +306,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     if (script?.source === undefined) {
       // Whenever the source is not defined ("Set value" is toggled off or the
       // script is empty) we clear the error and update the params cache.
-      lastExecutePainlessRequestParams.current.script = undefined;
+      controller.setLastExecutePainlessRequestParams({ script: undefined });
       controller.setPreviewError(null);
     }
   }, [script?.source, controller]);
@@ -608,7 +320,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
     if (scriptEditorValidation.isValid === false) {
       // Make sure to remove the "Updating..." spinner
-      setIsLoadingPreview(false);
+      controller.setIsLoadingPreview(false);
 
       // Set preview response error so it is displayed in the flyout footer
       const error =
@@ -628,7 +340,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
       // Make sure to update the lastExecutePainlessRequestParams cache so when the user updates
       // the script and fixes the syntax the "updatePreview()" will run
-      lastExecutePainlessRequestParams.current.script = script?.source;
+      // lastExecutePainlessRequestParams.current.script = script?.source;
+      controller.setLastExecutePainlessRequestParams({ script: script?.source });
     } else {
       // Clear possible previous syntax error
       controller.clearPreviewError('PAINLESS_SYNTAX_ERROR');
@@ -640,21 +353,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
    * we call it to update the preview response with the field(s) value or possible error.
    */
   useDebounce(updatePreview, 500, [updatePreview]);
-
-  /**
-   * Whenever the doc ID to load changes we load the document (after a 500ms debounce)
-   */
-  useDebounce(
-    () => {
-      if (customDocIdToLoad === null) {
-        return;
-      }
-
-      loadDocument(customDocIdToLoad);
-    },
-    500,
-    [customDocIdToLoad]
-  );
 
   return <fieldPreviewContext.Provider value={ctx}>{children}</fieldPreviewContext.Provider>;
 };

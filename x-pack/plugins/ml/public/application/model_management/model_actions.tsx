@@ -9,7 +9,7 @@ import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import {
   BUILT_IN_MODEL_TAG,
   DEPLOYMENT_STATE,
@@ -19,13 +19,15 @@ import {
   ELASTIC_MODEL_TAG,
   MODEL_STATE,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import {
+  getAnalysisType,
+  type DataFrameAnalysisConfigType,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
-import { getAnalysisType } from '../../../common/util/analytics_utils';
-import { DataFrameAnalysisConfigType } from '../../../common/types/data_frame_analytics';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable } from './test_models';
 import { ModelItem } from './models_list';
@@ -33,6 +35,7 @@ import { ModelItem } from './models_list';
 export function useModelActions({
   onTestAction,
   onModelsDeleteRequest,
+  onModelDeployRequest,
   onLoading,
   isLoading,
   fetchModels,
@@ -40,7 +43,8 @@ export function useModelActions({
 }: {
   isLoading: boolean;
   onTestAction: (model: ModelItem) => void;
-  onModelsDeleteRequest: (modelsIds: string[]) => void;
+  onModelsDeleteRequest: (models: ModelItem[]) => void;
+  onModelDeployRequest: (model: ModelItem) => void;
   onLoading: (isLoading: boolean) => void;
   fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
@@ -50,9 +54,13 @@ export function useModelActions({
       application: { navigateToUrl, capabilities },
       overlays,
       theme,
+      i18n: i18nStart,
       docLinks,
+      mlServices: { mlApiServices },
     },
   } = useMlKibana();
+
+  const [canManageIngestPipelines, setCanManageIngestPipelines] = useState(false);
 
   const startModelDeploymentDocUrl = docLinks.links.ml.startTrainedModelsDeployment;
 
@@ -68,15 +76,37 @@ export function useModelActions({
   const canTestTrainedModels = capabilities.ml.canTestTrainedModels as boolean;
   const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
 
+  useEffect(() => {
+    let isMounted = true;
+    mlApiServices
+      .hasPrivileges({
+        cluster: ['manage_ingest_pipelines'],
+      })
+      .then((result) => {
+        const canManagePipelines = result.cluster?.manage_ingest_pipelines;
+        if (isMounted) {
+          setCanManageIngestPipelines(canManagePipelines);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [mlApiServices]);
+
   const getUserConfirmation = useMemo(
-    () => getUserConfirmationProvider(overlays, theme),
-    [overlays, theme]
+    () => getUserConfirmationProvider(overlays, theme, i18nStart),
+    [i18nStart, overlays, theme]
   );
 
   const getUserInputModelDeploymentParams = useMemo(
     () =>
-      getUserInputModelDeploymentParamsProvider(overlays, theme.theme$, startModelDeploymentDocUrl),
-    [overlays, theme.theme$, startModelDeploymentDocUrl]
+      getUserInputModelDeploymentParamsProvider(
+        overlays,
+        theme,
+        i18nStart,
+        startModelDeploymentDocUrl
+      ),
+    [overlays, theme, i18nStart, startModelDeploymentDocUrl]
   );
 
   const isBuiltInModel = useCallback(
@@ -392,16 +422,71 @@ export function useModelActions({
       },
       {
         name: (model) => {
-          const enabled = !isPopulatedObject(model.pipelines);
+          const hasDeployments = model.state === MODEL_STATE.STARTED;
           return (
             <EuiToolTip
               position="left"
               content={
-                enabled
-                  ? null
-                  : i18n.translate('xpack.ml.trainedModels.modelsList.deleteDisabledTooltip', {
-                      defaultMessage: 'Model has associated pipelines',
-                    })
+                hasDeployments
+                  ? i18n.translate(
+                      'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                      {
+                        defaultMessage: 'Model has started deployments',
+                      }
+                    )
+                  : null
+              }
+            >
+              <>
+                {i18n.translate('xpack.ml.trainedModels.modelsList.deployModelActionLabel', {
+                  defaultMessage: 'Deploy model',
+                })}
+              </>
+            </EuiToolTip>
+          );
+        },
+        description: i18n.translate('xpack.ml.trainedModels.modelsList.deployModelActionLabel', {
+          defaultMessage: 'Deploy model',
+        }),
+        'data-test-subj': 'mlModelsTableRowDeployAction',
+        icon: 'continuityAbove',
+        type: 'icon',
+        isPrimary: false,
+        onClick: (model) => {
+          onModelDeployRequest(model);
+        },
+        available: (item) => {
+          const isDfaTrainedModel =
+            item.metadata?.analytics_config !== undefined ||
+            item.inference_config?.regression !== undefined ||
+            item.inference_config?.classification !== undefined;
+
+          return (
+            isDfaTrainedModel &&
+            !isBuiltInModel(item) &&
+            !item.putModelConfig &&
+            canManageIngestPipelines
+          );
+        },
+        enabled: (item) => {
+          return item.state !== MODEL_STATE.STARTED;
+        },
+      },
+      {
+        name: (model) => {
+          const hasDeployments = model.state === MODEL_STATE.STARTED;
+          return (
+            <EuiToolTip
+              position="left"
+              content={
+                hasDeployments
+                  ? i18n.translate(
+                      'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                      {
+                        defaultMessage: 'Model has started deployments',
+                      }
+                    )
+                  : null
               }
             >
               <>
@@ -421,14 +506,19 @@ export function useModelActions({
         color: 'danger',
         isPrimary: false,
         onClick: (model) => {
-          onModelsDeleteRequest([model.model_id]);
+          onModelsDeleteRequest([model]);
         },
-        available: (item) =>
-          canDeleteTrainedModels && !isBuiltInModel(item) && !item.putModelConfig,
+        available: (item) => {
+          const hasZeroPipelines = Object.keys(item.pipelines ?? {}).length === 0;
+          return (
+            canDeleteTrainedModels &&
+            !isBuiltInModel(item) &&
+            !item.putModelConfig &&
+            (hasZeroPipelines || canManageIngestPipelines)
+          );
+        },
         enabled: (item) => {
-          // TODO check for permissions to delete ingest pipelines.
-          // ATM undefined means pipelines fetch failed server-side.
-          return !isPopulatedObject(item.pipelines);
+          return item.state !== MODEL_STATE.STARTED;
         },
       },
       {
@@ -462,10 +552,12 @@ export function useModelActions({
       displayErrorToast,
       getUserConfirmation,
       onModelsDeleteRequest,
+      onModelDeployRequest,
       canDeleteTrainedModels,
       isBuiltInModel,
       onTestAction,
       canTestTrainedModels,
+      canManageIngestPipelines,
     ]
   );
 }

@@ -19,9 +19,7 @@ export const dataServiceFactory: DataServiceFactory = () => ({
       setField: () => {},
       fetch$: () =>
         of({
-          resp: {
-            rawResponse: { aggregations: { minAgg: { value: 0 }, maxAgg: { value: 1000 } } },
-          },
+          rawResponse: { aggregations: { minAgg: { value: 0 }, maxAgg: { value: 1000 } } },
         }),
     }),
   } as unknown as DataPublicPluginStart['search']['searchSource'],

@@ -8,13 +8,14 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
-import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  HiddenField,
-  updateActionConnector,
-  useKibana,
-} from '@kbn/triggers-actions-ui-plugin/public';
+  UseField,
+  useFormContext,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { updateActionConnector, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { DeprecatedCallout } from './deprecated_callout';
@@ -130,6 +131,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
           ...connectorToUpdate,
           isDeprecated,
           isPreconfigured: false,
+          isSystemAction: false,
           actionTypeId,
         });
 
@@ -174,7 +176,12 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
         <InstallationCallout appId={snExternalServiceConfig[action.actionTypeId]?.appId ?? ''} />
       )}
       {!requiresNewApplication && <SpacedDeprecatedCallout onMigrate={onMigrateClick} />}
-      <HiddenField path={'config.usesTableApi'} config={{ defaultValue: false }} />
+      <UseField
+        path="config.usesTableApi"
+        component={HiddenField}
+        config={{ defaultValue: false }}
+      />
+
       <Credentials readOnly={readOnly} isLoading={isLoading} isOAuth={isOAuth} />
     </>
   );

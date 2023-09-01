@@ -50,7 +50,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/shared-ux-button-exit-full-screen",
     "@kbn/i18n-react",
-    "@kbn/content-management-table-list",
     "@kbn/react-field",
     "@kbn/analytics",
     "@kbn/mapbox-gl",
@@ -70,6 +69,10 @@
     "@kbn/content-management-utils",
     "@kbn/core-saved-objects-server",
     "@kbn/maps-vector-tile-utils",
+    "@kbn/core-http-common",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/content-management-table-list-view",
+    "@kbn/serverless",
   ],
   "exclude": [
     "target/**/*",

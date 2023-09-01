@@ -1,0 +1,12 @@
+summary: Export a specific saved object. 
+value:
+  {
+    "objects": [
+      {
+        "type": "map",
+        "id": "de71f4f0-1902-11e9-919b-ffe5949a18d2"
+        }
+    ],
+    "includeReferencesDeep": false,
+    "excludeExportDetails": true
+  }

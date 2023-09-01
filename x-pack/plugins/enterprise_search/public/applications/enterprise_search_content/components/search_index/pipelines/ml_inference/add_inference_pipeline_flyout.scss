@@ -15,9 +15,8 @@
   }
 
   .enterpriseSearchInferencePipelineFlyoutFooter {
-    .euiButtonEmpty__content {
-      padding-left: $euiSizeM;
-      padding-right: $euiSizeM;
+    .euiButtonEmpty {
+      padding-inline: $euiSizeM;
     }
   }
 }

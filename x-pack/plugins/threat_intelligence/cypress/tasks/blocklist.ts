@@ -9,10 +9,7 @@ import {
   BLOCK_LIST_ADD_BUTTON,
   BLOCK_LIST_DESCRIPTION,
   BLOCK_LIST_NAME,
-  SAVED_BLOCK_LIST_ACTION_MENU,
   BLOCK_LIST_TOAST_LIST,
-  SAVED_BLOCK_LIST_CONFIRM_DELETE_BUTTON,
-  SAVED_BLOCK_LIST_DELETE_BUTTON,
   FLYOUT_ADD_TO_BLOCK_LIST_ITEM,
   INDICATORS_TABLE_ADD_TO_BLOCK_LIST_BUTTON_ICON,
 } from '../screens/blocklist';
@@ -41,13 +38,4 @@ export const fillBlocklistForm = (title: string, description: string) => {
 
   const text: string = `"${title}" has been added`;
   cy.get(BLOCK_LIST_TOAST_LIST).should('exist').and('contain.text', text);
-};
-
-/**
- * Remove the blocklist entry
- */
-export const deleteBlocklistEntry = () => {
-  cy.get(SAVED_BLOCK_LIST_ACTION_MENU).click();
-  cy.get(SAVED_BLOCK_LIST_DELETE_BUTTON).click();
-  cy.get(SAVED_BLOCK_LIST_CONFIRM_DELETE_BUTTON).click();
 };

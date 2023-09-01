@@ -7,14 +7,20 @@ set -euo pipefail
 source .buildkite/scripts/steps/artifacts/env.sh
 
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
-KIBANA_IMAGE_INPUT="docker.elastic.co/kibana-ci/kibana-serverless:git-$GIT_ABBREV_COMMIT"
-KIBANA_IMAGE_OUTPUT="docker.elastic.co/kibana-ci/kibana:git-$GIT_ABBREV_COMMIT"
+if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+  KIBANA_IMAGE_TAG="git-$GIT_ABBREV_COMMIT"
+else
+  KIBANA_IMAGE_TAG="pr-$BUILDKITE_PULL_REQUEST-$GIT_ABBREV_COMMIT"
+fi
+
+KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:$KIBANA_IMAGE_TAG"
 
 echo "--- Verify manifest does not already exist"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 trap 'docker logout docker.elastic.co' EXIT
 
-if docker manifest inspect $KIBANA_IMAGE_OUTPUT &> /dev/null; then
+echo "Checking manifest for $KIBANA_IMAGE"
+if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   echo "Manifest already exists, exiting"
   exit 1
 fi
@@ -26,44 +32,49 @@ node scripts/build \
   --docker-cross-compile \
   --docker-images \
   --docker-namespace="kibana-ci" \
-  --docker-tag="git-$GIT_ABBREV_COMMIT" \
+  --docker-tag="$KIBANA_IMAGE_TAG" \
   --skip-docker-ubuntu \
   --skip-docker-ubi \
   --skip-docker-cloud \
   --skip-docker-contexts
 
 echo "--- Tag images"
-docker rmi "$KIBANA_IMAGE_INPUT"
+docker rmi "$KIBANA_IMAGE"
 docker load < "target/kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
-docker tag "$KIBANA_IMAGE_INPUT" "$KIBANA_IMAGE_OUTPUT-amd64"
+docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-amd64"
 
-docker rmi "$KIBANA_IMAGE_INPUT"
+docker rmi "$KIBANA_IMAGE"
 docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
-docker tag "$KIBANA_IMAGE_INPUT" "$KIBANA_IMAGE_OUTPUT-arm64"
+docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
 
 echo "--- Push images"
-docker image push "$KIBANA_IMAGE_OUTPUT-arm64"
-docker image push "$KIBANA_IMAGE_OUTPUT-amd64"
+docker image push "$KIBANA_IMAGE-arm64"
+docker image push "$KIBANA_IMAGE-amd64"
 
 echo "--- Create manifest"
 docker manifest create \
-  "$KIBANA_IMAGE_OUTPUT" \
-  --amend "$KIBANA_IMAGE_OUTPUT-arm64" \
-  --amend "$KIBANA_IMAGE_OUTPUT-amd64"
+  "$KIBANA_IMAGE" \
+  --amend "$KIBANA_IMAGE-arm64" \
+  --amend "$KIBANA_IMAGE-amd64"
 
 echo "--- Push manifest"
-docker manifest push "$KIBANA_IMAGE_OUTPUT"
+docker manifest push "$KIBANA_IMAGE"
 docker logout docker.elastic.co
 
 cat << EOF | buildkite-agent annotate --style "info" --context image
-  ### Container Images
+  ### Serverless Images
 
-  Manifest: \`$KIBANA_IMAGE_OUTPUT\`
+  Manifest: \`$KIBANA_IMAGE\`
 
-  AMD64: \`$KIBANA_IMAGE_OUTPUT-amd64\`
+  AMD64: \`$KIBANA_IMAGE-amd64\`
 
-  ARM64: \`$KIBANA_IMAGE_OUTPUT-arm64\`
+  ARM64: \`$KIBANA_IMAGE-arm64\`
 EOF
+
+if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
+  buildkite-agent meta-data set pr_comment:build_serverless:head "* Kibana Serverless Image: \`$KIBANA_IMAGE\`"
+  buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"
+fi
 
 echo "--- Build dependencies report"
 node scripts/licenses_csv_report "--csv=target/dependencies-$GIT_ABBREV_COMMIT.csv"
@@ -81,19 +92,20 @@ cd -
 # so that new stack instances contain the latest and greatest image of kibana,
 # and the respective stack components of course.
 echo "--- Trigger image tag update"
-if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
+if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   cat << EOF | buildkite-agent pipeline upload
 steps:
-  - trigger: serverless-gitops-update-stack-image-tag
-    label: ":argo: Update image tag for Kibana"
+  - label: ":argo: Update kibana image tag for kibana-controller using gpctl"
+    async: true
     branches: main
+    trigger: gpctl-promote-with-e2e-tests
     build:
       env:
-        IMAGE_TAG: "git-$GIT_ABBREV_COMMIT"
+        SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
         SERVICE: kibana-controller
         NAMESPACE: kibana-ci
-        IMAGE_NAME: kibana
-        COMMIT_MESSAGE: "gitops: update kibana tag to elastic/kibana@$GIT_ABBREV_COMMIT"
+        IMAGE_NAME: kibana-serverless
+        REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
 EOF
 
 else

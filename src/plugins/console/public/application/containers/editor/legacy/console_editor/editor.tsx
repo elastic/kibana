@@ -87,7 +87,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const editorInstanceRef = useRef<senseEditor.SenseEditor | null>(null);
 
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
-  useUIAceKeyboardMode(textArea);
+  useUIAceKeyboardMode(textArea, settings.isAccessibilityOverlayEnabled);
 
   const openDocumentation = useCallback(async () => {
     const documentation = await getDocumentation(editorInstanceRef.current!, docLinkVersion);

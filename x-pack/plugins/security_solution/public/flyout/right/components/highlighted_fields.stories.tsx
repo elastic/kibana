@@ -39,7 +39,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const Emtpy: Story<void> = () => {
+export const Empty: Story<void> = () => {
   const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
   const panelContextValue = {
     eventId: null,

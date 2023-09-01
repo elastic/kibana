@@ -53,9 +53,10 @@ describe('When using processes action from response actions console', () => {
   };
 
   const endpointDetailsMock = () => {
+    const newDate = new Date('2023-04-20T09:37:40.309Z');
     const endpointMetadata = new EndpointMetadataGenerator('seed').generateHostInfo({
       metadata: {
-        '@timestamp': new Date('2023-04-20T09:37:40.309Z').getTime(),
+        '@timestamp': newDate.getTime(),
         agent: {
           id: agentId,
           version: '8.8.0',
@@ -69,6 +70,7 @@ describe('When using processes action from response actions console', () => {
           },
         },
       },
+      last_checkin: newDate.toISOString(),
     });
     useGetEndpointDetailsMock.mockReturnValue({
       data: endpointMetadata,

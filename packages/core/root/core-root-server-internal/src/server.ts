@@ -190,6 +190,7 @@ export class Server {
     this.capabilities.preboot({ http: httpPreboot });
     const elasticsearchServicePreboot = await this.elasticsearch.preboot();
     const uiSettingsPreboot = await this.uiSettings.preboot();
+    await this.status.preboot({ http: httpPreboot });
 
     const renderingPreboot = await this.rendering.preboot({ http: httpPreboot, uiPlugins });
     const httpResourcesPreboot = this.httpResources.preboot({
@@ -349,7 +350,7 @@ export class Server {
     this.#pluginsInitialized = pluginsSetup.initialized;
 
     this.registerCoreContext(coreSetup);
-    this.coreApp.setup(coreSetup, uiPlugins);
+    await this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction?.end();
     this.uptimePerStep.setup = { start: setupStartUptime, end: performance.now() };

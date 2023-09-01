@@ -10,13 +10,13 @@ import times from 'lodash/times';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep, intersection } from 'lodash';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
-import { createEsParams, UptimeEsClient } from '../legacy_uptime/lib/lib';
 import {
   OverviewPendingStatusMetaData,
   OverviewPing,
   OverviewStatus,
   OverviewStatusMetaData,
 } from '../../common/runtime_types';
+import { createEsParams, UptimeEsClient } from '../lib';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
@@ -34,7 +34,7 @@ const fields = [
 
 export async function queryMonitorStatus(
   esClient: UptimeEsClient,
-  listOfLocations: string[],
+  monitorLocationIds: string[],
   range: { from: string; to: string },
   monitorQueryIds: string[],
   monitorLocationsMap: Record<string, string[]>,
@@ -50,7 +50,7 @@ export async function queryMonitorStatus(
     | 'allIds'
   >
 > {
-  const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / listOfLocations.length || 1);
+  const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
   let up = 0;
   let down = 0;
@@ -95,8 +95,8 @@ export async function queryMonitorStatus(
               aggs: {
                 location: {
                   terms: {
-                    field: 'observer.geo.name',
-                    size: listOfLocations.length || 100,
+                    field: 'observer.name',
+                    size: monitorLocationIds.length || 100,
                   },
                   aggs: {
                     status: {
@@ -122,10 +122,10 @@ export async function queryMonitorStatus(
         },
       });
 
-      if (listOfLocations.length > 0) {
+      if (monitorLocationIds.length > 0) {
         params.body.query.bool.filter.push({
           terms: {
-            'observer.geo.name': listOfLocations,
+            'observer.name': monitorLocationIds,
           },
         });
       }
@@ -144,7 +144,7 @@ export async function queryMonitorStatus(
         // discard any locations that are not in the monitorLocationsMap for the given monitor as well as those which are
         // in monitorLocationsMap but not in listOfLocations
         const monLocations = monitorLocationsMap?.[queryId];
-        const monQueriedLocations = intersection(monLocations, listOfLocations);
+        const monQueriedLocations = intersection(monLocations, monitorLocationIds);
         monQueriedLocations?.forEach((monLocation) => {
           const locationSummary = locationSummaries.find(
             (summary) => summary.location === monLocation
@@ -154,14 +154,14 @@ export async function queryMonitorStatus(
             const { ping } = locationSummary;
             const downCount = ping.summary?.down ?? 0;
             const upCount = ping.summary?.up ?? 0;
-            const configId = ping.config_id!;
+            const configId = ping.config_id;
             const monitorQueryId = ping.monitor.id;
 
             const meta = {
               ping,
               configId,
               monitorQueryId,
-              location: monLocation,
+              locationId: monLocation,
               timestamp: ping['@timestamp'],
             };
 

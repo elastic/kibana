@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { ContentClientProvider, type ContentClient } from '@kbn/content-management-plugin/public';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
@@ -24,12 +24,7 @@ export const MSearchApp = (props: {
     <ContentClientProvider contentClient={props.contentClient}>
       <I18nProvider>
         <TableListViewKibanaProvider
-          core={{
-            application: props.core.application,
-            notifications: props.core.notifications,
-            overlays: props.core.overlays,
-            http: props.core.http,
-          }}
+          core={props.core}
           toMountPoint={toMountPoint}
           FormattedRelative={FormattedRelative}
           savedObjectsTagging={props.savedObjectsTagging.getTaggingApi()}

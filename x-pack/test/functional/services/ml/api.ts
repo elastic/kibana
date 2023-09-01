@@ -12,10 +12,12 @@ import type { TypeOf } from '@kbn/config-schema';
 import fs from 'fs';
 import { Calendar } from '@kbn/ml-plugin/server/models/calendar';
 import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common/constants/states';
-import { DataFrameTaskStateType } from '@kbn/ml-plugin/common/types/data_frame_analytics';
-import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
+import {
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
+  DATA_FRAME_TASK_STATE,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { setupModuleBodySchema } from '@kbn/ml-plugin/server/routes/schemas/modules';
@@ -1063,6 +1065,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async getGroups(space?: string) {
+      const { body, status } = await kbnSupertest
+        .get(`${space ? `/s/${space}` : ''}/internal/ml/jobs/groups`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, module);
+
+      return body;
+    },
+
     async getAnnotations(jobId: string) {
       log.debug(`Fetching annotations for job '${jobId}'...`);
 
@@ -1246,7 +1257,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async syncSavedObjects(simulate: boolean = false, space?: string) {
       const { body, status } = await kbnSupertest
         .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/sync?simulate=${simulate}`)
-        .set(getCommonRequestHeader('2023-05-15'));
+        .set(getCommonRequestHeader('2023-10-31'));
       this.assertResponseStatusCode(200, status, body);
 
       return body;
@@ -1487,12 +1498,39 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return ingestPipeline;
     },
 
-    async deleteIngestPipeline(modelId: string) {
+    async deleteIngestPipeline(modelId: string, usePrefix: boolean = true) {
       log.debug(`Deleting ingest pipeline for trained model with id "${modelId}"`);
-      const { body, status } = await esSupertest.delete(`/_ingest/pipeline/pipeline_${modelId}`);
+      const { body, status } = await esSupertest.delete(
+        `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
+      );
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Ingest pipeline deleted');
+    },
+
+    async assureMlStatsIndexExists(timeout: number = 60 * 1000) {
+      const params = {
+        index: '.ml-stats-000001',
+        id: 'noop_job_test_id',
+        body: {
+          type: 'analytics_memory_usage',
+          job_id: 'noop_job',
+          timestamp: 1687437633705,
+          peak_usage_bytes: 148148,
+          status: 'ok',
+        },
+        refresh: 'wait_for',
+      } as const;
+      await es.index(params);
+
+      await retry.waitForWithTimeout(`Stats index to exist`, timeout, async () => {
+        const statsIndices = await es.cat.indices({ format: 'json', index: '.ml-stats*' });
+        if (statsIndices[0]?.health === 'green') {
+          return true;
+        } else {
+          throw new Error(`expected stats index to exist`);
+        }
+      });
     },
 
     async setupModule(

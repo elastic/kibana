@@ -44,8 +44,12 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 
+import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
 import { calculateAuthz, calculatePackagePrivilegesFromCapabilities } from '../common/authz';
@@ -63,12 +67,21 @@ import { createPackageSearchProvider } from './search_provider';
 import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import { ExperimentalFeaturesService } from './services/experimental_features';
-import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
+import type {
+  UIExtensionRegistrationCallback,
+  UIExtensionsStorage,
+  GetBulkAssetsRequest,
+  GetBulkAssetsResponse,
+} from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 
 export type { FleetConfigType } from '../common/types';
 
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
+
+import type { RequestError } from './hooks';
+import { sendGetBulkAssets } from './hooks';
+import { fleetDeepLinks } from './deep_links';
 
 // We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
@@ -83,6 +96,13 @@ export interface FleetStart {
   authz: FleetAuthz;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
+  hooks: {
+    epm: {
+      getBulkAssets: (
+        body: GetBulkAssetsRequest['body']
+      ) => Promise<SendRequestResponse<GetBulkAssetsResponse, RequestError>>;
+    };
+  };
 }
 
 export interface FleetSetupDeps {
@@ -97,6 +117,7 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  dashboard: DashboardStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   navigation: NavigationPublicPluginStart;
@@ -110,6 +131,7 @@ export interface FleetStartDeps {
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
   storage: Storage;
   share: SharePluginStart;
+  dashboard: DashboardStart;
   cloud?: CloudSetup & CloudStart;
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
@@ -194,6 +216,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       order: 9020,
       euiIconType: 'logoElastic',
       appRoute: '/app/fleet',
+      deepLinks: fleetDeepLinks,
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
         const cloud =
@@ -315,6 +338,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       }),
 
       registerExtension,
+
+      hooks: {
+        epm: {
+          // hook exported to be used in monitoring-ui
+          getBulkAssets: sendGetBulkAssets,
+        },
+      },
     };
   }
 

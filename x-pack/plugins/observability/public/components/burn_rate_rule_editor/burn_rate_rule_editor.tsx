@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import numeral from '@elastic/numeral';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { SLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
 
-import { toDuration, toMinutes } from '../../utils/slo/duration';
+import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
-import { BurnRateRuleParams, Duration, DurationUnit } from '../../typings';
+import { BurnRateRuleParams, WindowSchema } from '../../typings';
 import { SloSelector } from './slo_selector';
-import { BurnRate } from './burn_rate';
-import { LongWindowDuration } from './long_window_duration';
 import { ValidationBurnRateRuleResult } from './validation';
+import { createNewWindow, Windows, calculateMaxBurnRateThreshold } from './windows';
+import {
+  ALERT_ACTION,
+  HIGH_PRIORITY_ACTION,
+  LOW_PRIORITY_ACTION,
+  MEDIUM_PRIORITY_ACTION,
+} from '../../../common/constants';
 
 type Props = Pick<
   RuleTypeParamsExpressionProps<BurnRateRuleParams>,
@@ -33,106 +36,95 @@ export function BurnRateRuleEditor(props: Props) {
   });
 
   const [selectedSlo, setSelectedSlo] = useState<SLOResponse | undefined>(undefined);
-  const [longWindowDuration, setLongWindowDuration] = useState<Duration>({
-    value: ruleParams?.longWindow?.value ?? 1,
-    unit: (ruleParams?.longWindow?.unit as DurationUnit) ?? 'h',
-  });
-  const [shortWindowDuration, setShortWindowDuration] = useState<Duration>({
-    value: ruleParams?.shortWindow?.value ?? 5,
-    unit: (ruleParams?.shortWindow?.unit as DurationUnit) ?? 'm',
-  });
-  const [burnRate, setBurnRate] = useState<number>(ruleParams?.burnRateThreshold ?? 1);
-  const [maxBurnRate, setMaxBurnRate] = useState<number>(ruleParams?.maxBurnRateThreshold ?? 1);
 
   useEffect(() => {
     const hasInitialSlo = !loadingInitialSlo && initialSlo !== undefined;
     setSelectedSlo(hasInitialSlo ? initialSlo : undefined);
   }, [loadingInitialSlo, initialSlo, setRuleParams]);
 
-  const onLongWindowDurationChange = (duration: Duration) => {
-    setLongWindowDuration(duration);
-    const longWindowDurationInMinutes = toMinutes(duration);
-    const shortWindowDurationValue = Math.floor(longWindowDurationInMinutes / 12);
-    setShortWindowDuration({ value: shortWindowDurationValue, unit: 'm' });
-  };
-
-  const onBurnRateChange = (value: number) => {
-    setBurnRate(value);
-    setRuleParams('burnRateThreshold', value);
-  };
-
   const onSelectedSlo = (slo: SLOResponse | undefined) => {
     setSelectedSlo(slo);
     setRuleParams('sloId', slo?.id);
   };
 
+  const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(
+    ruleParams?.windows || [
+      createNewWindow(selectedSlo, {
+        burnRateThreshold: 14.4,
+        longWindow: { value: 1, unit: 'h' },
+        shortWindow: { value: 5, unit: 'm' },
+        actionGroup: ALERT_ACTION.id,
+      }),
+      createNewWindow(selectedSlo, {
+        burnRateThreshold: 6,
+        longWindow: { value: 6, unit: 'h' },
+        shortWindow: { value: 30, unit: 'm' },
+        actionGroup: HIGH_PRIORITY_ACTION.id,
+      }),
+      createNewWindow(selectedSlo, {
+        burnRateThreshold: 3,
+        longWindow: { value: 24, unit: 'h' },
+        shortWindow: { value: 120, unit: 'm' },
+        actionGroup: MEDIUM_PRIORITY_ACTION.id,
+      }),
+      createNewWindow(selectedSlo, {
+        burnRateThreshold: 1,
+        longWindow: { value: 72, unit: 'h' },
+        shortWindow: { value: 360, unit: 'm' },
+        actionGroup: LOW_PRIORITY_ACTION.id,
+      }),
+    ]
+  );
+
+  // When the SLO changes, recalculate the max burn rates
   useEffect(() => {
-    if (selectedSlo) {
-      const sloDurationInMinutes = toMinutes(toDuration(selectedSlo.timeWindow.duration));
-      const longWindowDurationInMinutes = toMinutes(longWindowDuration);
-      const maxBurnRateThreshold = Math.floor(sloDurationInMinutes / longWindowDurationInMinutes);
-      setMaxBurnRate(maxBurnRateThreshold);
-    }
-  }, [longWindowDuration, selectedSlo]);
+    setWindowDefs((previous) =>
+      previous.map((windowDef) => {
+        return {
+          ...windowDef,
+          maxBurnRateThreshold: calculateMaxBurnRateThreshold(windowDef.longWindow, selectedSlo),
+        };
+      })
+    );
+  }, [selectedSlo]);
 
   useEffect(() => {
-    setRuleParams('longWindow', longWindowDuration);
-    setRuleParams('shortWindow', shortWindowDuration);
-  }, [shortWindowDuration, longWindowDuration, setRuleParams]);
-
-  useEffect(() => {
-    setRuleParams('burnRateThreshold', burnRate);
-    setRuleParams('maxBurnRateThreshold', maxBurnRate);
-  }, [burnRate, maxBurnRate, setRuleParams]);
-
-  const computeErrorBudgetExhaustionInHours = () => {
-    if (selectedSlo && longWindowDuration?.value > 0 && burnRate >= 1) {
-      return numeral(
-        longWindowDuration.value /
-          ((burnRate * toMinutes(longWindowDuration)) /
-            toMinutes(toDuration(selectedSlo.timeWindow.duration)))
-      ).format('0a');
-    }
-
-    return 'N/A';
-  };
+    setRuleParams('windows', windowDefs);
+  }, [windowDefs, setRuleParams]);
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem>
-          <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem>
-          <LongWindowDuration
-            initialDuration={longWindowDuration}
-            shortWindowDuration={shortWindowDuration}
-            onChange={onLongWindowDurationChange}
-            errors={errors.longWindow}
+    <>
+      <EuiTitle size="xs">
+        <h5>Choose a SLO to monitor</h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
+      {selectedSlo?.groupBy && selectedSlo.groupBy !== ALL_VALUE && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiCallOut
+            color="warning"
+            size="s"
+            title={i18n.translate('xpack.observability.slo.rules.groupByMessage', {
+              defaultMessage:
+                'The SLO you selected has been created with a partition on "{groupByField}". This rule will monitor and generate an alert for every instance found in the partition field.',
+              values: { groupByField: selectedSlo.groupBy },
+            })}
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <BurnRate
-            initialBurnRate={burnRate}
-            maxBurnRate={maxBurnRate}
-            onChange={onBurnRateChange}
-            errors={errors.burnRateThreshold}
-            helpText={getErrorBudgetExhaustionText(computeErrorBudgetExhaustionInHours())}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </>
+      )}
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h5>Define multiple burn rate windows</h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <Windows
+        slo={selectedSlo}
+        windows={windowDefs}
+        onChange={setWindowDefs}
+        errors={errors.windows}
+      />
       <EuiSpacer size="m" />
-    </EuiFlexGroup>
+    </>
   );
 }
-
-const getErrorBudgetExhaustionText = (formattedHours: string) =>
-  i18n.translate('xpack.observability.slo.rules.errorBudgetExhaustion.text', {
-    defaultMessage: '{formatedHours} hours until error budget exhaustion.',
-    values: {
-      formatedHours: formattedHours,
-    },
-  });

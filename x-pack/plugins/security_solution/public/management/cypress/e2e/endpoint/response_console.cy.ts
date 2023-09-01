@@ -23,14 +23,11 @@ import {
 } from '../../tasks/isolate';
 
 import { login } from '../../tasks/login';
-import { ENDPOINT_VM_NAME } from '../../tasks/common';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 
 describe('Response console', () => {
-  const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
-
   beforeEach(() => {
     login();
   });
@@ -58,7 +55,7 @@ describe('Response console', () => {
 
     after(() => {
       if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost).then(() => {});
+        cy.task('destroyEndpointHost', createdHost);
       }
 
       if (indexedPolicy) {
@@ -72,25 +69,25 @@ describe('Response console', () => {
 
     it('should isolate host from response console', () => {
       const command = 'isolate';
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyUnIsolatedHosts();
       openResponseConsoleFromEndpointList();
       performCommandInputChecks(command);
       submitCommand();
       waitForCommandToBeExecuted(command);
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyIsolatedHosts();
     });
 
     it('should release host from response console', () => {
       const command = 'release';
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyIsolatedHosts();
       openResponseConsoleFromEndpointList();
       performCommandInputChecks(command);
       submitCommand();
       waitForCommandToBeExecuted(command);
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyUnIsolatedHosts();
     });
   });
@@ -121,7 +118,7 @@ describe('Response console', () => {
 
     after(() => {
       if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost).then(() => {});
+        cy.task('destroyEndpointHost', createdHost);
       }
 
       if (indexedPolicy) {
@@ -134,7 +131,7 @@ describe('Response console', () => {
     });
 
     it('"processes" - should obtain a list of processes', () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
       performCommandInputChecks('processes');
       submitCommand();
@@ -159,7 +156,7 @@ describe('Response console', () => {
     });
 
     it('"kill-process --pid" - should kill a process', () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`kill-process --pid ${cronPID}`);
       submitCommand();
@@ -183,7 +180,7 @@ describe('Response console', () => {
     });
 
     it('"suspend-process --pid" - should suspend a process', () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`suspend-process --pid ${newCronPID}`);
       submitCommand();
@@ -191,11 +188,11 @@ describe('Response console', () => {
     });
   });
 
-  describe('File operations: get-file and  execute', () => {
-    const homeFilePath = `/home/ubuntu`;
+  describe('File operations: get-file and execute', () => {
+    const homeFilePath = process.env.CI || true ? '/home/vagrant' : `/home/ubuntu`;
 
     const fileContent = 'This is a test file for the get-file command.';
-    const filePath = `/home/ubuntu/test_file.txt`;
+    const filePath = `${homeFilePath}/test_file.txt`;
 
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
@@ -219,7 +216,7 @@ describe('Response console', () => {
 
     after(() => {
       if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost).then(() => {});
+        cy.task('destroyEndpointHost', createdHost);
       }
 
       if (indexedPolicy) {
@@ -232,7 +229,12 @@ describe('Response console', () => {
     });
 
     it('"get-file --path" - should retrieve a file', () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      cy.task('createFileOnEndpoint', {
+        hostname: createdHost.hostname,
+        path: filePath,
+        content: fileContent,
+      });
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`get-file --path ${filePath}`);
       submitCommand();
@@ -247,14 +249,14 @@ describe('Response console', () => {
         cy.readFile(`${downloadsFolder}/upload.zip`);
 
         cy.task('uploadFileToEndpoint', {
-          hostname: endpointHostname,
+          hostname: createdHost.hostname,
           srcPath: `${downloadsFolder}/upload.zip`,
-          destPath: '/home/ubuntu/upload.zip',
+          destPath: `${homeFilePath}/upload.zip`,
         });
 
         cy.task('readZippedFileContentOnEndpoint', {
-          hostname: endpointHostname,
-          path: '/home/ubuntu/upload.zip',
+          hostname: createdHost.hostname,
+          path: `${homeFilePath}/upload.zip`,
           password: 'elastic',
         }).then((unzippedFileContent) => {
           expect(unzippedFileContent).to.equal(fileContent);
@@ -262,8 +264,8 @@ describe('Response console', () => {
       });
     });
 
-    it('"execute --command" - should execute a command', async () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+    it('"execute --command" - should execute a command', () => {
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`execute --command "ls -al ${homeFilePath}"`);
       submitCommand();
@@ -294,7 +296,7 @@ describe('Response console', () => {
 
     after(() => {
       if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost).then(() => {});
+        cy.task('destroyEndpointHost', createdHost);
       }
 
       if (indexedPolicy) {
@@ -307,19 +309,19 @@ describe('Response console', () => {
     });
 
     it('should fail if data tampered', () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyUnIsolatedHosts();
       openResponseConsoleFromEndpointList();
       performCommandInputChecks('isolate');
 
       // stop host so that we ensure tamper happens before endpoint processes the action
-      cy.task('stopEndpointHost');
+      cy.task('stopEndpointHost', createdHost.hostname);
       // get action doc before we submit command so we know when the new action doc is indexed
       cy.task('getLatestActionDoc').then((previousActionDoc) => {
         submitCommand();
         cy.task('tamperActionDoc', previousActionDoc);
       });
-      cy.task('startEndpointHost');
+      cy.task('startEndpointHost', createdHost.hostname);
 
       const actionValidationErrorMsg =
         'Fleet action response error: Failed to validate action signature; check Endpoint logs for details';

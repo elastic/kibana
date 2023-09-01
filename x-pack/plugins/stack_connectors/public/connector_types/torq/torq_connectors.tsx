@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { Field, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import {
@@ -15,11 +15,11 @@ import {
   ValidationFunc,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
-import { ActionConnectorFieldsProps, PasswordField } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import * as i18n from './translations';
 
-const { urlField } = fieldValidators;
+const { urlField, emptyField } = fieldValidators;
 
 const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dataTestSubj }) => {
   return (
@@ -78,12 +78,24 @@ const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <PasswordField
+          <UseField
             path="secrets.token"
-            label={i18n.TORQ_TOKEN_LABEL}
-            readOnly={readOnly}
-            helpText={i18n.TORQ_TOKEN_HELP_TEXT}
-            data-test-subj="torqTokenInput"
+            config={{
+              label: i18n.TORQ_TOKEN_LABEL,
+              validations: [
+                {
+                  validator: emptyField(i18n.TORQ_TOKEN_REQUIRED),
+                },
+              ],
+              helpText: i18n.TORQ_TOKEN_HELP_TEXT,
+            }}
+            component={PasswordField}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'torqTokenInput',
+                readOnly,
+              },
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

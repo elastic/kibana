@@ -8,17 +8,15 @@
 import React from 'react';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
-import {
-  toMountPoint,
-  wrapWithTheme,
-  KibanaContextProvider,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { Embeddable } from '@kbn/lens-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { getMlGlobalServices } from '../../../application/app';
 
@@ -28,11 +26,13 @@ export function createFlyout(
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
+  dashboardService: DashboardStart,
   lens?: LensPublicStart
 ): Promise<void> {
   const {
     http,
-    theme: { theme$ },
+    theme,
+    i18n,
     overlays,
     application: { currentAppId$ },
   } = coreStart;
@@ -46,26 +46,25 @@ export function createFlyout(
 
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
-          wrapWithTheme(
-            <KibanaContextProvider
-              services={{
-                ...coreStart,
-                share,
-                data,
-                lens,
-                mlServices: getMlGlobalServices(http),
+          <KibanaContextProvider
+            services={{
+              ...coreStart,
+              share,
+              data,
+              lens,
+              dashboardService,
+              mlServices: getMlGlobalServices(http),
+            }}
+          >
+            <FlyoutComponent
+              embeddable={embeddable}
+              onClose={() => {
+                onFlyoutClose();
+                resolve();
               }}
-            >
-              <FlyoutComponent
-                embeddable={embeddable}
-                onClose={() => {
-                  onFlyoutClose();
-                  resolve();
-                }}
-              />
-            </KibanaContextProvider>,
-            theme$
-          )
+            />
+          </KibanaContextProvider>,
+          { theme, i18n }
         ),
         {
           'data-test-subj': 'mlFlyoutLayerSelector',

@@ -23,6 +23,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     type: 'date',
     esTypes: ['date'],
     aggregatable: true,
+    searchable: true,
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
   {

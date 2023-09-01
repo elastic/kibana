@@ -11,7 +11,7 @@ import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eu
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { noop } from 'lodash';
-import type { CasePostRequest } from '../../../../common/api';
+import type { CasePostRequest } from '../../../../common/types/api';
 import * as i18n from '../translations';
 import type { CaseUI } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';

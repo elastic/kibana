@@ -60,6 +60,7 @@ export const performBulkGet = async <T>(
     common: commonHelper,
     validation: validationHelper,
     encryption: encryptionHelper,
+    migration: migrationHelper,
   } = helpers;
   const { securityExtension, spacesExtension } = extensions;
 
@@ -203,7 +204,7 @@ export const performBulkGet = async <T>(
       const document = getSavedObjectFromSource(registry, type, id, doc, {
         migrationVersionCompatibility,
       });
-      const migrated = migrator.migrateDocument(document);
+      const migrated = migrationHelper.migrateStorageDocument(document);
 
       return migrated;
     }),

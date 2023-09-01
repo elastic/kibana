@@ -7,11 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { defer, from } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { SavedObjectsClientCommon } from '../types';
+import { rateLimitingForkJoin } from './utils';
+import { PersistenceAPI } from '../types';
 
 import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
@@ -89,7 +91,7 @@ export interface DataViewsServiceDeps {
   /**
    * Saved objects client interface wrapped in a common interface
    */
-  savedObjectsClient: SavedObjectsClientCommon;
+  savedObjectsClient: PersistenceAPI;
   /**
    * Wrapper around http call functionality so it can be used on client or server
    */
@@ -118,6 +120,8 @@ export interface DataViewsServiceDeps {
    * Determines whether the user can save advancedSettings (used for defaultIndex)
    */
   getCanSaveAdvancedSettings: () => Promise<boolean>;
+
+  scriptedFieldsEnabled: boolean;
 }
 
 /**
@@ -167,7 +171,7 @@ export interface DataViewsServicePublicMethods {
    */
   createSavedObject: (
     indexPattern: DataView,
-    override?: boolean,
+    overwrite?: boolean,
     displayErrors?: boolean
   ) => Promise<DataView>;
   /**
@@ -237,6 +241,12 @@ export interface DataViewsServicePublicMethods {
    */
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
   /**
+   * Get existing index pattern list by providing string array index pattern list.
+   * @param indices - index pattern list
+   * @returns index pattern list of index patterns that match indices
+   */
+  getExistingIndices: (indices: string[]) => Promise<string[]>;
+  /**
    * Get list of data view ids.
    * @param refresh - clear cache and fetch from server
    */
@@ -292,7 +302,7 @@ export interface DataViewsServicePublicMethods {
  */
 export class DataViewsService {
   private config: UiSettingsCommon;
-  private savedObjectsClient: SavedObjectsClientCommon;
+  private savedObjectsClient: PersistenceAPI;
   private savedObjectsCache?: Array<SavedObject<DataViewSavedObjectAttrs>> | null;
   private apiClient: IDataViewsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
@@ -317,6 +327,8 @@ export class DataViewsService {
    * Can the user save data views?
    */
   public getCanSave: () => Promise<boolean>;
+
+  public readonly scriptedFieldsEnabled: boolean;
   /**
    * DataViewsService constructor
    * @param deps Service dependencies
@@ -331,6 +343,7 @@ export class DataViewsService {
       onError,
       getCanSave = () => Promise.resolve(false),
       getCanSaveAdvancedSettings,
+      scriptedFieldsEnabled,
     } = deps;
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -342,6 +355,7 @@ export class DataViewsService {
     this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
     this.dataViewCache = createDataViewCache();
+    this.scriptedFieldsEnabled = scriptedFieldsEnabled;
   }
 
   /**
@@ -393,7 +407,7 @@ export class DataViewsService {
     const savedObjects = await this.savedObjectsClient.find({
       fields: ['title'],
       search,
-      searchFields: ['title'],
+      searchFields: ['title', 'name'],
       perPage: size,
     });
     const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
@@ -506,6 +520,41 @@ export class DataViewsService {
   };
 
   /**
+   * Get existing index pattern list by providing string array index pattern list.
+   * @param indices index pattern list
+   * @returns index pattern list
+   */
+  getExistingIndices = async (indices: string[]): Promise<string[]> => {
+    const indicesObs = indices.map((pattern) => {
+      // when checking a negative pattern, check if the positive pattern exists
+      const indexToQuery = pattern.trim().startsWith('-')
+        ? pattern.trim().substring(1)
+        : pattern.trim();
+      return defer(() =>
+        from(
+          this.getFieldsForWildcard({
+            // check one field to keep request fast/small
+            fields: ['_id'],
+            // true so no errors thrown in browser
+            allowNoIndex: true,
+            pattern: indexToQuery,
+          })
+        )
+      );
+    });
+
+    return new Promise<boolean[]>((resolve) => {
+      rateLimitingForkJoin(indicesObs, 3, []).subscribe((value) => {
+        resolve(value.map((v) => v.length > 0));
+      });
+    })
+      .then((allPatterns: boolean[]) =>
+        indices.filter((pattern, i, self) => self.indexOf(pattern) === i && allPatterns[i])
+      )
+      .catch(() => indices);
+  };
+
+  /**
    * Get field list by providing an index patttern (or spec).
    * @param options options for getting field list
    * @returns FieldSpec[]
@@ -548,7 +597,9 @@ export class DataViewsService {
   private refreshFieldsFn = async (indexPattern: DataView) => {
     const { fields, indices } = await this.getFieldsAndIndicesForDataView(indexPattern);
     fields.forEach((field) => (field.isMapped = true));
-    const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
+    const scripted = this.scriptedFieldsEnabled
+      ? indexPattern.getScriptedFields().map((field) => field.spec)
+      : [];
     const fieldAttrs = indexPattern.getFieldAttrs();
     const fieldsWithSavedAttrs = Object.values(
       this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
@@ -612,7 +663,9 @@ export class DataViewsService {
     displayErrors: boolean = true
   ) => {
     const fieldsAsArr = Object.values(fields);
-    const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
+    const scriptedFields = this.scriptedFieldsEnabled
+      ? fieldsAsArr.filter((field) => field.scripted)
+      : [];
     try {
       let updatedFieldList: FieldSpec[];
       const { fields: newFields, indices } = await this.getFieldsAndIndicesForWildcard(options);
@@ -964,12 +1017,16 @@ export class DataViewsService {
 
   async createAndSave(
     spec: DataViewSpec,
-    override = false,
+    overwrite = false,
     skipFetchFields = false,
     displayErrors = true
   ) {
     const indexPattern = await this.createFromSpec(spec, skipFetchFields, displayErrors);
-    const createdIndexPattern = await this.createSavedObject(indexPattern, override, displayErrors);
+    const createdIndexPattern = await this.createSavedObject(
+      indexPattern,
+      overwrite,
+      displayErrors
+    );
     await this.setDefault(createdIndexPattern.id!);
     return createdIndexPattern!;
   }
@@ -981,14 +1038,14 @@ export class DataViewsService {
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
 
-  async createSavedObject(dataView: DataView, override = false, displayErrors = true) {
+  async createSavedObject(dataView: DataView, overwrite = false, displayErrors = true) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
     const dupe = await findByName(this.savedObjectsClient, dataView.getName());
 
     if (dupe) {
-      if (override) {
+      if (overwrite) {
         await this.delete(dupe.id);
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
@@ -1000,6 +1057,7 @@ export class DataViewsService {
     const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
       id: dataView.id,
       initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
+      overwrite,
     })) as SavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response, displayErrors);

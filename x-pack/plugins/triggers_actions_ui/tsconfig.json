@@ -52,6 +52,8 @@
     "@kbn/ecs",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-ui-settings-common",
+    "@kbn/dashboard-plugin",
+    "@kbn/licensing-plugin",
   ],
   "exclude": ["target/**/*"]
 }

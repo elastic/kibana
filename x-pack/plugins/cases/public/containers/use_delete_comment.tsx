@@ -24,10 +24,7 @@ export const useDeleteComment = () => {
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation(
-    ({ caseId, commentId }: MutationArgs) => {
-      const abortCtrlRef = new AbortController();
-      return deleteComment({ caseId, commentId, signal: abortCtrlRef.signal });
-    },
+    ({ caseId, commentId }: MutationArgs) => deleteComment({ caseId, commentId }),
     {
       mutationKey: casesMutationsKeys.deleteComment,
       onSuccess: (_, { successToasterTitle }) => {

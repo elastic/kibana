@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObject } from '@kbn/core/server';
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
@@ -251,10 +252,10 @@ export interface SavedObjectsClientCommonFindArgs {
 }
 
 /**
- * Common interface for the saved objects client
+ * Common interface for the saved objects client on server and content management in browser
  * @public
  */
-export interface SavedObjectsClientCommon {
+export interface PersistenceAPI {
   /**
    * Search for saved objects
    * @param options - options for search
@@ -275,14 +276,6 @@ export interface SavedObjectsClientCommon {
    * @param attributes - attributes to update
    * @param options - client options
    */
-  getSavedSearch: (id: string) => Promise<SavedObject>;
-  /**
-   * Update a saved object by id
-   * @param type - type of saved object
-   * @param id - id of saved object
-   * @param attributes - attributes to update
-   * @param options - client options
-   */
   update: (
     id: string,
     attributes: DataViewAttributes,
@@ -296,7 +289,7 @@ export interface SavedObjectsClientCommon {
   create: (
     attributes: DataViewAttributes,
     // SavedObjectsCreateOptions
-    options: { id?: string; initialNamespaces?: string[] }
+    options: { id?: string; initialNamespaces?: string[]; overwrite?: boolean }
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
@@ -437,7 +430,7 @@ export type FieldSpec = DataViewFieldBase & {
   /**
    * set if field is a TSDB metric field
    */
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: estypes.MappingTimeSeriesMetricType;
 
   // not persisted
 
@@ -524,10 +517,15 @@ export type DataViewSpec = {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SourceFilter = {
   value: string;
+  clientId?: string | number;
 };
 
 export interface HasDataService {
   hasESData: () => Promise<boolean>;
   hasUserDataView: () => Promise<boolean>;
   hasDataView: () => Promise<boolean>;
+}
+
+export interface ClientConfigType {
+  scriptedFieldsEnabled?: boolean;
 }

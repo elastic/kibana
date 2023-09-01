@@ -27,28 +27,28 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   async function getEnvironments(serviceName: string) {
     return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/settings/agent-configuration/environments 2023-05-22',
+      endpoint: 'GET /api/apm/settings/agent-configuration/environments 2023-10-31',
       params: { query: { serviceName } },
     });
   }
 
   function getAgentName(serviceName: string) {
     return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/settings/agent-configuration/agent_name 2023-05-22',
+      endpoint: 'GET /api/apm/settings/agent-configuration/agent_name 2023-10-31',
       params: { query: { serviceName } },
     });
   }
 
   function searchConfigurations(configuration: AgentConfigSearchParams) {
     return apmApiClient.readUser({
-      endpoint: 'POST /api/apm/settings/agent-configuration/search 2023-05-22',
+      endpoint: 'POST /api/apm/settings/agent-configuration/search 2023-10-31',
       params: { body: configuration },
     });
   }
 
   function getAllConfigurations() {
     return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'GET /api/apm/settings/agent-configuration 2023-10-31',
     });
   }
 
@@ -57,7 +57,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
 
     return supertestClient({
-      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
       params: { body: configuration },
     });
   }
@@ -67,7 +67,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
 
     return supertestClient({
-      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
       params: { query: { overwrite: true }, body: config },
     });
   }
@@ -77,14 +77,14 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
 
     return supertestClient({
-      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
       params: { body: { service } },
     });
   }
 
   function findExactConfiguration(name: string, environment: string) {
     return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/settings/agent-configuration/view 2023-05-22',
+      endpoint: 'GET /api/apm/settings/agent-configuration/view 2023-10-31',
       params: {
         query: {
           name,
@@ -397,7 +397,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     };
 
     let agentConfiguration:
-      | APIReturnType<'GET /api/apm/settings/agent-configuration/view 2023-05-22'>
+      | APIReturnType<'GET /api/apm/settings/agent-configuration/view 2023-10-31'>
       | undefined;
 
     before(async () => {

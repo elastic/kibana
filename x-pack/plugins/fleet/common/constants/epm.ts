@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { AllowedAssetTypes } from '../types/models';
+import { ElasticsearchAssetType, KibanaAssetType } from '../types/models';
 
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
@@ -28,6 +30,9 @@ export const PACKAGE_TEMPLATE_SUFFIX = '@package';
 export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
 
 export const DATASET_VAR_NAME = 'data_stream.dataset';
+
+export const CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION = '2.9.0';
+
 /*
  Package rules:
 |               | autoUpdatePackages |
@@ -79,3 +84,12 @@ export const installationStatuses = {
   InstallFailed: 'install_failed',
   NotInstalled: 'not_installed',
 } as const;
+
+export const allowedAssetTypes: AllowedAssetTypes = [
+  KibanaAssetType.dashboard,
+  KibanaAssetType.search,
+  KibanaAssetType.visualization,
+  ElasticsearchAssetType.transform,
+];
+
+export const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);

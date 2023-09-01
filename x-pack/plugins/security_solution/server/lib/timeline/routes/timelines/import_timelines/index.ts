@@ -19,7 +19,7 @@ import { buildRouteValidationWithExcess } from '../../../../../utils/build_valid
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { importTimelines } from './helpers';
-import { ImportTimelinesPayloadSchemaRt } from '../../../schemas/timelines/import_timelines_schema';
+import { ImportTimelinesPayloadSchemaRt } from '../../../../../../common/api/timeline';
 import { buildFrameworkRequest } from '../../../utils/common';
 
 export { importTimelines } from './helpers';

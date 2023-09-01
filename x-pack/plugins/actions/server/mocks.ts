@@ -12,7 +12,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { Logger } from '@kbn/core/server';
-import { actionsClientMock } from './actions_client.mock';
+import { actionsClientMock } from './actions_client/actions_client.mock';
 import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
 import { Services } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
@@ -30,6 +30,7 @@ const createSetupMock = () => {
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),
     getActionsHealth: jest.fn(),
+    getActionsConfigurationUtilities: jest.fn(),
   };
   return mock;
 };
@@ -44,7 +45,7 @@ const createStartMock = () => {
     getActionsAuthorizationWithRequest: jest
       .fn()
       .mockReturnValue(actionsAuthorizationMock.create()),
-    preconfiguredActions: [],
+    inMemoryConnectors: [],
     renderActionParameterTemplates: jest.fn(),
   };
   return mock;

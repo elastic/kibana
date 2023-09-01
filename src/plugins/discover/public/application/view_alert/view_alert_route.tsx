@@ -13,8 +13,6 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { displayPossibleDocsDiffInfoAlert } from '../main/hooks/use_alert_results_toast';
 import { getAlertUtils, QueryParams } from './view_alert_utils';
 
-const DISCOVER_MAIN_ROUTE = '/';
-
 type NonNullableEntry<T> = { [K in keyof T]: NonNullable<T[keyof T]> };
 
 const isActualAlert = (queryParams: QueryParams): queryParams is NonNullableEntry<QueryParams> => {
@@ -58,7 +56,7 @@ export function ViewAlertRoute() {
       locator.navigate(state);
     };
 
-    const navigateToDiscoverRoot = () => history.push(DISCOVER_MAIN_ROUTE);
+    const navigateToDiscoverRoot = () => locator.navigate({});
 
     fetchAlert(id)
       .then(fetchSearchSource)

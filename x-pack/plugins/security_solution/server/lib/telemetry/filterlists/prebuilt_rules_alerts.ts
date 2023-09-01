@@ -92,9 +92,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       hash: true,
     },
   },
-  destination: {
-    port: true,
-  },
+  destination: true,
   dll: {
     Ext: {
       relative_file_creation_time: true,
@@ -135,13 +133,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   message: true,
-  network: {
-    bytes: true,
-    direction: true,
-    protocol: true,
-    transport: true,
-    type: true,
-  },
+  network: true,
   orchestrator: {
     namespace: true,
     resource: {
@@ -212,8 +204,52 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   rule: {
     name: true,
   },
-  source: {
-    port: true,
+  source: true,
+  threat: {
+    enrichments: {
+      indicator: {
+        confidence: true,
+        description: true,
+        email: {
+          address: true,
+        },
+        first_seen: true,
+        ip: true,
+        last_seen: true,
+        marking: {
+          tlp: true,
+          tlp_version: true,
+        },
+        modified_at: true,
+        name: true,
+        port: true,
+        provider: true,
+        reference: true,
+        scanner_stats: true,
+        sightings: true,
+        type: true,
+        matched: {
+          atomic: true,
+          field: true,
+          id: true,
+          index: true,
+          occurred: true,
+          type: true,
+        },
+      },
+    },
+    feed: {
+      description: true,
+      name: true,
+      reference: true,
+    },
+    framework: true,
+    group: {
+      alias: true,
+      id: true,
+      name: true,
+      reference: true,
+    },
   },
   tls: {
     server: {
@@ -221,11 +257,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   type: true,
-  url: {
-    extension: true,
-    full: true,
-    path: true,
-  },
+  url: true,
   user_agent: {
     original: true,
   },

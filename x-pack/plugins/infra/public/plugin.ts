@@ -19,7 +19,6 @@ import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common'
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DISCOVER_APP_TARGET, LOGS_APP_TARGET } from '../common/constants';
-import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -35,11 +34,10 @@ import {
   InfraLocators,
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
-} from './locators';
+} from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
-import { LogViewsService } from './services/log_views';
 import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { TelemetryService } from './services/telemetry';
 import {
@@ -56,23 +54,21 @@ import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private inventoryViews: InventoryViewsService;
-  private logViews: LogViewsService;
   private metricsExplorerViews: MetricsExplorerViewsService;
   private telemetry: TelemetryService;
   private locators?: InfraLocators;
   private appTarget: string;
+  private kibanaVersion: string;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
     this.config = context.config.get();
+
     this.inventoryViews = new InventoryViewsService();
-    this.logViews = new LogViewsService({
-      messageFields:
-        this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
-    });
     this.metricsExplorerViews = new MetricsExplorerViewsService();
     this.telemetry = new TelemetryService();
     this.appTarget = this.config.logs.app_target;
+    this.kibanaVersion = context.env.packageInfo.version;
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
@@ -89,9 +85,6 @@ export class Plugin implements InfraClientPluginClass {
     );
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createLogThresholdRuleType(core)
-    );
-    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createMetricThresholdRuleType()
     );
     pluginsSetup.observability.dashboard.register({
@@ -106,6 +99,10 @@ export class Plugin implements InfraClientPluginClass {
       fetchData: createMetricsFetchData(core.getStartServices),
     });
 
+    pluginsSetup.logsShared.logViews.setLogViewsStaticConfig({
+      messageFields: this.config.sources?.default?.fields?.message,
+    });
+
     const startDep$AndHostViewFlag$ = combineLatest([
       from(core.getStartServices()),
       core.uiSettings.get$<boolean>(enableInfrastructureHostsView),
@@ -115,7 +112,7 @@ export class Plugin implements InfraClientPluginClass {
     const infraEntries = [
       { label: 'Inventory', app: 'metrics', path: '/inventory' },
       { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
-      { label: 'Hosts', isTechnicalPreview: true, app: 'metrics', path: '/hosts' },
+      { label: 'Hosts', isBetaFeature: true, app: 'metrics', path: '/hosts' },
     ];
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
@@ -133,6 +130,12 @@ export class Plugin implements InfraClientPluginClass {
                     label: 'Logs',
                     sortKey: 200,
                     entries: [
+                      {
+                        label: 'Explorer',
+                        app: 'observability-log-explorer',
+                        path: '/',
+                        isBetaFeature: true,
+                      },
                       { label: 'Stream', app: 'logs', path: '/stream' },
                       { label: 'Anomalies', app: 'logs', path: '/anomalies' },
                       { label: 'Categories', app: 'logs', path: '/log-categories' },
@@ -188,6 +191,10 @@ export class Plugin implements InfraClientPluginClass {
         },
       });
     }
+
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createLogThresholdRuleType(core, logsLocator)
+    );
 
     if (this.appTarget === LOGS_APP_TARGET) {
       core.application.register({
@@ -284,10 +291,15 @@ export class Plugin implements InfraClientPluginClass {
       deepLinks: infraDeepLinks,
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
-        const [coreStart, pluginsStart, pluginStart] = await core.getStartServices();
+        const [coreStart, plugins, pluginStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/metrics_app');
 
-        return renderApp(coreStart, pluginsStart, pluginStart, params);
+        return renderApp(
+          coreStart,
+          { ...plugins, kibanaVersion: this.kibanaVersion },
+          pluginStart,
+          params
+        );
       },
     });
 
@@ -333,12 +345,6 @@ export class Plugin implements InfraClientPluginClass {
       http: core.http,
     });
 
-    const logViews = this.logViews.start({
-      http: core.http,
-      dataViews: plugins.dataViews,
-      search: plugins.data.search,
-    });
-
     const metricsExplorerViews = this.metricsExplorerViews.start({
       http: core.http,
     });
@@ -347,7 +353,6 @@ export class Plugin implements InfraClientPluginClass {
 
     const startContract: InfraClientStartExports = {
       inventoryViews,
-      logViews,
       metricsExplorerViews,
       telemetry,
       locators: this.locators!,

@@ -37,4 +37,5 @@ export interface AlertSummaryWidgetProps {
   onClick?: (status?: AlertStatus) => void;
   timeRange: AlertSummaryTimeRange;
   chartProps: ChartProps;
+  hideChart?: boolean;
 }

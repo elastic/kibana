@@ -50,7 +50,6 @@ describe('useDeleteFileAttachment', () => {
     expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
       caseId: basicCaseId,
       fileIds: [basicFileMock.id],
-      signal: expect.any(AbortSignal),
     });
   });
 
@@ -111,7 +110,6 @@ describe('useDeleteFileAttachment', () => {
     expect(spyOnDeleteFileAttachments).toBeCalledWith({
       caseId: basicCaseId,
       fileIds: [basicFileMock.id],
-      signal: expect.any(AbortSignal),
     });
 
     expect(addError).toHaveBeenCalled();

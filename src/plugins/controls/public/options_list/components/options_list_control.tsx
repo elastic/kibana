@@ -19,6 +19,7 @@ import { OptionsListPopover } from './options_list_popover';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 import './options_list.scss';
+import { ControlError } from '../../control_group/component/control_error_component';
 
 export const OptionsListControl = ({
   typeaheadSubject,
@@ -31,6 +32,7 @@ export const OptionsListControl = ({
   const optionsList = useOptionsList();
   const dimensions = useResizeObserver(resizeRef.current);
 
+  const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
   const validSelections = optionsList.select((state) => state.componentState.validSelections);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
@@ -124,6 +126,7 @@ export const OptionsListControl = ({
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
       <EuiFilterButton
+        badgeColor="success"
         iconType="arrowDown"
         isLoading={debouncedLoading}
         className={classNames('optionsList--filterBtn', {
@@ -143,7 +146,9 @@ export const OptionsListControl = ({
     </div>
   );
 
-  return (
+  return error ? (
+    <ControlError error={error} />
+  ) : (
     <EuiFilterGroup
       className={classNames('optionsList--filterGroup', {
         'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
@@ -152,15 +157,15 @@ export const OptionsListControl = ({
       <EuiPopover
         ownFocus
         button={button}
+        hasArrow={false}
         repositionOnScroll
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
         anchorPosition="downCenter"
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-        className="optionsList__popoverOverride"
         closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
-        anchorClassName="optionsList__anchorOverride"
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+        panelClassName="optionsList__popoverOverride"
       >
         <OptionsListPopover
           width={dimensions.width}

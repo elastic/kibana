@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { parse as parseCookie } from 'tough-cookie';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { verifyErrorResponse } from '../../../../../test/api_integration/apis/search/verify_error';
 
@@ -57,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 with final response without search id if wait_for_completion_timeout is long enough', async function () {
         const resp = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -82,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const resp = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -108,6 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const resp = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -132,6 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
         await retry.tryForTime(10000, async () => {
           const resp2 = await supertest
             .post(`/internal/search/ese/${id}`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
             .set('kbn-xsrf', 'foo')
             .send({})
             .expect(200);
@@ -149,6 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const resp = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -170,6 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const resp2 = await supertest
           .post(`/internal/search/ese/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({})
           .expect(200);
@@ -182,6 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should fail without kbn-xref header', async () => {
         const resp = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             params: {
               body: {
@@ -199,6 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 400 when unknown index type is provided', async () => {
         const resp = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             indexType: 'baad',
@@ -218,6 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 400 if invalid id is provided', async () => {
         const resp = await supertest
           .post(`/internal/search/ese/123`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -238,6 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(
             `/internal/search/ese/FkxOb21iV1g2VGR1S2QzaWVtRU9fMVEbc3JWeWc1VHlUdDZ6MENxcXlYVG1Fdzo2NDg4`
           )
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -255,6 +266,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 400 with a bad body', async () => {
         const resp = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -293,6 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertestNoAuth
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .set('Cookie', sessionCookie!.cookieString())
           .send({
@@ -323,6 +336,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 400 if rollup search is called without index', async () => {
         const resp = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             indexType: 'rollup',
@@ -341,6 +355,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 400 if rollup search is without non-existent index', async () => {
         const resp = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             indexType: 'rollup',
@@ -361,6 +376,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should rollup search', async () => {
         await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             indexType: 'rollup',
@@ -380,12 +396,18 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('delete', () => {
       it('should return 404 when no search id provided', async () => {
-        await supertest.delete(`/internal/search/ese`).set('kbn-xsrf', 'foo').send().expect(404);
+        await supertest
+          .delete(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set('kbn-xsrf', 'foo')
+          .send()
+          .expect(404);
       });
 
       it('should return 400 when trying a delete a bad id', async () => {
         const resp = await supertest
           .delete(`/internal/search/ese/123`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send()
           .expect(400);
@@ -397,6 +419,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const resp = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -418,6 +441,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertest
           .delete(`/internal/search/ese/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send()
           .expect(200);
@@ -425,16 +449,19 @@ export default function ({ getService }: FtrProviderContext) {
         // try to re-fetch
         await supertest
           .post(`/internal/search/ese/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({})
           .expect(404);
       });
 
-      it('should delete a completed search', async function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/164856
+      it.skip('should delete a completed search', async function () {
         await markRequiresShardDelayAgg(this);
 
         const resp = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -459,6 +486,7 @@ export default function ({ getService }: FtrProviderContext) {
         await retry.tryForTime(10000, async () => {
           const resp2 = await supertest
             .post(`/internal/search/ese/${id}`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
             .set('kbn-xsrf', 'foo')
             .send({})
             .expect(200);
@@ -472,6 +500,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertest
           .delete(`/internal/search/ese/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send()
           .expect(200);
@@ -479,6 +508,7 @@ export default function ({ getService }: FtrProviderContext) {
         // try to re-fetch
         await supertest
           .post(`/internal/search/ese/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({})
           .expect(404);

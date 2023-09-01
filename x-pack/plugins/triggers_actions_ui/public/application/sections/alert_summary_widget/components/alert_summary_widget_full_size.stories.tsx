@@ -17,6 +17,7 @@ export default {
 export const FullSize = {
   args: {
     ...mockedAlertSummaryResponse,
+    hideChart: false,
     chartProps: {
       ...mockedChartProps,
       onBrushEnd: action('brushEvent'),

@@ -6,8 +6,9 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core-plugins-server';
-import { AssetManagerServerPlugin, config, AssetManagerConfig } from './plugin';
+import { AssetManagerServerPlugin, config } from './plugin';
 import type { WriteSamplesPostBody } from './routes/sample_assets';
+import { AssetManagerConfig } from './types';
 
 export type { AssetManagerConfig, WriteSamplesPostBody };
 export { config };

@@ -27,6 +27,7 @@ import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '
 import { RenderingService } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
 
+const BUILD_DATE = '2023-05-15T23:12:09+0000';
 const INJECTED_METADATA = {
   version: expect.any(String),
   branch: expect.any(String),
@@ -43,6 +44,8 @@ const INJECTED_METADATA = {
       buildSha: expect.any(String),
       dist: expect.any(Boolean),
       version: expect.any(String),
+      buildDate: new Date(BUILD_DATE).toISOString(),
+      buildFlavor: expect.any(String),
     },
   },
 };
@@ -386,6 +389,15 @@ function renderDarkModeTestCases(
 
 describe('RenderingService', () => {
   let service: RenderingService;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(BUILD_DATE));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
