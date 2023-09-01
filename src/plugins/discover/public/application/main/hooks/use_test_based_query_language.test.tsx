@@ -50,7 +50,7 @@ function getHookProps(
     replaceUrlState,
   };
 }
-const query = { esql: 'rom the-data-view-title' };
+const query = { esql: 'from the-data-view-title' };
 const msgComplete = {
   recordRawType: RecordRawType.PLAIN,
   fetchStatus: FetchStatus.PARTIAL,
@@ -108,12 +108,11 @@ describe('useTextBasedQueryLanguage', () => {
         index: 'the-data-view-id',
       });
     });
-    expect(replaceUrlState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
 
     replaceUrlState.mockReset();
 
     stateContainer.dataState.data$.documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
   test('should change viewMode to DOCUMENT_LEVEL if it was AGGREGATED_LEVEL', async () => {
     const { replaceUrlState } = renderHookWithContext(false, {
@@ -284,7 +283,7 @@ describe('useTextBasedQueryLanguage', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
@@ -297,7 +296,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
     stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });

@@ -116,6 +116,7 @@ export const useLensSuggestions = ({
       }
       return undefined;
     }
+    return undefined;
   }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
 
   useEffect(() => {

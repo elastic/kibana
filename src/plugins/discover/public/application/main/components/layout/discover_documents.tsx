@@ -28,10 +28,10 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '@kbn/discover-utils';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DataLoadingState, DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
@@ -44,7 +44,6 @@ import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/docu
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
-import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 
@@ -186,7 +185,7 @@ function DiscoverDocumentsComponent({
   const showTimeCol = useMemo(
     () =>
       // for ES|QL we want to show the time column only when is on Document view
-      (!isTextBasedQuery || (isTextBasedQuery && !columns?.length)) &&
+      (!isTextBasedQuery || !columns?.length) &&
       !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
       !!dataView.timeFieldName,
     [isTextBasedQuery, columns, uiSettings, dataView.timeFieldName]
@@ -237,7 +236,6 @@ function DiscoverDocumentsComponent({
             onSort={!isTextBasedQuery ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
-            DocViewer={DocViewer}
           />
         </>
       )}
@@ -298,7 +296,13 @@ function DiscoverDocumentsComponent({
         </>
       )}
       {isDataLoading && (
-        <EuiProgress size="xs" color="accent" position="absolute" css={progressStyle} />
+        <EuiProgress
+          data-test-subj="discoverDataGridUpdating"
+          size="xs"
+          color="accent"
+          position="absolute"
+          css={progressStyle}
+        />
       )}
     </EuiFlexItem>
   );

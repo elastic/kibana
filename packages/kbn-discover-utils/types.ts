@@ -9,6 +9,7 @@
 export type {
   DataTableRecord,
   EsHitRecord,
+  FieldTypeKnown,
   IgnoredReason,
   ShouldShowFieldInTableHandler,
 } from './src/types';

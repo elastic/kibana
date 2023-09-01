@@ -182,6 +182,36 @@ describe('TextBasedLanguagesEditor', () => {
     );
   });
 
+  it('should not render the minimize button for the expanded code editor mode if the prop is set to true', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      hideMinimizeButton: true,
+    };
+    let component: ReactWrapper;
+    await act(async () => {
+      component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    });
+    component!.update();
+    await act(async () => {
+      expect(
+        component.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
+      ).not.toBe(0);
+      expect(component.find('[data-test-subj="TextBasedLangEditor-minimize"]').length).toBe(0);
+      expect(
+        component.find('[data-test-subj="TextBasedLangEditor-documentation"]').length
+      ).not.toBe(0);
+    });
+    component!.update();
+    expect(
+      component!.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
+    ).not.toBe(0);
+    expect(component!.find('[data-test-subj="TextBasedLangEditor-minimize"]').length).not.toBe(0);
+    expect(component!.find('[data-test-subj="TextBasedLangEditor-documentation"]').length).not.toBe(
+      0
+    );
+  });
+
   it('should call the expand editor function when minimize button is clicked', async () => {
     const expandCodeEditorSpy = jest.fn();
     const newProps = {

@@ -34,7 +34,7 @@ export const XY_OVERRIDES: XYOverrides = {
   settings: {
     showLegend: true,
     legendPosition: 'bottom',
-    legendSize: 35,
+    legendSize: 50,
   },
 };
 

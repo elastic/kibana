@@ -57,7 +57,7 @@ export enum RecordRawType {
    */
   DOCUMENT = 'document',
   /**
-   * Data returned e.g. SQL queries, flat structure
+   * Data returned e.g. ES|QL queries, flat structure
    * */
   PLAIN = 'plain',
 }

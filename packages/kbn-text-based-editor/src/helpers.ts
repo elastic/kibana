@@ -143,7 +143,7 @@ export const getDocumentationSections = async (language: string) => {
       await import('./esql_documentation_sections');
     groups.push({
       label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.esql', {
-        defaultMessage: 'ESQL',
+        defaultMessage: 'ES|QL',
       }),
       items: [],
     });

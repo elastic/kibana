@@ -122,7 +122,6 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
       : [];
 
     return {
-      incomplete: true,
       suggestions: withDynamicItems.map((i) => ({
         ...i,
         range: {

@@ -622,6 +622,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     apis: {
       bulkIndexAlias: `${ELASTICSEARCH_DOCS}indices-aliases.html`,
+      indexStats: `${ELASTICSEARCH_DOCS}indices-stats.html`,
       byteSizeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#byte-units`,
       createAutoFollowPattern: `${ELASTICSEARCH_DOCS}ccr-put-auto-follow-pattern.html`,
       createFollower: `${ELASTICSEARCH_DOCS}ccr-put-follow.html`,
