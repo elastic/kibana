@@ -11,7 +11,13 @@ import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } from './config';
+import {
+  ActionsConfig,
+  AllowedHosts,
+  EnabledActionTypes,
+  CustomHostSettings,
+  DEFAULT_QUEUED_MAX,
+} from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
 import { ProxySettings, ResponseSettings, SSLSettings } from './types';
@@ -29,7 +35,6 @@ enum AllowListingField {
 }
 
 export const DEFAULT_MAX_ATTEMPTS: number = 3;
-export const DEFAULT_QUEUED_MAX = 1000000;
 
 export interface ActionsConfigurationUtilities {
   isHostnameAllowed: (hostname: string) => boolean;
