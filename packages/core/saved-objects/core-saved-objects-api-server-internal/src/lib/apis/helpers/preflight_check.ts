@@ -151,10 +151,7 @@ export class PreflightCheckHelper {
   }
 
   /**
-   * Pre-flight check to ensure that a multi-namespace object exists in the current namespace.
-   checkDocResult
-   rawDocSource
-   * if a multi-namespace type isn't found it might still exist in another namespace
+   * Pre-flight check fetching the document regardless of its namespace type for update.
    */
   public async preflightGetDocForUpdate({
     type,
@@ -190,13 +187,12 @@ export class PreflightCheckHelper {
   /**
    * Pre-flight check to ensure that a multi-namespace object exists in the current namespace for update API.
    */
-  public async preflightCheckNamespacesForUpdate({
+  public preflightCheckNamespacesForUpdate({
     type,
-    id,
     namespace,
     initialNamespaces,
     preflightDocResult,
-  }: PreflightNSParams): Promise<PreflightNSResult> {
+  }: PreflightNSParams): PreflightNSResult {
     const { checkDocFound, rawDocSource } = preflightDocResult;
     if (!this.registry.isMultiNamespace(type)) {
       return {
@@ -325,7 +321,10 @@ export interface PreflightDocParams {
   id: string;
   /** The current space */
   namespace: string | undefined;
-  /** optional migration version compatibility */
+  /**
+   * optional migration version compatibility.
+   * {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}
+   */
   migrationVersionCompatibility?: 'compatible' | 'raw';
 }
 

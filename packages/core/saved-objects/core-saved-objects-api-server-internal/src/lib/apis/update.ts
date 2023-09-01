@@ -99,7 +99,7 @@ export const executeUpdate = async <T>(
     namespace,
   });
 
-  const preflightDocNSResult = await preflightHelper.preflightCheckNamespacesForUpdate({
+  const preflightDocNSResult = preflightHelper.preflightCheckNamespacesForUpdate({
     type,
     id,
     namespace,

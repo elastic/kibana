@@ -74,9 +74,10 @@ export interface SavedObjectsRawDoc {
 }
 
 /**
- * @public
- * Saved object document in ES index in the _source
+ * Saved object document as stored in `_source` of doc in ES index
  * Similar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]
+ *
+ * @public
  */
 export interface SavedObjectsRawDocSource {
   type: string;

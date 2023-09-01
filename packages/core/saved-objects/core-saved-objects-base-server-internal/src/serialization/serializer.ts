@@ -109,7 +109,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       namespace && (namespaceTreatment === 'lax' || this.registry.isSingleNamespace(type));
     const includeNamespaces = this.registry.isMultiNamespace(type);
 
-    const savedObject = {
+    return {
       type,
       id,
       ...(includeNamespace && { namespace }),
@@ -125,7 +125,6 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(_source.created_at && { created_at: _source.created_at }),
       ...(version && { version }),
     };
-    return savedObject;
   }
 
   /**
