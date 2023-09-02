@@ -48,7 +48,7 @@ const cursorCss = css`
 
 const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
 
-const CURSOR = `{{${v4()}}}`;
+const CURSOR = ` {{${v4()}}}`;
 
 const loadingCursorPlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
