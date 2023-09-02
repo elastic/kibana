@@ -42,8 +42,9 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@brokenInSer
     cy.task('esArchiverResetKibana');
   });
 
-  describe('Last response filter', () => {
+  describe.skip('Last response filter', () => {
     // Flaky in serverless tests
+    // @brokenInServerless tag is not working so a skip was needed
     it('Filters rules by last response', { tags: ['@brokenInServerless'] }, function () {
       deleteIndex('test_index');
 

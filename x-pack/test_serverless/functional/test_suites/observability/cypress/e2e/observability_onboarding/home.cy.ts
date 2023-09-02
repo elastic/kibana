@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-describe('[Serverless Observability onboarding] Landing page', () => {
+// Flaky in serverless tests
+describe.skip('[Serverless Observability onboarding] Landing page', () => {
   beforeEach(() => {
     cy.loginAsElasticUser();
   });
 
-  // Flaky in serverless tests
-  it.skip('when user navigates to observability onboarding landing page is showed', () => {
+  it('when user navigates to observability onboarding landing page is showed', () => {
     cy.visitKibana('/app/observabilityOnboarding');
     cy.contains('Get started with Observability');
   });

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-describe('Serverless', () => {
+// Flaky in serverless tests
+describe.skip('Serverless', () => {
   beforeEach(() => {
     cy.loginAsElasticUser();
   });
 
-  // Flaky in serverless tests
-  it.skip('contains the side navigation for observabilitity serverless', () => {
+  it('contains the side navigation for observabilitity serverless', () => {
     cy.loginAsElasticUser();
     cy.contains('Log Explorer');
     cy.contains('Dashboards');
