@@ -54,11 +54,13 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
     field: 'field',
     name: HIGHLIGHTED_FIELDS_FIELD_COLUMN,
     'data-test-subj': 'fieldCell',
+    width: '50%',
   },
   {
     field: 'description',
     name: HIGHLIGHTED_FIELDS_VALUE_COLUMN,
     'data-test-subj': 'valueCell',
+    width: '50%',
     render: (description: {
       field: string;
       values: string[] | null | undefined;
