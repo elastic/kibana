@@ -11,15 +11,11 @@ import {
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './rule_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
-import {
-  ComparatorFns,
-  getComparatorScript,
-  getHumanReadableComparator,
-  STACK_ALERTS_FEATURE_ID,
-} from '../../../common';
+import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '../../../common';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';

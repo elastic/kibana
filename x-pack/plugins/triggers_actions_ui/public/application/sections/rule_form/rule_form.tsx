@@ -141,6 +141,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   connectorFeatureId?: string;
   validConsumers?: RuleCreationValidConsumer[];
   onChangeMetaData: (metadata: MetaData) => void;
+  useRuleProducer?: boolean;
 }
 
 export const RuleForm = ({
@@ -162,6 +163,7 @@ export const RuleForm = ({
   connectorFeatureId = AlertingConnectorFeatureId,
   validConsumers,
   onChangeMetaData,
+  useRuleProducer,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -521,6 +523,13 @@ export const RuleForm = ({
                     setRuleProperty('params', {});
                     if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
                       setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
+                    }
+
+                    if (
+                      useRuleProducer &&
+                      validConsumers?.includes(solution as RuleCreationValidConsumer)
+                    ) {
+                      setConsumer(solution as RuleCreationValidConsumer);
                     }
                   }}
                 />

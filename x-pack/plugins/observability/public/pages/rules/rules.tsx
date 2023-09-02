@@ -177,6 +177,7 @@ export function RulesPage() {
 
       {addRuleFlyoutVisibility && (
         <AddRuleFlyout
+          consumer={ALERTS_FEATURE_ID}
           filteredRuleTypes={filteredRuleTypes}
           validConsumers={observabilityRuleCreationValidConsumers}
           onClose={() => {
@@ -186,6 +187,7 @@ export function RulesPage() {
             setRefresh(new Date());
             return Promise.resolve();
           }}
+          useRuleProducer={true}
         />
       )}
     </ObservabilityPageTemplate>

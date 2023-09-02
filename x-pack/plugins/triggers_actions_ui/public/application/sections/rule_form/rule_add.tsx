@@ -53,6 +53,7 @@ const RuleAdd = ({
   metadata: initialMetadata,
   filteredRuleTypes,
   validConsumers,
+  useRuleProducer,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -199,7 +200,6 @@ const RuleAdd = ({
   };
 
   const ruleType = rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null;
-
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = useMemo(
     () => getRuleErrors(rule as Rule, ruleType, config),
     [rule, ruleType, config]
@@ -279,6 +279,7 @@ const RuleAdd = ({
                 hideInterval={hideInterval}
                 onChangeMetaData={onChangeMetaData}
                 setConsumer={setSelectedConsumer}
+                useRuleProducer={useRuleProducer}
               />
             </EuiFlyoutBody>
             <RuleAddFooter

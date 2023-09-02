@@ -12,10 +12,10 @@ import {
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
+import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { getComparatorScript } from '../../../../common';
 import { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { ES_QUERY_ID } from '../constants';
 import { getSearchParams } from './get_search_params';
 
 export interface FetchEsQueryOpts {
