@@ -13,6 +13,7 @@ import {
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomBodyProps,
 } from '@elastic/eui';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { buildDataViewMock, deepMockedFields, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
@@ -64,7 +65,7 @@ function getProps(): UnifiedDataTableProps {
       uiSettings: services.uiSettings,
       dataViewFieldEditor: services.dataViewFieldEditor,
       toastNotifications: services.toastNotifications,
-      storage: services.storage,
+      storage: services.storage as unknown as Storage,
       data: services.data,
       theme: services.theme,
     },
