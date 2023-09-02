@@ -37,7 +37,7 @@ export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 export const CSP_LATEST_FINDINGS_DATA_VIEW = 'logs-cloud_security_posture.findings_latest-*';
 
 export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
-export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
+export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-*';
 export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
 
 export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';

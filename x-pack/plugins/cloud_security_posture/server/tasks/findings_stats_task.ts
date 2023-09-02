@@ -19,7 +19,7 @@ import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_i
 import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  FINDINGS_INDEX_PATTERN,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_SEVERITY,
   VULN_MGMT_POLICY_TEMPLATE,
@@ -119,7 +119,7 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
 }
 
 const getScoreQuery = (): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  index: FINDINGS_INDEX_PATTERN,
   size: 0,
   // creates the safe_posture_type and asset_identifier runtime fields
   runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },

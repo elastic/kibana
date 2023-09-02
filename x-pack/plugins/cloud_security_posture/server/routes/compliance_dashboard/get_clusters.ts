@@ -14,6 +14,7 @@ import type {
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../common/constants';
 import { CspFinding } from '../../../common/schemas/csp_finding';
 import type { Cluster } from '../../../common/types';
 import {
@@ -52,7 +53,22 @@ export const getClustersQuery = (
   // creates the `asset_identifier` and `safe_posture_type` runtime fields,
   // `safe_posture_type` is used by the `query` to filter by posture type for older findings without this field
   runtime_mappings: { ...runtimeMappings, ...getIdentifierRuntimeMapping() },
-  query,
+  query: {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [
+        ...(query?.bool?.filter || []),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+            },
+          },
+        },
+      ],
+    },
+  },
   aggs: {
     aggs_by_asset_identifier: {
       terms: {
@@ -91,8 +107,8 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
     };
 
     // get cluster's stats
-    if (!clusterBucket.failed_findings || !clusterBucket.passed_findings)
-      throw new Error('missing findings evaluations per cluster bucket');
+    // if (!clusterBucket.event_code)
+    //   throw new Error('missing findings evaluations per cluster bucket');
     const stats = getStatsFromFindingsEvaluationsAggs(clusterBucket);
 
     // get cluster's resource types aggs

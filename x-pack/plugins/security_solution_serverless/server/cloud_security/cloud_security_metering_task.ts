@@ -9,7 +9,7 @@ import {
   CNVM_POLICY_TEMPLATE,
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
-  LATEST_FINDINGS_INDEX_PATTERN,
+  FINDINGS_INDEX_PATTERN,
   LATEST_VULNERABILITIES_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -30,11 +30,11 @@ const ASSETS_SAMPLE_GRANULARITY = '24h';
 
 const queryParams = {
   [CSPM_POLICY_TEMPLATE]: {
-    index: LATEST_FINDINGS_INDEX_PATTERN,
+    index: FINDINGS_INDEX_PATTERN,
     assets_identifier: 'resource.id',
   },
   [KSPM_POLICY_TEMPLATE]: {
-    index: LATEST_FINDINGS_INDEX_PATTERN,
+    index: FINDINGS_INDEX_PATTERN,
     assets_identifier: 'agent.id',
   },
   [CNVM_POLICY_TEMPLATE]: {

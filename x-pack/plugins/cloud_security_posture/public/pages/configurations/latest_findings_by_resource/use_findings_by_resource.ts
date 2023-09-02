@@ -24,8 +24,8 @@ import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import type { FindingsBaseEsQuery, Sort } from '../../../common/types';
-import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
+import { getFindingsCountAggQuery, getFindingsTimeRangeQuery } from '../utils/utils';
+import { FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
 
 interface UseFindingsByResourceOptions extends FindingsBaseEsQuery {
   enabled: boolean;
@@ -80,8 +80,8 @@ export const getFindingsByResourceAggQuery = ({
   query,
   sortDirection,
 }: UseFindingsByResourceOptions): SearchRequest => ({
-  index: CSP_LATEST_FINDINGS_DATA_VIEW,
-  query,
+  index: FINDINGS_INDEX_PATTERN,
+  query: getFindingsTimeRangeQuery(query),
   size: 0,
   runtime_mappings: getBelongsToRuntimeMapping(),
   aggs: {
@@ -104,9 +104,23 @@ export const getFindingsByResourceAggQuery = ({
         },
         failed_findings: {
           filter: { term: { 'result.evaluation': 'failed' } },
+          aggs: {
+            event_code: {
+              cardinality: {
+                field: 'event.code',
+              },
+            },
+          },
         },
         passed_findings: {
           filter: { term: { 'result.evaluation': 'passed' } },
+          aggs: {
+            event_code: {
+              cardinality: {
+                field: 'event.code',
+              },
+            },
+          },
         },
         // this field is runtime generated
         belongs_to: {
@@ -137,6 +151,9 @@ export const getFindingsByResourceAggQuery = ({
     },
   },
   ignore_unavailable: false,
+  collapse: {
+    field: 'event.code',
+  },
 });
 
 const getFirstKey = (
@@ -160,11 +177,11 @@ const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResour
   belongs_to: getFirstKey(resource.belongs_to.buckets),
   compliance_score: resource.compliance_score.value,
   findings: {
-    failed_findings: resource.failed_findings.doc_count,
+    failed_findings: resource.failed_findings.event_code.value,
     normalized:
-      resource.doc_count > 0 ? resource.failed_findings.doc_count / resource.doc_count : 0,
+      resource.doc_count > 0 ? resource.failed_findings.event_code.value / resource.doc_count : 0,
     total_findings: resource.doc_count,
-    passed_findings: resource.passed_findings.doc_count,
+    passed_findings: resource.passed_findings.event_code.value,
   },
 });
 
@@ -189,10 +206,7 @@ export const useFindingsByResource = (options: UseFindingsByResourceOptions) => 
 
       if (!aggregations) throw new Error('Failed to aggregate by, missing resource id');
 
-      if (
-        !Array.isArray(aggregations.resources.buckets) ||
-        !Array.isArray(aggregations.count.buckets)
-      )
+      if (!Array.isArray(aggregations.resources.buckets))
         throw new Error('Failed to group by, missing resource id');
 
       const page = aggregations.resources.buckets.map(createFindingsByResource);
@@ -200,7 +214,10 @@ export const useFindingsByResource = (options: UseFindingsByResourceOptions) => 
       return {
         page,
         total: aggregations.resource_total.value,
-        count: getAggregationCount(aggregations.count.buckets),
+        count: {
+          failed: aggregations.failed_findings.event_code.value,
+          passed: aggregations.passed_findings.event_code.value,
+        },
       };
     },
     {

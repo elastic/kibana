@@ -168,15 +168,15 @@ export const getCspStatus = async ({
     installedPackagePoliciesVulnMgmt,
     installedPolicyTemplates,
   ] = await Promise.all([
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger),
     checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger),
     checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'cspm'),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'cspm'),
     checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'cspm'),
     checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'cspm'),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'kspm'),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'kspm'),
     checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'kspm'),
     checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'kspm'),
 

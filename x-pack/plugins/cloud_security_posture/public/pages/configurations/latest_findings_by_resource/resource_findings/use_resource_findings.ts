@@ -12,10 +12,10 @@ import { Pagination } from '@elastic/eui';
 import { number } from 'io-ts';
 import { getSafeKspmClusterIdRuntimeMapping } from '../../../../../common/runtime_mappings/get_safe_kspm_cluster_id_runtime_mapping';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
-import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils';
+import { getFindingsCountAggQuery, getFindingsTimeRangeQuery } from '../../utils/utils';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery, Sort } from '../../../../common/types';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../../common/constants';
+import { FINDINGS_INDEX_PATTERN } from '../../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../../common/constants';
 import { showErrorToast } from '../../../../common/utils/show_error_toast';
 
@@ -47,17 +47,20 @@ const getResourceFindingsQuery = ({
   resourceId,
   sort,
 }: UseResourceFindingsOptions): estypes.SearchRequest => ({
-  index: CSP_LATEST_FINDINGS_DATA_VIEW,
+  index: FINDINGS_INDEX_PATTERN,
   body: {
     size: MAX_FINDINGS_TO_LOAD,
     runtime_mappings: {
       ...getSafeKspmClusterIdRuntimeMapping(),
     },
     query: {
-      ...query,
+      ...getFindingsTimeRangeQuery(query),
       bool: {
         ...query?.bool,
-        filter: [...(query?.bool?.filter || []), { term: { 'resource.id': resourceId } }],
+        filter: [
+          ...getFindingsTimeRangeQuery(query).bool.filter,
+          { term: { 'resource.id': resourceId } },
+        ],
       },
     },
     sort: [{ [sort.field]: sort.direction }],
@@ -78,6 +81,9 @@ const getResourceFindingsQuery = ({
     },
   },
   ignore_unavailable: false,
+  collapse: {
+    field: 'event.code',
+  },
 });
 
 export const useResourceFindings = (options: UseResourceFindingsOptions) => {
@@ -101,7 +107,6 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
       keepPreviousData: true,
       select: ({ rawResponse: { hits, aggregations } }: ResourceFindingsResponse) => {
         if (!aggregations) throw new Error('expected aggregations to exists');
-        assertNonBucketsArray(aggregations.count?.buckets);
         assertNonBucketsArray(aggregations.clusterId?.buckets);
         assertNonBucketsArray(aggregations.resourceSubType?.buckets);
         assertNonBucketsArray(aggregations.resourceName?.buckets);
@@ -109,8 +114,11 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
 
         return {
           page: hits.hits.map((hit) => hit._source!),
-          total: number.is(hits.total) ? hits.total : 0,
-          count: getAggregationCount(aggregations.count?.buckets),
+          total: number.is(aggregations.total.value) ? aggregations.total.value : 0,
+          count: {
+            failed: aggregations.failed_findings.event_code.value,
+            passed: aggregations.passed_findings.event_code.value,
+          },
           clusterId: getFirstBucketKey(aggregations.clusterId?.buckets),
           resourceSubType: getFirstBucketKey(aggregations.resourceSubType?.buckets),
           resourceName: getFirstBucketKey(aggregations.resourceName?.buckets),

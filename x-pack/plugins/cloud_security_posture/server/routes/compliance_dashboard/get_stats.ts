@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../common/constants';
 import { calculatePostureScore } from '../../../common/utils/helpers';
 import type { ComplianceDashboardData } from '../../../common/types';
 
@@ -26,9 +27,23 @@ export interface FindingsEvaluationsQueryResult {
 export const findingsEvaluationAggsQuery = {
   failed_findings: {
     filter: { term: { 'result.evaluation': 'failed' } },
+    aggs: {
+      event_code: {
+        cardinality: {
+          field: 'event.code',
+        },
+      },
+    },
   },
   passed_findings: {
     filter: { term: { 'result.evaluation': 'passed' } },
+    aggs: {
+      event_code: {
+        cardinality: {
+          field: 'event.code',
+        },
+      },
+    },
   },
 };
 
@@ -49,7 +64,22 @@ export const getEvaluationsQuery = (
   // creates the `safe_posture_type` runtime fields,
   // `safe_posture_type` is used by the `query` to filter by posture type for older findings without this field
   runtime_mappings: runtimeMappings,
-  query,
+  query: {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [
+        ...(query?.bool?.filter || []),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+            },
+          },
+        },
+      ],
+    },
+  },
   aggs: {
     ...findingsEvaluationAggsQuery,
     ...uniqueResourcesCountQuery,
@@ -57,14 +87,17 @@ export const getEvaluationsQuery = (
   pit: {
     id: pitId,
   },
+  collapse: {
+    field: 'event.code',
+  },
 });
 
 export const getStatsFromFindingsEvaluationsAggs = (
   findingsEvaluationsAggs: FindingsEvaluationsQueryResult
 ): ComplianceDashboardData['stats'] => {
   const resourcesEvaluated = findingsEvaluationsAggs.resources_evaluated?.value;
-  const failedFindings = findingsEvaluationsAggs.failed_findings.doc_count || 0;
-  const passedFindings = findingsEvaluationsAggs.passed_findings.doc_count || 0;
+  const failedFindings = findingsEvaluationsAggs.failed_findings.event_code.value;
+  const passedFindings = findingsEvaluationsAggs.passed_findings.event_code.value;
   const totalFindings = failedFindings + passedFindings;
   const postureScore = calculatePostureScore(passedFindings, failedFindings) || 0;
 

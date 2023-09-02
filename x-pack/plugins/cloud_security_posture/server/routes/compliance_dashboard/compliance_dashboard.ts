@@ -15,7 +15,7 @@ import type {
   ComplianceDashboardData,
   GetComplianceDashboardRequest,
 } from '../../../common/types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
+import { FINDINGS_INDEX_PATTERN, STATS_ROUTE_PATH } from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
@@ -60,8 +60,9 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
         try {
           const esClient = cspContext.esClient.asCurrentUser;
 
+          // TODO: Can we open point in time with the time range filter?
           const { id: pitId } = await esClient.openPointInTime({
-            index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+            index: FINDINGS_INDEX_PATTERN,
             keep_alive: '30s',
           });
 

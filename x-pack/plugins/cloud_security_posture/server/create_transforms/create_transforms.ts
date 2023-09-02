@@ -8,7 +8,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { latestFindingsTransform } from './latest_findings_transform';
+// import { latestFindingsTransform } from './latest_findings_transform';
 import { latestVulnerabilitiesTransform } from './latest_vulnerabilities_transforms';
 
 const LATEST_FINDINGS_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-default-0.0.1';
@@ -22,7 +22,7 @@ export const initializeCspTransforms = async (
 ): Promise<void> => {
   // Deletes old assets from previous versions as part of upgrade process
   await deletePreviousTransformsVersions(esClient, logger);
-  await initializeTransform(esClient, latestFindingsTransform, logger);
+  // await initializeTransform(esClient, latestFindingsTransform, logger);
   await initializeTransform(esClient, latestVulnerabilitiesTransform, logger);
 };
 

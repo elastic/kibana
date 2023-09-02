@@ -20,11 +20,7 @@ import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
-import {
-  INTERNAL_FEATURE_FLAGS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_PATTERN,
-} from '../../../../common/constants';
+import { INTERNAL_FEATURE_FLAGS, FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
@@ -99,9 +95,9 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
       defaultMessage: 'Index',
     }),
     description: discoverIndexLink ? (
-      <EuiLink href={discoverIndexLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
+      <EuiLink href={discoverIndexLink}>{FINDINGS_INDEX_PATTERN}</EuiLink>
     ) : (
-      LATEST_FINDINGS_INDEX_DEFAULT_NS
+      FINDINGS_INDEX_PATTERN
     ),
   },
 ];
@@ -159,7 +155,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
   const {
     services: { discover },
   } = useKibana();
-  const latestFindingsDataView = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const latestFindingsDataView = useLatestFindingsDataView(FINDINGS_INDEX_PATTERN);
 
   const discoverIndexLink = useMemo(
     () =>

@@ -13,8 +13,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { Sort, FindingsBaseEsQuery } from '../../../common/types';
-import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
+import { getFindingsCountAggQuery, getFindingsTimeRangeQuery } from '../utils/utils';
+import { FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 
@@ -38,12 +38,15 @@ interface FindingsAggs {
 }
 
 export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => ({
-  index: CSP_LATEST_FINDINGS_DATA_VIEW,
-  query,
+  index: FINDINGS_INDEX_PATTERN,
+  query: getFindingsTimeRangeQuery(query),
   sort: getSortField(sort),
   size: MAX_FINDINGS_TO_LOAD,
   aggs: getFindingsCountAggQuery(),
   ignore_unavailable: false,
+  collapse: {
+    field: 'event.code',
+  },
 });
 
 /**
@@ -92,13 +95,14 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
         })
       );
       if (!aggregations) throw new Error('expected aggregations to be an defined');
-      if (!Array.isArray(aggregations.count.buckets))
-        throw new Error('expected buckets to be an array');
 
       return {
         page: hits.hits.map((hit) => hit._source!),
-        total: number.is(hits.total) ? hits.total : 0,
-        count: getAggregationCount(aggregations.count.buckets),
+        total: number.is(aggregations.total.value) ? aggregations.total.value : 0,
+        count: {
+          failed: aggregations.failed_findings.event_code.value,
+          passed: aggregations.passed_findings.event_code.value,
+        },
       };
     },
     {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { EuiThemeComputed } from '@elastic/eui';
+import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import type { CspFinding } from '../../../../common/schemas/csp_finding';
 export { getFilters } from './get_filters';
 
@@ -19,21 +19,50 @@ export const getFindingsPageSizeInfo = ({
   pageEnd: pageIndex * pageSize + currentPageSize,
 });
 
-export const getFindingsCountAggQuery = () => ({
-  count: { terms: { field: 'result.evaluation' } },
+export const getFindingsTimeRangeQuery = (query) => ({
+  ...query,
+  bool: {
+    ...query?.bool,
+    filter: [
+      ...(query?.bool?.filter || []),
+      {
+        range: {
+          '@timestamp': {
+            gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+          },
+        },
+      },
+    ],
+  },
 });
 
-export const getAggregationCount = (
-  buckets: Array<estypes.AggregationsStringRareTermsBucketKeys | undefined>
-) => {
-  const passed = buckets.find((bucket) => bucket?.key === 'passed');
-  const failed = buckets.find((bucket) => bucket?.key === 'failed');
-
-  return {
-    passed: passed?.doc_count || 0,
-    failed: failed?.doc_count || 0,
-  };
-};
+export const getFindingsCountAggQuery = () => ({
+  failed_findings: {
+    filter: { term: { 'result.evaluation': 'failed' } },
+    aggs: {
+      event_code: {
+        cardinality: {
+          field: 'event.code',
+        },
+      },
+    },
+  },
+  passed_findings: {
+    filter: { term: { 'result.evaluation': 'passed' } },
+    aggs: {
+      event_code: {
+        cardinality: {
+          field: 'event.code',
+        },
+      },
+    },
+  },
+  total: {
+    cardinality: {
+      field: 'event.code',
+    },
+  },
+});
 
 const isSelectedRow = (row: CspFinding, selected?: CspFinding) =>
   row.resource.id === selected?.resource.id && row.rule.id === selected?.rule.id;

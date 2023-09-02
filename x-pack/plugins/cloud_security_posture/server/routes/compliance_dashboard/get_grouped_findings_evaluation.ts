@@ -12,6 +12,7 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../common/constants';
 import { calculatePostureScore } from '../../../common/utils/helpers';
 import type { ComplianceDashboardData } from '../../../common/types';
 import { KeyDocCount } from './compliance_dashboard';
@@ -34,14 +35,28 @@ export const failedFindingsAggQuery = {
   aggs_by_resource_type: {
     terms: {
       field: 'rule.section',
-      size: 5,
+      size: 60000,
     },
     aggs: {
       failed_findings: {
         filter: { term: { 'result.evaluation': 'failed' } },
+        aggs: {
+          event_code: {
+            cardinality: {
+              field: 'event.code',
+            },
+          },
+        },
       },
       passed_findings: {
         filter: { term: { 'result.evaluation': 'passed' } },
+        aggs: {
+          event_code: {
+            cardinality: {
+              field: 'event.code',
+            },
+          },
+        },
       },
       score: {
         bucket_script: {
@@ -72,7 +87,22 @@ export const getRisksEsQuery = (
   // creates the `safe_posture_type` runtime fields,
   // `safe_posture_type` is used by the `query` to filter by posture type for older findings without this field
   runtime_mappings: runtimeMappings,
-  query,
+  query: {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [
+        ...(query?.bool?.filter || []),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+            },
+          },
+        },
+      ],
+    },
+  },
   aggs: failedFindingsAggQuery,
   pit: {
     id: pitId,
@@ -83,8 +113,8 @@ export const getFailedFindingsFromAggs = (
   queryResult: FailedFindingsBucket[]
 ): ComplianceDashboardData['groupedFindingsEvaluation'] =>
   queryResult.map((bucket) => {
-    const totalPassed = bucket.passed_findings.doc_count || 0;
-    const totalFailed = bucket.failed_findings.doc_count || 0;
+    const totalFailed = bucket.failed_findings.event_code.value;
+    const totalPassed = bucket.passed_findings.event_code.value;
 
     return {
       name: bucket.key,
