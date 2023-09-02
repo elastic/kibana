@@ -98,6 +98,7 @@ When <type> filter(s) is/are enabled
 Then all <type> rule data is fetched and rendered
 
 Examples:
+  | type                   |
   | enabled                |
   | disabled               |
   | prebuilt               |
