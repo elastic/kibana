@@ -21,6 +21,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const defaultSettings = { defaultIndex: 'logstash-*' };
 
   // Flaky in serverless tests (before hook)
+  // Failing: See https://github.com/elastic/kibana/issues/165396
   describe.skip('Customizations', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();

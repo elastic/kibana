@@ -11,9 +11,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getService('svlCommonNavigation');
 
-  describe('home page', function () {
-    // Flaky in serverless tests
-    it.skip('has project header', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/165386
+  describe.skip('home page', function () {
+    it('has project header', async () => {
       await svlCommonNavigation.navigateToKibanaHome();
       await svlCommonPage.assertProjectHeaderExists();
     });
