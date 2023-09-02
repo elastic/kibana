@@ -1052,13 +1052,13 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.ENABLE_SQL",
+        "id": "def-common.ENABLE_ESQL",
         "type": "string",
         "tags": [],
-        "label": "ENABLE_SQL",
+        "label": "ENABLE_ESQL",
         "description": [],
         "signature": [
-          "\"discover:enableSql\""
+          "\"discover:enableESQL\""
         ],
         "path": "packages/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
