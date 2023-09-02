@@ -610,7 +610,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         <RuleSwitch
                           id={rule?.id ?? '-1'}
                           isDisabled={
-                            !rule?.id ||
+                            !rule ||
                             !isExistingRule ||
                             !canEditRuleWithActions(rule, hasActionsPrivileges) ||
                             !hasUserCRUDPermission(canUserCRUD) ||
