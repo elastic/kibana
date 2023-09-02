@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddable-utils';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import React from 'react';
+import type { LensEmbeddableInput, LensPublicStart } from '@kbn/lens-plugin/public';
+import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import { i18n } from '@kbn/i18n';
+import { Assign } from 'utility-types';
 import type { RegisterFunctionDefinition } from '../../common/types';
 import type {
   ObservabilityAIAssistantPluginStartDependencies,
@@ -56,6 +58,8 @@ function Lens({
     });
   }, [indexPattern]);
 
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+
   if (!formulaAsync.value || !dataViewAsync.value) {
     return <EuiLoadingSpinner />;
   }
@@ -68,19 +72,65 @@ function Lens({
     }),
   }).build();
 
+  const lensEmbeddableInput: Assign<LensEmbeddableInput, { attributes: typeof attributes }> = {
+    id: indexPattern,
+    attributes,
+    timeRange: {
+      from: start,
+      to: end,
+      mode: 'relative' as const,
+    },
+  };
+
   return (
-    <lens.EmbeddableComponent
-      id={indexPattern}
-      attributes={attributes}
-      timeRange={{
-        from: start,
-        to: end,
-        mode: 'relative',
-      }}
-      style={{
-        height: 240,
-      }}
-    />
+    <>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="lensApp"
+                onClick={() => {
+                  lens.navigateToPrefilledEditor(lensEmbeddableInput);
+                }}
+              >
+                {i18n.translate('xpack.observabilityAIAssistant.lensFunction.openInLens', {
+                  defaultMessage: 'Open in Lens',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="save"
+                onClick={() => {
+                  setIsSaveModalOpen(() => true);
+                }}
+              >
+                {i18n.translate('xpack.observabilityAIAssistant.lensFunction.save', {
+                  defaultMessage: 'Save',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <lens.EmbeddableComponent
+            {...lensEmbeddableInput}
+            style={{
+              height: 240,
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isSaveModalOpen ? (
+        <lens.SaveModalComponent
+          initialInput={lensEmbeddableInput}
+          onClose={() => {
+            setIsSaveModalOpen(() => false);
+          }}
+        />
+      ) : null}
+    </>
   );
 }
 
