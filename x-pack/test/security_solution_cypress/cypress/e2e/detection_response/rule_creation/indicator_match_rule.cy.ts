@@ -534,15 +534,15 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
     });
 
     describe('Duplicates the indicator rule', () => {
+      const ruleData = getNewThreatIndicatorRule({
+        name: 'Indicator rule duplicate test',
+        rule_id: 'rule_testing',
+        enabled: false,
+      });
+
       describe('on rule editing page', () => {
         beforeEach(() => {
-          createRule(
-            getNewThreatIndicatorRule({
-              name: 'Indicator rule duplicate test',
-              rule_id: 'rule_testing',
-              enabled: true,
-            })
-          );
+          createRule(ruleData);
           visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
           disableAutoRefresh();
         });
@@ -551,32 +551,28 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
           duplicateFirstRule();
           goBackToRuleDetails();
           goBackToRulesTable();
-          checkDuplicatedRule('Indicator rule duplicate test [Duplicate]');
+          checkDuplicatedRule(ruleData.name);
         });
 
         it("Allows the rule to be duplicated from the table's bulk actions", () => {
           selectAllRules();
           duplicateSelectedRulesWithExceptions();
-          checkDuplicatedRule('Indicator rule duplicate test [Duplicate]');
+          checkDuplicatedRule(`${ruleData.name} [Duplicate]`);
         });
       });
 
       describe('on rule details page', () => {
         beforeEach(() => {
-          createRule(
-            getNewThreatIndicatorRule({
-              name: 'Indicator rule duplicate test',
-              rule_id: 'rule_testing',
-              enabled: true,
-            })
-          ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id)));
+          createRule(getNewThreatIndicatorRule(ruleData)).then((rule) =>
+            visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
+          );
         });
 
         it('Allows the rule to be duplicated', () => {
           duplicateRuleFromMenu();
           goBackToRuleDetails();
           goBackToRulesTable();
-          checkDuplicatedRule('Indicator rule duplicate test [Duplicate]');
+          checkDuplicatedRule(`${ruleData.name} [Duplicate]`);
         });
       });
     });
