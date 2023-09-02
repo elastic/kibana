@@ -71,7 +71,8 @@
     "@kbn/serverless",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
-    "@kbn/no-data-page-plugin"
+    "@kbn/no-data-page-plugin",
+    "@kbn/rule-data-utils"
   ],
   "exclude": [
     "target/**/*"
