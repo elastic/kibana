@@ -22,6 +22,7 @@ export interface DataTableContext {
   selectedDocs: string[];
   setSelectedDocs: (selected: string[]) => void;
   valueToStringConverter: ValueToStringConverter;
+  componentsTourSteps?: Record<string, string>;
 }
 
 const defaultContext = {} as unknown as DataTableContext;

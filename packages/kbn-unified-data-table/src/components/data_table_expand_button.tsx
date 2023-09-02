@@ -15,15 +15,14 @@ import { UnifiedDataTableContext } from '../table_context';
 /**
  * Button to expand a given row
  */
-export const ExpandButton = (
-  { rowIndex, setCellProps }: EuiDataGridCellValueElementProps,
-  tourStep?: string
-) => {
+export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
   const toolTipRef = useRef<EuiToolTip>(null);
   const [pressed, setPressed] = useState<boolean>(false);
-  const { expanded, setExpanded, rows, isDarkMode } = useContext(UnifiedDataTableContext);
+  const { expanded, setExpanded, rows, isDarkMode, componentsTourSteps } =
+    useContext(UnifiedDataTableContext);
   const current = rows[rowIndex];
 
+  const tourStep = componentsTourSteps ? componentsTourSteps.expandButton : undefined;
   useEffect(() => {
     if (current.isAnchor) {
       setCellProps({

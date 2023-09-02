@@ -18,6 +18,7 @@ import './saved_search_grid.scss';
 import { MAX_DOC_FIELDS_DISPLAYED, ROW_HEIGHT_OPTION, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import { DiscoverGridFlyout } from '../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
+import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../components/discover_tour';
 
 export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
   totalHitCount?: number;
@@ -77,6 +78,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={renderDocumentView}
+        componentsTourSteps={{ expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument }}
       />
     </SavedSearchEmbeddableBase>
   );
