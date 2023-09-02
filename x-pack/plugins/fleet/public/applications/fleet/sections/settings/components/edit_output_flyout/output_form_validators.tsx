@@ -290,6 +290,20 @@ export function validateKafkaClientId(value: string) {
       ];
 }
 
+export function validateKafkaPartitioningGroupEvents(value: string) {
+  const regex = /^[0-9]+$/;
+  return regex.test(value)
+    ? undefined
+    : [
+        i18n.translate(
+          'xpack.fleet.settings.outputForm.kafkaPartitioningGroupEventsFormattingMessage',
+          {
+            defaultMessage: 'Number of events must be a number',
+          }
+        ),
+      ];
+}
+
 export function validateKafkaTopics(
   topics: Array<{
     topic: string;

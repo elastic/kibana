@@ -116,6 +116,7 @@ const TopNComponent: React.FC<Props> = ({
       <TopNContent>
         {view === 'raw' || view === 'all' ? (
           <EventsByDataset
+            applyGlobalQueriesAndFilters={false} // Global filters are already included in combinedQueries
             combinedQueries={combinedQueries}
             deleteQuery={deleteQuery}
             filters={applicableFilters}

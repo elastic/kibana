@@ -188,10 +188,6 @@ const findSloDefinitionsParamsSchema = t.type({
  */
 const findSloDefinitionsResponseSchema = t.array(sloResponseSchema);
 
-const getSLODiagnosisParamsSchema = t.type({
-  path: t.type({ id: t.string }),
-});
-
 const getSLOBurnRatesResponseSchema = t.type({
   burnRates: t.array(
     t.type({
@@ -277,7 +273,6 @@ export {
   findSLOResponseSchema,
   getPreviewDataParamsSchema,
   getPreviewDataResponseSchema,
-  getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
   getSLOResponseSchema,
   fetchHistoricalSummaryParamsSchema,

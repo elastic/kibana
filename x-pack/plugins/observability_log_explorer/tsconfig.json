@@ -1,0 +1,29 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    ".storybook/**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/log-explorer-plugin",
+    "@kbn/i18n",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-router",
+    "@kbn/observability-shared-plugin",
+    "@kbn/data-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/serverless",
+    "@kbn/core-chrome-browser",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

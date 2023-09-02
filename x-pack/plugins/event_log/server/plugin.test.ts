@@ -18,7 +18,8 @@ describe('event_log plugin', () => {
     const coreStart = coreMock.createStart() as CoreStart;
 
     const plugin = new Plugin(initializerContext);
-    const setup = plugin.setup(coreSetup);
+    // serverless setup is currently empty, and there is no mock
+    const setup = plugin.setup(coreSetup, { serverless: {} });
     expect(typeof setup.getLogger).toBe('function');
     expect(typeof setup.getProviderActions).toBe('function');
     expect(typeof setup.isIndexingEntries).toBe('function');
@@ -40,7 +41,8 @@ describe('event_log plugin', () => {
 
     const plugin = new Plugin(initializerContext);
     const spaces = spacesMock.createStart();
-    plugin.setup(coreSetup);
+    // serverless setup is currently empty, and there is no mock
+    plugin.setup(coreSetup, { serverless: {} });
     plugin.start(coreStart, { spaces });
     await plugin.stop();
     expect(mockLogger.debug).toBeCalledWith('shutdown: waiting to finish');

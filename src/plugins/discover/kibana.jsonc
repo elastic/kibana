@@ -24,9 +24,10 @@
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressions",
+      "unifiedDocViewer",
       "unifiedSearch",
       "unifiedHistogram",
-      "contentManagement",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "home",
@@ -36,7 +37,8 @@
       "triggersActionsUi",
       "savedObjectsTaggingOss",
       "lens",
-      "serverless"
+      "serverless",
+      "noDataPage"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch"],
     "extraPublicDirs": ["common"]

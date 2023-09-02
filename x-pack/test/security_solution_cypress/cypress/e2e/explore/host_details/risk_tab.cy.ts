@@ -10,10 +10,11 @@ import { login, visitHostDetailsPage } from '../../../tasks/login';
 import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
 import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 
-describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
+describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_hosts');
+    // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
+    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
   });
 
   beforeEach(() => {

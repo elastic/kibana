@@ -18,3 +18,21 @@ export const connectorResponseSchema = schema.object({
   is_system_action: schema.boolean(),
   referenced_by_count: schema.number(),
 });
+
+export const connectorTypesResponseSchema = schema.object({
+  id: schema.string(),
+  name: schema.string(),
+  enabled: schema.boolean(),
+  enabled_in_config: schema.boolean(),
+  enabled_in_license: schema.boolean(),
+  minimum_license_required: schema.oneOf([
+    schema.literal('basic'),
+    schema.literal('standard'),
+    schema.literal('gold'),
+    schema.literal('platinum'),
+    schema.literal('enterprise'),
+    schema.literal('trial'),
+  ]),
+  supported_feature_ids: schema.arrayOf(schema.string()),
+  is_system_action_type: schema.boolean(),
+});

@@ -35,6 +35,7 @@ import type {
   SavedObjectsClosePointInTimeResponse,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesObject,
@@ -347,7 +348,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   async bulkResolve<T = unknown>(
     objects: SavedObjectsBulkResolveObject[],
-    options: SavedObjectsGetOptions = {}
+    options: SavedObjectsResolveOptions = {}
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
     return await performBulkResolve(
       {
@@ -382,7 +383,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   async resolve<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsGetOptions = {}
+    options: SavedObjectsResolveOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
     return await performResolve(
       {
