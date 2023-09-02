@@ -8,24 +8,30 @@ Status: `in progress`. The current test plan matches `Milestone 1 - MVP` of the 
 
 ### Tickets
 
-<!-- Add links to any related tickets. -->
-
 - [Protections/Detections Coverage Overview Page](https://github.com/elastic/security-team/issues/2905) epic
 - [Add test coverage for Protections/Detections Coverage Overview](https://github.com/elastic/kibana/issues/162250)
 - [Write a test plan for Protections/Detections Coverage Overview](https://github.com/elastic/kibana/issues/162248)
 
 ### Terminology
 
-- **Mitre Att&ck**: The [3rd party framework](https://attack.mitre.org/) the dashboard is built upon. It is a knowledge base of attack tactics and techniques adversaries use in real world applications.
+- **MITRE ATT&CK**: The [3rd party framework](https://attack.mitre.org/) the dashboard is built upon. It is a knowledge base of attack tactics and techniques adversaries use in real world applications.
 
 - **Tactic**: A generalized category or process that advesaries use to attack a system. Envelops many relevant Mitre Att&ck techniques
 
 - **Technique**: A specific technique advesaries use to attack a system. Can belong to one or more different Mitre Tactics and can potentially contain one or more sub-techniques further describing the process.
 
+- **Rule Activity**: The filter type defining rule status, current options are `enabled` and `disabled`.
+
+- **Rule Source**: The filter type defining rule type, current options are `prebuilt`(from elastic prebuilt rules package) and `custom`(created by user)
+
+-**Initial filter state**: The filters present on initial page load. Rule activity will be set to `enabled`, rule source will be set to `prebuilt` and `custom`.
+
 ### Assumptions
 
 - Currently all scenarios below only apply to rules that have correctly mapped `threat` fields (unmapped fields or `threat` fields that don't contain current versioned Mitre Att&ck data will not be displayed in the dashboard)
 - The feature is available under the Basic license
+- "Rules" will be referring to Security rules only (unless stated otherwise)
+- Page always loads with initial filter state
 
 ### Non-functional requirements
 
@@ -33,47 +39,152 @@ Status: `in progress`. The current test plan matches `Milestone 1 - MVP` of the 
 
 ## Scenarios
 
-<!--
-  Add scenarios for the feature. Split them into meaningful sections (groups) of related scenarios.
-  The goal of having sections is to make it easier to navigate the test plan:
-  - there shouldn't be too many sections with few scenarios in each -- it would be hard to see
-    the whole picture of how the feature works
-  - there shouldn't bee too few sections with a lot of scenarios in each
+### Coverage overview workflow: base cases
 
-  For example, here's some typical sections you might want to add:
-  - "Core functionality". Happy paths, base use cases, etc. Split it into several sections if
-    there's too many scenarios for it.
-  - "Error handling"
-  - "Authorization / RBAC"
-  - "Kibana upgrade"
--->
+#### **Scenario: No rules installed**
 
-### Section 1
-
-#### **Scenario: Awesome feature works**
-
-<!-- Describe how are you planning to automate this scenario -->
-
-**Automation**: X e2e tests + Y integration tests + unit tests.
-
-<!-- Use Gherkin syntax to describe the scenario https://cucumber.io/docs/gherkin/ -->
+**Automation**: 1 e2e test + 1 unit test 1 integration test.
 
 ```Gherkin
-Given ...
-When ...
-Then ...
+Given no rules installed/created
+When user navigates to Coverage Overview page
+Then an empty grid of all Mitre tactics and techniques are displayed
 ```
 
-<!-- Consider adding any other useful notes and clarifications -->
+#### **Scenario: Rules installed**
 
-### Section 2
-
-#### **Scenario: ?**
-
-**Automation**: X e2e tests + Y integration tests + unit tests.
+**Automation**: 1 e2e test + 1 integration test
 
 ```Gherkin
-Given ...
-When ...
-Then ...
+Given rules installed/created
+And rules enabled
+When user navigates to Coverage Overview page
+Then page should render all rule data in grid
+And color tiles according to filters and dashboard legend
+```
+
+#### **Scenario: User clicks on tile**
+
+**Automation**: 1 e2e test + 1 unit test.
+
+```Gherkin
+Given rules installed/created
+And rules enabled
+When user navigates to Coverage Overview page
+And clicks on technique tile with X rules
+Then the popover should display X rule names under their corresponding rule activity secition
+And each name should link to its own rule details page
+```
+
+### Coverage overview workflow: filters
+
+#### **Scenario: No filters are present**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given coverage overview page is loaded with rule data
+When no filters or search term is present
+Then all rule data is fetched and rendered
+```
+
+#### **Scenario: Users enables filters**
+
+**Automation**: integration tests + e2e tests.
+
+```Gherkin
+Given coverage overview page is loaded with rule data
+When <type> filter(s) is/are enabled
+Then all <type> rule data is fetched and rendered
+
+Examples:
+  | enabled                |
+  | disabled               |
+  | prebuilt               |
+  | custom                 |
+  | enabled and disabled   |
+  | prebuilt and custom    |
+  | all                    |
+```
+
+#### **Scenario: Search term filter present**
+
+**Automation**: 1 integration test + 1 e2e test.
+
+```Gherkin
+Given coverage overview page is loaded with rule data
+When search term filter is present in search box
+And user submits the search
+Then only search-filtered rule data is fetched and rendered
+```
+
+### Coverage overview workflow: rule enabling
+
+#### **Scenario: User can't enable all rules when no disabled rules**
+
+**Automation**: 1 unit test.
+
+```Gherkin
+Given coverage overview page is loaded with rule data
+When user clicks on a technique tile with no disabled rules
+Then "enable all disabled" button should be disabled
+```
+
+#### **Scenario: User enables all rules for technique**
+
+**Automation**: 1 e2e test.
+
+```Gherkin
+Given coverage overview page is loaded with rule data
+When user clicks on a technique tile with X disabled rules
+And clicks "enable all disabled" button
+Then all X disabled rules hould be enabled
+And user should see success toast message for X rules enabled
+And page should update data
+```
+
+#### **Scenario: User can't enable rules when they don't have CRUD privileges**
+
+**Automation**: 1 unit test.
+
+```Gherkin
+Given coverage overview page is loaded with rule data
+And user that doesn't have CRUD permissions
+When user clicks on a technique tile with disabled rules
+Then "enable all disabled" button should be disabled
+```
+
+### API specific cases
+
+#### **Scenario: Non-security rules are present**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given non-security rules are present in instance
+When coverage overview data is fetched
+Then only security rule data is returned
+And no error is thrown
+```
+
+#### **Scenario: Invalid API body**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given coverage overview data is fetched
+And query has an invalid body
+Then `400` error is returned
+```
+
+### Error handling
+
+#### **Scenario: Error is handled when API error is returned**
+
+**Automation**: 1 e2e test.
+
+```Gherkin
+Given a user navigates to coverage overview page
+And any error is returned from coverage overview API
+Then error is handled and displayed via a toast
 ```
