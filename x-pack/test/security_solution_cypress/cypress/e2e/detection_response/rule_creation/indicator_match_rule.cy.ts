@@ -534,7 +534,7 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
     });
 
     describe('Duplicates the indicator rule', () => {
-      const ruleData = getNewThreatIndicatorRule({
+      const TESTED_RULE_DATA = getNewThreatIndicatorRule({
         name: 'Indicator rule duplicate test',
         rule_id: 'rule_testing',
         enabled: false,
@@ -542,7 +542,7 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
       describe('on rule editing page', () => {
         beforeEach(() => {
-          createRule(ruleData);
+          createRule(TESTED_RULE_DATA);
           visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
           disableAutoRefresh();
         });
@@ -551,19 +551,19 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
           duplicateFirstRule();
           goBackToRuleDetails();
           goBackToRulesTable();
-          checkDuplicatedRule(ruleData.name);
+          checkDuplicatedRule(TESTED_RULE_DATA.name);
         });
 
         it("Allows the rule to be duplicated from the table's bulk actions", () => {
           selectAllRules();
           duplicateSelectedRulesWithExceptions();
-          checkDuplicatedRule(`${ruleData.name} [Duplicate]`);
+          checkDuplicatedRule(`${TESTED_RULE_DATA.name} [Duplicate]`);
         });
       });
 
       describe('on rule details page', () => {
         beforeEach(() => {
-          createRule(getNewThreatIndicatorRule(ruleData)).then((rule) =>
+          createRule(getNewThreatIndicatorRule(TESTED_RULE_DATA)).then((rule) =>
             visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
           );
         });
@@ -572,7 +572,7 @@ describe('indicator match', { tags: ['@ess', '@brokenInServerless'] }, () => {
           duplicateRuleFromMenu();
           goBackToRuleDetails();
           goBackToRulesTable();
-          checkDuplicatedRule(`${ruleData.name} [Duplicate]`);
+          checkDuplicatedRule(`${TESTED_RULE_DATA.name} [Duplicate]`);
         });
       });
     });

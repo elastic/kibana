@@ -238,10 +238,15 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
 
   describe('Custom detection rules deletion and edition', () => {
     context('Deletion', () => {
+      const TESTED_RULE_DATA = getNewRule({
+        rule_id: 'rule1',
+        name: 'New Rule Test',
+        enabled: false,
+        max_signals: 500,
+      });
+
       beforeEach(() => {
-        createRule(
-          getNewRule({ rule_id: 'rule1', name: 'New Rule Test', enabled: false, max_signals: 500 })
-        );
+        createRule(TESTED_RULE_DATA);
         createRule(
           getNewOverrideRule({
             rule_id: 'rule2',
@@ -281,7 +286,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
 
       it('Deletes more than one rule', () => {
         getRulesManagementTableRows().then((rules) => {
-          const rulesToDelete = ['New Rule Test', 'Override Rule'] as const;
+          const rulesToDelete = [TESTED_RULE_DATA.name, 'Override Rule'] as const;
           const initialNumberOfRules = rules.length;
           const numberOfRulesToBeDeleted = 2;
           const expectedNumberOfRulesAfterDeletion =
@@ -318,7 +323,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
           const initialNumberOfRules = rules.length;
           const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-          goToRuleDetailsOf('New Rule Test');
+          goToRuleDetailsOf(TESTED_RULE_DATA.name);
           cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
 
           deleteRuleFromDetailsPage();
