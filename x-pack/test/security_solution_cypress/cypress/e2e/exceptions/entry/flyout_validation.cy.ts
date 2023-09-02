@@ -95,6 +95,7 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless'] }, () => {
         })
       ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')))
     );
+    cy.get(RULE_STATUS).should('have.text', '—');
   });
 
   after(() => {
