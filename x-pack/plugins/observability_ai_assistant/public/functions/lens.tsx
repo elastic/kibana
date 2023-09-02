@@ -94,7 +94,7 @@ function Lens({
                   lens.navigateToPrefilledEditor(lensEmbeddableInput);
                 }}
               >
-                {i18n.translate('xpack.observabilityAIAssistant.lensFunction.openInLens', {
+                {i18n.translate('xpack.observabilityAiAssistant.lensFunction.openInLens', {
                   defaultMessage: 'Open in Lens',
                 })}
               </EuiButton>
@@ -106,7 +106,7 @@ function Lens({
                   setIsSaveModalOpen(() => true);
                 }}
               >
-                {i18n.translate('xpack.observabilityAIAssistant.lensFunction.save', {
+                {i18n.translate('xpack.observabilityAiAssistant.lensFunction.save', {
                   defaultMessage: 'Save',
                 })}
               </EuiButton>
