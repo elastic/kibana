@@ -68,10 +68,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
     });
 
+    it('should return statusCode 400 to unsupported HTTP verbs', async () => {
+      const expectedResponseContains = '"statusCode": 400';
+      await PageObjects.console.enterRequest('\n OPTIONS /');
+      await PageObjects.console.clickPlay();
+      await retry.try(async () => {
+        const actualResponse = await PageObjects.console.getResponse();
+        log.debug(actualResponse);
+        expect(actualResponse).to.contain(expectedResponseContains);
+      });
+      expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
+    });
+
     describe('with kbn: prefix in request', () => {
-      before(async () => {
+      beforeEach(async () => {
         await PageObjects.console.clearTextArea();
       });
+
       it('it should send successful request to Kibana API', async () => {
         const expectedResponseContains = 'default space';
         await PageObjects.console.enterRequest('\n GET kbn:/api/spaces/space');
@@ -81,6 +94,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug(actualResponse);
           expect(actualResponse).to.contain(expectedResponseContains);
         });
+      });
+
+      it('should process PATCH requests for Kibana APIs', async () => {
+        await PageObjects.console.enterRequest(`
+          DELETE kbn:api/detection_engine/rules?rule_id=_
+          POST kbn:api/detection_engine/rules
+          {
+            "rule_id": "_",
+            "risk_score": 0,
+            "description": "_",
+            "name": "_",
+            "severity": "low",
+            "type": "query"
+          }
+          PATCH kbn:api/detection_engine/rules
+          {
+            "rule_id": "_",
+            "severity": "high"
+          }
+        `);
+        await PageObjects.console.selectAllRequests();
+        await PageObjects.console.clickPlay();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.console.collapseJsonBlock(5); // collapse response to DELETE
+        await PageObjects.console.collapseJsonBlock(6); // collapse response to POST
+        await retry.try(async () => {
+          const response = await PageObjects.console.getResponse();
+          log.debug(response);
+          expect(response).to.contain('# PATCH kbn:api/detection_engine/rules 200');
+          expect(response.split('# PATCH kbn:')[1]).to.contain('"severity": "high"');
+        });
+        expect(await PageObjects.console.hasErrorMarker()).to.be(false);
       });
     });
 
