@@ -11,7 +11,7 @@ import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithB
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
   SavedObjectsBulkResolveObject,
-  SavedObjectsGetOptions,
+  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
@@ -74,7 +74,7 @@ export interface InternalBulkResolveParams {
   encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
   securityExtension: ISavedObjectsSecurityExtension | undefined;
   objects: SavedObjectsBulkResolveObject[];
-  options?: SavedObjectsGetOptions;
+  options?: SavedObjectsResolveOptions;
 }
 
 /**
@@ -120,7 +120,7 @@ export async function internalBulkResolve<T>(
   const validObjects = allObjects.filter(isRight);
 
   const namespace = normalizeNamespace(options.namespace);
-  const { migrationVersionCompatibility, downwardConversion } = options;
+  const { migrationVersionCompatibility } = options;
 
   const aliasDocs = await fetchAndUpdateAliases(
     validObjects,
@@ -186,11 +186,8 @@ export async function internalBulkResolve<T>(
     // @ts-expect-error MultiGetHit._source is optional
     const object = getSavedObjectFromSource<T>(registry, objectType, objectId, doc, {
       migrationVersionCompatibility,
-      downwardConversion,
     });
-    const migrated = migrator.migrateDocument(object, {
-      allowDowngrade: downwardConversion && downwardConversion === 'forbid' ? false : true, // 'forbid' => docMigrator throws on when documents have higher model versions than current.
-    }) as SavedObject<T>;
+    const migrated = migrator.migrateDocument(object, { allowDowngrade: true }) as SavedObject<T>;
 
     if (!encryptionExtension?.isEncryptableType(migrated.type)) {
       return migrated;

@@ -23,7 +23,7 @@ import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagina
 describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   describe('Host uncommon processes table)', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'host_uncommon_processes');
+      cy.task('esArchiverLoad', { archiveName: 'host_uncommon_processes' });
     });
 
     beforeEach(() => {
@@ -99,7 +99,7 @@ describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('All users and all Hosts tables', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'all_users');
+      cy.task('esArchiverLoad', { archiveName: 'all_users' });
     });
 
     beforeEach(() => {

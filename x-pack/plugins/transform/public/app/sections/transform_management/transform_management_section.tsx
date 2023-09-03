@@ -5,39 +5,37 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
-
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { type FC, useEffect, useMemo, useState } from 'react';
 
 import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonText,
-  EuiModal,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiCallOut,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiModal,
+  EuiPageTemplate,
+  EuiSkeletonText,
+  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { needsReauthorization } from '../../common/reauthorization_utils';
-import {
-  APP_GET_TRANSFORM_CLUSTER_PRIVILEGES,
-  TRANSFORM_STATE,
-} from '../../../../common/constants';
 
-import { useRefreshTransformList, TransformListRow } from '../../common';
-import { useDocumentationLinks } from '../../hooks/use_documentation_links';
-import { useDeleteTransforms, useGetTransforms } from '../../hooks';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+
+import { needsReauthorization } from '../../common/reauthorization_utils';
+import { TRANSFORM_STATE } from '../../../../common/constants';
+
+import {
+  useDocumentationLinks,
+  useDeleteTransforms,
+  useTransformCapabilities,
+  useGetTransforms,
+  useGetTransformNodes,
+} from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
-import { AuthorizationContext, PrivilegesWrapper } from '../../lib/authorization';
+import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
+import { ToastNotificationText } from '../../components/toast_notification_text';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 
-import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
 import { SearchSelection } from './components/search_selection';
 import { TransformList } from './components/transform_list';
 import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
@@ -47,39 +45,52 @@ import {
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
 
+const ErrorMessageCallout: FC<{
+  text: JSX.Element;
+  errorMessage: IHttpFetchError<unknown> | null;
+}> = ({ text, errorMessage }) => {
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        size="s"
+        title={
+          <>
+            {text}{' '}
+            {errorMessage !== null && (
+              <ToastNotificationText inline={true} forceModal={true} text={errorMessage} />
+            )}
+          </>
+        }
+        color="danger"
+        iconType="error"
+      />
+    </>
+  );
+};
+
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
 
-  const [transformsLoading, setTransformsLoading] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [blockRefresh, setBlockRefresh] = useState(false);
-  const [transforms, setTransforms] = useState<TransformListRow[]>([]);
-  const [transformNodes, setTransformNodes] = useState<number>(0);
-  const [errorMessage, setErrorMessage] = useState<any>(undefined);
-  const [transformIdsWithoutConfig, setTransformIdsWithoutConfig] = useState<
-    string[] | undefined
-  >();
-
   const deleteTransforms = useDeleteTransforms();
 
-  const getTransforms = useGetTransforms(
-    setTransforms,
-    setTransformNodes,
-    setErrorMessage,
-    setTransformIdsWithoutConfig,
-    setIsInitialized,
-    blockRefresh
-  );
+  const {
+    isInitialLoading: transformNodesInitialLoading,
+    error: transformNodesErrorMessage,
+    data: transformNodesData = 0,
+  } = useGetTransformNodes();
+  const transformNodes = transformNodesErrorMessage === null ? transformNodesData : 0;
 
-  // Subscribe to the refresh observable to trigger reloading the transform list.
-  useRefreshTransformList({
-    isLoading: setTransformsLoading,
-    onRefresh: () => getTransforms(true),
-  });
-  // Call useRefreshInterval() after the subscription above is set up.
-  useRefreshInterval(setBlockRefresh);
+  const {
+    isInitialLoading: transformsInitialLoading,
+    isLoading: transformsLoading,
+    error: transformsErrorMessage,
+    data: { transforms, transformIdsWithoutConfig },
+  } = useGetTransforms({ enabled: !transformNodesInitialLoading && transformNodes > 0 });
 
-  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+  const isInitialLoading = transformNodesInitialLoading || transformsInitialLoading;
+
+  const { canStartStopTransform } = useTransformCapabilities();
 
   const unauthorizedTransformsWarning = useMemo(() => {
     const unauthorizedCnt = transforms.filter((t) => needsReauthorization(t)).length;
@@ -151,7 +162,7 @@ export const TransformManagement: FC = () => {
 
   return (
     <>
-      <EuiPageHeader
+      <EuiPageTemplate.Header
         pageTitle={
           <span data-test-subj="transformAppTitle">
             <FormattedMessage
@@ -168,107 +179,107 @@ export const TransformManagement: FC = () => {
         }
         rightSideItems={[docsLink]}
         bottomBorder
+        paddingSize={'none'}
       />
 
-      <EuiSpacer size="l" />
-
-      <EuiPageContentBody data-test-subj="transformPageTransformList">
-        {!isInitialized && <EuiSkeletonText lines={2} />}
-        {isInitialized && (
+      <EuiPageTemplate.Section paddingSize={'none'} data-test-subj="transformPageTransformList">
+        {isInitialLoading && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiSkeletonText lines={2} />
+          </>
+        )}
+        {!isInitialLoading && (
           <>
             {unauthorizedTransformsWarning}
 
+            {transformNodesErrorMessage !== null && (
+              <ErrorMessageCallout
+                text={
+                  <FormattedMessage
+                    id="xpack.transform.list.transformNodesErrorPromptTitle"
+                    defaultMessage="An error occurred getting the number of transform nodes."
+                  />
+                }
+                errorMessage={transformNodesErrorMessage}
+              />
+            )}
+            {transformsErrorMessage !== null && (
+              <ErrorMessageCallout
+                text={
+                  <FormattedMessage
+                    id="xpack.transform.list.transformListErrorPromptTitle"
+                    defaultMessage="An error occurred getting the transform list."
+                  />
+                }
+                errorMessage={transformsErrorMessage}
+              />
+            )}
+            <EuiSpacer size="s" />
+
             <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
             <EuiSpacer size="s" />
-            {typeof errorMessage !== 'undefined' && (
-              <EuiFlexGroup justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>
-                  <EuiSpacer size="l" />
-                  <EuiPageContent
-                    verticalPosition="center"
-                    horizontalPosition="center"
-                    color="danger"
-                  >
-                    <EuiEmptyPrompt
-                      iconType="warning"
-                      title={
-                        <h2>
-                          <FormattedMessage
-                            id="xpack.transform.list.errorPromptTitle"
-                            defaultMessage="An error occurred getting the transform list"
-                          />
-                        </h2>
-                      }
-                      body={
-                        <p>
-                          <pre>{JSON.stringify(errorMessage)}</pre>
-                        </p>
-                      }
-                      actions={[]}
-                    />
-                  </EuiPageContent>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-            {typeof errorMessage === 'undefined' && (
-              <AlertRulesManageContext.Provider value={getAlertRuleManageContext()}>
-                {transformIdsWithoutConfig ? (
-                  <>
-                    <EuiCallOut color="warning">
-                      <p>
-                        <FormattedMessage
-                          id="xpack.transform.danglingTasksError"
-                          defaultMessage="{count} {count, plural, one {transform is} other {transforms are}} missing configuration details: [{transformIds}] {count, plural, one {It} other {They}} cannot be recovered and should be deleted."
-                          values={{
-                            count: transformIdsWithoutConfig.length,
-                            transformIds: transformIdsWithoutConfig.join(', '),
-                          }}
-                        />
-                      </p>
-                      <EuiButton
-                        color="warning"
-                        size="s"
-                        onClick={async () => {
-                          await deleteTransforms(
-                            // If transform task doesn't have any corresponding config
-                            // we won't know what the destination index or data view would be
-                            // and should be force deleted
-                            {
-                              transformsInfo: transformIdsWithoutConfig.map((id) => ({
-                                id,
-                                state: TRANSFORM_STATE.FAILED,
-                              })),
-                              deleteDestIndex: false,
-                              deleteDestDataView: false,
-                              forceDelete: true,
-                            }
-                          );
+
+            <AlertRulesManageContext.Provider value={getAlertRuleManageContext()}>
+              {transformIdsWithoutConfig ? (
+                <>
+                  <EuiCallOut color="warning">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.transform.danglingTasksError"
+                        defaultMessage="{count} {count, plural, one {transform is} other {transforms are}} missing configuration details: [{transformIds}] {count, plural, one {It} other {They}} cannot be recovered and should be deleted."
+                        values={{
+                          count: transformIdsWithoutConfig.length,
+                          transformIds: transformIdsWithoutConfig.join(', '),
                         }}
-                      >
-                        <FormattedMessage
-                          id="xpack.transform.forceDeleteTransformMessage"
-                          defaultMessage="Delete {count} {count, plural, one {transform} other {transforms}}"
-                          values={{
-                            count: transformIdsWithoutConfig.length,
-                          }}
-                        />
-                      </EuiButton>
-                    </EuiCallOut>
-                    <EuiSpacer />
-                  </>
-                ) : null}
+                      />
+                    </p>
+                    <EuiButton
+                      color="warning"
+                      size="s"
+                      onClick={() =>
+                        deleteTransforms(
+                          // If transform task doesn't have any corresponding config
+                          // we won't know what the destination index or data view would be
+                          // and should be force deleted
+                          {
+                            transformsInfo: transformIdsWithoutConfig.map((id) => ({
+                              id,
+                              state: TRANSFORM_STATE.FAILED,
+                            })),
+                            deleteDestIndex: false,
+                            deleteDestDataView: false,
+                            forceDelete: true,
+                          }
+                        )
+                      }
+                    >
+                      <FormattedMessage
+                        id="xpack.transform.forceDeleteTransformMessage"
+                        defaultMessage="Delete {count} {count, plural, one {transform} other {transforms}}"
+                        values={{
+                          count: transformIdsWithoutConfig.length,
+                        }}
+                      />
+                    </EuiButton>
+                  </EuiCallOut>
+                  <EuiSpacer />
+                </>
+              ) : null}
+              {(transformNodes > 0 || transforms.length > 0) && (
                 <TransformList
+                  isLoading={transformsLoading}
                   onCreateTransform={onOpenModal}
                   transformNodes={transformNodes}
                   transforms={transforms}
                   transformsLoading={transformsLoading}
                 />
-                <TransformAlertFlyoutWrapper />
-              </AlertRulesManageContext.Provider>
-            )}
+              )}
+              <TransformAlertFlyoutWrapper />
+            </AlertRulesManageContext.Provider>
           </>
         )}
-      </EuiPageContentBody>
+      </EuiPageTemplate.Section>
 
       {isSearchSelectionVisible && (
         <EuiModal
@@ -291,8 +302,8 @@ export const TransformManagementSection: FC = () => {
   }, []);
 
   return (
-    <PrivilegesWrapper privileges={APP_GET_TRANSFORM_CLUSTER_PRIVILEGES}>
+    <CapabilitiesWrapper requiredCapabilities={'canGetTransform'}>
       <TransformManagement />
-    </PrivilegesWrapper>
+    </CapabilitiesWrapper>
   );
 };

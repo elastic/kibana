@@ -16,7 +16,7 @@ import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   SavedObjectConfig,
   type SavedObjectsConfigType,
@@ -311,6 +311,7 @@ const getMigrator = async ({
     docLinks,
     waitForMigrationCompletion: false, // ensure we have an active role in the migration
     nodeRoles,
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   });
 };
 

@@ -65,7 +65,7 @@ export const performBulkGet = async <T>(
   const { securityExtension, spacesExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
-  const { migrationVersionCompatibility, downwardConversion } = options;
+  const { migrationVersionCompatibility } = options;
 
   if (objects.length === 0) {
     return { saved_objects: [] };
@@ -204,7 +204,7 @@ export const performBulkGet = async <T>(
       const document = getSavedObjectFromSource(registry, type, id, doc, {
         migrationVersionCompatibility,
       });
-      const migrated = migrationHelper.migrateStorageDocument(document, { downwardConversion });
+      const migrated = migrationHelper.migrateStorageDocument(document);
 
       return migrated;
     }),

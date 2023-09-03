@@ -92,7 +92,9 @@
             "label": "createPluginInitializerContext",
             "description": [],
             "signature": [
-              "(config?: unknown) => ",
+              "(config?: unknown, { buildFlavor }?: { buildFlavor?: ",
+              "BuildFlavor",
+              " | undefined; }) => ",
               {
                 "pluginId": "@kbn/core-plugins-browser",
                 "scope": "common",
@@ -116,6 +118,22 @@
                 "description": [],
                 "signature": [
                   "unknown"
+                ],
+                "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-plugins-browser-mocks",
+                "id": "def-common.pluginsServiceMock.createPluginInitializerContext.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "__1",
+                "description": [],
+                "signature": [
+                  "{ buildFlavor?: ",
+                  "BuildFlavor",
+                  " | undefined; }"
                 ],
                 "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
                 "deprecated": false,

@@ -64,9 +64,7 @@ describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
     );
 
     // Create exception list not used by any rules
-    createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
-      'exceptionListResponse'
-    );
+    createExceptionList(getExceptionList1(), getExceptionList1().list_id);
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id);
 

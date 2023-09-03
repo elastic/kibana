@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getExceptionList, expectedExportedExceptionList } from '../../../../objects/exception';
+import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { expectedExportedExceptionList, getExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -13,13 +14,13 @@ import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../..
 
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import {
+  assertNumberLinkedRules,
+  createSharedExceptionList,
   deleteExceptionListWithoutRuleReferenceByListId,
   deleteExceptionListWithRuleReferenceByListId,
   exportExceptionList,
-  waitForExceptionsTableToBeLoaded,
-  createSharedExceptionList,
   linkRulesToExceptionList,
-  assertNumberLinkedRules,
+  waitForExceptionsTableToBeLoaded,
 } from '../../../../tasks/exceptions_table';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
@@ -44,12 +45,15 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
+let exceptionListResponse: Cypress.Response<ExceptionListSchema>;
+
 describe(
   'Manage lists from "Shared Exception Lists" page',
   { tags: ['@ess', '@serverless'] },
   () => {
     describe('Create/Export/Delete List', () => {
       before(() => {
+        cy.task('esArchiverResetKibana');
         createRule(getNewRule({ name: 'Another rule' }));
 
         // Create exception list associated with a rule
@@ -69,9 +73,9 @@ describe(
         );
 
         // Create exception list not used by any rules
-        createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
-          'exceptionListResponse'
-        );
+        createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) => {
+          exceptionListResponse = response;
+        });
       });
 
       beforeEach(() => {
@@ -88,7 +92,7 @@ describe(
         cy.wait('@export').then(({ response }) => {
           cy.wrap(response?.body).should(
             'eql',
-            expectedExportedExceptionList(this.exceptionListResponse)
+            expectedExportedExceptionList(exceptionListResponse)
           );
 
           cy.get(TOASTER).should(

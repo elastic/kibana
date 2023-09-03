@@ -9,7 +9,6 @@ import {
   IEsSearchRequest,
   IKibanaSearchResponse,
   isCompleteResponse,
-  isErrorResponse,
 } from '@kbn/data-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -97,9 +96,6 @@ export const search = async <TResponse, T = {}>(
           if (isCompleteResponse(response)) {
             inspect.recordRequestCompletion(searchRequest, response);
             resolve(response.rawResponse);
-          } else if (isErrorResponse(response)) {
-            inspect.recordRequestError(response);
-            reject(response);
           }
         },
         error: (requestError) => {
