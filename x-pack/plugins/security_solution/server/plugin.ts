@@ -191,6 +191,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
+      cloud: plugins.cloud,
     });
 
     initUsageCollectors({
@@ -522,7 +523,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       manifestManager,
       registerIngestCallback,
       licenseService,
-      cloud: plugins.cloud,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,

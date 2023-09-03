@@ -51,6 +51,7 @@ import type { AppFeaturesService } from '../lib/app_features_service/app_feature
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
+  cloud: CloudSetup;
 }
 
 export interface EndpointAppContextServiceStartContract {
@@ -73,7 +74,6 @@ export interface EndpointAppContextServiceStartContract {
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ActionCreateService | undefined;
-  cloud: CloudSetup;
   esClient: ElasticsearchClient;
   appFeaturesService: AppFeaturesService;
   savedObjectsClient: SavedObjectsClientContract;
@@ -108,7 +108,6 @@ export class EndpointAppContextService {
         logger,
         manifestManager,
         alerting,
-        cloud,
         licenseService,
         exceptionListsClient,
         featureUsageService,
@@ -127,7 +126,7 @@ export class EndpointAppContextService {
           alerting,
           licenseService,
           exceptionListsClient,
-          cloud,
+          this.setupDependencies.cloud,
           appFeaturesService
         )
       );
@@ -144,7 +143,7 @@ export class EndpointAppContextService {
           licenseService,
           featureUsageService,
           endpointMetadataService,
-          cloud,
+          this.setupDependencies.cloud,
           esClient,
           appFeaturesService
         )

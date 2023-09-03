@@ -110,6 +110,27 @@ The editor also works on the expanded mode:
     </Story>
 </Canvas>
 
+The editor also works on the expanded mode with the minimize button hidden:
+
+<Canvas>
+    <Story 
+        name='on expanded mode with hidden the minimize button'
+        args={
+            {
+                query: { esql: 'from dataview | keep field1, field2' },
+                isCodeEditorExpanded:true,
+                hideMinimizeButton: true,
+                'data-test-subj':'test-id',
+            }
+        }
+        argTypes={
+            { onTextLangQueryChange: { action: 'changed' }, onTextLangQuerySubmit:  { action: 'submitted' }, expandCodeEditor:  { action: 'expanded' }}
+        }
+        >
+    {Template.bind({})}
+    </Story>
+</Canvas>
+
 ## Component props
 
 The component exposes the following properties:
