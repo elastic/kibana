@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AGGREGATION_PRECISION_THRESHOLD,
   ASSETS_SAMPLE_GRANULARITY,
@@ -16,9 +18,6 @@ import {
   METERING_CONFIGS,
   THRESHOLD_MINUTES,
 } from './constants';
-
-import type { Logger } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Tier, UsageRecord } from '../types';
 import type {
   CloudSecurityMeteringCallbackInput,
@@ -255,8 +254,6 @@ export const getCloudSecurityUsageRecord = async ({
       cloudSecuritySolution,
       searchFrom
     );
-
-    console.log({ assetCountAggregations });
 
     const usageRecords = await getUsageRecords(
       assetCountAggregations,

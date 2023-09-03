@@ -13,7 +13,7 @@ import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
 import type { ServerlessSecurityConfig } from '../config';
 import type { CloudSecuritySolutions } from './types';
 import type { ProductTier } from '../../common/product';
-import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM, CLOUD_DEFEND } from './constants';
+import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM } from './constants';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
