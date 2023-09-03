@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_PATTERN,
@@ -17,8 +19,6 @@ import { latestFindingsPipelineIngestConfig, scorePipelineIngestConfig } from '.
 import { latestIndexConfigs } from './latest_indices';
 import { IndexConfig, IndexTemplateParams } from './types';
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { CloudSecurityPostureConfig } from '../config';
 
 interface IndexTemplateSettings {
