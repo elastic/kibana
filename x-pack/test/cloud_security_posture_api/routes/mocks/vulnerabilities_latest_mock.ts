@@ -220,3 +220,42 @@ export const vulnerabilitiesLatestMock = [
     },
   },
 ];
+
+export const scoresVulnerabilitiesMock = [
+  {
+    // '@timestamp': '2023-09-03T11:36:58.441344Z',
+    critical: 0,
+    high: 1,
+    medium: 1,
+    low: 0,
+    policy_template: 'vuln_mgmt',
+    vulnerabilities_stats_by_cloud_account: {
+      '704479110758': {
+        cloudAccountName: 'elastic-security-cloud-security-dev',
+        cloudAccountId: '704479110758',
+        critical: 0,
+        high: 1,
+        medium: 1,
+        low: 0,
+      },
+    },
+  },
+  {
+    // '@timestamp': '2023-09-03T11:36:58.441344Z',
+    critical: 0,
+    high: 1,
+    medium: 1,
+    low: 0,
+    policy_template: 'vuln_mgmt',
+    vulnerabilities_stats_by_cloud_account: {
+      '704479110758': {
+        cloudAccountName: 'elastic-security-cloud-security-dev',
+        cloudAccountId: '704479110758',
+        critical: 0,
+        high: 1,
+        medium: 1,
+        low: 0,
+      },
+    },
+  },
+];

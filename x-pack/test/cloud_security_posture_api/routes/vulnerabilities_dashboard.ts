@@ -8,10 +8,99 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { vulnerabilitiesLatestMock } from './mocks/vulnerabilities_latest_mock';
+import {
+  scoresVulnerabilitiesMock,
+  vulnerabilitiesLatestMock,
+} from './mocks/vulnerabilities_latest_mock';
+
+export interface CnvmStatistics {
+  criticalCount?: number;
+  highCount?: number;
+  mediumCount?: number;
+  resourcesScanned?: number;
+  cloudRegions?: number;
+}
+
+export interface AccountVulnStats {
+  cloudAccountId: string;
+  cloudAccountName: string;
+  critical?: number;
+  high?: number;
+  medium?: number;
+  low?: number;
+}
+
+export interface VulnStatsTrend {
+  '@timestamp': string;
+  policy_template: 'vuln_mgmt';
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  vulnerabilities_stats_by_cloud_account?: Record<
+    AccountVulnStats['cloudAccountId'],
+    AccountVulnStats
+  >;
+}
+
+export interface VulnerableResourceStat {
+  vulnerabilityCount?: number;
+  resource: {
+    id?: string;
+    name?: string;
+  };
+  cloudRegion?: string;
+}
+
+export interface PatchableVulnerabilityStat {
+  vulnerabilityCount?: number;
+  packageFixVersion?: string;
+  cve?: string;
+  cvss: {
+    score?: number;
+    version?: string;
+  };
+}
+
+export interface VulnerabilityStat {
+  packageFixVersion?: string;
+  packageName?: string;
+  packageVersion?: string;
+  severity?: string;
+  vulnerabilityCount?: number;
+  cvss: {
+    score?: number;
+    version?: string;
+  };
+}
+
+export interface CnvmDashboardData {
+  cnvmStatistics: CnvmStatistics;
+  vulnTrends: VulnStatsTrend[];
+  topVulnerableResources: VulnerableResourceStat[];
+  topPatchableVulnerabilities: PatchableVulnerabilityStat[];
+  topVulnerabilities: VulnerabilityStat[];
+}
 
 const VULNERABILITIES_LATEST_INDEX = 'logs-cloud_security_posture.vulnerabilities_latest-default';
 const BENCHMARK_SCORES_INDEX = 'logs-cloud_security_posture.scores-default';
+
+type CnvmDashboardDataWithoutTimestamp = Omit<CnvmDashboardData, 'vulnTrends'> & {
+  vulnTrends: Array<Omit<VulnStatsTrend, '@timestamp'>>;
+};
+const removeRealtimeCalculatedFields = (
+  responseBody: CnvmDashboardData
+): CnvmDashboardDataWithoutTimestamp => {
+  const cleanedVulnTrends = responseBody.vulnTrends.map((trend) => {
+    const { ['@timestamp']: timestamp, ...rest } = trend;
+    return rest;
+  });
+
+  return {
+    ...responseBody,
+    vulnTrends: cleanedVulnTrends,
+  };
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -59,12 +148,24 @@ export default function ({ getService }: FtrProviderContext) {
         )
       );
     },
+
+    addScores: async <T>(scoresMock: T[]) => {
+      await Promise.all(
+        scoresMock.map((scoreDoc) =>
+          es.index({
+            index: 'logs-cloud_security_posture.scores-default',
+            body: scoreDoc,
+          })
+        )
+      );
+    },
   };
 
   describe('Vulnerability Dashboard API', async () => {
     before(async () => {
       await waitForPluginInitialized();
       await index.add(vulnerabilitiesLatestMock);
+      await index.addScores(scoresVulnerabilitiesMock);
     });
 
     afterEach(async () => {
@@ -75,20 +176,17 @@ export default function ({ getService }: FtrProviderContext) {
     it('API responds with a 200 status code and matching data mock', async () => {
       const { body } = await supertest
         .get(`/internal/cloud_security_posture/vulnerabilities_dashboard`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          unencrypted: true,
-          refreshCache: true,
-        })
+        // .set('kbn-xsrf', 'xxxx')
+        // .send({
+        //   unencrypted: true,
+        //   refreshCache: true,
+        // })
         .expect(200);
 
-      // TODO: make a function to remove real time calculated fields from 'body' like '@timestamp'
+      // @timestamp is calculated in real time while indexing the documents, we need to remove it to remove inconsistencies between mock and actual result
+      const cleanedBody = removeRealtimeCalculatedFields(body);
 
-      console.log('JSON.stringify(body, null, 2)');
-      console.log(JSON.stringify(body, null, 2));
-      console.log('JSON.stringify(body, null, 2)');
-
-      expect(body).to.eql({
+      expect(cleanedBody).to.eql({
         cnvmStatistics: {
           criticalCount: 0,
           highCount: 1,
@@ -96,11 +194,12 @@ export default function ({ getService }: FtrProviderContext) {
           resourcesScanned: 2,
           cloudRegions: 1,
         },
+        // TODO: add scores index mock and testings for trend graph
         vulnTrends: [
           {
             high: 1,
             policy_template: 'vuln_mgmt',
-            // '@timestamp': /[\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}\.[\d]{6}Z/,
+            // '@timestamp': '2023-09-03T12:57:04.925186Z',
             critical: 0,
             low: 0,
             vulnerabilities_stats_by_cloud_account: {
