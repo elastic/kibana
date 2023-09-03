@@ -85,7 +85,7 @@ export const getAggregationByCloudSecuritySolution = (
     return {
       asset_count_groups: {
         terms: {
-          field: 'block_action_enabled',
+          field: 'cloud_defend.block_action_enabled',
         },
         aggs: {
           unique_assets: {

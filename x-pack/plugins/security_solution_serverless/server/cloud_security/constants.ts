@@ -13,8 +13,8 @@ import {
   LATEST_VULNERABILITIES_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { INTEGRATION_PACKAGE_NAME } from '@kbn/cloud-defend-plugin/common/constants';
-import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 
+const CLOUD_DEFEND_HEARTBEAT_INDEX = 'metrics-cloud_defend.heartbeat';
 export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
 export const AGGREGATION_PRECISION_THRESHOLD = 40000;
 export const ASSETS_SAMPLE_GRANULARITY = '124h';
@@ -39,7 +39,7 @@ export const METERING_CONFIGS = {
     assets_identifier: 'cloud.instance.id',
   },
   [CLOUD_DEFEND]: {
-    index: ENDPOINT_HEARTBEAT_INDEX, // TODO: should be update once https://github.com/elastic/cloud-defend/issues/479 is completed
+    index: CLOUD_DEFEND_HEARTBEAT_INDEX,
     assets_identifier: 'agent.id',
   },
 };
