@@ -358,14 +358,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
   useEffect(() => {
-    if (isCodeEditorExpanded) {
+    if (isCodeEditorExpanded && !isWordWrapped) {
       const pipes = code?.split('|');
       const pipesWithNewLine = code?.split('\n|');
       if (pipes?.length === pipesWithNewLine?.length) {
         setIsWordWrapped(true);
       }
     }
-  }, [code, isCodeEditorExpanded]);
+  }, [code, isCodeEditorExpanded, isWordWrapped]);
 
   const onResize = ({ width }: { width: number }) => {
     calculateVisibleCode(width);
