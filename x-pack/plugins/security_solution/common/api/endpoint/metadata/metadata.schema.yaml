@@ -20,7 +20,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './list_metadata.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
 
   /api/endpoint/metadata/transforms:
     get:

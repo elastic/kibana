@@ -20,7 +20,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
 
 components:
   schemas:
@@ -42,8 +42,3 @@ components:
             file:
               type: string
               format: binary
-
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed

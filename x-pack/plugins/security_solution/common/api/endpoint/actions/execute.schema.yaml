@@ -20,7 +20,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+
 components:
   schemas:
     ExecuteActionRequestBody:
@@ -39,9 +40,3 @@ components:
                   $ref: '../model/schema/common.yaml#/components/schemas/Command'
                 timeout:
                   $ref: '../model/schema/common.yaml#/components/schemas/Timeout'
-
-
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed

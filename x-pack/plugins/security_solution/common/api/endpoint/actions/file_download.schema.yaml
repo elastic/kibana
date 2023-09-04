@@ -20,7 +20,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
 components:
   schemas:
     FileDownloadRequestParams:
@@ -33,7 +33,4 @@ components:
           type: string
         file_id:
           type: string
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed
+

@@ -14,9 +14,3 @@ components:
         properties:
           agentId:
             $ref: '../model/schema/common.yaml#/components/schemas/AgentId'
-
-  schemas:
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed

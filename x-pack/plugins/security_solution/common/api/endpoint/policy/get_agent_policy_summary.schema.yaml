@@ -18,8 +18,4 @@ components:
             type: string
             nullable: true
 
-  schemas:
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed
+

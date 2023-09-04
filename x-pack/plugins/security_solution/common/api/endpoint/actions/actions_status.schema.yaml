@@ -23,10 +23,5 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
-components:
-  schemas:
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+

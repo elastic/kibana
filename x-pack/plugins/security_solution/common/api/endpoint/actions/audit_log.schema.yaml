@@ -25,7 +25,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './audit_log.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
 
 components:
   schemas:
@@ -46,7 +46,3 @@ components:
       properties:
         agent_id:
           $ref: '../model/schema/common.yaml#/components/schemas/AgentId'
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed

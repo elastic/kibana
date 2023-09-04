@@ -20,7 +20,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
 components:
   schemas:
     ListRequestQuery:
@@ -46,8 +46,3 @@ components:
           $ref: '../model/schema/common.yaml#/components/schemas/Types'
         withOutputs:
           $ref: '../model/schema/common.yaml#/components/schemas/WithOutputs'
-
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed
