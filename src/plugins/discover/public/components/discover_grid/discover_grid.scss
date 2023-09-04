@@ -33,22 +33,12 @@
   flex-wrap: nowrap;
   height: 100%;
 
-  .euiDataGrid__controls {
-    border: none;
-    border-bottom: $euiBorderThin;
-  }
-
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
     padding: $euiSizeS 0 0 $euiSizeS;
   }
 
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'] {
     padding: $euiSizeXS 0 0 $euiSizeXS;
-  }
-
-  .dscDiscoverGrid__table .euiDataGridRowCell:first-of-type {
-    border-left: none;
-    border-right: none;
   }
 
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover,

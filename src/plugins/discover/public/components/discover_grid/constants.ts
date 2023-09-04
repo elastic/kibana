@@ -13,7 +13,7 @@ export const kibanaJSON = 'kibana-json';
 export const GRID_STYLE = {
   border: 'horizontal',
   fontSize: 's',
-  cellPadding: 'm',
+  cellPadding: 'l',
   rowHover: 'highlight',
 } as EuiDataGridStyle;
 
