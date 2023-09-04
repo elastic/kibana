@@ -19,6 +19,5 @@
     "@kbn/i18n",
     "@kbn/core",
     "@kbn/core-elasticsearch-server",
-    "@kbn/enterprise-search-plugin",
   ]
 }
