@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
 import { RawRule, RuleActionTypes } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { omit } from 'lodash';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,

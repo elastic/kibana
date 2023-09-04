@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { RuleActionTypes } from '@kbn/alerting-plugin/common';
+import { omit } from 'lodash';
 import { Spaces } from '../../../scenarios';
 import { checkAAD, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -125,6 +127,97 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           error: 'Not Found',
           message: `Saved object [alert/${createdAlert.id}] not found`,
         });
+    });
+
+    describe('system actions', () => {
+      const systemAction = {
+        id: 'system-connector-test.system-action',
+        uuid: '123',
+        params: {},
+        type: RuleActionTypes.SYSTEM,
+      };
+
+      it('should update a rule with a system action correctly', async () => {
+        const { body: rule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
+
+        const res = await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${rule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({ name: rule.name, schedule: rule.schedule, actions: [systemAction] })
+          .expect(200);
+
+        expect(res.body.actions).to.eql([
+          {
+            id: 'system-connector-test.system-action',
+            connector_type_id: 'test.system-action',
+            params: {},
+            uuid: '123',
+            type: RuleActionTypes.SYSTEM,
+          },
+        ]);
+      });
+
+      it('should throw 400 if the system action is missing required properties', async () => {
+        const { body: rule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        for (const propertyToOmit of ['id', 'uuid']) {
+          const systemActionWithoutProperty = omit(systemAction, propertyToOmit);
+
+          await supertest
+            .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${rule.id}`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: rule.name,
+              schedule: rule.schedule,
+              actions: [systemActionWithoutProperty],
+            })
+            .expect(400);
+        }
+      });
+
+      it('should throw 400 if the system action contain properties from the default actions', async () => {
+        const { body: rule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        for (const propertyAdd of [
+          { group: 'test' },
+          {
+            frequency: {
+              notify_when: 'onThrottleInterval' as const,
+              summary: true,
+              throttle: '1h',
+            },
+          },
+          {
+            alerts_filter: {
+              query: { dsl: '{test:1}', kql: 'test:1s', filters: [] },
+            },
+          },
+        ]) {
+          await supertest
+            .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${rule.id}`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: rule.name,
+              schedule: rule.schedule,
+              actions: [{ ...systemAction, ...propertyAdd }],
+            })
+            .expect(400);
+        }
+      });
     });
 
     describe('legacy', () => {
