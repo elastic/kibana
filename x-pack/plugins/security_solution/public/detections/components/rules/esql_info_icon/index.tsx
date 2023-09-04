@@ -49,7 +49,7 @@ Example
 
 \`\`\`
 FROM logs* [metadata _id, _index, _version]
-| WHERE event.id = "test"
+| WHERE event.id == "test"
 | LIMIT 10
 \`\`\`
 
