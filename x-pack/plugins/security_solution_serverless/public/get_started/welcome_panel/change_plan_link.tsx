@@ -19,25 +19,28 @@ import { css } from '@emotion/react';
 import type { ProductTier } from '../../../common/product';
 import { ProductTierBadge } from './product_tier_badge';
 import { WELCOME_PANEL_PROJECT_CREATED_CHANGE_PLAN_TITLE } from './translations';
-import { Spacer } from './spacer';
 import { getCloudUrl } from '../../navigation/links/util';
 import { useKibana } from '../../common/services';
 
 const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | undefined }) => {
   const { euiTheme } = useEuiTheme();
   const { cloud } = useKibana().services;
-  const colorStyles = useEuiBackgroundColorCSS();
-  const cssStyles = [colorStyles.primary];
+  const cssStyles = useEuiBackgroundColorCSS();
   return productTier ? (
     <>
       {/* <div> cannot appear as a descendant of <p>, EuiSpacer is a div */}
-      <Spacer />
-      <EuiFlexGroup justifyContent="flexEnd" component="span">
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+        component="span"
+        css={css`
+          padding-top: ${euiTheme.size.l};
+        `}
+      >
         <EuiFlexItem grow={false} component="span">
           <span
             className="eui-displayBlock"
             css={css`
-              ${cssStyles};
+              ${cssStyles.primary};
               border-radius: ${euiTheme.border.radius.medium};
               padding: 0 ${euiTheme.size.m};
               line-height: ${euiTheme.base * 2}px;

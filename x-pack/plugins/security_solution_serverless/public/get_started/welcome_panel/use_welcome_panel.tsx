@@ -22,7 +22,6 @@ import { useKibana } from '../../common/services';
 import { getCloudUrl } from '../../navigation/links/util';
 import type { ProductTier } from '../../../common/product';
 import { ChangePlanLink } from './change_plan_link';
-import { Spacer } from './spacer';
 
 export const useWelcomePanel = ({
   productTier,
@@ -46,7 +45,7 @@ export const useWelcomePanel = ({
             defaultMessage="View all projects {link}."
             values={{
               link: (
-                <EuiLink href={getCloudUrl('projects', cloud)}>
+                <EuiLink href={getCloudUrl('projects', cloud)} target="_blank">
                   <FormattedMessage
                     id="xpack.securitySolutionServerless.getStarted.welcomePanel.projectCreated.description.link"
                     defaultMessage="here"

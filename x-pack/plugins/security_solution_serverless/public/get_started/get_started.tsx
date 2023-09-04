@@ -20,7 +20,6 @@ import type { SecurityProductTypes } from '../../common/config';
 import { ProductSwitch } from './product_switch';
 import { useTogglePanel } from './use_toggle_panel';
 import { ProductLine } from '../../common/product';
-import { Spacer } from './welcome_panel/spacer';
 
 const CONTENT_WIDTH = 1150;
 
@@ -76,12 +75,10 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
             size="l"
             css={css`
               padding-left: ${euiTheme.size.xs};
+              padding-bottom: ${euiTheme.size.l};
             `}
           >
-            <>
-              <span>{GET_STARTED_PAGE_TITLE}</span>
-              <Spacer />
-            </>
+            <span>{GET_STARTED_PAGE_TITLE}</span>
           </EuiTitle>
         }
         description={

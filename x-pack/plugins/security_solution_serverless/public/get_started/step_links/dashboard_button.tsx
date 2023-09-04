@@ -6,28 +6,17 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
-import { LinkButton, useGetLinkProps } from '@kbn/security-solution-navigation/links';
+import React from 'react';
+import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
-const DashboardButtonComponent = () => {
-  const getLinkProps = useGetLinkProps();
-  const onClick = useCallback((e) => {
-    // TODO: telemetry https://github.com/elastic/kibana/issues/163247
-  }, []);
-  const { onClick: onLinkClicked } = getLinkProps({
-    id: SecurityPageName.dashboards,
-    onClick,
-  });
-
-  return (
-    <LinkButton onClick={onLinkClicked} id={SecurityPageName.dashboards} fill>
-      <FormattedMessage
-        id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2.description2.button"
-        defaultMessage="Go to  dashboards"
-      />
-    </LinkButton>
-  );
-};
+const DashboardButtonComponent = () => (
+  <LinkButton id={SecurityPageName.dashboards} fill>
+    <FormattedMessage
+      id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2.description2.button"
+      defaultMessage="Go to  dashboards"
+    />
+  </LinkButton>
+);
 
 export const DashboardButton = React.memo(DashboardButtonComponent);

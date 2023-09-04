@@ -7,13 +7,11 @@
 
 import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
-import type { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { WelcomePanel } from '.';
 import { ProductTier } from '../../../common/product';
-
+jest.mock('@kbn/security-solution-navigation/src/context');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -47,19 +45,10 @@ describe('WelcomePanel', () => {
     totalStepsLeft: 2,
     productTier: ProductTier.complete,
   };
-  const mockCore = {
-    application: {
-      getUrlForApp: jest.fn(),
-    },
-  } as unknown as CoreStart;
 
   beforeEach(() => {
     result = render(<WelcomePanel {...props} />, {
-      wrapper: ({ children }) => (
-        <NavigationProvider core={mockCore}>
-          <I18nProvider>{children}</I18nProvider>
-        </NavigationProvider>
-      ),
+      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
     });
   });
 
