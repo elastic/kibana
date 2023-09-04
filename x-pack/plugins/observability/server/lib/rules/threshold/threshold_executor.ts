@@ -169,7 +169,7 @@ export const createMetricThresholdExecutor = ({
     if (!dataView) {
       throw new Error('No matched data view');
     } else if (!timeFieldName) {
-      throw new Error('No timestamp field is specified');
+      throw new Error('The selected data view does not have a timestamp field');
     }
 
     const alertResults = await evaluateRule(

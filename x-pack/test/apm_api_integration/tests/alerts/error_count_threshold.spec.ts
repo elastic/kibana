@@ -123,7 +123,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ruleTypeId: ApmRuleType.ErrorCount,
           name: 'Apm error count without kql query',
           params: {
-            kqlFilter: '',
             ...ruleParams,
           },
           actions: [indexAction],
@@ -271,7 +270,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ruleTypeId: ApmRuleType.ErrorCount,
           name: 'Apm error count with kql query',
           params: {
-            kqlFilter: 'service.name: opbeans-php',
+            searchConfiguration: {
+              query: {
+                query: 'service.name: opbeans-php',
+                language: 'kuery',
+              },
+            },
             ...ruleParams,
           },
           actions: [],

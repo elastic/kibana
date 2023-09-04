@@ -9,15 +9,14 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { Message } from '../../../common/types';
-import { useAbortableAsync } from '../../hooks/use_abortable_async';
-import { useConversation } from '../../hooks/use_conversation';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
-import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { getModelsManagementHref } from '../../utils/get_models_management_href';
+import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatBody } from './chat_body';
 
 const containerClassName = css`
@@ -33,17 +32,21 @@ export function ChatFlyout({
   messages,
   conversationId,
   isOpen,
+  startedFrom,
   onClose,
   onChatUpdate,
   onChatComplete,
+  onChatTitleSave,
 }: {
   title: string;
   messages: Message[];
   conversationId?: string;
   isOpen: boolean;
+  startedFrom: StartedFrom;
   onClose: () => void;
-  onChatUpdate?: (messages: Message[]) => void;
-  onChatComplete?: (messages: Message[]) => void;
+  onChatUpdate: (messages: Message[]) => void;
+  onChatComplete: (messages: Message[]) => void;
+  onChatTitleSave: (title: string) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -54,24 +57,9 @@ export function ChatFlyout({
 
   const connectors = useGenAIConnectors();
 
-  const service = useObservabilityAIAssistant();
-
-  const chatService = useAbortableAsync(
-    ({ signal }) => {
-      return service.start({ signal });
-    },
-    [service]
-  );
-
   const router = useObservabilityAIAssistantRouter();
 
   const knowledgeBase = useKnowledgeBase();
-
-  const { saveTitle } = useConversation({
-    conversationId,
-    chatService: chatService.value,
-    connectorId: connectors.selectedConnector,
-  });
 
   return isOpen ? (
     <EuiFlyout onClose={onClose}>
@@ -115,7 +103,10 @@ export function ChatFlyout({
             messages={messages}
             currentUser={currentUser}
             connectorsManagementHref={getConnectorsManagementHref(http)}
+            modelsManagementHref={getModelsManagementHref(http)}
+            conversationId={conversationId}
             knowledgeBase={knowledgeBase}
+            startedFrom={startedFrom}
             onChatUpdate={(nextMessages) => {
               if (onChatUpdate) {
                 onChatUpdate(nextMessages);
@@ -127,7 +118,7 @@ export function ChatFlyout({
               }
             }}
             onSaveTitle={(newTitle) => {
-              saveTitle(newTitle);
+              onChatTitleSave(newTitle);
             }}
           />
         </EuiFlexItem>

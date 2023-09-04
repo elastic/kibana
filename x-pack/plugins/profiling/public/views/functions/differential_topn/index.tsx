@@ -251,6 +251,7 @@ export function DifferentialTopNFunctionsView() {
                     sortField={sortField}
                     sortDirection={sortDirection}
                     onChangeSort={handleSortChange}
+                    dataTestSubj="TopNFunctionsComparisonGrid"
                   />
                 </AsyncComponent>
               </EuiFlexItem>

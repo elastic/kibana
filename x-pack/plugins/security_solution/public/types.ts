@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 
 import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -139,6 +139,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
+  isILMAvailable$: Observable<boolean>;
   isSidebarEnabled$: Observable<boolean>;
   getStartedComponent$: Observable<React.ComponentType | null>;
   upselling: UpsellingService;
@@ -162,7 +163,6 @@ export type StartServices = CoreStart &
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     telemetry: TelemetryClientStart;
-    discoverFilterManager: FilterManager;
     customDataService: DataPublicPluginStart;
     topValuesPopover: TopValuesPopoverService;
   };
@@ -175,6 +175,7 @@ export interface PluginSetup {
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
+  setIsILMAvailable: (isILMAvailable: boolean) => void;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;

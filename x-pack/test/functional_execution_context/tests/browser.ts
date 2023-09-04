@@ -7,14 +7,12 @@
 
 import type { Ecs, KibanaExecutionContext } from '@kbn/core/server';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { assertLogContains, forceSyncLogFile, isExecutionContextLog } from '../test_utils';
+import { assertLogContains, isExecutionContextLog, readLogFile } from '../test_utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'timePicker']);
-  const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/149611
-  describe.skip('Browser apps', () => {
+  describe('Browser apps', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -32,11 +30,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('discover app', () => {
+      let logs: Ecs[];
+
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await forceSyncLogFile();
+        logs = await readLogFile();
       });
 
       function checkExecutionContextEntry(expectedExecutionContext: KibanaExecutionContext) {
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
             predicate: (record) =>
               Boolean(record.http?.request?.id?.includes('kibana:application:discover')),
-            retry,
+            logs,
           });
         });
 
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 description: 'fetch documents',
               },
             }),
-            retry,
+            logs,
           });
         });
 
@@ -104,20 +104,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               },
             }),
-            retry,
+            logs,
           });
         });
       });
     });
 
     describe('dashboard app', () => {
+      let logs: Ecs[];
+
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
         await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
         await PageObjects.dashboard.waitForRenderComplete();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await forceSyncLogFile();
+        logs = await readLogFile();
       });
 
       function checkHttpRequestId(suffix: string) {
@@ -172,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               predicate: checkHttpRequestId(
                 'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsXY:086ac2e9-dd16-4b45-92b8-1e43ff7e3f65'
               ),
-              retry,
+              logs,
             });
           });
 
@@ -199,19 +201,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   },
                 },
               }),
-              retry,
+              logs,
             });
           });
         });
 
-        describe('lnsMetric', () => {
+        describe.skip('lnsMetric', () => {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
             await assertLogContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
               predicate: checkHttpRequestId(
                 'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsLegacyMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'
               ),
-              retry,
+              logs,
             });
           });
 
@@ -238,7 +240,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   },
                 },
               }),
-              retry,
+              logs,
             });
           });
         });
@@ -250,7 +252,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               predicate: checkHttpRequestId(
                 'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsDatatable:fb86b32f-fb7a-45cf-9511-f366fef51bbd'
               ),
-              retry,
+              logs,
             });
           });
 
@@ -277,7 +279,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   },
                 },
               }),
-              retry,
+              logs,
             });
           });
         });
@@ -289,7 +291,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               predicate: checkHttpRequestId(
                 'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsPie:5d53db36-2d5a-4adc-af7b-cec4c1a294e0'
               ),
-              retry,
+              logs,
             });
           });
 
@@ -316,7 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   },
                 },
               }),
-              retry,
+              logs,
             });
           });
         });
@@ -329,7 +331,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             predicate: checkHttpRequestId(
               'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;search:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'
             ),
-            retry,
+            logs,
           });
         });
 
@@ -356,17 +358,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               },
             }),
-            retry,
+            logs,
           });
         });
       });
 
-      describe('propagates context for TSVB visualizations', () => {
+      describe.skip('propagates context for TSVB visualizations', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await assertLogContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
             predicate: checkHttpRequestId('agg_based:metrics:bcb63b50-4c89-11e8-b3d7-01146121b73d'),
-            retry,
+            logs,
           });
         });
 
@@ -387,7 +389,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 url: '/app/visualize#/edit/bcb63b50-4c89-11e8-b3d7-01146121b73d',
               },
             }),
-            retry,
+            logs,
           });
         });
       });
@@ -399,7 +401,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             predicate: checkHttpRequestId(
               'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b'
             ),
-            retry,
+            logs,
           });
         });
 
@@ -426,19 +428,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               },
             }),
-            retry,
+            logs,
           });
         });
       });
 
-      describe('propagates context for Tag Cloud visualization', () => {
+      describe.skip('propagates context for Tag Cloud visualization', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await assertLogContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
             predicate: checkHttpRequestId(
               'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:tagcloud:293b5a30-4c8f-11e8-b3d7-01146121b73d'
             ),
-            retry,
+            logs,
           });
         });
 
@@ -465,19 +467,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               },
             }),
-            retry,
+            logs,
           });
         });
       });
 
-      describe('propagates context for Vertical bar visualization', () => {
+      describe.skip('propagates context for Vertical bar visualization', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await assertLogContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
             predicate: checkHttpRequestId(
               'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:histogram:9886b410-4c8b-11e8-b3d7-01146121b73d'
             ),
-            retry,
+            logs,
           });
         });
 
@@ -504,7 +506,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               },
             }),
-            retry,
+            logs,
           });
         });
       });

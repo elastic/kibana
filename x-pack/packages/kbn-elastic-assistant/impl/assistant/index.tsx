@@ -172,13 +172,8 @@ const AssistantComponent: React.FC<Props> = ({
     },
   });
 
-  const currentTitle: { title: string | JSX.Element; titleIcon: string } =
-    isWelcomeSetup && blockBotConversation.theme?.title && blockBotConversation.theme?.titleIcon
-      ? {
-          title: blockBotConversation.theme?.title,
-          titleIcon: blockBotConversation.theme?.titleIcon,
-        }
-      : { title, titleIcon: 'logoSecurity' };
+  const currentTitle: string | JSX.Element =
+    isWelcomeSetup && blockBotConversation.theme?.title ? blockBotConversation.theme?.title : title;
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const lastCommentRef = useRef<HTMLDivElement | null>(null);
@@ -426,7 +421,6 @@ const AssistantComponent: React.FC<Props> = ({
         {showTitle && (
           <AssistantHeader
             currentConversation={currentConversation}
-            currentTitle={currentTitle}
             defaultConnectorId={defaultConnectorId}
             defaultProvider={defaultProvider}
             docLinks={docLinks}
@@ -438,6 +432,7 @@ const AssistantComponent: React.FC<Props> = ({
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             setSelectedConversationId={setSelectedConversationId}
             showAnonymizedValues={showAnonymizedValues}
+            title={currentTitle}
           />
         )}
 

@@ -11,8 +11,8 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../../../shared/doc_links';
 
 export const phpDefinition: LanguageDefinition = {
-  buildSearchQuery: `$params = [
-  'index' => 'books',
+  buildSearchQuery: ({ indexName }) => `$params = [
+  'index' => '${indexName}',
   'body'  => [
     'q' => 'snow'
   ]
@@ -33,11 +33,11 @@ print_r($response->asArray());`,
   },
   iconType: 'php.svg',
   id: Languages.PHP,
-  ingestData: `$params = [
+  ingestData: ({ indexName }) => `$params = [
   'body' => [
   [
     'index' => [
-    '_index' => 'books',
+    '_index' => '${indexName}',
     '_id' => '9780553351927',
   ],
   ],
@@ -49,7 +49,7 @@ print_r($response->asArray());`,
   ],
   [
     'index' => [
-    '_index' => 'books',
+    '_index' => '${indexName}',
     '_id' => '9780441017225',
   ],
   ],
@@ -61,7 +61,7 @@ print_r($response->asArray());`,
   ],
   [
     'index' => [
-    '_index' => 'books',
+    '_index' => '${indexName}',
     '_id' => '9780451524935',
     ],
   ],
@@ -73,7 +73,7 @@ print_r($response->asArray());`,
   ],
   [
     'index' => [
-    '_index' => 'books',
+    '_index' => '${indexName}',
     '_id' => '9781451673319',
     ],
   ],
@@ -85,7 +85,7 @@ print_r($response->asArray());`,
   ],
   [
     'index' => [
-    '_index' => 'books',
+    '_index' => '${indexName}',
     '_id' => '9780060850524',
     ],
   ],
@@ -97,7 +97,7 @@ print_r($response->asArray());`,
   ],
   [
     'index' => [
-    '_index' => 'books',
+    '_index' => '${indexName}',
     '_id' => '9780385490818',
     ],
   ],
@@ -118,7 +118,8 @@ print_r($response->asArray());`,
   name: i18n.translate('xpack.enterpriseSearch.languages.php', {
     defaultMessage: 'PHP',
   }),
-  testConnection: `$response = $client->info();
+  testConnection: `// API Key should have cluster monitor rights.
+$response = $client->info();
 echo $response->getStatusCode();
 echo (string) $response->getBody();`,
 };

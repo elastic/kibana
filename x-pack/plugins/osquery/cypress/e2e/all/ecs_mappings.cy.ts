@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { getAdvancedButton } from '../../screens/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -19,7 +18,7 @@ import {
 } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('EcsMapping', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
   });

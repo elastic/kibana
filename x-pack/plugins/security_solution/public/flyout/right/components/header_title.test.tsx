@@ -23,16 +23,23 @@ import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
 import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
 import { useAssistant } from '../hooks/use_assistant';
 import { TestProvidersComponent } from '../../../common/mock';
+import { useGetAlertDetailsFlyoutLink } from '../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../hooks/use_assistant');
+jest.mock(
+  '../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link'
+);
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
-
 const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
+const mockContextValue = {
+  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+  getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
+} as unknown as RightPanelContext;
 
 const renderHeader = (contextValue: RightPanelContext) =>
   render(
@@ -50,15 +57,11 @@ describe('<HeaderTitle />', () => {
     jest.mocked(useDateFormat).mockImplementation(() => dateFormat);
     jest.mocked(useTimeZone).mockImplementation(() => 'UTC');
     jest.mocked(useAssistant).mockReturnValue({ showAssistant: true, promptContextId: '' });
+    jest.mocked(useGetAlertDetailsFlyoutLink).mockReturnValue('url');
   });
 
   it('should render component', () => {
-    const contextValue = {
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-      getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = renderHeader(contextValue);
+    const { getByTestId } = renderHeader(mockContextValue);
 
     expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID)).toBeInTheDocument();
@@ -66,101 +69,42 @@ describe('<HeaderTitle />', () => {
   });
 
   it('should render rule name in the title if document is an alert', () => {
-    const contextValue = {
-      dataFormattedForFieldBrowser: [
-        {
-          category: 'kibana',
-          field: 'kibana.alert.rule.uuid',
-          values: ['123'],
-          originalValue: ['123'],
-          isObjectArray: false,
-        },
-        {
-          category: 'kibana',
-          field: 'kibana.alert.rule.name',
-          values: ['test'],
-          originalValue: ['test'],
-          isObjectArray: false,
-        },
-      ],
-      getFieldsData: () => [],
-    } as unknown as RightPanelContext;
+    const { getByTestId } = renderHeader(mockContextValue);
 
-    const { getByTestId } = renderHeader(contextValue);
-
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('test');
+    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('rule-name');
   });
 
-  it('should render share button in the title if document is an alert with url info', () => {
-    const contextValue = {
-      dataFormattedForFieldBrowser: [
-        {
-          category: 'kibana',
-          field: 'kibana.alert.rule.uuid',
-          values: ['123'],
-          originalValue: ['123'],
-          isObjectArray: false,
-        },
-        {
-          category: 'kibana',
-          field: 'kibana.alert.url',
-          values: ['http://kibana.url/alert/id'],
-          originalValue: ['http://kibana.url/alert/id'],
-          isObjectArray: false,
-        },
-      ],
-      getFieldsData: () => [],
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = renderHeader(contextValue);
+  it('should render share button in the title', () => {
+    const { getByTestId } = renderHeader(mockContextValue);
 
     expect(getByTestId(FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should not render share button in the title if alert is missing url info', () => {
-    const contextValue = {
-      dataFormattedForFieldBrowser: [
-        {
-          category: 'kibana',
-          field: 'kibana.alert.rule.uuid',
-          values: ['123'],
-          originalValue: ['123'],
-          isObjectArray: false,
-        },
-      ],
-      getFieldsData: () => [],
-    } as unknown as RightPanelContext;
+    jest.mocked(useGetAlertDetailsFlyoutLink).mockReturnValue(null);
 
-    const { queryByTestId } = renderHeader(contextValue);
+    const { queryByTestId } = renderHeader(mockContextValue);
 
     expect(queryByTestId(FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render chat button in the title', () => {
-    const contextValue = {
-      dataFormattedForFieldBrowser: [],
-      getFieldsData: () => [],
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = renderHeader(contextValue);
+    const { getByTestId } = renderHeader(mockContextValue);
 
     expect(getByTestId(FLYOUT_HEADER_CHAT_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should not render chat button in the title if should not be shown', () => {
     jest.mocked(useAssistant).mockReturnValue({ showAssistant: false, promptContextId: '' });
-    const contextValue = {
-      dataFormattedForFieldBrowser: [],
-      getFieldsData: () => [],
-    } as unknown as RightPanelContext;
 
-    const { queryByTestId } = renderHeader(contextValue);
+    const { queryByTestId } = renderHeader(mockContextValue);
 
     expect(queryByTestId(FLYOUT_HEADER_CHAT_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render default document detail title if document is not an alert', () => {
     const contextValue = {
+      ...mockContextValue,
       dataFormattedForFieldBrowser: [
         {
           category: 'kibana',
@@ -170,7 +114,6 @@ describe('<HeaderTitle />', () => {
           isObjectArray: false,
         },
       ],
-      getFieldsData: () => [],
     } as unknown as RightPanelContext;
 
     const { getByTestId } = renderHeader(contextValue);

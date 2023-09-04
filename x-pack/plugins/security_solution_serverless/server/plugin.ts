@@ -24,6 +24,7 @@ import type {
 } from './types';
 import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
 import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
+import { getProductAppFeaturesConfigurator } from './app_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import {
   endpointMeteringService,
@@ -57,7 +58,10 @@ export class SecuritySolutionServerlessPlugin
     if (shouldRegister) {
       const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
       this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
-      pluginsSetup.securitySolution.setAppFeatures(getProductAppFeatures(this.config.productTypes));
+      const appFeaturesConfigurator = getProductAppFeaturesConfigurator(
+        getProductAppFeatures(this.config.productTypes)
+      );
+      pluginsSetup.securitySolution.setAppFeaturesConfigurator(appFeaturesConfigurator);
     }
 
     pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });

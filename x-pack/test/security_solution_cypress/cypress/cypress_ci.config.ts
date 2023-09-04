@@ -17,6 +17,7 @@ export default defineCypressConfig({
   defaultCommandTimeout: 150000,
   env: {
     grepFilterSpecs: true,
+    grepOmitFiltered: true,
     grepTags: '@ess',
   },
   execTimeout: 150000,

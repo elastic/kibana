@@ -137,7 +137,7 @@ export function registerTransactionErrorRateRuleType({
           ? indices.metric
           : indices.transaction;
 
-        const termFilterQuery = !ruleParams.kqlFilter
+        const termFilterQuery = !ruleParams.searchConfiguration
           ? [
               ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
                 queryEmptyString: false,
@@ -179,7 +179,9 @@ export function registerTransactionErrorRateRuleType({
                     },
                   },
                   ...termFilterQuery,
-                  ...getParsedFilterQuery(ruleParams.kqlFilter),
+                  ...getParsedFilterQuery(
+                    ruleParams.searchConfiguration?.query?.query as string
+                  ),
                 ],
               },
             },

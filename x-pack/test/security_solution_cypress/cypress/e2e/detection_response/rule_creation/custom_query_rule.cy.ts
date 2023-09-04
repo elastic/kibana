@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { ruleFields } from '../../../data/detection_engine';
 import {
   getNewRule,
@@ -108,15 +106,14 @@ import {
   goToScheduleStepTab,
   importSavedQuery,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../tasks/edit_rule';
 import { login, visit, visitSecurityDetectionRulesPage } from '../../../tasks/login';
-import { enablesRule, getDetails } from '../../../tasks/rule_details';
+import { enablesRule, getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
   });

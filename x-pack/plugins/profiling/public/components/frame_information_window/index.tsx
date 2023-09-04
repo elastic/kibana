@@ -13,7 +13,10 @@ import {
   useObservabilityAIAssistant,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo } from 'react';
-import { FrameSymbolStatus, getFrameSymbolStatus } from '../../../common/profiling';
+import {
+  FrameSymbolStatus,
+  getFrameSymbolStatus,
+} from '@kbn/profiling-data-access-plugin/common/profiling';
 import { FrameInformationPanel } from './frame_information_panel';
 import { getImpactRows } from './get_impact_rows';
 import { getInformationRows } from './get_information_rows';
@@ -165,7 +168,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
     <FrameInformationPanel>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <KeyValueList rows={informationRows} />
+          <KeyValueList data-test-subj="informationRows" rows={informationRows} />
         </EuiFlexItem>
         {aiAssistant.isEnabled() && promptMessages ? (
           <>
@@ -196,7 +199,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <KeyValueList rows={impactRows} />
+              <KeyValueList data-test-subj="impactEstimates" rows={impactRows} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

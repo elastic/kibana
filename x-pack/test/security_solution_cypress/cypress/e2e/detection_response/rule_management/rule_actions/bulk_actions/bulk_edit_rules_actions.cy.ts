@@ -12,7 +12,6 @@ import {
   waitForCallOutToBeShown,
 } from '../../../../../tasks/common/callouts';
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
-import { tag } from '../../../../../tags';
 
 import {
   RULES_BULK_EDIT_ACTIONS_INFO,
@@ -76,7 +75,7 @@ const expectedSlackMessage = 'Slack action test message';
 
 describe(
   'Detection rules, bulk edit of rule actions',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       cleanKibana();

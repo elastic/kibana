@@ -147,6 +147,20 @@ export const filterByTags = (tags: string[]) => {
   for (const tag of tags) {
     cy.get(RULES_TAGS_FILTER_POPOVER).contains(tag).click();
   }
+
+  // close the popover
+  cy.get(RULES_TAGS_FILTER_BTN).click();
+};
+
+export const unselectTags = () => {
+  cy.get(RULES_TAGS_FILTER_BTN).click();
+
+  cy.get(RULES_TAGS_FILTER_POPOVER)
+    .find('[aria-checked="true"]')
+    .each((el) => cy.wrap(el).click());
+
+  // close the popover
+  cy.get(RULES_TAGS_FILTER_BTN).click();
 };
 
 export const waitForRuleExecution = (name: string) => {
