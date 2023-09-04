@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { REQUEST_NAMES, useFetch } from '../../common/hooks/use_fetch';
 import { useKibana } from '../../common/lib/kibana';
-import { fetchTags, isManagedTag } from '../../common/containers/tags/api';
+import { fetchTags } from '../../common/containers/tags/api';
+import { MANAGED_TAG_NAME } from '../../../common/constants';
+
+export const isManagedTag = ({ name }: { name: string }) => name === MANAGED_TAG_NAME;
 
 export const useDashboardRenderer = () => {
   const { savedObjectsTagging } = useKibana().services;
@@ -28,17 +31,20 @@ export const useDashboardRenderer = () => {
       const tagIds = container?.getExplicitInput().tags;
       if (savedObjectsTagging) {
         await fetchDashboardTags({ tagIds, savedObjectsTaggingClient: savedObjectsTagging.client });
-        if (dashboardTags != null) {
-          if (dashboardTags.some(isManagedTag)) {
-            setHasManagedTag(true);
-          } else {
-            setHasManagedTag(false);
-          }
-        }
       }
     },
-    [dashboardTags, fetchDashboardTags, savedObjectsTagging]
+    [fetchDashboardTags, savedObjectsTagging]
   );
+
+  useEffect(() => {
+    if (hasManagedTag == null && dashboardTags != null) {
+      if (dashboardTags.some(isManagedTag)) {
+        setHasManagedTag(true);
+      } else {
+        setHasManagedTag(false);
+      }
+    }
+  }, [hasManagedTag, dashboardTags]);
 
   return useMemo(
     () => ({
