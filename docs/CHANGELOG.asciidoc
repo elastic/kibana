@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.13>>
 * <<release-notes-7.17.12>>
 * <<release-notes-7.17.11>>
 * <<release-notes-7.17.10>>
@@ -82,6 +83,18 @@ Review important information about the {kib} 7.17.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.17.13]]
+== {kib} 7.17.13
+
+The 7.17.13 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.17.13]]
+=== Bug Fixes
+
+Uptime::
+* Fixes an issue with editing an ML rule in Uptime {kibana-pull}163357[#163357].
+
 [[release-notes-7.17.12]]
 == {kib} 7.17.12
 
