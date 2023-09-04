@@ -7,7 +7,7 @@
 import { SemVer } from 'semver';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { MAJOR_VERSION } from '../common/constants';
@@ -22,23 +22,22 @@ const schemaLatest = schema.object(
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
-    enableIndexActions: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
+    enableIndexActions: offeringBasedSchema({
       // Index actions are disabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
-      schema.boolean({ defaultValue: true }),
-      schema.never()
-    ),
-    enableLegacyTemplates: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
+    enableLegacyTemplates: offeringBasedSchema({
       // Legacy templates functionality is disabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
-      schema.boolean({ defaultValue: true }),
-      schema.never()
-    ),
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
     dev: schema.object({ enableIndexDetailsPage: schema.boolean({ defaultValue: false }) }),
+    enableIndexStats: offeringBasedSchema({
+      // Index stats information is disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
   },
   { defaultValue: undefined }
 );
@@ -51,6 +50,7 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     dev: {
       enableIndexDetailsPage: true,
     },
+    enableIndexStats: true,
   },
   schema: schemaLatest,
   deprecations: () => [],

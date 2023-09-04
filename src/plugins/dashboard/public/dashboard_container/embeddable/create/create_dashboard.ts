@@ -91,6 +91,7 @@ export const createDashboard = async (
     reduxEmbeddablePackage,
     searchSessionId,
     savedObjectResult?.dashboardInput,
+    savedObjectResult.anyMigrationRun,
     dashboardCreationStartTime,
     undefined,
     creationOptions,

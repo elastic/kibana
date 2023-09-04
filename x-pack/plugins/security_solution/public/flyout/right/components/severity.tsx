@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CellActionsMode } from '@kbn/cell-actions';
+import { getSourcererScopeId } from '../../../helpers';
 import { SecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger } from '../../../actions/constants';
 import { SEVERITY_TITLE } from './translations';
@@ -25,7 +26,7 @@ const isSeverity = (x: unknown): x is Severity =>
  * Document details severity displayed in flyout right section header
  */
 export const DocumentSeverity: FC = memo(() => {
-  const { getFieldsData } = useRightPanelContext();
+  const { getFieldsData, scopeId } = useRightPanelContext();
   const fieldsData = getFieldsData(ALERT_SEVERITY);
 
   if (!fieldsData) {
@@ -55,8 +56,10 @@ export const DocumentSeverity: FC = memo(() => {
             value: alertSeverity,
           }}
           mode={CellActionsMode.HOVER_RIGHT}
-          triggerId={SecurityCellActionsTrigger.DEFAULT}
-          visibleCellActions={6}
+          triggerId={SecurityCellActionsTrigger.DEFAULT} // TODO use SecurityCellActionsTrigger.DETAILS_FLYOUT when https://github.com/elastic/kibana/issues/155243 is fixed
+          visibleCellActions={5} // TODO use 6 when https://github.com/elastic/kibana/issues/155243 is fixed
+          sourcererScopeId={getSourcererScopeId(scopeId)}
+          metadata={{ scopeId }}
         >
           <SeverityBadge value={alertSeverity} />
         </SecurityCellActions>

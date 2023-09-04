@@ -13,7 +13,7 @@ import {
   EmbeddableOutput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { type CoreStart, IUiSettingsClient } from '@kbn/core/public';
@@ -58,12 +58,31 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
 
   private node?: HTMLElement;
 
+  // Need to defer embeddable load in order to resolve data views
+  deferEmbeddableLoad = true;
+
   constructor(
     private readonly deps: EmbeddableChangePointChartDeps,
     initialInput: EmbeddableChangePointChartInput,
     parent?: IContainer
   ) {
     super(initialInput, { defaultTitle: initialInput.title }, parent);
+
+    this.initOutput().finally(() => this.setInitializationFinished());
+  }
+
+  private async initOutput() {
+    const {
+      data: { dataViews: dataViewsService },
+    } = this.deps;
+
+    const { dataViewId } = this.getInput();
+
+    const dataView = await dataViewsService.get(dataViewId);
+
+    this.updateOutput({
+      indexPatterns: [dataView],
+    });
   }
 
   public reportsEmbeddableLoad() {
@@ -95,9 +114,7 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     const I18nContext = this.deps.i18n.Context;
 
     const datePickerDeps = {
-      ...pick(this.deps, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-      toMountPoint,
-      wrapWithTheme,
+      ...pick(this.deps, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
       uiSettingsKeys: UI_SETTINGS,
     };
 

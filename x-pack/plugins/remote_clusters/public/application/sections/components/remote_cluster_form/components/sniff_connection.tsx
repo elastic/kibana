@@ -99,8 +99,8 @@ export const SniffConnection: FunctionComponent<Props> = ({
               transportPort: (
                 <EuiLink href={transportPortUrl} target="_blank">
                   <FormattedMessage
-                    id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText.transportPortLinkText"
-                    defaultMessage="transport port"
+                    id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText.portLinkText"
+                    defaultMessage="port"
                   />
                 </EuiLink>
               ),

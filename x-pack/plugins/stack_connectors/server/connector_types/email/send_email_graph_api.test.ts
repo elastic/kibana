@@ -6,6 +6,7 @@
  */
 jest.mock('axios', () => ({
   create: jest.fn(),
+  AxiosHeaders: jest.requireActual('axios').AxiosHeaders,
 }));
 
 import axios from 'axios';

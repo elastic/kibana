@@ -145,6 +145,7 @@ export function PrimaryAndComparisonSearchBar() {
           onRefreshClick={() => {
             refresh();
           }}
+          dataTestSubj="profilingComparisonUnifiedSearchBar"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

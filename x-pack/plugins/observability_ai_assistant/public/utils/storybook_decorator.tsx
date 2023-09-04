@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
 import { ObservabilityAIAssistantAPIClient } from '../api';
 import type { Message } from '../../common';
@@ -51,6 +52,12 @@ const service: ObservabilityAIAssistantService = {
     authentication_type: '',
     elastic_cloud_user: false,
   }),
+  getLicense: () => new Observable(),
+  getLicenseManagementLocator: () =>
+    ({
+      url: {},
+      navigate: () => {},
+    } as unknown as SharePluginStart),
 };
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {

@@ -52,7 +52,7 @@ export async function getTransactionErrorRateChartPreview({
     end,
     transactionName,
     groupBy: groupByFields,
-    kqlFilter,
+    searchConfiguration,
   } = alertParams;
 
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -66,7 +66,7 @@ export async function getTransactionErrorRateChartPreview({
     groupByFields
   );
 
-  const termFilterQuery = !kqlFilter
+  const termFilterQuery = !searchConfiguration
     ? [
         ...termQuery(SERVICE_NAME, serviceName, {
           queryEmptyString: false,
@@ -92,7 +92,9 @@ export async function getTransactionErrorRateChartPreview({
         bool: {
           filter: [
             ...termFilterQuery,
-            ...getParsedFilterQuery(kqlFilter),
+            ...getParsedFilterQuery(
+              searchConfiguration?.query?.query as string
+            ),
             ...rangeQuery(start, end),
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions

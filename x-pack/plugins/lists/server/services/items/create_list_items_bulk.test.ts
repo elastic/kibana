@@ -56,6 +56,7 @@ describe('crete_list_item_bulk', () => {
       body: [
         { create: { _index: LIST_ITEM_INDEX } },
         {
+          '@timestamp': '2020-04-20T15:25:31.830Z',
           created_at: '2020-04-20T15:25:31.830Z',
           created_by: 'some user',
           deserializer: undefined,

@@ -504,6 +504,8 @@ components:
           required:
             - index
             - timestampField
+            - good
+            - total
           properties:
             index:
               description: The index or index pattern to use
@@ -922,6 +924,7 @@ components:
         - enabled
         - groupBy
         - instanceId
+        - tags
         - createdAt
         - updatedAt
       properties:
@@ -978,6 +981,11 @@ components:
           description: the value derived from the groupBy field, if present, otherwise '*'
           type: string
           example: host-abcde
+        tags:
+          description: List of tags
+          type: array
+          items:
+            type: string
         createdAt:
           description: The creation date
           type: string
@@ -1115,6 +1123,11 @@ components:
           description: optional group by field to use to generate an SLO per distinct value
           type: string
           example: some.field
+        tags:
+          description: List of tags
+          type: array
+          items:
+            type: string
     create_slo_response:
       title: Create SLO response
       type: object
@@ -1168,6 +1181,11 @@ components:
           $ref: '#/components/schemas/objective'
         settings:
           $ref: '#/components/schemas/settings'
+        tags:
+          description: List of tags
+          type: array
+          items:
+            type: string
     historical_summary_request:
       title: Historical summary request
       type: object

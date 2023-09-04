@@ -14,6 +14,7 @@ import {
   metaOrUndefined,
   serializerOrUndefined,
   tie_breaker_id,
+  timestamp,
   updated_at,
   updated_by,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -23,6 +24,7 @@ import { esDataTypeUnion } from '../common/schemas';
 export const indexEsListItemSchema = t.intersection([
   t.exact(
     t.type({
+      '@timestamp': timestamp,
       created_at,
       created_by,
       deserializer: deserializerOrUndefined,

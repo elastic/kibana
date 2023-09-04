@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { TRANSFORM_FUNCTION, TransformFunction } from '../../../../../../common/constants';

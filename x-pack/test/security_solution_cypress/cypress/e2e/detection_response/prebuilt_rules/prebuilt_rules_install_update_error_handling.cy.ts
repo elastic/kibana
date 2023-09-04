@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
-import { waitForRulesTableToBeLoaded } from '../../../tasks/alerts_detection_rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../urls/navigation';
+import { login, visitSecurityDetectionRulesPage } from '../../../tasks/login';
 import {
   addElasticRulesButtonClick,
   assertRuleAvailableForInstallAndInstallOne,
@@ -28,7 +24,7 @@ import {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Error handling',
-  { tags: tag.ESS },
+  { tags: '@ess' },
   () => {
     beforeEach(() => {
       login();
@@ -36,7 +32,7 @@ describe(
       deleteAlertsAndRules();
       cy.task('esArchiverResetKibana');
 
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
     });
 
     describe('Installation of prebuilt rules - Should fail gracefully with toast error message when', () => {
@@ -50,7 +46,6 @@ describe(
       });
       beforeEach(() => {
         createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
-        waitForRulesTableToBeLoaded();
       });
 
       it('installing prebuilt rules one by one', () => {
@@ -114,7 +109,6 @@ describe(
           rules: [UPDATED_RULE_1, UPDATED_RULE_2],
           installToKibana: false,
         });
-        waitForRulesTableToBeLoaded();
         reload();
       });
 

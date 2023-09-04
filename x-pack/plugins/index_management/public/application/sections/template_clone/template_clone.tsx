@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
+import { EuiPageSection } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { PageLoading, PageError, Error } from '../../../shared_imports';
@@ -103,7 +103,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   } as TemplateDeserialized;
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <TemplateForm
         title={
           <FormattedMessage
@@ -120,6 +120,6 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
         isLegacy={isLegacy}
         history={history as ScopedHistory}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };
