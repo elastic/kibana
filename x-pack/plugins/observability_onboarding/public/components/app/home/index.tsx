@@ -123,7 +123,12 @@ export function Home() {
                 { defaultMessage: 'Stream host system logs' }
               )}
               footer={
-                <EuiButton onClick={handleClickSystemLogs} color="primary" fill>
+                <EuiButton
+                  onClick={handleClickSystemLogs}
+                  color="primary"
+                  fill
+                  data-test-subj="obltOnboardingHomeStartSystemLogStream"
+                >
                   {getStartedLabel}
                 </EuiButton>
               }
@@ -216,7 +221,11 @@ export function Home() {
                 }
               )}
               footer={
-                <EuiButton onClick={handleClickApmSetupGuide} color="primary">
+                <EuiButton
+                  onClick={handleClickApmSetupGuide}
+                  color="primary"
+                  data-test-subj="obltOnboardingHomeStartApmTutorial"
+                >
                   {getStartedLabel}
                 </EuiButton>
               }
@@ -245,6 +254,7 @@ export function Home() {
                 <EuiButton
                   onClick={handleClickKubernetesSetupGuide}
                   color="primary"
+                  data-test-subj="obltOnboardingHomeGoToKubernetesIntegration"
                 >
                   {getStartedLabel}
                 </EuiButton>
@@ -282,7 +292,11 @@ export function Home() {
           )}
           footer={
             <>
-              <EuiButton onClick={handleClickIntegrations} color="primary">
+              <EuiButton
+                onClick={handleClickIntegrations}
+                color="primary"
+                data-test-subj="obltOnboardingHomeExploreIntegrations"
+              >
                 {i18n.translate(
                   'xpack.observability_onboarding.card.integrations.start',
                   { defaultMessage: 'Start exploring' }
@@ -298,14 +312,20 @@ export function Home() {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="none">
-                    <EuiLink onClick={handleClickSampleData}>
+                    <EuiLink
+                      onClick={handleClickSampleData}
+                      data-test-subj="obltOnboardingHomeUseSampleData"
+                    >
                       {i18n.translate(
                         'xpack.observability_onboarding.card.integrations.sampleData',
                         { defaultMessage: 'Use sample data' }
                       )}
                     </EuiLink>
                     <StyledItem>
-                      <EuiLink onClick={handleClickUploadFile}>
+                      <EuiLink
+                        onClick={handleClickUploadFile}
+                        data-test-subj="obltOnboardingHomeUploadAFile"
+                      >
                         {i18n.translate(
                           'xpack.observability_onboarding.card.integrations.uploadFile',
                           { defaultMessage: 'Upload a file' }

@@ -45,7 +45,7 @@ export const DISCOVER_FIELDS_LOADING = getDataTestSubjectSelector(
 
 export const DISCOVER_DATA_GRID_UPDATING = getDataTestSubjectSelector('discoverDataGridUpdating');
 
-export const DISCOVER_DATA_GRID_LOADING = getDataTestSubjectSelector('discoverDataGridLoading');
+export const UNIFIED_DATA_TABLE_LOADING = getDataTestSubjectSelector('unifiedDataTableLoading');
 
 export const DISCOVER_NO_RESULTS = getDataTestSubjectSelector('discoverNoResults');
 
@@ -54,7 +54,7 @@ export const DISCOVER_TABLE = getDataTestSubjectSelector('docTable');
 export const GET_DISCOVER_DATA_GRID_CELL = (columnId: string, rowIndex: number) => {
   return `${DISCOVER_TABLE} ${getDataTestSubjectSelector(
     'dataGridRowCell'
-  )}[data-gridcell-column-id="${columnId}"][data-gridcell-row-index="${rowIndex}"] .dscDiscoverGrid__cellValue`;
+  )}[data-gridcell-column-id="${columnId}"][data-gridcell-row-index="${rowIndex}"] .unifiedDataTable__cellValue`;
 };
 
 export const GET_DISCOVER_DATA_GRID_CELL_HEADER = (columnId: string) =>
