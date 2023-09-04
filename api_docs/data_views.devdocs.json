@@ -657,15 +657,15 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
-              },
-              {
-                "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/services/es_index_service.ts"
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_data_view_exists.ts"
               },
               {
                 "plugin": "transform",
@@ -8621,15 +8621,15 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
-              },
-              {
-                "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/services/es_index_service.ts"
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_data_view_exists.ts"
               },
               {
                 "plugin": "transform",
@@ -15695,15 +15695,15 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
-              },
-              {
-                "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/services/es_index_service.ts"
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_data_view_exists.ts"
               },
               {
                 "plugin": "transform",
