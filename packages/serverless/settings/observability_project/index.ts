@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_ID } from '@kbn/management-settings-ids';
+import * as settings from '@kbn/management-settings-ids';
 
-export const SEARCH_PROJECT_SETTINGS = [COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_ID];
+export const OBSERVABILITY_PROJECT_SETTINGS = [
+  settings.ML_ANOMALY_DETECTION_RESULTS_ENABLE_TIME_DEFAULTS_ID,
+  settings.ML_ANOMALY_DETECTION_RESULTS_TIME_DEFAULTS_ID,
+];

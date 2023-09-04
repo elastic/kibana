@@ -6,16 +6,20 @@
  * Side Public License, v 1.
  */
 
+import * as settings from '@kbn/management-settings-ids';
+
 export const SECURITY_PROJECT_SETTINGS = [
-  'securitySolution:refreshIntervalDefaults',
-  'securitySolution:timeDefaults',
-  'securitySolution:defaultIndex',
-  'securitySolution:defaultThreatIndex',
-  'securitySolution:defaultAnomalyScore',
+  settings.ML_ANOMALY_DETECTION_RESULTS_ENABLE_TIME_DEFAULTS_ID,
+  settings.ML_ANOMALY_DETECTION_RESULTS_TIME_DEFAULTS_ID,
+  settings.SECURITY_SOLUTION_REFRESH_INTERVAL_DEFAULTS_ID,
+  settings.SECURITY_SOLUTION_TIME_DEFAULTS_ID,
+  settings.SECURITY_SOLUTION_DEFAULT_INDEX_ID,
+  settings.SECURITY_SOLUTION_DEFAULT_THREAT_INDEX_ID,
+  settings.SECURITY_SOLUTION_DEFAULT_ANOMALY_SCORE_ID,
   // This setting doesn't seem to be registered anywhere in serverless
-  // 'securitySolution:enableGroupedNav',
-  'securitySolution:rulesTableRefresh',
-  'securitySolution:ipReputationLinks',
-  'securitySolution:enableCcsWarning',
-  'securitySolution:showRelatedIntegrations',
+  // settings.SECURITY_SOLUTION_ENABLE_GROUPED_NAV_ID,
+  settings.SECURITY_SOLUTION_RULES_TABLE_REFRESH_ID,
+  settings.SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID,
+  settings.SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID,
+  settings.SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID,
 ];
