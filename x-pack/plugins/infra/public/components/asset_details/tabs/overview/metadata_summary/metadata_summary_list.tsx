@@ -122,21 +122,6 @@ export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSumma
             )
         )}
       </EuiFlexGroup>
-      <EuiFlexItem grow={false} key="metadata-link">
-        <EuiButtonEmpty
-          data-test-subj="infraAssetDetailsMetadataShowAllButton"
-          onClick={onClick}
-          size="xs"
-          flush="both"
-          iconSide="right"
-          iconType="sortRight"
-        >
-          <FormattedMessage
-            id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
-            defaultMessage="Show all"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
     </>
   );
 };
@@ -149,25 +134,56 @@ export const MetadataSummaryListCompact = ({ metadata, metadataLoading }: Metada
   };
 
   return (
-    <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
-      <EuiFlexGroup alignItems="flexStart">
-        {metadataData(metadata?.info).map(
-          (metadataValue) =>
-            metadataValue && (
-              <EuiFlexItem key={metadataValue.field}>
-                <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
-                  <MetadataHeader metadataValue={metadataValue} />
-                  <EuiDescriptionListDescription>
-                    {metadataLoading ? (
-                      <EuiLoadingSpinner />
-                    ) : (
-                      <ExpandableContent values={metadataValue.value ?? NOT_AVAILABLE_LABEL} />
-                    )}
-                  </EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              </EuiFlexItem>
-            )
-        )}
+    <>
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="flexStart">
+          <EuiTitle data-test-subj="infraAssetDetailsMetadataTitle" size="xxs">
+            <span>
+              <FormattedMessage
+                id="xpack.infra.assetDetails.overview.metadataSectionTitle"
+                defaultMessage="Metadata"
+              />
+            </span>
+          </EuiTitle>
+        </EuiFlexGroup>
+        <EuiFlexItem grow={false} key="metadata-link">
+          <EuiButtonEmpty
+            data-test-subj="infraAssetDetailsMetadataShowAllButton"
+            onClick={onClick}
+            size="xs"
+            flush="both"
+            iconSide="right"
+            iconType="sortRight"
+          >
+            <FormattedMessage
+              id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
+              defaultMessage="Show all"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <MetadataExplanationMessage />
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="flexStart">
+          {metadataData(metadata?.info).map(
+            (metadataValue) =>
+              metadataValue && (
+                <EuiFlexItem key={metadataValue.field}>
+                  <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
+                    <MetadataHeader metadataValue={metadataValue} />
+                    <EuiDescriptionListDescription>
+                      {metadataLoading ? (
+                        <EuiLoadingSpinner />
+                      ) : (
+                        <ExpandableContent values={metadataValue.value ?? NOT_AVAILABLE_LABEL} />
+                      )}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+              )
+          )}
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </>
   );
