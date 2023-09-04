@@ -136,7 +136,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
-  const [isWordWrapped, setIsWordWrapped] = useState(true);
+  const [isWordWrapped, setIsWordWrapped] = useState(false);
   const [editorErrors, setEditorErrors] = useState<MonacoError[]>([]);
   const [editorWarning, setEditorWarning] = useState<MonacoError[]>([]);
 
@@ -367,6 +367,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onQueryUpdate = useCallback(
     (value: string) => {
       setCode(value);
+      setIsWordWrapped(false);
       onTextLangQueryChange({ [language]: value } as AggregateQuery);
     },
     [language, onTextLangQueryChange]
@@ -507,13 +508,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   ? i18n.translate(
                       'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
                       {
-                        defaultMessage: 'Disable word wrap',
+                        defaultMessage: 'Disable wrap with pipes',
                       }
                     )
                   : i18n.translate(
                       'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
                       {
-                        defaultMessage: 'Enable word wrap',
+                        defaultMessage: 'Wrap with pipes',
                       }
                     )
               }
@@ -527,13 +528,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     ? i18n.translate(
                         'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
                         {
-                          defaultMessage: 'Disable word wrap',
+                          defaultMessage: 'Disable wrap with pipes',
                         }
                       )
                     : i18n.translate(
                         'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
                         {
-                          defaultMessage: 'Enable word wrap',
+                          defaultMessage: 'Wrap with pipes',
                         }
                       )
                 }
@@ -543,6 +544,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     wordWrap: isWordWrapped ? 'off' : 'on',
                   });
                   setIsWordWrapped(!isWordWrapped);
+
+                  const pipes = code?.split('|');
+                  const codeNoLines = pipes?.map((pipe) => {
+                    return pipe.replaceAll('\n', '');
+                  });
+                  const updatedCode = codeNoLines.join(isWordWrapped ? '|' : '\n|');
+                  if (code !== updatedCode) {
+                    setCode(updatedCode);
+                    onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
+                  }
                 }}
               />
             </EuiToolTip>
