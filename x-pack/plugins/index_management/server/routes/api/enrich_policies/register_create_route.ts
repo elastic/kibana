@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { forEach, keys, sortBy } from 'lodash';
@@ -31,6 +31,12 @@ export const validationSchema = schema.object({
     sourceIndices: schema.arrayOf(schema.string()),
     query: schema.maybe(schema.any()),
   }),
+});
+
+export const querySchema = schema.object({
+  executePolicyAfterCreation: schema.maybe(
+    schema.oneOf([schema.literal('true'), schema.literal('false')])
+  ),
 });
 
 const getMatchingIndicesSchema = schema.object({ pattern: schema.string() }, { unknowns: 'allow' });
@@ -120,15 +126,25 @@ async function getIndices(dataClient: IScopedClusterClient, pattern: string, lim
 
 export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
-    { path: addInternalBasePath('/enrich_policies'), validate: { body: validationSchema } },
+    {
+      path: addInternalBasePath('/enrich_policies'),
+      validate: { body: validationSchema, query: querySchema },
+    },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
+      const executeAfter =
+        (request.query as TypeOf<typeof querySchema>).executePolicyAfterCreation === 'true';
 
       const { policy } = request.body;
       const serializedPolicy = serializeAsESPolicy(policy as SerializedEnrichPolicy);
 
       try {
         const res = await enrichPoliciesActions.create(client, policy.name, serializedPolicy);
+
+        if (executeAfter) {
+          await enrichPoliciesActions.execute(client, policy.name);
+        }
+
         return response.ok({ body: res });
       } catch (error) {
         return handleEsError({ error, response });
@@ -142,8 +158,17 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
       validate: { body: getMatchingIndicesSchema },
     },
     async (context, request, response) => {
-      const { pattern } = request.body;
+      let { pattern } = request.body;
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
+
+      // Add wildcards to the search query to match the behavior of the
+      // index pattern search in the Kibana UI.
+      if (!pattern.startsWith('*')) {
+        pattern = `*${pattern}`;
+      }
+      if (!pattern.endsWith('*')) {
+        pattern = `${pattern}*`;
+      }
 
       try {
         const indices = await getIndices(client, pattern);

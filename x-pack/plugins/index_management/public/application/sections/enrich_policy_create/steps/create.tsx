@@ -14,6 +14,9 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiText,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiTabbedContent,
   EuiSpacer,
   EuiCodeBlock,
@@ -170,8 +173,9 @@ const RequestTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
   );
 };
 
+const CREATE_AND_EXECUTE_POLICY = true;
 interface Props {
-  onSubmit: () => void;
+  onSubmit: (executePolicyAfterCreation?: boolean) => void;
   isLoading: boolean;
 }
 
@@ -201,12 +205,27 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
 
       <EuiSpacer />
 
-      <EuiButton fill color="primary" onClick={onSubmit} isLoading={isLoading}>
-        <FormattedMessage
-          id="xpack.idxMgmt.enrichPolicyCreate.createStep.nextButtonLabel"
-          defaultMessage="Create policy"
-        />
-      </EuiButton>
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={() => onSubmit(CREATE_AND_EXECUTE_POLICY)} isLoading={isLoading}>
+            <FormattedMessage
+              id="xpack.idxMgmt.enrichPolicyCreate.createStep.nextButtonLabel"
+              defaultMessage="Create and execute policy"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButton fill color="primary" onClick={() => onSubmit()} isLoading={isLoading}>
+            <FormattedMessage
+              id="xpack.idxMgmt.enrichPolicyCreate.createStep.nextButtonLabel"
+              defaultMessage="Create policy"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

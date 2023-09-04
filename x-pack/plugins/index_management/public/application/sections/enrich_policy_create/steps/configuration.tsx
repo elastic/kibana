@@ -9,7 +9,7 @@ import React from 'react';
 import { omit, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import {
   useForm,
   Form,
@@ -22,6 +22,7 @@ import {
   JsonEditorField,
 } from '../../../../shared_imports';
 
+import { useAppContext } from '../../../app_context';
 import { IndicesSelector } from './fields/indices_selector';
 import { documentationService } from '../../../services/documentation';
 import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
@@ -131,6 +132,11 @@ export const configurationFormSchema: FormSchema = {
 };
 
 export const ConfigurationStep = ({ onNext }: Props) => {
+  const {
+    core: {
+      application: { getUrlForApp },
+    },
+  } = useAppContext();
   const { draft, updateDraft, updateCompletionState } = useCreatePolicyContext();
 
   const { form } = useForm({
@@ -199,7 +205,26 @@ export const ConfigurationStep = ({ onNext }: Props) => {
         }}
       />
 
-      <UseField path="sourceIndices" component={IndicesSelector} />
+      <UseField
+        path="sourceIndices"
+        component={IndicesSelector}
+        labelAppend={
+          <EuiText size="xs">
+            <EuiLink
+              href={getUrlForApp('home', { path: '#/tutorial_directory/fileDataViz' })}
+              data-test-subj="uploadFileLink"
+            >
+              <FormattedMessage
+                id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.uploadFileLink"
+                defaultMessage="Upload a file"
+              />
+            </EuiLink>
+          </EuiText>
+        }
+        componentProps={{
+          fullWidth: false,
+        }}
+      />
 
       <UseField
         path="query"

@@ -21,7 +21,10 @@ const FIELD_SELECTION = 2;
 const CREATE = 3;
 
 export const CreatePolicyWizard = () => {
-  const { history } = useAppContext();
+  const {
+    history,
+    services: { notificationService },
+  } = useAppContext();
   const { draft, completionState } = useCreatePolicyContext();
   const [currentStep, setCurrentStep] = useState(CONFIGURATION);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,19 +41,42 @@ export const CreatePolicyWizard = () => {
     [currentStep]
   );
 
-  const onSubmit = useCallback(async () => {
-    setIsLoading(true);
-    const { error } = await createEnrichPolicy(draft as SerializedEnrichPolicy);
-    setIsLoading(false);
+  const onSubmit = useCallback(
+    async (executePolicyAfterCreation?: boolean) => {
+      setIsLoading(true);
+      const { error, data } = await createEnrichPolicy(
+        draft as SerializedEnrichPolicy,
+        executePolicyAfterCreation
+      );
+      setIsLoading(false);
 
-    // If there was an error while creating the policy, navigate back to the first step and show the error there
-    if (error) {
-      setCreateError(error);
-      return;
-    }
+      if (data) {
+        const toastMessage = executePolicyAfterCreation
+          ? i18n.translate(
+              'xpack.idxMgmt.enrichPoliciesCreate.createAndExecuteNotificationMessage',
+              {
+                defaultMessage: 'Created and executed policy: {policyName}',
+                values: { policyName: draft.name },
+              }
+            )
+          : i18n.translate('xpack.idxMgmt.enrichPoliciesCreate.createNotificationMessage', {
+              defaultMessage: 'Created policy: {policyName}',
+              values: { policyName: draft.name },
+            });
 
-    history.push('/enrich_policies');
-  }, [draft, history, setIsLoading, setCreateError]);
+        notificationService.showSuccessToast(toastMessage);
+      }
+
+      // If there was an error while creating the policy, navigate back to the first step and show the error there
+      if (error) {
+        setCreateError(error);
+        return;
+      }
+
+      history.push('/enrich_policies');
+    },
+    [draft, history, setIsLoading, setCreateError, notificationService]
+  );
 
   const changeCurrentStepTo = useCallback(
     (step: number) => {

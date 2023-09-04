@@ -49,6 +49,13 @@ const getIndexOptions = async (patternString: string) => {
         })
         .sort((a, b) => String(a.label).localeCompare(b.label)),
     });
+  } else {
+    options.push({
+      label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.indicesSelector.noMatchingOption', {
+        defaultMessage: 'No indices match your search criteria.',
+      }),
+      options: [],
+    });
   }
 
   return options;
@@ -76,6 +83,7 @@ export const IndicesSelector = ({ field, ...rest }: Props) => {
   return (
     <EuiFormRow
       label={field.label}
+      labelAppend={field.labelAppend}
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
