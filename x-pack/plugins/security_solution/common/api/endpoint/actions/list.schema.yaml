@@ -20,29 +20,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 components:
   schemas:
     ListRequestQuery:
       type: object
       properties:
         agentIds:
-          $ref: '../model/schema/common.yaml#/components/schemas/AgentIds'
+          $ref: '../model/schema/common.schema.yaml#/components/schemas/AgentIds'
         commands:
-          $ref: '../model/schema/common.yaml#/components/schemas/Commands'
+          $ref: '../model/schema/common.schema.yaml#/components/schemas/Commands'
         page:
-          $ref: '../model/schema/common.yaml#/components/schemas/Page'
+          $ref: '../model/schema/common.schema.yaml#/components/schemas/Page'
         pageSize:
           allOf:
-            - $ref: '../model/schema/common.yaml#/components/schemas/PageSize'
+            - $ref: '../model/schema/common.schema.yaml#/components/schemas/PageSize'
             - maximum: 10000
         startDate:
-            $ref: '../model/schema/common.yaml#/components/schemas/StartDate'
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/StartDate'
         endDate:
-          $ref: '../model/schema/common.yaml#/components/schemas/EndDate'
+          $ref: '../model/schema/common.schema.yaml#/components/schemas/EndDate'
         userIds:
-          $ref: '../model/schema/common.yaml#/components/schemas/UserIds'
+          $ref: '../model/schema/common.schema.yaml#/components/schemas/UserIds'
         types:
-          $ref: '../model/schema/common.yaml#/components/schemas/Types'
+          $ref: '../model/schema/common.schema.yaml#/components/schemas/Types'
         withOutputs:
-          $ref: '../model/schema/common.yaml#/components/schemas/WithOutputs'
+          $ref: '../model/schema/common.schema.yaml#/components/schemas/WithOutputs'

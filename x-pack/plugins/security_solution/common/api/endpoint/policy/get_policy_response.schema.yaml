@@ -13,4 +13,4 @@ components:
         type: object
         properties:
           agentId:
-            $ref: '../model/schema/common.yaml#/components/schemas/AgentId'
+            $ref: '../model/schema/common.schema.yaml#/components/schemas/AgentId'

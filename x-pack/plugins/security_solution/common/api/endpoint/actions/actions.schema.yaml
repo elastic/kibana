@@ -14,7 +14,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
   /api/endpoint/action/running_procs:
     post:
@@ -26,14 +26,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../model/schema/common.yaml#/components/schemas/BaseActionSchema'
+              $ref: '../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
   /api/endpoint/action/isolate:
     post:
@@ -45,14 +45,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../model/schema/common.yaml#/components/schemas/BaseActionSchema'
+              $ref: '../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
   /api/endpoint/action/unisolate:
     post:
@@ -64,14 +64,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../model/schema/common.yaml#/components/schemas/BaseActionSchema'
+              $ref: '../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
   /api/endpoint/action/kill_process:
     post:
@@ -83,14 +83,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../model/schema/common.yaml#/components/schemas/ProcessActionSchemas'
+              $ref: '../model/schema/common.schema.yaml#/components/schemas/ProcessActionSchemas'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
 
   /api/endpoint/action/suspend_process:
@@ -103,11 +103,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../model/schema/common.yaml#/components/schemas/ProcessActionSchemas'
+              $ref: '../model/schema/common.schema.yaml#/components/schemas/ProcessActionSchemas'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'

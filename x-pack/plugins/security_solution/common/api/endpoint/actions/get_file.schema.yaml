@@ -20,13 +20,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
 components:
   schemas:
     GetFileActionRequestBody:
       allOf:
-        - $ref: '../model/schema/common.yaml#/components/schemas/BaseActionSchema'
+        - $ref: '../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
         - type: object
           required:
             - parameters

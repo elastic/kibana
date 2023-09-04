@@ -16,7 +16,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
   /api/endpoint/policy_response:
     get:
@@ -31,4 +31,4 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'

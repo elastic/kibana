@@ -10,12 +10,12 @@ components:
       properties:
         page:
           allOf:
-          - $ref: '../model/schema/common.yaml#/components/schemas/Page'
+          - $ref: '../model/schema/common.schema.yaml#/components/schemas/Page'
           - minimum: 0
           - default: 0
         pageSize:
           allOf:
-            - $ref: '../model/schema/common.yaml#/components/schemas/PageSize'
+            - $ref: '../model/schema/common.schema.yaml#/components/schemas/PageSize'
             - default: 10
             - minimum: 1
             - maximum: 10000

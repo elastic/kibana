@@ -20,13 +20,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
 components:
   schemas:
     ExecuteActionRequestBody:
       allOf:
-        - $ref: '../model/schema/common.yaml#/components/schemas/BaseActionSchema'
+        - $ref: '../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
         - type: object
           required:
             - parameters
@@ -37,6 +37,6 @@ components:
               type: object
               properties:
                 command:
-                  $ref: '../model/schema/common.yaml#/components/schemas/Command'
+                  $ref: '../model/schema/common.schema.yaml#/components/schemas/Command'
                 timeout:
-                  $ref: '../model/schema/common.yaml#/components/schemas/Timeout'
+                  $ref: '../model/schema/common.schema.yaml#/components/schemas/Timeout'

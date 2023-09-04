@@ -16,12 +16,12 @@ paths:
             type: object
             properties:
               agent_ids:
-                $ref: '../model/schema/common.yaml#/components/schemas/AgentIds'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/AgentIds'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
