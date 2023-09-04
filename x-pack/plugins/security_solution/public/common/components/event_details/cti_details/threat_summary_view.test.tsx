@@ -64,7 +64,7 @@ describe('ThreatSummaryView', () => {
       </TestProviders>
     );
 
-    expect(getByText('Enriched with Threat Intelligence')).toBeInTheDocument();
+    expect(getByText('Enriched with threat intelligence')).toBeInTheDocument();
 
     expect(getAllByTestId('EnrichedDataRow')).toHaveLength(
       enrichments.length + RISK_SCORE_DATA_ROWS

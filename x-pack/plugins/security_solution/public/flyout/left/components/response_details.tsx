@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RESPONSE_DETAILS_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type {
@@ -61,7 +62,25 @@ export const ResponseDetails: React.FC = () => {
       </EuiTitle>
       <EuiSpacer size="s" />
       {!responseActions ? (
-        <InlineBlock data-test-subj={RESPONSE_EMPTY_TEST_ID}>{i18n.RESPONSE_EMPTY}</InlineBlock>
+        <InlineBlock data-test-subj={RESPONSE_EMPTY_TEST_ID}>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.documentDetails.response.emptyMessage"
+            defaultMessage="This alert did not generate an external notification. {editRuleLink} to set up notification actions."
+            values={{
+              editRuleLink: (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/security/current/rules-ui-management.html#edit-rules-settings"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.documentDetails.response.editRuleLink"
+                    defaultMessage="Edit your rule"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </InlineBlock>
       ) : (
         <ExtendedFlyoutWrapper>
           {endpointResponseActionsEnabled ? responseActionsView?.content : osqueryView?.content}
