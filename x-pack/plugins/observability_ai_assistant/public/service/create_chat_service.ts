@@ -112,7 +112,7 @@ export async function createChatService({
   }
 
   return {
-    executeFunction: async (name, args, signal) => {
+    executeFunction: async ({ name, args, signal, messages }) => {
       const fn = functionRegistry.get(name);
 
       if (!fn) {
@@ -123,7 +123,7 @@ export async function createChatService({
 
       validate(name, parsedArguments);
 
-      return await fn.respond({ arguments: parsedArguments }, signal);
+      return await fn.respond({ arguments: parsedArguments, messages }, signal);
     },
     renderFunction: (name, args, response) => {
       const fn = functionRegistry.get(name);

@@ -246,9 +246,11 @@ export class ObservabilityAIAssistantClient {
     });
 
     if ('object' in response && response.object === 'chat.completion') {
-      const title =
-        response.choices[0].message?.content?.slice(1, -1) ||
-        `Conversation on ${conversation['@timestamp']}`;
+      const input =
+        response.choices[0].message?.content || `Conversation on ${conversation['@timestamp']}`;
+
+      const match = input.match(/^["']?([^"']+)["']?$/);
+      const title = match ? match[1] : input;
 
       const updatedConversation: Conversation = merge(
         {},

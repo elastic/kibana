@@ -37,7 +37,6 @@ export const getApmTimeseriesRt = t.type({
   stats: t.array(
     t.intersection([
       t.type({
-        'service.environment': environmentRt.props.environment,
         'service.name': t.string,
         title: t.string,
         timeseries: t.union([
@@ -85,6 +84,7 @@ export const getApmTimeseriesRt = t.type({
       t.partial({
         filter: t.string,
         offset: t.string,
+        'service.environment': environmentRt.props.environment,
       }),
     ])
   ),
