@@ -34,6 +34,7 @@ import { tablePageSelector } from '../../../screens/table_pagination';
 import { ALERTS_TABLE_COUNT } from '../../../screens/timeline';
 import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../../screens/alerts';
 import { getLocalstorageEntryAsObject } from '../../../helpers/common';
+import { waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded } from '../../../tasks/rule_details';
 
 describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('Basic functions', () => {
@@ -179,6 +180,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
 
   describe('Localstorage management', () => {
     const ARCHIVED_RULE_ID = '7015a3e2-e4ea-11ed-8c11-49608884878f';
+    const ARCHIVED_RULE_NAME = 'Endpoint Security';
 
     before(() => {
       cleanKibana();
@@ -204,7 +206,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
      * We create this config to re-check localStorage 3 times, every 500ms to avoid any potential flakyness from that delay
      */
     const storageCheckRetryConfig = {
-      timeout: 7000,
+      timeout: 1500,
       interval: 500,
     };
 
@@ -235,6 +237,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
       cy.get(OVERVIEW_RULE).should('be.visible');
 
       visitWithoutDateRange(ruleDetailsUrl(ARCHIVED_RULE_ID));
+      waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
 
       const localStorageCheck = () =>
         cy.getAllLocalStorage().then((storage) => {
@@ -249,6 +252,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
       cy.get(OVERVIEW_RULE).should('be.visible');
 
       visitWithoutDateRange(ruleDetailsUrl(ARCHIVED_RULE_ID));
+      waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
 
       visit(ALERTS_URL);
       cy.get(OVERVIEW_RULE).should('not.exist');
