@@ -54,7 +54,7 @@ export function ChatPromptEditor({
 
   const { model, initialJsonString } = useJsonEditorModel({
     functionName: selectedFunctionName,
-    initialJson: initialFunctionPayload,
+    initialJson: functionPayload,
   });
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);

@@ -27,7 +27,7 @@ export async function waitForDocumentInIndex({
     async () => {
       const response = await esClient.search({ index: indexName });
       if (response.hits.hits.length < num) {
-        throw new Error('No hits found');
+        throw new Error(`Only found ${response.hits.hits.length} / ${num} documents`);
       }
       return response;
     },
@@ -63,12 +63,16 @@ export async function createIndex({
 
 export async function waitForAlertInIndex<T>({
   esClient,
+  filter,
   indexName,
   ruleId,
+  num = 1,
 }: {
   esClient: Client;
+  filter: Date;
   indexName: string;
   ruleId: string;
+  num: number;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return pRetry(
     async () => {
@@ -76,14 +80,27 @@ export async function waitForAlertInIndex<T>({
         index: indexName,
         body: {
           query: {
-            term: {
-              'kibana.alert.rule.uuid': ruleId,
+            bool: {
+              must: [
+                {
+                  term: {
+                    'kibana.alert.rule.uuid': ruleId,
+                  },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: filter.getTime().toString(),
+                    },
+                  },
+                },
+              ],
             },
           },
         },
       });
-      if (response.hits.hits.length === 0) {
-        throw new Error('No hits found');
+      if (response.hits.hits.length < num) {
+        throw new Error(`Only found ${response.hits.hits.length} / ${num} documents`);
       }
       return response;
     },

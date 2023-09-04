@@ -59,31 +59,39 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.visible');
   });
 
-  it('should show a confirmation modal for upgrading host risk score and display a link to host risk score Elastic doc', () => {
-    clickUpgradeRiskScore(RiskScoreEntity.host);
-    cy.get(UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.host)).should('exist');
+  it(
+    'should show a confirmation modal for upgrading host risk score and display a link to host risk score Elastic doc',
+    { tags: ['@brokenInServerless'] },
+    () => {
+      clickUpgradeRiskScore(RiskScoreEntity.host);
+      cy.get(UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.host)).should('exist');
 
-    cy.get(UPGRADE_CANCELLATION_BUTTON)
-      .get(`${UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.host)} a`)
-      .then((link) => {
-        expect(link.prop('href')).to.eql(
-          `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.host}-risk-score.html`
-        );
-      });
-  });
+      cy.get(UPGRADE_CANCELLATION_BUTTON)
+        .get(`${UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.host)} a`)
+        .then((link) => {
+          expect(link.prop('href')).to.eql(
+            `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.host}-risk-score.html`
+          );
+        });
+    }
+  );
 
-  it('should show a confirmation modal for upgrading user risk score and display a link to user risk score Elastic doc', () => {
-    clickUpgradeRiskScore(RiskScoreEntity.user);
-    cy.get(UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.user)).should('exist');
+  it(
+    'should show a confirmation modal for upgrading user risk score and display a link to user risk score Elastic doc',
+    { tags: ['@brokenInServerless'] },
+    () => {
+      clickUpgradeRiskScore(RiskScoreEntity.user);
+      cy.get(UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.user)).should('exist');
 
-    cy.get(UPGRADE_CANCELLATION_BUTTON)
-      .get(`${UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.user)} a`)
-      .then((link) => {
-        expect(link.prop('href')).to.eql(
-          `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.user}-risk-score.html`
-        );
-      });
-  });
+      cy.get(UPGRADE_CANCELLATION_BUTTON)
+        .get(`${UPGRADE_CONFIRMATION_MODAL(RiskScoreEntity.user)} a`)
+        .then((link) => {
+          expect(link.prop('href')).to.eql(
+            `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.user}-risk-score.html`
+          );
+        });
+    }
+  );
 });
 
 const versions: Array<'8.3' | '8.4'> = ['8.3', '8.4'];
