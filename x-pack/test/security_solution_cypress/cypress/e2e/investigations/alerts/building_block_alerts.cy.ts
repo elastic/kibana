@@ -25,15 +25,18 @@ describe(
   () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
+    });
+
+    after(() => {
+      cy.task('esArchiverUnload', 'auditbeat_big');
+    });
+
+    beforeEach(() => {
       cleanKibana();
       login();
       createRule(getBuildingBlockRule()).then((rule) =>
         visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
       );
-    });
-
-    after(() => {
-      cy.task('esArchiverUnload', 'auditbeat_big');
     });
 
     it('Alerts should be visible on the Rule Detail page and not visible on the Overview page', () => {
