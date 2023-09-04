@@ -6,7 +6,7 @@
  */
 import * as t from 'io-ts';
 import { sumBy } from 'lodash';
-import { createFrameGroupID, FrameGroupID } from '@kbn/profiling-utils/src/frame_group';
+import { createFrameGroupID, FrameGroupID } from '@kbn/profiling-utils/common/frame_group';
 import {
   createStackFrameMetadata,
   emptyExecutable,
@@ -19,7 +19,7 @@ import {
   StackFrameMetadata,
   StackTrace,
   StackTraceID,
-} from '@kbn/profiling-utils/src/profiling';
+} from '@kbn/profiling-utils/common/profiling';
 
 interface TopNFunctionAndFrameGroup {
   Frame: StackFrameMetadata;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { HttpFetchQuery } from '@kbn/core/public';
-import { ElasticFlameGraph } from '@kbn/profiling-utils/src/flamegraph';
+import { ElasticFlameGraph } from '@kbn/profiling-utils/common/flamegraph';
 import { getRoutePaths } from '../common';
 import { TopNFunctions } from '../common/functions';
 import type {

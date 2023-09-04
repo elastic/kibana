@@ -8,7 +8,7 @@
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ProfilingESField } from '@kbn/profiling-utils/src/elasticsearch';
+import { ProfilingESField } from '@kbn/profiling-utils/common/elasticsearch';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { topNElasticSearchQuery } from './topn';
 

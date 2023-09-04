@@ -6,7 +6,7 @@
  */
 
 import { ColumnarViewModel } from '@elastic/charts';
-import { ElasticFlameGraph } from '@kbn/profiling-utils/src/flamegraph';
+import { ElasticFlameGraph } from '@kbn/profiling-utils/common/flamegraph';
 import { frameTypeToRGB, rgbToRGBA } from './frame_type_colors';
 
 function normalize(n: number, lower: number, upper: number): number {
