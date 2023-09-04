@@ -3,6 +3,7 @@ info:
   title: Common Endpoint Attributes
   version: '2023-10-31'
 paths: { }
+x-codegen-enabled: false
 components:
   schemas:
     Id:
@@ -11,12 +12,12 @@ components:
       $ref: '#/components/schemas/Id'
       nullable: true
     Page:
-      type: number
+      type: integer
       default: 1
       minimum: 1
       description: Page number
     PageSize:
-      type: number
+      type: integer
       default: 10
       minimum: 1
       maximum: 100
@@ -63,7 +64,7 @@ components:
         $ref: '#/components/schemas/Command'
 
     Timeout:
-      type: number
+      type: integer
       minimum: 1
       description: The maximum timeout value in milliseconds (optional)
 
@@ -170,7 +171,7 @@ components:
                 - type: object
                   properties:
                     pid:
-                      type: number
+                      type: integer
                       minimum: 1
                 - type: object
                   properties:
