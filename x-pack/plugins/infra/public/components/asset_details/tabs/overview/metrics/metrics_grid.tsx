@@ -43,6 +43,7 @@ interface MetricsChartsWrapperProps {
   logsDataView?: DataView;
   charts: XYConfig[];
   SectionTitle: React.FunctionComponent;
+  testId: string;
 }
 
 interface Props extends CompactProps {
@@ -105,6 +106,7 @@ export const MetricsGrid = React.memo(
           SectionTitle={MetricsSectionTitle}
           metricsDataView={metricsDataView}
           logsDataView={logsDataView}
+          testId="infraAssetDetailsMetricsChart"
         />
         <EuiSpacer size="s" />
         {shouldShowNginxSection && (
@@ -115,6 +117,7 @@ export const MetricsGrid = React.memo(
             SectionTitle={NginxMetricsSectionTitle}
             metricsDataView={metricsDataView}
             logsDataView={logsDataView}
+            testId="infraAssetDetailsNginxMetricsChart"
           />
         )}
       </>
@@ -135,6 +138,7 @@ export const MetricsGridCompact = ({
     SectionTitle={MetricsSectionTitle}
     metricsDataView={metricsDataView}
     logsDataView={logsDataView}
+    testId="infraAssetDetailsMetricsChart"
   />
 );
 
@@ -146,6 +150,7 @@ const MetricsChartsWrapper = React.memo(
     timeRange,
     charts,
     SectionTitle,
+    testId,
   }: MetricsChartsWrapperProps) => {
     const { setDateRange } = useDateRangeProviderContext();
     const getDataView = useCallback(
@@ -187,15 +192,11 @@ const MetricsChartsWrapper = React.memo(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSpacer size="s" />
-          <EuiFlexGrid
-            columns={2}
-            gutterSize="s"
-            data-test-subj="infraAssetDetailsMetricsChartGrid"
-          >
+          <EuiFlexGrid columns={2} gutterSize="s" data-test-subj={`${testId}Grid`}>
             {charts.map(({ dataViewOrigin, id, layers, title, overrides }, index) => (
               <EuiFlexItem key={index} grow={false}>
                 <LensChart
-                  id={`infraAssetDetailsMetricsChart${id}`}
+                  id={`${testId}${id}`}
                   borderRadius="m"
                   dataView={getDataView(dataViewOrigin)}
                   dateRange={timeRange}
