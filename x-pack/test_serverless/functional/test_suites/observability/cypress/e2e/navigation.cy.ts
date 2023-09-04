@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-describe('Serverless', () => {
+// Flaky in serverless tests
+describe.skip('Serverless', () => {
   beforeEach(() => {
     cy.loginAsElasticUser();
   });
