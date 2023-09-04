@@ -8647,7 +8647,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsRawDocSource",
-        "description": [],
+        "description": [
+          "\nSaved object document as stored in `_source` of doc in ES index\nSimilar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9619,52 +9621,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectsServiceSetup.getAllIndices",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "getAllIndices",
-            "description": [
-              "\nReturns all (aliases to) kibana system indices used for saved object storage.\n"
-            ],
-            "signature": [
-              "() => string[]"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core-saved-objects-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-plugins-server-internal",
-                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
-              },
-              {
-                "plugin": "@kbn/core-plugins-server-internal",
-                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/plugins/saved_objects_tagging/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-server-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-server-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts"
-              }
-            ],
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10225,7 +10181,7 @@
             "tags": [],
             "label": "getAllIndices",
             "description": [
-              "\nReturns all (aliases to) kibana system indices used for saved object storage."
+              "\nReturns all (aliases to) kibana system indices used for saved object storage.\n"
             ],
             "signature": [
               "() => string[]"
