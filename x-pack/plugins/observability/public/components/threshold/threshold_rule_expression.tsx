@@ -266,6 +266,31 @@ export default function Expressions(props: Props) {
     }
   }, [metadata, setRuleParams, timeSize, timeUnit]);
 
+  const preFillAlertFilter = useCallback(() => {
+    const md = metadata;
+    if (md && md.currentOptions?.filterQuery) {
+      setRuleParams('searchConfiguration', {
+        ...ruleParams.searchConfiguration,
+        query: {
+          query: md.currentOptions.filterQuery,
+          language: 'kuery',
+        },
+      });
+    } else if (md && md.currentOptions?.groupBy && md.series) {
+      const { groupBy } = md.currentOptions;
+      const query = Array.isArray(groupBy)
+        ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
+        : `${groupBy}: "${md.series.id}"`;
+      setRuleParams('searchConfiguration', {
+        ...ruleParams.searchConfiguration,
+        query: {
+          query,
+          language: 'kuery',
+        },
+      });
+    }
+  }, [metadata, setRuleParams, ruleParams.searchConfiguration]);
+
   const preFillAlertGroupBy = useCallback(() => {
     const md = metadata;
     if (md && md.currentOptions?.groupBy && !md.series) {
@@ -279,6 +304,10 @@ export default function Expressions(props: Props) {
       setTimeUnit(ruleParams.criteria[0].timeUnit);
     } else {
       preFillAlertCriteria();
+    }
+
+    if (!ruleParams.filterQuery) {
+      preFillAlertFilter();
     }
 
     if (!ruleParams.groupBy) {

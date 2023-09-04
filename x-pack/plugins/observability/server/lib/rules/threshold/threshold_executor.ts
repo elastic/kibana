@@ -46,7 +46,7 @@ import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_mi
 
 export const searchConfigurationSchema = schema.object({
   query: schema.object({
-    query: schema.oneOf([schema.string(), schema.recordOf(schema.string(), schema.any())]),
+    query: schema.string(),
     language: schema.string(),
   }),
 });
