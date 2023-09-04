@@ -10,6 +10,7 @@ import execa from 'execa';
 import fs from 'fs';
 import Fsp from 'fs/promises';
 import { resolve, basename, join } from 'path';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
@@ -24,12 +25,18 @@ import {
   ESS_CONFIG_PATH,
   ESS_FILES_PATH,
 } from '../paths';
+import {
+  ELASTIC_SERVERLESS_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+} from './ess_file_realm';
+import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 
 interface BaseOptions {
   tag?: string;
   image?: string;
   port?: number;
   ssl?: boolean;
+  /** Kill running cluster before starting a new cluster  */
   kill?: boolean;
   files?: string | string[];
 }
@@ -39,10 +46,16 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 }
 
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
+  /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
+  /** Path to the directory where the ES cluster will store data */
   basePath: string;
+  /** If this process exits, teardown the ES cluster as well */
   teardown?: boolean;
+  /** Start the ES cluster in the background instead of remaining attached: useful for running tests */
   background?: boolean;
+  /** Wait for the ES cluster to be ready to serve requests */
+  waitForReady?: boolean;
 }
 
 interface ServerlessEsNodeArgs {
@@ -320,10 +333,14 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
   log.info(chalk.bold(`Checking for image: ${image}`));
 
   await execa('docker', ['pull', image], {
-    // inherit is required to show Docker output
-    stdio: ['ignore', 'inherit', 'inherit'],
-  }).catch(({ message }) => {
-    throw createCliError(message);
+    // inherit is required to show Docker pull output
+    stdio: ['ignore', 'inherit', 'pipe'],
+  }).catch(({ message, stderr }) => {
+    throw createCliError(
+      stderr.includes('unauthorized: authentication required')
+        ? `Error authenticating with ${DOCKER_REGISTRY}. Visit https://docker-auth.elastic.co/github_auth to login.`
+        : message
+    );
   });
 }
 
@@ -393,6 +410,14 @@ export function resolveEsArgs(
 
     args.forEach((arg) => {
       const [key, ...value] = arg.split('=');
+
+      // Guide the user to use SSL flag instead of manual setup
+      if (key === 'xpack.security.enabled' && value?.[0] === 'true') {
+        throw createCliError(
+          'Use the --ssl flag to automatically enable and set up the security plugin.'
+        );
+      }
+
       esArgs.set(key.trim(), value.join('=').trim());
     });
   }
@@ -522,6 +547,30 @@ export async function runServerlessEsNode(
   );
 }
 
+function getESClient(
+  { node }: { node: string } = { node: `http://localhost:${DEFAULT_PORT}` }
+): Client {
+  return new Client({
+    node,
+    Connection: HttpConnection,
+  });
+}
+
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+async function waitUntilClusterReady(timeoutMs = 60 * 1000): Promise<void> {
+  const started = Date.now();
+  const client = getESClient();
+  while (started + timeoutMs > Date.now()) {
+    try {
+      await client.info();
+      break;
+    } catch (e) {
+      await delay(1000);
+      /* trap to continue */
+    }
+  }
+}
+
 /**
  * Runs an ES Serverless Cluster through Docker
  */
@@ -555,6 +604,26 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   log.success(`Serverless ES cluster running.
       Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
+
+  if (options.ssl) {
+    log.success(`SSL and Security have been enabled for ES.
+      Login through your browser with username ${chalk.bold.cyan(
+        ELASTIC_SERVERLESS_SUPERUSER
+      )} or ${chalk.bold.cyan(SYSTEM_INDICES_SUPERUSER)} and password ${chalk.bold.magenta(
+      ELASTIC_SERVERLESS_SUPERUSER_PASSWORD
+    )}.
+    `);
+
+    log.warning(`Kibana should be started with the SSL flag so that it can authenticate with ES.
+      See packages/kbn-es/src/ess_resources/README.md for additional information on authentication.
+    `);
+  }
+
+  if (options.waitForReady) {
+    log.info('Waiting until ES is ready to serve requests...');
+    await waitUntilClusterReady();
+    log.success('ES is ready');
+  }
 
   if (!options.background) {
     // The ESS cluster has to be started detached, so we attach a logger afterwards for output

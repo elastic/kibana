@@ -16,7 +16,6 @@ import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React, { useMemo } from 'react';
 import type { Node } from 'unist';
-import { v4 } from 'uuid';
 
 interface Props {
   content: string;
@@ -48,7 +47,10 @@ const cursorCss = css`
 
 const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
 
-const CURSOR = `{{${v4()}}}`;
+// a weird combination of different whitespace chars to make sure it stays
+// invisible even when we cannot properly parse the text while still being
+// unique
+const CURSOR = ` ᠎  `;
 
 const loadingCursorPlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
