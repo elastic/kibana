@@ -76,10 +76,12 @@ export const FullPageView = () => {
           logsDataView={logs.dataView}
           metricsDataView={metrics.dataView}
           nodeName={asset.name}
-          showNginxStubstatus={
-            !!metadata?.features.find((feature) => feature.name === 'nginx.stubstatus')
-          }
-          showNginxAccess={!!metadata?.features.find((feature) => feature.name === 'nginx.access')}
+          showNginxStubstatus={(metadata?.features ?? []).some(
+            (feature) => feature.name === 'nginx.stubstatus'
+          )}
+          showNginxAccess={(metadata?.features ?? []).some(
+            (feature) => feature.name === 'nginx.access'
+          )}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
