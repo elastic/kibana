@@ -150,6 +150,18 @@ export class ConsolePageObject extends FtrService {
     return !attribute.includes('display: none;');
   }
 
+  public async getAutocompleteSuggestion(index: number = 0) {
+    const children1 = await this.find
+      .allByCssSelector('.ace_autocomplete .ace_line :nth-child(1)')
+      .catch(() => null);
+    const children2 = await this.find
+      .allByCssSelector('.ace_autocomplete .ace_line :nth-child(2)')
+      .catch(() => null);
+    if (!children1 || !children2) return null;
+
+    return (await children1[index].getVisibleText()) + (await children2[index].getVisibleText());
+  }
+
   public async enterRequest(request: string = '\nGET _search') {
     const textArea = await this.getEditorTextArea();
     await textArea.pressKeys(request);
@@ -206,24 +218,24 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys(Key.ESCAPE);
   }
 
-  public async pressDown() {
+  public async pressDown(shift: boolean = false) {
     const textArea = await this.testSubjects.find('console-textarea');
-    await textArea.pressKeys(Key.DOWN);
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.DOWN] : Key.DOWN);
   }
 
-  public async pressLeft() {
+  public async pressLeft(shift: boolean = false) {
     const textArea = await this.testSubjects.find('console-textarea');
-    await textArea.pressKeys(Key.LEFT);
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
   }
 
-  public async pressRight() {
+  public async pressRight(shift: boolean = false) {
     const textArea = await this.testSubjects.find('console-textarea');
-    await textArea.pressKeys(Key.RIGHT);
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.RIGHT] : Key.RIGHT);
   }
 
-  public async pressUp() {
+  public async pressUp(shift: boolean = false) {
     const textArea = await this.testSubjects.find('console-textarea');
-    await textArea.pressKeys(Key.UP);
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.UP] : Key.UP);
   }
 
   public async clearTextArea() {
