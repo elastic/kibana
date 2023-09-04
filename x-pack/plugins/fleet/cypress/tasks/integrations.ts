@@ -15,7 +15,7 @@ import {
 import { AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX, EXISTING_HOSTS_TAB } from '../screens/fleet';
 import { TOAST_CLOSE_BTN, CONFIRM_MODAL } from '../screens/navigation';
 
-import { OLDEST_PUBLIC_VERSION } from '../../common/constants';
+import { API_VERSIONS } from '../../common/constants';
 
 export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
   cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
@@ -56,7 +56,7 @@ export const deleteIntegrations = async () => {
     response.body.items.forEach((policy: any) => ids.push(policy.id));
     cy.request({
       url: `/api/fleet/package_policies/delete`,
-      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
       body: `{ "packagePolicyIds": ${JSON.stringify(ids)}, "force": true }`,
       method: 'POST',
     });
@@ -66,7 +66,7 @@ export const deleteIntegrations = async () => {
 export const installPackageWithVersion = (integration: string, version: string) => {
   cy.request({
     url: `/api/fleet/epm/packages/${integration}/${version}`,
-    headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
+    headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     body: '{ "force": true }',
     method: 'POST',
   });

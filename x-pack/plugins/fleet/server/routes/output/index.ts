@@ -7,7 +7,7 @@
 
 import type { FleetAuthzRouter } from '../../services/security';
 
-import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { OUTPUT_API_ROUTES } from '../../constants';
 import {
@@ -37,7 +37,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetOutputsRequestSchema },
       },
       getOutputsHandler
@@ -51,7 +51,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetOneOutputRequestSchema },
       },
       getOneOuputHandler
@@ -65,7 +65,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PutOutputRequestSchema },
       },
       putOutputHandler
@@ -80,7 +80,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostOutputRequestSchema },
       },
       postOutputHandler
@@ -95,7 +95,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: DeleteOutputRequestSchema },
       },
       deleteOutputHandler
@@ -110,7 +110,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
       postLogstashApiKeyHandler

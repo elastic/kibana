@@ -7,11 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
-import {
-  OLDEST_PUBLIC_VERSION,
-  OLDEST_INTERNAL_VERSION,
-  INTERNAL_API_ACCESS,
-} from '../../../common/constants';
+import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
 
 import type { FleetAuthz } from '../../../common';
 
@@ -91,7 +87,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetCategoriesRequestSchema },
       },
       getCategoriesHandler
@@ -104,7 +100,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetPackagesRequestSchema },
       },
       getListHandler
@@ -117,7 +113,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetInstalledPackagesRequestSchema },
       },
       getInstalledListHandler
@@ -130,7 +126,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
       getLimitedListHandler
@@ -143,7 +139,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetStatsRequestSchema },
       },
       getStatsHandler
@@ -156,7 +152,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetFileRequestSchema },
       },
       getFileHandler
@@ -171,7 +167,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetInfoRequestSchema },
       },
       getInfoHandler
@@ -186,7 +182,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: UpdatePackageRequestSchema },
       },
       updatePackageHandler
@@ -199,7 +195,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: InstallPackageFromRegistryRequestSchema },
       },
       installPackageFromRegistryHandler
@@ -214,7 +210,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: BulkInstallPackagesFromRegistryRequestSchema },
       },
       bulkInstallPackagesFromRegistryHandler
@@ -237,7 +233,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: InstallPackageByUploadRequestSchema },
       },
       installPackageByUploadHandler
@@ -250,7 +246,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: CreateCustomIntegrationRequestSchema },
       },
       createCustomIntegrationHandler
@@ -265,7 +261,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: DeletePackageRequestSchema },
       },
 
@@ -279,7 +275,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
       getVerificationKeyIdHandler
@@ -292,7 +288,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetDataStreamsRequestSchema },
       },
       getDataStreamsHandler
@@ -305,7 +301,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetBulkAssetsRequestSchema },
       },
       getBulkAssetsHandler
@@ -325,7 +321,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetInfoRequestSchemaDeprecated },
       },
       async (context, request, response) => {
@@ -354,7 +350,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_INTERNAL_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: { request: UpdatePackageRequestSchemaDeprecated },
       },
       async (context, request, response) => {
@@ -379,7 +375,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_INTERNAL_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: { request: InstallPackageFromRegistryRequestSchemaDeprecated },
       },
       async (context, request, response) => {
@@ -408,7 +404,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_INTERNAL_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: { request: DeletePackageRequestSchemaDeprecated },
       },
       async (context, request, response) => {
@@ -445,7 +441,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: ReauthorizeTransformRequestSchema },
       },
       reauthorizeTransformsHandler

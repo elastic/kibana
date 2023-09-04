@@ -10,7 +10,7 @@ import { getRouteRequiredAuthz } from '../../services/security';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import type { FleetAuthz } from '../../../common';
-import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 import { PACKAGE_POLICY_API_ROUTES } from '../../constants';
 import {
   GetPackagePoliciesRequestSchema,
@@ -51,7 +51,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetPackagePoliciesRequestSchema },
       },
       getPackagePoliciesHandler
@@ -69,7 +69,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: BulkGetPackagePoliciesRequestSchema },
       },
       bulkGetPackagePoliciesHandler
@@ -87,7 +87,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetOnePackagePolicyRequestSchema },
       },
       getOnePackagePolicyHandler
@@ -102,7 +102,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {},
       },
       getOrphanedPackagePolicies
@@ -115,7 +115,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: CreatePackagePolicyRequestSchema },
       },
       createPackagePolicyHandler
@@ -133,7 +133,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: UpdatePackagePolicyRequestSchema },
       },
 
@@ -150,7 +150,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: DeletePackagePoliciesRequestSchema },
       },
       deletePackagePolicyHandler
@@ -165,7 +165,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: DeleteOnePackagePolicyRequestSchema },
       },
       deleteOnePackagePolicyHandler
@@ -181,7 +181,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: UpgradePackagePoliciesRequestSchema },
       },
       upgradePackagePolicyHandler
@@ -197,7 +197,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: DryRunPackagePoliciesRequestSchema },
       },
       dryRunUpgradePackagePolicyHandler

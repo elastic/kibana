@@ -16,7 +16,7 @@ import {
 
 import type { AgentPolicySOAttributes } from '../types';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common';
-import { OLDEST_INTERNAL_VERSION } from '../../common/constants';
+import { API_VERSIONS } from '../../common/constants';
 
 import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from './helpers';
 
@@ -187,7 +187,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
         .expect(200)
         .send();
 
@@ -233,7 +233,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
         .expect(200)
         .send();
 
@@ -271,7 +271,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
         .expect(200)
         .send();
 
@@ -307,7 +307,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
         .expect(200)
         .send();
 

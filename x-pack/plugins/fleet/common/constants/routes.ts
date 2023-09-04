@@ -206,7 +206,14 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
 };
 
 // API versioning constants
-export const OLDEST_PUBLIC_VERSION = '2023-10-31';
-export const OLDEST_INTERNAL_VERSION = '1';
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+  internal: {
+    v1: '1',
+  },
+};
+
 export const PUBLIC_API_ACCESS = 'public';
 export const INTERNAL_API_ACCESS = 'internal';

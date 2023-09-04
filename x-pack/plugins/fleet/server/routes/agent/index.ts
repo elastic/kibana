@@ -6,11 +6,7 @@
  */
 
 import type { FleetAuthz } from '../../../common';
-import {
-  OLDEST_PUBLIC_VERSION,
-  OLDEST_INTERNAL_VERSION,
-  INTERNAL_API_ACCESS,
-} from '../../../common/constants';
+import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
 
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 
@@ -86,7 +82,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetOneAgentRequestSchema },
       },
       getAgentHandler
@@ -102,7 +98,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: UpdateAgentRequestSchema },
       },
       updateAgentHandler
@@ -118,7 +114,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostBulkUpdateAgentTagsRequestSchema },
       },
       bulkUpdateAgentTagsHandler
@@ -134,7 +130,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: DeleteAgentRequestSchema },
       },
       deleteAgentHandler
@@ -151,7 +147,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetAgentsRequestSchema },
       },
       getAgentsHandler
@@ -167,7 +163,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetTagsRequestSchema },
       },
       getAgentTagsHandler
@@ -183,7 +179,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostNewAgentActionRequestSchema },
       },
       postNewAgentActionHandlerBuilder({
@@ -203,7 +199,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostCancelActionRequestSchema },
       },
       postCancelActionHandlerBuilder({
@@ -224,7 +220,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostRetrieveAgentsByActionsRequestSchema },
       },
       postRetrieveAgentsByActionsHandler
@@ -239,7 +235,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostAgentUnenrollRequestSchema },
       },
       postAgentUnenrollHandler
@@ -255,7 +251,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PutAgentReassignRequestSchemaDeprecated },
       },
       putAgentsReassignHandlerDeprecated
@@ -270,7 +266,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostAgentReassignRequestSchema },
       },
       postAgentsReassignHandler
@@ -285,7 +281,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostRequestDiagnosticsActionRequestSchema },
       },
       requestDiagnosticsHandler
@@ -300,7 +296,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostBulkRequestDiagnosticsActionRequestSchema },
       },
       bulkRequestDiagnosticsHandler
@@ -315,7 +311,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: ListAgentUploadsRequestSchema },
       },
       getAgentUploadsHandler
@@ -330,7 +326,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetAgentUploadFileRequestSchema },
       },
       getAgentUploadFileHandler
@@ -348,7 +344,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetAgentStatusRequestSchema },
       },
       getAgentStatusForAgentPolicyHandler
@@ -363,7 +359,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_INTERNAL_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: { request: GetAgentStatusRequestSchema },
       },
       getAgentStatusForAgentPolicyHandler
@@ -378,7 +374,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetAgentDataRequestSchema },
       },
       getAgentDataHandler
@@ -394,7 +390,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostAgentUpgradeRequestSchema },
       },
       postAgentUpgradeHandler
@@ -409,7 +405,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostBulkAgentUpgradeRequestSchema },
       },
       postBulkAgentsUpgradeHandler
@@ -426,7 +422,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetActionStatusRequestSchema },
       },
       getActionStatusHandler
@@ -442,7 +438,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostBulkAgentReassignRequestSchema },
       },
       postBulkAgentsReassignHandler
@@ -458,7 +454,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostBulkAgentUnenrollRequestSchema },
       },
       postBulkAgentsUnenrollHandler
@@ -474,7 +470,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
       getAvailableVersionsHandler

@@ -8,11 +8,7 @@
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { ENROLLMENT_API_KEY_ROUTES } from '../../constants';
-import {
-  OLDEST_PUBLIC_VERSION,
-  OLDEST_INTERNAL_VERSION,
-  INTERNAL_API_ACCESS,
-} from '../../../common/constants';
+import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
 
 import {
   GetEnrollmentAPIKeysRequestSchema,
@@ -38,7 +34,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetOneEnrollmentAPIKeyRequestSchema },
       },
       getOneEnrollmentApiKeyHandler
@@ -53,7 +49,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: DeleteEnrollmentAPIKeyRequestSchema },
       },
       deleteEnrollmentApiKeyHandler
@@ -68,7 +64,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetEnrollmentAPIKeysRequestSchema },
       },
       getEnrollmentApiKeysHandler
@@ -83,7 +79,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostEnrollmentAPIKeyRequestSchema },
       },
       postEnrollmentApiKeyHandler
@@ -99,7 +95,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_INTERNAL_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: { request: GetOneEnrollmentAPIKeyRequestSchema },
       },
       getOneEnrollmentApiKeyHandler
@@ -115,7 +111,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_INTERNAL_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: { request: DeleteEnrollmentAPIKeyRequestSchema },
       },
       deleteEnrollmentApiKeyHandler
@@ -131,7 +127,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_INTERNAL_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: { request: GetEnrollmentAPIKeysRequestSchema },
       },
       getEnrollmentApiKeysHandler
@@ -147,7 +143,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_INTERNAL_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: { request: PostEnrollmentAPIKeyRequestSchema },
       },
       postEnrollmentApiKeyHandler

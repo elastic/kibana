@@ -8,7 +8,7 @@
 import { agentPolicyRouteService } from '../../services';
 
 import type { GetFullAgentManifestResponse } from '../../../common/types';
-import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { sendRequest } from './use_request';
 
@@ -16,7 +16,7 @@ export const sendGetK8sManifest = (query: { fleetServer?: string; enrolToken?: s
   return sendRequest<GetFullAgentManifestResponse>({
     path: agentPolicyRouteService.getK8sInfoPath(),
     method: 'get',
-    version: OLDEST_PUBLIC_VERSION,
+    version: API_VERSIONS.public.v1,
     query,
   });
 };

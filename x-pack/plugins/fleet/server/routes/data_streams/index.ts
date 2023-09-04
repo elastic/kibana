@@ -7,7 +7,7 @@
 
 import type { FleetAuthzRouter } from '../../services/security';
 
-import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { DATA_STREAM_API_ROUTES } from '../../constants';
 
@@ -24,7 +24,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
       getListHandler

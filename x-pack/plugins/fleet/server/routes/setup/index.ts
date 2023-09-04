@@ -8,7 +8,7 @@
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
-import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import type { FleetConfigType } from '../../../common/types';
 
@@ -24,7 +24,7 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
       fleetSetupHandler
@@ -42,7 +42,7 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
       fleetSetupHandler
@@ -59,7 +59,7 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
       getFleetStatusHandler

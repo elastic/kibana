@@ -16,10 +16,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type {
   CustomIntegrationsStart,
@@ -64,7 +61,7 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 
 import type { FleetConfigType } from '../common/types';
 
-import { OLDEST_PUBLIC_VERSION } from '../common/constants';
+import { API_VERSIONS } from '../common/constants';
 
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
@@ -295,10 +292,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const getPermissions = once(() =>
       core.http.fetch<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath(), {
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: OLDEST_PUBLIC_VERSION,
-          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          [ELASTIC_HTTP_VERSION_HEADER]: API_VERSIONS.public.v1,
         },
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
       })
     );
 

@@ -18,7 +18,7 @@ import type { CheckPrivilegesPayload } from '@kbn/security-plugin/server';
 
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin/server/authorization/types';
 
-import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import type { FleetRequestHandlerContext } from '../..';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -106,7 +106,7 @@ describe('FleetAuthzRouter', () => {
     const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter as any, mockLogger);
     fleetAuthzRouter.versioned
       .get({ ...routeConfig })
-      .addVersion({ version: OLDEST_PUBLIC_VERSION, validate: false }, fakeHandler);
+      .addVersion({ version: API_VERSIONS.public.v1, validate: false }, fakeHandler);
     // @ts-ignore
     const wrappedRouteConfig = fakeRouter.versioned.get.mock.calls[0][0];
     const wrappedHandler =

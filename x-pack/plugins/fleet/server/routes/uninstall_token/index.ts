@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UNINSTALL_TOKEN_ROUTES, OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+import { UNINSTALL_TOKEN_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetConfigType } from '../../config';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -29,7 +29,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       })
       .addVersion(
         {
-          version: OLDEST_PUBLIC_VERSION,
+          version: API_VERSIONS.public.v1,
           validate: { request: GetUninstallTokensMetadataRequestSchema },
         },
         getUninstallTokensMetadataHandler
@@ -44,7 +44,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       })
       .addVersion(
         {
-          version: OLDEST_PUBLIC_VERSION,
+          version: API_VERSIONS.public.v1,
           validate: { request: GetUninstallTokenRequestSchema },
         },
         getUninstallTokenHandler

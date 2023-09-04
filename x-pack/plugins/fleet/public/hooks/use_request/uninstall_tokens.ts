@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { uninstallTokensRouteService } from '../../../common/services';
 
-import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import type {
   GetUninstallTokensMetadataRequest,
@@ -25,7 +25,7 @@ export const useGetUninstallTokens = (query: GetUninstallTokensMetadataRequest['
     sendRequestForRq({
       method: 'get',
       path: uninstallTokensRouteService.getListPath(),
-      version: OLDEST_PUBLIC_VERSION,
+      version: API_VERSIONS.public.v1,
       query,
     })
   );
@@ -37,7 +37,7 @@ export const useGetUninstallToken = (uninstallTokenId: string) =>
       sendRequestForRq({
         method: 'get',
         path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
       })
   );
 
@@ -45,5 +45,5 @@ export const sendGetUninstallToken = (uninstallTokenId: string) =>
   sendRequest<GetUninstallTokenResponse>({
     method: 'get',
     path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
-    version: OLDEST_PUBLIC_VERSION,
+    version: API_VERSIONS.public.v1,
   });

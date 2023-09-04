@@ -34,7 +34,7 @@ const printUsage = () =>
 const DEFAULT_KIBANA_URL = 'http://localhost:5601';
 const DEFAULT_KIBANA_USERNAME = 'elastic';
 const DEFAULT_KIBANA_PASSWORD = 'changeme';
-const OLDEST_PUBLIC_VERSION = '2023-10-31';
+const PUBLIC_VERSION_V1 = '2023-10-31';
 
 const DEFAULT_UNENROLL_TIMEOUT = 300; // 5 minutes
 const ES_URL = 'http://localhost:9200';
@@ -302,7 +302,7 @@ async function createAgentPolicy(id: string, name: string) {
       'kbn-xsrf': 'kibana',
       'x-elastic-product-origin': 'fleet',
       // Note: version can change in the future
-      'Elastic-Api-Version': OLDEST_PUBLIC_VERSION,
+      'Elastic-Api-Version': PUBLIC_VERSION_V1,
     },
   });
   const data = await res.json();

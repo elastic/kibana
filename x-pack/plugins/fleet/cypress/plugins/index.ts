@@ -12,7 +12,7 @@ import fs from 'fs';
 import fetch from 'node-fetch';
 import { createEsClientForTesting } from '@kbn/test';
 
-import { OLDEST_PUBLIC_VERSION } from '../../common/constants';
+import { API_VERSIONS } from '../../common/constants';
 
 const plugin: Cypress.PluginConfig = (on, config) => {
   const client = createEsClientForTesting({
@@ -79,7 +79,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
         path: '/api/fleet/epm/packages',
         body: Buffer.from(zipContent, 'base64'),
         contentType: 'application/zip',
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
       });
     },
 
@@ -87,7 +87,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
       return kibanaFetch({
         method: 'DELETE',
         path: `/api/fleet/epm/packages/${packageName}`,
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
       });
     },
   });

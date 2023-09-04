@@ -8,7 +8,7 @@
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { ENROLLMENT_TOKENS } from '../screens/fleet';
 
-import { OLDEST_PUBLIC_VERSION } from '../../common/constants';
+import { API_VERSIONS } from '../../common/constants';
 
 describe('Enrollment token page', () => {
   before(() => {
@@ -22,7 +22,7 @@ describe('Enrollment token page', () => {
         monitoring_enabled: ['logs', 'metrics'],
         id: 'agent-policy-1',
       },
-      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     });
   });
 

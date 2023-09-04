@@ -6,7 +6,7 @@
  */
 
 import { fleetProxiesRoutesService } from '../../../common/services';
-import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import type {
   GetFleetProxiesResponse,
@@ -20,7 +20,7 @@ export function useGetFleetProxies() {
   return useRequest<GetFleetProxiesResponse>({
     method: 'get',
     path: fleetProxiesRoutesService.getListPath(),
-    version: OLDEST_PUBLIC_VERSION,
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -28,7 +28,7 @@ export function sendDeleteFleetProxy(proxyId: string) {
   return sendRequest({
     method: 'delete',
     path: fleetProxiesRoutesService.getDeletePath(proxyId),
-    version: OLDEST_PUBLIC_VERSION,
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -37,7 +37,7 @@ export function sendPostFleetProxy(body: PostFleetProxiesRequest['body']) {
     method: 'post',
     path: fleetProxiesRoutesService.getCreatePath(),
     body,
-    version: OLDEST_PUBLIC_VERSION,
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -45,7 +45,7 @@ export function sendPutFleetProxy(proxyId: string, body: PutFleetProxiesRequest[
   return sendRequest({
     method: 'put',
     path: fleetProxiesRoutesService.getUpdatePath(proxyId),
-    version: OLDEST_PUBLIC_VERSION,
+    version: API_VERSIONS.public.v1,
     body,
   });
 }

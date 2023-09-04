@@ -7,7 +7,7 @@
 
 import type { FleetAuthzRouter } from '../../services/security';
 
-import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { DOWNLOAD_SOURCE_API_ROUTES } from '../../constants';
 import {
@@ -36,7 +36,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: getDownloadSourcesRequestSchema },
       },
       getDownloadSourcesHandler
@@ -51,7 +51,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: GetOneDownloadSourcesRequestSchema },
       },
       getOneDownloadSourcesHandler
@@ -66,7 +66,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PutDownloadSourcesRequestSchema },
       },
       putDownloadSourcesHandler
@@ -81,7 +81,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostDownloadSourcesRequestSchema },
       },
       postDownloadSourcesHandler
@@ -96,7 +96,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: { request: DeleteDownloadSourcesRequestSchema },
       },
       deleteDownloadSourcesHandler

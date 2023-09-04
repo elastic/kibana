@@ -84,8 +84,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             appenders: ['default'],
           },
         ])}`,
-        // Don't enforce versions header validation
-        `--server.versioned.versionResolution=oldest`,
       ],
     },
   };
