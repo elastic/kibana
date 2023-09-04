@@ -355,9 +355,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await Promise.all([
-          esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-        ]);
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
 
       describe('Overview Tab Nginx', () => {
