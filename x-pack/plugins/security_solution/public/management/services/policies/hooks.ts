@@ -8,7 +8,9 @@ import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
-import { useHttp } from '../../../common/lib/kibana';
+import { firstValueFrom } from 'rxjs';
+import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { useHttp, useKibana } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { sendGetEndpointSecurityPackage } from './ingest';
 import type { GetPolicyListResponse } from '../../pages/policy/types';
@@ -44,6 +46,22 @@ export function useGetEndpointSpecificPolicies(
           onError,
         }
       : undefined
+  );
+}
+
+export function useEndpointPackagePoliciesStats(enabled: boolean) {
+  const { data } = useKibana().services;
+  return useQuery(
+    ['endpointPackagePoliciesStatsStrategy'],
+    async () => {
+      return firstValueFrom(
+        data.search.search<{}, IKibanaSearchResponse<{ outdatedManifestsCount: number }>>(
+          {},
+          { strategy: 'endpointPackagePoliciesStatsStrategy' }
+        )
+      );
+    },
+    { select: (response) => response.rawResponse, enabled }
   );
 }
 

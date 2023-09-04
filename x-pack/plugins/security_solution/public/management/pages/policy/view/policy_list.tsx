@@ -26,6 +26,7 @@ import { useLocation } from 'react-router-dom';
 import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import moment from 'moment';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -33,6 +34,7 @@ import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import type { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import {
+  useEndpointPackagePoliciesStats,
   useGetEndpointSecurityPackage,
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
@@ -46,6 +48,7 @@ import { ManagementEmptyStateWrapper } from '../../../components/management_empt
 
 export const PolicyList = memo(() => {
   const { canReadEndpointList, loading: authLoading } = useUserPrivileges().endpointPrivileges;
+  const isProtectionUpdatesEnabled = useIsExperimentalFeatureEnabled('protectionUpdatesEnabled');
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
   const { search } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -62,6 +65,9 @@ export const PolicyList = memo(() => {
     perPage: pagination.pageSize,
   });
 
+  const { data: outdatedManifestsCount, isLoading: outdatedManifestsCountLoading } =
+    useEndpointPackagePoliciesStats(isProtectionUpdatesEnabled);
+
   // grab endpoint version for empty page
   const { data: endpointPackageInfo, isFetching: packageIsFetching } =
     useGetEndpointSecurityPackage({
@@ -75,8 +81,6 @@ export const PolicyList = memo(() => {
         },
       },
     });
-
-  const outdatedManifestsCount = 2;
 
   const totalItemCount = useMemo(() => data?.total ?? 0, [data]);
 
@@ -122,7 +126,12 @@ export const PolicyList = memo(() => {
   );
 
   const outdatedManifestsCallOut = () => {
-    if (outdatedManifestsCount === 0) {
+    if (
+      !isProtectionUpdatesEnabled ||
+      outdatedManifestsCountLoading ||
+      !outdatedManifestsCount ||
+      outdatedManifestsCount.outdatedManifestsCount === 0
+    ) {
       return null;
     }
 
@@ -134,7 +143,7 @@ export const PolicyList = memo(() => {
         title={i18n.translate('xpack.securitySolution.policy.list.outdatedManifestsCallOut', {
           defaultMessage:
             'Updates available for {outdatedManifestsCount} {outdatedManifestsCount, plural, one {policy} other {policies}}',
-          values: { outdatedManifestsCount },
+          values: { outdatedManifestsCount: outdatedManifestsCount.outdatedManifestsCount },
         })}
       />
     );
@@ -150,6 +159,10 @@ export const PolicyList = memo(() => {
     });
 
     const generateDeployedVersionEntry = (version?: 'latest' | string) => {
+      if (!version) {
+        return [];
+      }
+
       if (version === 'latest') {
         return [
           'success',
@@ -204,31 +217,35 @@ export const PolicyList = memo(() => {
           );
         },
       },
-      {
-        field: '',
-        name: i18n.translate('xpack.securitySolution.policy.list.deployedVersion', {
-          defaultMessage: 'Deployed Version',
-        }),
-        truncateText: true,
-        render: (policy: PolicyData) => {
-          const [color, displayText, tooltip] = generateDeployedVersionEntry(
-            policy.inputs[0]?.config?.policy.value.global_manifest_version
-          );
+      ...(isProtectionUpdatesEnabled
+        ? [
+            {
+              field: '',
+              name: i18n.translate('xpack.securitySolution.policy.list.deployedVersion', {
+                defaultMessage: 'Deployed Version',
+              }),
+              truncateText: true,
+              render: (policy: PolicyData) => {
+                const [color, displayText, tooltip] = generateDeployedVersionEntry(
+                  policy.inputs[0]?.config?.policy.value.global_manifest_version
+                );
 
-          return (
-            <EuiFlexGroup responsive={false} gutterSize={'xs'} alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIconTip type={'dot'} color={color} content={tooltip} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" data-test-subj="policyDeployedVersion">
-                  {displayText}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
-      },
+                return (
+                  <EuiFlexGroup responsive={false} gutterSize={'xs'} alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip type={'dot'} color={color} content={tooltip} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" data-test-subj="policyDeployedVersion">
+                        {displayText}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              },
+            },
+          ]
+        : []),
       {
         field: 'created_by',
         name: i18n.translate('xpack.securitySolution.policy.list.createdBy', {
@@ -321,7 +338,13 @@ export const PolicyList = memo(() => {
         },
       },
     ];
-  }, [euiTheme.colors.warning, backLink, authLoading, canReadEndpointList]);
+  }, [
+    isProtectionUpdatesEnabled,
+    euiTheme.colors.warning,
+    backLink,
+    authLoading,
+    canReadEndpointList,
+  ]);
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PolicyData>) => {
