@@ -53,7 +53,7 @@ export class AnalyticsManager {
 
   private async initData() {
     const [models, jobs] = await Promise.all([
-      this._enabledFeatures.nlp
+      this._enabledFeatures.nlp || this._enabledFeatures.dfa
         ? this._mlClient.getTrainedModels({ size: DEFAULT_TRAINED_MODELS_PAGE_SIZE })
         : { trained_model_configs: [] },
       this._enabledFeatures.dfa

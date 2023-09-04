@@ -40,7 +40,7 @@ export interface LogRateAnalysisAppStateProps {
   appDependencies: AiopsAppDependencies;
   /** Option to make main histogram sticky */
   stickyHistogram?: boolean;
-  /** Optional flag to designate whether we're running in a serverless environment */
+  /** Optional flag to indicate whether kibana is running in serverless */
   isServerless?: boolean;
 }
 

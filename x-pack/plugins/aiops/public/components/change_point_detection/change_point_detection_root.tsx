@@ -50,7 +50,7 @@ export interface ChangePointDetectionAppStateProps {
   savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
-  /** Optional flag to designate whether we're running in a serverless environment */
+  /** Optional flag to indicate whether kibana is running in serverless */
   isServerless?: boolean;
 }
 
