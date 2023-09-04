@@ -87,9 +87,12 @@ export default function ({ getService, getPageObjects }) {
     });
     describe('edit meta-data', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_visualize_all', 'test_logstash_reader'], {
-          skipBrowserRefresh: true,
-        });
+        await security.testUser.setRoles(
+          ['global_maps_all', 'global_visualize_all', 'test_logstash_reader'],
+          {
+            skipBrowserRefresh: true,
+          }
+        );
 
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
       });
