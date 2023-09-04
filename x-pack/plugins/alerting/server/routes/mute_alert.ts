@@ -6,23 +6,14 @@
  */
 // FIXME: move file to server/routes/rule/apis
 import { IRouter } from '@kbn/core/server';
+import { transformRequestParamsToApplicationV1 } from './rule/apis/mute_alert/transforms';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { MuteOptions } from '../rules_client';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 import {
   muteAlertParamsSchemaV1,
   MuteAlertRequestParamsV1,
 } from '../../common/routes/rule/apis/mute_alert';
-
-// FIXME: move to server/routes/rule/apis transformations
-const rewriteParamsReq: RewriteRequestCase<MuteOptions> = ({
-  rule_id: alertId,
-  alert_id: alertInstanceId,
-}) => ({
-  alertId,
-  alertInstanceId,
-});
 
 export const muteAlertRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -41,7 +32,7 @@ export const muteAlertRoute = (
         const params: MuteAlertRequestParamsV1 = req.params;
         try {
           // FIXME: set the params type rulesClient.muteInstance<MuteParamsV1>. Create type in application types
-          await rulesClient.muteInstance(rewriteParamsReq(params));
+          await rulesClient.muteInstance(transformRequestParamsToApplicationV1(params));
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
