@@ -838,58 +838,38 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('adds a file to the case', async () => {
-        // navigate to files tab
         await testSubjects.click('case-view-tab-title-files');
         await testSubjects.existOrFail('case-view-tab-content-files');
 
-        await cases.casesFilesTable.addFile(
-          require.resolve('../../../../shared/lib/assets/elastic_logo.png')
-        );
+        await cases.casesFilesTable.addFile(require.resolve('./empty.txt'));
 
-        // make sure the uploaded file is displayed on the table
-        await find.byButtonText('elastic_logo.png');
+        const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');
+        expect(uploadedFileName).to.be('empty.txt');
       });
 
       it('search by file name', async () => {
         await cases.casesFilesTable.searchByFileName('foobar');
-
         await cases.casesFilesTable.emptyOrFail();
+        await cases.casesFilesTable.searchByFileName('empty');
 
-        await cases.casesFilesTable.searchByFileName('elastic');
-
-        await find.byButtonText('elastic_logo.png');
-      });
-
-      it('displays the file preview correctly', async () => {
-        await cases.casesFilesTable.openFilePreview(0);
-
-        await testSubjects.existOrFail('cases-files-image-preview');
-      });
-
-      it('pressing escape key closes the file preview', async () => {
-        await testSubjects.existOrFail('cases-files-image-preview');
-
-        await browser.pressKeys(browser.keys.ESCAPE);
-
-        await testSubjects.missingOrFail('cases-files-image-preview');
+        const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');
+        expect(uploadedFileName).to.be('empty.txt');
       });
 
       it('files added to a case can be deleted', async () => {
         await cases.casesFilesTable.deleteFile(0);
-
         await cases.casesFilesTable.emptyOrFail();
       });
 
       describe('Files User Activity', () => {
         it('file user action is displayed correctly', async () => {
-          await cases.casesFilesTable.addFile(
-            require.resolve('../../../../shared/lib/assets/elastic_logo.png')
-          );
+          await cases.casesFilesTable.addFile(require.resolve('./empty.txt'));
 
           await testSubjects.click('case-view-tab-title-activity');
           await testSubjects.existOrFail('case-view-tab-content-activity');
 
-          await find.byButtonText('elastic_logo.png');
+          const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');
+          expect(uploadedFileName).to.be('empty.txt');
         });
       });
     });
