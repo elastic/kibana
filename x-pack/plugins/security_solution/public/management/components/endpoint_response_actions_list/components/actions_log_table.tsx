@@ -131,7 +131,8 @@ const getResponseActionListTableColumns = ({
               <EuiAvatar
                 // We've a EuiTooltip that shows for createdBy below,
                 // Thus we don't need to add a title tooltip as well.
-                title={undefined}
+                aria-hidden={true}
+                title=""
                 name={createdBy}
                 data-test-subj={getTestId('column-user-avatar')}
                 size="s"
