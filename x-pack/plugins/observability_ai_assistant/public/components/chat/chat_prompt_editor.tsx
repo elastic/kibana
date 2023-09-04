@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -18,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
 import { FunctionListPopover } from './function_list_popover';
@@ -91,7 +91,7 @@ export function ChatPromptEditor({
   };
 
   const handleSubmit = useCallback(async () => {
-    if (loading) {
+    if (loading || !prompt?.trim()) {
       return;
     }
     const currentPrompt = prompt;
@@ -257,7 +257,7 @@ export function ChatPromptEditor({
           <EuiSpacer size="xl" />
           <EuiButtonIcon
             aria-label="Submit"
-            disabled={selectedFunctionName ? false : !prompt || loading || disabled}
+            disabled={selectedFunctionName ? false : !prompt?.trim() || loading || disabled}
             display={
               selectedFunctionName ? (functionPayload ? 'fill' : 'base') : prompt ? 'fill' : 'base'
             }
