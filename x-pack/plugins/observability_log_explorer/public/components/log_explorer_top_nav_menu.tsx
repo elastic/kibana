@@ -40,6 +40,7 @@ export const LogExplorerTopNavMenu = ({
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
       <EuiHeaderSection
+        data-test-subj="logExplorerHeaderMenu"
         css={css`
           gap: ${euiTheme.size.m};
         `}
@@ -95,6 +96,7 @@ const DiscoverLink = React.memo(
         onClick={() => discover.locator?.navigate(discoverLinkParams)}
         color="primary"
         iconType="discoverApp"
+        data-test-subj="logExplorerDiscoverFallbackLink"
       >
         {discoverLinkTitle}
       </EuiHeaderLink>
