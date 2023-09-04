@@ -7,7 +7,7 @@ paths:
     get:
       summary: Get Action State schema
       operationId: EndpointGetActionsState
-      x-codegen-enabled: true
+      x-codegen-enabled: false
       responses:
         '200':
           description: OK
@@ -20,7 +20,7 @@ paths:
     post:
       summary: Get Running Processes Action
       operationId: EndpointGetRunningProcessesAction
-      x-codegen-enabled: true
+      x-codegen-enabled: false
       requestBody:
         required: true
         content:
@@ -39,7 +39,7 @@ paths:
     post:
       summary: Isolate host Action
       operationId: EndpointIsolateHostAction
-      x-codegen-enabled: true
+      x-codegen-enabled: false
       requestBody:
         required: true
         content:
@@ -58,7 +58,7 @@ paths:
     post:
       summary: Unisolate host Action
       operationId: EndpointUnisolateHostAction
-      x-codegen-enabled: true
+      x-codegen-enabled: false
       requestBody:
         required: true
         content:
@@ -77,7 +77,7 @@ paths:
     post:
       summary: Kill process Action
       operationId: EndpointKillProcessAction
-      x-codegen-enabled: true
+      x-codegen-enabled: false
       requestBody:
         required: true
         content:
@@ -97,7 +97,7 @@ paths:
     post:
       summary: Suspend process Action
       operationId: EndpointSuspendProcessAction
-      x-codegen-enabled: true
+      x-codegen-enabled: false
       requestBody:
         required: true
         content:

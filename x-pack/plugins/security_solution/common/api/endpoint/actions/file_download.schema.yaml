@@ -7,7 +7,7 @@ paths:
     get:
       summary: File Download schema
       operationId: EndpointFileDownload
-      x-codegen-enabled: true
+      x-codegen-enabled: false
       parameters:
         - name: query
           in: path

@@ -7,7 +7,7 @@ paths:
     post:
       summary: Upload Action
       operationId: EndpointUploadAction
-      x-codegen-enabled: true
+      x-codegen-enabled: false
       requestBody:
         required: true
         content:
