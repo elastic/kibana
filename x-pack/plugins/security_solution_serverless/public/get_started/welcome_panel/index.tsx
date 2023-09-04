@@ -65,7 +65,16 @@ const WelcomePanelComponent = ({
                   >
                     {item.description && item.description}
                   </span>
-                  {item.footer && item.footer}
+                  {item.footer && (
+                    <span
+                      className="eui-displayInlineBlock"
+                      css={css`
+                        padding-top: ${euiTheme.size.l};
+                      `}
+                    >
+                      {item.footer}
+                    </span>
+                  )}
                 </>
               }
               hasBorder

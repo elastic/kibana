@@ -29,13 +29,7 @@ const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | u
   return productTier ? (
     <>
       {/* <div> cannot appear as a descendant of <p>, EuiSpacer is a div */}
-      <EuiFlexGroup
-        justifyContent="flexEnd"
-        component="span"
-        css={css`
-          padding-top: ${euiTheme.size.l};
-        `}
-      >
+      <EuiFlexGroup justifyContent="flexEnd" component="span">
         <EuiFlexItem grow={false} component="span">
           <span
             className="eui-displayBlock"

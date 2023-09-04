@@ -65,7 +65,6 @@ export const useWelcomePanel = ({
         id: 'inviteYourTeam',
         footer: (
           <>
-            <Spacer />
             <EuiFlexGroup justifyContent="flexStart" component="span">
               <EuiFlexItem grow={false} component="span">
                 <EuiButton

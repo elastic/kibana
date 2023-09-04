@@ -11,7 +11,7 @@ import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 const AddElasticRulesButtonComponent = () => (
-  <LinkButton id={SecurityPageName.rules} path="/management" fill>
+  <LinkButton id={SecurityPageName.rules} fill>
     <FormattedMessage
       id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4.description2.button"
       defaultMessage="Add Elastic rules"

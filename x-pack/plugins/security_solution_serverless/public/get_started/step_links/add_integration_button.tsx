@@ -6,30 +6,17 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
-import { useNavigation } from '@kbn/security-solution-navigation';
+import React from 'react';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
+import { ExternalPageName } from '../../navigation/links/constants';
 
-const AddIntegrationButtonComponent = () => {
-  const { getAppUrl, navigateTo } = useNavigation();
-
-  const integrationsUrl = getAppUrl({ appId: 'integrations', path: '/browse/security' });
-  const onClick = useCallback(
-    (e) => {
-      e.preventDefault();
-      // TODO: telemetry https://github.com/elastic/kibana/issues/163247
-      navigateTo({ url: integrationsUrl });
-    },
-    [navigateTo, integrationsUrl]
-  );
-  return (
-    <LinkButton onClick={onClick} fill id="integrations" path="/browse/security">
-      <FormattedMessage
-        id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description2.button"
-        defaultMessage="Add integrations"
-      />
-    </LinkButton>
-  );
-};
+const AddIntegrationButtonComponent = () => (
+  <LinkButton id={ExternalPageName.integrationsSecurity} fill>
+    <FormattedMessage
+      id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description2.button"
+      defaultMessage="Add integrations"
+    />
+  </LinkButton>
+);
 
 export const AddIntegrationButton = React.memo(AddIntegrationButtonComponent);
