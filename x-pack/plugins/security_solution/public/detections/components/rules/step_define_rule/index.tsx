@@ -54,6 +54,7 @@ import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
+import { EsqlInfoIcon } from '../esql_info_icon';
 import { Field, Form, getUseField, UseField, UseMultiFields } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
@@ -315,6 +316,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     }
 
+    // TODO:ESQL fix issue around this
     if (isEsqlRule(ruleType)) {
       if (previousRuleType && !isEsqlRule(previousRuleType)) {
         currentQuery.reset({
@@ -428,11 +430,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [license, groupByFields]
   );
-  const esqlQuery = '';
-  // const esqlQuery = useMemo(
-  //   () => (isEsqlRule(ruleType) && typeof query === 'string' ? query : undefined),
-  //   [query, ruleType]
-  // );
+
+  // TODO: is this needed in UI?
   const isEsqlGrouping = true;
 
   const EsqlDurationOptions = useCallback(
@@ -640,21 +639,29 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [indexPattern, isLoading, setIsQueryBarValid]
   );
 
+  const esqlQueryBarConfig = useMemo(
+    () => ({
+      ...schema.queryBar,
+      label: (
+        <span>
+          {'ES|QL query'} <EsqlInfoIcon />
+        </span>
+      ) as unknown as string,
+    }),
+    []
+  );
+
   const EsqlQueryBarMemo = useMemo(
     () => (
       <UseField
         key="QueryBarDefineRule"
         path="queryBar"
-        config={{
-          // TODO: use memo
-          ...schema.queryBar,
-          label: 'ES|QL query',
-        }}
+        config={esqlQueryBarConfig}
         component={QueryBarDefineRule}
         componentProps={queryBarProps}
       />
     ),
-    [queryBarProps]
+    [queryBarProps, esqlQueryBarConfig]
   );
 
   const QueryBarMemo = useMemo(

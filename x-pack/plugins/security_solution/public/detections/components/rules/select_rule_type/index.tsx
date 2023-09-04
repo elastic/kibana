@@ -198,7 +198,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 data-test-subj="esqRuleType"
                 title={<TechnicalPreviewBadge label="ES|QL" />}
                 titleSize="xs"
-                description="[Technical Preview] Create rule using The Elasticsearch Query Language (ES|QL)"
+                description="Use The Elasticsearch Query Language (ES|QL) to search or aggregate data"
                 icon={<EuiIcon type="logoElasticsearch" size="l" />}
                 selectable={esqlSelectableConfig}
                 layout="horizontal"
