@@ -233,7 +233,7 @@ describe('<HostDetails />', () => {
         </TestProviders>
       );
       expect(getByTestId(USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID).textContent).toContain(
-        'No items found'
+        'No hosts identified'
       );
     });
   });

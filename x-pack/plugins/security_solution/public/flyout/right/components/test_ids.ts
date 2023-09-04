@@ -99,7 +99,7 @@ export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID = `${ENTITIES_HOST_OVERVI
 export const TECHNICAL_PREVIEW_ICON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutTechnicalPreviewIcon';
 
-/* Insights Threat Intelligence */
+/* Insights Threat intelligence */
 
 export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsThreatIntelligence';
