@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'timePicker']);
 
-  describe.only('Header menu', () => {
+  describe('Header menu', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
