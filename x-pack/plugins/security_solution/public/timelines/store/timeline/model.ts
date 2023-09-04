@@ -134,7 +134,7 @@ export interface TimelineModel {
   isLoading: boolean;
   selectAll: boolean;
   /* discover saved search Id */
-  savedSearchId?: string;
+  savedSearchId: string | null;
 }
 
 export type SubsetTimelineModel = Readonly<

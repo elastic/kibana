@@ -59,7 +59,7 @@ export interface TimelinePersistInput {
   templateTimelineVersion?: number | null;
   title?: string;
   /* used to saved discover Saved search Id */
-  savedSearchId?: string;
+  savedSearchId?: string | null;
 }
 
 /** Invoked when a column is sorted */

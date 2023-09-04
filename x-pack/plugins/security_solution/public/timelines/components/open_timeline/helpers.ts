@@ -357,7 +357,7 @@ export const queryTimelineById = <TCache>({
         activeTab: activeTimelineTab,
         show: openTimeline,
         initialized: true,
-        savedSearchId,
+        savedSearchId: savedSearchId ?? null,
       },
     })();
     updateIsLoading({ id: TimelineId.active, isLoading: false });

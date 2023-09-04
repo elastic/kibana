@@ -27,7 +27,7 @@ export const useSyncTimelineUrlParam = () => {
       isOpen: show,
       activeTab,
       graphEventId: graphEventId ?? '',
-      savedSearchId,
+      savedSearchId: savedSearchId ? savedSearchId : undefined,
     };
     updateUrlParam(params);
   }, [activeTab, graphEventId, savedObjectId, show, updateUrlParam, savedSearchId]);
