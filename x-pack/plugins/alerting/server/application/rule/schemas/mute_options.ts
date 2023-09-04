@@ -4,14 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
 
-export type {
-  Rule,
-  RuleDomain,
-  RuleLastRun,
-  Monitoring,
-  RuleParams,
-  RuleNotifyWhen,
-  RuleSnoozeSchedule,
-  RuleMuteAlertOptions,
-} from './rule';
+export const muteOptionsSchema = schema.object({
+  alertId: schema.string(),
+  alertInstanceId: schema.string(),
+});

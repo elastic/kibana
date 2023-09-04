@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { RuleMuteAlertOptions } from '../../../../../../application/rule/types';
 import { RewriteRequestCase } from '../../../../../lib';
-import { MuteOptions } from '../../../../../../rules_client';
 
-export const transformRequestParamsToApplication: RewriteRequestCase<MuteOptions> = ({
+export const transformRequestParamsToApplication: RewriteRequestCase<RuleMuteAlertOptions> = ({
   rule_id: alertId,
   alert_id: alertInstanceId,
 }) => ({

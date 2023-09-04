@@ -30,7 +30,6 @@ export const muteAlertRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const params: MuteAlertRequestParamsV1 = req.params;
         try {
-          // FIXME: set the params type rulesClient.muteInstance<MuteParamsV1>. Create type in application types
           await rulesClient.muteInstance(transformRequestParamsToApplicationV1(params));
           return res.noContent();
         } catch (e) {

@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { Rule } from '../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { MuteOptions } from '../types';
-import { RulesClientContext } from '../types';
-import { updateMeta } from '../lib';
+import { RuleMuteAlertOptions } from '../../types';
+import { Rule } from '../../../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { updateMeta } from '../../../../rules_client/lib';
 
-// FIXME: move to server/application/rule/methods/mute_alert
 export async function muteInstance(
   context: RulesClientContext,
-  { alertId, alertInstanceId }: MuteOptions
+  { alertId, alertInstanceId }: RuleMuteAlertOptions
 ): Promise<void> {
   return await retryIfConflicts(
     context.logger,
@@ -27,7 +26,7 @@ export async function muteInstance(
 
 async function muteInstanceWithOCC(
   context: RulesClientContext,
-  { alertId, alertInstanceId }: MuteOptions
+  { alertId, alertInstanceId }: RuleMuteAlertOptions
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
     'alert',
