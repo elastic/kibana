@@ -11,9 +11,13 @@ import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { APP_UI_ID, SecurityPageName } from '../../../common';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
+
+import { APP_NAME } from '../../../common/constants';
 
 const DashboardToolBarComponent = ({
   dashboardContainer,
@@ -58,6 +62,18 @@ const DashboardToolBarComponent = ({
     [dashboardListingUrl, getEditOrCreateDashboardUrl, navigateTo]
   );
 
+  const originatingPath = dashboardId ? `dashboards/${dashboardId}/edit` : `dashboards/create`;
+
+  const landingBreadcrumb: ChromeBreadcrumb[] = useMemo(
+    () => [
+      {
+        text: APP_NAME,
+        href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.landing }),
+      },
+    ],
+    [getSecuritySolutionUrl]
+  );
+
   useEffect(() => {
     onLoad(viewMode);
   }, [onLoad, viewMode]);
@@ -84,11 +100,12 @@ const DashboardToolBarComponent = ({
 
   return dashboardContainer ? (
     <DashboardTopNav
+      customLeadingBreadCrumbs={landingBreadcrumb}
       redirectTo={redirectTo}
       dashboardContainer={dashboardContainer}
       embedSettings={embedSettings}
       originatingApp={APP_UI_ID}
-      originatingPath={dashboardId ? `dashboards/${dashboardId}/edit` : `dashboards/create`}
+      originatingPath={originatingPath}
     />
   ) : null;
 };

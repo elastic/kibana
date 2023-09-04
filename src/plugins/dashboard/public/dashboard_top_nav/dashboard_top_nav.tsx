@@ -20,7 +20,7 @@ import { SerializedStyles } from '@emotion/react';
 import classNames from 'classnames';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
-
+import type { ChromeProjectBreadcrumb } from '@kbn/core-chrome-browser';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -39,6 +39,7 @@ import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
 
 export interface InternalDashboardTopNavProps {
+  customLeadingBreadCrumbs?: ChromeProjectBreadcrumb[];
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
   originatingApp?: string;
@@ -48,6 +49,7 @@ export interface InternalDashboardTopNavProps {
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 
 export function InternalDashboardTopNav({
+  customLeadingBreadCrumbs = [],
   embedSettings,
   redirectTo,
   originatingApp,
@@ -171,21 +173,31 @@ export function InternalDashboardTopNav({
     if (serverless?.setBreadcrumbs) {
       // set serverless breadcrumbs if available,
       // set only the dashboardTitleBreadcrumbs because the main breadcrumbs automatically come as part of the navigation config
-      serverless.setBreadcrumbs(dashboardTitleBreadcrumbs);
+      serverless.setBreadcrumbs(customLeadingBreadCrumbs.concat(dashboardTitleBreadcrumbs));
     } else {
       // non-serverless regular breadcrumbs
-      setBreadcrumbs([
-        {
-          text: getDashboardBreadcrumb(),
-          'data-test-subj': 'dashboardListingBreadcrumb',
-          onClick: () => {
-            redirectTo({ destination: 'listing' });
+      setBreadcrumbs(
+        customLeadingBreadCrumbs.concat([
+          {
+            text: getDashboardBreadcrumb(),
+            'data-test-subj': 'dashboardListingBreadcrumb',
+            onClick: () => {
+              redirectTo({ destination: 'listing' });
+            },
           },
-        },
-        ...dashboardTitleBreadcrumbs,
-      ]);
+          ...dashboardTitleBreadcrumbs,
+        ])
+      );
     }
-  }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode, serverless]);
+  }, [
+    setBreadcrumbs,
+    redirectTo,
+    dashboardTitle,
+    dashboard,
+    viewMode,
+    serverless,
+    customLeadingBreadCrumbs,
+  ]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes
