@@ -13,7 +13,7 @@ import type { ScopedHistory } from '@kbn/core/public';
 import type { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useQuery } from '@tanstack/react-query';
-import { debounce } from 'lodash';
+import { debounce, isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { useDiscoverInTimelineContext } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
@@ -27,6 +27,7 @@ import { timelineSelectors } from '../../../store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../../common/types';
 import { timelineDefaults } from '../../../store/timeline/defaults';
+import { savedSearchComparator } from './utils';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
   [data-test-subj='searchSessionIndicator'] {
@@ -116,13 +117,20 @@ export const DiscoverTabContent = () => {
     isFetching,
   ]);
 
-  const getCombinedDiscoverSavedSearchState = useCallback(() => {
+  const getCombinedDiscoverSavedSearchState: () => SavedSearch | undefined = useCallback(() => {
     if (!discoverSavedSearchState) return;
     return {
       ...(discoverStateContainer.current?.savedSearchState.getState() ?? discoverSavedSearchState),
-      timeRange: discoverTimerange,
+      timeRange: discoverDataService.query.timefilter.timefilter.getTime(),
+      refreshInterval: discoverStateContainer.current?.globalState.get()?.refreshInterval,
+      breakdownField: discoverStateContainer.current?.appState.getState().breakdownField,
+      rowsPerPage: discoverStateContainer.current?.appState.getState().rowsPerPage,
     };
-  }, [discoverSavedSearchState, discoverTimerange, discoverStateContainer]);
+  }, [
+    discoverSavedSearchState,
+    discoverStateContainer,
+    discoverDataService.query.timefilter.timefilter,
+  ]);
 
   const combinedDiscoverSavedSearchStateRef = useRef<SavedSearch | undefined>();
 
@@ -136,9 +144,9 @@ export const DiscoverTabContent = () => {
     if (!savedSearchLoaded) return;
     if (!savedObjectId) return;
     if (!status || status === 'draft') return;
-    if (!getCombinedDiscoverSavedSearchState) return;
     const latestState = getCombinedDiscoverSavedSearchState();
     if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
+    if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
     debouncedUpdateSavedSearch(latestState);
     combinedDiscoverSavedSearchStateRef.current = latestState;
   }, [
