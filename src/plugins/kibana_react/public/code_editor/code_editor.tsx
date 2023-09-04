@@ -9,6 +9,7 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import ReactMonacoEditor from 'react-monaco-editor';
+import useUnmount from 'react-use/lib/useUnmount';
 import {
   htmlIdGenerator,
   EuiToolTip,
@@ -419,11 +420,7 @@ export const CodeEditor: React.FC<Props> = ({
     [editorDidMount]
   );
 
-  useEffect(() => {
-    return () => {
-      textboxMutationObserver.current?.disconnect();
-    };
-  }, []);
+  useUnmount(() => textboxMutationObserver.current?.disconnect());
 
   useEffect(() => {
     if (placeholder && !value && _editor.current) {
