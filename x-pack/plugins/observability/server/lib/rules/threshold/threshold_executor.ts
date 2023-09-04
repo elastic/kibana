@@ -50,14 +50,14 @@ export type MetricThresholdRuleTypeState = RuleTypeState & {
   groupBy?: string | string[];
 };
 export type MetricThresholdAlertState = AlertState; // no specific instance state used
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type MetricThresholdAlertContext = {
+
+export interface MetricThresholdAlertContext extends Record<string, unknown> {
   alertDetailsUrl: string;
   groupings?: object;
   reason?: string;
   timestamp: string; // ISO string
   value?: Array<number | null> | null;
-};
+}
 
 export const FIRED_ACTIONS_ID = 'threshold.fired';
 export const NO_DATA_ACTIONS_ID = 'threshold.nodata';
@@ -169,7 +169,7 @@ export const createMetricThresholdExecutor = ({
     if (!dataView) {
       throw new Error('No matched data view');
     } else if (!timeFieldName) {
-      throw new Error('No timestamp field is specified');
+      throw new Error('The selected data view does not have a timestamp field');
     }
 
     const alertResults = await evaluateRule(

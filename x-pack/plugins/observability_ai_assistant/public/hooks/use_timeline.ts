@@ -10,6 +10,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { last } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
+import usePrevious from 'react-use/lib/usePrevious';
 import { i18n } from '@kbn/i18n';
 import {
   ContextDefinition,
@@ -22,7 +23,10 @@ import type { ChatTimelineProps } from '../components/chat/chat_timeline';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 import type { ObservabilityAIAssistantChatService, PendingMessage } from '../types';
-import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
+import {
+  getTimelineItemsfromConversation,
+  StartedFrom,
+} from '../utils/get_timeline_items_from_conversation';
 import type { UseGenAIConnectorsResult } from './use_genai_connectors';
 import { useKibana } from './use_kibana';
 
@@ -52,15 +56,19 @@ export type UseTimelineResult = Pick<
 export function useTimeline({
   messages,
   connectors,
+  conversationId,
   currentUser,
   chatService,
+  startedFrom,
   onChatUpdate,
   onChatComplete,
 }: {
   messages: Message[];
+  conversationId?: string;
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   chatService: ObservabilityAIAssistantChatService;
+  startedFrom?: StartedFrom;
   onChatUpdate: (messages: Message[]) => void;
   onChatComplete: (messages: Message[]) => void;
 }): UseTimelineResult {
@@ -74,20 +82,28 @@ export function useTimeline({
 
   const conversationItems = useMemo(() => {
     const items = getTimelineItemsfromConversation({
-      messages,
       currentUser,
-      hasConnector,
       chatService,
+      hasConnector,
+      messages,
+      startedFrom,
     });
 
     return items;
-  }, [messages, currentUser, hasConnector, chatService]);
+  }, [currentUser, chatService, hasConnector, messages, startedFrom]);
 
   const [subscription, setSubscription] = useState<Subscription | undefined>();
 
   const controllerRef = useRef(new AbortController());
 
   const [pendingMessage, setPendingMessage] = useState<PendingMessage>();
+
+  const prevConversationId = usePrevious(conversationId);
+  useEffect(() => {
+    if (prevConversationId !== conversationId && pendingMessage?.error) {
+      setPendingMessage(undefined);
+    }
+  }, [conversationId, pendingMessage?.error, prevConversationId]);
 
   function chat(nextMessages: Message[]): Promise<Message[]> {
     const controller = new AbortController();
@@ -122,8 +138,10 @@ export function useTimeline({
         },
         error: reject,
         complete: () => {
-          if (pendingMessageLocal?.error) {
-            notifications.toasts.addError(pendingMessageLocal?.error, {
+          const error = pendingMessageLocal?.error;
+
+          if (error) {
+            notifications.toasts.addError(error, {
               title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
                 defaultMessage: 'Failed to load response from the AI Assistant',
               }),
@@ -190,7 +208,7 @@ export function useTimeline({
                 name,
                 content: JSON.stringify({
                   message: error.toString(),
-                  error: error.body,
+                  error,
                 }),
               },
             })

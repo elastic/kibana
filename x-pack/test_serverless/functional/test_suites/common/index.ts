@@ -13,9 +13,13 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./management'));
 
     // platform security
+    loadTestFile(require.resolve('./security/api_keys'));
     loadTestFile(require.resolve('./security/navigation/avatar_menu'));
 
     // Management
     loadTestFile(require.resolve('./index_management'));
+
+    // Data View Management
+    loadTestFile(require.resolve('./data_view_mgmt'));
   });
 }

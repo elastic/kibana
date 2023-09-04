@@ -25,7 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
     return appLinks.some((item) => item.path === path);
   };
 
-  describe('sample data apis', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/164568
+  describe.skip('sample data apis', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
     });

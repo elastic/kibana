@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { encode } from '@kbn/rison';
-import { tag } from '../../../tags';
 
 import { getTimeline } from '../../../objects/timeline';
 
@@ -23,7 +22,7 @@ import { login, visitWithoutDateRange, visit } from '../../../tasks/login';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Open timeline', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
+describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
   let timelineSavedObjectId: string | null = null;
   before(function () {
     cleanKibana();

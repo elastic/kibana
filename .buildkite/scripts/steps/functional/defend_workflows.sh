@@ -10,4 +10,6 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Defend Workflows Cypress tests"
 
-yarn --cwd x-pack/plugins/security_solution cypress:dw:run
+cd x-pack/plugins/security_solution
+
+yarn cypress:dw:run; status=$?; yarn junit:merge && exit $status

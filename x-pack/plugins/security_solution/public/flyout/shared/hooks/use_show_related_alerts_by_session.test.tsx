@@ -8,39 +8,29 @@
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 
-import type { UseShowRelatedAlertsBySessionParams } from './use_show_related_alerts_by_session';
+import type {
+  UseShowRelatedAlertsBySessionParams,
+  UseShowRelatedAlertsBySessionResult,
+} from './use_show_related_alerts_by_session';
 import { useShowRelatedAlertsBySession } from './use_show_related_alerts_by_session';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
 describe('useShowRelatedAlertsBySession', () => {
-  let hookResult: RenderHookResult<UseShowRelatedAlertsBySessionParams, boolean>;
+  let hookResult: RenderHookResult<
+    UseShowRelatedAlertsBySessionParams,
+    UseShowRelatedAlertsBySessionResult
+  >;
 
-  it('should return false if dataFormattedForFieldBrowser is null', () => {
-    const dataFormattedForFieldBrowser = null;
-    hookResult = renderHook(() => useShowRelatedAlertsBySession({ dataFormattedForFieldBrowser }));
+  it('should return false if getFieldsData returns null', () => {
+    const getFieldsData = () => null;
+    hookResult = renderHook(() => useShowRelatedAlertsBySession({ getFieldsData }));
 
-    expect(hookResult.result.current).toEqual(false);
+    expect(hookResult.result.current).toEqual({ show: false });
   });
 
-  it('should return false if dataFormattedForFieldBrowser is missing the correct field', () => {
-    const dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [];
-    hookResult = renderHook(() => useShowRelatedAlertsBySession({ dataFormattedForFieldBrowser }));
+  it('should return true if getFieldsData has the correct field', () => {
+    const getFieldsData = () => 'entity_id';
+    hookResult = renderHook(() => useShowRelatedAlertsBySession({ getFieldsData }));
 
-    expect(hookResult.result.current).toEqual(false);
-  });
-
-  it('should return true if dataFormattedForFieldBrowser has the correct field', () => {
-    const dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
-      {
-        category: 'process',
-        field: 'process.entry_leader.entity_id',
-        isObjectArray: false,
-        originalValue: ['abc'],
-        values: ['abc'],
-      },
-    ];
-    hookResult = renderHook(() => useShowRelatedAlertsBySession({ dataFormattedForFieldBrowser }));
-
-    expect(hookResult.result.current).toEqual(true);
+    expect(hookResult.result.current).toEqual({ show: true, entityId: 'entity_id' });
   });
 });

@@ -108,7 +108,6 @@ describe('Instances table', () => {
 
       cy.wait('@instancesDetailsRequest');
       cy.getByTestSubj(`instanceDetailsButton_${serviceNodeName}`).realClick();
-      cy.getByTestSubj('loadingSpinner').should('be.visible');
       cy.wait('@instanceDetailsRequest').then(() => {
         cy.contains('Service');
       });

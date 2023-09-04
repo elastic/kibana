@@ -6,6 +6,8 @@
  */
 import React, { memo, useState, useEffect } from 'react';
 import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel, EuiLoadingSpinner } from '@elastic/eui';
+import { useKibana } from '../../../common/lib/kibana';
+import { useGetSavedQuery } from '../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
 import { usePreviewPanelContext } from '../context';
 import { ExpandableSection } from '../../right/components/expandable_section';
@@ -32,7 +34,12 @@ import * as i18n from './translations';
 export const RulePreview: React.FC = memo(() => {
   const { ruleId, indexPattern } = usePreviewPanelContext();
   const [rule, setRule] = useState<Rule | null>(null);
-  const { rule: maybeRule, loading: ruleLoading } = useRuleWithFallback(ruleId ?? '');
+  const {
+    rule: maybeRule,
+    loading: ruleLoading,
+    isExistingRule,
+  } = useRuleWithFallback(ruleId ?? '');
+  const { data } = useKibana().services;
 
   // persist rule until refresh is complete
   useEffect(() => {
@@ -51,13 +58,30 @@ export const RulePreview: React.FC = memo(() => {
           ruleActionsData: null,
         };
 
+  const [dataViewTitle, setDataViewTitle] = useState<string>();
+
+  useEffect(() => {
+    const fetchDataViewTitle = async () => {
+      if (defineRuleData?.dataViewId != null && defineRuleData?.dataViewId !== '') {
+        const dataView = await data.dataViews.get(defineRuleData?.dataViewId);
+        setDataViewTitle(dataView.title);
+      }
+    };
+    fetchDataViewTitle();
+  }, [data.dataViews, defineRuleData?.dataViewId]);
+
+  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery({
+    savedQueryId: rule?.saved_id,
+    ruleType: rule?.type,
+  });
+
   const hasNotificationActions = Boolean(ruleActionsData?.actions?.length);
   const hasResponseActions = Boolean(ruleActionsData?.responseActions?.length);
   const hasActions = ruleActionsData != null && (hasNotificationActions || hasResponseActions);
 
   return rule ? (
     <EuiPanel hasShadow={false} data-test-subj={RULE_PREVIEW_BODY_TEST_ID} className="eui-yScroll">
-      <RulePreviewTitle rule={rule} />
+      <RulePreviewTitle rule={rule} isSuppressed={!isExistingRule} />
       <EuiHorizontalRule margin="s" />
       <ExpandableSection
         title={i18n.RULE_PREVIEW_ABOUT_TEXT}
@@ -76,7 +100,7 @@ export const RulePreview: React.FC = memo(() => {
         )}
       </ExpandableSection>
       <EuiHorizontalRule margin="l" />
-      {defineRuleData && (
+      {defineRuleData && !isSavedQueryLoading && (
         <>
           <ExpandableSection
             title={i18n.RULE_PREVIEW_DEFINITION_TEXT}
@@ -86,7 +110,11 @@ export const RulePreview: React.FC = memo(() => {
             <StepDefineRuleReadOnly
               addPadding={false}
               descriptionColumns="single"
-              defaultValues={defineRuleData}
+              defaultValues={{
+                ...defineRuleData,
+                dataViewTitle,
+                queryBar: savedQueryBar ?? defineRuleData.queryBar,
+              }}
               indexPattern={indexPattern}
               isInPanelView
             />

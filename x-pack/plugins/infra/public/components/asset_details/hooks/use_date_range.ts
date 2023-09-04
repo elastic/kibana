@@ -5,33 +5,47 @@
  * 2.0.
  */
 
+import type { TimeRange } from '@kbn/es-query';
 import createContainer from 'constate';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { parseDateRange } from '../../../utils/datemath';
-import type { AssetDetailsProps } from '../types';
-import { toTimestampRange } from '../utils';
 
-const DEFAULT_DATE_RANGE = {
+import { toTimestampRange } from '../utils';
+import { useAssetDetailsUrlState } from './use_asset_details_url_state';
+
+const DEFAULT_DATE_RANGE: TimeRange = {
   from: 'now-15m',
   to: 'now',
 };
 
-export type UseAssetDetailsStateProps = Pick<AssetDetailsProps, 'dateRange'>;
+export interface UseDateRangeProviderProps {
+  initialDateRange: TimeRange;
+}
 
-export function useDateRangeProvider({ dateRange: rawDateRange }: UseAssetDetailsStateProps) {
-  const dateRange = useMemo(() => {
+export function useDateRangeProvider({ initialDateRange }: UseDateRangeProviderProps) {
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const dateRange: TimeRange = urlState?.dateRange ?? initialDateRange;
+
+  const setDateRange = useCallback(
+    (newDateRange: TimeRange) => {
+      setUrlState({ dateRange: newDateRange });
+    },
+    [setUrlState]
+  );
+
+  const parsedDateRange = useMemo(() => {
     const { from = DEFAULT_DATE_RANGE.from, to = DEFAULT_DATE_RANGE.to } =
-      parseDateRange(rawDateRange);
+      parseDateRange(dateRange);
 
     return { from, to };
-  }, [rawDateRange]);
+  }, [dateRange]);
 
-  const dateRangeTs = toTimestampRange(dateRange);
+  const getDateRangeInTimestamp = useCallback(
+    () => toTimestampRange(parsedDateRange),
+    [parsedDateRange]
+  );
 
-  return {
-    dateRange,
-    dateRangeTs,
-  };
+  return { dateRange, setDateRange, getDateRangeInTimestamp };
 }
 
 export const [DateRangeProvider, useDateRangeProviderContext] =

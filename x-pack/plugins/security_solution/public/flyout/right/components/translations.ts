@@ -19,9 +19,9 @@ export const COLLAPSE_DETAILS_BUTTON = i18n.translate(
   { defaultMessage: 'Collapse details' }
 );
 
-export const DOCUMENT_DETAILS = i18n.translate(
+export const EVENT_DETAILS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.headerTitle',
-  { defaultMessage: 'Document details' }
+  { defaultMessage: 'Event details' }
 );
 
 export const SEVERITY_TITLE = i18n.translate(
@@ -41,7 +41,7 @@ export const RISK_SCORE_TITLE = i18n.translate(
 export const RULE_SUMMARY_TEXT = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.ruleSummaryText',
   {
-    defaultMessage: 'Rule summary',
+    defaultMessage: 'Show rule summary',
   }
 );
 
@@ -130,9 +130,16 @@ export const ENTITIES_TITLE = i18n.translate(
   { defaultMessage: 'Entities' }
 );
 
+export const ENTITIES_NO_DATA_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.entitiesNoDataMessage',
+  {
+    defaultMessage: 'Host and user information are unavailable for this alert',
+  }
+);
+
 export const THREAT_INTELLIGENCE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle',
-  { defaultMessage: 'Threat Intelligence' }
+  { defaultMessage: 'Threat intelligence' }
 );
 
 export const INSIGHTS_TITLE = i18n.translate(
@@ -145,9 +152,24 @@ export const CORRELATIONS_TITLE = i18n.translate(
   { defaultMessage: 'Correlations' }
 );
 
+export const CORRELATIONS_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.correlations.error',
+  {
+    defaultMessage: 'No correlations data available',
+  }
+);
+
 export const PREVALENCE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.prevalenceTitle',
   { defaultMessage: 'Prevalence' }
+);
+
+export const PREVALENCE_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.prevalenceNoData',
+  {
+    defaultMessage:
+      'Over the last 30 days, the highlighted fields for this alert were observed frequently on other host and user events.',
+  }
 );
 
 export const THREAT_MATCH_DETECTED = i18n.translate(
@@ -200,9 +222,23 @@ export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetai
 });
 
 export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.investigationGuideText',
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideTitle',
   {
     defaultMessage: 'Investigation guide',
+  }
+);
+
+export const INVESTIGATION_GUIDE_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideButton',
+  {
+    defaultMessage: 'Show investigation guide',
+  }
+);
+
+export const INVESTIGATION_GUIDE_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideNoData',
+  {
+    defaultMessage: 'There’s no investigation guide for this rule.',
   }
 );
 
@@ -249,5 +285,18 @@ export const RESPONSE_TITLE = i18n.translate(
 );
 
 export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
-  defaultMessage: 'There are no response actions defined for this event.',
+  defaultMessage: 'This alert did not generate an external notification.',
 });
+
+export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
+  { defaultMessage: 'Technical preview' }
+);
+
+export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);

@@ -12,13 +12,12 @@ import { filter } from 'lodash';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
-import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseLiveQueryDetails {
   actionId?: string;
   isLive?: boolean;
-  filterQuery?: ESTermQuery | string;
+  kuery?: string;
   skip?: boolean;
   queryIds?: string[];
 }
@@ -54,7 +53,7 @@ export interface LiveQueryDetailsItem {
 
 export const useLiveQueryDetails = ({
   actionId,
-  filterQuery,
+  kuery,
   isLive = false,
   skip = false,
   queryIds, // enable finding out specific queries only, eg. in cases
@@ -63,7 +62,7 @@ export const useLiveQueryDetails = ({
   const setErrorToast = useErrorToast();
 
   return useQuery<{ data: LiveQueryDetailsItem }, Error, LiveQueryDetailsItem>(
-    ['liveQueries', { actionId, filterQuery, queryIds }],
+    ['liveQueries', { actionId, kuery, queryIds }],
     () => http.get(`/api/osquery/live_queries/${actionId}`, { version: API_VERSIONS.public.v1 }),
     {
       enabled: !skip && !!actionId,

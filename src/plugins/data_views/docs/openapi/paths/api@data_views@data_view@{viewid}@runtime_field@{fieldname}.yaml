@@ -68,13 +68,18 @@ post:
       application/json:
         schema:
             type: object
+            required:
+              - runtimeField
             properties:
-              data_view:
+              runtimeField:
                 type: object
-              fields:
-                type: array
-                items:
-                  type: object
+                description: |
+                  The runtime field definition object.
+
+                  You can update following fields:
+
+                  - `type`
+                  - `script`
         examples:
           updateRuntimeFieldRequest:
             $ref: '../components/examples/update_runtime_field_request.yaml'

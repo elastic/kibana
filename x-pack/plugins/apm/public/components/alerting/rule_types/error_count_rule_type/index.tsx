@@ -17,6 +17,7 @@ import {
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
+import { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asInteger } from '../../../../../common/utils/formatters';
 import {
@@ -58,7 +59,7 @@ export interface ErrorCountRuleParams {
   groupBy?: string[] | undefined;
   errorGroupingKey?: string;
   useKqlFilter?: boolean;
-  kqlFilter?: string;
+  searchConfiguration?: SearchConfigurationType;
 }
 
 interface Props {
@@ -105,7 +106,7 @@ export function ErrorCountRuleType(props: Props) {
                 start,
                 end,
                 groupBy: params.groupBy,
-                kqlFilter: params.kqlFilter,
+                searchConfiguration: JSON.stringify(params.searchConfiguration),
               },
             },
           }
@@ -119,7 +120,7 @@ export function ErrorCountRuleType(props: Props) {
       params.serviceName,
       params.errorGroupingKey,
       params.groupBy,
-      params.kqlFilter,
+      params.searchConfiguration,
     ]
   );
 
@@ -244,7 +245,9 @@ export function ErrorCountRuleType(props: Props) {
     setRuleParams('serviceName', undefined);
     setRuleParams('errorGroupingKey', undefined);
     setRuleParams('environment', ENVIRONMENT_ALL.value);
-    setRuleParams('kqlFilter', undefined);
+    setRuleParams('searchConfiguration', {
+      query: { query: '', language: 'kuery' },
+    });
     setRuleParams('useKqlFilter', e.target.checked);
   };
 

@@ -21,6 +21,7 @@ export * from './components/try_in_console_button';
 export * from './components/install_client';
 
 export * from './types';
+export * from './utils';
 
 export interface WelcomeBannerProps {
   userProfile: {

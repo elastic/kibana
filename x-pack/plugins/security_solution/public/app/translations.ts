@@ -157,6 +157,13 @@ export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
   }
 );
 
+export const PROTECTION_UPDATES = i18n.translate(
+  'xpack.securitySolution.navigation.protectionUpdates',
+  {
+    defaultMessage: 'Protection updates',
+  }
+);
+
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',
 });
