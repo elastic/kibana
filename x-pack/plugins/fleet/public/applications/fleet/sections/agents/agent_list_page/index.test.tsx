@@ -286,6 +286,7 @@ describe('agent_list_page', () => {
       // todo: this can be removed when agentTamperProtectionEnabled feature flag is enabled/deleted
       ExperimentalFeaturesService.init({
         ...allowedExperimentalValues,
+        // @ts-expect-error ts upgrade v4.7.4
         agentTamperProtectionEnabled: true,
       });
 

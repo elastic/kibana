@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { TimelineTitleAndDescription } from './title_and_description';
 import * as i18n from './translations';
 

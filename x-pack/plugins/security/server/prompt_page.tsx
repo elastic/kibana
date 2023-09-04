@@ -22,9 +22,9 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 
+import type { IBasePath } from '@kbn/core/server';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { Fonts } from '@kbn/core-rendering-server-internal';
-import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';

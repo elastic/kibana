@@ -144,8 +144,6 @@ describe('SyntheticsService', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => jest.restoreAllMocks());
-
   it('setup properly', async () => {
     const service = new SyntheticsService(serverMock);
     service.setup(taskManagerSetup);

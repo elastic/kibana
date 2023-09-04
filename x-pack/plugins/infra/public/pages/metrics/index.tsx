@@ -14,6 +14,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -89,6 +90,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         >
                           {ADD_DATA_LABEL}
                         </EuiHeaderLink>
+                        <ObservabilityAIAssistantActionMenuItem />
                       </EuiHeaderLinks>
                     </HeaderMenuPortal>
                   )}

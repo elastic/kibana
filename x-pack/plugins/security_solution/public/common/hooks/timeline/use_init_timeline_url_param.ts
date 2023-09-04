@@ -23,7 +23,7 @@ export const useInitTimelineFromUrlParam = () => {
 
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
-      if (initialState != null && initialState.id !== '') {
+      if (initialState != null) {
         queryTimelineById({
           activeTimelineTab: initialState.activeTab,
           duplicate: false,

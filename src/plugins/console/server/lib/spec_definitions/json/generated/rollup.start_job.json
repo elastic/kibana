@@ -1,11 +1,21 @@
 {
   "rollup.start_job": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_rollup/job/{id}/_start"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-start-job.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-start-job.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

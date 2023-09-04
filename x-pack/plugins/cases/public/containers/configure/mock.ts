@@ -7,7 +7,7 @@
 
 import type { ConfigurationRequest } from '../../../common/types/api';
 import type { Configuration } from '../../../common/types/domain';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { CaseConfigure, CaseConnectorMapping } from './types';
 

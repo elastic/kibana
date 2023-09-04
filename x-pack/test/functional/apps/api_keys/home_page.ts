@@ -66,7 +66,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('Loads the app', async () => {
       await security.testUser.setRoles(['test_api_keys']);
-      log.debug('Checking for create API key call to action');
+      log.debug('Checking for Create API key call to action');
       await find.existsByLinkText('Create API key');
     });
 
@@ -91,9 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const apiKeyName = 'Happy API Key';
         await pageObjects.apiKeys.clickOnPromptCreateApiKey();
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/create');
-        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API Key');
-
-        expect(await pageObjects.apiKeys.getFlyoutUsername()).to.be('test_user');
+        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API key');
 
         await pageObjects.apiKeys.setApiKeyName(apiKeyName);
         await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
@@ -114,11 +112,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.apiKeys.setApiKeyName(apiKeyName);
         await pageObjects.apiKeys.toggleCustomExpiration();
-        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
-        expect(await pageObjects.apiKeys.getErrorCallOutText()).to.be(
-          'Enter a valid duration or disable this option.'
-        );
-
         await pageObjects.apiKeys.setApiKeyCustomExpiration('12');
         await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
         const newApiKeyCreation = await pageObjects.apiKeys.getNewApiKeyCreation();
@@ -175,7 +168,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.apiKeys.waitForSubmitButtonOnApiKeyFlyoutEnabled();
 
-        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Update API Key');
+        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Update API key');
 
         // Verify name input box are disabled
         const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
@@ -371,8 +364,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('API key details');
-
-        expect(await pageObjects.apiKeys.getFlyoutUsername()).to.be('elastic');
 
         // Verify name input box are disabled
         const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();

@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiIcon, EuiText } from '@elastic/eui';
 import { Status } from '@kbn/cases-components';
-import type { RelatedCaseInfo } from '@kbn/cases-plugin/common/api';
+import type { RelatedCase } from '@kbn/cases-plugin/common';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { CaseDetailsLink } from '../../../../../../common/components/links';
@@ -38,7 +38,7 @@ export const RelatedCasesList = ({
   relatedCases,
   maximumVisible,
 }: {
-  relatedCases: RelatedCaseInfo[];
+  relatedCases: RelatedCase[];
   maximumVisible?: number;
 }) => {
   // Sort related cases, showing the most recently created first.

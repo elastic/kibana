@@ -11,7 +11,7 @@ import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timelin
 import { DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
 import { DataSourceType, GroupByOptions, RuleStep } from './types';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { fillEmptySeverityMappings } from './helpers';
 
 export const ruleStepsOrder: RuleStepsOrder = [
@@ -83,6 +83,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   isBuildingBlock: false,
   severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
+  investigationFields: [],
   references: [''],
   falsePositives: [''],
   license: '',

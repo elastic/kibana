@@ -7,27 +7,24 @@
 
 import * as t from 'io-ts';
 import { SavedObject } from '@kbn/core/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import {
-  getApmIndices,
   getApmIndexSettings,
   ApmIndexSettingsResponse,
-  ApmIndicesConfig,
 } from './get_apm_indices';
 import { saveApmIndices } from './save_apm_indices';
-import { APMConfig } from '../../..';
 
 // get list of apm indices and values
 const apmIndexSettingsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/apm-index-settings',
   options: { tags: ['access:apm'] },
-  handler: async ({
-    config,
-    context,
-  }): Promise<{
+  handler: async (
+    resources
+  ): Promise<{
     apmIndexSettings: ApmIndexSettingsResponse;
   }> => {
-    const apmIndexSettings = await getApmIndexSettings({ config, context });
+    const apmIndexSettings = await getApmIndexSettings(resources);
     return { apmIndexSettings };
   },
 });
@@ -36,18 +33,13 @@ const apmIndexSettingsRoute = createApmServerRoute({
 const apmIndicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/apm-indices',
   options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<ApmIndicesConfig> => {
-    const { context, config } = resources;
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    return await getApmIndices({
-      savedObjectsClient,
-      config,
-    });
+  handler: async (resources): Promise<APMIndices> => {
+    return await resources.getApmIndices();
   },
 });
 
 type SaveApmIndicesBodySchema = {
-  [Property in keyof APMConfig['indices']]: t.StringC;
+  [Property in keyof APMIndices]: t.StringC;
 };
 
 // save ui indices

@@ -5,27 +5,31 @@
  * 2.0.
  */
 import React from 'react';
+
 import {
   SectionId,
-  GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
   IntroductionSteps,
   type Section,
+  ConfigureSteps,
+  ExploreSteps,
 } from './types';
 import * as i18n from './translations';
-import respond from './images/respond.svg';
-import protect from './images/protect.svg';
+import explore from './images/explore.svg';
 import { ProductLine } from '../../common/product';
+import { FleetOverviewLink } from './step_links/fleet_overview_link';
+import { EndpointManagementLink } from './step_links/endpoint_management_link';
+import { IntegrationsLink } from './step_links/integrations_link';
+import { RulesManagementLink } from './step_links/rules_management_link';
+import { OverviewLink } from './step_links/overview_link';
+import { AlertsLink } from './step_links/alerts_link';
+import { ExploreLink } from './step_links/explore_link';
 
 export const introductionSteps = [
   {
-    id: IntroductionSteps.watchOverviewVideo,
-    title: i18n.WATCH_OVERVIEW_VIDEO_TITLE,
-    description: [
-      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION1,
-      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION2,
-      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION3,
-    ],
+    id: IntroductionSteps.getToKnowElasticSecurity,
+    title: i18n.INTRODUCTION_STEP1,
+    description: [i18n.INTRODUCTION_STEP1_DESCRIPTION1, i18n.INTRODUCTION_STEP1_DESCRIPTION2],
     splitPanel: (
       <iframe
         allowFullScreen
@@ -41,11 +45,43 @@ export const introductionSteps = [
       />
     ),
     timeInMinutes: 3,
-    badges: [
-      { id: 'analytics', name: i18n.PRODUCT_BADGE_ANALYTICS },
-      { id: 'cloud', name: i18n.PRODUCT_BADGE_CLOUD },
-      { id: 'edr', name: i18n.PRODUCT_BADGE_EDR },
-    ],
+  },
+];
+
+const configureSteps = [
+  {
+    id: ConfigureSteps.learnAbout,
+    title: i18n.CONFIGURE_STEP1,
+    description: [<FleetOverviewLink />],
+  },
+  {
+    id: ConfigureSteps.deployElasticAgent,
+    title: i18n.CONFIGURE_STEP2,
+    description: [i18n.CONFIGURE_STEP2_DESCRIPTION1, <EndpointManagementLink />],
+  },
+  {
+    id: ConfigureSteps.connectToDataSources,
+    title: i18n.CONFIGURE_STEP3,
+    description: [i18n.CONFIGURE_STEP3_DESCRIPTION1, <IntegrationsLink />],
+    productLineRequired: [ProductLine.security],
+  },
+  {
+    id: ConfigureSteps.enablePrebuiltRules,
+    title: i18n.CONFIGURE_STEP4,
+    description: [i18n.CONFIGURE_STEP4_DESCRIPTION1, <RulesManagementLink />],
+  },
+];
+
+const exploreSteps = [
+  {
+    id: ExploreSteps.viewAlerts,
+    title: i18n.EXPLORE_STEP1,
+    description: [i18n.EXPLORE_STEP1_DESCRIPTION1, <AlertsLink />],
+  },
+  {
+    id: ExploreSteps.analyzeData,
+    title: i18n.EXPLORE_STEP2,
+    description: [<OverviewLink />, <ExploreLink />],
   },
 ];
 
@@ -59,48 +95,18 @@ export const sections: Section[] = [
         icon: { type: 'securityApp', size: 'xl' },
         id: GetSetUpCardId.introduction,
         steps: introductionSteps,
-        timeInMins: introductionSteps.reduce(
-          (totalMin, { timeInMinutes }) => totalMin + timeInMinutes,
-          0
-        ),
-        stepsLeft: introductionSteps.length,
       },
       {
         icon: { type: 'agentApp', size: 'xl' },
-        title: i18n.BRING_IN_YOUR_DATA_TITLE,
-        id: GetSetUpCardId.bringInYourData,
+        title: i18n.CONFIGURE_TITLE,
+        id: GetSetUpCardId.configure,
+        steps: configureSteps,
       },
       {
-        icon: { type: 'advancedSettingsApp', size: 'xl' },
-        title: i18n.ACTIVATE_AND_CREATE_RULES_TITLE,
-        id: GetSetUpCardId.activateAndCreateRules,
-      },
-      {
-        icon: { type: protect, size: 'xl' },
-        title: i18n.PROTECT_YOUR_ENVIRONMENT_TITLE,
-        id: GetSetUpCardId.protectYourEnvironmentInRealtime,
-        productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
-      },
-    ],
-  },
-  {
-    id: SectionId.getMoreFromElasticSecurity,
-    title: i18n.GET_MORE_TITLE,
-    cards: [
-      {
-        icon: { type: 'advancedSettingsApp', size: 'xl' },
-        title: i18n.MASTER_THE_INVESTIGATION_TITLE,
-        id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-      },
-      {
-        icon: { type: respond, size: 'xl' },
-        title: i18n.RESPOND_TO_THREATS_TITLE,
-        id: GetMoreFromElasticSecurityCardId.respondToThreats,
-      },
-      {
-        icon: { type: 'spacesApp', size: 'xl' },
-        title: i18n.OPTIMIZE_YOUR_WORKSPACE_TITLE,
-        id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
+        icon: { type: explore, size: 'xl' },
+        title: i18n.EXPLORE_TITLE,
+        id: GetSetUpCardId.explore,
+        steps: exploreSteps,
       },
     ],
   },

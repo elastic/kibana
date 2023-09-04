@@ -407,5 +407,17 @@ export interface FleetServerAgentAction {
   /** Trace id */
   traceparent?: string | null;
 
+  // signed data + signature
+  signed?: {
+    data: string;
+    signature: string;
+  };
+
   [k: string]: unknown;
+}
+
+export interface ActionStatusOptions {
+  errorSize: number;
+  page?: number;
+  perPage?: number;
 }

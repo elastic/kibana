@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   RuleStats,
   TotalEnabledDisabled,
-} from '../../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
 
 export const getRuleStatsAggregation = (): Record<

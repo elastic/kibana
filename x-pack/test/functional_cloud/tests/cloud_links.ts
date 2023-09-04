@@ -72,6 +72,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const cloudLink = await find.byLinkText('Organization');
         expect(cloudLink).to.not.be(null);
       });
+
+      it('Shows the theme darkMode toggle', async () => {
+        await PageObjects.common.clickAndValidate('userMenuButton', 'darkModeToggle');
+        const darkModeSwitch = await find.byCssSelector('[data-test-subj="darkModeToggleSwitch"]');
+        expect(darkModeSwitch).to.not.be(null);
+      });
     });
   });
 }

@@ -1,8 +1,8 @@
 .canvasEmbeddable {
   .embPanel {
-    border: none;
-    border-style: none !important;
+    outline: none !important;
     background: none;
+    border-radius: 0 !important;
 
     .embPanel__title {
       margin-bottom: $euiSizeXS;

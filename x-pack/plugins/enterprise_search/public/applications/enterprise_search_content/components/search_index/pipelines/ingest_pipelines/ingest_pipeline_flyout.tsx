@@ -160,7 +160,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
                       'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalBodyConnectorText',
                       {
                         defaultMessage:
-                          'This pipeline runs automatically on all Crawler and Connector indices created through Enterprise Search.',
+                          'This pipeline runs automatically on all Crawler and Connector indices created through Search.',
                       }
                     )
                   )}
@@ -172,7 +172,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalIngestLinkLabel',
                     {
-                      defaultMessage: 'Learn more about Enterprise Search ingest pipelines',
+                      defaultMessage: 'Learn more about Search ingest pipelines',
                     }
                   )}
                 </EuiLink>

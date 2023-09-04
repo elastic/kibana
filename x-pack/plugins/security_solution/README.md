@@ -128,3 +128,17 @@ In another terminal, run:
 ```bash
 yarn test:ftr:runner --config x-pack/test/security_solution_endpoint/config.ts
 ```
+
+#### Generate huge amount of indices with huge amount of fields
+
+The result of this operation will be 10 separate bucket folders within `mappings_folder`. Each bucket folder will contain a `mappings.json` file describing 50 indices.
+
+```bash
+yarn mappings:generate --fieldsCount=10000 --indexCount=500 --indexPrefix='.ds-huge' --unmappedRate=.2 --buckets=10 --outputDirectory='mappings_folder'
+```
+
+#### Load generated mappings
+
+```bash
+yarn mappings:load --mappings-dir='mappings_folder' --es-url=http://username:password@localhost:9200 --kibana-url=http://username:password@localhost:5601/app
+```

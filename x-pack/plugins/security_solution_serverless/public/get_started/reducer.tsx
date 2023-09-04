@@ -6,20 +6,11 @@
  */
 
 import type { ProductLine } from '../../common/product';
-import { setupCards, updateCard } from './helpers';
-import {
-  type CardId,
-  type StepId,
-  type ToggleProductAction,
-  type TogglePanelReducer,
-  type AddFinishedStepAction,
-  GetStartedPageActions,
-} from './types';
+import { setupActiveSections, updateActiveSections } from './helpers';
+import type { ReducerActions } from './types';
+import { type CardId, type StepId, type TogglePanelReducer, GetStartedPageActions } from './types';
 
-export const reducer = (
-  state: TogglePanelReducer,
-  action: ToggleProductAction | AddFinishedStepAction
-): TogglePanelReducer => {
+export const reducer = (state: TogglePanelReducer, action: ReducerActions): TogglePanelReducer => {
   if (action.type === GetStartedPageActions.ToggleProduct) {
     const activeProducts = new Set([...state.activeProducts]);
 
@@ -29,10 +20,17 @@ export const reducer = (
       activeProducts.add(action.payload.section);
     }
 
+    const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
+      state.finishedSteps,
+      activeProducts
+    );
+
     return {
       ...state,
       activeProducts,
-      activeCards: setupCards(state.finishedSteps, activeProducts),
+      activeSections,
+      totalStepsLeft,
+      totalActiveSteps,
     };
   }
 
@@ -44,18 +42,95 @@ export const reducer = (
         : new Set(),
     };
 
-    finishedSteps[action.payload.cardId].add(action.payload.stepId);
+    if (action.type === GetStartedPageActions.AddFinishedStep) {
+      finishedSteps[action.payload.cardId].add(action.payload.stepId);
+    }
+
+    const { activeSections, totalStepsLeft, totalActiveSteps } = updateActiveSections({
+      activeProducts: state.activeProducts,
+      activeSections: state.activeSections,
+      cardId: action.payload.cardId,
+      finishedSteps,
+      sectionId: action.payload.sectionId,
+    });
 
     return {
       ...state,
       finishedSteps,
-      activeCards: updateCard({
-        finishedSteps,
-        activeProducts: state.activeProducts,
-        activeCards: state.activeCards,
-        cardId: action.payload.cardId,
-        sectionId: action.payload.sectionId,
-      }),
+      activeSections,
+      totalStepsLeft,
+      totalActiveSteps,
+    };
+  }
+
+  if (action.type === GetStartedPageActions.RemoveFinishedStep) {
+    const finishedSteps = {
+      ...state.finishedSteps,
+      [action.payload.cardId]: state.finishedSteps[action.payload.cardId]
+        ? new Set([...state.finishedSteps[action.payload.cardId]])
+        : new Set(),
+    };
+
+    if (action.type === GetStartedPageActions.RemoveFinishedStep) {
+      finishedSteps[action.payload.cardId].delete(action.payload.stepId);
+    }
+
+    const { activeSections, totalStepsLeft, totalActiveSteps } = updateActiveSections({
+      activeProducts: state.activeProducts,
+      activeSections: state.activeSections,
+      cardId: action.payload.cardId,
+      finishedSteps,
+      sectionId: action.payload.sectionId,
+    });
+
+    return {
+      ...state,
+      finishedSteps,
+      activeSections,
+      totalStepsLeft,
+      totalActiveSteps,
+    };
+  }
+
+  if (
+    action.type === GetStartedPageActions.ToggleExpandedCardStep &&
+    action.payload.isCardExpanded != null
+  ) {
+    return {
+      ...state,
+      expandedCardSteps: {
+        ...state.expandedCardSteps,
+        [action.payload.cardId]: {
+          expandedSteps: state.expandedCardSteps[action.payload.cardId]?.expandedSteps ?? [],
+          isExpanded: action.payload.isCardExpanded,
+        },
+      },
+    };
+  }
+
+  if (
+    action.type === GetStartedPageActions.ToggleExpandedCardStep &&
+    action.payload.isStepExpanded != null
+  ) {
+    const expandedSteps = new Set(
+      [...state.expandedCardSteps[action.payload.cardId]?.expandedSteps] ?? []
+    );
+    if (action.payload.isStepExpanded === true && action.payload.stepId) {
+      expandedSteps.add(action.payload.stepId);
+    }
+
+    if (action.payload.isStepExpanded === false && action.payload.stepId) {
+      expandedSteps.delete(action.payload.stepId);
+    }
+    return {
+      ...state,
+      expandedCardSteps: {
+        ...state.expandedCardSteps,
+        [action.payload.cardId]: {
+          expandedSteps: [...expandedSteps],
+          isExpanded: state.expandedCardSteps[action.payload.cardId]?.isExpanded,
+        },
+      },
     };
   }
 
@@ -77,16 +152,16 @@ export const getFinishedStepsInitialStates = ({
   return initialStates;
 };
 
-export const getActiveSectionsInitialStates = ({
+export const getActiveProductsInitialStates = ({
   activeProducts,
 }: {
   activeProducts: ProductLine[];
 }) => new Set(activeProducts);
 
-export const getActiveCardsInitialStates = ({
+export const getActiveSectionsInitialStates = ({
   activeProducts,
   finishedSteps,
 }: {
   activeProducts: Set<ProductLine>;
   finishedSteps: Record<CardId, Set<StepId>>;
-}) => setupCards(finishedSteps, activeProducts);
+}) => setupActiveSections(finishedSteps, activeProducts);

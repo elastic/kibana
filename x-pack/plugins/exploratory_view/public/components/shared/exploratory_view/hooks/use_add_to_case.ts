@@ -8,7 +8,7 @@
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, MountPoint } from '@kbn/core/public';
-import { CaseUI, CommentType } from '@kbn/cases-plugin/common';
+import { CaseUI, AttachmentType } from '@kbn/cases-plugin/common';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '@kbn/cases-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
@@ -29,7 +29,7 @@ async function addToCase(
   const payload = {
     persistableStateAttachmentState: { attributes, timeRange },
     persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
-    type: CommentType.persistableState,
+    type: AttachmentType.persistableState,
     owner: owner ?? observabilityFeatureId,
   };
 

@@ -17,11 +17,17 @@
       "ml",
       "security",
       "securitySolution",
-      "serverless"
+      "serverless",
+      "taskManager",
+      "cloud",
+      "fleet"
     ],
     "optionalPlugins": [
       "securitySolutionEss"
     ],
-    "requiredBundles": ["kibanaUtils"]
+    "requiredBundles": [
+      "kibanaUtils",
+      "usageCollection"
+    ]
   }
 }

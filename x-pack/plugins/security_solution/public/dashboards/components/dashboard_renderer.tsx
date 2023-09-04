@@ -45,6 +45,7 @@ const DashboardRendererComponent = ({
     () =>
       Promise.resolve({
         getInitialInput: () => ({ timeRange, viewMode: ViewMode.VIEW, query, filters }),
+        useControlGroupIntegration: true,
       }),
     [filters, query, timeRange]
   );

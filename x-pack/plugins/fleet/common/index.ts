@@ -58,6 +58,7 @@ export {
   ENDPOINT_PRIVILEGES,
   // dashboards ids
   DASHBOARD_LOCATORS_IDS,
+  FLEET_ENROLLMENT_API_PREFIX,
 } from './constants';
 export {
   // Route services

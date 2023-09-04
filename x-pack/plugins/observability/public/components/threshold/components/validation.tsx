@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
@@ -13,9 +14,7 @@ import {
   Aggregators,
   Comparator,
   CustomMetricExpressionParams,
-  FilterQuery,
   MetricExpressionParams,
-  QUERY_INVALID,
 } from '../../../../common/threshold_rule/types';
 
 export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
@@ -28,10 +27,12 @@ const isCustomMetricExpressionParams = (
 
 export function validateMetricThreshold({
   criteria,
+  searchConfiguration,
   filterQuery,
 }: {
   criteria: MetricExpressionParams[];
-  filterQuery?: FilterQuery;
+  searchConfiguration: SerializedSearchSourceFields;
+  filterQuery?: string;
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {
@@ -52,15 +53,30 @@ export function validateMetricThreshold({
       customMetrics: Record<string, { aggType?: string; field?: string; filter?: string }>;
       equation?: string;
     };
-  } & { filterQuery?: string[] } = {};
+  } & { filterQuery?: string[]; searchConfiguration?: string[] } = {};
   validationResult.errors = errors;
 
-  if (filterQuery === QUERY_INVALID) {
-    errors.filterQuery = [
-      i18n.translate('xpack.observability.threshold.rule.alertFlyout.error.invalidFilterQuery', {
-        defaultMessage: 'Filter query is invalid.',
-      }),
+  if (!searchConfiguration || !searchConfiguration.index) {
+    errors.searchConfiguration = [
+      i18n.translate(
+        'xpack.observability.threshold.rule.alertFlyout.error.invalidSearchConfiguration',
+        {
+          defaultMessage: 'Data view is required.',
+        }
+      ),
     ];
+  }
+
+  if (filterQuery) {
+    try {
+      buildEsQuery(undefined, [{ query: filterQuery, language: 'kuery' }], []);
+    } catch (e) {
+      errors.filterQuery = [
+        i18n.translate('xpack.observability.threshold.rule.alertFlyout.error.invalidFilterQuery', {
+          defaultMessage: 'Filter query is invalid.',
+        }),
+      ];
+    }
   }
 
   if (!criteria || !criteria.length) {
@@ -84,7 +100,6 @@ export function validateMetricThreshold({
         threshold1: [],
       },
       metric: [],
-      filterQuery: [],
       customMetrics: {},
     };
     if (!c.aggType) {

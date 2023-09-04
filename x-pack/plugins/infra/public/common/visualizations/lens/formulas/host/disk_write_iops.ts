@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const diskIOWrite: LensChartConfig = {
-  title: 'Disk Write IOPS',
-  formula: {
-    formula: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
-    format: {
-      id: 'number',
-      params: {
-        decimals: 0,
-      },
+export const diskIOWrite: FormulaValueConfig = {
+  label: 'Disk Write IOPS',
+  value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+  format: {
+    id: 'number',
+    params: {
+      decimals: 0,
     },
   },
-  getFilters,
 };

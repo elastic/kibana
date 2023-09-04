@@ -24,7 +24,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const pageObjects = getPageObjects(['discover']);
 
-  describe('creation_continuous_transform', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/165146
+  // Failing: See https://github.com/elastic/kibana/issues/165144
+  describe.skip('creation_continuous_transform', function () {
     before(async () => {
       // installing the sample data with test user with super user role and then switching roles with limited privileges
       await security.testUser.setRoles(['superuser'], { skipBrowserRefresh: true });
@@ -225,6 +227,104 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
+        before(async () => {
+          // Add explicit mapping for destination index https://github.com/elastic/elasticsearch/issues/67148
+          if (testData.type === 'latest') {
+            const destIndexMappings: MappingTypeMapping = {
+              properties: {
+                customer_id: {
+                  type: 'long',
+                },
+                day_of_week_i: {
+                  type: 'long',
+                },
+                order_date: {
+                  type: 'date',
+                },
+                order_id: {
+                  type: 'long',
+                },
+                products: {
+                  properties: {
+                    _id: {
+                      type: 'text',
+                      fields: {
+                        keyword: {
+                          type: 'keyword',
+                          ignore_above: 256,
+                        },
+                      },
+                    },
+                    base_price: {
+                      type: 'float',
+                    },
+                    base_unit_price: {
+                      type: 'float',
+                    },
+                    created_on: {
+                      type: 'date',
+                    },
+                    discount_amount: {
+                      type: 'float',
+                    },
+                    discount_percentage: {
+                      type: 'float',
+                    },
+                    min_price: {
+                      type: 'float',
+                    },
+                    price: {
+                      type: 'float',
+                    },
+                    product_id: {
+                      type: 'long',
+                    },
+                    product_name: {
+                      type: 'text',
+                      fields: {
+                        keyword: {
+                          type: 'keyword',
+                          ignore_above: 256,
+                        },
+                      },
+                    },
+                    quantity: {
+                      type: 'long',
+                    },
+                    tax_amount: {
+                      type: 'float',
+                    },
+                    taxful_price: {
+                      type: 'float',
+                    },
+                    taxless_price: {
+                      type: 'float',
+                    },
+                    unit_discount_amount: {
+                      type: 'float',
+                    },
+                  },
+                },
+                taxful_total_price: {
+                  type: 'float',
+                },
+                taxless_total_price: {
+                  type: 'float',
+                },
+                total_quantity: {
+                  type: 'long',
+                },
+                total_unique_products: {
+                  type: 'long',
+                },
+              },
+            };
+
+            await transform.api.createIndices(testData.destinationIndex, {
+              mappings: destIndexMappings,
+            });
+          }
+        });
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
           await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
@@ -415,7 +515,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
-        it('runs the transform and displays it correctly in the job list', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/158612
+        // FLAKY: https://github.com/elastic/kibana/issues/158613
+        it.skip('runs the transform and displays it correctly in the job list', async () => {
           await transform.testExecution.logTestStep('creates the transform');
           await transform.wizard.createTransform();
 

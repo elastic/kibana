@@ -10,6 +10,11 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { dataLoaders } from './cypress/support/data_loaders';
 
 export default defineCypressConfig({
+  reporter: '../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './public/management/reporter_config.json',
+  },
+
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
   pageLoadTimeout: 12000,
@@ -32,7 +37,9 @@ export default defineCypressConfig({
     ELASTICSEARCH_URL: 'http://localhost:9200',
     FLEET_SERVER_URL: 'https://localhost:8220',
     // Username/password used for both elastic and kibana
-    ELASTICSEARCH_USERNAME: 'elastic',
+    KIBANA_USERNAME: 'elastic',
+    KIBANA_PASSWORD: 'changeme',
+    ELASTICSEARCH_USERNAME: 'system_indices_superuser',
     ELASTICSEARCH_PASSWORD: 'changeme',
   },
 

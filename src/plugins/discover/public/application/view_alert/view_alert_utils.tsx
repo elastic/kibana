@@ -14,7 +14,8 @@ import type { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { MarkdownSimple } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Filter } from '@kbn/es-query';
 import { DiscoverAppLocatorParams } from '../../../common/locator';
 
@@ -55,13 +56,15 @@ export const getAlertUtils = (
     const errorTitle = i18n.translate('discover.viewAlert.dataViewErrorTitle', {
       defaultMessage: 'Error fetching data view',
     });
+    const errorText = i18n.translate('discover.viewAlert.dataViewErrorText', {
+      defaultMessage: 'Data view failure of the alert rule with id {alertId}.',
+      values: {
+        alertId,
+      },
+    });
     toastNotifications.addDanger({
       title: errorTitle,
-      text: toMountPoint(
-        <MarkdownSimple>
-          {new Error(`Data view failure of the alert rule with id ${alertId}.`).message}
-        </MarkdownSimple>
-      ),
+      text: errorText,
     });
   };
 
@@ -76,7 +79,10 @@ export const getAlertUtils = (
       });
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>, {
+          theme: core.theme,
+          i18n: core.i18n,
+        }),
       });
       throw new Error(errorTitle);
     }
@@ -96,7 +102,10 @@ export const getAlertUtils = (
       });
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>, {
+          theme: core.theme,
+          i18n: core.i18n,
+        }),
       });
       throw new Error(errorTitle);
     }

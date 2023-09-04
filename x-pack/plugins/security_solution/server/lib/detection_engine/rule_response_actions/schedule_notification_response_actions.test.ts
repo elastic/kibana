@@ -6,8 +6,8 @@
  */
 
 import { getScheduleNotificationResponseActionsService } from './schedule_notification_response_actions';
-import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/api/detection_engine/model/rule_response_actions';
 
 describe('ScheduleNotificationResponseActions', () => {
   const signalOne = { agent: { id: 'agent-id-1' }, _id: 'alert-id-1', user: { id: 'S-1-5-20' } };

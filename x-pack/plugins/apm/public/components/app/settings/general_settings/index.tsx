@@ -19,6 +19,7 @@ import {
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableAgentExplorerView,
+  apmEnableProfilingIntegration,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -37,6 +38,7 @@ const apmSettingsKeys = [
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableAgentExplorerView,
+  apmEnableProfilingIntegration,
 ];
 
 export function GeneralSettings() {

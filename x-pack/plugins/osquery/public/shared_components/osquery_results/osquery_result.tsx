@@ -21,6 +21,7 @@ interface OsqueryResultProps extends OsqueryActionResultsProps {
   startDate: string;
 }
 
+// eslint-disable-next-line react/display-name
 export const OsqueryResult = React.memo<OsqueryResultProps>(
   ({ actionId, ruleName, startDate, ecsData }) => {
     const [isLive, setIsLive] = useState(false);

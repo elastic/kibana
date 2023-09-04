@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { FindCommentsQueryParamsRt, decodeWithExcessOrThrow } from '../../../../common/api';
+import type { attachmentApiV1 } from '../../../../common/types/api';
 import { CASE_FIND_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
@@ -22,15 +22,17 @@ export const findCommentsRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const query = decodeWithExcessOrThrow(FindCommentsQueryParamsRt)(request.query);
-
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
+      const query = request.query as attachmentApiV1.FindAttachmentsQueryParams;
+
+      const res: attachmentApiV1.AttachmentsFindResponse = await client.attachments.find({
+        caseID: request.params.case_id,
+        findQueryParams: query,
+      });
+
       return response.ok({
-        body: await client.attachments.find({
-          caseID: request.params.case_id,
-          findQueryParams: query,
-        }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

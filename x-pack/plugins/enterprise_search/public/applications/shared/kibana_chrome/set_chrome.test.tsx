@@ -15,24 +15,24 @@ import { shallow } from 'enzyme';
 
 jest.mock('./generate_breadcrumbs', () => ({
   useGenerateBreadcrumbs: jest.requireActual('./generate_breadcrumbs').useGenerateBreadcrumbs,
-  useEnterpriseSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
+  useSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
   useAppSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
   useWorkplaceSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
 }));
 import {
-  useEnterpriseSearchBreadcrumbs,
+  useSearchBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 
 jest.mock('./generate_title', () => ({
-  enterpriseSearchTitle: jest.fn((title: any) => title),
+  searchTitle: jest.fn((title: any) => title),
   appSearchTitle: jest.fn((title: any) => title),
   workplaceSearchTitle: jest.fn((title: any) => title),
 }));
-import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
+import { searchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
-import { SetEnterpriseSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from '.';
+import { SetSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from '.';
 
 describe('Set Kibana Chrome helpers', () => {
   const mockCurrentPath = (pathname: string) =>
@@ -48,12 +48,12 @@ describe('Set Kibana Chrome helpers', () => {
     expect(mockKibanaValues.setDocTitle).toHaveBeenCalled();
   });
 
-  describe('SetEnterpriseSearchChrome', () => {
+  describe('SetSearchChrome', () => {
     it('sets breadcrumbs and document title', () => {
-      shallow(<SetEnterpriseSearchChrome trail={['Hello World']} />);
+      shallow(<SetSearchChrome trail={['Hello World']} />);
 
-      expect(enterpriseSearchTitle).toHaveBeenCalledWith(['Hello World']);
-      expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([
+      expect(searchTitle).toHaveBeenCalledWith(['Hello World']);
+      expect(useSearchBreadcrumbs).toHaveBeenCalledWith([
         {
           text: 'Hello World',
           path: '/current-path',
@@ -62,10 +62,10 @@ describe('Set Kibana Chrome helpers', () => {
     });
 
     it('handles empty trails as a root-level page', () => {
-      shallow(<SetEnterpriseSearchChrome />);
+      shallow(<SetSearchChrome />);
 
-      expect(enterpriseSearchTitle).toHaveBeenCalledWith([]);
-      expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([]);
+      expect(searchTitle).toHaveBeenCalledWith([]);
+      expect(useSearchBreadcrumbs).toHaveBeenCalledWith([]);
     });
   });
 

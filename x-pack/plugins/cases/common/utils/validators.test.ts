@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { MAX_ASSIGNEES_PER_CASE } from '../constants';
-import { areTotalAssigneesInvalid } from './validators';
+import { createUserActionServiceMock } from '../../server/services/mocks';
+import { MAX_ASSIGNEES_PER_CASE, MAX_USER_ACTIONS_PER_CASE } from '../constants';
+import { areTotalAssigneesInvalid, validateMaxUserActions } from './validators';
 
 describe('validators', () => {
   describe('areTotalAssigneesInvalid', () => {
@@ -29,6 +30,39 @@ describe('validators', () => {
 
     it(`returns true if assignees are greater than ${MAX_ASSIGNEES_PER_CASE}`, () => {
       expect(areTotalAssigneesInvalid(generateAssignees(MAX_ASSIGNEES_PER_CASE + 1))).toBe(true);
+    });
+  });
+
+  describe('validateMaxUserActions', () => {
+    const caseId = 'test-case';
+    const userActionService = createUserActionServiceMock();
+
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+      [caseId]: MAX_USER_ACTIONS_PER_CASE - 1,
+    });
+
+    it('does not throw if the limit is not reached', async () => {
+      await expect(
+        validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 })
+      ).resolves.not.toThrow();
+    });
+
+    it('throws if the max user actions per case limit is reached', async () => {
+      await expect(
+        validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 2 })
+      ).rejects.toThrow(
+        `The case with id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+      );
+    });
+
+    it('the caseId does not exist in the response', async () => {
+      userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        foobar: MAX_USER_ACTIONS_PER_CASE - 1,
+      });
+
+      await expect(
+        validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 })
+      ).resolves.not.toThrow();
     });
   });
 });

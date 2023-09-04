@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
+import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_LAST_DETECTED, ALERT_START } from '@kbn/rule-data-utils';
 
 export const removeRandomValuedProperties = (alert: DetectionAlert | undefined) => {

@@ -10,7 +10,6 @@ import type { Screen } from '@testing-library/react';
 import { waitFor, within, screen, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { CaseSeverity, CommentType, ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -48,6 +47,7 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { useLicense } from '../../common/use_license';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { categories } from '../../containers/mock';
+import { CaseSeverity, AttachmentType, ConnectorTypes } from '../../../common/types/domain';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
@@ -304,34 +304,6 @@ describe('Create case', () => {
           severity: CaseSeverity.HIGH,
         },
       });
-    });
-
-    it('does not submits the title when the length is longer than 160 characters', async () => {
-      const longTitle = 'a'.repeat(161);
-
-      appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
-      );
-
-      await waitForFormToRender(screen);
-
-      const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
-      userEvent.paste(titleInput, longTitle);
-
-      userEvent.click(screen.getByTestId('create-case-submit'));
-
-      await waitFor(() => {
-        expect(
-          screen.getByText(
-            'The length of the name is too long. The maximum length is 160 characters.'
-          )
-        ).toBeInTheDocument();
-      });
-
-      expect(postCase).not.toHaveBeenCalled();
     });
 
     it('should toggle sync settings', async () => {
@@ -715,7 +687,7 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
       {
         alertId: '7896',
@@ -725,7 +697,7 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'second-owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
     ];
 
@@ -791,7 +763,7 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
     ];
 

@@ -11,7 +11,7 @@ import {
   XYState,
 } from '../../types';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
-import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { cloneDeep } from 'lodash';
 import { getUnlinkLayerAction } from './unlink_action';
 

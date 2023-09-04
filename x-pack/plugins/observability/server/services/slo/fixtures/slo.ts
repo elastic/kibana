@@ -5,12 +5,10 @@
  * 2.0.
  */
 
+import { SavedObject } from '@kbn/core-saved-objects-server';
+import { ALL_VALUE, CreateSLOParams, HistogramIndicator, sloSchema } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v1 as uuidv1 } from 'uuid';
-import { SavedObject } from '@kbn/core-saved-objects-server';
-import { sloSchema, CreateSLOParams } from '@kbn/slo-schema';
-
-import { SO_SLO_TYPE } from '../../../saved_objects';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -22,9 +20,9 @@ import {
   SLO,
   StoredSLO,
 } from '../../../domain/models';
-import { Paginated } from '../slo_repository';
-import { oneWeek, twoMinute } from './duration';
-import { sevenDaysRolling } from './time_window';
+import { SO_SLO_TYPE } from '../../../saved_objects';
+import { twoMinute } from './duration';
+import { sevenDaysRolling, weeklyCalendarAligned } from './time_window';
 
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
@@ -71,7 +69,7 @@ export const createKQLCustomIndicator = (
 
 export const createMetricCustomIndicator = (
   params: Partial<MetricCustomIndicator['params']> = {}
-): Indicator => ({
+): MetricCustomIndicator => ({
   type: 'sli.metric.custom',
   params: {
     index: 'my-index*',
@@ -86,6 +84,30 @@ export const createMetricCustomIndicator = (
     total: {
       metrics: [{ name: 'A', aggregation: 'sum', field: 'total' }],
       equation: 'A',
+    },
+    timestampField: 'log_timestamp',
+    ...params,
+  },
+});
+
+export const createHistogramIndicator = (
+  params: Partial<HistogramIndicator['params']> = {}
+): HistogramIndicator => ({
+  type: 'sli.histogram.custom',
+  params: {
+    index: 'my-index*',
+    filter: 'labels.groupId: group-3',
+    good: {
+      field: 'latency',
+      aggregation: 'range',
+      from: 0,
+      to: 100,
+      filter: '',
+    },
+    total: {
+      field: 'latency',
+      aggregation: 'value_count',
+      filter: '',
     },
     timestampField: 'log_timestamp',
     ...params,
@@ -107,6 +129,7 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
   },
   tags: ['critical', 'k8s'],
   enabled: true,
+  groupBy: ALL_VALUE,
 };
 
 const defaultCreateSloParams: CreateSLOParams = {
@@ -160,23 +183,7 @@ export const createSLOWithTimeslicesBudgetingMethod = (params: Partial<SLO> = {}
 
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
   return createSLO({
-    timeWindow: {
-      duration: oneWeek(),
-      type: 'calendarAligned',
-    },
+    timeWindow: weeklyCalendarAligned(),
     ...params,
   });
-};
-
-export const createPaginatedSLO = (
-  slo: SLO,
-  params: Partial<Paginated<SLO>> = {}
-): Paginated<SLO> => {
-  return {
-    page: 1,
-    perPage: 25,
-    total: 1,
-    results: [slo],
-    ...params,
-  };
 };

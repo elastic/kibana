@@ -23,7 +23,7 @@ import type {
   ThreatMatchRuleCreateProps,
   ThresholdRule,
   ThresholdRuleCreateProps,
-} from '../../../../../../../common/detection_engine/rule_schema';
+} from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
 import type {
   DiffableCommonFields,
@@ -35,7 +35,7 @@ import type {
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
   DiffableThresholdFields,
-} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
+} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { extractBuildingBlockObject } from './extract_building_block_object';
 import {
   extractInlineKqlQuery,

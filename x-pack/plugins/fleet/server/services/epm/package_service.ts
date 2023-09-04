@@ -27,8 +27,10 @@ import type {
   ArchivePackage,
   BundledPackage,
 } from '../../types';
-import { checkSuperuser } from '../security';
+import type { FleetAuthzRouteConfig } from '../security/types';
+import { checkSuperuser, getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from '../security';
 import { FleetUnauthorizedError } from '../../errors';
+import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/epm';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
 import type { FetchFindLatestPackageOptions } from './registry';
@@ -86,8 +88,17 @@ export class PackageServiceImpl implements PackageService {
   ) {}
 
   public asScoped(request: KibanaRequest) {
-    const preflightCheck = () => {
-      if (!checkSuperuser(request)) {
+    const preflightCheck = async (requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']) => {
+      if (requiredAuthz) {
+        const requestedAuthz = await getAuthzFromRequest(request);
+
+        const noRequiredAuthz = doesNotHaveRequiredFleetAuthz(requestedAuthz, requiredAuthz);
+        if (noRequiredAuthz) {
+          throw new FleetUnauthorizedError(
+            `User does not have adequate permissions to access Fleet packages.`
+          );
+        }
+      } else if (!checkSuperuser(request)) {
         throw new FleetUnauthorizedError(
           `User does not have adequate permissions to access Fleet packages.`
         );
@@ -115,7 +126,9 @@ class PackageClientImpl implements PackageClient {
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
     private readonly logger: Logger,
-    private readonly preflightCheck?: () => void | Promise<void>,
+    private readonly preflightCheck?: (
+      requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']
+    ) => void | Promise<void>,
     private readonly request?: KibanaRequest
   ) {}
 
@@ -127,7 +140,7 @@ class PackageClientImpl implements PackageClient {
   }
 
   public async getInstallation(pkgName: string) {
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getInstallation({
       pkgName,
       savedObjectsClient: this.internalSoClient,
@@ -139,7 +152,7 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string;
     spaceId?: string;
   }): Promise<Installation | undefined> {
-    await this.#runPreflight();
+    await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
     return ensureInstalledPackage({
       ...options,
@@ -152,12 +165,12 @@ class PackageClientImpl implements PackageClient {
     packageName: string,
     options?: FetchFindLatestPackageOptions
   ): Promise<RegistryPackage | BundledPackage> {
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return fetchFindLatestPackageOrThrow(packageName, options);
   }
 
   public async readBundledPackage(bundledPackage: BundledPackage) {
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return generatePackageInfoFromArchiveBuffer(bundledPackage.buffer, 'application/zip');
   }
 
@@ -166,7 +179,7 @@ class PackageClientImpl implements PackageClient {
     packageVersion: string,
     options?: Parameters<typeof getPackage>['2']
   ) {
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getPackage(packageName, packageVersion, options);
   }
 
@@ -176,7 +189,7 @@ class PackageClientImpl implements PackageClient {
     prerelease?: false;
   }) {
     const { excludeInstallStatus, category, prerelease } = params || {};
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getPackages({
       savedObjectsClient: this.internalSoClient,
       excludeInstallStatus,
@@ -189,7 +202,7 @@ class PackageClientImpl implements PackageClient {
     packageInfo: InstallablePackage,
     assetPaths: string[]
   ): Promise<InstalledAssetType[]> {
-    await this.#runPreflight();
+    await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
     let installedAssets: InstalledAssetType[] = [];
 
     const transformPaths = assetPaths.filter(isTransform);
@@ -207,7 +220,7 @@ class PackageClientImpl implements PackageClient {
   }
 
   async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
-    const authorizationHeader = await this.getAuthorizationHeader();
+    const authorizationHeader = this.getAuthorizationHeader();
 
     const { installedTransforms } = await installTransforms({
       installablePackage: packageInfo,
@@ -222,9 +235,9 @@ class PackageClientImpl implements PackageClient {
     return installedTransforms;
   }
 
-  #runPreflight() {
+  async #runPreflight(requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']) {
     if (this.preflightCheck) {
-      return this.preflightCheck();
+      return await this.preflightCheck(requiredAuthz);
     }
   }
 }

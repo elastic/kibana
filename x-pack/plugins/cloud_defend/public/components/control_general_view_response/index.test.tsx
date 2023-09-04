@@ -10,7 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewResponse } from '.';
-import { Response, Selector } from '../../types';
+import { Response, Selector } from '../../../common';
 import * as i18n from '../control_general_view/translations';
 
 describe('<ControlGeneralViewSelector />', () => {

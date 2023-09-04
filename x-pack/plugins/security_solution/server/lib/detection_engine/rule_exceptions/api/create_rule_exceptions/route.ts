@@ -31,12 +31,12 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   CreateRuleExceptionsRequestBodyDecoded,
   CreateRuleExceptionsRequestParamsDecoded,
-} from '../../../../../../common/detection_engine/rule_exceptions';
+} from '../../../../../../common/api/detection_engine/rule_exceptions';
 import {
   CREATE_RULE_EXCEPTIONS_URL,
   CreateRuleExceptionsRequestBody,
   CreateRuleExceptionsRequestParams,
-} from '../../../../../../common/detection_engine/rule_exceptions';
+} from '../../../../../../common/api/detection_engine/rule_exceptions';
 
 import { readRules } from '../../../rule_management/logic/crud/read_rules';
 import { patchRules } from '../../../rule_management/logic/crud/patch_rules';

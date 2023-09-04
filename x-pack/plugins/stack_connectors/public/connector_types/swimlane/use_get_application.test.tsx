@@ -40,7 +40,6 @@ describe('useGetApplication', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('init', async () => {

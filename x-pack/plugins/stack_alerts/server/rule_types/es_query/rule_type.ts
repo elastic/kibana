@@ -8,6 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
+import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import { ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
+import { StackAlert } from '@kbn/alerts-as-data-utils';
+import { STACK_AAD_INDEX_NAME } from '..';
+import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
@@ -30,7 +35,9 @@ export function getRuleType(
   EsQueryRuleState,
   {},
   ActionContext,
-  typeof ActionGroupId
+  typeof ActionGroupId,
+  never,
+  StackAlert
 > {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
     defaultMessage: 'Elasticsearch query',
@@ -78,7 +85,7 @@ export function getRuleType(
   const actionVariableContextIndexLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextIndexLabel',
     {
-      defaultMessage: 'The index the query was run against.',
+      defaultMessage: 'The indices the rule queries.',
     }
   );
 
@@ -92,7 +99,8 @@ export function getRuleType(
   const actionVariableContextSizeLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextSizeLabel',
     {
-      defaultMessage: 'The number of hits to retrieve for each query.',
+      defaultMessage:
+        'The number of documents to pass to the configured actions when the threshold condition is met.',
     }
   );
 
@@ -100,14 +108,14 @@ export function getRuleType(
     'xpack.stackAlerts.esQuery.actionVariableContextThresholdLabel',
     {
       defaultMessage:
-        "An array of values to use as the threshold. 'between' and 'notBetween' require two values.",
+        'An array of rule threshold values. For between and notBetween thresholds, there are two values.',
     }
   );
 
   const actionVariableContextThresholdComparatorLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextThresholdComparatorLabel',
     {
-      defaultMessage: 'A function to determine if the threshold was met.',
+      defaultMessage: 'The comparison function for the threshold.',
     }
   );
 
@@ -122,7 +130,7 @@ export function getRuleType(
     'xpack.stackAlerts.esQuery.actionVariableContextSearchConfigurationLabel',
     {
       defaultMessage:
-        'Serialized search source fields used to fetch the documents from Elasticsearch.',
+        'The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.',
     }
   );
 
@@ -133,6 +141,18 @@ export function getRuleType(
        the alert when the rule is created in Discover. Otherwise, navigate to the status page for the rule.`,
     }
   );
+
+  const alerts: IRuleTypeAlerts<StackAlert> = {
+    context: STACK_AAD_INDEX_NAME,
+    mappings: {
+      fieldMap: {
+        [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
+        [ALERT_EVALUATION_CONDITIONS]: { type: 'keyword', array: false, required: false },
+        [ALERT_EVALUATION_VALUE]: { type: 'keyword', array: false, required: false },
+      },
+    },
+    shouldWrite: true,
+  };
 
   return {
     id: ES_QUERY_ID,
@@ -187,5 +207,6 @@ export function getRuleType(
     },
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
+    alerts,
   };
 }

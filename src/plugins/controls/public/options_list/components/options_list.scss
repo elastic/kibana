@@ -1,117 +1,101 @@
-.optionsList__anchorOverride {
-  display:block;
-}
-
-.optionsList__popoverOverride {
+.optionsList--filterGroup {
   width: 100%;
-  height: 100%;
-}
+  height: $euiSizeXXL;
+  background-color: transparent;
 
-.optionsList__actions {
-  padding: $euiSizeS;
-  padding-bottom: 0;
-  border-bottom: $euiBorderThin;
-  border-color: darken($euiColorLightestShade, 2%);
-
-  .optionsList__actionsRow {
-    margin: ($euiSizeS / 2) 0 !important;
-
-    .optionsList__actionBarDivider {
-      height: $euiSize;
-      border-right: $euiBorderThin;
-    }
-  }
-}
-
-.optionsList__popoverTitle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.optionsList__filterInvalid {
-  color: $euiTextSubduedColor;
-  text-decoration: line-through;
-  margin-left: $euiSizeS;
-  font-weight: $euiFontWeightRegular;
-}
-
-.optionsList__existsFilter {
-  font-style: italic;
-}
-
-.optionsList__loadMore {
-  font-style: italic;
-}
-
-.optionsList__negateLabel {
-  font-weight: bold;
-  font-size: $euiSizeM;
-  color: $euiColorDanger;
-}
-
-.optionsList__actionBarFirstBadge {
-  margin-left: $euiSizeS;
-}
-
-.optionsList-control-ignored-selection-title {
-  padding-left: $euiSizeS;
-}
-
-.optionsList__selectionInvalid {
-  text-decoration: line-through;
-  color: $euiTextSubduedColor;
-}
-
-.optionsList--filterBtnWrapper {
-  height: 100%;
-}
-
-.optionsList--filterBtn {
-  .euiFilterButton__text-hasNotification {
-    flex-grow: 1;
-    justify-content: space-between;
-    width: 0;
-  }
-  &.optionsList--filterBtnPlaceholder {
-    .euiFilterButton__textShift {
-      color: $euiTextSubduedColor;
-    }
-  }
-}
-
-.optionsList--filterGroupSingle {
   box-shadow: none;
-  height: 100%;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-top-right-radius: $euiBorderRadius - 1px;
   border-bottom-right-radius: $euiBorderRadius - 1px;
-}
 
-.optionsList--filterGroup {
-  width: 100%;
-}
+  .optionsList--filterBtn {
+    border-radius: 0 !important;
+    height: $euiButtonHeight;
 
-.optionsList--hiddenEditorForm {
-  margin-left: $euiSizeXXL + $euiSizeM;
+    &.optionsList--filterBtnPlaceholder {
+      color: $euiTextSubduedColor;
+      font-weight: $euiFontWeightRegular;
+    }
+
+    .optionsList__filterInvalid {
+      color: $euiTextSubduedColor;
+      text-decoration: line-through;
+      margin-left: $euiSizeS;
+      font-weight: $euiFontWeightRegular;
+    }
+
+    .optionsList__negateLabel {
+      font-weight: bold;
+      font-size: $euiSizeM;
+      color: $euiColorDanger;
+    }
+
+    .euiFilterButton__text-hasNotification {
+      flex-grow: 1;
+      justify-content: space-between;
+      width: 0;
+    }
+  }
 }
 
 .optionsList--sortPopover {
   width: $euiSizeXL * 7;
 }
 
-.optionslist--loadingMoreGroupLabel {
-  text-align: center;
-  padding: $euiSizeM;
+.optionsList__existsFilter {
   font-style: italic;
-  height:  $euiSizeXXL !important;
 }
 
-.optionslist--endOfOptionsGroupLabel {
-  text-align: center;
-  font-size: $euiSizeM;
-  height:  auto !important;
-  color: $euiTextSubduedColor;
-  padding: $euiSizeM;
+.optionsList__popoverOverride {
+  @include euiBottomShadowMedium;
+  filter: none; // overwrite the default popover shadow
+  transform: translateY(-$euiSizeS) translateX(0); // prevent "slide in" animation on open/close
+}
+
+.optionsList__popover {
+  .optionsList__actions {
+    padding: $euiSizeS;
+    padding-bottom: 0;
+    border-bottom: $euiBorderThin;
+    border-color: darken($euiColorLightestShade, 2%);
+
+    .optionsList__sortButton {
+      box-shadow: inset 0 0 0 $euiBorderWidthThin $euiFormBorderColor;
+      background-color: $euiFormBackgroundColor;
+    }
+
+    .optionsList__actionsRow {
+      margin: ($euiSizeS / 2) 0 !important;
+
+      .optionsList__actionBarDivider {
+        height: $euiSize;
+        border-right: $euiBorderThin;
+      }
+    }
+  }
+
+  .optionsList-control-ignored-selection-title {
+    padding-left: $euiSizeS;
+  }
+
+  .optionsList__selectionInvalid {
+    text-decoration: line-through;
+    color: $euiTextSubduedColor;
+  }
+
+  .optionslist--loadingMoreGroupLabel {
+    text-align: center;
+    padding: $euiSizeM;
+    font-style: italic;
+    height:  $euiSizeXXL !important;
+  }
+
+  .optionslist--endOfOptionsGroupLabel {
+    text-align: center;
+    font-size: $euiSizeM;
+    height:  auto !important;
+    color: $euiTextSubduedColor;
+    padding: $euiSizeM;
+  }
 }

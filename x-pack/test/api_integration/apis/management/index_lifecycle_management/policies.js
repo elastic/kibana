@@ -9,9 +9,11 @@ import expect from '@kbn/expect';
 
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 import { registerHelpers as registerIndexHelpers } from './indices.helpers';
-import { getPolicyPayload } from './fixtures';
+import { registerSnapshotPoliciesHelpers } from './snapshot_policies.helpers';
+import { registerSnapshotRepositoriesHelpers } from './snapshot_repositories.helpers';
+
+import { getPolicyPayload, getPolicyPayloadWithSearchableSnapshots } from './fixtures';
 import { initElasticsearchHelpers, getPolicyNames } from './lib';
-import { DEFAULT_POLICY_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -32,36 +34,22 @@ export default function ({ getService }) {
 
   const { addPolicyToIndex } = registerIndexHelpers({ supertest });
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/114030
-  describe.skip('policies', () => {
+  const { createSnapshotPolicy, cleanupPolicies: cleanupSnapshotPolicies } =
+    registerSnapshotPoliciesHelpers(getService);
+  const { createSnapshotRepository, cleanupRepositories } =
+    registerSnapshotRepositoriesHelpers(getService);
+
+  describe('policies', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
 
     describe('list', () => {
-      it('should have a default policy to manage the Watcher history indices', async () => {
-        const { body } = await loadPolicies().expect(200);
-        const { version, name, policy } = body.find(
-          (policy) => policy.name === DEFAULT_POLICY_NAME
-        );
-
-        expect(version).to.eql(1);
-        expect(name).to.eql(DEFAULT_POLICY_NAME);
-        expect(policy.phases).to.eql({
-          delete: {
-            min_age: '7d',
-            actions: {
-              delete: {
-                delete_searchable_snapshot: true,
-              },
-            },
-          },
-        });
-      });
-
       it('should add the indices linked to the policies', async () => {
         // Create a policy
         const policy = getPolicyPayload('link-test-policy');
         const { name: policyName } = policy;
-        await createPolicy(policy);
+
+        const { statusCode } = await createPolicy(policy);
+        expect(statusCode).to.eql(200);
 
         // Create a new index
         const indexName = await createIndex();
@@ -105,6 +93,46 @@ export default function ({ getService }) {
     describe('create', () => {
       it('should create a lifecycle policy', async () => {
         const policy = getPolicyPayload('create-test-policy');
+        const { name } = policy;
+
+        // Load current policies
+        const { body: bodyFirstLoad } = await loadPolicies();
+        expect(getPolicyNames(bodyFirstLoad)).not.to.contain(name);
+
+        // Create new policy
+        await createPolicy(policy).expect(200);
+
+        // Make sure the new policy is returned
+        const { body: bodySecondLoad } = await loadPolicies();
+        expect(getPolicyNames(bodySecondLoad)).to.contain(name);
+      });
+    });
+
+    describe('searchable snapshots', function () {
+      this.tags(['skipCloud']); // file system repositories are not supported in cloud
+
+      before(async () => {
+        try {
+          await createSnapshotRepository('backing_repo'); // This corresponds to the name set in the ILM policy
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Setup error] Error creating repository');
+          throw err;
+        }
+
+        try {
+          await createSnapshotPolicy('policy', 'backing_repo'); // Policy name corresponds to the policy name specified in the ILM policy
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Setup error] Error creating SLM policy');
+          throw err;
+        }
+      });
+
+      after(async () => Promise.all([cleanupRepositories(), cleanupSnapshotPolicies()]));
+
+      it('should create a lifecycle policy with searchable snapshot action', async () => {
+        const policy = getPolicyPayloadWithSearchableSnapshots('create-searchable-snapshot-policy');
         const { name } = policy;
 
         // Load current policies

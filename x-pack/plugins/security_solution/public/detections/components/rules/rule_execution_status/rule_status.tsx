@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 
-import type { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';

@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 
 import { SearchRow } from '.';
 
@@ -77,7 +77,7 @@ describe('SearchRow', () => {
         </ThemeProvider>
       );
 
-      wrapper.find('[data-test-subj="only-favorites-toggle"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="only-favorites-toggle"]').first().simulate('click');
 
       expect(onToggleOnlyFavorites).toHaveBeenCalled();
     });

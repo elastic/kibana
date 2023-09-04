@@ -157,6 +157,26 @@
       },
       {
         "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.getDefaultDSLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultDSLQuery",
+        "description": [
+          "\nDefault DSL query which matches all the results"
+        ],
+        "signature": [
+          "() => ",
+          "QueryDslQueryContainer"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/get_default_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
         "id": "def-common.getSafeAggregationName",
         "type": "Function",
         "tags": [],
@@ -214,7 +234,25 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.SearchQueryLanguage",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchQueryLanguage",
+        "description": [
+          "\nType for SearchQueryLanguage"
+        ],
+        "signature": [
+          "\"kuery\" | \"lucene\""
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "@kbn/ml-query-utils",
@@ -233,6 +271,23 @@
           "; }"
         ],
         "path": "x-pack/packages/ml/query_utils/src/es_client_total_hits_relation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.SEARCH_QUERY_LANGUAGE",
+        "type": "Object",
+        "tags": [],
+        "label": "SEARCH_QUERY_LANGUAGE",
+        "description": [
+          "\nConstant for kuery and lucene string"
+        ],
+        "signature": [
+          "{ readonly KUERY: \"kuery\"; readonly LUCENE: \"lucene\"; }"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

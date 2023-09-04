@@ -309,9 +309,13 @@ export class MlServerPlugin
     this.savedObjectsStart = coreStart.savedObjects;
     this.dataViews = plugins.dataViews;
 
-    this.mlLicense.setup(plugins.licensing.license$, (mlLicense: MlLicense) => {
+    this.mlLicense.setup(plugins.licensing.license$, async (mlLicense: MlLicense) => {
       if (mlLicense.isMlEnabled() === false || mlLicense.isFullLicense() === false) {
-        this.savedObjectsSyncService.unscheduleSyncTask(plugins.taskManager);
+        try {
+          await this.savedObjectsSyncService.unscheduleSyncTask(plugins.taskManager);
+        } catch (e) {
+          this.log.debug(`Error unscheduling saved objects sync task`, e);
+        }
         return;
       }
 

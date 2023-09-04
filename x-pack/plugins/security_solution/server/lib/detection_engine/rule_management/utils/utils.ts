@@ -14,12 +14,15 @@ import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 
-import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
+import type {
+  FindRulesResponse,
+  RuleToImport,
+} from '../../../../../common/api/detection_engine/rule_management';
 import type {
   AlertSuppression,
   RuleResponse,
   AlertSuppressionCamel,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
@@ -110,14 +113,7 @@ export const transformRuleToExportableFormat = (
   return exportedRule;
 };
 
-export const transformFindAlerts = (
-  ruleFindResults: FindResult<RuleParams>
-): {
-  page: number;
-  perPage: number;
-  total: number;
-  data: Array<Partial<RuleResponse>>;
-} | null => {
+export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): FindRulesResponse => {
   return {
     page: ruleFindResults.page,
     perPage: ruleFindResults.perPage,

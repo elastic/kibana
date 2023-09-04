@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { UserActionFindResponse } from '@kbn/cases-plugin/common/api';
-import { getCaseFindUserActionsUrl } from '@kbn/cases-plugin/common/api';
-import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '@kbn/cases-plugin/common/constants';
+import {
+  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  getCaseFindUserActionsUrl,
+} from '@kbn/cases-plugin/common';
+import type { UserActionFindResponse } from '@kbn/cases-plugin/common';
 import { ELASTIC_SECURITY_RULE_ID } from '../../../../common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { DEFAULT_ALERTS_INDEX, DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
@@ -34,6 +36,9 @@ export const addAlertsToCase = ({
     method: 'GET',
     url: DETECTION_ENGINE_RULES_URL,
     qs: { rule_id: ELASTIC_SECURITY_RULE_ID },
+    headers: {
+      'elastic-api-version': '2023-10-31',
+    },
   }).then((ruleResponse) => {
     const endpointRuleDocId = ruleResponse.body.id;
 

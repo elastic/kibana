@@ -75,8 +75,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
             title={i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.connectorConnected',
               {
-                defaultMessage:
-                  'Your connector {name} has connected to Enterprise Search successfully.',
+                defaultMessage: 'Your connector {name} has connected to Search successfully.',
                 values: { name: nativeConnector.name },
               }
             )}

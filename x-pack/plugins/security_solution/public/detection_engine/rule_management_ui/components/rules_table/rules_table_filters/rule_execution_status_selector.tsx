@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
+import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring/model/execution_status';
 import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
 import { RuleStatusBadge } from '../../../../../detections/components/rules/rule_execution_status/rule_status_badge';
 
@@ -77,6 +77,7 @@ const RuleExecutionStatusSelectorComponent = ({
       isSelected={isExecutionStatusPopoverOpen}
       hasActiveFilters={selectedStatus !== undefined}
       numActiveFilters={selectedStatus !== undefined ? 1 : 0}
+      data-test-subj="executionStatusFilterButton"
     >
       {i18n.COLUMN_LAST_RESPONSE}
     </EuiFilterButton>
@@ -108,11 +109,13 @@ const RuleExecutionStatusSelectorComponent = ({
               css={`
                 margin-top: 4px; // aligns the badge within the option
               `}
+              data-test-subj="executionStatusFilterOption"
             >
               <RuleStatusBadge status={status} showTooltip={false} />
             </div>
           );
         }}
+        data-test-subj="executionStatusFilterSelectableList"
       >
         {(list) => (
           <div

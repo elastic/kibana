@@ -21,7 +21,9 @@ export interface CloudStart {
    */
   cloudId?: string;
   /**
-   * The full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud.
+   * This is the path to the Cloud deployment management page for the deployment to which the Kibana instance belongs. The value is already prepended with `baseUrl`.
+   *
+   * @example `{baseUrl}/deployments/bfdad4ef99a24212a06d387593686d63`
    */
   deploymentUrl?: string;
   /**
@@ -37,6 +39,18 @@ export interface CloudStart {
    */
   organizationUrl?: string;
   /**
+   * The full URL to the performance page on Elastic Cloud. Undefined if not running on Cloud.
+   */
+  performanceUrl?: string;
+  /**
+   * The full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud.
+   */
+  usersAndRolesUrl?: string;
+  /**
+   * The full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless.
+   */
+  projectsUrl?: string;
+  /**
    * The full URL to the elasticsearch cluster.
    */
   elasticsearchUrl?: string;
@@ -44,6 +58,21 @@ export interface CloudStart {
    * The full URL to the Kibana deployment.
    */
   kibanaUrl?: string;
+  /**
+   * `true` when running on Serverless Elastic Cloud
+   * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
+   */
+  isServerlessEnabled: boolean;
+  /**
+   * Serverless configuration
+   */
+  serverless: {
+    /**
+     * The serverless projectId.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectId?: string;
+  };
 }
 
 export interface CloudSetup {
@@ -57,6 +86,8 @@ export interface CloudSetup {
   deploymentId?: string;
   /**
    * This value is the same as `baseUrl` on ESS but can be customized on ECE.
+   *
+   * @example `cloud.elastic.co`
    */
   cname?: string;
   /**
@@ -65,18 +96,30 @@ export interface CloudSetup {
   baseUrl?: string;
   /**
    * The full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud.
+   *
+   * @example `{baseUrl}/deployments/bfdad4ef99a24212a06d387593686d63`
    */
   deploymentUrl?: string;
   /**
-   * The full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud.
+   * The full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless.
+   */
+  projectsUrl?: string;
+  /**
+   * This is the path to the Cloud User Profile page. The value is already prepended with `baseUrl`.
+   *
+   * @example `{baseUrl}/user/settings/`
    */
   profileUrl?: string;
   /**
-   * The full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud.
+   * This is the path to the Cloud Account and Billing page. The value is already prepended with `baseUrl`.
+   *
+   * @example `{baseUrl}/account/`
    */
   organizationUrl?: string;
   /**
    * This is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.
+   *
+   * @example `{deploymentUrl}/elasticsearch/snapshots`
    */
   snapshotsUrl?: string;
   /**
@@ -100,7 +143,9 @@ export interface CloudSetup {
    */
   isCloudEnabled: boolean;
   /**
-   * When the Cloud Trial ends/ended for the organization that owns this deployment. Only available when running on Elastic Cloud.
+   * The end date for the Elastic Cloud trial. Only available on Elastic Cloud.
+   *
+   * @example `2020-10-14T10:40:22Z`
    */
   trialEndDate?: Date;
   /**
@@ -109,7 +154,23 @@ export interface CloudSetup {
   isElasticStaffOwned?: boolean;
   /**
    * Registers CloudServiceProviders so start's `CloudContextProvider` hooks them.
+   *
    * @param contextProvider The React component from the Service Provider.
    */
   registerCloudService: (contextProvider: FC) => void;
+  /**
+   * `true` when running on Serverless Elastic Cloud
+   * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
+   */
+  isServerlessEnabled: boolean;
+  /**
+   * Serverless configuration
+   */
+  serverless: {
+    /**
+     * The serverless projectId.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectId?: string;
+  };
 }

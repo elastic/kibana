@@ -13,7 +13,7 @@
  */
 
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { RuleExecutionStatus } from '../../../../../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../../../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import {
   formatExecutionEventResponse,

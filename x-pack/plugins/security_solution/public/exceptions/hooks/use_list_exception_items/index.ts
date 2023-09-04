@@ -45,7 +45,7 @@ export const useListExceptionItems = ({
 
   const [exceptions, setExceptions] = useState<ExceptionListItemSchema[]>([]);
   const [exceptionListReferences, setExceptionListReferences] = useState<RuleReferences>({});
-  const [pagination, setPagination] = useState<Pagination>({
+  const [pagination, setPagination] = useState<Pagination & { pageSize: number }>({
     pageIndex: 0,
     pageSize: 0,
     totalItemCount: 0,

@@ -30,7 +30,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'confluence_cloud.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['confluence', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.confluence.name', {
@@ -39,8 +39,19 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'confluence',
   },
   {
-    iconPath: 'jira_cloud.svg',
+    iconPath: 'dropbox.svg',
     isBeta: true,
+    isNative: true,
+    isTechPreview: false,
+    keywords: ['dropbox', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.dropbox.name', {
+      defaultMessage: 'Dropbox',
+    }),
+    serviceType: 'dropbox',
+  },
+  {
+    iconPath: 'jira_cloud.svg',
+    isBeta: false,
     isNative: true,
     keywords: ['jira', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.jira.name', {
@@ -49,9 +60,19 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'jira',
   },
   {
+    iconPath: 'github.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['github', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.github.name', {
+      defaultMessage: 'GitHub & GitHub Enterprise Server',
+    }),
+    serviceType: 'github',
+  },
+  {
     iconPath: 'google_cloud_storage.svg',
     isBeta: true,
-    isNative: true,
+    isNative: false,
     keywords: ['google', 'cloud', 'blob', 's3', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.googleCloud.name', {
       defaultMessage: 'Google Cloud Storage',
@@ -100,7 +121,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'network_drive.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['network', 'drive', 'file', 'directory', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.networkDrive.name', {
@@ -119,6 +140,28 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'postgresql',
   },
   {
+    iconPath: 'salesforce.svg',
+    isBeta: true,
+    isNative: false,
+    isTechPreview: false,
+    keywords: ['salesforce', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.salesforce.name', {
+      defaultMessage: 'Salesforce',
+    }),
+    serviceType: 'salesforce',
+  },
+  {
+    iconPath: 'servicenow.svg',
+    isBeta: true,
+    isNative: true,
+    isTechPreview: false,
+    keywords: ['servicenow', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.serviceNow.name', {
+      defaultMessage: 'ServiceNow',
+    }),
+    serviceType: 'servicenow',
+  },
+  {
     iconPath: 'sharepoint_online.svg',
     isBeta: false,
     isNative: true,
@@ -130,26 +173,15 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'sharepoint_online',
   },
   {
-    iconPath: 'dropbox.svg',
-    isBeta: true,
+    iconPath: 'gmail.svg',
+    isBeta: false,
     isNative: false,
-    isTechPreview: false,
-    keywords: ['dropbox', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.dropbox.name', {
-      defaultMessage: 'Dropbox',
+    isTechPreview: true,
+    keywords: ['google', 'gmail', 'connector', 'mail'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.gmail.name', {
+      defaultMessage: 'Gmail',
     }),
-    serviceType: 'dropbox',
-  },
-  {
-    iconPath: 'github.svg',
-    isBeta: true,
-    isNative: false,
-    isTechPreview: false,
-    keywords: ['github', 'cloud', 'server', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.github.name', {
-      defaultMessage: 'GitHub',
-    }),
-    serviceType: 'github',
+    serviceType: 'gmail',
   },
   {
     iconPath: 'oracle.svg',
@@ -162,6 +194,16 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'oracle',
   },
   {
+    iconPath: 'onedrive.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['network', 'drive', 'file', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.oneDrive.name', {
+      defaultMessage: 'OneDrive',
+    }),
+    serviceType: 'onedrive',
+  },
+  {
     iconPath: 's3.svg',
     isBeta: true,
     isNative: false,
@@ -170,6 +212,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'S3',
     }),
     serviceType: 's3',
+  },
+  {
+    iconPath: 'slack.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['slack', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.slack.name', {
+      defaultMessage: 'Slack',
+    }),
+    serviceType: 'slack',
   },
   {
     iconPath: 'sharepoint_server.svg',

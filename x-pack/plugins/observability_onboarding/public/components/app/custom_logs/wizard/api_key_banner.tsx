@@ -21,7 +21,7 @@ import React from 'react';
 import { APIReturnType } from '../../../../services/rest/create_call_api';
 
 type ApiKeyPayload =
-  APIReturnType<'POST /internal/observability_onboarding/custom_logs/save'>;
+  APIReturnType<'POST /internal/observability_onboarding/logs/flow'>;
 
 export type HasPrivileges = boolean;
 
@@ -54,6 +54,7 @@ export function ApiKeyBanner({
         </EuiFlexGroup>
       }
       color="primary"
+      data-test-subj="obltOnboardingLogsCreatingApiKey"
     />
   );
 
@@ -67,6 +68,7 @@ export function ApiKeyBanner({
       )}
       color="success"
       iconType="check"
+      data-test-subj="obltOnboardingLogsApiKeyCreated"
     >
       <p>
         {i18n.translate(
@@ -123,6 +125,7 @@ export function ApiKeyBanner({
       )}
       color="danger"
       iconType="error"
+      data-test-subj="obltOnboardingLogsApiKeyCreationFailed"
     >
       <p>
         {i18n.translate(
@@ -148,6 +151,7 @@ export function ApiKeyBanner({
       )}
       color="warning"
       iconType="warning"
+      data-test-subj="obltOnboardingLogsApiKeyCreationNoPrivileges"
     >
       <p>
         {i18n.translate(

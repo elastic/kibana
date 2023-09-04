@@ -30,6 +30,9 @@ export const PACKAGE_TEMPLATE_SUFFIX = '@package';
 export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
 
 export const DATASET_VAR_NAME = 'data_stream.dataset';
+
+export const CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION = '2.9.0';
+
 /*
  Package rules:
 |               | autoUpdatePackages |

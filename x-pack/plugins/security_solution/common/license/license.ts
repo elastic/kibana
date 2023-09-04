@@ -44,6 +44,12 @@ export class LicenseService {
       : '';
   }
 
+  public getLicenseUID() {
+    return this.licenseInformation && this.licenseInformation.uid
+      ? this.licenseInformation.uid
+      : '';
+  }
+
   public isAtLeast(level: LicenseType): boolean {
     return isAtLeast(this.licenseInformation, level);
   }

@@ -14,12 +14,12 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   getHttp,
   getTypes,
-  getUISettings,
   getApplication,
   getEmbeddable,
   getDocLinks,
   getTheme,
-  getSavedObjectsManagement,
+  getContentManagement,
+  getUISettings,
 } from '../services';
 import type { BaseVisType } from '../vis_types';
 
@@ -79,10 +79,9 @@ export function showNewVisModal({
             outsideVisualizeApp={outsideVisualizeApp}
             editorParams={editorParams}
             visTypesRegistry={getTypes()}
-            addBasePath={getHttp().basePath.prepend}
+            contentClient={getContentManagement().client}
             uiSettings={getUISettings()}
-            http={getHttp()}
-            savedObjectsManagement={getSavedObjectsManagement()}
+            addBasePath={getHttp().basePath.prepend}
             application={getApplication()}
             docLinks={getDocLinks()}
             showAggsSelection={showAggsSelection}

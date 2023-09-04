@@ -10,9 +10,9 @@ import React from 'react';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
+import { FeatureTableCell } from './feature_table_cell';
 import { createFeature } from '../../../../__fixtures__/kibana_features';
 import { SecuredFeature } from '../../../../model';
-import { FeatureTableCell } from './feature_table_cell';
 
 describe('FeatureTableCell', () => {
   it('renders the feature name', () => {

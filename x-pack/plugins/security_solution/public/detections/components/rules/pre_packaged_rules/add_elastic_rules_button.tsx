@@ -17,12 +17,14 @@ import { usePrebuiltRulesStatus } from '../../../../detection_engine/rule_manage
 interface AddElasticRulesButtonProps {
   'data-test-subj'?: string;
   fill?: boolean;
+  isDisabled: boolean;
   showBadge?: boolean;
 }
 
 export const AddElasticRulesButton = ({
   'data-test-subj': dataTestSubj = 'addElasticRulesButton',
   fill,
+  isDisabled,
   showBadge = true,
 }: AddElasticRulesButtonProps) => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
@@ -43,6 +45,7 @@ export const AddElasticRulesButton = ({
       color={'primary'}
       onClick={onClickLink}
       data-test-subj={dataTestSubj}
+      isDisabled={isDisabled}
     >
       {i18n.ADD_ELASTIC_RULES}
       {newRulesCount > 0 && showBadge && (

@@ -9,7 +9,7 @@ import React from 'react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiScreenReaderOnly,
   EuiPanel,
   EuiSpacer,
@@ -59,7 +59,7 @@ export const EnterpriseSearchOverview: React.FC<any> = ({ metrics, stats, ...res
         </EuiPanel>
         <EuiSpacer size="m" />
 
-        <EuiPageContent>
+        <EuiPageSection>
           <EuiScreenReaderOnly>
             <h1>
               <FormattedMessage
@@ -78,11 +78,11 @@ export const EnterpriseSearchOverview: React.FC<any> = ({ metrics, stats, ...res
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-        </EuiPageContent>
+        </EuiPageSection>
 
         <EuiSpacer />
 
-        <EuiPageContent>
+        <EuiPageSection>
           <EuiScreenReaderOnly>
             <h1>
               <FormattedMessage
@@ -101,11 +101,11 @@ export const EnterpriseSearchOverview: React.FC<any> = ({ metrics, stats, ...res
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-        </EuiPageContent>
+        </EuiPageSection>
 
         <EuiSpacer />
 
-        <EuiPageContent>
+        <EuiPageSection>
           <EuiScreenReaderOnly>
             <h1>
               <FormattedMessage
@@ -122,11 +122,11 @@ export const EnterpriseSearchOverview: React.FC<any> = ({ metrics, stats, ...res
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-        </EuiPageContent>
+        </EuiPageSection>
 
         <EuiSpacer />
 
-        <EuiPageContent>
+        <EuiPageSection>
           <EuiScreenReaderOnly>
             <h1>
               <FormattedMessage
@@ -143,7 +143,7 @@ export const EnterpriseSearchOverview: React.FC<any> = ({ metrics, stats, ...res
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-        </EuiPageContent>
+        </EuiPageSection>
       </EuiPageBody>
     </EuiPage>
   );

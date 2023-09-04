@@ -7,8 +7,8 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { Query } from '@kbn/data-plugin/common/query';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { RandomSamplerOption } from '../constants/random_sampler';
-import type { SearchQueryLanguage } from './combined_query';
 
 import type { DATA_VISUALIZER_INDEX_VIEWER } from '../constants/index_data_visualizer_viewer';
 

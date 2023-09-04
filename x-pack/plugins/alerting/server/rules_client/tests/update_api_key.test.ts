@@ -355,7 +355,7 @@ describe('updateApiKey()', () => {
     test('ensures user is authorised to updateApiKey this type of alert under the consumer', async () => {
       await rulesClient.updateApiKey({ id: '1' });
 
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',

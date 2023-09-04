@@ -27,14 +27,24 @@ import {
   EuiSpacer,
   EuiLink,
   EuiComboBox,
+  EuiBetaBadge,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { css } from '@emotion/react/dist/emotion-react.cjs';
+
+import { ExperimentalFeaturesService } from '../../../../../../services';
+
+import { outputType } from '../../../../../../../common/constants';
 
 import { MultiRowInput } from '../multi_row_input';
 import type { Output, FleetProxy } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 import { LogstashInstructions } from '../logstash_instructions';
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+
+import { OutputFormKafkaSection } from './output_form_kafka';
 
 import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placeholder';
 import { useOutputForm } from './use_output_form';
@@ -47,11 +57,6 @@ export interface EditOutputFlyoutProps {
   proxies: FleetProxy[];
 }
 
-const OUTPUT_TYPE_OPTIONS = [
-  { value: 'elasticsearch', text: 'Elasticsearch' },
-  { value: 'logstash', text: 'Logstash' },
-];
-
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
   onClose,
   output,
@@ -61,17 +66,224 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const form = useOutputForm(onClose, output);
   const inputs = form.inputs;
   const { docLinks } = useStartServices();
+  const { euiTheme } = useEuiTheme();
 
   const proxiesOptions = useMemo(
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
     [proxies]
   );
 
-  const isLogstashOutput = inputs.typeInput.value === 'logstash';
-  const isESOutput = inputs.typeInput.value === 'elasticsearch';
+  const { kafkaOutput: isKafkaOutputEnabled } = ExperimentalFeaturesService.get();
 
-  const showLogstashNeedEncryptedSavedObjectCallout =
-    isLogstashOutput && !form.hasEncryptedSavedObjectConfigured;
+  const OUTPUT_TYPE_OPTIONS = [
+    { value: outputType.Elasticsearch, text: 'Elasticsearch' },
+    { value: outputType.Logstash, text: 'Logstash' },
+    ...(isKafkaOutputEnabled ? [{ value: outputType.Kafka, text: 'Kafka' }] : []),
+  ];
+
+  const renderLogstashSection = () => {
+    return (
+      <>
+        {!form.hasEncryptedSavedObjectConfigured && (
+          <>
+            <EuiSpacer size="m" />
+            <EncryptionKeyRequiredCallout />
+          </>
+        )}
+        <EuiSpacer size="m" />
+        <LogstashInstructions />
+        <EuiSpacer size="m" />
+        <MultiRowInput
+          placeholder={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.logstashHostsInputPlaceholder',
+            {
+              defaultMessage: 'Specify host',
+            }
+          )}
+          sortable={false}
+          helpText={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.logstashHostsInputDescription"
+              defaultMessage="Specify the addresses that your agents will use to connect to Logstash. {guideLink}."
+              values={{
+                guideLink: (
+                  <EuiLink href={docLinks.links.fleet.logstashSettings} target="_blank" external>
+                    <FormattedMessage
+                      id="xpack.fleet.settings.fleetSettingsLink"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+          label={i18n.translate('xpack.fleet.settings.editOutputFlyout.logstashHostsInputLabel', {
+            defaultMessage: 'Logstash hosts',
+          })}
+          {...inputs.logstashHostsInput.props}
+        />
+        <MultiRowInput
+          placeholder={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
+            {
+              defaultMessage: 'Specify certificate authority',
+            }
+          )}
+          label={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
+            {
+              defaultMessage: 'Server SSL certificate authorities (optional)',
+            }
+          )}
+          multiline={true}
+          sortable={false}
+          {...inputs.sslCertificateAuthoritiesInput.props}
+        />
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.sslCertificateInputLabel"
+              defaultMessage="Client SSL certificate"
+            />
+          }
+          {...inputs.sslCertificateInput.formRowProps}
+        >
+          <EuiTextArea
+            fullWidth
+            rows={5}
+            {...inputs.sslCertificateInput.props}
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.sslCertificateInputPlaceholder',
+              {
+                defaultMessage: 'Specify ssl certificate',
+              }
+            )}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
+              defaultMessage="Client SSL certificate key"
+            />
+          }
+          {...inputs.sslKeyInput.formRowProps}
+        >
+          <EuiTextArea
+            fullWidth
+            rows={5}
+            {...inputs.sslKeyInput.props}
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+              {
+                defaultMessage: 'Specify certificate key',
+              }
+            )}
+          />
+        </EuiFormRow>
+      </>
+    );
+  };
+
+  const renderElasticsearchSection = () => {
+    return (
+      <>
+        <MultiRowInput
+          data-test-subj="settingsOutputsFlyout.hostUrlInput"
+          label={i18n.translate('xpack.fleet.settings.editOutputFlyout.esHostsInputLabel', {
+            defaultMessage: 'Hosts',
+          })}
+          placeholder={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder',
+            {
+              defaultMessage: 'Specify host URL',
+            }
+          )}
+          {...inputs.elasticsearchUrlInput.props}
+          isUrl
+        />
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.caTrustedFingerprintInputLabel"
+              defaultMessage="Elasticsearch CA trusted fingerprint (optional)"
+            />
+          }
+          {...inputs.caTrustedFingerprintInput.formRowProps}
+        >
+          <EuiFieldText
+            fullWidth
+            {...inputs.caTrustedFingerprintInput.props}
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.caTrustedFingerprintInputPlaceholder',
+              {
+                defaultMessage: 'Specify Elasticsearch CA trusted fingerprint',
+              }
+            )}
+          />
+        </EuiFormRow>
+      </>
+    );
+  };
+
+  const renderKafkaSection = () => {
+    if (isKafkaOutputEnabled) {
+      return <OutputFormKafkaSection inputs={inputs} />;
+    }
+    return null;
+  };
+
+  const renderOutputTypeSection = (type: string) => {
+    switch (type) {
+      case outputType.Logstash:
+        return renderLogstashSection();
+      case outputType.Kafka:
+        return renderKafkaSection();
+      case outputType.Elasticsearch:
+      default:
+        return renderElasticsearchSection();
+    }
+  };
+
+  const renderTypeSpecificWarning = () => {
+    const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
+    const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
+    if (!isKafkaOutput && !isESOutput) {
+      return null;
+    }
+
+    const generateWarningMessage = () => {
+      switch (inputs.typeInput.value) {
+        case outputType.Kafka:
+          return i18n.translate('xpack.fleet.settings.editOutputFlyout.kafkaOutputTypeCallout', {
+            defaultMessage:
+              'Kafka output is currently not supported on Agents using the Elastic Defend integration.',
+          });
+        default:
+        case outputType.Elasticsearch:
+          return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {
+            defaultMessage:
+              'This output type currently does not support connectivity to a remote Elasticsearch cluster.',
+          });
+      }
+    };
+    return (
+      <>
+        <EuiSpacer size="xs" />
+        <EuiCallOut
+          data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
+          title={generateWarningMessage()}
+          iconType="alert"
+          color="warning"
+          size="s"
+          heading="p"
+        />
+      </>
+    );
+  };
 
   return (
     <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
@@ -139,10 +351,26 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           <EuiFormRow
             fullWidth
             label={
-              <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.typeInputLabel"
-                defaultMessage="Type"
-              />
+              <>
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.typeInputLabel"
+                  defaultMessage="Type"
+                />
+                {inputs.typeInput.value === outputType.Kafka && (
+                  <EuiBetaBadge
+                    label={i18n.translate('xpack.fleet.settings.betaBadgeLabel', {
+                      defaultMessage: 'Beta',
+                    })}
+                    size="s"
+                    css={css`
+                      margin-left: ${euiTheme.size.s};
+                      color: ${euiTheme.colors.text};
+                      vertical-align: middle;
+                      margin-bottom: ${euiTheme.size.xxs};
+                    `}
+                  />
+                )}
+              </>
             }
           >
             <>
@@ -158,179 +386,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   }
                 )}
               />
-              {isESOutput && (
-                <>
-                  <EuiSpacer size="xs" />
-                  <EuiCallOut
-                    title={i18n.translate(
-                      'xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout',
-                      {
-                        defaultMessage:
-                          'This output type currently does not support connectivity to a remote Elasticsearch cluster.',
-                      }
-                    )}
-                    iconType="alert"
-                    color="warning"
-                    size="s"
-                    heading="p"
-                  />
-                </>
-              )}
+              {renderTypeSpecificWarning()}
             </>
           </EuiFormRow>
-          {showLogstashNeedEncryptedSavedObjectCallout && (
-            <>
-              <EuiSpacer size="m" />
-              <EncryptionKeyRequiredCallout />
-            </>
-          )}
-          {isLogstashOutput && (
-            <>
-              <EuiSpacer size="m" />
-              <LogstashInstructions />
-              <EuiSpacer size="m" />
-            </>
-          )}
-          {isESOutput && (
-            <MultiRowInput
-              data-test-subj="settingsOutputsFlyout.hostUrlInput"
-              label={i18n.translate('xpack.fleet.settings.editOutputFlyout.esHostsInputLabel', {
-                defaultMessage: 'Hosts',
-              })}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder',
-                {
-                  defaultMessage: 'Specify host URL',
-                }
-              )}
-              {...inputs.elasticsearchUrlInput.props}
-              isUrl
-            />
-          )}
-          {isLogstashOutput && (
-            <MultiRowInput
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.logstashHostsInputPlaceholder',
-                {
-                  defaultMessage: 'Specify host',
-                }
-              )}
-              sortable={false}
-              helpText={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.logstashHostsInputDescription"
-                  defaultMessage="Specify the addresses that your agents will use to connect to Logstash. {guideLink}."
-                  values={{
-                    guideLink: (
-                      <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>
-                        <FormattedMessage
-                          id="xpack.fleet.settings.fleetSettingsLink"
-                          defaultMessage="Learn more"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
-              label={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.logstashHostsInputLabel',
-                {
-                  defaultMessage: 'Logstash hosts',
-                }
-              )}
-              {...inputs.logstashHostsInput.props}
-            />
-          )}
-          {isESOutput && (
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.caTrustedFingerprintInputLabel"
-                  defaultMessage="Elasticsearch CA trusted fingerprint (optional)"
-                />
-              }
-              {...inputs.caTrustedFingerprintInput.formRowProps}
-            >
-              <EuiFieldText
-                fullWidth
-                {...inputs.caTrustedFingerprintInput.props}
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.editOutputFlyout.caTrustedFingerprintInputPlaceholder',
-                  {
-                    defaultMessage: 'Specify Elasticsearch CA trusted fingerprint',
-                  }
-                )}
-              />
-            </EuiFormRow>
-          )}
-          {isLogstashOutput && (
-            <MultiRowInput
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
-                {
-                  defaultMessage: 'Specify certificate authority',
-                }
-              )}
-              label={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
-                {
-                  defaultMessage: 'Server SSL certificate authorities (optional)',
-                }
-              )}
-              multiline={true}
-              sortable={false}
-              {...inputs.sslCertificateAuthoritiesInput.props}
-            />
-          )}
-          {isLogstashOutput && (
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.sslCertificateInputLabel"
-                  defaultMessage="Client SSL certificate"
-                />
-              }
-              {...inputs.sslCertificateInput.formRowProps}
-            >
-              <EuiTextArea
-                fullWidth
-                rows={5}
-                {...inputs.sslCertificateInput.props}
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.editOutputFlyout.sslCertificateInputPlaceholder',
-                  {
-                    defaultMessage: 'Specify ssl certificate',
-                  }
-                )}
-              />
-            </EuiFormRow>
-          )}
-          {isLogstashOutput && (
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
-                  defaultMessage="Client SSL certificate key"
-                />
-              }
-              {...inputs.sslKeyInput.formRowProps}
-            >
-              <EuiTextArea
-                fullWidth
-                rows={5}
-                {...inputs.sslKeyInput.props}
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
-                  {
-                    defaultMessage: 'Specify certificate key',
-                  }
-                )}
-              />
-            </EuiFormRow>
-          )}
+
+          {renderOutputTypeSection(inputs.typeInput.value)}
+
           <EuiFormRow
             fullWidth
             label={

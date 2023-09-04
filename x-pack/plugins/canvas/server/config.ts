@@ -8,17 +8,5 @@
 import { schema } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
-  enabled: schema.conditional(
-    schema.contextRef('dev'),
-    true,
-    schema.boolean({ defaultValue: true }),
-    schema.boolean({
-      validate: (rawValue) => {
-        if (rawValue === false) {
-          return 'Canvas can only be disabled in development mode';
-        }
-      },
-      defaultValue: true,
-    })
-  ),
+  enabled: schema.boolean({ defaultValue: true }),
 });

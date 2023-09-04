@@ -7,7 +7,6 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
@@ -19,7 +18,7 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Ecommerce Dashboard with TSVB Gauge only', async ({ page, log }) => {
+  .step('Go to Ecommerce Dashboard with TSVB Gauge only', async ({ page, kibanaPage }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-TSVB-Gauge-Only-Dashboard'));
-    await waitForVisualizations(page, log, 1);
+    await kibanaPage.waitForVisualizations(1);
   });

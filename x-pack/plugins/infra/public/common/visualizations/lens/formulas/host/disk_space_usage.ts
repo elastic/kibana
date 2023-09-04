@@ -5,30 +5,15 @@
  * 2.0.
  */
 
-import type { LensChartConfig, LensLineChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const diskSpaceUsageLineChart: LensLineChartConfig = {
-  extraVisualizationState: {
-    yLeftExtent: {
-      mode: 'custom',
-      lowerBound: 0,
-      upperBound: 1,
+export const diskSpaceUsage: FormulaValueConfig = {
+  label: 'Disk Space Usage',
+  value: 'average(system.filesystem.used.pct)',
+  format: {
+    id: 'percent',
+    params: {
+      decimals: 0,
     },
   },
-};
-
-export const diskSpaceUsage: LensChartConfig = {
-  title: 'Disk Space Usage',
-  formula: {
-    formula: 'average(system.filesystem.used.pct)',
-    format: {
-      id: 'percent',
-      params: {
-        decimals: 0,
-      },
-    },
-  },
-  getFilters,
-  lineChartConfig: diskSpaceUsageLineChart,
 };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GetInstalledIntegrationsResponse } from '../../../../common/detection_engine/fleet_integrations';
-import { GET_INSTALLED_INTEGRATIONS_URL } from '../../../../common/detection_engine/fleet_integrations';
+import type { GetInstalledIntegrationsResponse } from '../../../../common/api/detection_engine/fleet_integrations';
+import { GET_INSTALLED_INTEGRATIONS_URL } from '../../../../common/api/detection_engine/fleet_integrations';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import type {

@@ -19,13 +19,15 @@ import {
 } from './use_metrics_explorer_options';
 
 const DEFAULT_TIME_RANGE = {};
+const DEFAULT_TIMESTAMP = '@timestamp';
 
 export const useMetricsExplorerChartData = (
   expression: MetricExpression,
   derivedIndexPattern: DataViewBase,
   filterQuery?: string,
   groupBy?: string | string[],
-  timeRange: TimeRange = DEFAULT_TIME_RANGE
+  timeRange: TimeRange = DEFAULT_TIME_RANGE,
+  timeFieldName: string = DEFAULT_TIMESTAMP
 ) => {
   const { timeSize, timeUnit } = expression || { timeSize: 1, timeUnit: 'm' };
 
@@ -69,8 +71,9 @@ export const useMetricsExplorerChartData = (
       interval: `>=${timeSize || 1}${timeUnit}`,
       fromTimestamp,
       toTimestamp,
+      timeFieldName,
     };
-  }, [timeRange, timeSize, timeUnit]);
+  }, [timeRange.from, timeRange.to, timeSize, timeUnit, timeFieldName]);
 
   return useMetricsExplorerData(options, derivedIndexPattern, timestamps);
 };

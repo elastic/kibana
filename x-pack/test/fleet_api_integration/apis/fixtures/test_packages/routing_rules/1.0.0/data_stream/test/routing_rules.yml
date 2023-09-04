@@ -1,0 +1,9 @@
+# "Local" routing rules are included under this current dataset, not a special case
+- source_dataset: routing_rules.test
+  rules:
+    # Route error logs to `nginx.error` when they're sourced from an error logfile
+    - target_dataset: routing_rules.reroute
+      if: 'true == true'
+      namespace:
+        - '{{ data_stream.namespace }}'
+        - default

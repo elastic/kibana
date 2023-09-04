@@ -7,7 +7,7 @@
 import { SemVer } from 'semver';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { MAJOR_VERSION } from '../common/constants';
@@ -28,7 +28,11 @@ const schemaLatest = schema.object(
      * Disables the plugin.
      * Added back in 8.8.
      */
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: offeringBasedSchema({
+      // ILM is disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) to view disabled plugins across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
   },
   { defaultValue: undefined }
 );

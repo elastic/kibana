@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
@@ -14,8 +14,7 @@ import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 
 describe('Transform: Transform List Expanded Row <ExpandedRowJsonPane />', () => {
   test('Minimal initialization', () => {
-    const wrapper = shallow(<ExpandedRowJsonPane json={transformListRow.config} />);
-
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(<ExpandedRowJsonPane json={transformListRow.config} />);
+    expect(container.textContent).toContain(JSON.stringify(transformListRow.config, null, 2));
   });
 });

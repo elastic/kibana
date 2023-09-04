@@ -9,8 +9,8 @@ import { isEmpty, isInteger } from 'lodash/fp';
 import type {
   TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
-} from '../../../../common/types/timeline/api';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
+} from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../framework';
 
 import type { TimelineStatusAction } from './common';

@@ -307,7 +307,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: '/api/alerts_fixture/{id}/enqueue_action',
+      path: '/api/alerts_fixture/{id}/bulk_enqueue_actions',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -329,27 +329,29 @@ export function defineRoutes(
         const createAPIKeyResult =
           security &&
           (await security.authc.apiKeys.grantAsInternalUser(req, {
-            name: `alerts_fixture:enqueue_action:${uuidv4()}`,
+            name: `alerts_fixture:bulk_enqueue_actions:${uuidv4()}`,
             role_descriptors: {},
           }));
 
-        await actionsClient.enqueueExecution({
-          id: req.params.id,
-          spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
-          executionId: uuidv4(),
-          apiKey: createAPIKeyResult
-            ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
-                'base64'
-              )
-            : null,
-          params: req.body.params,
-          source: {
-            type: 'HTTP_REQUEST' as any,
-            source: req,
+        await actionsClient.bulkEnqueueExecution([
+          {
+            id: req.params.id,
+            spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
+            executionId: uuidv4(),
+            apiKey: createAPIKeyResult
+              ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
+                  'base64'
+                )
+              : null,
+            params: req.body.params,
           },
-        });
+        ]);
         return res.noContent();
       } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
         return res.badRequest({ body: err });
       }
     }

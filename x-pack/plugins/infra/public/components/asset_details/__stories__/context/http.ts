@@ -9,11 +9,13 @@ import type { HttpStart, HttpHandler } from '@kbn/core/public';
 import type { Parameters } from '@storybook/react';
 import { INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH } from '../../../../../common/http_api/infra_ml';
 import {
+  alertsSummaryHttpResponse,
   anomaliesHttpResponse,
   metadataHttpResponse,
   processesChartHttpResponse,
   processesHttpResponse,
   snapshotAPItHttpResponse,
+  type AlertsSummaryHttpMocks,
   type AnomaliesHttpMocks,
   type MetadataResponseMocks,
   type ProcessesHttpMocks,
@@ -39,6 +41,14 @@ export const getHttp = (params: Parameters): HttpStart => {
           return snapshotAPItHttpResponse[params.mock as SnapshotAPIHttpMocks]();
         case INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH:
           return anomaliesHttpResponse[params.mock as AnomaliesHttpMocks]();
+        default:
+          return Promise.resolve({});
+      }
+    }) as HttpHandler,
+    post: (async (path: string) => {
+      switch (path) {
+        case '/internal/rac/alerts/_alert_summary':
+          return alertsSummaryHttpResponse[params.mock as AlertsSummaryHttpMocks]();
         default:
           return Promise.resolve({});
       }

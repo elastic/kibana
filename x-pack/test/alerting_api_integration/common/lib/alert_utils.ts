@@ -43,6 +43,15 @@ interface UpdateAlwaysFiringAction {
   overwrites: Record<string, any>;
 }
 
+const SNOOZE_SCHEDULE = {
+  rRule: {
+    dtstart: '2021-03-07T00:00:00.000Z',
+    tzid: 'UTC',
+    count: 1,
+  },
+  duration: 864000000,
+};
+
 export class AlertUtils {
   private referenceCounter = 1;
   private readonly user?: User;
@@ -105,7 +114,11 @@ export class AlertUtils {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_snooze`)
       .set('kbn-xsrf', 'foo')
-      .set('content-type', 'application/json');
+      .set('content-type', 'application/json')
+      .send({
+        snooze_schedule: SNOOZE_SCHEDULE,
+      });
+
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
     }
@@ -116,7 +129,10 @@ export class AlertUtils {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_unsnooze`)
       .set('kbn-xsrf', 'foo')
-      .set('content-type', 'application/json');
+      .set('content-type', 'application/json')
+      .send({
+        schedule_ids: [alertId],
+      });
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
     }
@@ -167,7 +183,7 @@ export class AlertUtils {
 
   public getUpdateApiKeyRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_update_api_key`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/_update_api_key`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -417,12 +433,12 @@ function getDefaultAlwaysFiringAlertData(
   notifyWhen = 'onActiveAlert'
 ) {
   const messageTemplate = `
-alertId: {{alertId}},
-alertName: {{alertName}},
-spaceId: {{spaceId}},
-tags: {{tags}},
-alertInstanceId: {{alertInstanceId}},
-alertActionGroup: {{alertActionGroup}},
+ruleId: {{rule.id}},
+ruleName: {{rule.name}},
+spaceId: {{rule.spaceId}},
+tags: {{rule.tags}},
+alertId: {{alert.id}},
+alertActionGroup: {{alert.actionGroup}},
 instanceContextValue: {{context.instanceContextValue}},
 instanceStateValue: {{state.instanceStateValue}}
 `.trim();
@@ -461,12 +477,12 @@ function getAlwaysFiringAlertWithThrottledActionData(
   summary = false
 ) {
   const messageTemplate = `
-alertId: {{alertId}},
-alertName: {{alertName}},
-spaceId: {{spaceId}},
-tags: {{tags}},
-alertInstanceId: {{alertInstanceId}},
-alertActionGroup: {{alertActionGroup}},
+ruleId: {{rule.id}},
+ruleName: {{rule.name}},
+spaceId: {{rule.spaceId}},
+tags: {{rule.tags}},
+alertId: {{alert.id}},
+alertActionGroup: {{alert.actionGroup}},
 instanceContextValue: {{context.instanceContextValue}},
 instanceStateValue: {{state.instanceStateValue}}
 `.trim();

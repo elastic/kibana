@@ -13,7 +13,7 @@ import {
   EVENT_KIND,
 } from '@kbn/rule-data-utils';
 
-import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
@@ -399,11 +399,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with host risk index', async () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {

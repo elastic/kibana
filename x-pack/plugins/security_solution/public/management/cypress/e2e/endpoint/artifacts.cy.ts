@@ -6,32 +6,57 @@
  */
 
 import { recurse } from 'cypress-recurse';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
-import type { MetadataListResponse } from '../../../../../common/endpoint/types';
+import type { MetadataListResponse, PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts } from '../../tasks/artifacts';
-import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
 import { login } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
-import { request } from '../../tasks/common';
-import { yieldEndpointPolicyRevision } from '../../tasks/fleet';
+import { request, loadPage } from '../../tasks/common';
+import {
+  createAgentPolicyTask,
+  getEndpointIntegrationVersion,
+  yieldEndpointPolicyRevision,
+} from '../../tasks/fleet';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
   request<MetadataListResponse>({
     method: 'GET',
     url: HOST_METADATA_LIST_ROUTE,
   }).then(({ body }) => {
-    expect(body.data.length).is.lte(1); // during update it can be temporary zero
+    expect(body.data.length).is.lte(2); // during update it can be temporary zero
     return Number(body.data?.[0]?.metadata.Endpoint.policy.applied.endpoint_policy_version) ?? -1;
   });
 
 const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
 describe('Artifact pages', () => {
+  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  let policy: PolicyData;
+  let createdHost: CreateAndEnrollEndpointHostResponse;
+
   before(() => {
+    getEndpointIntegrationVersion().then((version) =>
+      createAgentPolicyTask(version).then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
+
+        return enableAllPolicyProtections(policy.id).then(() => {
+          // Create and enroll a new Endpoint host
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
+          });
+        });
+      })
+    );
+
     login();
-    loadEndpointDataForEventFiltersIfNeeded();
     removeAllArtifacts();
 
     // wait for ManifestManager to pick up artifact changes that happened either here
@@ -49,11 +74,23 @@ describe('Artifact pages', () => {
 
   beforeEach(() => {
     login();
-    cy.visit(APP_ENDPOINTS_PATH);
+    loadPage(APP_ENDPOINTS_PATH);
   });
 
   after(() => {
     removeAllArtifacts();
+
+    if (createdHost) {
+      cy.task('destroyEndpointHost', createdHost);
+    }
+
+    if (indexedPolicy) {
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+    }
+
+    if (createdHost) {
+      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+    }
   });
 
   for (const testData of getArtifactsListTestsData()) {
@@ -64,7 +101,7 @@ describe('Artifact pages', () => {
           .invoke('text')
           .then(parseRevNumber)
           .then((initialRevisionNumber) => {
-            cy.visit(`/app/security/administration/${testData.urlPath}`);
+            loadPage(`/app/security/administration/${testData.urlPath}`);
 
             cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).click();
             performUserActions(testData.create.formActions);
@@ -75,7 +112,7 @@ describe('Artifact pages', () => {
               cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
             }
 
-            cy.visit(APP_ENDPOINTS_PATH);
+            loadPage(APP_ENDPOINTS_PATH);
 
             // depends on the 10s auto refresh
             cy.getByTestSubj('policyListRevNo')

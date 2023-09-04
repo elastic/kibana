@@ -131,13 +131,10 @@
           {
             "parentPluginId": "@kbn/default-nav-devtools",
             "id": "def-common.defaultNavigation.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/default-nav/devtools/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false

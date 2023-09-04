@@ -29,6 +29,7 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
 
 const agentKeys: ApiKey[] = [
   {
+    type: 'rest',
     id: 'M96XSX4BQcLuJqE2VX29',
     name: 'apm_api_key1',
     creation: 1641912161726,
@@ -36,10 +37,11 @@ const agentKeys: ApiKey[] = [
     username: 'elastic',
     realm: 'reserved',
     expiration: 0,
+    role_descriptors: {},
     metadata: { application: 'apm' },
   },
-
   {
+    type: 'rest',
     id: 'Nd6XSX4BQcLuJqE2eH2A',
     name: 'apm_api_key2',
     creation: 1641912170624,
@@ -47,6 +49,7 @@ const agentKeys: ApiKey[] = [
     username: 'elastic',
     realm: 'reserved',
     expiration: 0,
+    role_descriptors: {},
     metadata: { application: 'apm' },
   },
 ];

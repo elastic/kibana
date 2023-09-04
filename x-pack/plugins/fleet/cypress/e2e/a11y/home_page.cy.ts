@@ -26,10 +26,13 @@ import {
   SETTINGS_FLEET_SERVER_HOST_HEADING,
   FLEET_SERVER_SETUP,
   LANDING_PAGE_ADD_FLEET_SERVER_BUTTON,
+  UNINSTALL_TOKENS_TAB,
+  UNINSTALL_TOKENS,
 } from '../../screens/fleet';
 import { AGENT_POLICY_NAME_LINK } from '../../screens/integrations';
 import { cleanupAgentPolicies, unenrollAgent } from '../../tasks/cleanup';
 import { setFleetServerHost } from '../../tasks/fleet_server';
+
 describe('Home page', () => {
   before(() => {
     setFleetServerHost('https://fleetserver:8220');
@@ -139,6 +142,38 @@ describe('Home page', () => {
       cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_NAME_FIELD, { timeout: 15000 }).should(
         'be.visible'
       );
+      checkA11y({ skipFailures: false });
+    });
+  });
+
+  describe('Uninstall Tokens', () => {
+    before(() => {
+      cy.request({
+        method: 'POST',
+        url: '/api/fleet/agent_policies',
+        body: { name: 'Agent policy for A11y test', namespace: 'default', id: 'agent-policy-a11y' },
+        headers: { 'kbn-xsrf': 'cypress' },
+      });
+    });
+    beforeEach(() => {
+      navigateTo(FLEET);
+      cy.getBySel(UNINSTALL_TOKENS_TAB).click();
+    });
+    after(() => {
+      cy.request({
+        method: 'POST',
+        url: '/api/fleet/agent_policies/delete',
+        body: { agentPolicyId: 'agent-policy-a11y' },
+        headers: { 'kbn-xsrf': 'kibana' },
+      });
+    });
+    it('Uninstall Tokens Table', () => {
+      cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).first().should('be.visible');
+      checkA11y({ skipFailures: false });
+    });
+    it('Uninstall Command Flyout', () => {
+      cy.getBySel(UNINSTALL_TOKENS.VIEW_UNINSTALL_COMMAND_BUTTON).first().click();
+      cy.getBySel(UNINSTALL_TOKENS.UNINSTALL_COMMAND_FLYOUT).should('be.visible');
       checkA11y({ skipFailures: false });
     });
   });

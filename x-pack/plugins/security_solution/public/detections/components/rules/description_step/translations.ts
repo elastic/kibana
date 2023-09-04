@@ -161,3 +161,17 @@ export const ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS = i18n.translat
     defaultMessage: 'Do not suppress alerts for events with missing fields',
   }
 );
+
+export const BUILDING_BLOCK_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.buildingBlockLabel',
+  {
+    defaultMessage: 'Building block',
+  }
+);
+
+export const BUILDING_BLOCK_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.buildingBlockDescription',
+  {
+    defaultMessage: 'All generated alerts will be marked as "building block" alerts',
+  }
+);

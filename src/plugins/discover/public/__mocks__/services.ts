@@ -22,7 +22,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   HIDE_ANNOUNCEMENTS,
   SEARCH_ON_PAGE_LOAD_SETTING,
-} from '../../common';
+} from '@kbn/discover-utils';
 import {
   UI_SETTINGS,
   calculateBounds,
@@ -221,6 +221,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       useUrl: jest.fn(() => ''),
       navigate: jest.fn(),
       getUrl: jest.fn(() => Promise.resolve('')),
+      getRedirectUrl: jest.fn(() => ''),
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },

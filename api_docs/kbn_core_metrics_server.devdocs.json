@@ -892,7 +892,7 @@
           "\nProtocol(s) used by the Elasticsearch Client"
         ],
         "signature": [
-          "\"none\" | \"mixed\" | \"http\" | \"https\""
+          "\"none\" | \"http\" | \"mixed\" | \"https\""
         ],
         "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
         "deprecated": false,

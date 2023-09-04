@@ -6,7 +6,10 @@
     "id": "securitySolution",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "securitySolution"],
+    "configPath": [
+      "xpack",
+      "securitySolution"
+    ],
     "requiredPlugins": [
       "actions",
       "alerting",
@@ -14,11 +17,13 @@
       "cloud",
       "cloudDefend",
       "cloudSecurityPosture",
+      "contentManagement",
       "dashboard",
       "data",
       "dataViews",
       "discover",
       "ecsDataQualityDashboard",
+      "elasticAssistant",
       "embeddable",
       "eventLog",
       "features",
@@ -29,6 +34,7 @@
       "lens",
       "licensing",
       "maps",
+      "navigation",
       "ruleRegistry",
       "sessionView",
       "spaces",
@@ -40,8 +46,10 @@
       "unifiedSearch",
       "files",
       "controls",
-      "savedObjectsManagement",
-      "stackConnectors"
+      "dataViewEditor",
+      "stackConnectors",
+      "discover",
+      "notifications"
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -69,6 +77,8 @@
       "unifiedSearch",
       "cloudChat"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

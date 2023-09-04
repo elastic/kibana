@@ -9,76 +9,79 @@ import { render, fireEvent } from '@testing-library/react';
 import { CardStep } from './card_step';
 import type { StepId } from './types';
 import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
+import { ProductLine } from '../../common/product';
 
 describe('CardStepComponent', () => {
   const step = {
-    id: IntroductionSteps.watchOverviewVideo,
-    title: 'Test Step',
-    badges: [
-      { id: 'badge1', name: 'Badge 1' },
-      { id: 'badge2', name: 'Badge 2' },
-    ],
-    description: ['Description line 1', 'Description line 2'],
-    splitPanel: <div>{'Split Panel'}</div>,
+    id: IntroductionSteps.getToKnowElasticSecurity,
   };
 
   const onStepClicked = jest.fn();
+  const onStepButtonClicked = jest.fn();
+  const expandedSteps = new Set([IntroductionSteps.getToKnowElasticSecurity]);
 
   const props = {
-    sectionId: SectionId.getSetUp,
+    activeProducts: new Set([ProductLine.security]),
     cardId: GetSetUpCardId.introduction,
-    step,
+    expandedSteps,
+    finishedStepsByCard: new Set<StepId>(),
+    onStepButtonClicked,
     onStepClicked,
-    finishedStepsByCard: new Set() as Set<StepId>,
+    sectionId: SectionId.getSetUp,
+    stepId: step.id,
   };
+  const testStepTitle = 'Get to know Elastic Security';
 
   it('should toggle step expansion on click', () => {
     const { getByText } = render(<CardStep {...props} />);
 
-    const stepTitle = getByText('Test Step');
+    const stepTitle = getByText(testStepTitle);
     fireEvent.click(stepTitle);
 
     expect(onStepClicked).toHaveBeenCalledTimes(1);
     expect(onStepClicked).toHaveBeenCalledWith({
       sectionId: SectionId.getSetUp,
-      stepId: IntroductionSteps.watchOverviewVideo,
+      stepId: IntroductionSteps.getToKnowElasticSecurity,
       cardId: GetSetUpCardId.introduction,
+      isExpanded: false,
     });
   });
 
   it('should render step title, badges, and description when expanded', () => {
-    const { getByText } = render(<CardStep {...props} />);
+    const { getByText, getByTestId } = render(<CardStep {...props} />);
 
-    const stepTitle = getByText('Test Step');
+    const stepTitle = getByText(testStepTitle);
     fireEvent.click(stepTitle);
 
-    const badge1 = getByText('Badge 1');
-    const badge2 = getByText('Badge 2');
+    const badge1 = getByText('Analytics');
+    const badge2 = getByText('Cloud');
+    const badge3 = getByText('EDR');
     expect(badge1).toBeInTheDocument();
     expect(badge2).toBeInTheDocument();
+    expect(badge3).toBeInTheDocument();
 
-    const description1 = getByText('Description line 1');
-    const description2 = getByText('Description line 2');
+    const description1 = getByTestId(`${IntroductionSteps.getToKnowElasticSecurity}-description-0`);
+    const description2 = getByTestId(`${IntroductionSteps.getToKnowElasticSecurity}-description-1`);
     expect(description1).toBeInTheDocument();
     expect(description2).toBeInTheDocument();
   });
 
-  it('should render split panel when expanded', () => {
-    const { getByText, queryByText } = render(<CardStep {...props} />);
+  it('should render expended steps', () => {
+    const { getByTestId } = render(<CardStep {...props} />);
 
-    const stepTitle = getByText('Test Step');
-    fireEvent.click(stepTitle);
-
-    const splitPanel = getByText('Split Panel');
+    const splitPanel = getByTestId('split-panel');
     expect(splitPanel).toBeInTheDocument();
+  });
 
-    fireEvent.click(stepTitle);
+  it('should render collapsed steps', () => {
+    const { queryByTestId } = render(<CardStep {...props} expandedSteps={new Set()} />);
 
-    expect(queryByText('Split Panel')).not.toBeInTheDocument();
+    const splitPanel = queryByTestId('split-panel');
+    expect(splitPanel).not.toBeInTheDocument();
   });
 
   it('should render check icon when stepId is in finishedStepsByCard', () => {
-    const finishedStepsByCard = new Set([IntroductionSteps.watchOverviewVideo]);
+    const finishedStepsByCard = new Set([IntroductionSteps.getToKnowElasticSecurity]);
 
     const { getByTestId } = render(
       <CardStep {...props} finishedStepsByCard={finishedStepsByCard} />

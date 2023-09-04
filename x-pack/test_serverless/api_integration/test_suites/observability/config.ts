@@ -6,6 +6,7 @@
  */
 
 import { createTestConfig } from '../../config.base';
+import { services } from './apm_api_integration/common/services';
 
 export default createTestConfig({
   serverlessProject: 'oblt',
@@ -19,4 +20,5 @@ export default createTestConfig({
     reportName: 'Serverless Observability API Integration Tests',
   },
   suiteTags: { exclude: ['skipSvlOblt'] },
+  services,
 });

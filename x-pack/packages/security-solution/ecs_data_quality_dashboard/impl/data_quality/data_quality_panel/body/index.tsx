@@ -24,7 +24,9 @@ import { useResultsRollup } from '../../use_results_rollup';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
+  baseTheme: Theme;
   canUserCreateAndReadCases: () => boolean;
+  endDate?: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -52,13 +54,14 @@ interface Props {
   }) => void;
   patterns: string[];
   setLastChecked: (lastChecked: string) => void;
+  startDate?: string | null;
   theme?: PartialTheme;
-  baseTheme: Theme;
 }
 
 const BodyComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
+  endDate,
   formatBytes,
   formatNumber,
   getGroupByFieldsOnClick,
@@ -68,6 +71,7 @@ const BodyComponent: React.FC<Props> = ({
   openCreateCaseFlyout,
   patterns,
   setLastChecked,
+  startDate,
   theme,
   baseTheme,
 }) => {
@@ -82,7 +86,10 @@ const BodyComponent: React.FC<Props> = ({
     totalSizeInBytes,
     updatePatternIndexNames,
     updatePatternRollup,
-  } = useResultsRollup({ ilmPhases, patterns });
+  } = useResultsRollup({
+    ilmPhases,
+    patterns,
+  });
 
   return (
     <EuiFlexGroup data-test-subj="body" direction="column" gutterSize="none">
@@ -112,7 +119,9 @@ const BodyComponent: React.FC<Props> = ({
       <EuiFlexItem>
         <DataQualityDetails
           addSuccessToast={addSuccessToast}
+          baseTheme={baseTheme}
           canUserCreateAndReadCases={canUserCreateAndReadCases}
+          endDate={endDate}
           formatBytes={formatBytes}
           formatNumber={formatNumber}
           getGroupByFieldsOnClick={getGroupByFieldsOnClick}
@@ -122,8 +131,8 @@ const BodyComponent: React.FC<Props> = ({
           patterns={patterns}
           patternIndexNames={patternIndexNames}
           patternRollups={patternRollups}
+          startDate={startDate}
           theme={theme}
-          baseTheme={baseTheme}
           updatePatternIndexNames={updatePatternIndexNames}
           updatePatternRollup={updatePatternRollup}
         />

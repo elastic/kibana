@@ -6,7 +6,9 @@
  */
 
 import { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
+import { AssetAccessor } from '../lib/asset_accessor';
 
 export interface SetupRouteOptions<T extends RequestHandlerContextBase> {
   router: IRouter<T>;
+  assetAccessor: AssetAccessor;
 }

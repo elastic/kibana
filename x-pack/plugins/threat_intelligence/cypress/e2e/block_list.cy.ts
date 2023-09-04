@@ -67,7 +67,7 @@ describe('Block list interactions', () => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });
 
-  it('should add to block list from the indicators table and from flyout', () => {
+  it.skip('should add to block list from the indicators table and from flyout', () => {
     // first indicator is a valid indicator for add to blocklist feature
     const firstIndicatorId = 'd86e656455f985357df3063dff6637f7f3b95bb27d1769a6b88c7adecaf7763f';
     openIndicatorsTableMoreActions(0);

@@ -1,14 +1,26 @@
 {
   "ml.get_records": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "desc": "__flag__",
+      "end": [
+        "-1"
+      ],
       "exclude_interim": "__flag__",
-      "from": 0,
-      "size": 0,
-      "start": "",
-      "end": "",
-      "record_score": 0,
-      "sort": "",
-      "desc": "__flag__"
+      "from": "",
+      "record_score": "",
+      "size": [
+        "100"
+      ],
+      "sort": [
+        "record_score"
+      ],
+      "start": [
+        "-1"
+      ]
     },
     "methods": [
       "GET",
@@ -17,6 +29,10 @@
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/results/records"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-record.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-record.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

@@ -12,7 +12,7 @@ import type {
   TelemetryClientStart,
   TelemetryEventParams,
 } from './types';
-import { telemetryEvents } from './telemetry_events';
+import { telemetryEvents } from './events/telemetry_events';
 import { TelemetryClient } from './telemetry_client';
 
 /**

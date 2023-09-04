@@ -1,0 +1,5 @@
+description: >
+  Indicates whether to exclude matches from previous runs.
+  If `true`, you can avoid alert duplication by excluding documents that have already been detected by the previous rule run.
+  This option is not available when a grouping field is specified.
+type: boolean

@@ -6,6 +6,7 @@
  */
 
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { SavedObject } from '@kbn/core/server';
 import {
   Rule,
   RuleTypeParams,
@@ -13,10 +14,12 @@ import {
   RuleMonitoring,
   RuleLastRunOutcomeOrderMap,
   RuleLastRunOutcomes,
+  SanitizedRule,
 } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import { RawRule } from '../types';
 
 interface GeneratorParams {
   [key: string]: string | number | boolean | undefined | object[] | boolean[] | object;
@@ -30,17 +33,6 @@ export const DATE_1970 = '1970-01-01T00:00:00.000Z';
 export const DATE_1970_5_MIN = '1969-12-31T23:55:00.000Z';
 export const DATE_9999 = '9999-12-31T12:34:56.789Z';
 export const MOCK_DURATION = '86400000000000';
-
-export const SAVED_OBJECT = {
-  id: '1',
-  type: 'alert',
-  attributes: {
-    apiKey: Buffer.from('123:abc').toString('base64'),
-    consumer: 'bar',
-    enabled: true,
-  },
-  references: [],
-};
 
 export const RULE_ACTIONS = [
   {
@@ -140,10 +132,7 @@ export const generateSavedObjectParams = ({
 
 export const GENERIC_ERROR_MESSAGE = 'GENERIC ERROR MESSAGE';
 
-export const getSummarizedAlertsMock = jest.fn();
-
 export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
-  getSummarizedAlerts: getSummarizedAlertsMock,
   id: RULE_TYPE_ID,
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -158,6 +147,10 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   autoRecoverAlerts: true,
   validate: {
     params: { validate: (params) => params },
+  },
+  alerts: {
+    context: 'test',
+    mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
   },
 };
 
@@ -214,6 +207,83 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
   },
   monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
   revision: 0,
+};
+
+export const mockedRawRuleSO: SavedObject<RawRule> = {
+  id: '1',
+  type: 'alert',
+  references: [],
+  attributes: {
+    legacyId: '1',
+    consumer: 'bar',
+    createdAt: mockDate.toString(),
+    updatedAt: mockDate.toString(),
+    throttle: null,
+    muteAll: false,
+    notifyWhen: 'onActiveAlert',
+    enabled: true,
+    alertTypeId: ruleType.id,
+    apiKey: 'MTIzOmFiYw==',
+    apiKeyOwner: 'elastic',
+    schedule: { interval: '10s' },
+    name: RULE_NAME,
+    tags: ['rule-', '-tags'],
+    createdBy: 'rule-creator',
+    updatedBy: 'rule-updater',
+    mutedInstanceIds: [],
+    params: {
+      bar: true,
+    },
+    actions: [
+      {
+        group: 'default',
+        actionTypeId: 'action',
+        params: {
+          foo: true,
+        },
+        uuid: '111-111',
+        actionRef: '1',
+      },
+      {
+        group: RecoveredActionGroup.id,
+        actionTypeId: 'action',
+        params: {
+          isResolved: true,
+        },
+        uuid: '222-222',
+        actionRef: '2',
+      },
+    ],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z').toString(),
+      error: null,
+      warning: null,
+    },
+    monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
+    revision: 0,
+  },
+};
+
+export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params> = {
+  id: mockedRawRuleSO.id,
+  ...mockedRawRuleSO.attributes,
+  nextRun: undefined,
+  createdAt: new Date(mockedRawRuleSO.attributes.createdAt),
+  updatedAt: new Date(mockedRawRuleSO.attributes.updatedAt),
+  executionStatus: {
+    ...mockedRawRuleSO.attributes.executionStatus,
+    lastExecutionDate: new Date(mockedRawRuleSO.attributes.executionStatus.lastExecutionDate),
+    error: undefined,
+    warning: undefined,
+  },
+  actions: mockedRawRuleSO.attributes.actions.map((action) => {
+    return {
+      ...action,
+      id: action.uuid,
+    };
+  }),
+  isSnoozedUntil: undefined,
 };
 
 export const mockTaskInstance = () => ({
@@ -283,6 +353,7 @@ export const generateRunnerResult = ({
   alertInstances = {},
   alertRecoveredInstances = {},
   summaryActions = {},
+  hasError = false,
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
@@ -312,9 +383,10 @@ export const generateRunnerResult = ({
       ...(state && { alertInstances }),
       ...(state && { alertRecoveredInstances }),
       ...(state && { alertTypeState: {} }),
-      ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z') }),
+      ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z').toISOString() }),
       ...(state && { summaryActions }),
     },
+    hasError,
   };
 };
 
@@ -368,7 +440,7 @@ export const generateAlertInstance = (
     meta: {
       uuid: expect.any(String),
       lastScheduledActions: {
-        date: new Date(DATE_1970),
+        date: new Date(DATE_1970).toISOString(),
         group: 'default',
         ...(actions && { actions }),
       },

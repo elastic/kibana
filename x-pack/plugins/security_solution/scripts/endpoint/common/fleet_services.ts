@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { map, pick } from 'lodash';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type {
   Agent,
@@ -35,6 +35,8 @@ import type {
 } from '@kbn/fleet-plugin/common/types';
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
+import axios from 'axios';
+import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
@@ -106,6 +108,7 @@ export const fetchFleetAgents = async (
       path: AGENT_API_ROUTES.LIST_PATTERN,
       query: options,
     })
+    .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);
 };
 
@@ -161,6 +164,7 @@ export const fetchFleetServerUrl = async (kbnClient: KbnClient): Promise<string 
         perPage: 100,
       },
     })
+    .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);
 
   // TODO:PT need to also pull in the Proxies and use that instead if defiend for url
@@ -195,6 +199,7 @@ export const fetchAgentPolicyEnrollmentKey = async (
       path: enrollmentAPIKeyRouteService.getListPath(),
       query: { kuery: `policy_id: "${agentPolicyId}"` },
     })
+    .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data.items[0]);
 
   if (!apiKey) {
@@ -219,6 +224,7 @@ export const fetchAgentPolicyList = async (
       path: agentPolicyRouteService.getListPath(),
       query: options,
     })
+    .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);
 };
 
@@ -231,7 +237,13 @@ export const getAgentVersionMatchingCurrentStack = async (
   kbnClient: KbnClient
 ): Promise<string> => {
   const kbnStatus = await kbnClient.status.get();
-  let version = kbnStatus.version.number;
+  const agentVersions = await axios
+    .get('https://artifacts-api.elastic.co/v1/versions')
+    .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
+
+  let version =
+    semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
+    kbnStatus.version.number;
 
   // Add `-SNAPSHOT` if version indicates it was from a snapshot or the build hash starts
   // with `xxxxxxxxx` (value that seems to be present when running kibana from source)
@@ -279,7 +291,8 @@ export const getAgentDownloadUrl = async (
 ): Promise<string> => {
   const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
   const downloadArch =
-    { arm64: 'arm64', x64: 'x86_64' }[process.arch] ?? `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+    { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
+    `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
   const agentFile = `elastic-agent-${agentVersion}-linux-${downloadArch}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 
@@ -368,11 +381,13 @@ export const unEnrollFleetAgent = async (
   agentId: string,
   force = false
 ): Promise<PostAgentUnenrollResponse> => {
-  const { data } = await kbnClient.request<PostAgentUnenrollResponse>({
-    method: 'POST',
-    path: agentRouteService.getUnenrollPath(agentId),
-    body: { revoke: force },
-  });
+  const { data } = await kbnClient
+    .request<PostAgentUnenrollResponse>({
+      method: 'POST',
+      path: agentRouteService.getUnenrollPath(agentId),
+      body: { revoke: force },
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
 
   return data;
 };

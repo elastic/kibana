@@ -119,7 +119,6 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '16mb',
                   'Version',
-                  '8.10.0',
                 ],
               },
               {

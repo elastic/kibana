@@ -104,6 +104,7 @@ const previouslyRegisteredTypes = [
   'search-telemetry',
   'security-rule',
   'security-solution-signals-migration',
+  'risk-engine-configuration',
   'server',
   'siem-detection-engine-rule-actions',
   'siem-detection-engine-rule-execution-info',

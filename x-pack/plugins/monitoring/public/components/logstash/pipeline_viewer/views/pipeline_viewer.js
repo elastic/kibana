@@ -11,13 +11,7 @@ import { DetailDrawer } from './detail_drawer';
 import { Queue } from './queue';
 import { StatementSection } from './statement_section';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiSpacer,
-  EuiPage,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageBody,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import { EuiSpacer, EuiPage, EuiPageSection, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export class PipelineViewer extends React.Component {
@@ -58,11 +52,7 @@ export class PipelineViewer extends React.Component {
               />
             </h1>
           </EuiScreenReaderOnly>
-          <EuiPageContent
-            verticalPosition="center"
-            horizontalPosition="center"
-            className="monPipelineViewer"
-          >
+          <EuiPageSection alignment="center" className="monPipelineViewer">
             <StatementSection
               iconType="logstashInput"
               headingText={i18n.translate('xpack.monitoring.logstash.pipelineViewer.inputsTitle', {
@@ -92,7 +82,7 @@ export class PipelineViewer extends React.Component {
               onShowVertexDetails={this.props.setDetailVertexId}
             />
             {this.renderDetailDrawer()}
-          </EuiPageContent>
+          </EuiPageSection>
         </EuiPageBody>
       </EuiPage>
     );

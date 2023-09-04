@@ -69,10 +69,17 @@ function mutatePipelineContentWithNewProcessor(jsonPipelineContent: any, process
   jsonPipelineContent.processors.push(processor);
 }
 
-export function addCustomPipelineProcessor(pipeline: PipelineInstall): PipelineInstall {
+export function addCustomPipelineAndLocalRoutingRulesProcessor(
+  pipeline: PipelineInstall
+): PipelineInstall {
   if (!pipeline.customIngestPipelineNameForInstallation) {
     return pipeline;
   }
+
+  const localRoutingRules =
+    pipeline.dataStream?.routing_rules?.find(
+      (rule) => rule.source_dataset === pipeline.dataStream?.dataset
+    )?.rules ?? [];
 
   const customPipelineProcessor = {
     pipeline: {
@@ -80,10 +87,21 @@ export function addCustomPipelineProcessor(pipeline: PipelineInstall): PipelineI
       ignore_missing_pipeline: true,
     },
   };
+  const rerouteProcessors = localRoutingRules.map((routingRule) => ({
+    reroute: {
+      tag: pipeline.dataStream?.dataset,
+      dataset: routingRule.target_dataset,
+      namespace: routingRule.namespace,
+      if: routingRule.if,
+    },
+  }));
 
   if (pipeline.extension === 'yml') {
     const parsedPipelineContent = safeLoad(pipeline.contentForInstallation);
     mutatePipelineContentWithNewProcessor(parsedPipelineContent, customPipelineProcessor);
+    rerouteProcessors.forEach((processor) =>
+      mutatePipelineContentWithNewProcessor(parsedPipelineContent, processor)
+    );
     return {
       ...pipeline,
       contentForInstallation: `---\n${safeDump(parsedPipelineContent)}`,
@@ -92,6 +110,9 @@ export function addCustomPipelineProcessor(pipeline: PipelineInstall): PipelineI
 
   const parsedPipelineContent = JSON.parse(pipeline.contentForInstallation);
   mutatePipelineContentWithNewProcessor(parsedPipelineContent, customPipelineProcessor);
+  rerouteProcessors.forEach((processor) =>
+    mutatePipelineContentWithNewProcessor(parsedPipelineContent, processor)
+  );
 
   return {
     ...pipeline,

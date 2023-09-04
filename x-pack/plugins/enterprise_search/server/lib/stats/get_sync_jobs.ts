@@ -13,125 +13,140 @@ import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
 import { SyncJobsStats } from '../../../common/stats';
 
 import { ConnectorStatus, SyncStatus } from '../../../common/types/connectors';
+import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<SyncJobsStats> => {
-  const connectorIdsResult = await client.asCurrentUser.search({
-    index: CONNECTORS_INDEX,
-    scroll: '10s',
-    stored_fields: [],
-  });
-  const ids = connectorIdsResult.hits.hits.map((hit) => hit._id);
-  const orphanedJobsCountResponse = await client.asCurrentUser.count({
-    index: CONNECTORS_JOBS_INDEX,
-    query: {
-      bool: {
-        must_not: [
-          {
-            terms: {
-              'connector.id': ids,
-            },
-          },
-        ],
-      },
-    },
-  });
-
-  const inProgressJobsCountResponse = await client.asCurrentUser.count({
-    index: CONNECTORS_JOBS_INDEX,
-    query: {
-      term: {
-        status: SyncStatus.IN_PROGRESS,
-      },
-    },
-  });
-
-  const idleJobsCountResponse = await client.asCurrentUser.count({
-    index: CONNECTORS_JOBS_INDEX,
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              status: SyncStatus.IN_PROGRESS,
-            },
-          },
-          {
-            range: {
-              last_seen: {
-                lt: moment().subtract(1, 'minute').toISOString(),
+  try {
+    const connectorIdsResult = await client.asCurrentUser.search({
+      index: CONNECTORS_INDEX,
+      scroll: '10s',
+      stored_fields: [],
+    });
+    const ids = connectorIdsResult.hits.hits.map((hit) => hit._id);
+    const orphanedJobsCountResponse = await client.asCurrentUser.count({
+      index: CONNECTORS_JOBS_INDEX,
+      query: {
+        bool: {
+          must_not: [
+            {
+              terms: {
+                'connector.id': ids,
               },
             },
-          },
-        ],
+          ],
+        },
       },
-    },
-  });
+    });
 
-  const errorResponse = await client.asCurrentUser.count({
-    index: CONNECTORS_INDEX,
-    query: {
-      term: {
-        last_sync_status: SyncStatus.ERROR,
+    const inProgressJobsCountResponse = await client.asCurrentUser.count({
+      index: CONNECTORS_JOBS_INDEX,
+      query: {
+        term: {
+          status: SyncStatus.IN_PROGRESS,
+        },
       },
-    },
-  });
+    });
 
-  const connectedResponse = await client.asCurrentUser.count({
-    index: CONNECTORS_INDEX,
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              status: ConnectorStatus.CONNECTED,
-            },
-          },
-          {
-            range: {
-              last_seen: {
-                gte: moment().subtract(30, 'minutes').toISOString(),
+    const idleJobsCountResponse = await client.asCurrentUser.count({
+      index: CONNECTORS_JOBS_INDEX,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                status: SyncStatus.IN_PROGRESS,
               },
             },
-          },
-        ],
-      },
-    },
-  });
-
-  const incompleteResponse = await client.asCurrentUser.count({
-    index: CONNECTORS_INDEX,
-    query: {
-      bool: {
-        should: [
-          {
-            bool: {
-              must_not: {
-                terms: {
-                  status: [ConnectorStatus.CONNECTED, ConnectorStatus.ERROR],
+            {
+              range: {
+                last_seen: {
+                  lt: moment().subtract(1, 'minute').toISOString(),
                 },
               },
             },
-          },
-          {
-            range: {
-              last_seen: {
-                lt: moment().subtract(30, 'minutes').toISOString(),
+          ],
+        },
+      },
+    });
+
+    const errorResponse = await client.asCurrentUser.count({
+      index: CONNECTORS_INDEX,
+      query: {
+        term: {
+          last_sync_status: SyncStatus.ERROR,
+        },
+      },
+    });
+
+    const connectedResponse = await client.asCurrentUser.count({
+      index: CONNECTORS_INDEX,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                status: ConnectorStatus.CONNECTED,
               },
             },
-          },
-        ],
+            {
+              range: {
+                last_seen: {
+                  gte: moment().subtract(30, 'minutes').toISOString(),
+                },
+              },
+            },
+          ],
+        },
       },
-    },
-  });
+    });
 
-  const response = {
-    connected: connectedResponse.count,
-    errors: errorResponse.count,
-    idle: idleJobsCountResponse.count,
-    in_progress: inProgressJobsCountResponse.count,
-    incomplete: incompleteResponse.count,
-    orphaned_jobs: orphanedJobsCountResponse.count,
-  };
+    const incompleteResponse = await client.asCurrentUser.count({
+      index: CONNECTORS_INDEX,
+      query: {
+        bool: {
+          should: [
+            {
+              bool: {
+                must_not: {
+                  terms: {
+                    status: [ConnectorStatus.CONNECTED, ConnectorStatus.ERROR],
+                  },
+                },
+              },
+            },
+            {
+              range: {
+                last_seen: {
+                  lt: moment().subtract(30, 'minutes').toISOString(),
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
 
-  return response;
+    const response = {
+      connected: connectedResponse.count,
+      errors: errorResponse.count,
+      idle: idleJobsCountResponse.count,
+      in_progress: inProgressJobsCountResponse.count,
+      incomplete: incompleteResponse.count,
+      orphaned_jobs: orphanedJobsCountResponse.count,
+    };
+
+    return response;
+  } catch (error) {
+    if (isIndexNotFoundException(error)) {
+      return {
+        connected: 0,
+        errors: 0,
+        idle: 0,
+        in_progress: 0,
+        incomplete: 0,
+        orphaned_jobs: 0,
+      };
+    }
+    throw error;
+  }
 };

@@ -45,11 +45,19 @@ jest.mock('./lib/fetch_search_source_query', () => ({
     mockFetchSearchSourceQuery(...args),
 }));
 
-const scheduleActions = jest.fn();
-const replaceState = jest.fn(() => ({ scheduleActions }));
-const mockCreateAlert = jest.fn(() => ({ replaceState }));
 const mockGetRecoveredAlerts = jest.fn().mockReturnValue([]);
 const mockSetLimitReached = jest.fn();
+const mockReport = jest.fn();
+const mockSetAlertData = jest.fn();
+const mockGetAlertLimitValue = jest.fn().mockReturnValue(1000);
+
+const mockAlertClient = {
+  report: mockReport,
+  getAlertLimitValue: mockGetAlertLimitValue,
+  setAlertLimitReached: mockSetLimitReached,
+  getRecoveredAlerts: mockGetRecoveredAlerts,
+  setAlertData: mockSetAlertData,
+};
 
 const mockNow = jest.getRealSystemTime();
 
@@ -87,16 +95,7 @@ describe('es_query executor', () => {
         get: () => ({ attributes: { consumer: 'alerts' } }),
       },
       searchSourceClient: searchSourceClientMock,
-      alertFactory: {
-        create: mockCreateAlert,
-        alertLimit: {
-          getValue: jest.fn().mockReturnValue(1000),
-          setLimitReached: mockSetLimitReached,
-        },
-        done: () => ({
-          getRecoveredAlerts: mockGetRecoveredAlerts,
-        }),
-      },
+      alertsClient: mockAlertClient,
       alertWithLifecycle: jest.fn(),
       logger,
       shouldWriteAlerts: () => true,
@@ -210,7 +209,7 @@ describe('es_query executor', () => {
         params: { ...defaultProps, threshold: [500], thresholdComparator: '>=' as Comparator },
       });
 
-      expect(mockCreateAlert).not.toHaveBeenCalled();
+      expect(mockReport).not.toHaveBeenCalled();
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
       expect(mockSetLimitReached).toHaveBeenCalledWith(false);
     });
@@ -237,22 +236,47 @@ describe('es_query executor', () => {
         params: { ...defaultProps, threshold: [200], thresholdComparator: '>=' as Comparator },
       });
 
-      expect(mockCreateAlert).toHaveBeenCalledTimes(1);
-      expect(mockCreateAlert).toHaveBeenNthCalledWith(1, 'query matched');
-      expect(scheduleActions).toHaveBeenCalledTimes(1);
-      expect(scheduleActions).toHaveBeenNthCalledWith(1, 'query matched', {
-        conditions: 'Number of matching documents is greater than or equal to 200',
-        date: new Date(mockNow).toISOString(),
-        hits: [],
-        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-        message: `rule 'test-rule-name' is active:
+      expect(mockReport).toHaveBeenCalledTimes(1);
+      expect(mockReport).toHaveBeenNthCalledWith(1, {
+        actionGroup: 'query matched',
+        context: {
+          conditions: 'Number of matching documents is greater than or equal to 200',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: `rule 'test-rule-name' is active:
 
 - Value: 491
 - Conditions Met: Number of matching documents is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-        title: "rule 'test-rule-name' matched query",
-        value: 491,
+          title: "rule 'test-rule-name' matched query",
+          value: 491,
+        },
+        id: 'query matched',
+        state: {
+          dateEnd: new Date(mockNow).toISOString(),
+          dateStart: new Date(mockNow).toISOString(),
+          latestTimestamp: undefined,
+        },
+        payload: {
+          kibana: {
+            alert: {
+              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+              reason: `rule 'test-rule-name' is active:
+
+- Value: 491
+- Conditions Met: Number of matching documents is greater than or equal to 200 over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+              title: "rule 'test-rule-name' matched query",
+              evaluation: {
+                conditions: 'Number of matching documents is greater than or equal to 200',
+                value: 491,
+              },
+            },
+          },
+        },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
       expect(mockSetLimitReached).toHaveBeenCalledWith(false);
@@ -297,55 +321,135 @@ describe('es_query executor', () => {
         },
       });
 
-      expect(mockCreateAlert).toHaveBeenCalledTimes(3);
-      expect(mockCreateAlert).toHaveBeenNthCalledWith(1, 'host-1');
-      expect(mockCreateAlert).toHaveBeenNthCalledWith(2, 'host-2');
-      expect(mockCreateAlert).toHaveBeenNthCalledWith(3, 'host-3');
-      expect(scheduleActions).toHaveBeenCalledTimes(3);
-      expect(scheduleActions).toHaveBeenNthCalledWith(1, 'query matched', {
-        conditions:
-          'Number of matching documents for group "host-1" is greater than or equal to 200',
-        date: new Date(mockNow).toISOString(),
-        hits: [],
-        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-        message: `rule 'test-rule-name' is active:
+      expect(mockReport).toHaveBeenCalledTimes(3);
+      expect(mockReport).toHaveBeenNthCalledWith(1, {
+        actionGroup: 'query matched',
+        context: {
+          conditions:
+            'Number of matching documents for group "host-1" is greater than or equal to 200',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: `rule 'test-rule-name' is active:
 
 - Value: 291
 - Conditions Met: Number of matching documents for group "host-1" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-        title: "rule 'test-rule-name' matched query for group host-1",
-        value: 291,
+          title: "rule 'test-rule-name' matched query for group host-1",
+          value: 291,
+        },
+        id: 'host-1',
+        state: {
+          dateEnd: new Date(mockNow).toISOString(),
+          dateStart: new Date(mockNow).toISOString(),
+          latestTimestamp: undefined,
+        },
+        payload: {
+          kibana: {
+            alert: {
+              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+              reason: `rule 'test-rule-name' is active:
+
+- Value: 291
+- Conditions Met: Number of matching documents for group "host-1" is greater than or equal to 200 over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+              title: "rule 'test-rule-name' matched query for group host-1",
+              evaluation: {
+                conditions:
+                  'Number of matching documents for group "host-1" is greater than or equal to 200',
+                value: 291,
+              },
+            },
+          },
+        },
       });
-      expect(scheduleActions).toHaveBeenNthCalledWith(2, 'query matched', {
-        conditions:
-          'Number of matching documents for group "host-2" is greater than or equal to 200',
-        date: new Date(mockNow).toISOString(),
-        hits: [],
-        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-        message: `rule 'test-rule-name' is active:
+      expect(mockReport).toHaveBeenNthCalledWith(2, {
+        actionGroup: 'query matched',
+        context: {
+          conditions:
+            'Number of matching documents for group "host-2" is greater than or equal to 200',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: `rule 'test-rule-name' is active:
 
 - Value: 477
 - Conditions Met: Number of matching documents for group "host-2" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-        title: "rule 'test-rule-name' matched query for group host-2",
-        value: 477,
+          title: "rule 'test-rule-name' matched query for group host-2",
+          value: 477,
+        },
+        id: 'host-2',
+        state: {
+          dateEnd: new Date(mockNow).toISOString(),
+          dateStart: new Date(mockNow).toISOString(),
+          latestTimestamp: undefined,
+        },
+        payload: {
+          kibana: {
+            alert: {
+              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+              reason: `rule 'test-rule-name' is active:
+
+- Value: 477
+- Conditions Met: Number of matching documents for group "host-2" is greater than or equal to 200 over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+              title: "rule 'test-rule-name' matched query for group host-2",
+              evaluation: {
+                conditions:
+                  'Number of matching documents for group "host-2" is greater than or equal to 200',
+                value: 477,
+              },
+            },
+          },
+        },
       });
-      expect(scheduleActions).toHaveBeenNthCalledWith(3, 'query matched', {
-        conditions:
-          'Number of matching documents for group "host-3" is greater than or equal to 200',
-        date: new Date(mockNow).toISOString(),
-        hits: [],
-        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-        message: `rule 'test-rule-name' is active:
+      expect(mockReport).toHaveBeenNthCalledWith(3, {
+        actionGroup: 'query matched',
+        context: {
+          conditions:
+            'Number of matching documents for group "host-3" is greater than or equal to 200',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: `rule 'test-rule-name' is active:
 
 - Value: 999
 - Conditions Met: Number of matching documents for group "host-3" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-        title: "rule 'test-rule-name' matched query for group host-3",
-        value: 999,
+          title: "rule 'test-rule-name' matched query for group host-3",
+          value: 999,
+        },
+        id: 'host-3',
+        state: {
+          dateEnd: new Date(mockNow).toISOString(),
+          dateStart: new Date(mockNow).toISOString(),
+          latestTimestamp: undefined,
+        },
+        payload: {
+          kibana: {
+            alert: {
+              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+              reason: `rule 'test-rule-name' is active:
+
+- Value: 999
+- Conditions Met: Number of matching documents for group \"host-3\" is greater than or equal to 200 over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+              title: "rule 'test-rule-name' matched query for group host-3",
+              evaluation: {
+                conditions:
+                  'Number of matching documents for group "host-3" is greater than or equal to 200',
+                value: 999,
+              },
+            },
+          },
+        },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
       expect(mockSetLimitReached).toHaveBeenCalledWith(false);
@@ -389,21 +493,20 @@ describe('es_query executor', () => {
         },
       });
 
-      expect(mockCreateAlert).toHaveBeenCalledTimes(3);
-      expect(mockCreateAlert).toHaveBeenNthCalledWith(1, 'host-1');
-      expect(mockCreateAlert).toHaveBeenNthCalledWith(2, 'host-2');
-      expect(mockCreateAlert).toHaveBeenNthCalledWith(3, 'host-3');
-      expect(scheduleActions).toHaveBeenCalledTimes(3);
+      expect(mockReport).toHaveBeenCalledTimes(3);
+      expect(mockReport).toHaveBeenNthCalledWith(1, expect.objectContaining({ id: 'host-1' }));
+      expect(mockReport).toHaveBeenNthCalledWith(2, expect.objectContaining({ id: 'host-2' }));
+      expect(mockReport).toHaveBeenNthCalledWith(3, expect.objectContaining({ id: 'host-3' }));
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
       expect(mockSetLimitReached).toHaveBeenCalledWith(true);
     });
 
     it('should correctly handle recovered alerts for ungrouped alert', async () => {
-      const mockSetContext = jest.fn();
       mockGetRecoveredAlerts.mockReturnValueOnce([
         {
-          getId: () => 'query matched',
-          setContext: mockSetContext,
+          alert: {
+            getId: () => 'query matched',
+          },
         },
       ]);
       mockFetchEsQuery.mockResolvedValueOnce({
@@ -427,36 +530,58 @@ describe('es_query executor', () => {
         params: { ...defaultProps, threshold: [500], thresholdComparator: '>=' as Comparator },
       });
 
-      expect(mockCreateAlert).not.toHaveBeenCalled();
-      expect(mockSetContext).toHaveBeenCalledTimes(1);
-      expect(mockSetContext).toHaveBeenNthCalledWith(1, {
-        conditions: 'Number of matching documents is NOT greater than or equal to 500',
-        date: new Date(mockNow).toISOString(),
-        hits: [],
-        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-        message: `rule 'test-rule-name' is recovered:
+      expect(mockReport).not.toHaveBeenCalled();
+      expect(mockSetAlertData).toHaveBeenCalledTimes(1);
+      expect(mockSetAlertData).toHaveBeenNthCalledWith(1, {
+        id: 'query matched',
+        context: {
+          conditions: 'Number of matching documents is NOT greater than or equal to 500',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: `rule 'test-rule-name' is recovered:
 
 - Value: 0
 - Conditions Met: Number of matching documents is NOT greater than or equal to 500 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-        title: "rule 'test-rule-name' recovered",
-        value: 0,
+          title: "rule 'test-rule-name' recovered",
+          value: 0,
+        },
+        payload: {
+          kibana: {
+            alert: {
+              evaluation: {
+                conditions: 'Number of matching documents is NOT greater than or equal to 500',
+                value: 0,
+              },
+              reason: `rule 'test-rule-name' is recovered:
+
+- Value: 0
+- Conditions Met: Number of matching documents is NOT greater than or equal to 500 over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+              title: "rule 'test-rule-name' recovered",
+              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+            },
+          },
+        },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
       expect(mockSetLimitReached).toHaveBeenCalledWith(false);
     });
 
     it('should correctly handle recovered alerts for grouped alerts', async () => {
-      const mockSetContext = jest.fn();
       mockGetRecoveredAlerts.mockReturnValueOnce([
         {
-          getId: () => 'host-1',
-          setContext: mockSetContext,
+          alert: {
+            getId: () => 'host-1',
+          },
         },
         {
-          getId: () => 'host-2',
-          setContext: mockSetContext,
+          alert: {
+            getId: () => 'host-2',
+          },
         },
       ]);
       mockFetchEsQuery.mockResolvedValueOnce({
@@ -478,35 +603,79 @@ describe('es_query executor', () => {
         },
       });
 
-      expect(mockCreateAlert).not.toHaveBeenCalled();
-      expect(mockSetContext).toHaveBeenCalledTimes(2);
-      expect(mockSetContext).toHaveBeenNthCalledWith(1, {
-        conditions: `Number of matching documents for group "host-1" is NOT greater than or equal to 200`,
-        date: new Date(mockNow).toISOString(),
-        hits: [],
-        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-        message: `rule 'test-rule-name' is recovered:
+      expect(mockReport).not.toHaveBeenCalled();
+      expect(mockSetAlertData).toHaveBeenCalledTimes(2);
+      expect(mockSetAlertData).toHaveBeenNthCalledWith(1, {
+        id: 'host-1',
+        context: {
+          conditions: `Number of matching documents for group "host-1" is NOT greater than or equal to 200`,
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: `rule 'test-rule-name' is recovered:
 
 - Value: 0
 - Conditions Met: Number of matching documents for group "host-1" is NOT greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-        title: "rule 'test-rule-name' recovered",
-        value: 0,
+          title: "rule 'test-rule-name' recovered",
+          value: 0,
+        },
+        payload: {
+          kibana: {
+            alert: {
+              evaluation: {
+                conditions:
+                  'Number of matching documents for group "host-1" is NOT greater than or equal to 200',
+                value: 0,
+              },
+              reason: `rule 'test-rule-name' is recovered:
+
+- Value: 0
+- Conditions Met: Number of matching documents for group \"host-1\" is NOT greater than or equal to 200 over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+              title: "rule 'test-rule-name' recovered",
+              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+            },
+          },
+        },
       });
-      expect(mockSetContext).toHaveBeenNthCalledWith(2, {
-        conditions: `Number of matching documents for group "host-2" is NOT greater than or equal to 200`,
-        date: new Date(mockNow).toISOString(),
-        hits: [],
-        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-        message: `rule 'test-rule-name' is recovered:
+      expect(mockSetAlertData).toHaveBeenNthCalledWith(2, {
+        id: 'host-2',
+        context: {
+          conditions: `Number of matching documents for group "host-2" is NOT greater than or equal to 200`,
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: `rule 'test-rule-name' is recovered:
 
 - Value: 0
 - Conditions Met: Number of matching documents for group "host-2" is NOT greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-        title: "rule 'test-rule-name' recovered",
-        value: 0,
+          title: "rule 'test-rule-name' recovered",
+          value: 0,
+        },
+        payload: {
+          kibana: {
+            alert: {
+              evaluation: {
+                conditions:
+                  'Number of matching documents for group "host-2" is NOT greater than or equal to 200',
+                value: 0,
+              },
+              reason: `rule 'test-rule-name' is recovered:
+
+- Value: 0
+- Conditions Met: Number of matching documents for group \"host-2\" is NOT greater than or equal to 200 over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+              title: "rule 'test-rule-name' recovered",
+              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+            },
+          },
+        },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
       expect(mockSetLimitReached).toHaveBeenCalledWith(false);

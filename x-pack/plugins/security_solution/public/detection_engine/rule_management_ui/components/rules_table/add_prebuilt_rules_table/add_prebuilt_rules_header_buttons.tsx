@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
+import { useUserData } from '../../../../../detections/components/user_info';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import * as i18n from './translations';
 
@@ -15,6 +16,8 @@ export const AddPrebuiltRulesHeaderButtons = () => {
     state: { rules, selectedRules, loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { installAllRules, installSelectedRules },
   } = useAddPrebuiltRulesTableContext();
+  const [{ loading: isUserDataLoading, canUserCRUD }] = useUserData();
+  const canUserEditRules = canUserCRUD && !isUserDataLoading;
 
   const isRulesAvailableForInstall = rules.length > 0;
   const numberOfSelectedRules = selectedRules.length ?? 0;
@@ -29,7 +32,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={installSelectedRules}
-            disabled={isRequestInProgress}
+            disabled={!canUserEditRules || isRequestInProgress}
             data-test-subj="installSelectedRulesButton"
           >
             {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
@@ -43,7 +46,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           iconType="plusInCircle"
           data-test-subj="installAllRulesButton"
           onClick={installAllRules}
-          disabled={!isRulesAvailableForInstall || isRequestInProgress}
+          disabled={!canUserEditRules || !isRulesAvailableForInstall || isRequestInProgress}
         >
           {i18n.INSTALL_ALL}
           {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}

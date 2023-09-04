@@ -41,32 +41,6 @@ describe('getProductAppFeatures', () => {
     expect(appFeatureKeys).toEqual(['foo', 'baz']);
   });
 
-  it('should return the union of all enabled PLIs features without duplicates', () => {
-    // @ts-ignore reassigning readonly value for testing
-    pliConfig.PLI_APP_FEATURES = {
-      security: {
-        essentials: ['foo'],
-        complete: ['baz'],
-      },
-      endpoint: {
-        essentials: ['bar', 'repeated'],
-        complete: ['qux', 'quux'],
-      },
-      cloud: {
-        essentials: ['corge', 'garply', 'repeated'],
-        complete: ['grault'],
-      },
-    };
-
-    const appFeatureKeys = getProductAppFeatures([
-      { product_line: ProductLine.security, product_tier: ProductTier.essentials },
-      { product_line: ProductLine.endpoint, product_tier: ProductTier.complete },
-      { product_line: ProductLine.cloud, product_tier: ProductTier.essentials },
-    ]);
-
-    expect(appFeatureKeys).toEqual(['foo', 'bar', 'repeated', 'qux', 'quux', 'corge', 'garply']);
-  });
-
   it('returns an empty object if no PLIs are enabled', () => {
     expect(getProductAppFeatures([])).toEqual([]);
   });

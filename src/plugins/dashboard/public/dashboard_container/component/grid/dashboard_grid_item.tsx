@@ -10,11 +10,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
-import {
-  EmbeddableChildPanel,
-  EmbeddablePhaseEvent,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddablePhaseEvent, EmbeddablePanel, ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
@@ -52,9 +48,6 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     },
     ref
   ) => {
-    const {
-      embeddable: { EmbeddablePanel: PanelComponent },
-    } = pluginServices.getServices();
     const container = useDashboardContainer();
     const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
     const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
@@ -90,13 +83,13 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       >
         {isRenderable ? (
           <>
-            <EmbeddableChildPanel
-              // This key is used to force rerendering on embeddable type change while the id remains the same
+            <EmbeddablePanel
               key={type}
-              embeddableId={id}
               index={index}
+              showBadges={true}
+              showNotifications={true}
               onPanelStatusChange={onPanelStatusChange}
-              {...{ container, PanelComponent }}
+              embeddable={() => container.untilEmbeddableLoaded(id)}
             />
             {children}
           </>

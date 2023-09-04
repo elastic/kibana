@@ -22,18 +22,18 @@ Fleet API docs: https://www.elastic.co/guide/en/fleet/master/fleet-apis.html
 It is possible to validate the docs before bundling them with the following command:
 
 ```shell
-$ npx @redocly/cli lint entrypoint.yaml
+npx @redocly/cli lint entrypoint.yaml
 ```
 
 Then generate the `bundled` files with the following:
 
 ```shell
-$ npx @redocly/openapi-cli bundle --ext yaml --output bundled.yaml entrypoint.yaml
-$ npx @redocly/openapi-cli bundle --ext json --output bundled.json entrypoint.yaml
+npx @redocly/openapi-cli bundle --ext yaml --output bundled.yaml entrypoint.yaml
+npx @redocly/openapi-cli bundle --ext json --output bundled.json entrypoint.yaml
 ```
 
 Validate the resulting bundle via
 
 ```shell
-$ npx @redocly/cli lint bundled.json
+npx @redocly/cli lint bundled.json
 ```

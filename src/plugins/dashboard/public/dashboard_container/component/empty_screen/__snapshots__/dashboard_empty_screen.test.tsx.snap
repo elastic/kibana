@@ -59,7 +59,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
                       class="euiText emotion-euiText-s-euiTextColor-subdued"
                     >
                       <span>
-                        Create a visualization of your data, or add one from the Visualize Library.
+                        Create a visualization of your data, or add one from the library.
                       </span>
                     </div>
                   </div>

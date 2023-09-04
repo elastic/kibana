@@ -25,6 +25,7 @@ import { elasticsearchErrorHandler } from '../../../utils/elasticsearch_error_ha
 
 import { registerCrawlerCrawlRulesRoutes } from './crawler_crawl_rules';
 import { registerCrawlerEntryPointRoutes } from './crawler_entry_points';
+import { registerCrawlerMultipleSchedulesRoutes } from './crawler_multiple_schedules';
 import { registerCrawlerSitemapRoutes } from './crawler_sitemaps';
 
 export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
@@ -42,11 +43,11 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const connParams = {
-        delete_existing_connector: true,
-        index_name: request.body.index_name,
-        is_native: true,
+        deleteExistingConnector: true,
+        indexName: request.body.index_name,
+        isNative: true,
         language: request.body.language,
-        service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+        serviceType: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
       };
       const { client } = (await context.core).elasticsearch;
 
@@ -112,7 +113,9 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         const createdConnector = await fetchConnectorByIndexName(client, request.body.index_name);
         if (createdConnector) {
           await deleteConnectorById(client, createdConnector.id);
-          await deleteIndex(client, createdConnector.index_name);
+          if (createdConnector.index_name) {
+            await deleteIndex(client, createdConnector.index_name);
+          }
         }
 
         throw error;
@@ -464,4 +467,5 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   registerCrawlerCrawlRulesRoutes(routeDependencies);
   registerCrawlerEntryPointRoutes(routeDependencies);
   registerCrawlerSitemapRoutes(routeDependencies);
+  registerCrawlerMultipleSchedulesRoutes(routeDependencies);
 }

@@ -7,10 +7,13 @@
  */
 import React from 'react';
 import type { ComponentType } from 'react';
+import { of } from 'rxjs';
 
 import { TagSelector, TagList } from '../mocks';
 import { ContentEditorProvider } from '../services';
 import type { Services } from '../services';
+
+const theme$ = of({ darkMode: false });
 
 export const getMockServices = (overrides?: Partial<Services>) => {
   const services = {
@@ -21,6 +24,7 @@ export const getMockServices = (overrides?: Partial<Services>) => {
     TagList,
     TagSelector,
     notifyError: () => undefined,
+    theme$,
     ...overrides,
   };
 

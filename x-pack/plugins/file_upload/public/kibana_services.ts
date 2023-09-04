@@ -21,3 +21,4 @@ export const getHttp = () => coreStart.http;
 export const getSavedObjectsClient = () => coreStart.savedObjects.client;
 export const getUiSettings = () => coreStart.settings.client;
 export const getSettings = () => coreStart.settings;
+export const getTheme = () => coreStart.theme;

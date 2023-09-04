@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import { UpsertMonitorRequest } from '..';
+import { UpsertMonitorResponse } from '../monitor_management/api';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResult,
   MonitorManagementListResultCodec,
-  ServiceLocationErrors,
   SyntheticsMonitor,
   MonitorFiltersResult,
 } from '../../../../../common/runtime_types';
@@ -56,10 +55,6 @@ export const fetchDeleteMonitor = async ({ configId }: { configId: string }): Pr
   return await apiService.delete(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${configId}`);
 };
 
-export type UpsertMonitorResponse =
-  | { attributes: { errors: ServiceLocationErrors }; id: string }
-  | SavedObject<SyntheticsMonitor>;
-
 export const fetchUpsertMonitor = async ({
   monitor,
   configId,
@@ -75,7 +70,7 @@ export const createGettingStartedMonitor = async ({
   monitor,
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
-}): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
+}): Promise<UpsertMonitorResponse> => {
   return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, undefined, {
     gettingStarted: true,
   });

@@ -8,7 +8,7 @@ steps:
     parallelism: 4
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1
+    artifact_paths:
+      - "target/kibana-security-solution/**/*"

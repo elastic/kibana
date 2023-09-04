@@ -9,12 +9,8 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CURRENT_CONNECTORS_INDEX } from '../..';
 
+import { DefaultConnectorsPipelineMeta } from '../../../common/constants';
 import { IngestPipelineParams } from '../../../common/types/connectors';
-import {
-  DefaultConnectorsPipelineMeta,
-  setupConnectorsIndices,
-} from '../../index_management/setup_indices';
-import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 export const updateDefaultPipeline = async (
   client: IScopedClusterClient,
@@ -35,8 +31,7 @@ export const updateDefaultPipeline = async (
       index: CURRENT_CONNECTORS_INDEX,
     });
   } catch (error) {
-    if (isIndexNotFoundException(error)) {
-      setupConnectorsIndices(client.asCurrentUser);
-    }
+    // TODO: Throw error saying you have to index a connector first
+    throw error;
   }
 };

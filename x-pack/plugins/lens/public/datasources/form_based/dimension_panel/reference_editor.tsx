@@ -82,7 +82,6 @@ export interface ReferenceEditorProps {
   labelAppend?: EuiFormRowProps['labelAppend'];
   isFullscreen: boolean;
   toggleFullscreen: () => void;
-  setIsCloseable: (isCloseable: boolean) => void;
   paramEditorCustomProps?: ParamEditorCustomProps;
   paramEditorUpdater: (
     setter:
@@ -318,6 +317,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
             markAllFieldsCompatible={selectionStyle === 'field'}
             onDeleteColumn={onDeleteColumn}
             onChoose={onChooseField}
+            showTimeSeriesDimensions={false}
           />
         </FormRow>
       ) : null}

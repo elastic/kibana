@@ -75,6 +75,8 @@
     "@kbn/core-http-server",
     "@kbn/std",
     "@kbn/core-saved-objects-server-mocks",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/observability-ai-assistant-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -8,7 +8,7 @@
 import type { EcsEvent } from '@kbn/ecs';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { ArrayElement } from '@kbn/utility-types';
-import type { ActionCategory as Action } from '../../../common/api';
+import type { UserActionAction as Action } from '../../../common/types/domain';
 import type { EventDetails } from './types';
 
 const actionsToEcsType: Record<Action, ArrayElement<EcsEvent['type']>> = {

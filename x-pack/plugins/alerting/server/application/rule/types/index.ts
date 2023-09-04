@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export type { Rule, RuleDomain, RuleLastRun, Monitoring, RuleParams, RuleNotifyWhen } from './rule';
+export type {
+  Rule,
+  RuleDomain,
+  RuleLastRun,
+  Monitoring,
+  RuleParams,
+  RuleNotifyWhen,
+  RuleSnoozeSchedule,
+} from './rule';

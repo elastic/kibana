@@ -7,17 +7,20 @@
 
 import type { EuiIconProps } from '@elastic/eui';
 import type React from 'react';
+
 import type { ProductLine } from '../../common/product';
 
 export interface HeaderSection {
-  description?: string;
+  description?: (params: {
+    totalActiveSteps: number | null;
+    totalStepsLeft: number | null;
+  }) => React.ReactNode | null;
   icon: EuiIconProps;
   id: string;
   title: string;
 }
 export interface Section {
   cards?: Card[];
-  description?: string;
   icon?: EuiIconProps;
   id: SectionId;
   title: string;
@@ -28,31 +31,27 @@ export interface Badge {
   id: string;
 }
 
-export type StepId = IntroductionSteps;
+export type StepId = IntroductionSteps | ConfigureSteps | ExploreSteps;
 
 export interface Step {
-  badges: Badge[];
-  description?: string[];
+  description?: Array<React.ReactNode | string>;
   id: StepId;
+  productLineRequired?: ProductLine[];
   splitPanel?: React.ReactNode;
   title: string;
   timeInMinutes?: number;
 }
 
-export type CardId = GetSetUpCardId | GetMoreFromElasticSecurityCardId;
+export type CardId = GetSetUpCardId;
 
 export interface Card {
-  productLineRequired?: ProductLine[];
-  description?: string | React.ReactNode;
   icon?: EuiIconProps;
   id: CardId;
   steps?: Step[];
   title: string;
-  timeInMins?: number;
-  stepsLeft?: number;
 }
 
-export type ActiveCards = Record<SectionId, Record<CardId, ActiveCard>>;
+export type ActiveSections = Partial<Record<SectionId, Partial<Record<CardId, ActiveCard>>>>;
 
 export enum SectionId {
   getSetUp = 'getSetUp',
@@ -60,31 +59,48 @@ export enum SectionId {
 }
 
 export enum GetSetUpCardId {
-  activateAndCreateRules = 'activateAndCreateRules',
-  bringInYourData = 'bringInYourData',
+  configure = 'configure',
   introduction = 'introduction',
-  protectYourEnvironmentInRealtime = 'protectYourEnvironmentInRealtime',
+  explore = 'explore',
+}
+
+export enum BadgeId {
+  analytics = 'analytics',
+  cloud = 'cloud',
+  edr = 'edr',
 }
 
 export enum IntroductionSteps {
-  watchOverviewVideo = 'watchOverviewVideo',
+  getToKnowElasticSecurity = 'getToKnowElasticSecurity',
 }
 
-export enum GetMoreFromElasticSecurityCardId {
-  masterTheInvestigationsWorkflow = 'masterTheInvestigationsWorkflow',
-  optimizeYourWorkSpace = 'optimizeYourWorkSpace',
-  respondToThreats = 'respondToThreats',
+export enum ConfigureSteps {
+  learnAbout = 'learnAbout',
+  deployElasticAgent = 'deployElasticAgent',
+  connectToDataSources = 'connectToDataSources',
+  enablePrebuiltRules = 'enablePrebuiltRules',
+}
+
+export enum ExploreSteps {
+  viewAlerts = 'viewAlerts',
+  analyzeData = 'analyzeData',
 }
 
 export interface ActiveCard {
   id: CardId;
   timeInMins: number;
   stepsLeft: number;
+  activeStepIds: StepId[] | undefined;
 }
+
+export type ExpandedCardSteps = Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>;
 export interface TogglePanelReducer {
   activeProducts: Set<ProductLine>;
+  activeSections: ActiveSections | null;
+  expandedCardSteps: ExpandedCardSteps;
   finishedSteps: Record<CardId, Set<StepId>>;
-  activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
+  totalActiveSteps: number | null;
+  totalStepsLeft: number | null;
 }
 
 export interface ToggleProductAction {
@@ -97,6 +113,22 @@ export interface AddFinishedStepAction {
   payload: { stepId: StepId; cardId: CardId; sectionId: SectionId };
 }
 
+export interface RemoveFinishedStepAction {
+  type: GetStartedPageActions.RemoveFinishedStep;
+  payload: { stepId: StepId; cardId: CardId; sectionId: SectionId };
+}
+
+export interface ToggleCardStepAction {
+  type: GetStartedPageActions.ToggleExpandedCardStep;
+  payload: { stepId?: StepId; cardId: CardId; isCardExpanded?: boolean; isStepExpanded?: boolean };
+}
+
+export type ReducerActions =
+  | ToggleProductAction
+  | AddFinishedStepAction
+  | RemoveFinishedStepAction
+  | ToggleCardStepAction;
+
 export interface Switch {
   id: ProductLine;
   label: string;
@@ -104,5 +136,39 @@ export interface Switch {
 
 export enum GetStartedPageActions {
   AddFinishedStep = 'addFinishedStep',
+  RemoveFinishedStep = 'removeFinishedStep',
   ToggleProduct = 'toggleProduct',
+  ToggleExpandedCardStep = 'toggleExpandedCardStep',
 }
+
+export type OnStepClicked = ({
+  stepId,
+  cardId,
+  sectionId,
+  isExpanded,
+}: {
+  stepId: StepId;
+  cardId: CardId;
+  sectionId: SectionId;
+  isExpanded: boolean;
+}) => void;
+
+export type OnCardClicked = ({
+  cardId,
+  isExpanded,
+}: {
+  cardId: CardId;
+  isExpanded: boolean;
+}) => void;
+
+export type OnStepButtonClicked = ({
+  stepId,
+  cardId,
+  sectionId,
+  undo,
+}: {
+  stepId: StepId;
+  cardId: CardId;
+  sectionId: SectionId;
+  undo?: boolean;
+}) => void;

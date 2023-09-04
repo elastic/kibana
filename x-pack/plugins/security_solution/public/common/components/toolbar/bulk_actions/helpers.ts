@@ -45,21 +45,3 @@ export const createInitialTagsState = (existingTags: string[][], defaultTags: st
     })
     .sort(checkedSortCallback);
 };
-
-/**
- * @deprecated
- * Please avoid using update_by_query API with `refresh:true` on serverless, use `_bulk` update by id instead.
- */
-export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
-  return {
-    query: {
-      bool: {
-        filter: {
-          terms: {
-            _id: eventIds,
-          },
-        },
-      },
-    },
-  };
-};

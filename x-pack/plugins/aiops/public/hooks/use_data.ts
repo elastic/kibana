@@ -20,7 +20,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PLUGIN_ID } from '../../common';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
-import type { GroupTableItem } from '../components/spike_analysis_table/types';
+import type { GroupTableItem } from '../components/log_rate_analysis_results_table/types';
 
 import { useTimeBuckets } from './use_time_buckets';
 import { useAiopsAppContext } from './use_aiops_app_context';

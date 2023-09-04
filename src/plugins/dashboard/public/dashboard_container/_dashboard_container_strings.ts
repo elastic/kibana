@@ -19,7 +19,7 @@ export const emptyScreenStrings = {
     }),
   getEditModeSubtitle: () =>
     i18n.translate('dashboard.emptyScreen.editModeSubtitle', {
-      defaultMessage: 'Create a visualization of your data, or add one from the Visualize Library.',
+      defaultMessage: 'Create a visualization of your data, or add one from the library.',
     }),
   getAddFromLibraryButtonTitle: () =>
     i18n.translate('dashboard.emptyScreen.addFromLibrary', {

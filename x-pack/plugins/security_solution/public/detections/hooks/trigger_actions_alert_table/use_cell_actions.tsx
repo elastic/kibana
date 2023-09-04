@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { BrowserField, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useCallback, useMemo } from 'react';
 import { TableId, tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
-import { getAllFieldsByName } from '../../../common/containers/source';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../actions/constants';
 import { VIEW_SELECTION } from '../../../../common/constants';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
 
 export const getUseCellActionsHook = (tableId: TableId) => {
   const useCellActions: AlertsTableConfigurationRegistry['useCellActions'] = ({
@@ -24,7 +23,7 @@ export const getUseCellActionsHook = (tableId: TableId) => {
     data,
     dataGridRef,
   }) => {
-    const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
+    const getFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
     /**
      * There is difference between how `triggers actions` fetched data v/s
      * how security solution fetches data via timelineSearchStrategy
@@ -35,7 +34,6 @@ export const getUseCellActionsHook = (tableId: TableId) => {
      *
      */
 
-    const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const finalData = useMemo(
       () =>
         (data as TimelineNonEcsData[][]).map((row) =>
@@ -66,19 +64,16 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       if (viewMode === VIEW_SELECTION.eventRenderedView) {
         return undefined;
       }
-      return columns.map((column) => {
-        // TODO use FieldSpec object instead of browserField
-        const browserField: Partial<BrowserField> | undefined = browserFieldsByName[column.id];
-        return {
-          name: column.id,
-          type: browserField?.type ?? '', // When type is an empty string all cell actions are incompatible
-          esTypes: browserField?.esTypes ?? [],
-          aggregatable: browserField?.aggregatable ?? false,
-          searchable: browserField?.searchable ?? false,
-          subType: browserField?.subType,
-        };
-      });
-    }, [browserFieldsByName, columns, viewMode]);
+      return columns.map(
+        (column) =>
+          getFieldSpec(column.id) ?? {
+            name: '',
+            type: '', // When type is an empty string all cell actions are incompatible
+            aggregatable: false,
+            searchable: false,
+          }
+      );
+    }, [getFieldSpec, columns, viewMode]);
 
     const getCellValue = useCallback<UseDataGridColumnsSecurityCellActionsProps['getCellValue']>(
       (fieldName, rowIndex) => {

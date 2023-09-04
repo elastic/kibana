@@ -15,11 +15,13 @@ describe('getGroupByActionVariables', () => {
       'transaction.type': 'request',
       'transaction.name': 'tx-java',
       'error.grouping_key': 'error-key-0',
+      'error.grouping_name': 'error-name-0',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "environment": "development",
         "errorGroupingKey": "error-key-0",
+        "errorGroupingName": "error-name-0",
         "serviceName": "opbeans-java",
         "transactionName": "tx-java",
         "transactionType": "request",

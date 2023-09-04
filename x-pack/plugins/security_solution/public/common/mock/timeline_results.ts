@@ -9,9 +9,9 @@ import { FilterStateStore } from '@kbn/es-query';
 
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
-import type { TimelineResult } from '../../../common/types/timeline/api';
+import type { TimelineResult } from '../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';

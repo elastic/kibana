@@ -23,6 +23,7 @@ import type {
 } from './types';
 import { loadDashboardState } from './lib/load_dashboard_state';
 import { deleteDashboards } from './lib/delete_dashboards';
+import { updateDashboardMeta } from './lib/update_dashboard_meta';
 
 export type DashboardContentManagementServiceFactory = KibanaPluginServiceFactory<
   DashboardContentManagementService,
@@ -79,5 +80,7 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
     checkForDuplicateDashboardTitle: (props) =>
       checkForDuplicateDashboardTitle(props, contentManagement),
     deleteDashboards: (ids) => deleteDashboards(ids, contentManagement),
+    updateDashboardMeta: (props) =>
+      updateDashboardMeta(props, { contentManagement, savedObjectsTagging, embeddable }),
   };
 };

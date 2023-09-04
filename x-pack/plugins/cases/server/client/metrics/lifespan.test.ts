@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { UserActionAttributes } from '../../../common/types/domain';
 import type { SavedObject } from '@kbn/core/server';
-import type { UserActionAttributes } from '../../../common/api';
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import { getStatusInfo } from './lifespan';
 import { createStatusChangeSavedObject } from './test_utils/lifespan';
 

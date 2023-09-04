@@ -9,97 +9,74 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { HighlightedFields } from './highlighted_fields';
-import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
-import { ThemeProvider } from 'styled-components';
+import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { TestProviders } from '../../../common/mock';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+
+jest.mock('../../shared/hooks/use_highlighted_fields');
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
 describe('<HighlightedFields />', () => {
+  beforeEach(() => {
+    (useRuleWithFallback as jest.Mock).mockReturnValue({ investigation_fields: undefined });
+  });
+
   it('should render the component', () => {
-    const mockTheme = getMockTheme({
-      eui: {
-        euiSizeL: '10px',
+    const panelContextValue = {
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      scopeId: 'scopeId',
+    } as unknown as RightPanelContext;
+    (useHighlightedFields as jest.Mock).mockReturnValue({
+      field: {
+        values: ['value'],
       },
     });
-    const flyoutContextValue = {
-      openRightPanel: jest.fn(),
-    } as unknown as ExpandableFlyoutContext;
-    const panelContextValue = {
-      eventId: 'eventId',
-      indexName: 'indexName',
-      dataFormattedForFieldBrowser: [],
-      browserFields: {},
-    } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
-      <ThemeProvider theme={mockTheme}>
-        <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-          <RightPanelContext.Provider value={panelContextValue}>
-            <HighlightedFields />
-          </RightPanelContext.Provider>
-        </ExpandableFlyoutContext.Provider>
-      </ThemeProvider>
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <HighlightedFields />
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).toBeInTheDocument();
   });
 
+  it(`should render empty component if there aren't any highlighted fields`, () => {
+    const panelContextValue = {
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      scopeId: 'scopeId',
+    } as unknown as RightPanelContext;
+    (useHighlightedFields as jest.Mock).mockReturnValue({});
+
+    const { container } = render(
+      <RightPanelContext.Provider value={panelContextValue}>
+        <HighlightedFields />
+      </RightPanelContext.Provider>
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('should render empty component if dataFormattedForFieldBrowser is null', () => {
-    const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
     const panelContextValue = {
-      eventId: 'eventId',
-      indexName: 'indexName',
       dataFormattedForFieldBrowser: null,
-      browserFields: {},
+      scopeId: 'scopeId',
     } as unknown as RightPanelContext;
+    (useHighlightedFields as jest.Mock).mockReturnValue({
+      field: {
+        values: ['value'],
+      },
+    });
 
     const { container } = render(
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <HighlightedFields />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
-    );
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should render empty component if browserFields is null', () => {
-    const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
-    const panelContextValue = {
-      eventId: 'eventId',
-      indexName: 'indexName',
-      dataFormattedForFieldBrowser: [],
-      browserFields: null,
-    } as unknown as RightPanelContext;
-
-    const { container } = render(
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <HighlightedFields />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
-    );
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should render empty component if eventId is null', () => {
-    const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
-    const panelContextValue = {
-      eventId: null,
-      indexName: 'indexName',
-      dataFormattedForFieldBrowser: [],
-      browserFields: {},
-    } as unknown as RightPanelContext;
-
-    const { container } = render(
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <HighlightedFields />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      <RightPanelContext.Provider value={panelContextValue}>
+        <HighlightedFields />
+      </RightPanelContext.Provider>
     );
 
     expect(container).toBeEmptyDOMElement();

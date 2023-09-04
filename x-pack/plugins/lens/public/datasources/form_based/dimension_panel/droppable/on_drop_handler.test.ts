@@ -65,7 +65,6 @@ function getStateWithMultiFieldColumn(state: FormBasedPrivateState) {
 
 describe('FormBasedDimensionEditorPanel: onDrop', () => {
   let state: FormBasedPrivateState;
-  let setState: jest.Mock;
   let defaultProps: DatasourceDimensionDropHandlerProps<FormBasedPrivateState>;
 
   beforeEach(() => {
@@ -77,14 +76,11 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       },
     };
 
-    setState = jest.fn();
-
     defaultProps = {
       dropType: 'reorder',
       source: { name: 'bar', id: 'bar', humanData: { label: 'Label' } },
       target: mockedDndOperations.notFiltering,
       state,
-      setState,
       targetLayerDimensionGroups: [],
       indexPatterns: mockDataViews(),
     };
@@ -94,14 +90,13 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
 
   describe('dropping a field', () => {
     it('updates a column when a field is dropped', () => {
-      onDrop({
-        ...defaultProps,
-        source: mockedDraggedField,
-        dropType: 'field_replace',
-      });
-
-      expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          source: mockedDraggedField,
+          dropType: 'field_replace',
+        })
+      ).toEqual({
         ...state,
         layers: {
           ...state.layers,
@@ -117,19 +112,18 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       });
     });
     it('selects the specific operation that was valid on drop', () => {
-      onDrop({
-        ...defaultProps,
-        source: mockedDraggedField,
-        dropType: 'field_replace',
-        target: {
-          ...defaultProps.target,
-          filterOperations: (op: OperationMetadata) => op.isBucketed,
-          columnId: 'col2',
-        },
-      });
-
-      expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          source: mockedDraggedField,
+          dropType: 'field_replace',
+          target: {
+            ...defaultProps.target,
+            filterOperations: (op: OperationMetadata) => op.isBucketed,
+            columnId: 'col2',
+          },
+        })
+      ).toEqual({
         ...state,
         layers: {
           ...state.layers,
@@ -165,20 +159,19 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           },
         },
       };
-      onDrop({
-        ...defaultProps,
-        state: localState,
-        source: mockedDraggedField,
-        dropType: 'field_replace',
-        target: {
-          ...defaultProps.target,
-          filterOperations: (op: OperationMetadata) => !op.isBucketed,
-          columnId: 'col2',
-        },
-      });
-
-      expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          state: localState,
+          source: mockedDraggedField,
+          dropType: 'field_replace',
+          target: {
+            ...defaultProps.target,
+            filterOperations: (op: OperationMetadata) => !op.isBucketed,
+            columnId: 'col2',
+          },
+        })
+      ).toEqual({
         ...localState,
         layers: {
           ...localState.layers,
@@ -198,32 +191,31 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       });
     });
     it('keeps the operation when dropping a different compatible field', () => {
-      onDrop({
-        ...defaultProps,
-        source: {
-          humanData: { label: 'Label1' },
-          field: { name: 'memory', type: 'number', aggregatable: true },
-          indexPatternId: 'first',
-          id: '1',
-        },
-        state: {
-          ...state,
-          layers: {
-            ...state.layers,
-            first: {
-              indexPatternId: 'first',
-              columnOrder: ['col1'],
-              columns: {
-                col1: mockedColumns.sum,
+      expect(
+        onDrop({
+          ...defaultProps,
+          source: {
+            humanData: { label: 'Label1' },
+            field: { name: 'memory', type: 'number', aggregatable: true },
+            indexPatternId: 'first',
+            id: '1',
+          },
+          state: {
+            ...state,
+            layers: {
+              ...state.layers,
+              first: {
+                indexPatternId: 'first',
+                columnOrder: ['col1'],
+                columns: {
+                  col1: mockedColumns.sum,
+                },
               },
             },
           },
-        },
-        dropType: 'field_replace',
-      });
-
-      expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+          dropType: 'field_replace',
+        })
+      ).toEqual({
         ...state,
         layers: {
           ...state.layers,
@@ -240,19 +232,18 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       });
     });
     it('appends the dropped column when a field is dropped', () => {
-      onDrop({
-        ...defaultProps,
-        source: mockedDraggedField,
-        dropType: 'field_replace',
-        target: {
-          ...defaultProps.target,
-          columnId: 'col2',
-          filterOperations: (op: OperationMetadata) => op.dataType === 'number',
-        },
-      });
-
-      expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          source: mockedDraggedField,
+          dropType: 'field_replace',
+          target: {
+            ...defaultProps.target,
+            columnId: 'col2',
+            filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+          },
+        })
+      ).toEqual({
         ...state,
         layers: {
           ...state.layers,
@@ -279,21 +270,20 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       // c: col4
       // dragging field into newCol in group a
 
-      onDrop({
-        ...defaultProps,
-        source: mockedDraggedField,
-        targetLayerDimensionGroups: dimensionGroups,
-        dropType: 'field_add',
-        target: {
-          ...defaultProps.target,
-          filterOperations: (op: OperationMetadata) => op.dataType === 'number',
-          groupId: 'a',
-          columnId: 'newCol',
-        },
-      });
-
-      expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          source: mockedDraggedField,
+          targetLayerDimensionGroups: dimensionGroups,
+          dropType: 'field_add',
+          target: {
+            ...defaultProps.target,
+            filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+            groupId: 'a',
+            columnId: 'newCol',
+          },
+        })
+      ).toEqual({
         ...testState,
         layers: {
           ...testState.layers,
@@ -318,15 +308,14 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
 
     it('appends the new field to the column that supports multiple fields when a field is dropped', () => {
       state = getStateWithMultiFieldColumn(state);
-      onDrop({
-        ...defaultProps,
-        state,
-        source: mockedDraggedField,
-        dropType: 'field_combine',
-      });
-
-      expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          state,
+          source: mockedDraggedField,
+          dropType: 'field_combine',
+        })
+      ).toEqual({
         ...state,
         layers: {
           ...state.layers,
@@ -371,19 +360,18 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         id: 'col3',
         humanData: { label: 'Label' },
       };
-
-      onDrop({
-        ...defaultProps,
-        source: referenceDragging,
-        state: testState,
-        dropType: 'duplicate_compatible',
-        target: {
-          ...defaultProps.target,
-          columnId: 'newCol',
-        },
-      });
-      // metric is appended
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          source: referenceDragging,
+          state: testState,
+          dropType: 'duplicate_compatible',
+          target: {
+            ...defaultProps.target,
+            columnId: 'newCol',
+          },
+        })
+      ).toEqual({
         ...testState,
         layers: {
           ...testState.layers,
@@ -408,19 +396,19 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         humanData: { label: 'Label' },
       };
 
-      onDrop({
-        ...defaultProps,
-        state: testState,
-        dropType: 'duplicate_compatible',
-        source: bucketDragging,
-        target: {
-          ...defaultProps.target,
-          columnId: 'newCol',
-        },
-      });
-
-      // bucket is placed after the last existing bucket
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          state: testState,
+          dropType: 'duplicate_compatible',
+          source: bucketDragging,
+          target: {
+            ...defaultProps.target,
+            columnId: 'newCol',
+          },
+        })
+      ).toEqual({
+        // bucket is placed after the last existing bucket
         ...testState,
         layers: {
           ...testState.layers,
@@ -467,18 +455,18 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         id: 'col1',
         humanData: { label: 'Label' },
       };
-      onDrop({
-        ...defaultProps,
-        source: referenceDragging,
-        state: testState,
-        dropType: 'duplicate_compatible',
-        target: {
-          ...defaultProps.target,
-          columnId: 'col1Copy',
-        },
-      });
-
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          source: referenceDragging,
+          state: testState,
+          dropType: 'duplicate_compatible',
+          target: {
+            ...defaultProps.target,
+            columnId: 'col1Copy',
+          },
+        })
+      ).toEqual({
         ...testState,
         layers: {
           ...testState.layers,
@@ -530,18 +518,18 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         id: 'col1',
         humanData: { label: 'Label' },
       };
-      onDrop({
-        ...defaultProps,
-        source: metricDragging,
-        state: testState,
-        dropType: 'duplicate_compatible',
-        target: {
-          ...defaultProps.target,
-          columnId: 'col1Copy',
-        },
-      });
-
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          source: metricDragging,
+          state: testState,
+          dropType: 'duplicate_compatible',
+          target: {
+            ...defaultProps.target,
+            columnId: 'col1Copy',
+          },
+        })
+      ).toEqual({
         ...testState,
         layers: {
           ...testState.layers,
@@ -601,18 +589,18 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         id: 'col1',
         humanData: { label: 'Label' },
       };
-      onDrop({
-        ...defaultProps,
-        source: refDragging,
-        state: testState,
-        dropType: 'duplicate_compatible',
-        target: {
-          ...defaultProps.target,
-          columnId: 'col1Copy',
-        },
-      });
-
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          source: refDragging,
+          state: testState,
+          dropType: 'duplicate_compatible',
+          target: {
+            ...defaultProps.target,
+            columnId: 'col1Copy',
+          },
+        })
+      ).toEqual({
         ...testState,
         layers: {
           ...testState.layers,
@@ -682,92 +670,90 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       };
 
       // first element to last
-      onDrop({
-        ...defaultReorderDropParams,
-        target: {
-          ...defaultReorderDropParams.target,
-          columnId: 'col3',
-        },
-      });
-      expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col2', 'col3', 'col1']));
+      expect(
+        onDrop({
+          ...defaultReorderDropParams,
+          target: {
+            ...defaultReorderDropParams.target,
+            columnId: 'col3',
+          },
+        })
+      ).toEqual(stateWithColumnOrder(['col2', 'col3', 'col1']));
 
       // last element to first
-      onDrop({
-        ...defaultReorderDropParams,
-        target: {
-          ...defaultReorderDropParams.target,
-          columnId: 'col1',
-        },
-        source: {
-          humanData: { label: 'Label1' },
-          columnId: 'col3',
-          groupId: 'a',
-          layerId: 'first',
-          id: 'col3',
-        },
-      });
-      expect(setState).toBeCalledTimes(2);
-      expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col3', 'col1', 'col2']));
+      expect(
+        onDrop({
+          ...defaultReorderDropParams,
+          target: {
+            ...defaultReorderDropParams.target,
+            columnId: 'col1',
+          },
+          source: {
+            humanData: { label: 'Label1' },
+            columnId: 'col3',
+            groupId: 'a',
+            layerId: 'first',
+            id: 'col3',
+          },
+        })
+      ).toEqual(stateWithColumnOrder(['col3', 'col1', 'col2']));
 
       // middle column to first
-      onDrop({
-        ...defaultReorderDropParams,
-        target: {
-          ...defaultReorderDropParams.target,
-          columnId: 'col1',
-        },
-        source: {
-          humanData: { label: 'Label1' },
-          columnId: 'col2',
-          groupId: 'a',
-          layerId: 'first',
-          id: 'col2',
-        },
-      });
-      expect(setState).toBeCalledTimes(3);
-      expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col2', 'col1', 'col3']));
+      expect(
+        onDrop({
+          ...defaultReorderDropParams,
+          target: {
+            ...defaultReorderDropParams.target,
+            columnId: 'col1',
+          },
+          source: {
+            humanData: { label: 'Label1' },
+            columnId: 'col2',
+            groupId: 'a',
+            layerId: 'first',
+            id: 'col2',
+          },
+        })
+      ).toEqual(stateWithColumnOrder(['col2', 'col1', 'col3']));
 
       // middle column to last
-      onDrop({
-        ...defaultReorderDropParams,
-        target: {
-          ...defaultReorderDropParams.target,
-          columnId: 'col3',
-        },
-        source: {
-          humanData: { label: 'Label1' },
-          columnId: 'col2',
-          groupId: 'a',
-          layerId: 'first',
-          id: 'col2',
-        },
-      });
-      expect(setState).toBeCalledTimes(4);
-      expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col1', 'col3', 'col2']));
+      expect(
+        onDrop({
+          ...defaultReorderDropParams,
+          target: {
+            ...defaultReorderDropParams.target,
+            columnId: 'col3',
+          },
+          source: {
+            humanData: { label: 'Label1' },
+            columnId: 'col2',
+            groupId: 'a',
+            layerId: 'first',
+            id: 'col2',
+          },
+        })
+      ).toEqual(stateWithColumnOrder(['col1', 'col3', 'col2']));
     });
 
     it('updates the column id when moving an operation to an empty dimension', () => {
-      onDrop({
-        ...defaultProps,
-        source: mockedDndOperations.metric,
-        target: {
-          ...defaultProps.target,
-          columnId: 'col2',
-        },
-        dropType: 'move_compatible',
-      });
-
-      expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          source: mockedDndOperations.metric,
+          target: {
+            ...defaultProps.target,
+            columnId: 'col2',
+          },
+          dropType: 'move_compatible',
+        })
+      ).toEqual({
         ...state,
         layers: {
           ...state.layers,
           first: {
             ...state.layers.first,
-            columnOrder: ['col1', 'col2'],
+            columnOrder: ['col2'],
             columns: {
-              col1: state.layers.first.columns.col1,
               col2: state.layers.first.columns.col1,
             },
           },
@@ -787,24 +773,23 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         },
       };
 
-      onDrop({
-        ...defaultProps,
-        source: mockedDndOperations.bucket,
-        state: testState,
-        dropType: 'replace_compatible',
-      });
-
-      expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          source: mockedDndOperations.bucket,
+          state: testState,
+          dropType: 'replace_compatible',
+        })
+      ).toEqual({
         ...testState,
         layers: {
           ...testState.layers,
           first: {
             ...testState.layers.first,
-            columnOrder: ['col1', 'col2', 'col3'],
+            incompleteColumns: {},
+            columnOrder: ['col1', 'col3'],
             columns: {
               col1: testState.layers.first.columns.col2,
-              col2: testState.layers.first.columns.col2,
               col3: testState.layers.first.columns.col3,
             },
           },
@@ -818,27 +803,26 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         ...state.layers.first.columns,
         col2: mockedColumns.terms,
       };
-      onDrop({
-        ...defaultProps,
-        state,
-        source: {
-          columnId: 'col2',
-          groupId: 'a',
-          layerId: 'first',
-          id: 'col2',
-          humanData: { label: 'Label' },
-        },
-        dropType: 'combine_compatible',
-        target: {
-          ...defaultProps.target,
-          columnId: 'col1',
-          groupId: 'a',
-          filterOperations: (op: OperationMetadata) => op.isBucketed,
-        },
-      });
-
-      expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith({
+      expect(
+        onDrop({
+          ...defaultProps,
+          state,
+          source: {
+            columnId: 'col2',
+            groupId: 'a',
+            layerId: 'first',
+            id: 'col2',
+            humanData: { label: 'Label' },
+          },
+          dropType: 'combine_compatible',
+          target: {
+            ...defaultProps.target,
+            columnId: 'col1',
+            groupId: 'a',
+            filterOperations: (op: OperationMetadata) => op.isBucketed,
+          },
+        })
+      ).toEqual({
         ...state,
         layers: {
           ...state.layers,
@@ -868,31 +852,30 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // b: col1, col2, col3
         // c: col4
         // dragging col2 into newCol in group a
-        onDrop({
-          ...defaultProps,
-          target: {
-            ...defaultProps.target,
-            columnId: 'newCol',
-            groupId: 'a',
-          },
-          source: mockedDndOperations.bucket,
-          state: testState,
-          targetLayerDimensionGroups: dimensionGroups,
-          dropType: 'move_compatible',
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            target: {
+              ...defaultProps.target,
+              columnId: 'newCol',
+              groupId: 'a',
+            },
+            source: mockedDndOperations.bucket,
+            state: testState,
+            targetLayerDimensionGroups: dimensionGroups,
+            dropType: 'move_compatible',
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              columnOrder: ['newCol', 'col1', 'col2', 'col3', 'col4'],
+              incompleteColumns: {},
+              columnOrder: ['newCol', 'col1', 'col3', 'col4'],
               columns: {
                 newCol: testState.layers.first.columns.col2,
                 col1: testState.layers.first.columns.col1,
-                col2: testState.layers.first.columns.col2,
                 col3: testState.layers.first.columns.col3,
                 col4: testState.layers.first.columns.col4,
               },
@@ -907,21 +890,20 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // b: col1, col2, col3
         // c: col4
         // dragging col2 into newCol in group a
-        onDrop({
-          ...defaultProps,
-          target: {
-            ...defaultProps.target,
-            columnId: 'newCol',
-            groupId: 'a',
-          },
-          source: mockedDndOperations.bucket,
-          state: testState,
-          targetLayerDimensionGroups: dimensionGroups,
-          dropType: 'duplicate_compatible',
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            target: {
+              ...defaultProps.target,
+              columnId: 'newCol',
+              groupId: 'a',
+            },
+            source: mockedDndOperations.bucket,
+            state: testState,
+            targetLayerDimensionGroups: dimensionGroups,
+            dropType: 'duplicate_compatible',
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
@@ -946,35 +928,34 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // b: col2, col3
         // c: col4
         // dragging col3 onto col1 in group a
-        onDrop({
-          ...defaultProps,
-          target: {
-            ...defaultProps.target,
-            columnId: 'col1',
-            groupId: 'a',
-          },
-          source: mockedDndOperations.bucket2,
-          state: testState,
-          targetLayerDimensionGroups: [
-            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
-            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
-            { ...dimensionGroups[2] },
-          ],
-          dropType: 'move_compatible',
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            target: {
+              ...defaultProps.target,
+              columnId: 'col1',
+              groupId: 'a',
+            },
+            source: mockedDndOperations.bucket2,
+            state: testState,
+            targetLayerDimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+            dropType: 'move_compatible',
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              columnOrder: ['col1', 'col2', 'col3', 'col4'],
+              incompleteColumns: {},
+              columnOrder: ['col1', 'col2', 'col4'],
               columns: {
                 col1: testState.layers.first.columns.col3,
                 col2: testState.layers.first.columns.col2,
-                col3: testState.layers.first.columns.col3,
                 col4: testState.layers.first.columns.col4,
               },
             },
@@ -989,63 +970,65 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // c: col4
         // col5, col6 not in visualization groups
         // dragging col3 onto col1 in group a
-        onDrop({
-          ...defaultProps,
-          source: mockedDndOperations.bucket2,
-          target: {
-            ...defaultProps.target,
-            columnId: 'col1',
-            groupId: 'a',
-          },
-          state: {
-            ...testState,
-            layers: {
-              ...testState.layers,
-              first: {
-                ...testState.layers.first,
-                columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
-                columns: {
-                  ...testState.layers.first.columns,
-                  col5: {
-                    dataType: 'number',
-                    operationType: 'count',
-                    label: '',
-                    isBucketed: false,
-                    sourceField: '___records___',
-                    customLabel: true,
-                  },
-                  col6: {
-                    dataType: 'number',
-                    operationType: 'count',
-                    label: '',
-                    isBucketed: false,
-                    sourceField: '___records___',
-                    customLabel: true,
+        expect(
+          onDrop({
+            ...defaultProps,
+            source: mockedDndOperations.bucket2,
+            target: {
+              ...defaultProps.target,
+              columnId: 'col1',
+              groupId: 'a',
+            },
+            state: {
+              ...testState,
+              layers: {
+                ...testState.layers,
+                first: {
+                  ...testState.layers.first,
+                  columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
+                  columns: {
+                    col1: testState.layers.first.columns.col1,
+                    col2: testState.layers.first.columns.col2,
+                    col3: testState.layers.first.columns.col3,
+                    col4: testState.layers.first.columns.col4,
+                    col5: {
+                      dataType: 'number',
+                      operationType: 'count',
+                      label: '',
+                      isBucketed: false,
+                      sourceField: '___records___',
+                      customLabel: true,
+                    },
+                    col6: {
+                      dataType: 'number',
+                      operationType: 'count',
+                      label: '',
+                      isBucketed: false,
+                      sourceField: '___records___',
+                      customLabel: true,
+                    },
                   },
                 },
               },
             },
-          },
-          targetLayerDimensionGroups: [
-            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
-            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
-            { ...dimensionGroups[2] },
-          ],
-          dropType: 'move_compatible',
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+            targetLayerDimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+            dropType: 'move_compatible',
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
+              incompleteColumns: {},
+              columnOrder: ['col1', 'col2', 'col4', 'col5', 'col6'],
               columns: {
                 col1: testState.layers.first.columns.col3,
                 col2: testState.layers.first.columns.col2,
-                col3: testState.layers.first.columns.col3,
                 col4: testState.layers.first.columns.col4,
                 col5: expect.objectContaining({
                   dataType: 'number',
@@ -1073,26 +1056,24 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // b: col2, col3
         // c: col4
         // dragging col3 onto col1 in group a
-
-        onDrop({
-          ...defaultProps,
-          source: mockedDndOperations.bucket2,
-          state: testState,
-          target: {
-            ...defaultProps.target,
-            columnId: 'col1',
-            groupId: 'a',
-          },
-          targetLayerDimensionGroups: [
-            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
-            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
-            { ...dimensionGroups[2] },
-          ],
-          dropType: 'duplicate_compatible',
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            source: mockedDndOperations.bucket2,
+            state: testState,
+            target: {
+              ...defaultProps.target,
+              columnId: 'col1',
+              groupId: 'a',
+            },
+            targetLayerDimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+            dropType: 'duplicate_compatible',
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
@@ -1116,33 +1097,32 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // b: col2, col3
         // c: col4
         // dragging col1 into newCol in group b
-        onDrop({
-          ...defaultProps,
-          dropType: 'move_compatible',
-          source: mockedDndOperations.metric,
-          state: testState,
-          target: {
-            ...defaultProps.target,
-            columnId: 'newCol',
-            groupId: 'b',
-          },
-          targetLayerDimensionGroups: [
-            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
-            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
-            { ...dimensionGroups[2] },
-          ],
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            dropType: 'move_compatible',
+            source: mockedDndOperations.metric,
+            state: testState,
+            target: {
+              ...defaultProps.target,
+              columnId: 'newCol',
+              groupId: 'b',
+            },
+            targetLayerDimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
             first: {
+              incompleteColumns: {},
               ...testState.layers.first,
-              columnOrder: ['col1', 'col2', 'col3', 'newCol', 'col4'],
+              columnOrder: ['col2', 'col3', 'newCol', 'col4'],
               columns: {
-                col1: testState.layers.first.columns.col1,
                 newCol: testState.layers.first.columns.col1,
                 col2: testState.layers.first.columns.col2,
                 col3: testState.layers.first.columns.col3,
@@ -1159,25 +1139,24 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // b: col2, col3
         // c: col4
         // copying col1 within group a
-        onDrop({
-          ...defaultProps,
-          dropType: 'duplicate_compatible',
-          target: {
-            ...defaultProps.target,
-            columnId: 'newCol',
-            groupId: 'a',
-          },
-          source: mockedDndOperations.metric,
-          state: testState,
-          targetLayerDimensionGroups: [
-            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
-            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
-            { ...dimensionGroups[2] },
-          ],
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            dropType: 'duplicate_compatible',
+            target: {
+              ...defaultProps.target,
+              columnId: 'newCol',
+              groupId: 'a',
+            },
+            source: mockedDndOperations.metric,
+            state: testState,
+            targetLayerDimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
@@ -1202,27 +1181,25 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // b: col1, col2, col3
         // c: col4
         // dragging field into newCol in group a
-
-        onDrop({
-          ...defaultProps,
-          source: mockedDraggedField,
-          target: {
-            ...defaultProps.target,
-            columnId: 'newCol',
-            groupId: 'a',
-            filterOperations: (op: OperationMetadata) => op.dataType === 'number',
-          },
-          targetLayerDimensionGroups: [
-            // a and b are ordered in reverse visually, but nesting order keeps them in place for column order
-            { ...dimensionGroups[1], nestingOrder: 1 },
-            { ...dimensionGroups[0], nestingOrder: 0 },
-            { ...dimensionGroups[2] },
-          ],
-          dropType: 'field_add',
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            source: mockedDraggedField,
+            target: {
+              ...defaultProps.target,
+              columnId: 'newCol',
+              groupId: 'a',
+              filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+            },
+            targetLayerDimensionGroups: [
+              // a and b are ordered in reverse visually, but nesting order keeps them in place for column order
+              { ...dimensionGroups[1], nestingOrder: 1 },
+              { ...dimensionGroups[0], nestingOrder: 0 },
+              { ...dimensionGroups[2] },
+            ],
+            dropType: 'field_add',
+          })
+        ).toEqual({
           ...state,
           layers: {
             ...state.layers,
@@ -1251,32 +1228,30 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // b: col2, col3
         // c: col4
         // dragging col4 into newCol in group a
-
-        onDrop({
-          ...defaultProps,
-          dropType: 'move_incompatible',
-          source: mockedDndOperations.metricC,
-          state: testState,
-          target: {
-            ...defaultProps.target,
-            columnId: 'newCol',
-            groupId: 'a',
-          },
-          targetLayerDimensionGroups: [
-            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
-            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
-            { ...dimensionGroups[2] },
-          ],
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            dropType: 'move_incompatible',
+            source: mockedDndOperations.metricC,
+            state: testState,
+            target: {
+              ...defaultProps.target,
+              columnId: 'newCol',
+              groupId: 'a',
+            },
+            targetLayerDimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              columnOrder: ['col1', 'newCol', 'col2', 'col3', 'col4'],
+              columnOrder: ['col1', 'newCol', 'col2', 'col3'],
               columns: {
                 col1: testState.layers.first.columns.col1,
                 newCol: expect.objectContaining({
@@ -1285,7 +1260,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                 }),
                 col2: testState.layers.first.columns.col2,
                 col3: testState.layers.first.columns.col3,
-                col4: testState.layers.first.columns.col4,
               },
               incompleteColumns: {},
             },
@@ -1299,26 +1273,24 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // b: col2, col3
         // c: col4
         // dragging col4 into newCol in group a
-
-        onDrop({
-          ...defaultProps,
-          dropType: 'duplicate_incompatible',
-          source: mockedDndOperations.metricC,
-          state: testState,
-          target: {
-            ...defaultProps.target,
-            columnId: 'newCol',
-            groupId: 'a',
-          },
-          targetLayerDimensionGroups: [
-            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
-            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
-            { ...dimensionGroups[2] },
-          ],
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            dropType: 'duplicate_incompatible',
+            source: mockedDndOperations.metricC,
+            state: testState,
+            target: {
+              ...defaultProps.target,
+              columnId: 'newCol',
+              groupId: 'a',
+            },
+            targetLayerDimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
@@ -1347,32 +1319,30 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // b: col2, col3
         // c: col4
         // dragging col4 into col2 in group b
-
-        onDrop({
-          ...defaultProps,
-          dropType: 'move_incompatible',
-          source: mockedDndOperations.metricC,
-          state: testState,
-          target: {
-            ...defaultProps.target,
-            columnId: 'col2',
-            groupId: 'b',
-          },
-          targetLayerDimensionGroups: [
-            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
-            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
-            { ...dimensionGroups[2] },
-          ],
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            dropType: 'move_incompatible',
+            source: mockedDndOperations.metricC,
+            state: testState,
+            target: {
+              ...defaultProps.target,
+              columnId: 'col2',
+              groupId: 'b',
+            },
+            targetLayerDimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              columnOrder: ['col1', 'col2', 'col3', 'col4'],
+              columnOrder: ['col1', 'col2', 'col3'],
               columns: {
                 col1: testState.layers.first.columns.col1,
                 col2: {
@@ -1391,13 +1361,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   },
                 },
                 col3: testState.layers.first.columns.col3,
-                col4: {
-                  dataType: 'number',
-                  isBucketed: false,
-                  label: 'Median of bytes',
-                  operationType: 'median',
-                  sourceField: 'bytes',
-                },
               },
               incompleteColumns: {},
             },
@@ -1412,25 +1375,24 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // c: col4
         // dragging col4 into col1
 
-        onDrop({
-          ...defaultProps,
-          target: {
-            ...defaultProps.target,
-            columnId: 'col1',
-            groupId: 'a',
-          },
-          source: mockedDndOperations.metricC,
-          dropType: 'swap_compatible',
-          state: testState,
-          targetLayerDimensionGroups: [
-            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
-            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
-            { ...dimensionGroups[2] },
-          ],
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            target: {
+              ...defaultProps.target,
+              columnId: 'col1',
+              groupId: 'a',
+            },
+            source: mockedDndOperations.metricC,
+            dropType: 'swap_compatible',
+            state: testState,
+            targetLayerDimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
@@ -1455,25 +1417,24 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         // c: col4
         // dragging col4 into col2
 
-        onDrop({
-          ...defaultProps,
-          target: {
-            ...defaultProps.target,
-            columnId: 'col2',
-            groupId: 'b',
-          },
-          dropType: 'swap_incompatible',
-          source: mockedDndOperations.metricC,
-          state: testState,
-          targetLayerDimensionGroups: [
-            { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
-            { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
-            { ...dimensionGroups[2] },
-          ],
-        });
-
-        expect(setState).toBeCalledTimes(1);
-        expect(setState).toHaveBeenCalledWith({
+        expect(
+          onDrop({
+            ...defaultProps,
+            target: {
+              ...defaultProps.target,
+              columnId: 'col2',
+              groupId: 'b',
+            },
+            dropType: 'swap_incompatible',
+            source: mockedDndOperations.metricC,
+            state: testState,
+            targetLayerDimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+          })
+        ).toEqual({
           ...testState,
           layers: {
             ...testState.layers,
@@ -1553,8 +1514,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       describe('simple operations', () => {
         let props: DatasourceDimensionDropHandlerProps<FormBasedPrivateState>;
         beforeEach(() => {
-          setState = jest.fn();
-
           props = {
             indexPatterns: mockDataViews(),
             state: {
@@ -1564,7 +1523,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                 second: mockedLayers.multipleColumnsLayer('col2', 'col3', 'col4', 'col5'),
               },
             },
-            setState: jest.fn(),
             source: {
               id: 'col1',
               humanData: { label: '2' },
@@ -1588,16 +1546,18 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         });
         it('doesnt allow dropping for different data views', () => {
           props.state.layers.second.indexPatternId = 'second';
-          expect(onDrop(props)).toEqual(false);
-          expect(props.setState).not.toHaveBeenCalled();
+          expect(onDrop(props)).toEqual(undefined);
         });
         it('move_compatible; allows dropping to the compatible group in different layer to empty column', () => {
-          expect(onDrop(props)).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          expect(onDrop(props)).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
+              first: {
+                ...props.state.layers.first,
+                columns: {},
+                columnOrder: [],
+              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'newCol', 'col5'],
                 columns: {
@@ -1610,9 +1570,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           });
         });
         it('duplicate_compatible: allows dropping to the compatible group in different layer to empty column', () => {
-          expect(onDrop({ ...props, dropType: 'duplicate_compatible' })).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          expect(onDrop({ ...props, dropType: 'duplicate_compatible' })).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
@@ -1640,9 +1598,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             dropType: 'swap_compatible',
           };
 
-          expect(onDrop(props)).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          expect(onDrop(props)).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
@@ -1673,12 +1629,15 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             },
             dropType: 'replace_compatible',
           };
-          expect(onDrop(props)).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          expect(onDrop(props)).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
+              first: {
+                ...props.state.layers.first,
+                columns: {},
+                columnOrder: [],
+              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'col5'],
                 columns: {
@@ -1702,9 +1661,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             dropType: 'replace_duplicate_compatible',
           };
 
-          expect(onDrop(props)).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          expect(onDrop(props)).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
@@ -1732,9 +1689,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             dropType: 'replace_duplicate_incompatible',
           };
 
-          expect(onDrop(props)).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          expect(onDrop(props)).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
@@ -1773,12 +1728,15 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             dropType: 'replace_incompatible',
           };
 
-          expect(onDrop(props)).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          expect(onDrop(props)).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
+              first: {
+                ...props.state.layers.first,
+                columns: {},
+                columnOrder: [],
+              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'col5'],
                 columns: {
@@ -1814,12 +1772,15 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             dropType: 'move_incompatible',
           };
 
-          expect(onDrop(props)).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          expect(onDrop(props)).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
+              first: {
+                ...props.state.layers.first,
+                columns: {},
+                columnOrder: [],
+              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'col5', 'newCol'],
                 columns: {
@@ -1855,9 +1816,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             dropType: 'duplicate_incompatible',
           };
 
-          expect(onDrop(props)).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          expect(onDrop(props)).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
@@ -1896,9 +1855,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             dropType: 'swap_incompatible',
           };
 
-          expect(onDrop(props)).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          expect(onDrop(props)).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
@@ -1951,37 +1908,37 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           });
         });
         it('combine_compatible: allows dropping to combine to multiterms', () => {
-          onDrop({
-            ...props,
-            state: {
-              ...props.state,
-              layers: {
-                ...props.state.layers,
-                first: {
-                  ...props.state.layers.first,
-                  columns: {
-                    terms1: mockedColumns.terms,
+          expect(
+            onDrop({
+              ...props,
+              state: {
+                ...props.state,
+                layers: {
+                  ...props.state.layers,
+                  first: {
+                    ...props.state.layers.first,
+                    columns: {
+                      terms1: mockedColumns.terms,
+                    },
                   },
                 },
               },
-            },
-            source: {
-              columnId: 'terms1',
-              groupId: 'a',
-              layerId: 'first',
-              id: 'terms1',
-              humanData: { label: 'Label' },
-            },
-            dropType: 'combine_compatible',
-            target: {
-              ...props.target,
-              columnId: 'col4',
-              groupId: 'a',
-              filterOperations: (op: OperationMetadata) => op.isBucketed,
-            },
-          });
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+              source: {
+                columnId: 'terms1',
+                groupId: 'a',
+                layerId: 'first',
+                id: 'terms1',
+                humanData: { label: 'Label' },
+              },
+              dropType: 'combine_compatible',
+              target: {
+                ...props.target,
+                columnId: 'col4',
+                groupId: 'a',
+                filterOperations: (op: OperationMetadata) => op.isBucketed,
+              },
+            })
+          ).toEqual({
             ...props.state,
             layers: expect.objectContaining({
               second: {
@@ -2013,38 +1970,38 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           });
         });
         it('combine_incompatible: allows dropping to combine to multiterms', () => {
-          onDrop({
-            ...props,
-            state: {
-              ...props.state,
-              layers: {
-                ...props.state.layers,
-                first: {
-                  ...props.state.layers.first,
-                  columns: {
-                    median: mockedColumns.median,
+          expect(
+            onDrop({
+              ...props,
+              state: {
+                ...props.state,
+                layers: {
+                  ...props.state.layers,
+                  first: {
+                    ...props.state.layers.first,
+                    columns: {
+                      median: mockedColumns.median,
+                    },
                   },
                 },
               },
-            },
-            source: {
-              columnId: 'median',
-              groupId: 'x',
-              layerId: 'first',
-              id: 'median',
-              humanData: { label: 'Label' },
-              filterOperations: (op: OperationMetadata) => !op.isBucketed,
-            },
-            dropType: 'combine_incompatible',
-            target: {
-              ...props.target,
-              columnId: 'col4',
-              groupId: 'breakdown',
-              filterOperations: (op: OperationMetadata) => op.isBucketed,
-            },
-          });
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+              source: {
+                columnId: 'median',
+                groupId: 'x',
+                layerId: 'first',
+                id: 'median',
+                humanData: { label: 'Label' },
+                filterOperations: (op: OperationMetadata) => !op.isBucketed,
+              },
+              dropType: 'combine_incompatible',
+              target: {
+                ...props.target,
+                columnId: 'col4',
+                groupId: 'breakdown',
+                filterOperations: (op: OperationMetadata) => op.isBucketed,
+              },
+            })
+          ).toEqual({
             ...props.state,
             layers: expect.objectContaining({
               second: {
@@ -2081,7 +2038,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         beforeEach(() => {
           props = {
             targetLayerDimensionGroups: defaultDimensionGroups,
-            setState: jest.fn(),
             dropType: 'move_compatible',
 
             indexPatterns: mockDataViews(),
@@ -2161,12 +2117,15 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         });
 
         it('move_compatible; allows dropping to the compatible group in different layer to empty column', () => {
-          expect(onDrop(props)).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          expect(onDrop(props)).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
+              first: {
+                ...props.state.layers.first,
+                columns: {},
+                columnOrder: [],
+              },
               second: {
                 columnOrder: ['second', 'secondX0', 'newColumnX0', 'newColumn'],
                 columns: {
@@ -2216,12 +2175,15 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                 indexPatternId: 'test',
               },
             })
-          ).toEqual(true);
-          expect(props.setState).toBeCalledTimes(1);
-          expect(props.setState).toHaveBeenCalledWith({
+          ).toEqual({
             ...props.state,
             layers: {
               ...props.state.layers,
+              first: {
+                ...props.state.layers.first,
+                columns: {},
+                columnOrder: [],
+              },
               second: {
                 columnOrder: ['second', 'secondX0'],
                 columns: {

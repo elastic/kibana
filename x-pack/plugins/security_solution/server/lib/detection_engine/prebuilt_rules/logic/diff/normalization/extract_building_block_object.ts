@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../../common/detection_engine/rule_schema';
-import type { BuildingBlockObject } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_field_types';
+import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { BuildingBlockObject } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
 
 export const extractBuildingBlockObject = (
