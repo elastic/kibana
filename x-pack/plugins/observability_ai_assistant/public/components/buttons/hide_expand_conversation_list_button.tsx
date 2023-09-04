@@ -8,9 +8,11 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function HideExpandConversationListButton(
-  props: React.ComponentProps<typeof EuiButtonEmpty> & { isExpanded: boolean }
-) {
+export type HideExpandConversationListButtonProps = React.ComponentProps<typeof EuiButtonEmpty> & {
+  isExpanded: boolean;
+};
+
+export function HideExpandConversationListButton(props: HideExpandConversationListButtonProps) {
   return (
     <EuiButtonEmpty iconType={props.isExpanded ? 'menuLeft' : 'menuRight'} size="xs" {...props}>
       {props.isExpanded

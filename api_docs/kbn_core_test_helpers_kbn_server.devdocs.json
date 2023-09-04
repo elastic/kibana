@@ -765,7 +765,17 @@
         "label": "TestServerlessESUtils",
         "description": [],
         "signature": [
-          "{ stop: () => Promise<void>; es: any; }"
+          "Pick<",
+          {
+            "pluginId": "@kbn/core-test-helpers-kbn-server",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
+            "section": "def-common.TestElasticsearchUtils",
+            "text": "TestElasticsearchUtils"
+          },
+          ", \"stop\" | \"es\"> & { getClient: () => ",
+          "default",
+          "; }"
         ],
         "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
         "deprecated": false,

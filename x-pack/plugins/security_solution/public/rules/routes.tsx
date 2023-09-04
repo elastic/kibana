@@ -19,10 +19,7 @@ import {
 import { NotFoundPage } from '../app/404';
 import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
 import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
-import {
-  RuleDetailsPage,
-  RuleDetailTabs,
-} from '../detection_engine/rule_details_ui/pages/rule_details';
+import { RuleDetailsPage } from '../detection_engine/rule_details_ui/pages/rule_details';
 import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_editing';
 import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
@@ -31,8 +28,8 @@ import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/
 import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
-import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
+import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 
 const RulesSubRoutes = [
   {
@@ -109,21 +106,13 @@ const RulesContainerComponent: React.FC = () => {
 
 const Rules = React.memo(RulesContainerComponent);
 
-const CoverageOverviewRoutes = () => {
-  const isDetectionsCoverageOverviewEnabled = useIsExperimentalFeatureEnabled(
-    'detectionsCoverageOverview'
-  );
-
-  return isDetectionsCoverageOverviewEnabled ? (
-    <PluginTemplateWrapper>
-      <TrackApplicationView viewId={SecurityPageName.coverageOverview}>
-        <CoverageOverviewPage />
-      </TrackApplicationView>
-    </PluginTemplateWrapper>
-  ) : (
-    <Redirect to={SecurityPageName.landing} />
-  );
-};
+const CoverageOverviewRoutes = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.coverageOverview}>
+      <CoverageOverviewPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
+);
 
 export const routes: SecuritySubPluginRoutes = [
   {

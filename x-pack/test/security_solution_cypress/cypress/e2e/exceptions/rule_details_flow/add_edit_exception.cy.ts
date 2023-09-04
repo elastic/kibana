@@ -66,7 +66,7 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@brokenInServ
 
   before(() => {
     cy.task('esArchiverResetKibana');
-    cy.task('esArchiverLoad', 'exceptions');
+    cy.task('esArchiverLoad', { archiveName: 'exceptions' });
     login();
   });
 
@@ -319,7 +319,7 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@brokenInServ
       cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
       // load more docs
-      cy.task('esArchiverLoad', 'exceptions_2');
+      cy.task('esArchiverLoad', { archiveName: 'exceptions_2' });
 
       // now that there are no more exceptions, the docs should match and populate alerts
       goToAlertsTab();
