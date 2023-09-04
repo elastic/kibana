@@ -7,5 +7,6 @@
  */
 
 export * from './connectors';
+export * from './native_connectors';
 export * from './optimistic_concurrency';
 export * from './pagination';

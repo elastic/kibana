@@ -14,9 +14,8 @@ import {
   ConnectorStatus,
 } from '@kbn/search-connectors';
 
-import { fetchConnectorByIndexName } from '@kbn/search-connectors/lib/fetch_connectors';
+import { fetchConnectorByIndexName, NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
 
-import { NATIVE_CONNECTOR_DEFINITIONS } from '../../../common/connectors/native_connectors';
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
 import { ErrorCode } from '../../../common/types/error_codes';
