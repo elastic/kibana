@@ -55,4 +55,4 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './get_metadata.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../model/schema/common.yaml#/components/schemas/SuccessResponse'
