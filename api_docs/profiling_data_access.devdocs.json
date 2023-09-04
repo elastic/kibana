@@ -1,0 +1,76 @@
+{
+  "id": "profilingDataAccess",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-server.ProfilingConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ProfilingConfig",
+        "description": [],
+        "signature": [
+          "{ readonly elasticsearch?: Readonly<{} & { username: string; hosts: string; password: string; }> | undefined; }"
+        ],
+        "path": "x-pack/plugins/profiling_data_access/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-server.ProfilingDataAccessPluginStart",
+        "type": "Type",
+        "tags": [],
+        "label": "ProfilingDataAccessPluginStart",
+        "description": [],
+        "signature": [
+          "{ services: { fetchFlamechartData: ({ esClient, rangeFrom, rangeTo, kuery }: FetchFlamechartParams) => Promise<",
+          "BaseFlameGraph",
+          ">; }; }"
+        ],
+        "path": "x-pack/plugins/profiling_data_access/server/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "profilingDataAccess",
+      "id": "def-server.ProfilingDataAccessPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "ProfilingDataAccessPluginSetup",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/profiling_data_access/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
