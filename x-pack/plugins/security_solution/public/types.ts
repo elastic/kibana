@@ -142,6 +142,7 @@ export interface ContractStartServices {
   isILMAvailable$: Observable<boolean>;
   isSidebarEnabled$: Observable<boolean>;
   getStartedComponent$: Observable<React.ComponentType | null>;
+  dashboardsLandingCalloutComponent$: Observable<React.ComponentType | null>;
   upselling: UpsellingService;
 }
 
@@ -178,6 +179,7 @@ export interface PluginStart {
   setIsILMAvailable: (isILMAvailable: boolean) => void;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
+  setDashboardsLandingCallout: (dashboardsLandingCallout: React.ComponentType) => void;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
 }
