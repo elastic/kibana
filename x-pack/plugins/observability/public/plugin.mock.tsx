@@ -6,6 +6,9 @@
  */
 import React from 'react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 
 const triggersActionsUiStartMock = {
@@ -110,6 +113,8 @@ export const observabilityPublicPluginsStartMock = {
   createStart() {
     return {
       cases: mockCasesContract(),
+      charts: chartPluginMock.createStartContract(),
+      contentManagement: contentManagementMock.createStartContract(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       data: data.createStart(),
       dataViews: dataViews.createStart(),
