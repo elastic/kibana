@@ -211,7 +211,7 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={() => onSubmit(CREATE_AND_EXECUTE_POLICY)} isLoading={isLoading}>
             <FormattedMessage
-              id="xpack.idxMgmt.enrichPolicyCreate.createStep.nextButtonLabel"
+              id="xpack.idxMgmt.enrichPolicyCreate.createStep.createAndExecuteButtonLabel"
               defaultMessage="Create and execute policy"
             />
           </EuiButtonEmpty>
@@ -220,7 +220,7 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
         <EuiFlexItem grow={false}>
           <EuiButton fill color="primary" onClick={() => onSubmit()} isLoading={isLoading}>
             <FormattedMessage
-              id="xpack.idxMgmt.enrichPolicyCreate.createStep.nextButtonLabel"
+              id="xpack.idxMgmt.enrichPolicyCreate.createStep.createButtonLabel"
               defaultMessage="Create policy"
             />
           </EuiButton>
