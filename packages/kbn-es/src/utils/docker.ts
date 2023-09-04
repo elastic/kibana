@@ -10,6 +10,7 @@ import execa from 'execa';
 import fs from 'fs';
 import Fsp from 'fs/promises';
 import { resolve, basename, join } from 'path';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
@@ -35,6 +36,7 @@ interface BaseOptions {
   image?: string;
   port?: number;
   ssl?: boolean;
+  /** Kill running cluster before starting a new cluster  */
   kill?: boolean;
   files?: string | string[];
 }
@@ -44,10 +46,16 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 }
 
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
+  /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
+  /** Path to the directory where the ES cluster will store data */
   basePath: string;
+  /** If this process exits, teardown the ES cluster as well */
   teardown?: boolean;
+  /** Start the ES cluster in the background instead of remaining attached: useful for running tests */
   background?: boolean;
+  /** Wait for the ES cluster to be ready to serve requests */
+  waitForReady?: boolean;
 }
 
 interface ServerlessEsNodeArgs {
@@ -539,6 +547,30 @@ export async function runServerlessEsNode(
   );
 }
 
+function getESClient(
+  { node }: { node: string } = { node: `http://localhost:${DEFAULT_PORT}` }
+): Client {
+  return new Client({
+    node,
+    Connection: HttpConnection,
+  });
+}
+
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+async function waitUntilClusterReady(timeoutMs = 60 * 1000): Promise<void> {
+  const started = Date.now();
+  const client = getESClient();
+  while (started + timeoutMs > Date.now()) {
+    try {
+      await client.info();
+      break;
+    } catch (e) {
+      await delay(1000);
+      /* trap to continue */
+    }
+  }
+}
+
 /**
  * Runs an ES Serverless Cluster through Docker
  */
@@ -583,8 +615,14 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     `);
 
     log.warning(`Kibana should be started with the SSL flag so that it can authenticate with ES.
-      See packages/kbn-es/src/ess_resources/README.md for additional information on authentication.    
+      See packages/kbn-es/src/ess_resources/README.md for additional information on authentication.
     `);
+  }
+
+  if (options.waitForReady) {
+    log.info('Waiting until ES is ready to serve requests...');
+    await waitUntilClusterReady();
+    log.success('ES is ready');
   }
 
   if (!options.background) {
