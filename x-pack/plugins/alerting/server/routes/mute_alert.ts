@@ -10,7 +10,10 @@ import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import { MuteOptions } from '../rules_client';
 import { RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
-import { muteAlertParamsSchemaV1 } from '../../common/routes/rule/apis/mute_alert';
+import {
+  muteAlertParamsSchemaV1,
+  MuteAlertRequestParamsV1,
+} from '../../common/routes/rule/apis/mute_alert';
 
 // FIXME: move to server/routes/rule/apis transformations
 const rewriteParamsReq: RewriteRequestCase<MuteOptions> = ({
@@ -35,11 +38,10 @@ export const muteAlertRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        // FIXME: set type params: MuteAlertRequestParamsV1. Create type in common types based on schema definition
-        const params = rewriteParamsReq(req.params);
+        const params: MuteAlertRequestParamsV1 = req.params;
         try {
           // FIXME: set the params type rulesClient.muteInstance<MuteParamsV1>. Create type in application types
-          await rulesClient.muteInstance(params);
+          await rulesClient.muteInstance(rewriteParamsReq(params));
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
