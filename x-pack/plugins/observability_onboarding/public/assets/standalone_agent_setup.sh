@@ -61,6 +61,7 @@ updateStepProgress() {
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
+    --header "x-elastic-internal-origin: Kibana" \
     --data "{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}" \
     --output /dev/null \
     --no-progress-meter
@@ -148,6 +149,7 @@ downloadElasticAgentConfig() {
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
+    --header "x-elastic-internal-origin: Kibana" \
     --no-progress-meter \
     --output ${cfg}
 
@@ -162,7 +164,7 @@ downloadElasticAgentConfig() {
 
 if [ "${AUTO_DOWNLOAD_CONFIG}" == "autoDownloadConfig=1" ]; then
   downloadElasticAgentConfig
-  echo "Done with standalone Elastic Agent setup for custom logs. Look for streaming logs to arrive in Kibana"
+  echo "Done with standalone Elastic Agent setup. Look for streaming logs to arrive in Kibana"
 else
-  echo "Done with standalone Elastic Agent setup for custom logs. Make sure to add your configuration to ${cfg}, then look for streaming logs to arrive in Kibana"
+  echo "Done with standalone Elastic Agent setup. Make sure to add your configuration to ${cfg}, then look for streaming logs to arrive in Kibana"
 fi

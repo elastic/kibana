@@ -7,7 +7,10 @@
 import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { StackTracesDisplayOption, TopNType } from '../../../common/stack_traces';
+import {
+  StackTracesDisplayOption,
+  TopNType,
+} from '@kbn/profiling-data-access-plugin/common/stack_traces';
 import { groupSamplesByCategory, TopNResponse } from '../../../common/topn';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';

@@ -34,6 +34,19 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: SERVERLESS_ENVIRONMENT=observability.examples .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Observability Examples Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
   - command: SERVERLESS_ENVIRONMENT=search .buildkite/scripts/steps/functional/serverless_ftr.sh
     label: 'Serverless Search Tests'
     agents:
@@ -47,8 +60,34 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: SERVERLESS_ENVIRONMENT=search.examples .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Search Examples Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
   - command: SERVERLESS_ENVIRONMENT=security .buildkite/scripts/steps/functional/serverless_ftr.sh
     label: 'Serverless Security Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
+  - command: SERVERLESS_ENVIRONMENT=security.examples .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Security Examples Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
