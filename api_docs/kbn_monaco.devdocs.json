@@ -373,7 +373,7 @@
             "label": "getSourceIdentifiers",
             "description": [],
             "signature": [
-              "CallbackFn | undefined"
+              "CallbackFn<string> | undefined"
             ],
             "path": "packages/kbn-monaco/src/esql/lib/autocomplete/types.ts",
             "deprecated": false,
@@ -387,7 +387,49 @@
             "label": "getFieldsIdentifiers",
             "description": [],
             "signature": [
-              "CallbackFn | undefined"
+              "CallbackFn<string> | undefined"
+            ],
+            "path": "packages/kbn-monaco/src/esql/lib/autocomplete/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCustomAutocompleteCallbacks.getPoliciesIdentifiers",
+            "type": "Function",
+            "tags": [],
+            "label": "getPoliciesIdentifiers",
+            "description": [],
+            "signature": [
+              "CallbackFn<{ name: string; indices: string[]; }> | undefined"
+            ],
+            "path": "packages/kbn-monaco/src/esql/lib/autocomplete/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCustomAutocompleteCallbacks.getPolicyFieldsIdentifiers",
+            "type": "Function",
+            "tags": [],
+            "label": "getPolicyFieldsIdentifiers",
+            "description": [],
+            "signature": [
+              "CallbackFn<string> | undefined"
+            ],
+            "path": "packages/kbn-monaco/src/esql/lib/autocomplete/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCustomAutocompleteCallbacks.getPolicyMatchingFieldIdentifiers",
+            "type": "Function",
+            "tags": [],
+            "label": "getPolicyMatchingFieldIdentifiers",
+            "description": [],
+            "signature": [
+              "CallbackFn<string> | undefined"
             ],
             "path": "packages/kbn-monaco/src/esql/lib/autocomplete/types.ts",
             "deprecated": false,
