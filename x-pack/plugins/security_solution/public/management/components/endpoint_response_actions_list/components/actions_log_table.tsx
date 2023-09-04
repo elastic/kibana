@@ -43,7 +43,7 @@ import { useUrlPagination } from '../../../hooks/use_url_pagination';
 const emptyValue = getEmptyValue();
 
 // Truncated usernames
-const StyledFacetButton = euiStyled(EuiFacetButton)`
+const StyledFacetButton = euiStyled(EuiFacetButton).attrs({ title: undefined })`
   .euiText {
     margin-top: 0.38rem;
     overflow-y: visible !important;
@@ -110,7 +110,6 @@ const getResponseActionListTableColumns = ({
           return (
             <EuiToolTip content={UX_MESSAGES.triggeredByRule} anchorClassName="eui-textTruncate">
               <SecuritySolutionLinkAnchor
-                title={undefined}
                 data-test-subj="ruleName"
                 deepLinkId={SecurityPageName.rules}
                 path={getRuleDetailsUrl(ruleId)}
@@ -130,13 +129,14 @@ const getResponseActionListTableColumns = ({
           <StyledFacetButton
             icon={
               <EuiAvatar
+                // We've a EuiTooltip that shows for createdBy below,
+                // Thus we don't need to add a title tooltip as well.
                 title={undefined}
                 name={createdBy}
                 data-test-subj={getTestId('column-user-avatar')}
                 size="s"
               />
             }
-            title={undefined}
           >
             <EuiToolTip content={createdBy} anchorClassName="eui-textTruncate">
               <EuiText
