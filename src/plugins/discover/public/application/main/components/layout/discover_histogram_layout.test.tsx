@@ -58,7 +58,6 @@ const mountComponent = async ({
   storage?: Storage;
   savedSearch?: SavedSearch;
   searchSessionId?: string | null;
-  selectedColumns?: string[];
 } = {}) => {
   let services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
