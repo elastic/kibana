@@ -46,12 +46,6 @@ export interface MSearchIn {
 
 export type MSearchResult<T = unknown> = SearchResult<T>;
 
-export interface MSearchIn<Options extends void | object = object> {
-  contentTypes: Array<{ contentTypeId: string; version?: Version }>;
-  query: MSearchQuery;
-  options?: Options;
-}
-
 export interface MSearchOut<T = unknown> {
   contentTypes: Array<{ contentTypeId: string; version?: Version }>;
   result: MSearchResult<T>;
