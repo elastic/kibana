@@ -62,6 +62,7 @@ export class ExceptionsListApiClient {
         const asyncFunction = async () => {
           try {
             await this.http.post<ExceptionListSchema>(INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL, {
+              version: '1',
               body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
             });
 

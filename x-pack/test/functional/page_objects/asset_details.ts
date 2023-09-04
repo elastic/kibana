@@ -136,6 +136,14 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return await testSubjects.find('infraAssetDetailsProcessesSearchBarInput');
     },
 
+    async processesSearchInputErrorMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsProcessesSearchInputError');
+    },
+
+    async processesSearchInputErrorExists() {
+      return await testSubjects.existOrFail('infraAssetDetailsProcessesSearchInputError');
+    },
+
     // Logs
     async clickLogsTab() {
       return testSubjects.click('infraAssetDetailsLogsTab');
