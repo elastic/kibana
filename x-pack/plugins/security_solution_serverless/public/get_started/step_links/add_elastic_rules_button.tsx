@@ -21,7 +21,7 @@ const AddElasticRulesButtonComponent = () => {
     onClick,
   });
   return (
-    <LinkButton onClick={onLinkClicked} id={SecurityPageName.rules} path="/management" fill>
+    <LinkButton onClick={onLinkClicked} id={SecurityPageName.rules} fill>
       <FormattedMessage
         id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4.description2.button"
         defaultMessage="Add Elastic rules"
