@@ -238,6 +238,7 @@ export function ChatPromptEditor({
                 </EuiPanel>
               ) : (
                 <EuiTextArea
+                  css={{ maxHeight: 200 }}
                   disabled={disabled}
                   fullWidth
                   inputRef={textAreaRef}
