@@ -30,6 +30,7 @@ import {
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
 } from './ess_file_realm';
 import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
+import { waitForClusterReady } from './wait_for_cluster_ready';
 
 interface BaseOptions {
   tag?: string;
@@ -556,21 +557,6 @@ function getESClient(
   });
 }
 
-const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
-async function waitUntilClusterReady(timeoutMs = 60 * 1000): Promise<void> {
-  const started = Date.now();
-  const client = getESClient();
-  while (started + timeoutMs > Date.now()) {
-    try {
-      await client.info();
-      break;
-    } catch (e) {
-      await delay(1000);
-      /* trap to continue */
-    }
-  }
-}
-
 /**
  * Runs an ES Serverless Cluster through Docker
  */
@@ -621,7 +607,8 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
-    await waitUntilClusterReady();
+    const client = getESClient();
+    await waitForClusterReady({ client, log });
     log.success('ES is ready');
   }
 
