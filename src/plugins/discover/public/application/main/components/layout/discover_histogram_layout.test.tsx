@@ -52,7 +52,6 @@ const mountComponent = async ({
   storage,
   savedSearch = savedSearchMock,
   searchSessionId = '123',
-  selectedColumns = [],
 }: {
   isPlainRecord?: boolean;
   isTimeBased?: boolean;
@@ -89,13 +88,6 @@ const mountComponent = async ({
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
-    textBasedQueryColumns: isPlainRecord
-      ? [
-          { id: '1', name: 'extension', meta: { type: 'text' } },
-          { id: '2', name: 'bytes', meta: { type: 'number' } },
-          { id: '3', name: '@timestamp', meta: { type: 'date' } },
-        ]
-      : undefined,
   }) as DataDocuments$;
 
   const availableFields$ = new BehaviorSubject({
@@ -128,7 +120,7 @@ const mountComponent = async ({
     dataView: dataViewMock,
     stateContainer,
     onFieldEdited: jest.fn(),
-    columns: selectedColumns,
+    columns: [],
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onAddFilter: jest.fn(),
     resizeRef: { current: null },
@@ -169,14 +161,6 @@ describe('Discover histogram layout component', () => {
     it('should not render null if there is no search session, but isPlainRecord is true', async () => {
       const { component } = await mountComponent({ isPlainRecord: true });
       expect(component.isEmptyRender()).toBe(false);
-    });
-
-    it('should render the callout if isPlainRecord is true and the selected columns are less than the available ones', async () => {
-      const { component } = await mountComponent({
-        isPlainRecord: true,
-        selectedColumns: ['bytes'],
-      });
-      expect(component.find('[data-test-subj="dscSelectedColumnsCallout"]').exists()).toBe(true);
     });
   });
 
