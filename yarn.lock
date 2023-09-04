@@ -5093,6 +5093,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/profiling-data-access-plugin@link:x-pack/plugins/profiling_data_access":
+  version "0.0.0"
+  uid ""
+
 "@kbn/profiling-plugin@link:x-pack/plugins/profiling":
   version "0.0.0"
   uid ""
@@ -5922,6 +5926,10 @@
   uid ""
 
 "@kbn/unified-doc-viewer@link:packages/kbn-unified-doc-viewer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-data-table@link:packages/kbn-unified-data-table":
   version "0.0.0"
   uid ""
 
