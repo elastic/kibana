@@ -56,7 +56,6 @@
     "@kbn/react-field",
     "@kbn/field-types",
     "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/global-search-plugin",
     "@kbn/logs-shared-plugin",
