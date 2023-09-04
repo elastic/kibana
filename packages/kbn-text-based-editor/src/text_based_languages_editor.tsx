@@ -357,6 +357,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
+  useEffect(() => {
+    if (isCodeEditorExpanded) {
+      const pipes = code?.split('|');
+      const pipesWithNewLine = code?.split('\n|');
+      if (pipes?.length === pipesWithNewLine?.length) {
+        setIsWordWrapped(true);
+      }
+    }
+  }, [code, isCodeEditorExpanded]);
+
   const onResize = ({ width }: { width: number }) => {
     calculateVisibleCode(width);
     if (editor1.current) {
