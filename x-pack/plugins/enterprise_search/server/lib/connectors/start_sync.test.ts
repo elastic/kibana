@@ -35,7 +35,7 @@ describe('startSync lib function', () => {
   });
 
   it('should start a full sync', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({
         _id: 'connectorId',
         _source: {
@@ -98,8 +98,8 @@ describe('startSync lib function', () => {
       index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
-  it('should start a full sync with service type, pipeline and nextSyncConfig', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+  it('should start a full sync with service type, pipeline', async () => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({
         _source: {
           api_key_id: null,
@@ -126,12 +126,7 @@ describe('startSync lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
 
     await expect(
-      startSync(
-        mockClient as unknown as IScopedClusterClient,
-        'connectorId',
-        SyncJobType.FULL,
-        'syncConfig'
-      )
+      startSync(mockClient as unknown as IScopedClusterClient, 'connectorId', SyncJobType.FULL)
     ).resolves.toEqual({ _id: 'fakeId' });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
@@ -141,7 +136,6 @@ describe('startSync lib function', () => {
         connector: {
           configuration: {
             config: { label: 'label', value: 'haha' },
-            nextSyncConfig: { label: 'nextSyncConfig', value: 'syncConfig' },
           },
           filtering: 'filtering',
           id: 'connectorId',
@@ -169,7 +163,7 @@ describe('startSync lib function', () => {
   });
 
   it('should not create index if there is no connector', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({});
     });
     await expect(
@@ -179,7 +173,7 @@ describe('startSync lib function', () => {
   });
 
   it('should set sync_now for crawler and not index a sync job', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({
         _primary_term: 1,
         _seq_no: 10,
@@ -232,7 +226,7 @@ describe('startSync lib function', () => {
   });
 
   it('should start an incremental sync', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({
         _id: 'connectorId',
         _source: {
@@ -300,7 +294,7 @@ describe('startSync lib function', () => {
   });
 
   it('should start an access control sync', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({
         _id: 'connectorId',
         _source: {

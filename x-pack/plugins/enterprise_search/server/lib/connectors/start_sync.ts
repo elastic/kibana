@@ -29,7 +29,7 @@ export const startSync = async (
   client: IScopedClusterClient,
   connectorId: string,
   jobType: SyncJobType,
-  nextSyncConfig?: string
+  nextSyncConfig?: string // only processed for elastic-crawler service types
 ) => {
   const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
     id: connectorId,

@@ -26,7 +26,7 @@ describe('startSync lib function', () => {
   });
 
   it('should start a full sync', async () => {
-    mockClient.get.mockImplementationOnce(() => {
+    mockClient.get.mockImplementation(() => {
       return Promise.resolve({
         _id: 'connectorId',
         _source: {
@@ -94,7 +94,7 @@ describe('startSync lib function', () => {
   });
 
   it('should not create index if there is no connector', async () => {
-    mockClient.get.mockImplementationOnce(() => {
+    mockClient.get.mockImplementation(() => {
       return Promise.resolve({});
     });
     await expect(
@@ -107,7 +107,7 @@ describe('startSync lib function', () => {
   });
 
   it('should start an incremental sync', async () => {
-    mockClient.get.mockImplementationOnce(() => {
+    mockClient.get.mockImplementation(() => {
       return Promise.resolve({
         _id: 'connectorId',
         _source: {
@@ -174,7 +174,7 @@ describe('startSync lib function', () => {
   });
 
   it('should start an access control sync', async () => {
-    mockClient.get.mockImplementationOnce(() => {
+    mockClient.get.mockImplementation(() => {
       return Promise.resolve({
         _id: 'connectorId',
         _source: {

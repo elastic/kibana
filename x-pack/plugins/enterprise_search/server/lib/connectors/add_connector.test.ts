@@ -7,9 +7,12 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CURRENT_CONNECTORS_INDEX, deleteConnectorById } from '@kbn/search-connectors';
-
-import { ConnectorStatus, fetchConnectorByIndexName } from '@kbn/search-connectors';
+import {
+  ConnectorStatus,
+  fetchConnectorByIndexName,
+  CURRENT_CONNECTORS_INDEX,
+  deleteConnectorById,
+} from '@kbn/search-connectors';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
