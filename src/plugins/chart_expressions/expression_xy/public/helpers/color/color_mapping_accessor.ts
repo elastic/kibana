@@ -18,14 +18,14 @@ export function getColorSeriesAccessorFn(
   getPaletteFn: (paletteId: string) => ColorMapping.CategoricalPalette,
   isDarkMode: boolean,
   mappingData: ColorMappingInputData,
-  fieldId: string
+  fieldId: string,
+  specialTokens: Map<string, string>
 ): SeriesColorAccessorFn {
   // inverse map to handle the conversion between the formatted string and their original format
   // for any specified special tokens
-  const specialHandlingInverseMap: Map<string, string> =
-    mappingData.type === 'categories'
-      ? new Map([...mappingData.specialTokens.entries()].map((d) => [d[1], d[0]]))
-      : new Map();
+  const specialHandlingInverseMap: Map<string, string> = new Map(
+    [...specialTokens.entries()].map((d) => [d[1], d[0]])
+  );
 
   const getColor = getColorFactory(config, getPaletteFn, isDarkMode, mappingData);
 

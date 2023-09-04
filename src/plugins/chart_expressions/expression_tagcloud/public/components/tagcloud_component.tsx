@@ -18,9 +18,8 @@ import {
   PaletteOutput,
   getColorFactory,
   getPalette,
-  availablePalettes,
+  AVAILABLE_PALETTES,
   NeutralPalette,
-  SPECIAL_TOKENS_STRING_CONVERTION,
 } from '@kbn/coloring';
 import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
 import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
@@ -320,12 +319,11 @@ function getColorFromMappingFactory(
   }
   return getColorFactory(
     JSON.parse(colorMapping),
-    getPalette(availablePalettes, NeutralPalette),
+    getPalette(AVAILABLE_PALETTES, NeutralPalette),
     isDarkMode,
     {
       type: 'categories',
       categories: getColorCategories(rows, tagColumn),
-      specialTokens: SPECIAL_TOKENS_STRING_CONVERTION,
     }
   );
 }

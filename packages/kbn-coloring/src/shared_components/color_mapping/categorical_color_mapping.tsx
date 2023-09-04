@@ -20,7 +20,6 @@ export type ColorMappingInputData =
       type: 'categories';
       /** an ORDERED array of categories rendered in the visualization  */
       categories: Array<string | string[]>;
-      specialTokens: Map<string, string>;
     }
   | {
       type: 'ranges';
@@ -36,7 +35,8 @@ export interface ColorMappingProps {
   palettes: Map<string, ColorMapping.CategoricalPalette>;
   data: ColorMappingInputData;
   isDarkMode: boolean;
-
+  /** map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket */
+  specialTokens: Map<string, string>;
   /** a function called at every change in the model */
   onModelUpdate: (model: ColorMapping.Config) => void;
 }
@@ -73,10 +73,15 @@ export class CategoricalColorMapping extends React.Component<ColorMappingProps> 
     }
   }
   render() {
-    const { palettes, data, isDarkMode } = this.props;
+    const { palettes, data, isDarkMode, specialTokens } = this.props;
     return (
       <Provider store={this.store}>
-        <Container palettes={palettes} data={data} isDarkMode={isDarkMode} />
+        <Container
+          palettes={palettes}
+          data={data}
+          isDarkMode={isDarkMode}
+          specialTokens={specialTokens}
+        />
       </Provider>
     );
   }

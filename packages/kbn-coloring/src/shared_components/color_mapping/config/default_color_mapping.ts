@@ -8,7 +8,11 @@
 
 import { ColorMapping } from '.';
 import { AVAILABLE_PALETTES } from '../palettes/available_palettes';
-import { NeutralPalette, getPalette } from '../palettes/default_palettes';
+import {
+  NeutralPalette,
+  getPalette,
+  DEFAULT_NEUTRAL_PALETTE_INDEX,
+} from '../palettes/default_palettes';
 
 export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
   assignmentMode: 'auto',
@@ -21,7 +25,7 @@ export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
       color: {
         type: 'categorical',
         paletteId: NeutralPalette.id,
-        colorIndex: 2,
+        colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
       },
       touched: false,
     },

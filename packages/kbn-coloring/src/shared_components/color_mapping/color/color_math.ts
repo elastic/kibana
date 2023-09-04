@@ -7,7 +7,7 @@
  */
 
 import chroma from 'chroma-js';
-import { APCAContrast, RgbaTuple } from './apca';
+import { APCAContrast } from './apca';
 
 export function getValidColor(color: string): chroma.Color {
   try {
@@ -30,7 +30,7 @@ export function changeAlpha(color: string, alpha: number) {
 }
 
 export function toHex(color: string) {
-  return getValidColor(color).hex();
+  return getValidColor(color).hex().toLowerCase();
 }
 
 export function isSameColor(color1: string, color2: string) {

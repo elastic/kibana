@@ -33,6 +33,7 @@ export function Assignment({
   colorMode,
   getPaletteFn,
   isDarkMode,
+  specialTokens,
 }: {
   data: ColorMappingInputData;
   index: number;
@@ -44,6 +45,7 @@ export function Assignment({
   getPaletteFn: ReturnType<typeof getPalette>;
   canPickColor: boolean;
   isDarkMode: boolean;
+  specialTokens: Map<string, string>;
 }) {
   const dispatch = useDispatch();
 
@@ -75,7 +77,7 @@ export function Assignment({
           index={index}
           rule={assignment.rule}
           options={data.type === 'categories' ? data.categories : []}
-          specialTokens={data.type === 'categories' ? data.specialTokens : new Map()}
+          specialTokens={specialTokens}
           updateValue={(values: Array<string | string[]>) => {
             dispatch(
               updateAssignmentRule({

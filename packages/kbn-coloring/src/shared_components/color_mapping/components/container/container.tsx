@@ -58,6 +58,8 @@ export function Container(props: {
   palettes: Map<string, ColorMapping.CategoricalPalette>;
   data: ColorMappingInputData;
   isDarkMode: boolean;
+  /** map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket */
+  specialTokens: Map<string, string>;
 }) {
   const dispatch = useDispatch();
 
@@ -131,6 +133,7 @@ export function Container(props: {
                     getPaletteFn={getPaletteFn}
                     assignment={assignment}
                     disableDelete={assignments.length <= 1 || autoAssignmentMode}
+                    specialTokens={props.specialTokens}
                   />
                 );
               })}

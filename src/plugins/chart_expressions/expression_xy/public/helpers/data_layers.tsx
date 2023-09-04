@@ -24,8 +24,12 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
-import { getPalette, AVAILABLE_PALETTES, NeutralPalette } from '@kbn/coloring';
-import { SPECIAL_TOKENS_STRING_CONVERTION } from '@kbn/coloring/src/shared_components/color_mapping/color/rule_matching';
+import {
+  getPalette,
+  AVAILABLE_PALETTES,
+  NeutralPalette,
+  SPECIAL_TOKENS_STRING_CONVERTION,
+} from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
@@ -495,9 +499,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
           {
             type: 'categories',
             categories: getColorCategories(table.rows, splitColumnIds[0]),
-            specialTokens: SPECIAL_TOKENS_STRING_CONVERTION,
           },
-          splitColumnIds[0]
+          splitColumnIds[0],
+          SPECIAL_TOKENS_STRING_CONVERTION
         )
       : (series) =>
           getColor(

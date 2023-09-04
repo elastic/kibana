@@ -23,7 +23,7 @@ export const Match: React.FC<{
   updateValue: (values: Array<string | string[]>) => void;
   options: Array<string | string[]>;
   specialTokens: Map<unknown, string>;
-}> = ({ rule, updateValue, editable, options, specialTokens }) => {
+}> = ({ index, rule, updateValue, editable, options, specialTokens }) => {
   const selectedOptions =
     rule.type === 'auto'
       ? []
@@ -50,6 +50,7 @@ export const Match: React.FC<{
   return (
     <EuiFlexItem style={{ minWidth: 1 }}>
       <EuiComboBox
+        data-test-subj={`lns-colorMapping-assignmentsItem${index}`}
         isDisabled={!editable}
         fullWidth={true}
         aria-label="Accessible screen reader label"
@@ -76,7 +77,6 @@ export const Match: React.FC<{
           }
         }}
         isClearable={false}
-        data-test-subj="demoComboBox"
       />
     </EuiFlexItem>
   );

@@ -196,8 +196,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         data={{
                           type: 'categories',
                           categories: splitCategories,
-                          specialTokens: SPECIAL_TOKENS_STRING_CONVERTION,
                         }}
+                        specialTokens={SPECIAL_TOKENS_STRING_CONVERTION}
                       />
                     ) : (
                       <PalettePicker

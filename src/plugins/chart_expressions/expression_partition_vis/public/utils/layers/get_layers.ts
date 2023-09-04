@@ -10,7 +10,6 @@ import { Datum, PartitionLayer } from '@elastic/charts';
 import {
   PaletteRegistry,
   getColorFactory,
-  SPECIAL_TOKENS_STRING_CONVERTION,
   getPalette,
   NeutralPalette,
   AVAILABLE_PALETTES,
@@ -152,7 +151,6 @@ function getColorFromMappingFactory(
     {
       type: 'categories',
       categories,
-      specialTokens: SPECIAL_TOKENS_STRING_CONVERTION,
     }
   );
 }
