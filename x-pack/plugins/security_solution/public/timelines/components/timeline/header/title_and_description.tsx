@@ -69,7 +69,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     });
 
     const handleSubmit = useCallback(
-      async (titleAndDescription, isValid) => {
+      (titleAndDescription, isValid) => {
         if (isValid) {
           dispatch(
             timelineActions.updateTitleAndDescription({
@@ -103,7 +103,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     });
     const { isSubmitted, isSubmitting, submit } = form;
 
-    const onSubmit = useCallback(async () => {
+    const onSubmit = useCallback(() => {
       startTransaction({ name: TIMELINE_ACTIONS.SAVE });
       submit();
     }, [submit, startTransaction]);
@@ -248,7 +248,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                     onClick={onSubmit}
                     data-test-subj="save-button"
                   >
-                    {`Save this Heloo`}
+                    {saveButtonTitle}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
