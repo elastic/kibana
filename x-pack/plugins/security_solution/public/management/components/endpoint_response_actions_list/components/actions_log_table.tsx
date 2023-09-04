@@ -37,7 +37,6 @@ import { ResponseActionStatusBadge } from './response_action_status_badge';
 import { ActionsLogExpandedTray } from './action_log_expanded_tray';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
 
 const emptyValue = getEmptyValue();
@@ -296,22 +295,19 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { pagination: paginationFromUrlParams } = useUrlPagination();
-    const { withOutputs: withOutputsFromUrl } = useActionHistoryUrlParams();
 
     const [expandedRowMap, setExpandedRowMap] = useState<ExpandedRowMapType>({});
 
-    const actionIdsWithOpenTrays = useMemo((): string[] => {
-      // get the list of action ids from URL params on the history page
-      if (!isFlyout) {
-        return withOutputsFromUrl ?? [];
-      }
-      // get the list of action ids form the query params for flyout view
-      return queryParams.withOutputs
-        ? typeof queryParams.withOutputs === 'string'
-          ? [queryParams.withOutputs]
-          : queryParams.withOutputs
-        : [];
-    }, [isFlyout, queryParams.withOutputs, withOutputsFromUrl]);
+    const actionIdsWithOpenTrays = useMemo(
+      (): string[] =>
+        // get the list of action ids from the query params for flyout view
+        queryParams.withOutputs
+          ? typeof queryParams.withOutputs === 'string'
+            ? [queryParams.withOutputs]
+            : queryParams.withOutputs
+          : [],
+      [queryParams.withOutputs]
+    );
 
     const redoOpenTrays = useCallback(() => {
       if (actionIdsWithOpenTrays.length && items.length) {
