@@ -99,9 +99,10 @@ export function ChatHeader({
           <ChatActionsMenu
             connectors={connectors}
             connectorsManagementHref={connectorsManagementHref}
-            modelsManagementHref={modelsManagementHref}
+            disabled={licenseInvalid}
             conversationId={conversationId}
             knowledgeBase={knowledgeBase}
+            modelsManagementHref={modelsManagementHref}
             startedFrom={startedFrom}
             onCopyConversationClick={onCopyConversation}
           />
