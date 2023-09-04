@@ -171,7 +171,7 @@ describe('Discover histogram layout component', () => {
       expect(component.isEmptyRender()).toBe(false);
     });
 
-    it('should the callout if isPlainRecord is true and the selected columns are less than the available ones', async () => {
+    it('should render the callout if isPlainRecord is true and the selected columns are less than the available ones', async () => {
       const { component } = await mountComponent({
         isPlainRecord: true,
         selectedColumns: ['bytes'],
