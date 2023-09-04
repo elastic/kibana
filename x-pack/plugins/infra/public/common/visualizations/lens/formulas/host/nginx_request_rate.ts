@@ -9,7 +9,7 @@ import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const nginxRequestRate: FormulaValueConfig = {
   label: 'Request Rate',
-  value: 'max(nginx.stubstatus.requests)', // TODO
+  value: 'differences(max(nginx.stubstatus.requests))',
   format: {
     id: 'number',
     params: {
