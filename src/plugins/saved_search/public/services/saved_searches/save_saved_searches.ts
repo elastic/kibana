@@ -28,7 +28,6 @@ export const saveSearchSavedObject = async (
   references: Reference[] | undefined,
   contentManagement: ContentManagementPublicStart['client']
 ) => {
-  debugger;
   const resp = id
     ? await contentManagement.update<
         SavedSearchCrudTypes['UpdateIn'],

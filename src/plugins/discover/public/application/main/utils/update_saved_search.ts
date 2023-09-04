@@ -38,7 +38,6 @@ export function updateSavedSearch({
   services: DiscoverServices;
   useFilterAndQueryServices?: boolean;
 }) {
-  debugger;
   if (dataView) {
     savedSearch.searchSource.setField('index', dataView);
     savedSearch.usesAdHocDataView = !dataView.isPersisted();

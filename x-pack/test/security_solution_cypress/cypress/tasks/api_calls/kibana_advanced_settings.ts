@@ -7,6 +7,10 @@
 
 import { rootRequest } from '../common';
 
+const ADVANCED_SETTINGS = {
+  DISCOVER_SQL: 'discover:enableSql',
+};
+
 const kibanaSettings = (body: Cypress.RequestBody) => {
   rootRequest({
     method: 'POST',
@@ -30,5 +34,15 @@ export const disableRelatedIntegrations = () => {
 
 export const disableExpandableFlyout = () => {
   const body = { changes: { 'securitySolution:enableExpandableFlyout': false } };
+  kibanaSettings(body);
+};
+
+export const enableDiscoverSQL = () => {
+  const body = { changes: { [ADVANCED_SETTINGS.DISCOVER_SQL]: true } };
+  kibanaSettings(body);
+};
+
+export const disableDiscoverSQL = () => {
+  const body = { changes: { [ADVANCED_SETTINGS.DISCOVER_SQL]: false } };
   kibanaSettings(body);
 };

@@ -39,6 +39,6 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     hasAssistantPrivilege,
     hasConnectorsAllPrivilege,
     hasConnectorsReadPrivilege,
-    isAssistantEnabled: isEnterprise,
+    isAssistantEnabled: false,
   };
 };

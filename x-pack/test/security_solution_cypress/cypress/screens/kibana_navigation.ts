@@ -38,3 +38,6 @@ export const SPACES_BUTTON = '[data-test-subj="spacesNavSelector"]';
 export const APP_LEAVE_CONFIRM_MODAL = '[data-test-subj="appLeaveConfirmModal"]';
 
 export const getGoToSpaceMenuItem = (space: string) => `[data-test-subj="space-avatar-${space}"]`;
+
+export const STACK_MANAGEMENT_PAGE =
+  '[data-test-subj="collapsibleNavAppLink"] [title="Stack Management"]';

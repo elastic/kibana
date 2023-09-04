@@ -25,6 +25,12 @@ export const switchDataViewTo = (dataviewName: string) => {
   cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
 };
 
+export const switchDataViewToSQL = () => {
+  openDataViewSwitcher();
+  cy.get(DISCOVER_DATA_VIEW_SWITCHER.TEXT_BASE_LANG_SWICTHER).trigger('click');
+  cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('have.attr', 'title', 'SQL');
+};
+
 export const openDataViewSwitcher = () => {
   cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).click();
   cy.get(DISCOVER_DATA_VIEW_SWITCHER.INPUT).should('be.visible');
@@ -38,7 +44,7 @@ export const waitForDiscoverGridToLoad = () => {
 };
 
 export const addDiscoverKqlQuery = (kqlQuery: string) => {
-  cy.get(DISCOVER_QUERY_INPUT).type(kqlQuery);
+  cy.get(DISCOVER_QUERY_INPUT).type(`${kqlQuery}{enter}`);
 };
 
 export const submitDiscoverSearchBar = () => {

@@ -69,7 +69,7 @@ export const getCommonColumns = ({
     render: (title: string, timelineResult: OpenTimelineResult) =>
       timelineResult.savedObjectId != null ? (
         <EuiLink
-          data-test-subj={`title-${timelineResult.savedObjectId}`}
+          data-test-subj={`timeline-title-${timelineResult.savedObjectId}`}
           onClick={() =>
             onOpenTimeline({
               duplicate: false,
