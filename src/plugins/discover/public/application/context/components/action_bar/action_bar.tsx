@@ -156,7 +156,6 @@ export function ActionBar({
       </EuiFlexGroup>
       {!isSuccessor && showWarning && <EuiSpacer size="s" />}
       {!isSuccessor && showWarning && <ActionBarWarning docCount={docCountAvailable} type={type} />}
-      {!isSuccessor && <EuiSpacer size="s" />}
     </form>
   );
 }

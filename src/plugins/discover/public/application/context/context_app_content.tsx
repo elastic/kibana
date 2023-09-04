@@ -8,7 +8,7 @@
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -169,7 +169,6 @@ export function ContextAppContent({
         isDisabled={isAnchorLoading}
       />
       {loadingFeedback()}
-      <EuiHorizontalRule margin="xs" />
       {isLegacy && rows && rows.length !== 0 && (
         <DocTableContextMemoized
           columns={columns}
@@ -215,7 +214,6 @@ export function ContextAppContent({
           </CellActionsProvider>
         </div>
       )}
-      <EuiHorizontalRule margin="xs" />
       <ActionBarMemoized
         type={SurrDocType.SUCCESSORS}
         defaultStepSize={defaultStepSize}

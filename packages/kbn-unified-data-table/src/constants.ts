@@ -21,6 +21,7 @@ export const GRID_STYLE: EuiDataGridStyle = {
   fontSize: 's',
   cellPadding: 'l',
   rowHover: 'highlight',
+  header: 'underline',
   stripes: true,
 };
 

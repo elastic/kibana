@@ -33,6 +33,10 @@
   flex-wrap: nowrap;
   height: 100%;
 
+  .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+    border-bottom: $euiBorderThin;
+  }
+
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
     padding: $euiSizeS 0 0 $euiSizeS;
   }
@@ -51,14 +55,6 @@
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
-}
-
-.unifiedDataTable__footer {
-  flex-shrink: 0;
-  background-color: $euiColorLightShade;
-  padding: $euiSize / 2 $euiSize;
-  margin-top: $euiSize / 4;
-  text-align: center;
 }
 
 .unifiedDataTable__flyoutHeader {
