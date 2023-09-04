@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-if [ "$SKIP_KIBANA_HOOKS" = "1" ]; then
-  echo "Pipeline file triggered with SKIP_KIBANA_HOOKS, skipping pre_command.sh"
-else
+if [ "$BUILDKITE_AGENT_META_DATA_AGENT_MANAGER" = "kibana" ]; then
   .buildkite/scripts/lifecycle/post_command.sh
+else
+  echo "Pipeline file triggered from outside the kibana executors, skipping post_command"
 fi
