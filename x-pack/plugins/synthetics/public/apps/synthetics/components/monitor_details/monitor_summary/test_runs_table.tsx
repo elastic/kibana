@@ -245,8 +245,8 @@ export const TestRunsTable = ({
           isTableRow &&
           targetElem.tagName !== 'IMG' &&
           targetElem.tagName !== 'path' &&
-          !targetElem.parentElement?.classList.contains('euiLink') &&
-          !targetElem.parentElement?.classList.contains('documentViewer')
+          targetElem.tagName !== 'BUTTON' &&
+          !targetElem.parentElement?.classList.contains('euiLink')
         ) {
           if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
             toggleDetails(item, expandedRows, setExpandedRows);

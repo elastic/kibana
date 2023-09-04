@@ -51,7 +51,7 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
   }, [data, dataView, ping.docId, isFlyoutVisible]);
 
   return (
-    <span className="documentViewer">
+    <>
       <EuiButtonIcon
         iconType="discoverApp"
         onClick={() => {
@@ -76,7 +76,7 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
           </EuiFlyoutBody>
         </EuiFlyout>
       )}
-    </span>
+    </>
   );
 };
 
