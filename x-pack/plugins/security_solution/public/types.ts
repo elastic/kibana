@@ -48,7 +48,7 @@ import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plu
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import type { RouteProps } from 'react-router-dom';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -133,7 +133,7 @@ export interface StartPlugins {
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
   savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
 }
 
@@ -161,7 +161,7 @@ export type StartServices = CoreStart &
     securityLayout: {
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
-    savedObjectsManagement: SavedObjectsManagementPluginStart;
+    contentManagement: ContentManagementPublicStart;
     telemetry: TelemetryClientStart;
     customDataService: DataPublicPluginStart;
     topValuesPopover: TopValuesPopoverService;
