@@ -616,6 +616,10 @@
       }
     }
   },
+  "apm-indices": {
+    "dynamic": false,
+    "properties": {}
+  },
   "tag": {
     "properties": {
       "name": {
@@ -2925,6 +2929,9 @@
       },
       "updatedBy": {
         "type": "text"
+      },
+      "savedSearchId": {
+        "type": "text"
       }
     }
   },
@@ -3030,10 +3037,6 @@
         "type": "keyword"
       }
     }
-  },
-  "apm-indices": {
-    "dynamic": false,
-    "properties": {}
   },
   "apm-telemetry": {
     "dynamic": false,
