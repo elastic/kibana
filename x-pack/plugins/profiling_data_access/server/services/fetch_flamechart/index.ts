@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { createBaseFlameGraph, createFlameGraph } from '@kbn/profiling-utils/common';
-import { createCalleeTree } from '@kbn/profiling-utils/common';
+import { createBaseFlameGraph, createFlameGraph } from '@kbn/profiling-utils';
+import { createCalleeTree } from '@kbn/profiling-utils';
 import { RegisterServicesParams } from '../register_services';
 import { withProfilingSpan } from '../../utils/with_profiling_span';
 import { searchStackTraces } from '../search_stack_traces';

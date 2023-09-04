@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FrameSymbolStatus, getFrameSymbolStatus } from '@kbn/profiling-utils/common';
+import { FrameSymbolStatus, getFrameSymbolStatus } from '@kbn/profiling-utils';
 import React from 'react';
 import { FrameInformationAIAssistant } from './frame_information_ai_assistant';
 import { FrameInformationPanel } from './frame_information_panel';

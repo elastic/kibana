@@ -6,7 +6,7 @@
  */
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProfilingESField } from '@kbn/profiling-utils/common';
+import { ProfilingESField } from '@kbn/profiling-utils';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../../common/histogram';
 import {
   IndexLifecyclePhaseSelectOption,

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import type { ElasticFlameGraph } from '@kbn/profiling-utils/common/flamegraph';
+import type { ElasticFlameGraph } from '@kbn/profiling-utils';
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilitySharedStart } from '../../../plugin';

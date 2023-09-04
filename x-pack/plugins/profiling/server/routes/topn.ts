@@ -12,7 +12,7 @@ import {
   groupStackFrameMetadataByStackTrace,
   ProfilingESField,
   TopNType,
-} from '@kbn/profiling-utils/common';
+} from '@kbn/profiling-utils';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';

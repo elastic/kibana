@@ -19,7 +19,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import type { ElasticFlameGraph } from '@kbn/profiling-utils/common/flamegraph';
+import type { ElasticFlameGraph } from '@kbn/profiling-utils';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
 import { FlameGraphLegend } from './flame_graph_legend';
 import { FrameInformationWindow } from '../frame_information_window';

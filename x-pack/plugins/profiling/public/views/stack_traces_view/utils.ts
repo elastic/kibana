@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/typed-react-router-config';
-import { getFieldNameForTopNType, TopNType } from '@kbn/profiling-utils/common';
+import { getFieldNameForTopNType, TopNType } from '@kbn/profiling-utils';
 import { ProfilingRoutes } from '../../routing';
 
 export function getTracesViewRouteParams({
