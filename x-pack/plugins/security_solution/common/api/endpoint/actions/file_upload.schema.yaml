@@ -2,7 +2,26 @@ openapi: 3.0.0
 info:
   title: File Upload Schema
   version: '2023-10-31'
-paths: { }
+paths:
+  /api/endpoint/action/upload:
+    post:
+      summary: Upload Action
+      operationId: EndpointUploadAction
+      x-codegen-enabled: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileUploadActionRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
 components:
   schemas:
     FileUploadActionRequestBody:

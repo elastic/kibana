@@ -4,14 +4,6 @@ info:
   version: '2023-10-31'
 paths: { }
 components:
-  parameters:
-   ListRequestQueryParameter:
-      name: query
-      in: query
-      required: true
-      schema:
-        $ref: '#/components/schemas/ListRequestQuery'
-
   schemas:
     ListRequestQuery:
       type: object

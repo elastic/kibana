@@ -6,6 +6,8 @@ paths:
   /api/endpoint/policy/summaries:
     get:
       summary: Get Agent Policy Summary schema
+      operationId: GetAgentPolicySummary
+      x-codegen-enabled: false
       parameters:
         - $ref: './get_agent_policy_summary.schema.yaml#/components/parameters/AgentPolicySummaryRequestQueryParameter'
       responses:
@@ -19,6 +21,8 @@ paths:
   /api/endpoint/policy_response:
     get:
       summary: Get Policy Response schema
+      operationId: GetPolicyResponse
+      x-codegen-enabled: false
       parameters:
         - $ref: './get_policy_response.schema.yaml#/components/parameters/PolicyResponseRequestQueryParameter'
       responses:

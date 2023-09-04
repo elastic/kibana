@@ -4,17 +4,6 @@ info:
   version: '2023-10-31'
 paths: { }
 components:
-  parameters:
-    GetMetadataRequestParams:
-      name: query
-      in: path
-      required: true
-      schema:
-        type: object
-        properties:
-          id:
-            type: string
-
   schemas:
     SuccessResponse:
       type: object

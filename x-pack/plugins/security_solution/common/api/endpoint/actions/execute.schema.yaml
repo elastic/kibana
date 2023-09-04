@@ -2,7 +2,25 @@ openapi: 3.0.0
 info:
   title: Execute Action Schema
   version: '2023-10-31'
-paths: { }
+paths:
+  /api/endpoint/action/execute:
+    post:
+      summary: Execute Action
+      operationId: EndpointExecuteAction
+      x-codegen-enabled: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteActionRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 components:
   schemas:
     ExecuteActionRequestBody:
@@ -19,11 +37,9 @@ components:
               properties:
                 command:
                   $ref: '../model/schema/common.yaml#/components/schemas/Command'
-
                 timeout:
-                  type: number
-                  minimum: 1
-                  description: The maximum timeout value in milliseconds (optional)
+                  $ref: '../model/schema/common.yaml#/components/schemas/Timeout'
+
 
     SuccessResponse:
       type: object

@@ -2,21 +2,32 @@ openapi: 3.0.0
 info:
   title: Audit Log Schema
   version: '2023-10-31'
-paths: { }
+paths:
+  /api/endpoint/action_log/{agent_id}:
+    get:
+      summary: Get action audit log schema
+      operationId: EndpointGetActionAuditLog
+      x-codegen-enabled: true
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/AuditLogRequestQuery'
+        - name: query
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/AuditLogRequestParams'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './audit_log.schema.yaml#/components/schemas/SuccessResponse'
+
 components:
-  parameters:
-   AuditLogRequestQueryParameter:
-      name: query
-      in: query
-      required: true
-      schema:
-        $ref: '#/components/schemas/AuditLogRequestQuery'
-   AuditLogRequestParameter:
-      name: query
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/AuditLogRequestParams'
   schemas:
     AuditLogRequestQuery:
       type: object

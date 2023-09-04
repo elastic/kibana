@@ -9,8 +9,7 @@ components:
       type: string
     IdOrUndefined:
       $ref: '#/components/schemas/Id'
-    nullable: true
-
+      nullable: true
     Page:
       type: number
       default: 1
@@ -63,8 +62,13 @@ components:
       items:
         $ref: '#/components/schemas/Command'
 
+    Timeout:
+      type: number
+      minimum: 1
+      description: The maximum timeout value in milliseconds (optional)
+
     Status:
-      type: string;
+      type: string
       enum:
         - failed
         - pending

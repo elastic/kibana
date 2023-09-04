@@ -6,8 +6,14 @@ paths:
   /api/endpoint/metadata:
     get:
       summary: Get Metadata List schema
+      operationId: GetEndpointMetadataList
+      x-codegen-enabled: true
       parameters:
-        - $ref: './list_metadata.schema.yaml#/components/parameters/ListRequestQueryParameter'
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: './list_metadata.schema.yaml#/components/schemas/ListRequestQuery'
       responses:
         '200':
           description: OK
@@ -15,9 +21,12 @@ paths:
             application/json:
               schema:
                 $ref: './list_metadata.schema.yaml#/components/schemas/SuccessResponse'
+
   /api/endpoint/metadata/transforms:
     get:
       summary: Get Metadata Transform schema
+      operationId: GetEndpointMetadataTransform
+      x-codegen-enabled: false
       responses:
         '200':
           description: OK
@@ -29,8 +38,17 @@ paths:
   /api/endpoint/metadata/{id}:
     get:
       summary: Get Metadata schema
+      operationId: GetEndpointMetadata
+      x-codegen-enabled: false
       parameters:
-        - $ref: './get_metadata.schema.yaml#/components/parameters/GetMetadataRequestParams'
+        - name: query
+          in: path
+          required: true
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
       responses:
         '200':
           description: OK
