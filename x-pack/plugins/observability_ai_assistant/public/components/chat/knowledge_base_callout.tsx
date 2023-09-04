@@ -111,7 +111,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
         hasShadow={false}
         borderRadius="none"
         color={color}
-        paddingSize={knowledgeBase.status.value?.ready ? 'none' : 's'}
+        paddingSize="s"
         css={{ width: 'max-content' }}
       >
         {content}

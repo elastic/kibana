@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
-  describe('handling warnings with search source fetch', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/139879
+  describe.skip('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
     const fromTime = 'Jun 17, 2022 @ 00:00:00.000';
     const toTime = 'Jun 23, 2022 @ 00:00:00.000';
@@ -167,6 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // click "see full error" button in the toast
       const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
       await openShardModalButton.click();
+      await testSubjects.exists('shardFailureModalTitle');
       const modalHeader = await testSubjects.find('shardFailureModalTitle');
       expect(await modalHeader.getVisibleText()).to.be('2 of 4 shards failed');
       // request

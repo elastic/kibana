@@ -25,11 +25,12 @@ import {
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
   getPackagePolicyCreateCallback,
-  getPackagePolicyPostCreateCallback,
   getPackagePolicyDeleteCallback,
+  getPackagePolicyPostCreateCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
 import type { KibanaRequest } from '@kbn/core/server';
+import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
@@ -54,9 +55,8 @@ import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
-import type { AppFeatures } from '../lib/app_features';
-import { createAppFeaturesMock } from '../lib/app_features/mocks';
-import { ALL_APP_FEATURE_KEYS } from '../../common';
+import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
+import { createAppFeaturesServiceMock } from '../lib/app_features_service/mocks';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -77,7 +77,7 @@ describe('ingest_integration tests ', () => {
   });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
-  let appFeatures: AppFeatures;
+  let appFeaturesService: AppFeaturesService;
 
   beforeEach(() => {
     endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
@@ -86,7 +86,7 @@ describe('ingest_integration tests ', () => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
-    appFeatures = endpointAppContextMock.appFeatures;
+    appFeaturesService = endpointAppContextMock.appFeaturesService;
 
     jest
       .spyOn(endpointAppContextMock.endpointMetadataService, 'getFleetEndpointPackagePolicy')
@@ -143,7 +143,7 @@ describe('ingest_integration tests ', () => {
         licenseService,
         exceptionListClient,
         cloudService,
-        appFeatures
+        appFeaturesService
       );
 
       return callback(
@@ -395,7 +395,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -414,7 +414,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -448,7 +448,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -463,7 +463,7 @@ describe('ingest_integration tests ', () => {
     });
 
     it('should turn off protections if endpointPolicyProtections appFeature is disabled', async () => {
-      appFeatures = createAppFeaturesMock(
+      appFeaturesService = createAppFeaturesServiceMock(
         ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
       );
       const callback = getPackagePolicyUpdateCallback(
@@ -473,7 +473,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
 
       const updatedPolicy = await callback(
@@ -552,7 +552,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
 
@@ -589,7 +589,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeatures
+        appFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       // values should be updated

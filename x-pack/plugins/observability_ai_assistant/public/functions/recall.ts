@@ -20,7 +20,7 @@ export function registerRecallFunction({
     {
       name: 'recall',
       contexts: ['core'],
-      description: `Use this function to recall earlier learnings. Anything you will summarise can be retrieved again later via this function. This is semantic/vector search so there's no need for an exact match.
+      description: `Use this function to recall earlier learnings. Anything you will summarize can be retrieved again later via this function. This is semantic/vector search so there's no need for an exact match.
       
       Make sure the query covers the following aspects:
       - The user's prompt, verbatim

@@ -14,13 +14,16 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import type { InfraMetadata } from '../../../../../../common/http_api';
 import { NOT_AVAILABLE_LABEL } from '../../../translations';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
 import { FlyoutTabIds } from '../../../types';
 import { ExpandableContent } from '../../../components/expandable_content';
 import { MetadataHeader } from './metadata_header';
+import { MetadataExplanationMessage } from '../../../components/metadata_explanation';
 
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
@@ -70,7 +73,36 @@ export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSumma
   };
 
   return (
-    <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
+    <>
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="flexStart">
+          <EuiTitle data-test-subj="infraAssetDetailsMetadataTitle" size="xxs">
+            <span>
+              <FormattedMessage
+                id="xpack.infra.assetDetails.overview.metadataSectionTitle"
+                defaultMessage="Metadata"
+              />
+            </span>
+          </EuiTitle>
+        </EuiFlexGroup>
+        <EuiFlexItem grow={false} key="metadata-link">
+          <EuiButtonEmpty
+            data-test-subj="infraAssetDetailsMetadataShowAllButton"
+            onClick={onClick}
+            size="xs"
+            flush="both"
+            iconSide="right"
+            iconType="sortRight"
+          >
+            <FormattedMessage
+              id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
+              defaultMessage="Show all"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <MetadataExplanationMessage />
+      <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="flexStart">
         {[...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)].map(
           (metadataValue) =>
@@ -137,21 +169,6 @@ export const MetadataSummaryListCompact = ({ metadata, metadataLoading }: Metada
             )
         )}
       </EuiFlexGroup>
-      <EuiFlexItem grow={false} key="metadata-link">
-        <EuiButtonEmpty
-          data-test-subj="infraAssetDetailsMetadataShowAllButton"
-          onClick={onClick}
-          size="xs"
-          flush="both"
-          iconSide="right"
-          iconType="sortRight"
-        >
-          <FormattedMessage
-            id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
-            defaultMessage="Show all"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    </>
   );
 };
