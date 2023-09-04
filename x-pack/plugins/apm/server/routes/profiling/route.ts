@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { ElasticFlameGraph } from '@kbn/profiling-data-access-plugin/common/flamegraph';
+import { ElasticFlameGraph } from '@kbn/profiling-utils/src/flamegraph';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';

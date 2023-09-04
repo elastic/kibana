@@ -6,11 +6,11 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { createBaseFlameGraph, createFlameGraph } from '@kbn/profiling-utils/src/flamegraph';
+import { createCalleeTree } from '@kbn/profiling-utils/src/callee';
 import { RegisterServicesParams } from '../register_services';
 import { withProfilingSpan } from '../../utils/with_profiling_span';
 import { searchStackTraces } from '../search_stack_traces';
-import { createCalleeTree } from '../../../common/callee';
-import { createBaseFlameGraph, createFlameGraph } from '../../../common/flamegraph';
 
 export interface FetchFlamechartParams {
   esClient: ElasticsearchClient;

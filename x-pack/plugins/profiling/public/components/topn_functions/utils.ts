@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import { StackFrameMetadata } from '@kbn/profiling-data-access-plugin/common/profiling';
+import { StackFrameMetadata } from '@kbn/profiling-utils/src/profiling';
 import { TopNFunctions } from '../../../common/functions';
 import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
 

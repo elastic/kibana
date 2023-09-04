@@ -7,12 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
-import { ProfilingESField } from '@kbn/profiling-data-access-plugin/common/elasticsearch';
-import { groupStackFrameMetadataByStackTrace } from '@kbn/profiling-data-access-plugin/common/profiling';
-import {
-  getFieldNameForTopNType,
-  TopNType,
-} from '@kbn/profiling-data-access-plugin/common/stack_traces';
+import { ProfilingESField } from '@kbn/profiling-utils/src/elasticsearch';
+import { groupStackFrameMetadataByStackTrace } from '@kbn/profiling-utils/src/profiling';
+import { getFieldNameForTopNType, TopNType } from '@kbn/profiling-utils/src/stack_traces';
 import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { RouteRegisterParameters } from '.';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';

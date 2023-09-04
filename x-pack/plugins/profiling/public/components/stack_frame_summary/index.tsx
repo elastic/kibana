@@ -10,7 +10,7 @@ import {
   getCalleeFunction,
   getCalleeSource,
   StackFrameMetadata,
-} from '@kbn/profiling-data-access-plugin/common/profiling';
+} from '@kbn/profiling-utils/src/profiling';
 
 interface Props {
   frame: StackFrameMetadata;

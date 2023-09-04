@@ -8,8 +8,8 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { ProfilingStatusResponse, StackTraceResponse } from '../../common/stack_traces';
-import { unwrapEsResponse } from '../../common/utils/unwrap_es_response';
+import { ProfilingStatusResponse, StackTraceResponse } from '@kbn/profiling-utils/src/stack_traces';
+import { unwrapEsResponse } from './unwrap_es_response';
 import { withProfilingSpan } from './with_profiling_span';
 
 export interface ProfilingESClient {

@@ -5,11 +5,7 @@
  * 2.0.
  */
 import { HttpFetchQuery } from '@kbn/core/public';
-import {
-  BaseFlameGraph,
-  createFlameGraph,
-  ElasticFlameGraph,
-} from '@kbn/profiling-data-access-plugin/common/flamegraph';
+import { ElasticFlameGraph } from '@kbn/profiling-utils/src/flamegraph';
 import { getRoutePaths } from '../common';
 import { TopNFunctions } from '../common/functions';
 import type {
@@ -106,8 +102,7 @@ export function getServices(): Services {
         timeTo,
         kuery,
       };
-      const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
-      return createFlameGraph(baseFlamegraph);
+      return (await http.get(paths.Flamechart, { query })) as ElasticFlameGraph;
     },
     fetchHasSetup: async ({ http }) => {
       const hasSetup = (await http.get(paths.HasSetupESResources, {})) as ProfilingSetupStatus;

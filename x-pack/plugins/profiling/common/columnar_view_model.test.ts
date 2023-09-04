@@ -6,15 +6,11 @@
  */
 
 import { sum } from 'lodash';
-
-import { createCalleeTree } from '@kbn/profiling-data-access-plugin/common/callee';
+import { createCalleeTree } from '@kbn/profiling-utils/src/callee';
 import { createColumnarViewModel } from './columnar_view_model';
-import {
-  createBaseFlameGraph,
-  createFlameGraph,
-} from '@kbn/profiling-data-access-plugin/common/flamegraph';
-import { decodeStackTraceResponse } from '@kbn/profiling-data-access-plugin/common/stack_traces';
-import { stackTraceFixtures } from '@kbn/profiling-data-access-plugin/common/__fixtures__/stacktraces';
+import { createBaseFlameGraph, createFlameGraph } from '@kbn/profiling-utils/src/flamegraph';
+import { decodeStackTraceResponse } from '@kbn/profiling-utils/src/stack_traces';
+import { stackTraceFixtures } from '@kbn/profiling-utils/src/__fixtures__/stacktraces';
 
 describe('Columnar view model operations', () => {
   stackTraceFixtures.forEach(({ response, seconds, upsampledBy }) => {
