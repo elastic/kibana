@@ -7,7 +7,7 @@
 import React, { memo } from 'react';
 import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
 
-export const StatusBadge = memo(
+export const ResponseActionStatusBadge = memo(
   ({
     color,
     status,
@@ -18,6 +18,8 @@ export const StatusBadge = memo(
     status: string;
   }) => {
     return (
+      // We've a EuiTooltip that wraps this component,
+      // Thus we don't need to add a title tooltip as well.
       <EuiBadge data-test-subj={dataTestSubj} color={color} title={undefined}>
         {status}
       </EuiBadge>
@@ -25,4 +27,4 @@ export const StatusBadge = memo(
   }
 );
 
-StatusBadge.displayName = 'StatusBadge';
+ResponseActionStatusBadge.displayName = 'ResponseActionStatusBadge';

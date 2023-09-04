@@ -7,19 +7,19 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
-  EuiI18nNumber,
+  type CriteriaWithPagination,
   EuiAvatar,
   EuiBasicTable,
   EuiButtonIcon,
   EuiFacetButton,
   EuiHorizontalRule,
-  RIGHT_ALIGNMENT,
+  EuiI18nNumber,
   EuiScreenReaderOnly,
+  EuiSkeletonText,
   EuiText,
   EuiToolTip,
   type HorizontalAlignment,
-  type CriteriaWithPagination,
-  EuiSkeletonText,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,10 +30,10 @@ import { SecuritySolutionLinkAnchor } from '../../../../common/components/links'
 import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../../common/api/endpoint';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { TABLE_COLUMN_NAMES, UX_MESSAGES, ARIA_LABELS } from '../translations';
+import { ARIA_LABELS, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
 import { getActionStatus, getUiCommand } from './hooks';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { StatusBadge } from './status_badge';
+import { ResponseActionStatusBadge } from './response_action_status_badge';
 import { ActionsLogExpandedTray } from './action_log_expanded_tray';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
@@ -223,7 +223,7 @@ const getResponseActionListTableColumns = ({
 
         return (
           <EuiToolTip content={status} anchorClassName="eui-textTruncate">
-            <StatusBadge
+            <ResponseActionStatusBadge
               color={
                 _status === 'failed' ? 'danger' : _status === 'successful' ? 'success' : 'warning'
               }
