@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { stripSearchPrefix } from '@kbn/enterprise-search-plugin/common/utils/strip_search_prefix';
 import {
   Connector,
   ConnectorConfiguration,
@@ -109,7 +108,7 @@ export function createConnectorDocument({
     last_sync_scheduled_at: null,
     last_sync_status: null,
     last_synced: null,
-    name: name || stripSearchPrefix(indexName ?? ''),
+    name: name ?? '',
     pipeline,
     scheduling: {
       access_control: { enabled: false, interval: '0 0 0 * * ?' },

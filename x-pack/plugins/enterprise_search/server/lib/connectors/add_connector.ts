@@ -20,6 +20,7 @@ import { NATIVE_CONNECTOR_DEFINITIONS } from '../../../common/connectors/native_
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
 import { ErrorCode } from '../../../common/types/error_codes';
+import { stripSearchPrefix } from '../../../common/utils/strip_search_prefix';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { createIndex } from '../indices/create_index';
@@ -84,6 +85,7 @@ export const addConnector = async (
 
   return await createConnector(client.asCurrentUser, {
     ...input,
+    name: stripSearchPrefix(input.indexName || ''),
     ...nativeFields,
     pipeline: await getDefaultPipeline(client),
   });
