@@ -39,14 +39,14 @@ export function IncorrectLicensePanel() {
         justifyContent="center"
         className={incorrectLicenseContainer}
       >
-        <EuiImage src={ctaImage} alt="Elastic AI Assistant" size="l" />
+        <EuiImage src={ctaImage} alt="Elastic AI Assistant" size="m" />
         <EuiTitle>
           <h2>{UPGRADE_LICENSE_TITLE}</h2>
         </EuiTitle>
         <EuiText color="subdued">
           <p>
             {i18n.translate('xpack.observabilityAiAssistant.incorrectLicense.body', {
-              defaultMessage: 'You need a Platinum license to use the Elastic AI Assistant.',
+              defaultMessage: 'You need an Enterprise license to use the Elastic AI Assistant.',
             })}
           </p>
         </EuiText>

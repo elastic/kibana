@@ -31,6 +31,7 @@ export function ChatActionsMenu({
   connectors,
   connectorsManagementHref,
   conversationId,
+  disabled,
   knowledgeBase,
   modelsManagementHref,
   startedFrom,
@@ -39,6 +40,7 @@ export function ChatActionsMenu({
   connectors: UseGenAIConnectorsResult;
   connectorsManagementHref: string;
   conversationId?: string;
+  disabled: boolean;
   knowledgeBase: UseKnowledgeBaseResult;
   modelsManagementHref: string;
   startedFrom?: StartedFrom;
@@ -56,6 +58,7 @@ export function ChatActionsMenu({
       button={
         <EuiButtonIcon
           data-test-subj="observabilityAiAssistantChatActionsMenuButtonIcon"
+          disabled={disabled}
           iconType="boxesVertical"
           onClick={toggleActionsMenu}
           aria-label="Menu"
@@ -75,7 +78,7 @@ export function ChatActionsMenu({
             items: [
               {
                 name: (
-                  <>
+                  <div className="eui-textTruncate">
                     {i18n.translate('xpack.observabilityAiAssistant.chatHeader.actions.connector', {
                       defaultMessage: 'Connector',
                     })}{' '}
@@ -85,7 +88,7 @@ export function ChatActionsMenu({
                           ?.name
                       }
                     </strong>
-                  </>
+                  </div>
                 ),
                 panel: 1,
               },
