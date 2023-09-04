@@ -10,12 +10,13 @@ import { EuiDataGridStyle } from '@elastic/eui';
 
 // data types
 export const kibanaJSON = 'kibana-json';
-export const GRID_STYLE = {
+export const GRID_STYLE: EuiDataGridStyle = {
   border: 'horizontal',
   fontSize: 's',
   cellPadding: 'l',
   rowHover: 'highlight',
-} as EuiDataGridStyle;
+  stripes: true,
+};
 
 export const defaultTimeColumnWidth = 210;
 export const toolbarVisibility = {
