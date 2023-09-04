@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// FIXME: move file to server/routes/rule/apis
 import { IRouter } from '@kbn/core/server';
-import { transformRequestParamsToApplicationV1 } from './rule/apis/mute_alert/transforms';
-import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { transformRequestParamsToApplicationV1 } from './transforms';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import {
   muteAlertParamsSchemaV1,
   MuteAlertRequestParamsV1,
-} from '../../common/routes/rule/apis/mute_alert';
+} from '../../../../../common/routes/rule/apis/mute_alert';
 
 export const muteAlertRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
