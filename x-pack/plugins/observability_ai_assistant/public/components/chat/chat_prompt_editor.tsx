@@ -51,6 +51,7 @@ export function ChatPromptEditor({
   const [functionPayload, setFunctionPayload] = useState<string | undefined>(
     initialFunctionPayload
   );
+  const [functionEditorLineCount, setFunctionEditorLineCount] = useState<number>(0);
 
   const { model, initialJsonString } = useJsonEditorModel({
     functionName: selectedFunctionName,
@@ -59,9 +60,12 @@ export function ChatPromptEditor({
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    setFunctionPayload(initialJsonString);
-  }, [initialJsonString, selectedFunctionName]);
+  const recalculateFunctionEditorLineCount = useCallback(() => {
+    const newLineCount = model?.getLineCount() || 0;
+    if (newLineCount !== functionEditorLineCount) {
+      setFunctionEditorLineCount(newLineCount);
+    }
+  }, [functionEditorLineCount, model]);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.currentTarget.value);
@@ -69,6 +73,7 @@ export function ChatPromptEditor({
 
   const handleChangeFunctionPayload = (params: string) => {
     setFunctionPayload(params);
+    recalculateFunctionEditorLineCount();
   };
 
   const handleClearSelection = () => {
@@ -128,6 +133,14 @@ export function ChatPromptEditor({
       setPrompt(currentPrompt);
     }
   }, [functionPayload, loading, onSubmit, prompt, selectedFunctionName]);
+
+  useEffect(() => {
+    setFunctionPayload(initialJsonString);
+  }, [initialJsonString, selectedFunctionName]);
+
+  useEffect(() => {
+    recalculateFunctionEditorLineCount();
+  }, [model, recalculateFunctionEditorLineCount]);
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
@@ -196,7 +209,7 @@ export function ChatPromptEditor({
                     aria-label="payloadEditor"
                     data-test-subj="observabilityAiAssistantChatPromptEditorCodeEditor"
                     fullWidth
-                    height="200px"
+                    height={functionEditorLineCount > 8 ? '200px' : '120px'}
                     languageId="json"
                     isCopyable
                     languageConfiguration={{
