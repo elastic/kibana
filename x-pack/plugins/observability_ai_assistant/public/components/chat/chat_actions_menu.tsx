@@ -77,7 +77,7 @@ export function ChatActionsMenu({
             items: [
               {
                 name: (
-                  <>
+                  <div className="eui-textTruncate">
                     {i18n.translate('xpack.observabilityAiAssistant.chatHeader.actions.connector', {
                       defaultMessage: 'Connector',
                     })}{' '}
@@ -87,7 +87,7 @@ export function ChatActionsMenu({
                           ?.name
                       }
                     </strong>
-                  </>
+                  </div>
                 ),
                 panel: 1,
               },
