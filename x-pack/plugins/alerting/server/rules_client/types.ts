@@ -114,6 +114,7 @@ export interface IndexType {
   [key: string]: unknown;
 }
 
+// FIXME: move to server/application/rule/methods/mute_alert/types out of a schema definition
 export interface MuteOptions extends IndexType {
   alertId: string;
   alertInstanceId: string;

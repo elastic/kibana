@@ -13,6 +13,7 @@ import { MuteOptions } from '../types';
 import { RulesClientContext } from '../types';
 import { updateMeta } from '../lib';
 
+// FIXME: move to server/application/rule/methods/mute_alert
 export async function muteInstance(
   context: RulesClientContext,
   { alertId, alertInstanceId }: MuteOptions
