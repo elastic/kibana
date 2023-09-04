@@ -20,7 +20,7 @@ export function registerRecallFunction({
     {
       name: 'recall',
       contexts: ['core'],
-      description: `Use this function to recall earlier learnings. Anything you will summarise can be retrieved again later via this function.
+      description: `Use this function to recall earlier learnings. Anything you will summarize can be retrieved again later via this function.
       
       Make sure the query covers the following aspects:
       - Anything you've inferred from the user's request, but is not mentioned in the user's request
