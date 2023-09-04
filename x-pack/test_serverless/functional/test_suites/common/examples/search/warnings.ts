@@ -119,8 +119,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // click "see full error" button in the toast
       const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
       await openShardModalButton.click();
-      const modalHeader = await testSubjects.find('shardFailureModalTitle');
-      expect(await modalHeader.getVisibleText()).to.be('2 of 4 shards failed');
+
+      await retry.waitFor('modal title visible', async () => {
+        const modalHeader = await testSubjects.find('shardFailureModalTitle');
+        return (await modalHeader.getVisibleText()) === '2 of 4 shards failed';
+      });
+
       // request
       await testSubjects.click('shardFailuresModalRequestButton');
       const requestBlock = await testSubjects.find('shardsFailedModalRequestBlock');
@@ -165,8 +169,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // click "see full error" button in the toast
       const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
       await openShardModalButton.click();
-      const modalHeader = await testSubjects.find('shardFailureModalTitle');
-      expect(await modalHeader.getVisibleText()).to.be('2 of 4 shards failed');
+
+      await retry.waitFor('modal title visible', async () => {
+        const modalHeader = await testSubjects.find('shardFailureModalTitle');
+        return (await modalHeader.getVisibleText()) === '2 of 4 shards failed';
+      });
+
       // request
       await testSubjects.click('shardFailuresModalRequestButton');
       const requestBlock = await testSubjects.find('shardsFailedModalRequestBlock');
