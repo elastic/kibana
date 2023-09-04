@@ -74,7 +74,7 @@ export async function createChatService({
   };
 
   const registerFunction: RegisterFunctionDefinition = (def, respond, render) => {
-    validators.set(def.name, new Validator(def.parameters as Schema, '2020-12', false));
+    validators.set(def.name, new Validator(def.parameters as Schema, '2020-12', true));
     functionRegistry.set(def.name, { options: def, respond, render });
   };
 

@@ -14,7 +14,6 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { termQuery } from '../../../../common/utils/term_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { environmentRt } from '../../default_api_types';
 import { getErrorEventRate } from './get_error_event_rate';
 import { getExitSpanFailureRate } from './get_exit_span_failure_rate';
 import { getExitSpanLatency } from './get_exit_span_latency';
@@ -84,7 +83,7 @@ export const getApmTimeseriesRt = t.type({
       t.partial({
         filter: t.string,
         offset: t.string,
-        'service.environment': environmentRt.props.environment,
+        'service.environment': t.string,
       }),
     ])
   ),
