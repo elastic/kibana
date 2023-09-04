@@ -27,7 +27,7 @@ export const nginxRequestRate: XYConfig = {
 
 export const nginxActiveConnections: XYConfig = {
   id: 'ActiveConnections',
-  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.nginx.ActiveConnections', {
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.nginx.activeConnections', {
     defaultMessage: 'Active Connections',
   }),
 
