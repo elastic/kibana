@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { Stat, StatsBarStat } from './stat';
 
 interface Stats {
