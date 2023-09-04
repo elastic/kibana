@@ -6,17 +6,11 @@
  */
 // FIXME: move file to server/routes/rule/apis
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import { MuteOptions } from '../rules_client';
 import { RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
-
-// FIXME: move to common/routes/rules/apis schemas
-const paramSchema = schema.object({
-  rule_id: schema.string(),
-  alert_id: schema.string(),
-});
+import { muteAlertParamsSchemaV1 } from '../../common/routes/rule/apis/mute_alert';
 
 // FIXME: move to server/routes/rule/apis transformations
 const rewriteParamsReq: RewriteRequestCase<MuteOptions> = ({
@@ -35,7 +29,7 @@ export const muteAlertRoute = (
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{rule_id}/alert/{alert_id}/_mute`,
       validate: {
-        params: paramSchema,
+        params: muteAlertParamsSchemaV1,
       },
     },
     router.handleLegacyErrors(
