@@ -65,7 +65,15 @@ const WelcomePanelComponent = ({
                   >
                     {item.description && item.description}
                   </span>
-                  {item.footer && item.footer}
+                  {item.footer && (
+                    <span
+                      css={css`
+                        margin-top: ${euiTheme.size.l};
+                      `}
+                    >
+                      {item.footer}
+                    </span>
+                  )}
                 </>
               }
               hasBorder
