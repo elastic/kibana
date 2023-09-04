@@ -13,6 +13,7 @@ import { z } from 'zod';
  */
 
 import {
+  SuccessResponse,
   AgentIds,
   Commands,
   Page,
@@ -36,9 +37,6 @@ export const ListRequestQuery = z.object({
   types: Types.optional(),
   withOutputs: WithOutputs.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});
 
 export type EndpointGetActionsListRequestQuery = z.infer<typeof EndpointGetActionsListRequestQuery>;
 export const EndpointGetActionsListRequestQuery = z.object({

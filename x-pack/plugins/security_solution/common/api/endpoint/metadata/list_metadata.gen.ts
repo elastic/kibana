@@ -35,6 +35,3 @@ export const ListRequestQuery = z.object({
   sortDirection: z.enum(['asc', 'desc']).nullable().optional(),
   hostStatuses: z.array(z.unknown()).optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

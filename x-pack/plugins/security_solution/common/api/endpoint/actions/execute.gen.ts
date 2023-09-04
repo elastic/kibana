@@ -23,6 +23,3 @@ export const ExecuteActionRequestBody = BaseActionSchema.and(
     }),
   })
 );
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});
