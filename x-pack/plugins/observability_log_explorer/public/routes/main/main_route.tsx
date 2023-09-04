@@ -9,7 +9,8 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
-import React from 'react';
+import React, { useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
 import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
 import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
@@ -31,11 +32,17 @@ export const ObservablityLogExplorerMainRoute = ({
 }: ObservablityLogExplorerMainRouteProps) => {
   useBreadcrumbs(noBreadcrumbs, core.chrome, serverless);
 
+  const [state$] = useState(() => new BehaviorSubject({}));
+
   return (
     <>
-      <LogExplorerTopNavMenu setHeaderActionMenu={setHeaderActionMenu} theme$={theme$} />
+      <LogExplorerTopNavMenu
+        setHeaderActionMenu={setHeaderActionMenu}
+        state$={state$}
+        theme$={theme$}
+      />
       <ObservabilityLogExplorerPageTemplate observabilityShared={observabilityShared}>
-        <logExplorer.LogExplorer scopedHistory={history} />
+        <logExplorer.LogExplorer scopedHistory={history} state$={state$} />
       </ObservabilityLogExplorerPageTemplate>
     </>
   );

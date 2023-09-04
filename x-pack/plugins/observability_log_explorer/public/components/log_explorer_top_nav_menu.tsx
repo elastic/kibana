@@ -6,6 +6,9 @@
  */
 
 import React from 'react';
+import deepEqual from 'fast-deep-equal';
+import useObservable from 'react-use/lib/useObservable';
+import { type BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import {
@@ -17,23 +20,22 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { LogExplorerStateContainer } from '@kbn/log-explorer-plugin/public';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { betaBadgeDescription, betaBadgeTitle, discoverLinkTitle } from '../../common/translations';
 
 interface LogExplorerTopNavMenuProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  state$: BehaviorSubject<LogExplorerStateContainer>;
   theme$: AppMountParameters['theme$'];
 }
 
 export const LogExplorerTopNavMenu = ({
   setHeaderActionMenu,
+  state$,
   theme$,
 }: LogExplorerTopNavMenuProps) => {
   const { euiTheme } = useEuiTheme();
-
-  const {
-    services: { discover },
-  } = useKibanaContextForPlugin();
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
@@ -50,15 +52,52 @@ export const LogExplorerTopNavMenu = ({
           />
         </EuiHeaderSectionItem>
         <EuiHeaderLinks gutterSize="xs">
-          <EuiHeaderLink
-            onClick={() => discover.locator?.navigate({})}
-            color="primary"
-            iconType="discoverApp"
-          >
-            {discoverLinkTitle}
-          </EuiHeaderLink>
+          <DiscoverLink state$={state$} />
         </EuiHeaderLinks>
       </EuiHeaderSection>
     </HeaderMenuPortal>
   );
 };
+
+const DiscoverLink = React.memo(
+  ({ state$ }: { state$: BehaviorSubject<LogExplorerStateContainer> }) => {
+    const {
+      services: { discover },
+    } = useKibanaContextForPlugin();
+
+    const { appState, logExplorerState } = useObservable<LogExplorerStateContainer>(
+      state$.pipe(
+        distinctUntilChanged<LogExplorerStateContainer>((prev, curr) => {
+          if (!prev.appState || !curr.appState) return false;
+          return deepEqual(
+            [
+              prev.appState.columns,
+              prev.appState.filters,
+              prev.appState.index,
+              prev.appState.query,
+            ],
+            [curr.appState.columns, curr.appState.filters, curr.appState.index, curr.appState.query]
+          );
+        })
+      ),
+      { appState: {}, logExplorerState: {} }
+    );
+
+    const discoverLinkParams = {
+      columns: appState?.columns,
+      filters: appState?.filters,
+      query: appState?.query,
+      dataViewSpec: logExplorerState?.datasetSelection?.selection.dataset.toDataviewSpec(),
+    };
+
+    return (
+      <EuiHeaderLink
+        onClick={() => discover.locator?.navigate(discoverLinkParams)}
+        color="primary"
+        iconType="discoverApp"
+      >
+        {discoverLinkTitle}
+      </EuiHeaderLink>
+    );
+  }
+);
