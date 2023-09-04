@@ -327,12 +327,12 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  summarise = async ({
+  summarize = async ({
     entry,
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
   }): Promise<void> => {
-    return this.dependencies.knowledgeBaseService.summarise({
+    return this.dependencies.knowledgeBaseService.summarize({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
       entry,
