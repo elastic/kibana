@@ -21,7 +21,7 @@ const AlertsButtonComponent = () => {
     onClick,
   });
   return (
-    <LinkButton onClick={onLinkClicked} id={SecurityPageName.alerts} fill>
+    <LinkButton onClick={onClick} id={SecurityPageName.alerts} fill>
       <FormattedMessage
         id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.button"
         defaultMessage="View alerts"
