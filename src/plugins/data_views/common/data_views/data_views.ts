@@ -120,6 +120,8 @@ export interface DataViewsServiceDeps {
    * Determines whether the user can save advancedSettings (used for defaultIndex)
    */
   getCanSaveAdvancedSettings: () => Promise<boolean>;
+
+  scriptedFieldsEnabled: boolean;
 }
 
 /**
@@ -325,6 +327,8 @@ export class DataViewsService {
    * Can the user save data views?
    */
   public getCanSave: () => Promise<boolean>;
+
+  public readonly scriptedFieldsEnabled: boolean;
   /**
    * DataViewsService constructor
    * @param deps Service dependencies
@@ -339,6 +343,7 @@ export class DataViewsService {
       onError,
       getCanSave = () => Promise.resolve(false),
       getCanSaveAdvancedSettings,
+      scriptedFieldsEnabled,
     } = deps;
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -350,6 +355,7 @@ export class DataViewsService {
     this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
     this.dataViewCache = createDataViewCache();
+    this.scriptedFieldsEnabled = scriptedFieldsEnabled;
   }
 
   /**
@@ -591,7 +597,9 @@ export class DataViewsService {
   private refreshFieldsFn = async (indexPattern: DataView) => {
     const { fields, indices } = await this.getFieldsAndIndicesForDataView(indexPattern);
     fields.forEach((field) => (field.isMapped = true));
-    const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
+    const scripted = this.scriptedFieldsEnabled
+      ? indexPattern.getScriptedFields().map((field) => field.spec)
+      : [];
     const fieldAttrs = indexPattern.getFieldAttrs();
     const fieldsWithSavedAttrs = Object.values(
       this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
@@ -655,7 +663,9 @@ export class DataViewsService {
     displayErrors: boolean = true
   ) => {
     const fieldsAsArr = Object.values(fields);
-    const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
+    const scriptedFields = this.scriptedFieldsEnabled
+      ? fieldsAsArr.filter((field) => field.scripted)
+      : [];
     try {
       let updatedFieldList: FieldSpec[];
       const { fields: newFields, indices } = await this.getFieldsAndIndicesForWildcard(options);

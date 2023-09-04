@@ -105,7 +105,7 @@ describe('NavControlPopover', () => {
       />
     );
 
-    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+    wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
 
     // Wait for `getSpaces` promise to resolve
     await waitFor(() => {
@@ -118,7 +118,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(mockSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
 
@@ -167,7 +167,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(eightSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
 
@@ -200,7 +200,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(sevenSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
 
@@ -211,7 +211,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(mockSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
     expect(wrapper.find(EuiPopover).props().isOpen).toEqual(true);

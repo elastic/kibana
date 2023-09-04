@@ -56,6 +56,7 @@ export * from './sort_field';
 export * from './sort_order';
 export * from './tags';
 export * from './tie_breaker_id';
+export * from './timestamp';
 export * from './total';
 export * from './type';
 export * from './underscore_version';

@@ -14,7 +14,7 @@ import {
 import { fromESFormat } from './helper';
 import { filterOptionsRt } from './custom_link_types';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { APM_CUSTOM_LINK_INDEX } from '../apm_indices/get_apm_indices';
+import { APM_CUSTOM_LINK_INDEX } from '../apm_indices/apm_system_index_constants';
 
 export async function listCustomLinks({
   internalESClient,

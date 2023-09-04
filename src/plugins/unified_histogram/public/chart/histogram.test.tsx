@@ -38,7 +38,7 @@ const getMockLensAttributes = () =>
     suggestion: undefined,
   });
 
-function mountComponent() {
+function mountComponent(isPlainRecord = false, hasLensSuggestions = false) {
   const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -51,7 +51,8 @@ function mountComponent() {
     request: {
       searchSessionId: '123',
     },
-    hasLensSuggestions: false,
+    hasLensSuggestions,
+    isPlainRecord,
     hits: {
       status: UnifiedHistogramFetchStatus.loading,
       total: undefined,
@@ -70,6 +71,7 @@ function mountComponent() {
     lensAttributesContext: getMockLensAttributes(),
     onTotalHitsChange: jest.fn(),
     onChartLoad: jest.fn(),
+    withDefaultActions: undefined,
   };
 
   return {
@@ -95,16 +97,18 @@ describe('Histogram', () => {
       attributes: getMockLensAttributes().attributes,
       onLoad: lensProps.onLoad,
     });
-    expect(lensProps).toEqual(originalProps);
+    expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     component.setProps({ request: { ...props.request, searchSessionId: '321' } }).update();
     lensProps = component.find(embeddable).props();
-    expect(lensProps).toEqual(originalProps);
+    expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     await act(async () => {
       props.refetch$.next({ type: 'refetch' });
     });
     component.update();
     lensProps = component.find(embeddable).props();
-    expect(lensProps).toEqual({ ...originalProps, searchSessionId: '321' });
+    expect(lensProps).toMatchObject(
+      expect.objectContaining({ ...originalProps, searchSessionId: '321' })
+    );
   });
 
   it('should execute onLoad correctly', async () => {
@@ -231,6 +235,78 @@ describe('Histogram', () => {
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.complete,
       100
+    );
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
+  });
+
+  it('should execute onLoad correctly for textbased language and no Lens suggestions', async () => {
+    const { component, props } = mountComponent(true, false);
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
+    const onLoad = component.find(embeddable).props().onLoad;
+    const adapters = createDefaultInspectorAdapters();
+    adapters.tables.tables.layerId = {
+      meta: { type: 'es_ql' },
+      columns: [
+        {
+          id: 'rows',
+          name: 'rows',
+          meta: {
+            type: 'number',
+            dimensionName: 'Vertical axis',
+          },
+        },
+      ],
+      rows: [
+        {
+          rows: 16,
+        },
+        {
+          rows: 4,
+        },
+      ],
+    } as any;
+    act(() => {
+      onLoad(false, adapters);
+    });
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.complete,
+      20
+    );
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
+  });
+
+  it('should execute onLoad correctly for textbased language and Lens suggestions', async () => {
+    const { component, props } = mountComponent(true, true);
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
+    const onLoad = component.find(embeddable).props().onLoad;
+    const adapters = createDefaultInspectorAdapters();
+    adapters.tables.tables.layerId = {
+      meta: { type: 'es_ql' },
+      columns: [
+        {
+          id: 'rows',
+          name: 'rows',
+          meta: {
+            type: 'number',
+            dimensionName: 'Vertical axis',
+          },
+        },
+      ],
+      rows: [
+        {
+          var0: 5584.925311203319,
+        },
+        {
+          var0: 6788.7777444444,
+        },
+      ],
+    } as any;
+    act(() => {
+      onLoad(false, adapters);
+    });
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.complete,
+      2
     );
     expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
   });

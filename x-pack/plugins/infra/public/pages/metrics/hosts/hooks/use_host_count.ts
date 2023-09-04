@@ -22,12 +22,12 @@ export const useHostCount = () => {
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
-  const { buildQuery, getParsedDateRange } = useUnifiedSearchContext();
+  const { buildQuery, parsedDateRange } = useUnifiedSearchContext();
 
   const { search: fetchHostCount, requests$ } = useDataSearch({
     getRequest: useCallback(() => {
       const query = buildQuery();
-      const dateRange = getParsedDateRange();
+      const dateRange = parsedDateRange;
 
       const filters: QueryDslQueryContainer = {
         bool: {
@@ -74,7 +74,7 @@ export const useHostCount = () => {
         },
         options: { strategy: ES_SEARCH_STRATEGY },
       };
-    }, [buildQuery, dataView, getParsedDateRange, metricAlias]),
+    }, [buildQuery, dataView, parsedDateRange, metricAlias]),
     parseResponses: normalizeDataSearchResponse,
   });
 

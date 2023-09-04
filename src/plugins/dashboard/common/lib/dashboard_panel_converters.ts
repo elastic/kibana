@@ -17,7 +17,6 @@ export function convertSavedDashboardPanelToPanelState<
 >(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<TEmbeddableInput> {
   return {
     type: savedDashboardPanel.type,
-    version: savedDashboardPanel.version,
     gridData: savedDashboardPanel.gridData,
     panelRefName: savedDashboardPanel.panelRefName,
     explicitInput: {
@@ -26,16 +25,29 @@ export function convertSavedDashboardPanelToPanelState<
       ...(savedDashboardPanel.title !== undefined && { title: savedDashboardPanel.title }),
       ...savedDashboardPanel.embeddableConfig,
     } as TEmbeddableInput,
+
+    /**
+     * Version information used to be stored in the panel until 8.11 when it was moved
+     * to live inside the explicit Embeddable Input. If version information is given here, we'd like to keep it.
+     * It will be removed on Dashboard save
+     */
+    version: savedDashboardPanel.version,
   };
 }
 
 export function convertPanelStateToSavedDashboardPanel(
   panelState: DashboardPanelState,
-  version?: string
+  removeLegacyVersion?: boolean
 ): SavedDashboardPanel {
   const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
   return {
-    version: version ?? (panelState.version as string), // temporary cast. Version will be mandatory at a later date.
+    /**
+     * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
+     * explicit Embeddable Input. If removeLegacyVersion is not passed, we'd like to keep this information for
+     * the time being.
+     */
+    ...(!removeLegacyVersion ? { version: panelState.version } : {}),
+
     type: panelState.type,
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
@@ -56,9 +68,9 @@ export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): Da
 
 export const convertPanelMapToSavedPanels = (
   panels: DashboardPanelMap,
-  versionOverride?: string
+  removeLegacyVersion?: boolean
 ) => {
   return Object.values(panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, versionOverride)
+    convertPanelStateToSavedDashboardPanel(panel, removeLegacyVersion)
   );
 };

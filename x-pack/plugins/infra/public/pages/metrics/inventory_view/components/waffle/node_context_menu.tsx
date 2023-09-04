@@ -24,7 +24,7 @@ import {
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
-import { getNodeDetailUrl } from '../../../../link_to';
+import { useNodeDetailsRedirect } from '../../../../link_to';
 import { findInventoryModel, findInventoryFields } from '../../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
@@ -38,6 +38,7 @@ interface Props {
 
 export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
   ({ options, currentTime, node, nodeType }) => {
+    const { getNodeDetailUrl } = useNodeDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
@@ -79,8 +80,11 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       ...getNodeDetailUrl({
         nodeType,
         nodeId: node.id,
-        from: nodeDetailFrom,
-        to: currentTime,
+        search: {
+          from: nodeDetailFrom,
+          to: currentTime,
+          assetName: node.name,
+        },
       }),
     });
     const apmTracesMenuItemLinkProps = useLinkProps({

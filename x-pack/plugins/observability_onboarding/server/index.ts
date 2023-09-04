@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import {
   PluginConfigDescriptor,
   PluginInitializerContext,
@@ -17,13 +17,10 @@ const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
   serverless: schema.object({
-    enabled: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
-      schema.literal(true),
-      schema.never(),
-      { defaultValue: schema.contextRef('serverless') }
-    ),
+    enabled: offeringBasedSchema({
+      serverless: schema.literal(true),
+      options: { defaultValue: schema.contextRef('serverless') },
+    }),
   }),
 });
 

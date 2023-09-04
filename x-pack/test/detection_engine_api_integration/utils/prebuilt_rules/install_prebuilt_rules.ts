@@ -42,6 +42,7 @@ export const installPrebuiltRules = async (
   const response = await supertest
     .post(PERFORM_RULE_INSTALLATION_URL)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '1')
     .send(payload)
     .expect(200);
 

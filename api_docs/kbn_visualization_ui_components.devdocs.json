@@ -2533,13 +2533,10 @@
       {
         "parentPluginId": "@kbn/visualization-ui-components",
         "id": "def-public.emptyTitleText",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "emptyTitleText",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

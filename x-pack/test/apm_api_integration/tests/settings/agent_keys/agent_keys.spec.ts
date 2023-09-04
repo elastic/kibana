@@ -15,7 +15,7 @@ import { expectToReject } from '../../../common/utils/expect_to_reject';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const esClient = getService('es');
+  const es = getService('es');
 
   const agentKeyName = 'test';
   const allApplicationPrivileges = [PrivilegeType.AGENT_CONFIG, PrivilegeType.EVENT];
@@ -100,7 +100,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       afterEach(async () => {
-        await esClient.security.invalidateApiKey({
+        await es.security.invalidateApiKey({
           username: ApmUsername.apmManageOwnAndCreateAgentKeys,
         });
       });
@@ -114,7 +114,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(body.agentKey).to.have.property('encoded');
         expect(body.agentKey.name).to.be(agentKeyName);
 
-        const { api_keys: apiKeys } = await esClient.security.getApiKey({});
+        const { api_keys: apiKeys } = await es.security.getApiKey({});
         expect(
           apiKeys.filter((key) => !key.invalidated && key.metadata?.application === 'apm')
         ).to.have.length(1);
@@ -139,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(body.invalidatedAgentKeys).to.eql([id]);
 
         // Get
-        const { api_keys: apiKeys } = await esClient.security.getApiKey({});
+        const { api_keys: apiKeys } = await es.security.getApiKey({});
         expect(
           apiKeys.filter((key) => !key.invalidated && key.metadata?.application === 'apm')
         ).to.be.empty();

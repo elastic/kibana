@@ -11,6 +11,7 @@ import {
   USER_DETAILS_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/left/components/test_ids';
 import { INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/left/tabs/test_ids';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/shared/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON = getDataTestSubjectSelector(
@@ -19,7 +20,9 @@ export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON = getDataTestS
 
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT =
   getDataTestSubjectSelector(ENTITIES_DETAILS_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS =
-  getDataTestSubjectSelector(USER_DETAILS_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS =
-  getDataTestSubjectSelector(HOST_DETAILS_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS = getDataTestSubjectSelector(
+  EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID)
+);
+export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS = getDataTestSubjectSelector(
+  EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID)
+);

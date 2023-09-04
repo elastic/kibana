@@ -11,8 +11,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { HttpError } from '../../../../../../../common/types/api';
-
 import { DeployModel } from './deploy_model';
 import { ModelDeployed } from './model_deployed';
 import { ModelDeploymentInProgress } from './model_deployment_in_progress';
@@ -31,7 +29,6 @@ jest.mock('./text_expansion_callout_data', () => ({
 }));
 
 const DEFAULT_VALUES = {
-  startTextExpansionModelError: undefined,
   isCreateButtonDisabled: false,
   isModelDownloadInProgress: false,
   isModelDownloaded: false,
@@ -47,13 +44,10 @@ describe('TextExpansionCallOut', () => {
   it('renders error panel instead of normal panel if there are some errors', () => {
     setMockValues({
       ...DEFAULT_VALUES,
-      startTextExpansionModelError: {
-        body: {
-          error: 'some-error',
-          message: 'some-error-message',
-          statusCode: 500,
-        },
-      } as HttpError,
+      textExpansionError: {
+        title: 'Error with ELSER deployment',
+        message: 'Mocked error message',
+      },
     });
 
     const wrapper = shallow(<TextExpansionCallOut />);

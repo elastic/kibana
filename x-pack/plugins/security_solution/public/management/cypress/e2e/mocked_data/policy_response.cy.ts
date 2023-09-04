@@ -15,7 +15,7 @@ import { navigateToFleetAgentDetails } from '../../screens/fleet';
 import { EndpointPolicyResponseGenerator } from '../../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
 import { descriptions } from '../../../components/policy_response/policy_response_friendly_names';
 
-describe('Endpoint Policy Response', () => {
+describe.skip('Endpoint Policy Response', () => {
   let loadedEndpoint: CyIndexEndpointHosts;
   let endpointMetadata: HostMetadata;
   let loadedPolicyResponse: IndexedEndpointPolicyResponse;

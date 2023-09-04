@@ -61,6 +61,8 @@ const listedTypes = new Set<RegistryRuleType>([
     name: 'myType',
     producer: 'myApp',
     enabledInLicense: true,
+    hasAlertsMappings: false,
+    hasFieldsForAAD: false,
   },
 ]);
 
@@ -112,6 +114,8 @@ describe('getTags()', () => {
             myApp: { read: true, all: true },
           },
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ])
     );

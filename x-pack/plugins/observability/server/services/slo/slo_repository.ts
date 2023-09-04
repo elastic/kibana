@@ -20,6 +20,7 @@ export interface SLORepository {
   findAllByIds(ids: string[]): Promise<SLO[]>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
+  search(search: string): Promise<SLO[]>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
@@ -94,6 +95,21 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw new SLONotFound(`SLOs [${ids.join(',')}] not found`);
       }
+      throw err;
+    }
+  }
+
+  async search(search: string): Promise<SLO[]> {
+    try {
+      const response = await this.soClient.find<StoredSLO>({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: 25,
+        search,
+        searchFields: ['name'],
+      });
+      return response.saved_objects.map((slo) => toSLO(slo.attributes));
+    } catch (err) {
       throw err;
     }
   }

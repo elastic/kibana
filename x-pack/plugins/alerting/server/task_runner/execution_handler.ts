@@ -11,6 +11,7 @@ import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils'
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { GetSummarizedAlertsParams, IAlertsClient } from '../alerts_client/types';
@@ -24,7 +25,6 @@ import { transformActionParams, transformSummaryActionParams } from './transform
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
-  ActionsCompletion,
   AlertInstanceContext,
   AlertInstanceState,
   RuleAction,
@@ -259,7 +259,7 @@ export class ExecutionHandler<
           });
 
           if (isActionOnInterval(action)) {
-            throttledSummaryActions[action.uuid!] = { date: new Date() };
+            throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
           }
 
           logActions.push({
