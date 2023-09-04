@@ -213,7 +213,7 @@ export function ServiceMap({
       <SearchBar showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div
-          data-test-subj="ServiceMap"
+          data-test-subj="serviceMap"
           style={{ height: heightWithPadding }}
           ref={ref}
         >

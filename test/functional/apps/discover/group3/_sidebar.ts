@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show filters by type in text-based view', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:enableSql': true });
+        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
         await browser.refresh();
 
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(options).to.have.length(6);
         await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
 
-        await PageObjects.discover.selectTextBaseLang('SQL');
+        await PageObjects.discover.selectTextBaseLang();
 
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(options).to.have.length(3);
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '50 selected fields. 51 available fields.'
+          '82 available fields.'
         );
 
         await testSubjects.click('typeFilter-number');
@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '6 selected fields. 6 available fields.'
+            '6 available fields.'
           );
         });
       });
@@ -366,7 +366,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show selected and available fields in text-based mode', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:enableSql': true });
+        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
         await browser.refresh();
 
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -375,24 +375,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           INITIAL_FIELD_LIST_SUMMARY
         );
 
-        await PageObjects.discover.selectTextBaseLang('SQL');
+        await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '50 selected fields. 51 available fields.'
+          '82 available fields.'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '49 selected fields. 51 available fields.'
+          '82 available fields.'
         );
 
-        const testQuery = `SELECT "@tags", geo.dest, count(*) occurred FROM "logstash-*"
-          GROUP BY "@tags", geo.dest
-          HAVING occurred > 20
-          ORDER BY occurred DESC`;
+        const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -400,11 +397,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '3 selected fields. 3 available fields.'
+          '2 selected fields. 2 available fields.'
         );
         expect(
           (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('selected')).join(', ')
-        ).to.be('@tags, geo.dest, occurred');
+        ).to.be('countB, geo.dest');
 
         await PageObjects.unifiedSearch.switchDataView(
           'discover-dataView-switch-link',
