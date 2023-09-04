@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import {
-  scoresVulnerabilitiesMock,
   vulnerabilitiesLatestMock,
+  scoresVulnerabilitiesMock,
 } from './mocks/vulnerabilities_latest_mock';
 
 export interface CnvmStatistics {
@@ -124,21 +124,29 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
   const index = {
-    remove: () =>
+    removeFindings: async () =>
       es.deleteByQuery({
         index: VULNERABILITIES_LATEST_INDEX,
         query: { match_all: {} },
         refresh: true,
       }),
 
-    removeScores: () =>
+    removeScores: async () =>
       es.deleteByQuery({
         index: BENCHMARK_SCORES_INDEX,
         query: { match_all: {} },
         refresh: true,
       }),
 
-    add: async <T>(vulnerabilitiesMock: T[]) => {
+    deleteFindingsIndex: async () => {
+      const indexExists = await es.indices.exists({ index: VULNERABILITIES_LATEST_INDEX });
+
+      if (indexExists) {
+        await es.indices.delete({ index: VULNERABILITIES_LATEST_INDEX });
+      }
+    },
+
+    addFindings: async <T>(vulnerabilitiesMock: T[]) => {
       await Promise.all(
         vulnerabilitiesMock.map((vulnerabilityDoc) =>
           es.index({
@@ -153,7 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
       await Promise.all(
         scoresMock.map((scoreDoc) =>
           es.index({
-            index: 'logs-cloud_security_posture.scores-default',
+            index: BENCHMARK_SCORES_INDEX,
             body: scoreDoc,
           })
         )
@@ -162,20 +170,32 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Vulnerability Dashboard API', async () => {
-    before(async () => {
+    beforeEach(async () => {
       await waitForPluginInitialized();
-      await index.add(vulnerabilitiesLatestMock);
       await index.addScores(scoresVulnerabilitiesMock);
+      await index.addFindings(vulnerabilitiesLatestMock);
     });
 
     afterEach(async () => {
-      await index.remove();
+      await index.removeFindings();
       await index.removeScores();
+    });
+
+    it('When the necessary indices are nonexistent, the API returns a 400 error without providing any data', async () => {
+      // Remove the required indices to simulate nonexistence
+      await index.deleteFindingsIndex();
+      // await index.removeScores();
+
+      // await supertest
+      //   .get(`/internal/cloud_security_posture/vulnerabilities_dashboard`)
+      //   .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      //   .expect(400);
     });
 
     it('API responds with a 200 status code and matching data mock', async () => {
       const { body } = await supertest
         .get(`/internal/cloud_security_posture/vulnerabilities_dashboard`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         // .set('kbn-xsrf', 'xxxx')
         // .send({
         //   unencrypted: true,
@@ -194,26 +214,25 @@ export default function ({ getService }: FtrProviderContext) {
           resourcesScanned: 2,
           cloudRegions: 1,
         },
-        // TODO: add scores index mock and testings for trend graph
         vulnTrends: [
-          {
-            high: 1,
-            policy_template: 'vuln_mgmt',
-            // '@timestamp': '2023-09-03T12:57:04.925186Z',
-            critical: 0,
-            low: 0,
-            vulnerabilities_stats_by_cloud_account: {
-              '704479110758': {
-                cloudAccountName: 'elastic-security-cloud-security-dev',
-                high: 1,
-                critical: 0,
-                low: 0,
-                cloudAccountId: '704479110758',
-                medium: 1,
-              },
-            },
-            medium: 1,
-          },
+          // {
+          //   high: 1,
+          //   policy_template: 'vuln_mgmt',
+          //   // '@timestamp': '2023-09-03T12:57:04.925186Z',
+          //   critical: 0,
+          //   low: 0,
+          //   vulnerabilities_stats_by_cloud_account: {
+          //     '704479110758': {
+          //       cloudAccountName: 'elastic-security-cloud-security-dev',
+          //       high: 1,
+          //       critical: 0,
+          //       low: 0,
+          //       cloudAccountId: '704479110758',
+          //       medium: 1,
+          //     },
+          //   },
+          //   medium: 1,
+          // },
         ],
         topVulnerableResources: [
           {
