@@ -7,14 +7,13 @@
 
 import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 
+import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
 import type {
   ServerlessObservabilityPluginSetup,
   ServerlessObservabilityPluginStart,
   SetupDependencies,
   StartDependencies,
 } from './types';
-
-import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings'
 
 export class ServerlessObservabilityPlugin
   implements

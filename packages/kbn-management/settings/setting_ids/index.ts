@@ -137,14 +137,16 @@ export const ROLLUPS_ENABLE_INDEX_PATTERNS_ID = 'rollups.enableIndexPatterns';
 
 // Search settings
 export const COURIER_CUSTOM_REQUEST_PREFERENCE_ID = 'courier:customRequestPreference';
-export const COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_ID = 'courier:ignoreFilterIfFieldNotInIndex';
+export const COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_ID =
+  'courier:ignoreFilterIfFieldNotInIndex';
 export const COURIER_MAX_CONCURRENT_SHARD_REQUEST_ID = 'courier:maxConcurrentShardRequests';
 export const COURIER_SET_REQUEST_PREFERENCE_ID = 'courier:setRequestPreference';
 export const SEARCH_INCLUDE_FROZEN_ID = 'search:includeFrozen';
 export const SEARCH_TIMEOUT_ID = 'search:timeout';
 
 // Security solution settings
-export const SECURITY_SOLUTION_REFRESH_INTERVAL_DEFAULTS_ID = 'securitySolution:refreshIntervalDefaults';
+export const SECURITY_SOLUTION_REFRESH_INTERVAL_DEFAULTS_ID =
+  'securitySolution:refreshIntervalDefaults';
 export const SECURITY_SOLUTION_TIME_DEFAULTS_ID = 'securitySolution:timeDefaults';
 export const SECURITY_SOLUTION_DEFAULT_INDEX_ID = 'securitySolution:defaultIndex';
 export const SECURITY_SOLUTION_DEFAULT_THREAT_INDEX_ID = 'securitySolution:defaultThreatIndex';
@@ -155,7 +157,8 @@ export const SECURITY_SOLUTION_RULES_TABLE_REFRESH_ID = 'securitySolution:rulesT
 export const SECURITY_SOLUTION_NEWS_FEED_URL_ID = 'securitySolution:newsFeedUrl';
 export const SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID = 'securitySolution:ipReputationLinks';
 export const SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID = 'securitySolution:enableCcsWarning';
-export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID = 'securitySolution:showRelatedIntegrations';
+export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
+  'securitySolution:showRelatedIntegrations';
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';
