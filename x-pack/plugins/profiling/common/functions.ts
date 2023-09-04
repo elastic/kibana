@@ -6,12 +6,15 @@
  */
 import * as t from 'io-ts';
 import { sumBy } from 'lodash';
-import { createFrameGroupID, FrameGroupID } from '@kbn/profiling-utils/common/frame_group';
+import type { FrameGroupID } from '@kbn/profiling-utils/common/frame_group';
+import { createFrameGroupID } from '@kbn/profiling-utils/common';
 import {
   createStackFrameMetadata,
   emptyExecutable,
   emptyStackFrame,
   emptyStackTrace,
+} from '@kbn/profiling-utils/common';
+import type {
   Executable,
   FileID,
   StackFrame,

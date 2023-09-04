@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import {
+  createBaseFlameGraph,
+  createCalleeTree,
+  createFlameGraph,
+  decodeStackTraceResponse,
+} from '@kbn/profiling-utils/common';
+import { stackTraceFixtures } from './__fixtures__/stacktraces';
 import { sum } from 'lodash';
-import { createCalleeTree } from '@kbn/profiling-utils/common/callee';
 import { createColumnarViewModel } from './columnar_view_model';
-import { createBaseFlameGraph, createFlameGraph } from '@kbn/profiling-utils/common/flamegraph';
-import { decodeStackTraceResponse } from '@kbn/profiling-utils/common/stack_traces';
-import { stackTraceFixtures } from '@kbn/profiling-utils/common/__fixtures__/stacktraces';
 
 describe('Columnar view model operations', () => {
   stackTraceFixtures.forEach(({ response, seconds, upsampledBy }) => {
