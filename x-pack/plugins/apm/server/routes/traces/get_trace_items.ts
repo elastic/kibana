@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import {
   QueryDslQueryContainer,
   Sort,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { last } from 'lodash';
 import { APMConfig } from '../..';
 import {
   AGENT_NAME,
@@ -62,13 +64,19 @@ export interface TraceItems {
   maxTraceItems: number;
 }
 
-export async function getTraceItems(
-  traceId: string,
-  config: APMConfig,
-  apmEventClient: APMEventClient,
-  start: number,
-  end: number
-): Promise<TraceItems> {
+export async function getTraceItems({
+  traceId,
+  config,
+  apmEventClient,
+  start,
+  end,
+}: {
+  traceId: string;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
+  start: number;
+  end: number;
+}): Promise<TraceItems> {
   const maxTraceItems = config.ui.maxTraceItems;
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
@@ -78,7 +86,7 @@ export async function getTraceItems(
     },
     body: {
       track_total_hits: false,
-      size: maxTraceItems,
+      size: 1000,
       _source: [
         TIMESTAMP,
         TRACE_ID,
@@ -102,13 +110,107 @@ export async function getTraceItems(
     },
   });
 
-  const traceResponsePromise = apmEventClient.search('get_trace_docs', {
+  const traceResponsePromise = getTraceDocsPaginated({
+    apmEventClient,
+    maxTraceItems,
+    traceId,
+    start,
+    end,
+  });
+
+  const [errorResponse, traceResponse, spanLinksCountById] = await Promise.all([
+    errorResponsePromise,
+    traceResponsePromise,
+    getSpanLinksCountById({ traceId, apmEventClient, start, end }),
+  ]);
+
+  const traceItemCount = traceResponse.total;
+  const exceedsMax = traceItemCount > maxTraceItems;
+  const traceDocs = traceResponse.hits.map((hit) => hit._source);
+  const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
+
+  return {
+    exceedsMax,
+    traceDocs,
+    errorDocs,
+    spanLinksCountById,
+    traceItemCount,
+    maxTraceItems,
+  };
+}
+
+async function getTraceDocsPaginated({
+  apmEventClient,
+  maxTraceItems,
+  traceId,
+  start,
+  end,
+  results = [],
+  searchAfter,
+}: {
+  apmEventClient: APMEventClient;
+  maxTraceItems: number;
+  traceId: string;
+  start: number;
+  end: number;
+  results?: any[];
+  searchAfter?: SortResults;
+}): Promise<ReturnType<typeof getTraceDocsPerPage>> {
+  const { hits, total } = await getTraceDocsPerPage({
+    apmEventClient,
+    maxTraceItems,
+    traceId,
+    start,
+    end,
+    searchAfter,
+    hitsRetrievedCount: results.length,
+  });
+
+  const newResults = [...results, ...hits];
+  if (newResults.length >= maxTraceItems) {
+    return { hits: newResults, total };
+  }
+
+  return getTraceDocsPaginated({
+    apmEventClient,
+    maxTraceItems,
+    traceId,
+    start,
+    end,
+    results: newResults,
+    searchAfter: last(hits)?.sort,
+  });
+}
+
+async function getTraceDocsPerPage({
+  apmEventClient,
+  maxTraceItems,
+  traceId,
+  start,
+  end,
+  searchAfter,
+  hitsRetrievedCount,
+}: {
+  apmEventClient: APMEventClient;
+  maxTraceItems: number;
+  traceId: string;
+  start: number;
+  end: number;
+  searchAfter?: SortResults;
+  hitsRetrievedCount: number;
+}) {
+  const MAX_ITEMS_PER_PAGE = 100; // 10000 is the max allowed by ES
+  const hitsRemaining = maxTraceItems - hitsRetrievedCount;
+  const size = Math.min(hitsRemaining, MAX_ITEMS_PER_PAGE);
+
+  const res = await apmEventClient.search('get_trace_docs', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
-      track_total_hits: Math.max(10000, maxTraceItems + 1),
-      size: maxTraceItems,
+      track_total_hits: true,
+      size,
+      search_after: searchAfter,
       _source: [
         TIMESTAMP,
         TRACE_ID,
@@ -149,30 +251,25 @@ export async function getTraceItems(
         },
       },
       sort: [
-        { _score: { order: 'asc' as const } },
-        { [TRANSACTION_DURATION]: { order: 'desc' as const } },
-        { [SPAN_DURATION]: { order: 'desc' as const } },
+        { _score: 'asc' },
+        {
+          _script: {
+            type: 'number',
+            script: {
+              lang: 'painless',
+              source: `if (doc['${TRANSACTION_DURATION}'].size() > 0) { return doc['${TRANSACTION_DURATION}'].value } else { return doc['${SPAN_DURATION}'].value }`,
+            },
+            order: 'desc',
+          },
+        },
+        { '@timestamp': 'asc' },
+        { _doc: 'asc' }, // tiebreaker
       ] as Sort,
     },
   });
 
-  const [errorResponse, traceResponse, spanLinksCountById] = await Promise.all([
-    errorResponsePromise,
-    traceResponsePromise,
-    getSpanLinksCountById({ traceId, apmEventClient, start, end }),
-  ]);
-
-  const traceItemCount = traceResponse.hits.total.value;
-  const exceedsMax = traceItemCount > maxTraceItems;
-  const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
-  const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
-
   return {
-    exceedsMax,
-    traceDocs,
-    errorDocs,
-    spanLinksCountById,
-    traceItemCount,
-    maxTraceItems,
+    hits: res.hits.hits,
+    total: res.hits.total.value,
   };
 }

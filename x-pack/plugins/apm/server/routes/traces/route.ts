@@ -98,7 +98,13 @@ const tracesByIdRoute = createApmServerRoute({
     const { traceId } = params.path;
     const { start, end, entryTransactionId } = params.query;
     const [traceItems, entryTransaction] = await Promise.all([
-      getTraceItems(traceId, config, apmEventClient, start, end),
+      getTraceItems({
+        traceId,
+        config,
+        apmEventClient,
+        start,
+        end,
+      }),
       getTransaction({
         transactionId: entryTransactionId,
         traceId,
