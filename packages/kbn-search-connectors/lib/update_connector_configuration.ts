@@ -55,7 +55,7 @@ export const updateConnectorConfiguration = async (
     return updatedConfig;
   } else {
     throw new Error(
-      i18n.translate('xpack.enterpriseSearch.server.connectors.configuration.error', {
+      i18n.translate('searchConnectors.server.connectors.configuration.error', {
         defaultMessage: 'Could not find connector',
       })
     );

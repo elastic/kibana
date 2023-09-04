@@ -7,9 +7,17 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { createConnector, Connector, deleteConnectorById } from '@kbn/search-connectors';
+import {
+  createConnector,
+  Connector,
+  deleteConnectorById,
+  ConnectorStatus,
+} from '@kbn/search-connectors';
 
 import { fetchConnectorByIndexName } from '@kbn/search-connectors/lib/fetch_connectors';
+
+import { NATIVE_CONNECTOR_DEFINITIONS } from '../../../common/connectors/native_connectors';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
@@ -52,8 +60,31 @@ export const addConnector = async (
     await createIndex(client, index, input.language, false);
   }
 
+  const nativeConnector =
+    input.isNative && input.serviceType
+      ? NATIVE_CONNECTOR_DEFINITIONS[input.serviceType]
+      : undefined;
+
+  if (
+    input.isNative &&
+    input.serviceType &&
+    !nativeConnector &&
+    input.serviceType !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+  ) {
+    throw new Error(`Could not find connector definition for service type ${input.serviceType}`);
+  }
+
+  const nativeFields = nativeConnector
+    ? {
+        configuration: nativeConnector.configuration,
+        features: nativeConnector.features,
+        status: ConnectorStatus.NEEDS_CONFIGURATION,
+      }
+    : {};
+
   return await createConnector(client.asCurrentUser, {
     ...input,
+    ...nativeFields,
     pipeline: await getDefaultPipeline(client),
   });
 };

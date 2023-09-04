@@ -28,7 +28,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: true,
     keywords: ['cloud', 'azure', 'blob', 's3', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.azureBlob.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.azureBlob.name', {
       defaultMessage: 'Azure Blob Storage',
     }),
     serviceType: 'azure_blob_storage',
@@ -38,7 +38,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['confluence', 'cloud', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.confluence.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.confluence.name', {
       defaultMessage: 'Confluence Cloud & Server',
     }),
     serviceType: 'confluence',
@@ -49,7 +49,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: true,
     isTechPreview: false,
     keywords: ['dropbox', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.dropbox.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.dropbox.name', {
       defaultMessage: 'Dropbox',
     }),
     serviceType: 'dropbox',
@@ -59,7 +59,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['jira', 'cloud', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.jira.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.jira.name', {
       defaultMessage: 'Jira Cloud & Server',
     }),
     serviceType: 'jira',
@@ -69,7 +69,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: false,
     keywords: ['github', 'cloud', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.github.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.github.name', {
       defaultMessage: 'GitHub & GitHub Enterprise Server',
     }),
     serviceType: 'github',
@@ -79,7 +79,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: false,
     keywords: ['google', 'cloud', 'blob', 's3', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.googleCloud.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.googleCloud.name', {
       defaultMessage: 'Google Cloud Storage',
     }),
     serviceType: 'google_cloud_storage',
@@ -89,7 +89,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: false,
     keywords: ['google', 'drive', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.googleDrive.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.googleDrive.name', {
       defaultMessage: 'Google Drive',
     }),
     serviceType: 'google_drive',
@@ -99,7 +99,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['mongo', 'mongodb', 'database', 'nosql', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.mongodb.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.mongodb.name', {
       defaultMessage: 'MongoDB',
     }),
     serviceType: 'mongodb',
@@ -109,7 +109,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['mysql', 'sql', 'database', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.mysql.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.mysql.name', {
       defaultMessage: 'MySQL',
     }),
     serviceType: 'mysql',
@@ -119,7 +119,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: true,
     keywords: ['mssql', 'microsoft', 'sql', 'database', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.microsoftSQL.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.microsoftSQL.name', {
       defaultMessage: 'Microsoft SQL',
     }),
     serviceType: 'mssql',
@@ -129,7 +129,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     keywords: ['network', 'drive', 'file', 'directory', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.networkDrive.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.networkDrive.name', {
       defaultMessage: 'Network drive',
     }),
     serviceType: 'network_drive',
@@ -139,7 +139,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: true,
     keywords: ['postgresql', 'sql', 'database', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.postgresql.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.postgresql.name', {
       defaultMessage: 'PostgreSQL',
     }),
     serviceType: 'postgresql',
@@ -150,7 +150,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: false,
     isTechPreview: false,
     keywords: ['salesforce', 'cloud', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.salesforce.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.salesforce.name', {
       defaultMessage: 'Salesforce',
     }),
     serviceType: 'salesforce',
@@ -161,7 +161,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: true,
     isTechPreview: false,
     keywords: ['servicenow', 'cloud', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.serviceNow.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.serviceNow.name', {
       defaultMessage: 'ServiceNow',
     }),
     serviceType: 'servicenow',
@@ -172,7 +172,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: true,
     isTechPreview: false,
     keywords: ['sharepoint', 'office365', 'cloud', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepoint_online.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.sharepoint_online.name', {
       defaultMessage: 'Sharepoint Online',
     }),
     serviceType: 'sharepoint_online',
@@ -183,7 +183,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: false,
     isTechPreview: true,
     keywords: ['google', 'gmail', 'connector', 'mail'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.gmail.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.gmail.name', {
       defaultMessage: 'Gmail',
     }),
     serviceType: 'gmail',
@@ -193,7 +193,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: false,
     keywords: ['oracle', 'sql', 'database', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.oracle.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.oracle.name', {
       defaultMessage: 'Oracle',
     }),
     serviceType: 'oracle',
@@ -203,7 +203,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: false,
     keywords: ['network', 'drive', 'file', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.oneDrive.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.oneDrive.name', {
       defaultMessage: 'OneDrive',
     }),
     serviceType: 'onedrive',
@@ -213,7 +213,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: false,
     keywords: ['s3', 'cloud', 'amazon', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.s3.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.s3.name', {
       defaultMessage: 'S3',
     }),
     serviceType: 's3',
@@ -224,7 +224,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: false,
     isTechPreview: true,
     keywords: ['slack', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.slack.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.slack.name', {
       defaultMessage: 'Slack',
     }),
     serviceType: 'slack',
@@ -235,7 +235,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: false,
     isTechPreview: false,
     keywords: ['sharepoint', 'cloud', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepointServer.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.sharepointServer.name', {
       defaultMessage: 'Sharepoint Server',
     }),
     serviceType: 'sharepoint_server',
@@ -245,7 +245,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: false,
     keywords: ['custom', 'connector', 'code'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.customConnector.name', {
+    name: i18n.translate('searchConnectors.content.nativeConnectors.customConnector.name', {
       defaultMessage: 'Customized connector',
     }),
     serviceType: '',

@@ -33,7 +33,7 @@ export const updateConnectorNameAndDescription = async (
     return result;
   } else {
     throw new Error(
-      i18n.translate('xpack.enterpriseSearch.server.connectors.serviceType.error', {
+      i18n.translate('searchConnectors.server.connectors.serviceType.error', {
         defaultMessage: 'Could not find document',
       })
     );

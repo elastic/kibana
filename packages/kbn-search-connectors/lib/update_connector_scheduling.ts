@@ -33,7 +33,7 @@ export const updateConnectorScheduling = async (
     return result;
   } else {
     throw new Error(
-      i18n.translate('xpack.enterpriseSearch.server.connectors.scheduling.error', {
+      i18n.translate('searchConnectors.server.connectors.scheduling.error', {
         defaultMessage: 'Could not find document',
       })
     );

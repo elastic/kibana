@@ -30,7 +30,7 @@ import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
-import { startConnectorSync } from '../../lib/connectors/start_sync';
+import { startSync } from '../../lib/connectors/start_sync';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
 import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
@@ -167,7 +167,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startConnectorSync(
+      await startSync(
         client,
         request.params.connectorId,
         SyncJobType.FULL,
@@ -188,7 +188,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startConnectorSync(client, request.params.connectorId, SyncJobType.INCREMENTAL);
+      await startSync(client, request.params.connectorId, SyncJobType.INCREMENTAL);
       return response.ok();
     })
   );
@@ -204,7 +204,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startConnectorSync(client, request.params.connectorId, SyncJobType.ACCESS_CONTROL);
+      await startSync(client, request.params.connectorId, SyncJobType.ACCESS_CONTROL);
       return response.ok();
     })
   );

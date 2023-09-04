@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/enterprise-search-plugin/common/connectors/native_connectors';
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '@kbn/enterprise-search-plugin/common/constants';
-
 import { stripSearchPrefix } from '@kbn/enterprise-search-plugin/common/utils/strip_search_prefix';
 import {
+  Connector,
+  ConnectorConfiguration,
   ConnectorDocument,
   ConnectorStatus,
   FilteringPolicy,
@@ -20,6 +19,8 @@ import {
 } from '../types/connectors';
 
 export function createConnectorDocument({
+  configuration,
+  features,
   indexName,
   isNative,
   name,
@@ -27,6 +28,8 @@ export function createConnectorDocument({
   serviceType,
   language,
 }: {
+  configuration?: ConnectorConfiguration;
+  features?: Connector['features'];
   indexName: string | null;
   isNative: boolean;
   language: string | null;
@@ -35,35 +38,14 @@ export function createConnectorDocument({
   serviceType: string | null;
 }): ConnectorDocument {
   const currentTimestamp = new Date().toISOString();
-  const nativeConnector =
-    isNative && serviceType ? NATIVE_CONNECTOR_DEFINITIONS[serviceType] : undefined;
-
-  if (
-    isNative &&
-    serviceType &&
-    !nativeConnector &&
-    serviceType !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
-  ) {
-    throw new Error(`Could not find connector definition for service type ${serviceType}`);
-  }
-
-  const nativeFields = nativeConnector
-    ? {
-        configuration: nativeConnector.configuration,
-        features: nativeConnector.features,
-        name: nativeConnector.name,
-        service_type: serviceType,
-        status: ConnectorStatus.NEEDS_CONFIGURATION,
-      }
-    : {};
 
   return {
     api_key_id: null,
-    configuration: {},
+    configuration: configuration || {},
     custom_scheduling: {},
     description: null,
     error: null,
-    features: null,
+    features: features || null,
     filtering: [
       {
         active: {
@@ -137,6 +119,5 @@ export function createConnectorDocument({
     service_type: serviceType || null,
     status: ConnectorStatus.CREATED,
     sync_now: false,
-    ...nativeFields,
   };
 }

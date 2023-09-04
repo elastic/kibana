@@ -9,15 +9,18 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { CURRENT_CONNECTORS_INDEX } from '..';
 
-import { Connector, IngestPipelineParams } from '../types/connectors';
+import { Connector, ConnectorConfiguration, IngestPipelineParams } from '../types/connectors';
 import { createConnectorDocument } from './create_connector_document';
 
 export const createConnector = async (
   client: ElasticsearchClient,
   input: {
+    configuration?: ConnectorConfiguration;
+    features?: Connector['features'];
     indexName: string | null;
     isNative: boolean;
     language: string | null;
+    name?: string;
     pipeline: IngestPipelineParams;
     serviceType?: string | null;
   }

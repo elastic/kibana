@@ -9,7 +9,7 @@ xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
 xpack.uptime.enabled: false
-enterpriseSearch.enabled: true
+enterpriseSearch.enabled: false
 enterpriseSearch.canDeployEntSearch: false
 enterpriseSearch.hasConnectors: true
 enterpriseSearch.hasNativeConnectors: false
