@@ -29,6 +29,10 @@ interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
   metadataLoading: boolean;
 }
+interface MetadataSummaryWrapperProps {
+  visibleMetadata: MetadataData[];
+  metadataLoading: boolean;
+}
 
 export interface MetadataData {
   field: string;
@@ -65,7 +69,10 @@ const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   },
 ];
 
-export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSummaryProps) => {
+const MetadataSummaryListWrapper = ({
+  metadataLoading,
+  visibleMetadata,
+}: MetadataSummaryWrapperProps) => {
   const { showTab } = useTabSwitcherContext();
 
   const onClick = () => {
@@ -104,7 +111,7 @@ export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSumma
       <MetadataExplanationMessage />
       <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="flexStart">
-        {[...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)].map(
+        {visibleMetadata.map(
           (metadataValue) =>
             metadataValue && (
               <EuiFlexItem key={metadataValue.field}>
@@ -125,66 +132,16 @@ export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSumma
     </>
   );
 };
+export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSummaryProps) => (
+  <MetadataSummaryListWrapper
+    visibleMetadata={[...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)]}
+    metadataLoading={metadataLoading}
+  />
+);
 
-export const MetadataSummaryListCompact = ({ metadata, metadataLoading }: MetadataSummaryProps) => {
-  const { showTab } = useTabSwitcherContext();
-
-  const onClick = () => {
-    showTab(FlyoutTabIds.METADATA);
-  };
-
-  return (
-    <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
-        <EuiFlexGroup alignItems="flexStart">
-          <EuiTitle data-test-subj="infraAssetDetailsMetadataTitle" size="xxs">
-            <span>
-              <FormattedMessage
-                id="xpack.infra.assetDetails.overview.metadataSectionTitle"
-                defaultMessage="Metadata"
-              />
-            </span>
-          </EuiTitle>
-        </EuiFlexGroup>
-        <EuiFlexItem grow={false} key="metadata-link">
-          <EuiButtonEmpty
-            data-test-subj="infraAssetDetailsMetadataShowAllButton"
-            onClick={onClick}
-            size="xs"
-            flush="both"
-            iconSide="right"
-            iconType="sortRight"
-          >
-            <FormattedMessage
-              id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
-              defaultMessage="Show all"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <MetadataExplanationMessage />
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
-        <EuiFlexGroup alignItems="flexStart">
-          {metadataData(metadata?.info).map(
-            (metadataValue) =>
-              metadataValue && (
-                <EuiFlexItem key={metadataValue.field}>
-                  <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
-                    <MetadataHeader metadataValue={metadataValue} />
-                    <EuiDescriptionListDescription>
-                      {metadataLoading ? (
-                        <EuiLoadingSpinner />
-                      ) : (
-                        <ExpandableContent values={metadataValue.value ?? NOT_AVAILABLE_LABEL} />
-                      )}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
-              )
-          )}
-        </EuiFlexGroup>
-      </EuiFlexGroup>
-    </>
-  );
-};
+export const MetadataSummaryListCompact = ({ metadata, metadataLoading }: MetadataSummaryProps) => (
+  <MetadataSummaryListWrapper
+    visibleMetadata={metadataData(metadata?.info)}
+    metadataLoading={metadataLoading}
+  />
+);
