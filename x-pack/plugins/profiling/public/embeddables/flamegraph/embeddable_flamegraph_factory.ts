@@ -11,7 +11,6 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { ElasticFlameGraph } from '@kbn/profiling-utils/common/flamegraph';
 import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
-import { EmbeddableFlamegraph } from './embeddable_flamegraph';
 
 interface EmbeddableFlamegraphInput {
   data?: ElasticFlameGraph;
@@ -30,6 +29,7 @@ export class EmbeddableFlamegraphFactory
   }
 
   async create(input: EmbeddableFlamegraphEmbeddableInput, parent?: IContainer) {
+    const { EmbeddableFlamegraph } = await import('./embeddable_flamegraph');
     return new EmbeddableFlamegraph(input, {}, parent);
   }
 
