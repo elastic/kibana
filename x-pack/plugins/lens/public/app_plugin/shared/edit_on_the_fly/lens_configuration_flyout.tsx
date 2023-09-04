@@ -145,7 +145,7 @@ export function LensEditConfigurationFlyout({
               <EuiTitle size="xs">
                 <h2 id="Edit Lens configuration">
                   {i18n.translate('xpack.lens.config.editLabel', {
-                    defaultMessage: 'Edit SQL visualization',
+                    defaultMessage: 'Edit ES|QL visualization',
                   })}
                 </h2>
               </EuiTitle>
@@ -179,7 +179,7 @@ export function LensEditConfigurationFlyout({
               isCodeEditorExpanded={true}
               detectTimestamp={Boolean(dataView?.timeFieldName)}
               errors={errors}
-              hideExpandButton={true}
+              hideMinimizeButton={true}
               editorIsInline={true}
               disableSubmitAction={isEqual(queryTextBased, prevQuery.current)}
               onTextLangQuerySubmit={(q) => {

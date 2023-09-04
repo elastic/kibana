@@ -51,7 +51,7 @@ export const FlyoutWrapper = ({
           <EuiCallOut
             size="s"
             title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
-              defaultMessage: 'SQL currently offers limited configuration options',
+              defaultMessage: 'ES|QL currently offers limited configuration options',
             })}
             iconType="iInCircle"
           />

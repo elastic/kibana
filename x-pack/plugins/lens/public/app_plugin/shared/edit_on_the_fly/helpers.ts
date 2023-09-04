@@ -6,7 +6,11 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { getIndexPatternFromSQLQuery, type AggregateQuery } from '@kbn/es-query';
+import {
+  getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
+  type AggregateQuery,
+} from '@kbn/es-query';
 import { fetchDataFromAggregateQuery } from '../../../datasources/text_based/fetch_data_from_aggregate_query';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
@@ -28,6 +32,9 @@ export const getLensDataFromQuery = async (
     let indexPattern = '';
     if ('sql' in query) {
       indexPattern = getIndexPatternFromSQLQuery(query.sql);
+    }
+    if ('esql' in query) {
+      indexPattern = getIndexPatternFromESQLQuery(query.esql);
     }
     const dv =
       indexPattern && indexPattern !== dataView.name
