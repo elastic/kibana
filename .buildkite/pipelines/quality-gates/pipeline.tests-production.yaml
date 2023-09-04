@@ -1,3 +1,7 @@
+env:
+  TEAM_CHANNEL: "#kibana-serverless-release"
+  ENVIRONMENT: "production"
+
 steps:
   - label: ":pipeline::fleet::seedling: Trigger Observability Kibana Tests for ${ENVIRONMENT}"
     command: echo "replace me with Observability specific Kibana tests"
@@ -8,3 +12,10 @@ steps:
     command: echo "replace me with Security specific Kibana tests"
     agent:
       image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
+
+  - wait: ~
+
+  - label: ":judge::seedling: Trigger Manual Tests Phase"
+    command: "make -C /agent trigger-manual-verification-phase"
+    agents:
+      image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.1"
