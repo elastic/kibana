@@ -174,6 +174,7 @@ export function ChatPromptEditor({
                 <EuiFlexItem grow={false}>
                   {selectedFunctionName ? (
                     <EuiButtonEmpty
+                      data-test-subj="observabilityAiAssistantChatPromptEditorEmptySelectionButton"
                       iconType="cross"
                       iconSide="right"
                       size="xs"
@@ -193,8 +194,9 @@ export function ChatPromptEditor({
                 <EuiPanel borderRadius="none" color="subdued" hasShadow={false} paddingSize="xs">
                   <CodeEditor
                     aria-label="payloadEditor"
+                    data-test-subj="observabilityAiAssistantChatPromptEditorCodeEditor"
                     fullWidth
-                    height="120px"
+                    height="200px"
                     languageId="json"
                     isCopyable
                     languageConfiguration={{
@@ -238,6 +240,7 @@ export function ChatPromptEditor({
                 </EuiPanel>
               ) : (
                 <EuiTextArea
+                  data-test-subj="observabilityAiAssistantChatPromptEditorTextArea"
                   css={{ maxHeight: 200 }}
                   disabled={disabled}
                   fullWidth
@@ -257,6 +260,7 @@ export function ChatPromptEditor({
         <EuiFlexItem grow={false}>
           <EuiSpacer size="xl" />
           <EuiButtonIcon
+            data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
             aria-label="Submit"
             disabled={selectedFunctionName ? false : !prompt?.trim() || loading || disabled}
             display={
