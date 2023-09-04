@@ -11,53 +11,64 @@ import {
   PluginSetupContract as FeaturesPluginSetup,
   // PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
+import { FEATURE_PRIVILEGES_PLUGIN_ID } from '../common';
 
 export interface FeatureControlExampleDeps {
   features: FeaturesPluginSetup;
 }
 
-export class MyFeaturePlugin implements Plugin<void, void, any, FeatureControlExampleDeps> {
+export class FeatureControlsPluginExample
+  implements Plugin<void, void, any, FeatureControlExampleDeps>
+{
   public setup(core: CoreSetup, { features }: FeatureControlExampleDeps) {
+    features.registerKibanaFeature({
+      id: FEATURE_PRIVILEGES_PLUGIN_ID,
+      name: 'Feature Plugin Examples',
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: ['FeaturePluginExample'],
+      privileges: {
+        all: {
+          app: ['FeaturePluginExample'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          api: ['my_closed_example_api'],
+          ui: ['view', 'create', 'edit', 'delete', 'assign'],
+        },
+        read: {
+          app: ['FeaturePluginExample'],
+          savedObject: {
+            all: [],
+            read: ['tag'],
+          },
+          api: [],
+          ui: ['view'],
+        },
+      },
+    });
+
     const router = core.http.createRouter();
-    // features.registerKibanaFeature({
-    //   id: 'MyFeaturePLuginIsNeeded',
-    //   name: 'FeaturePLuginExample',
-    //   category: DEFAULT_APP_CATEGORIES.management,
-    //   app: [],
-    //   privileges: {
-    //     all: {
-    //       app: [],
-    //       api: [],
-    //       catalogue: [],
-    //       management: {
-    //         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
-    //       },
-    //       savedObject: {
-    //         all: [],
-    //         read: [],
-    //       },
-    //       ui: ['show', 'execute', 'save', 'delete'],
-    //     },
-    //     read: {
-    //       app: [],
-    //       api: [],
-    //       catalogue: [],
-    //       management: {
-    //         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
-    //       },
-    //       savedObject: {
-    //         // action execution requires 'read' over `actions`, but 'all' over `action_task_params`
-    //         all: [],
-    //         read: [],
-    //       },
-    //       ui: ['show', 'execute'],
-    //     },
-    //   },
-    // });
     router.get(
       {
-        path: '/internal/my_plugin/example',
+        path: '/internal/my_plugin/read',
         validate: false,
+      },
+      async (context, request, response) => {
+        return response.ok({
+          body: {
+            time: new Date().toISOString(),
+          },
+        });
+      }
+    );
+    router.get(
+      {
+        path: '/internal/my_plugin/sensitive_action',
+        validate: false,
+        options: {
+          tags: ['access:my_closed_example_api'],
+        },
       },
       async (context, request, response) => {
         return response.ok({

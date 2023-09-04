@@ -7,11 +7,7 @@
     "id": "featureControlsExamples",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "developerExamples",
-      "security",
-      "spaces",
-      "features",
-    ]
+    "requiredBundles": ["kibanaReact"],
+    "requiredPlugins": ["developerExamples", "security", "spaces", "features"]
   }
 }

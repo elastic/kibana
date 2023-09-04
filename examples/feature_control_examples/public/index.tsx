@@ -11,46 +11,53 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/publ
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import {
+  PluginSetupContract as FeaturesPluginSetup,
+  // PluginStartContract as FeaturesPluginStart,
+} from '@kbn/features-plugin/server';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MyPluginComponent } from './app';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
   security: SecurityPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 interface StartDeps {
   security: SecurityPluginStart;
 }
 
-export class FeatureControlsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
-    // Register an application into the side navigation menu
-    core.application.register({
+export class FeatureControlsPluginExample implements Plugin<void, void, SetupDeps, StartDeps> {
+  public setup(coreSetup: CoreSetup<StartDeps>, deps: SetupDeps) {
+    const { features } = deps;
+    coreSetup.application.register({
       id: 'featureControlsExamples',
       title: 'FeatureControlExamples',
       async mount({ element }: AppMountParameters) {
+        const [coreStart, startDeps, something] = await coreSetup.getStartServices();
         ReactDOM.render(
           <KibanaPageTemplate>
-            <KibanaPageTemplate.Header pageTitle="User profile components" />
-            <MyPluginComponent />
+            <KibanaContextProvider services={{ ...coreStart, ...deps }}>
+              <MyPluginComponent />
+            </KibanaContextProvider>
           </KibanaPageTemplate>,
           element
         );
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });
-
     deps.developerExamples.register({
       appId: 'featureControlsExamples',
-      title: 'featureControlsExamples',
-      description: 'Demo of how to implement featureControlsExamples',
+      title: 'Feature Control Examples',
+      description: 'Demo of how to implement Feature Controls',
     });
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, deps: StartDeps) {
     return {};
   }
 
   public stop() {}
 }
-export const plugin = () => new FeatureControlsPlugin();
+export const plugin = () => new FeatureControlsPluginExample();

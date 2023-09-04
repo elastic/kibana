@@ -5,14 +5,13 @@
   },
   "include": [
     "index.ts",
+    "common/**/*.ts",
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
     "../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/security-plugin",
@@ -21,6 +20,6 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/features-plugin",
     "@kbn/spaces-plugin",
-    "@kbn/config-schema",
+    "@kbn/config-schema"
   ]
 }
