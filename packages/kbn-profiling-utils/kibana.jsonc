@@ -1,5 +1,5 @@
 {
-  "type": "shared-browser",
+  "type": "shared-common",
   "id": "@kbn/profiling-utils",
   "owner": "@elastic/profiling-ui"
 }
