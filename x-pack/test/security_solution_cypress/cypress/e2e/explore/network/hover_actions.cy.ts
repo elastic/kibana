@@ -32,7 +32,7 @@ describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   };
 
   before(() => {
-    cy.task('esArchiverLoad', 'network');
+    cy.task('esArchiverLoad', { archiveName: 'network' });
   });
 
   after(() => {

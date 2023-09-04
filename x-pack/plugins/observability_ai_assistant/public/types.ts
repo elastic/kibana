@@ -29,6 +29,8 @@ import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import type { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   ContextDefinition,
   FunctionDefinition,
@@ -55,7 +57,11 @@ export interface PendingMessage {
 }
 
 export interface ObservabilityAIAssistantChatService {
-  chat: (options: { messages: Message[]; connectorId: string }) => Observable<PendingMessage>;
+  chat: (options: {
+    messages: Message[];
+    connectorId: string;
+    function?: 'none' | 'auto';
+  }) => Observable<PendingMessage>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
   hasRenderFunction: (name: string) => boolean;
@@ -81,6 +87,8 @@ export interface ObservabilityAIAssistantService {
   isEnabled: () => boolean;
   callApi: ObservabilityAIAssistantAPIClient;
   getCurrentUser: () => Promise<AuthenticatedUser>;
+  getLicense: () => Observable<ILicense>;
+  getLicenseManagementLocator: () => SharePluginStart;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
 }
 
@@ -90,20 +98,22 @@ export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssi
 
 export interface ObservabilityAIAssistantPluginSetup {}
 export interface ObservabilityAIAssistantPluginSetupDependencies {
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  security: SecurityPluginSetup;
-  features: FeaturesPluginSetup;
-  observabilityShared: ObservabilitySharedPluginSetup;
-  lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
+  features: FeaturesPluginSetup;
+  lens: LensPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
+  security: SecurityPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
-  security: SecurityPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  observabilityShared: ObservabilitySharedPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
   lens: LensPublicStart;
-  dataViews: DataViewsPublicPluginStart;
+  licensing: LicensingPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
+  security: SecurityPluginStart;
+  share: SharePluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface ConfigSchema {}

@@ -50,8 +50,12 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     return client.chat({
       messages,
       connectorId,
-      functions,
-      functionCall: isStartOfConversation && isRecallFunctionAvailable ? 'recall' : undefined,
+      ...(functions.length
+        ? {
+            functions,
+            functionCall: isStartOfConversation && isRecallFunctionAvailable ? 'recall' : undefined,
+          }
+        : {}),
     });
   },
 });

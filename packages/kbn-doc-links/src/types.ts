@@ -361,6 +361,7 @@ export interface DocLinks {
   readonly visualize: Record<string, string>;
   readonly apis: Readonly<{
     bulkIndexAlias: string;
+    indexStats: string;
     byteSizeUnits: string;
     createAutoFollowPattern: string;
     createFollower: string;

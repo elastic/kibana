@@ -26,7 +26,7 @@ const ReasonPreviewContainer = styled.div``;
  * Alert reason renderer on a preview panel on top of the right section of expandable flyout
  */
 export const AlertReasonPreview: React.FC = () => {
-  const { dataAsNestedObject } = usePreviewPanelContext();
+  const { dataAsNestedObject, scopeId } = usePreviewPanelContext();
 
   const renderer = useMemo(
     () =>
@@ -43,10 +43,10 @@ export const AlertReasonPreview: React.FC = () => {
             contextId: 'event-details',
             data: dataAsNestedObject,
             isDraggable: false,
-            scopeId: 'global',
+            scopeId,
           })
         : null,
-    [renderer, dataAsNestedObject]
+    [renderer, dataAsNestedObject, scopeId]
   );
 
   if (!dataAsNestedObject || !renderer) {

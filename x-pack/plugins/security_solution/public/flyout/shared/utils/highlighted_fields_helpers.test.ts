@@ -10,6 +10,8 @@ import {
   convertHighlightedFieldsToTableRow,
 } from './highlighted_fields_helpers';
 
+const scopeId = 'scopeId';
+
 describe('convertHighlightedFieldsToTableRow', () => {
   it('should convert highlighted fields to a table row', () => {
     const highlightedFields = {
@@ -17,12 +19,13 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields)).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId)).toEqual([
       {
         field: 'host.name',
         description: {
           field: 'host.name',
           values: ['host-1'],
+          scopeId: 'scopeId',
         },
       },
     ]);
@@ -35,12 +38,13 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields)).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId)).toEqual([
       {
         field: 'host.name-override',
         description: {
           field: 'host.name-override',
           values: ['host-1'],
+          scopeId: 'scopeId',
         },
       },
     ]);

@@ -18,7 +18,7 @@ describe('updateAPIKey', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/internal/alerting/rule/1%2F/_update_api_key",
+          "/api/alerting/rule/1%2F/_update_api_key",
         ],
       ]
     `);

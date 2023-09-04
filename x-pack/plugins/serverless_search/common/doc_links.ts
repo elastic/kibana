@@ -14,7 +14,7 @@ class ESDocLinks {
   public integrations: string = '';
   public kibanaFeedback: string = '';
   public kibanaRunApiInConsole: string = '';
-  public logStash: string = '';
+  public logstash: string = '';
   public metadata: string = '';
   public roleDescriptors: string = '';
   public securityApis: string = '';
@@ -51,7 +51,7 @@ class ESDocLinks {
   setDocLinks(newDocLinks: DocLinks) {
     this.apiIntro = newDocLinks.serverlessClients.httpApis;
     this.integrations = newDocLinks.serverlessSearch.integrations;
-    this.logStash = newDocLinks.serverlessSearch.integrationsLogstash;
+    this.logstash = newDocLinks.serverlessSearch.integrationsLogstash;
     this.beats = newDocLinks.serverlessSearch.integrationsBeats;
     this.connectors = newDocLinks.serverlessSearch.integrationsConnectorClient;
     this.kibanaFeedback = newDocLinks.kibana.feedback;

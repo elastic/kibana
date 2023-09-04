@@ -11,8 +11,6 @@ import {
 } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 
-export const coverageOverviewPaletteColors = ['#00BFB326', '#00BFB34D', '#00BFB399', '#00BFB3'];
-
 export const coverageOverviewPanelWidth = 160;
 
 export const coverageOverviewLegendWidth = 380;
@@ -25,10 +23,10 @@ export const coverageOverviewFilterWidth = 300;
  * A corresponding color is applied if rules count >= a specific threshold
  */
 export const coverageOverviewCardColorThresholds = [
-  { threshold: 10, color: coverageOverviewPaletteColors[3] },
-  { threshold: 7, color: coverageOverviewPaletteColors[2] },
-  { threshold: 3, color: coverageOverviewPaletteColors[1] },
-  { threshold: 1, color: coverageOverviewPaletteColors[0] },
+  { threshold: 10, color: '#00BFB3' },
+  { threshold: 7, color: '#00BFB399' },
+  { threshold: 3, color: '#00BFB34D' },
+  { threshold: 1, color: '#00BFB326' },
 ];
 
 export const ruleActivityFilterDefaultOptions = [

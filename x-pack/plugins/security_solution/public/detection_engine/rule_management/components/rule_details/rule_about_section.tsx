@@ -283,10 +283,12 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
     });
   }
 
-  if (rule.investigation_fields && rule.investigation_fields.length > 0) {
+  if (rule.investigation_fields && rule.investigation_fields.field_names.length > 0) {
     aboutSectionListItems.push({
       title: i18n.INVESTIGATION_FIELDS_FIELD_LABEL,
-      description: <InvestigationFields investigationFields={rule.investigation_fields} />,
+      description: (
+        <InvestigationFields investigationFields={rule.investigation_fields.field_names} />
+      ),
     });
   }
 

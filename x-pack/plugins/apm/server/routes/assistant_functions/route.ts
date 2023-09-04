@@ -213,6 +213,14 @@ const getApmServicesListRoute = createApmServerRoute({
       }),
       t.partial({
         'service.environment': environmentRt.props.environment,
+        healthStatus: t.array(
+          t.union([
+            t.literal(ServiceHealthStatus.unknown),
+            t.literal(ServiceHealthStatus.healthy),
+            t.literal(ServiceHealthStatus.warning),
+            t.literal(ServiceHealthStatus.critical),
+          ])
+        ),
       }),
     ]),
   }),
@@ -222,6 +230,8 @@ const getApmServicesListRoute = createApmServerRoute({
   handler: async (resources): Promise<{ content: ApmServicesListContent }> => {
     const { params } = resources;
     const { query } = params;
+
+    const { healthStatus } = query;
 
     const [apmEventClient, apmAlertsClient, mlClient, randomSampler] =
       await Promise.all([
@@ -253,7 +263,7 @@ const getApmServicesListRoute = createApmServerRoute({
       mlClient,
     });
 
-    const mappedItems = serviceItems.items.map((item): ApmServicesListItem => {
+    let mappedItems = serviceItems.items.map((item): ApmServicesListItem => {
       return {
         'service.name': item.serviceName,
         'agent.name': item.agentName,
@@ -263,6 +273,12 @@ const getApmServicesListRoute = createApmServerRoute({
         'transaction.type': item.transactionType,
       };
     });
+
+    if (healthStatus && healthStatus.length) {
+      mappedItems = mappedItems.filter((item): boolean =>
+        healthStatus.includes(item.healthStatus)
+      );
+    }
 
     return {
       content: mappedItems,

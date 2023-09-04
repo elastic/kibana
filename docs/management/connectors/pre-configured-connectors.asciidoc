@@ -81,8 +81,28 @@ Clicking a preconfigured connector shows the description, but not the
 configuration.
 
 [float]
+=== Examples
+
+* <<preconfigured-server-log-configuration>>
+* <<preconfigured-webhook-configuration>>
+
+[float]
+[[preconfigured-server-log-configuration]]
+==== Server log connectors
+
+The following example creates a <<server-log-action-type,server log connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-server-log:
+    name: preconfigured-server-log-connector-type
+    actionTypeId: .server-log
+--
+
+[float]
 [[preconfigured-webhook-configuration]]
-=== Webhook preconfigured connector example
+==== Webhook connectors
 
 The following example creates a <<webhook-action-type,webhook connector>> with basic authentication:
 
