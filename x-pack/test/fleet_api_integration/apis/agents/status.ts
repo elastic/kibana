@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { OLDEST_INTERNAL_VERSION } from '@kbn/fleet-plugin/common/constants';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -235,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get(`/api/fleet/agent-status`)
         .set('kbn-xsrf', 'xxxx')
-        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
         .expect(200);
     });
 

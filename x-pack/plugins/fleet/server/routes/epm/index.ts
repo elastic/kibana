@@ -367,15 +367,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       }
     );
 
+  // This endpoint should be marked as internal but the router selects this endpoint over the new POST
   router.versioned
     .post({
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED,
       fleetAuthz: INSTALL_PACKAGES_AUTHZ,
-      access: INTERNAL_API_ACCESS,
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: { request: InstallPackageFromRegistryRequestSchemaDeprecated },
       },
       async (context, request, response) => {

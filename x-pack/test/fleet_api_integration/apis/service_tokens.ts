@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { OLDEST_INTERNAL_VERSION } from '@kbn/fleet-plugin/common/constants';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
@@ -50,7 +50,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .post(`/api/fleet/service-tokens`)
         .set('kbn-xsrf', 'xxxx')
-        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
         .expect(200);
     });
   });

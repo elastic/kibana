@@ -19,16 +19,16 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
 
-  const epmInstall = async (pkgName: string) => {
+  const getPackage = async (pkgName: string) => {
     const getPkgRes = await supertest
       .get(`/api/fleet/epm/packages/${pkgName}`)
       .set('kbn-xsrf', 'xxxx')
       .expect(200);
     return getPkgRes;
   };
-  const epmForceInstall = async (pkgName: string) => {
+  const epmInstall = async (pkgName: string, pkgVersion: string) => {
     const getPkgRes = await supertest
-      .get(`/api/fleet/epm/packages/${pkgName}`)
+      .post(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true })
       .expect(200);
@@ -105,7 +105,7 @@ export default function (providerContext: FtrProviderContext) {
       let packagePoliciesToDeleteIds: string[] = [];
       after(async () => {
         if (systemPkgVersion) {
-          await supertest.delete(`/api/fleet/epm/packages/system-${systemPkgVersion}`);
+          await supertest.delete(`/api/fleet/epm/packages/system/${systemPkgVersion}`);
         }
         if (packagePoliciesToDeleteIds.length > 0) {
           await kibanaServer.savedObjects.bulkDelete({
@@ -313,14 +313,14 @@ export default function (providerContext: FtrProviderContext) {
           .expect(409);
       });
 
-      it('should allow to create policy with the system integration policy and increment correctly the name if there is more than 10 package policy', async () => {
+      it('should allow to create policy with the system integration policy and increment correctly the name if package policies are more than 10', async () => {
         // load a bunch of fake system integration policy
         const policyIds = new Array(10).fill(null).map((_, i) => `package-policy-test-${i}`);
         packagePoliciesToDeleteIds = packagePoliciesToDeleteIds.concat(policyIds);
-        const getPkRes = await epmInstall('system');
+        const getPkRes = await getPackage('system');
         systemPkgVersion = getPkRes.body.item.version;
         // we must first force install the system package to override package verification error on policy create
-        const installPromise = await epmForceInstall(`system-${systemPkgVersion}`);
+        const installPromise = await epmInstall('system', `${systemPkgVersion}`);
 
         await Promise.all([
           installPromise,
@@ -428,7 +428,7 @@ export default function (providerContext: FtrProviderContext) {
         await Promise.all(deletedPromises);
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
         if (systemPkgVersion) {
-          await supertest.delete(`/api/fleet/epm/packages/system-${systemPkgVersion}`);
+          await supertest.delete(`/api/fleet/epm/packages/system/${systemPkgVersion}`);
         }
         if (packagePoliciesToDeleteIds.length > 0) {
           await kibanaServer.savedObjects.bulkDelete({
@@ -600,10 +600,10 @@ export default function (providerContext: FtrProviderContext) {
 
         const policyId = 'package-policy-test-';
         packagePoliciesToDeleteIds.push(policyId);
-        const getPkRes = await epmInstall('system');
+        const getPkRes = await getPackage('system');
         systemPkgVersion = getPkRes.body.item.version;
         // we must first force install the system package to override package verification error on policy create
-        const installPromise = await epmForceInstall(`system-${systemPkgVersion}`);
+        const installPromise = await epmInstall('system', `${systemPkgVersion}`);
 
         await Promise.all([
           installPromise,
@@ -684,10 +684,10 @@ export default function (providerContext: FtrProviderContext) {
       it('should work with package policy with space in name', async () => {
         const policyId = 'package-policy-test-1';
         packagePoliciesToDeleteIds.push(policyId);
-        const getPkRes = await epmInstall('system');
+        const getPkRes = await getPackage('system');
         systemPkgVersion = getPkRes.body.item.version;
         // we must first force install the system package to override package verification error on policy create
-        const installPromise = await epmForceInstall(`system-${systemPkgVersion}`);
+        const installPromise = await epmInstall('system', `${systemPkgVersion}`);
 
         await Promise.all([
           installPromise,
@@ -1187,10 +1187,10 @@ export default function (providerContext: FtrProviderContext) {
       });
       setupFleetAndAgents(providerContext);
       before(async () => {
-        const getPkRes = await epmInstall('system');
+        const getPkRes = await getPackage('system');
 
         // we must first force install the system package to override package verification error on policy create
-        await epmForceInstall(`system-${getPkRes.body.item.version}`);
+        await epmInstall('system', `${getPkRes.body.item.version}`);
 
         const {
           body: { item: createdPolicy },
