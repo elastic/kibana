@@ -5,6 +5,9 @@ The tests and helper methods (services, page objects) defined here in
  `serverless`, `serverless_observability`, `serverless_search` and
  `serverless_security` plugins.
 
+ For how to set up Docker for serverless ES images, please refer to
+ [packages/kbn-es/README](https://github.com/elastic/kibana/blob/main/packages/kbn-es/README.mdx).
+
 ## Serverless testing structure and conventions
 
 ### Overview
