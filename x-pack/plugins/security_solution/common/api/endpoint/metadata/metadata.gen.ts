@@ -14,7 +14,6 @@ import { z } from 'zod';
 
 import { ListRequestQuery, SuccessResponse } from './list_metadata.gen';
 import { SuccessResponse } from '../model/schema/common.yaml';
-import { SuccessResponse } from './get_metadata.gen';
 
 export type GetEndpointMetadataListRequestQuery = z.infer<
   typeof GetEndpointMetadataListRequestQuery
