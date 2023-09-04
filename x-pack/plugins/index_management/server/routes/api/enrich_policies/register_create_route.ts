@@ -7,18 +7,15 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { forEach, keys, sortBy } from 'lodash';
-import { flatMap, flow, groupBy, values as valuesFP, map, pickBy } from 'lodash/fp';
 
 import { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 import { serializeAsESPolicy } from '../../../../common/lib';
+import { normalizeFieldsList, getIndices, FieldCapsList, getCommonFields } from './helpers';
 import type { SerializedEnrichPolicy } from '../../../../common';
 
-export const validationSchema = schema.object({
+const validationSchema = schema.object({
   policy: schema.object({
     name: schema.string(),
     type: schema.oneOf([
@@ -33,7 +30,7 @@ export const validationSchema = schema.object({
   }),
 });
 
-export const querySchema = schema.object({
+const querySchema = schema.object({
   executePolicyAfterCreation: schema.maybe(
     schema.oneOf([schema.literal('true'), schema.literal('false')])
   ),
@@ -45,85 +42,6 @@ const getFieldsFromIndicesSchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-interface IndicesAggs extends estypes.AggregationsMultiBucketAggregateBase {
-  buckets: Array<{ key: unknown }>;
-}
-
-type FieldCapsList = FieldCapsResponse['fields'];
-
-const normalizedFieldTypes: { [key: string]: string } = {
-  long: 'number',
-  integer: 'number',
-  short: 'number',
-  byte: 'number',
-  double: 'number',
-  float: 'number',
-  half_float: 'number',
-  scaled_float: 'number',
-};
-
-interface FieldItem {
-  name: string;
-  type: string;
-  normalizedType: string;
-}
-
-function buildFieldList(fields: FieldCapsList) {
-  const result: FieldItem[] = [];
-
-  forEach(fields, (field, name) => {
-    // If the field exists in multiple indexes, the types may be inconsistent.
-    // In this case, default to the first type.
-    const type = keys(field)[0];
-
-    // Do not include fields that have a type that starts with an underscore.
-    if (type.startsWith('_')) {
-      return;
-    }
-
-    const normalizedType = normalizedFieldTypes[type] || type;
-
-    result.push({
-      name,
-      type,
-      normalizedType,
-    });
-  });
-
-  return sortBy(result, 'name');
-}
-
-async function getIndices(dataClient: IScopedClusterClient, pattern: string, limit = 10) {
-  const response = await dataClient.asCurrentUser.search<unknown, { indices: IndicesAggs }>(
-    {
-      index: pattern,
-      body: {
-        size: 0,
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: limit,
-            },
-          },
-        },
-      },
-    },
-    {
-      ignore: [404],
-      meta: true,
-    }
-  );
-
-  if (response.statusCode === 404 || !response.body.aggregations) {
-    return [];
-  }
-
-  const indices = response.body.aggregations.indices;
-
-  return indices.buckets ? indices.buckets.map((bucket) => bucket.key) : [];
-}
-
 export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     {
@@ -133,7 +51,7 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
       const executeAfter =
-        (request.query as TypeOf<typeof querySchema>).executePolicyAfterCreation === 'true';
+        (request.query as TypeOf<typeof querySchema>)?.executePolicyAfterCreation === 'true';
 
       const { policy } = request.body;
       const serializedPolicy = serializeAsESPolicy(policy as SerializedEnrichPolicy);
@@ -211,27 +129,14 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
 
           return {
             index: indexName,
-            fields: buildFieldList(json.fields as FieldCapsList),
+            fields: normalizeFieldsList(json.fields as FieldCapsList),
           };
         });
-
-        const commonFields = flow(
-          // Flatten the fields arrays
-          flatMap('fields'),
-          // Group fields by name
-          groupBy('name'),
-          // Keep groups with more than 1 field
-          pickBy((group) => group.length > 1),
-          // Convert the result object to an array of fields
-          valuesFP,
-          // Take the first item from each group (since we only want one)
-          map((group) => group[0])
-        )(serializedFieldsPerIndex);
 
         return response.ok({
           body: {
             indices: serializedFieldsPerIndex,
-            commonFields,
+            commonFields: getCommonFields(serializedFieldsPerIndex),
           },
         });
       } catch (error) {
