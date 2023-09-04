@@ -1496,6 +1496,8 @@
       "@kbn/ui-shared-deps-src/*": ["packages/kbn-ui-shared-deps-src/*"],
       "@kbn/ui-theme": ["packages/kbn-ui-theme"],
       "@kbn/ui-theme/*": ["packages/kbn-ui-theme/*"],
+      "@kbn/unified-data-table": ["packages/kbn-unified-data-table"],
+      "@kbn/unified-data-table/*": ["packages/kbn-unified-data-table/*"],
       "@kbn/unified-doc-viewer": ["packages/kbn-unified-doc-viewer"],
       "@kbn/unified-doc-viewer/*": ["packages/kbn-unified-doc-viewer/*"],
       "@kbn/unified-doc-viewer-examples": ["examples/unified_doc_viewer"],
