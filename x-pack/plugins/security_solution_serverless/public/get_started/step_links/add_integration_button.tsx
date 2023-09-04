@@ -23,7 +23,7 @@ const AddIntegrationButtonComponent = () => {
     [navigateTo, integrationsUrl]
   );
   return (
-    <LinkButton onClick={onClick} fill id="integrations" path="/browse/security">
+    <LinkButton id={ExternalPageName.integrationsSecurity} fill>
       <FormattedMessage
         id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description2.button"
         defaultMessage="Add integrations"
