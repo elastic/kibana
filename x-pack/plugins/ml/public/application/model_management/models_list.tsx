@@ -18,7 +18,7 @@ import {
   EuiTitle,
   SearchFilterConfig,
 } from '@elastic/eui';
-import { groupBy, intersection } from 'lodash';
+import { groupBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -40,7 +40,6 @@ import {
   MODEL_STATE,
   ModelState,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
-import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics-utils';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
@@ -586,6 +585,11 @@ export const ModelsList: FC<Props> = ({
   };
 
   const resultItems = useMemo<ModelItem[]>(() => {
+    if (isNLPEnabled === false) {
+      // don't add any of the built in models (e.g. elser) if NLP is disabled
+      return items;
+    }
+
     const idSet = new Set(items.map((i) => i.model_id));
     const notDownloaded: ModelItem[] = Object.entries(ELASTIC_MODEL_DEFINITIONS)
       .filter(([modelId]) => !idSet.has(modelId))
@@ -599,14 +603,6 @@ export const ModelsList: FC<Props> = ({
         } as ModelItem;
       });
     const result = [...items, ...notDownloaded];
-
-    if (isNLPEnabled === false) {
-      // if NLP is disabled, only show DFA models
-      const dfaModelTypes = Object.values(ANALYSIS_CONFIG_TYPE);
-      // is this correct? will 3rd party models ever be of type outlier_detection, regression, classification?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      // otherwise this check needs to look for something else in the model to know that it is a DFA model
-      return result.filter((item) => intersection(dfaModelTypes, item.type).length);
-    }
 
     return result;
   }, [isNLPEnabled, items]);

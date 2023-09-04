@@ -19,11 +19,12 @@ import type {
   AnalyticsManagementItems,
   TrainedModelsManagementItems,
 } from '../../common/types/management';
+import { filterForEnabledFeatureModels } from './trained_models';
 
 /**
  * Routes for management service
  */
-export function managementRoutes({ router, routeGuard }: RouteInitialization) {
+export function managementRoutes({ router, routeGuard, getEnabledFeatures }: RouteInitialization) {
   /**
    * @apiGroup Management
    *
@@ -126,14 +127,14 @@ export function managementRoutes({ router, routeGuard }: RouteInitialization) {
                   trainedModelsSpaces(),
                 ]);
 
-                // filter out non NLP models if NLP is disabled !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                const filteredModels = filterForEnabledFeatureModels(models, getEnabledFeatures());
 
                 const modelStatsMapped = modelsStats.reduce((acc, cur) => {
                   acc[cur.model_id] = cur;
                   return acc;
                 }, {} as Record<string, estypes.MlTrainedModelStats>);
 
-                const modelsWithSpaces: TrainedModelsManagementItems[] = models.map((m) => {
+                const modelsWithSpaces: TrainedModelsManagementItems[] = filteredModels.map((m) => {
                   const id = m.model_id;
                   return {
                     id,
