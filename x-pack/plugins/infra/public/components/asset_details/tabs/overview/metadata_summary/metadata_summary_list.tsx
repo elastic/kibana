@@ -137,7 +137,7 @@ export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSumma
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </>
   );
 };
 
