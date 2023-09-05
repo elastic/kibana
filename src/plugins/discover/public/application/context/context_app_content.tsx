@@ -8,7 +8,8 @@
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -149,26 +150,28 @@ export function ContextAppContent({
 
   return (
     <Fragment>
-      {!!interceptedWarnings?.length && (
-        <>
-          <SearchResponseWarnings
-            variant="callout"
-            interceptedWarnings={interceptedWarnings}
-            data-test-subj="dscContextInterceptedWarnings"
-          />
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <ActionBarMemoized
-        type={SurrDocType.PREDECESSORS}
-        defaultStepSize={defaultStepSize}
-        docCount={predecessorCount}
-        docCountAvailable={predecessors.length}
-        onChangeCount={onChangeCount}
-        isLoading={arePredecessorsLoading}
-        isDisabled={isAnchorLoading}
-      />
-      {loadingFeedback()}
+      <WrapperWithPadding>
+        {!!interceptedWarnings?.length && (
+          <>
+            <SearchResponseWarnings
+              variant="callout"
+              interceptedWarnings={interceptedWarnings}
+              data-test-subj="dscContextInterceptedWarnings"
+            />
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <ActionBarMemoized
+          type={SurrDocType.PREDECESSORS}
+          defaultStepSize={defaultStepSize}
+          docCount={predecessorCount}
+          docCountAvailable={predecessors.length}
+          onChangeCount={onChangeCount}
+          isLoading={arePredecessorsLoading}
+          isDisabled={isAnchorLoading}
+        />
+        {loadingFeedback()}
+      </WrapperWithPadding>
       {isLegacy && rows && rows.length !== 0 && (
         <DocTableContextMemoized
           columns={columns}
@@ -214,15 +217,31 @@ export function ContextAppContent({
           </CellActionsProvider>
         </div>
       )}
-      <ActionBarMemoized
-        type={SurrDocType.SUCCESSORS}
-        defaultStepSize={defaultStepSize}
-        docCount={successorCount}
-        docCountAvailable={successors.length}
-        onChangeCount={onChangeCount}
-        isLoading={areSuccessorsLoading}
-        isDisabled={isAnchorLoading}
-      />
+      <WrapperWithPadding>
+        <ActionBarMemoized
+          type={SurrDocType.SUCCESSORS}
+          defaultStepSize={defaultStepSize}
+          docCount={successorCount}
+          docCountAvailable={successors.length}
+          onChangeCount={onChangeCount}
+          isLoading={areSuccessorsLoading}
+          isDisabled={isAnchorLoading}
+        />
+      </WrapperWithPadding>
     </Fragment>
   );
 }
+
+const WrapperWithPadding: React.FC = ({ children }) => {
+  const padding = useEuiPaddingSize('s');
+
+  return (
+    <div
+      css={css`
+        padding: 0 ${padding};
+      `}
+    >
+      {children}
+    </div>
+  );
+};
