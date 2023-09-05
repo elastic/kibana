@@ -98,14 +98,16 @@ async function getApmApiClient({
   username,
 }: {
   kibanaServer: UrlObject;
-  username: ApmUsername | 'elastic';
+  username: ApmUsername | 'elastic_serverless';
 }) {
   const url = format({
     ...kibanaServer,
     auth: `${username}:${kbnTestConfig.getUrlParts().password}`,
   });
 
-  return createApmApiClient(supertest(url));
+  const cAuthorities = kibanaServer.certificateAuthorities;
+
+  return createApmApiClient(supertest.agent(url, { ca: cAuthorities }));
 }
 
 export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
@@ -125,7 +127,7 @@ export async function getApmApiClientService({
   return {
     slsUser: await getApmApiClient({
       kibanaServer,
-      username: 'elastic',
+      username: 'elastic_serverless',
     }),
   };
 }
