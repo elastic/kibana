@@ -12,4 +12,5 @@ echo "--- Explore Cypress Tests on Security Solution"
 
 cd x-pack/test/security_solution_cypress
 
+set +e
 yarn cypress:explore:run:ess; status=$?; yarn junit:merge && exit $status
