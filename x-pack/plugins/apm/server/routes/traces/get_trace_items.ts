@@ -60,7 +60,7 @@ export interface TraceItems {
   traceDocs: Array<WaterfallTransaction | WaterfallSpan>;
   errorDocs: WaterfallError[];
   spanLinksCountById: Record<string, number>;
-  traceItemCount: number;
+  traceDocsTotal: number;
   maxTraceItems: number;
 }
 
@@ -70,14 +70,16 @@ export async function getTraceItems({
   apmEventClient,
   start,
   end,
+  maxTraceItemsFromUrlParam,
 }: {
   traceId: string;
   config: APMConfig;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
+  maxTraceItemsFromUrlParam?: number;
 }): Promise<TraceItems> {
-  const maxTraceItems = config.ui.maxTraceItems;
+  const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
   const errorResponsePromise = apmEventClient.search('get_errors_docs', {
@@ -124,8 +126,8 @@ export async function getTraceItems({
     getSpanLinksCountById({ traceId, apmEventClient, start, end }),
   ]);
 
-  const traceItemCount = traceResponse.total;
-  const exceedsMax = traceItemCount > maxTraceItems;
+  const traceDocsTotal = traceResponse.total;
+  const exceedsMax = traceDocsTotal > maxTraceItems;
   const traceDocs = traceResponse.hits.map((hit) => hit._source);
   const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
 
@@ -134,7 +136,7 @@ export async function getTraceItems({
     traceDocs,
     errorDocs,
     spanLinksCountById,
-    traceItemCount,
+    traceDocsTotal,
     maxTraceItems,
   };
 }
@@ -167,7 +169,8 @@ async function getTraceDocsPaginated({
   });
 
   const newResults = [...results, ...hits];
-  if (newResults.length >= maxTraceItems) {
+
+  if (newResults.length >= maxTraceItems || newResults.length >= total) {
     return { hits: newResults, total };
   }
 
@@ -262,7 +265,7 @@ async function getTraceDocsPerPage({
             order: 'desc',
           },
         },
-        { '@timestamp': 'asc' },
+        // { '@timestamp': 'asc' },
         { _doc: 'asc' }, // tiebreaker
       ] as Sort,
     },
