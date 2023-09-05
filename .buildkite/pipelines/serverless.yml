@@ -110,8 +110,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - "target/kibana-security-serverless/**/*"
 
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
     label: 'Serverless Explore - Security Solution Cypress Tests'
@@ -124,8 +122,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - "target/kibana-security-serverless/**/*"
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Investigations - Security Solution Cypress Tests'
@@ -138,5 +134,3 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - "target/kibana-security-serverless/**/*"
