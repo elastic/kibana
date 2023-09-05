@@ -576,11 +576,19 @@ describe('Handler', () => {
       'An internal server error occurred. Check Kibana server logs for details.'
     );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+      Array [
         Array [
-          Array [
-            [Error: unexpected error],
-          ],
-        ]
+          "500 Server Error - /",
+          Object {
+            "error": [Error: unexpected error],
+            "http": Object {
+              "response": Object {
+                "status_code": 500,
+              },
+            },
+          },
+        ],
+      ]
     `);
   });
 
@@ -617,7 +625,15 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unauthorized],
+          "500 Server Error - /",
+          Object {
+            "error": [Error: Unauthorized],
+            "http": Object {
+              "response": Object {
+                "status_code": 500,
+              },
+            },
+          },
         ],
       ]
     `);
@@ -639,7 +655,15 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from Route Handler. Expected KibanaResponse, but given: string.],
+          "500 Server Error - /",
+          Object {
+            "error": [Error: Unexpected result from Route Handler. Expected KibanaResponse, but given: string.],
+            "http": Object {
+              "response": Object {
+                "status_code": 500,
+              },
+            },
+          },
         ],
       ]
     `);
@@ -672,6 +696,22 @@ describe('Handler', () => {
       message: '[request query.page]: expected value of type [number] but got [string]',
       statusCode: 400,
     });
+
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "400 Bad Request - /",
+          Object {
+            "error": [Error: [request query.page]: expected value of type [number] but got [string]],
+            "http": Object {
+              "response": Object {
+                "status_code": 400,
+              },
+            },
+          },
+        ],
+      ]
+    `);
   });
 
   it('accept to receive an array payload', async () => {
@@ -1145,7 +1185,15 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected 'location' header to be set],
+            "500 Server Error - /",
+            Object {
+              "error": [Error: expected 'location' header to be set],
+              "http": Object {
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1551,7 +1599,15 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: Unexpected Http status code. Expected from 400 to 599, but given: 200],
+            "500 Server Error - /",
+            Object {
+              "error": [Error: Unexpected Http status code. Expected from 400 to 599, but given: 200],
+              "http": Object {
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1620,7 +1676,15 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected 'location' header to be set],
+            "500 Server Error - /",
+            Object {
+              "error": [Error: expected 'location' header to be set],
+              "http": Object {
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1760,7 +1824,15 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected error message to be provided],
+            "500 Server Error - /",
+            Object {
+              "error": [Error: expected error message to be provided],
+              "http": Object {
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1786,7 +1858,15 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected error message to be provided],
+            "500 Server Error - /",
+            Object {
+              "error": [Error: expected error message to be provided],
+              "http": Object {
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1811,7 +1891,15 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: options.statusCode is expected to be set. given options: undefined],
+            "500 Server Error - /",
+            Object {
+              "error": [Error: options.statusCode is expected to be set. given options: undefined],
+              "http": Object {
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1836,7 +1924,15 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: Unexpected Http status code. Expected from 100 to 599, but given: 20.],
+            "500 Server Error - /",
+            Object {
+              "error": [Error: Unexpected Http status code. Expected from 100 to 599, but given: 20.],
+              "http": Object {
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);

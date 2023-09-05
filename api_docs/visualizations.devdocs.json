@@ -2249,7 +2249,7 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          "[]; }"
+          "[]; warning?: string | undefined; }"
         ],
         "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
         "deprecated": false,
@@ -8133,7 +8133,7 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          "[]; }"
+          "[]; warning?: string | undefined; }"
         ],
         "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
         "deprecated": false,

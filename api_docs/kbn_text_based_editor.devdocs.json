@@ -205,6 +205,20 @@
           },
           {
             "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.TextBasedLanguagesEditorProps.warning",
+            "type": "string",
+            "tags": [],
+            "label": "warning",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
             "id": "def-public.TextBasedLanguagesEditorProps.isDisabled",
             "type": "CompoundType",
             "tags": [],
@@ -240,6 +254,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.TextBasedLanguagesEditorProps.hideMinimizeButton",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideMinimizeButton",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
