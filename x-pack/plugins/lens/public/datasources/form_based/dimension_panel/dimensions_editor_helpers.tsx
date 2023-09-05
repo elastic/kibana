@@ -16,14 +16,41 @@ import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { operationDefinitionMap } from '../operations';
+import {
+  operationDefinitionMap,
+  type PercentileIndexPatternColumn,
+  type PercentileRanksIndexPatternColumn,
+  type TermsIndexPatternColumn,
+} from '../operations';
+import { isColumnOfType } from '../operations/definitions/helpers';
+import { FormBasedLayer } from '../types';
 
 export const formulaOperationName = 'formula';
 export const staticValueOperationName = 'static_value';
 export const quickFunctionsName = 'quickFunctions';
+export const termsOperationName = 'terms';
+export const optionallySortableOperationNames = ['percentile', 'percentile_ranks'];
 export const nonQuickFunctions = new Set([formulaOperationName, staticValueOperationName]);
 
 export type TemporaryState = typeof quickFunctionsName | typeof staticValueOperationName | 'none';
+
+export function hasRiskyColumnRanking(layer: FormBasedLayer) {
+  return Object.values(layer.columns).some((column) => {
+    if (
+      isColumnOfType<TermsIndexPatternColumn>('terms', column) &&
+      column.params?.orderBy.type === 'column' &&
+      column.params.orderBy.columnId != null
+    ) {
+      const rankingColumn = layer.columns[column.params.orderBy.columnId];
+      if (isColumnOfType<PercentileIndexPatternColumn>('percentile', rankingColumn)) {
+        return Number.isInteger(rankingColumn.params.percentile);
+      }
+      if (isColumnOfType<PercentileRanksIndexPatternColumn>('percentile_rank', rankingColumn)) {
+        return Number.isInteger(rankingColumn.params.value);
+      }
+    }
+  });
+}
 
 export function isQuickFunction(operationType: string) {
   return !nonQuickFunctions.has(operationType);
