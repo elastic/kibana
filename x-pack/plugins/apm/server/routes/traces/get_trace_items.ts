@@ -270,7 +270,6 @@ async function getTraceDocsPerPage({
             order: 'desc',
           },
         },
-        // { '@timestamp': 'asc' },
         { _doc: 'asc' }, // tiebreaker
       ] as Sort,
     },
