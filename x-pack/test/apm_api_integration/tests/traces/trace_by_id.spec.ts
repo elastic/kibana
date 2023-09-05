@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start: new Date(start).toISOString(),
               end: new Date(end).toISOString(),
-              entryTransactionId: 'foo',
+              entryTransactionId,
             },
           },
         });
