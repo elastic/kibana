@@ -6,7 +6,7 @@
  */
 
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { ActionsConfigurationUtilities } from './actions_config';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 export async function hasReachedTheQueuedActionsLimit(
   taskManager: TaskManagerStartContract,

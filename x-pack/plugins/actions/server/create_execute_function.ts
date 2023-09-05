@@ -17,7 +17,7 @@ import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects'
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
 import { ActionsConfigurationUtilities } from './actions_config';
-import { hasReachedTheQueuedActionsLimit } from './has_reached_queued_actions_limit';
+import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_actions_limit';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;

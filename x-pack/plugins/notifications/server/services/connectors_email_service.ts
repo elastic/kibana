@@ -6,7 +6,10 @@
  */
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
+import {
+  ExecutionResponseItem,
+  ExecutionResponseType,
+} from '@kbn/actions-plugin/server/create_execute_function';
 import type { Logger } from '@kbn/core/server';
 import type { EmailService, PlainTextEmail, HTMLEmail } from './types';
 
@@ -31,13 +34,7 @@ export class ConnectorsEmailService implements EmailService {
 
     const response = await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
     if (response.errors) {
-      for (const r of response.items) {
-        if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
-          this.logger.warn(
-            `Skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
-          );
-        }
-      }
+      this.logEnqueueExecutionResponse(response.items);
     }
   }
 
@@ -55,12 +52,16 @@ export class ConnectorsEmailService implements EmailService {
 
     const response = await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
     if (response.errors) {
-      for (const r of response.items) {
-        if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
-          this.logger.warn(
-            `Skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
-          );
-        }
+      this.logEnqueueExecutionResponse(response.items);
+    }
+  }
+
+  private logEnqueueExecutionResponse(items: ExecutionResponseItem[]) {
+    for (const r of items) {
+      if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
+        this.logger.warn(
+          `Skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
+        );
       }
     }
   }

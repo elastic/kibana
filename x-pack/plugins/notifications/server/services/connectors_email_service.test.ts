@@ -29,6 +29,7 @@ describe('sendPlainTextEmail()', () => {
           {
             id: CONNECTOR_ID,
             response: ExecutionResponseType.SUCCESS,
+            actionTypeId: 'test',
           },
         ],
       });
@@ -62,6 +63,7 @@ describe('sendPlainTextEmail()', () => {
           {
             id: CONNECTOR_ID,
             response: ExecutionResponseType.SUCCESS,
+            actionTypeId: 'test',
           },
         ],
       });
@@ -141,6 +143,7 @@ describe('sendPlainTextEmail()', () => {
           {
             id: CONNECTOR_ID,
             response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+            actionTypeId: 'test',
           },
         ],
       });
@@ -173,6 +176,7 @@ describe('sendHTMLEmail()', () => {
           {
             id: CONNECTOR_ID,
             response: ExecutionResponseType.SUCCESS,
+            actionTypeId: 'test',
           },
         ],
       });
@@ -208,6 +212,7 @@ describe('sendHTMLEmail()', () => {
           {
             id: CONNECTOR_ID,
             response: ExecutionResponseType.SUCCESS,
+            actionTypeId: 'test',
           },
         ],
       });
@@ -290,6 +295,7 @@ describe('sendHTMLEmail()', () => {
           {
             id: CONNECTOR_ID,
             response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+            actionTypeId: 'test',
           },
         ],
       });

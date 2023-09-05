@@ -350,7 +350,11 @@ export class ExecutionHandler<
         for (const c of chunk(bulkActions, CHUNK_SIZE)) {
           const response = await this.actionsClient!.bulkEnqueueExecution(c);
           if (response.errors) {
-            bulkActionsResponse = bulkActionsResponse.concat(response.items);
+            bulkActionsResponse = bulkActionsResponse.concat(
+              response.items.filter(
+                (i) => i.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR
+              )
+            );
           }
         }
       }

@@ -14,12 +14,9 @@ import {
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
-import {
-  ExecutionResponseItem as ActionExecutionResponseItem,
-  ExecutionResponseType,
-} from './create_execute_function';
+import { ExecutionResponseItem, ExecutionResponseType } from './create_execute_function';
 import { ActionsConfigurationUtilities } from './actions_config';
-import { hasReachedTheQueuedActionsLimit } from './has_reached_queued_actions_limit';
+import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_actions_limit';
 
 // This allowlist should only contain connector types that don't require API keys for
 // execution.
@@ -35,8 +32,6 @@ export interface ExecuteOptions
   extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects'> {
   id: string;
 }
-
-export type ExecutionResponseItem = Pick<ActionExecutionResponseItem, 'id' | 'response'>;
 
 export interface ExecutionResponse {
   errors: boolean;
@@ -166,11 +161,13 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
         .map((a) => ({
           id: a.id,
           response: ExecutionResponseType.SUCCESS,
+          actionTypeId: connectorTypeIds[a.id],
         }))
         .concat(
           actionsOverLimit.map((a) => ({
             id: a.id,
             response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+            actionTypeId: connectorTypeIds[a.id],
           }))
         ),
     };

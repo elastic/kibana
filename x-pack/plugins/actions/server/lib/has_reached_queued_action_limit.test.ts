@@ -6,7 +6,7 @@
  */
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { actionsConfigMock } from './actions_config.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 import { hasReachedTheQueuedActionsLimit } from './has_reached_queued_actions_limit';
 
 const mockTaskManager = taskManagerMock.createStart();
