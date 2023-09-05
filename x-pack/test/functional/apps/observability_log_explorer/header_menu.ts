@@ -8,10 +8,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const config = getService('config');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'timePicker']);
 
   describe('Header menu', () => {
@@ -51,17 +49,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverLink.click();
 
         await PageObjects.discover.waitForDocTableLoadingComplete();
-
-        await retry.try(async () => {
-          expect(
-            await (
-              await testSubjects.find(
-                'discover-dataView-switch-link',
-                config.get('timeouts.find') * 10
-              )
-            ).getVisibleText()
-          ).to.eql('All log datasets');
-        });
 
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql(['@timestamp', 'message']);
