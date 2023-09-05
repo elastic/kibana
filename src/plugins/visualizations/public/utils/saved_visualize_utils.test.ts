@@ -364,9 +364,6 @@ describe('saved_visualize_utils', () => {
               { contentTypeId: 'etc' },
               { contentTypeId: 'visualization' },
             ],
-            options: {
-              searchFields: ['baz', 'bing', 'title^3', 'description'],
-            },
           },
         ],
       ]);
@@ -406,9 +403,6 @@ describe('saved_visualize_utils', () => {
               { contentTypeId: 'visualization' },
               { contentTypeId: 'foo' },
             ],
-            options: {
-              searchFields: ['baz', 'bing', 'barfield', 'foofield', 'title^3', 'description'],
-            },
           },
         ],
       ]);
