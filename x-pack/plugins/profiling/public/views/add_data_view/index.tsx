@@ -330,7 +330,7 @@ EOF`}
               <EuiText style={{ fontWeight: 'bold' }} size="s">
                 {i18n.translate(
                   'xpack.profiling.tabs.elasticAgentIntegration.step1.collectionAgentUrl',
-                  { defaultMessage: 'Universal Profiling Collector url:' }
+                  { defaultMessage: 'Universal Profiling Collector URL:' }
                 )}
               </EuiText>
               <EuiCodeBlock paddingSize="s" isCopyable>

@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { getNodeDetailUrl } from '../../../pages/link_to';
+import { useNodeDetailsRedirect } from '../../../pages/link_to';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface LinkToNodeDetailsProps {
@@ -22,13 +22,16 @@ export const LinkToNodeDetails = ({
   assetType,
   dateRangeTimestamp,
 }: LinkToNodeDetailsProps) => {
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
       nodeType: assetType,
       nodeId: asset.id,
-      from: dateRangeTimestamp.from,
-      to: dateRangeTimestamp.to,
-      assetName: asset.name,
+      search: {
+        from: dateRangeTimestamp.from,
+        to: dateRangeTimestamp.to,
+        assetName: asset.name,
+      },
     }),
   });
 

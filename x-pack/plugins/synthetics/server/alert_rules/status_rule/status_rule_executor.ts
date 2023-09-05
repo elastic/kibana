@@ -13,7 +13,6 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SyntheticsServerSetup } from '../../types';
 import { UptimeEsClient } from '../../lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import {
   getAllMonitors,
   processMonitors,
@@ -49,8 +48,6 @@ export class StatusRuleExecutor {
   syntheticsMonitorClient: SyntheticsMonitorClient;
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
 
-  public locationIdNameMap: Record<string, string> = {};
-
   constructor(
     previousStartedAt: Date | null,
     p: StatusRuleParams,
@@ -69,28 +66,7 @@ export class StatusRuleExecutor {
     this.syntheticsMonitorClient = syntheticsMonitorClient;
   }
 
-  async getAllLocationNames() {
-    const { publicLocations, privateLocations } = await getAllLocations({
-      server: this.server,
-      syntheticsMonitorClient: this.syntheticsMonitorClient,
-      savedObjectsClient: this.soClient,
-    });
-
-    publicLocations.forEach((loc) => {
-      this.locationIdNameMap[loc.label] = loc.id;
-    });
-
-    privateLocations.forEach((loc) => {
-      this.locationIdNameMap[loc.label] = loc.id;
-    });
-  }
-
-  getLocationId(name: string) {
-    return this.locationIdNameMap[name];
-  }
-
   async getMonitors() {
-    await this.getAllLocationNames();
     this.monitors = await getAllMonitors({
       soClient: this.soClient,
       filter: `${monitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`,
@@ -99,20 +75,15 @@ export class StatusRuleExecutor {
     const {
       allIds,
       enabledMonitorQueryIds,
-      listOfLocations,
+      monitorLocationIds,
       monitorLocationMap,
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
-    } = await processMonitors(
-      this.monitors,
-      this.server,
-      this.soClient,
-      this.syntheticsMonitorClient
-    );
+    } = processMonitors(this.monitors, this.server, this.soClient, this.syntheticsMonitorClient);
 
     return {
       enabledMonitorQueryIds,
-      listOfLocations,
+      monitorLocationIds,
       allIds,
       monitorLocationMap,
       projectMonitorsCount,
@@ -124,7 +95,7 @@ export class StatusRuleExecutor {
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
     const {
-      listOfLocations,
+      monitorLocationIds,
       enabledMonitorQueryIds,
       allIds,
       monitorLocationMap,
@@ -138,7 +109,7 @@ export class StatusRuleExecutor {
     if (enabledMonitorQueryIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
-        listOfLocations,
+        monitorLocationIds,
         {
           to: 'now',
           from,
@@ -201,9 +172,7 @@ export class StatusRuleExecutor {
         delete downConfigs[locPlusId];
       } else {
         const { locations } = monitor.attributes;
-        const isLocationRemoved = !locations.some(
-          (l) => l.id === this.getLocationId(downConfig.location)
-        );
+        const isLocationRemoved = !locations.some((l) => l.id === downConfig.locationId);
         if (isLocationRemoved) {
           staleDownConfigs[locPlusId] = { ...downConfig, isLocationRemoved: true };
           delete downConfigs[locPlusId];

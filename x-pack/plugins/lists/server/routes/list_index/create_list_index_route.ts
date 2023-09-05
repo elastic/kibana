@@ -11,19 +11,19 @@ import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
 import { createListIndexResponse } from '../../../common/api';
 import type { ListsPluginRouter } from '../../types';
-import { buildSiemResponse, removeLegacyTemplatesIfExist } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const createListIndexRoute = (router: ListsPluginRouter): void => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       options: {
         tags: ['access:lists-all'],
       },
       path: LIST_INDEX,
-      validate: false,
-    },
-    async (context, _, response) => {
+    })
+    .addVersion({ validate: false, version: '2023-10-31' }, async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
@@ -42,8 +42,6 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
         if (!templateListItemsExists || !listItemDataStreamExists) {
           await lists.setListItemTemplate();
         }
-
-        await removeLegacyTemplatesIfExist(lists);
 
         if (listDataStreamExists && listItemDataStreamExists) {
           return siemResponse.error({
@@ -79,6 +77,5 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
           statusCode: error.statusCode,
         });
       }
-    }
-  );
+    });
 };

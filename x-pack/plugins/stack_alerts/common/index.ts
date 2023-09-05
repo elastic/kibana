@@ -11,3 +11,6 @@ export {
   ComparatorFnNames,
   getHumanReadableComparator,
 } from './comparator';
+
+export type { EsqlTable } from './esql_query_utils';
+export { rowToDocument, transformDatatableToEsqlTable, toEsQueryHits } from './esql_query_utils';
