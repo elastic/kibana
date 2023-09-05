@@ -9,6 +9,7 @@ import {
   ADD_INTEGRATION_POLICY_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   FLYOUT_CLOSE_BTN_SEL,
+  INTEGRATION_LIST,
 } from '../screens/integrations';
 
 import { AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX, EXISTING_HOSTS_TAB } from '../screens/fleet';
@@ -68,3 +69,19 @@ export const installPackageWithVersion = (integration: string, version: string) 
     method: 'POST',
   });
 };
+
+export function scrollToIntegration(selector: string) {
+  cy.getBySel(INTEGRATION_LIST);
+
+  return cy.window().then(async (win) => {
+    let found = false;
+    let i = 0;
+    while (!found && i < 10) {
+      win.scroll(0, i++ * 500);
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      if (win.document.querySelector(`[data-test-subj="${selector}"]`)) {
+        found = true;
+      }
+    }
+  });
+}

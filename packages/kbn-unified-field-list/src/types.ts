@@ -8,6 +8,7 @@
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { EuiButtonIconProps, EuiButtonProps } from '@elastic/eui';
+import type { FieldTypeKnown } from '@kbn/discover-utils/types';
 
 export interface BucketedAggregation<KeyType = string> {
   buckets: Array<{
@@ -88,11 +89,6 @@ export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails
 export type FieldListGroups<T extends FieldListItem> = {
   [key in FieldsGroupNames]?: FieldsGroup<T>;
 };
-
-export type FieldTypeKnown = Exclude<
-  DataViewField['timeSeriesMetric'] | DataViewField['type'],
-  undefined
->;
 
 export type GetCustomFieldType<T extends FieldListItem> = (field: T) => FieldTypeKnown;
 

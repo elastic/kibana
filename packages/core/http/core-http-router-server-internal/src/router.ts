@@ -199,26 +199,38 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
-    } catch (e) {
-      return hapiResponseAdapter.toBadRequest(e.message);
+    } catch (error) {
+      this.log.error(`400 Bad Request - ${request.path}`, {
+        error,
+        http: { response: { status_code: 400 } },
+      });
+
+      return hapiResponseAdapter.toBadRequest(error.message);
     }
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       return hapiResponseAdapter.handle(kibanaResponse);
-    } catch (e) {
-      // log and capture error
-      this.log.error(e);
-      apm.captureError(e);
+    } catch (error) {
+      // capture error
+      apm.captureError(error);
 
       // forward 401 errors from ES client
-      if (isElasticsearchUnauthorizedError(e)) {
+      if (isElasticsearchUnauthorizedError(error)) {
+        this.log.error(`401 Unauthorized - ${request.path}`, {
+          error,
+          http: { response: { status_code: 401 } },
+        });
         return hapiResponseAdapter.handle(
-          kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
+          kibanaResponseFactory.unauthorized(convertEsUnauthorized(error))
         );
       }
 
       // return a generic 500 to avoid error info / stack trace surfacing
+      this.log.error(`500 Server Error - ${request.path}`, {
+        error,
+        http: { response: { status_code: 500 } },
+      });
       return hapiResponseAdapter.toInternalError();
     }
   }
