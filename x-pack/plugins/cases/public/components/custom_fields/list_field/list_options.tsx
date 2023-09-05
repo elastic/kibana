@@ -48,7 +48,7 @@ const ListOptionsComponent: React.FC<Props> = ({ disabled, isLoading, listValues
 
   const onAddOption = useCallback(() => {
     setAddOption(true);
-  }, [setAddOption, listValues]);
+  }, [setAddOption]);
 
   const handleOptionSave = useCallback(
     (id: string | undefined, value: string) => {
@@ -76,7 +76,7 @@ const ListOptionsComponent: React.FC<Props> = ({ disabled, isLoading, listValues
 
       onChange(listValues.filter((item) => item.id !== id));
     },
-    [onChange]
+    [onChange, listValues]
   );
 
   const renderInlineEdit = (id?: string, content?: string) => (
@@ -144,8 +144,16 @@ const ListOptionsComponent: React.FC<Props> = ({ disabled, isLoading, listValues
         </EuiDragDropContext>
       ) : null}
       {listValues.length ? <EuiSpacer size="l" /> : null}
-      {addOption ? renderInlineEdit() : null}
-      <AddListOption disabled={disabled} isLoading={isLoading} handleAddOption={onAddOption} />
+      {addOption ? (
+        <>
+          {renderInlineEdit()} <EuiSpacer />
+        </>
+      ) : null}
+      <EuiFlexGroup justifyContent="flexStart">
+        <EuiFlexItem grow={true}>
+          <AddListOption disabled={disabled} isLoading={isLoading} handleAddOption={onAddOption} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

@@ -13,7 +13,7 @@ import type { TextOptions, ListOptions, BasicOptions } from './field_options/con
 
 const { emptyField } = fieldValidators;
 
-export const customFieldTypes: CustomFieldTypesUI[] = ['Text', 'Textarea', 'List', 'Url', 'Number'];
+export const customFieldTypes: CustomFieldTypesUI[] = ['Text', 'List'];
 
 export interface FormProps {
   fieldLabel: string;
@@ -44,8 +44,5 @@ export const schema = {
   fieldOptions: {
     label: i18n.FIELD_OPTIONS,
     type: FIELD_TYPES.CHECKBOX,
-  },
-  textAreaHeight: {
-    label: i18n.TextAreaHeight,
   },
 };

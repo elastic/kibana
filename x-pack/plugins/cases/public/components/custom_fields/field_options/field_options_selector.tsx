@@ -14,7 +14,7 @@ import { FieldOptions } from '.';
 
 interface FieldOptionsSelectorProps {
   dataTestSubj: string;
-  idAria: string;
+  idAria?: string;
   disabled: boolean;
   field: FieldHook<string>;
   isLoading: boolean;

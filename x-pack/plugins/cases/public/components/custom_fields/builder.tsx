@@ -6,16 +6,10 @@
  */
 
 import type { CustomFieldBuilderMap } from './types';
-import { createTextAreaCustomFieldBuilder } from './text_area_field';
 import { createTextCustomFieldBuilder } from './text_field';
 import { createListCustomFieldBuilder } from './list_field';
-import { createNumberCustomFieldBuilder } from './number_field';
-import { createUrlCustomFieldBuilder } from './url_field';
 
 export const builderMap: CustomFieldBuilderMap = {
   Text: createTextCustomFieldBuilder,
-  Textarea: createTextAreaCustomFieldBuilder,
   List: createListCustomFieldBuilder,
-  Url: createUrlCustomFieldBuilder,
-  Number: createNumberCustomFieldBuilder,
 };

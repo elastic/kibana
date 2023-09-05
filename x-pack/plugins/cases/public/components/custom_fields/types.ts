@@ -7,11 +7,7 @@
 
 import type React from 'react';
 
-export interface CustomFieldFormSchema<Config = Record<string, unknown>> {
-  config: Config;
-}
-
-export type CustomFieldTypesUI = 'Text' | 'Textarea' | 'Url' | 'List' | 'Number';
+export type CustomFieldTypesUI = 'Text' | 'List';
 
 export interface CustomFieldBuilderArgs {
   appId?: string;

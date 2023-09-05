@@ -7,7 +7,7 @@
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { FormFields } from './form_fields';
@@ -24,15 +24,10 @@ interface Props {
 }
 
 const FormComponent: React.FC<Props> = ({ onChange }) => {
-  const submitForm = useCallback(async (data, isValid) => {
-    console.log('submit form', { data, isValid });
-  }, []);
-
   const { form } = useForm<FormProps>({
-    defaultValue: { fieldType: 'Text', textAreaHeight: '2' },
+    defaultValue: { fieldType: 'Text' },
     options: { stripEmptyFields: false },
     schema,
-    onSubmit: submitForm,
   });
 
   const { submit, isValid: isFormValid, isSubmitted, isSubmitting } = form;

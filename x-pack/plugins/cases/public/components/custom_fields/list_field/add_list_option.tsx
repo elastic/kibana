@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiButtonEmpty } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import * as i18n from '../translations';
@@ -17,12 +17,27 @@ export interface Props {
   handleAddOption: () => void;
 }
 const AddListOptionComponent: React.FC<Props> = ({ disabled, isLoading, handleAddOption }) => {
+  const renderBody = () => (
+    <EuiFlexGroup justifyContent="flexStart">
+      <EuiFlexItem grow={false}>
+        <h5>{i18n.LIST_VALUES_LABEL}</h5>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <EuiEmptyPrompt
+      body={renderBody()}
       color="subdued"
       className="eui-fullWidth"
       css={css`
-        max-width: 580px;
+        max-width: 750px;
+        .euiEmptyPrompt__main {
+          padding: 12px;
+        }
+        .euiEmptyPrompt__contentInner {
+          max-width: none;
+        }
       `}
       actions={
         <EuiButtonEmpty

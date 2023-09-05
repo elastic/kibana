@@ -34,7 +34,7 @@ export const FieldTypeDropdownComponent = ({
             gutterSize="xs"
             alignItems={'center'}
             responsive={false}
-            data-test-subj={`case-severity-filter-${fieldType}`}
+            data-test-subj={`custom-field-type-${fieldType}`}
           >
             <EuiFlexItem grow={false}>
               <EuiText size="s">{fieldType}</EuiText>
@@ -53,6 +53,7 @@ export const FieldTypeDropdownComponent = ({
       onChange={onChange}
       options={options}
       valueOfSelected={selectedType}
+      data-test-subj="custom-field-type-dropdown"
     />
   );
 };

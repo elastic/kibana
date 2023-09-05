@@ -29,14 +29,17 @@ export const FieldOptionsComponent = ({
   const onChange = useCallback(
     (id: string) => {
       let checkboxOption = {};
+
       setCheckboxIdToSelectedMap((prev) => {
         checkboxOption = {
           ...prev,
           [id]: !prev[id],
         };
+
+        handleOptionChange(checkboxOption);
+
         return checkboxOption;
       });
-      handleOptionChange(checkboxOption);
     },
     [handleOptionChange, setCheckboxIdToSelectedMap]
   );
@@ -51,6 +54,7 @@ export const FieldOptionsComponent = ({
       idToSelectedMap={checkboxIdToSelectedMap}
       onChange={onChange}
       disabled={disabled}
+      data-test-subj="custom-field-options-checkbox-group"
     />
   );
 };

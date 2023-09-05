@@ -87,6 +87,10 @@ export const REQUIRED_FIELD = (fieldName: string): string =>
     defaultMessage: '{fieldName} is required.',
   });
 
+export const LIST_VALUES_LABEL = i18n.translate('xpack.cases.customFields.list.valuesLabel', {
+  defaultMessage: 'Values',
+});
+
 export const LIST_ADD_OPTION = i18n.translate('xpack.cases.customFields.list.addOption', {
   defaultMessage: 'Add option',
 });

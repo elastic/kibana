@@ -14,10 +14,10 @@ import { FieldTypeDropdown } from './field_type_dropdown';
 
 interface FieldTypeSelectorProps {
   customFieldTypes: CustomFieldTypesUI[];
-  dataTestSubj: string;
+  dataTestSubj?: string;
   disabled: boolean;
   field: FieldHook<string>;
-  idAria: string;
+  idAria?: string;
   isLoading: boolean;
   handleChange: (newValue: string) => void;
 }

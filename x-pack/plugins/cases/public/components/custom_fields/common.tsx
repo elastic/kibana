@@ -35,7 +35,7 @@ export const createCommonCustomFieldBuilder = ({
             path="fieldOptions"
             component={FieldOptionsSelector}
             componentProps={{
-              dataTestSubj: 'fieldOptions',
+              dataTestSubj: 'custom-field-options',
               selectedType: customFieldType,
             }}
           />

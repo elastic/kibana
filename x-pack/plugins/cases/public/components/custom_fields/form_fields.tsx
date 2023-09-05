@@ -58,10 +58,10 @@ const FormFieldsComponent: React.FC = () => {
   return (
     <>
       <UseField
-        path="fieldLabel"
+        path="custom-field-label"
         component={Field}
         componentProps={{
-          euiFieldProps: { 'data-test-subj': 'fieldLabelInput', fullWidth: true },
+          euiFieldProps: { 'data-test-subj': 'custom-field-label-input', fullWidth: true },
         }}
       />
       <UseField
@@ -69,7 +69,7 @@ const FormFieldsComponent: React.FC = () => {
         component={FieldTypeSelector}
         componentProps={{
           customFieldTypes,
-          dataTestSubj: 'fieldTypeDropdown',
+          dataTestSubj: 'custom-field-type-selector',
           selectedType,
           handleChange: handleTypeChange,
         }}

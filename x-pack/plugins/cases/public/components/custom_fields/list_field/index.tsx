@@ -18,7 +18,7 @@ import type { ListOption } from './list_options';
 interface ListOptionsSelectorProps {
   dataTestSubj: string;
   disabled: boolean;
-  field: FieldHook<string>;
+  field: FieldHook<ListOption[]>;
   idAria: string;
   isLoading: boolean;
 }
@@ -44,6 +44,7 @@ const ListOptionsSelector = ({
   return (
     <>
       <EuiSpacer />
+
       <EuiFormRow
         data-test-subj={dataTestSubj}
         describedByIds={idAria ? [idAria] : undefined}

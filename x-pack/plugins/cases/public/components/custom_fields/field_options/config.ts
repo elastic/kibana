@@ -36,7 +36,6 @@ export const getConfig = (selectedType: CustomFieldTypesUI) => {
 
   switch (selectedType) {
     case 'Text':
-    case 'Textarea':
       config = {
         ...config,
         characterLimit: {
