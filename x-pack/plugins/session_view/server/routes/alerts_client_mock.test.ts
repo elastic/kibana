@@ -101,7 +101,6 @@ export function resetAlertingAuthMock() {
     ];
     return Promise.resolve(authorizedRuleTypes);
   });
-  // @ts-expect-error
   getAlertIndicesAliasMock.mockReturnValue(['.alerts-observability.apm-default']);
 
   alertingAuthMock.ensureAuthorized.mockImplementation(
