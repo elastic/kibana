@@ -52,7 +52,7 @@ import { OverviewLogic } from '../../overview.logic';
 import { GenerateApiKeyModal } from '../generate_api_key_modal/modal';
 
 import { consoleDefinition } from './languages/console';
-import { javascriptDefinition } from './languages/javascript';
+import { curlDefinition } from './languages/curl';
 import { languageDefinitions } from './languages/languages';
 
 const DEFAULT_URL = 'https://localhost:9200';
@@ -85,8 +85,7 @@ export const APIGettingStarted = () => {
   };
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/client_libraries/`);
 
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<LanguageDefinition>(javascriptDefinition);
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
   return (
     <>
       {isGenerateModalOpen && (
