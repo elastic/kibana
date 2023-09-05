@@ -39,6 +39,7 @@ const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) =>
       <EuiSpacer />
 
       <EuiButton
+        data-test-subj="observabilityAiAssistantTemplateAddMessageButton"
         onClick={() => setCount(count >= 0 && count < props.items.length - 1 ? count + 1 : 0)}
       >
         Add message
