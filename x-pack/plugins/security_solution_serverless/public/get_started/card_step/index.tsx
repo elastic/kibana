@@ -48,8 +48,7 @@ const CardStepComponent: React.FC<{
   stepId,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const colorStyles = useEuiBackgroundColorCSS();
-  const cssStyles = [colorStyles.primary];
+  const backgroundColorStyles = useEuiBackgroundColorCSS();
   const isExpandedStep = expandedSteps.has(stepId);
   const steps = useMemo(
     () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
