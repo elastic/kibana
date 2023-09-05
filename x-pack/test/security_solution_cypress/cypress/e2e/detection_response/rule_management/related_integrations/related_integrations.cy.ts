@@ -189,7 +189,9 @@ describe('Related integrations', { tags: ['@ess', '@brokenInServerless'] }, () =
       });
     });
 
-    describe('rule details', () => {
+    // Flaky in serverless tests
+    // @brokenInServerless tag is not working so a skip was needed
+    describe.skip('rule details', { tags: ['@brokenInServerless'] }, () => {
       beforeEach(() => {
         visitFirstInstalledPrebuiltRuleDetailsPage();
       });

@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
-import { useResetTransforms } from '../../../../hooks';
-import { AuthorizationContext } from '../../../../lib/authorization';
+import { useTransformCapabilities, useResetTransforms } from '../../../../hooks';
 
 import { resetActionNameText, isResetActionDisabled, ResetActionName } from './reset_action_name';
 
 export type ResetAction = ReturnType<typeof useResetAction>;
 export const useResetAction = (forceDisable: boolean) => {
-  const { canResetTransform } = useContext(AuthorizationContext).capabilities;
+  const { canResetTransform } = useTransformCapabilities();
 
   const resetTransforms = useResetTransforms();
 
