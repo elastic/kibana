@@ -56,10 +56,12 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       return await this.findFlyoutTestSubject('superDatePickerToggleQuickMenuButton');
     }
 
-    public async clickToggleQuickMenuButton() {
+    public async clickToggleQuickMenuButton(open?: boolean) {
       log.debug('clickToggleQuickMenuButton');
       const button = await this.findToggleQuickMenuButton();
-      await button.click();
+      if (typeof open === 'undefined' || open !== await button.isSelected()) {
+        await button.click();
+      }
     }
 
     public async clickCommonlyUsedTimeRange(time: CommonlyUsed) {
@@ -113,11 +115,12 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       });
     }
 
-    public async clickToggleShowCustomTimeRange() {
+    public async clickToggleShowCustomTimeRange(enable?: boolean) {
       log.debug('clickToggleShowCustomTimeRange');
-      await testSubjects.click(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
-      // give the toggle animation time to complete
-      await common.sleep(200);
+      const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
+      if (typeof enable !== 'undefined' || enable !== toggle.isSelected()) {
+        await toggle.click();
+      }
     }
   })();
 }
