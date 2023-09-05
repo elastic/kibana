@@ -24,26 +24,35 @@ describe('Large Trace in waterfall', () => {
       repeaterFactor: 10,
       environment: 'large_trace',
     });
-
-    cy.loginAsViewerUser();
   });
 
-  describe('when navigating to a trace sample', () => {
-    it('shows warning about trace size', () => {
+  describe('when navigating to a trace sample with default maxTraceItems', () => {
+    beforeEach(() => {
+      cy.loginAsViewerUser();
       cy.visitKibana(
         `/app/apm/services/synth-rum/transactions/view?${new URLSearchParams({
           ...timeRange,
           transactionName: rootTransactionName,
         })}`
       );
+    });
 
+    it('renders waterfall items', () => {
+      cy.getByTestSubj('waterfallItem').should('have.length.greaterThan', 200);
+    });
+
+    it('shows warning about trace size', () => {
       cy.getByTestSubj('apmWaterfallSizeWarning').should(
         'have.text',
         'The number of items in this trace is 15551 which is higher than the current limit of 5000. Please increase the limit via `xpack.apm.ui.maxTraceItems` to see the full trace'
       );
     });
+  });
 
-    it('does not show the warning about trace size', () => {
+  describe('when navigating to a trace sample with maxTraceItems=20000', () => {
+    beforeEach(() => {
+      cy.loginAsViewerUser();
+
       cy.intercept('GET', '/internal/apm/traces/**', (req) => {
         req.query.maxTraceItems = 20000;
       }).as('getTraces');
@@ -54,7 +63,13 @@ describe('Large Trace in waterfall', () => {
           transactionName: rootTransactionName,
         })}`
       );
+    });
 
+    it('renders waterfall items', () => {
+      cy.getByTestSubj('waterfallItem').should('have.length.greaterThan', 400);
+    });
+
+    it('does not show the warning about trace size', () => {
       cy.getByTestSubj('apmWaterfallSizeWarning').should('not.exist');
     });
   });
