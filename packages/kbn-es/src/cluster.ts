@@ -6,42 +6,45 @@
  * Side Public License, v 1.
  */
 
-const fs = require('fs');
-const fsp = require('fs/promises');
-const execa = require('execa');
-const chalk = require('chalk');
-const path = require('path');
-const Rx = require('rxjs');
-const { Client } = require('@elastic/elasticsearch');
-const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
-const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
-const {
+import fs from 'fs';
+import fsp from 'fs/promises';
+import chalk from 'chalk';
+import { resolve as pathResolve, relative as pathRelative } from 'path';
+import execa from 'execa';
+import { Readable } from 'stream';
+import Rx from 'rxjs';
+import { Client } from '@elastic/elasticsearch';
+import { promisify } from 'util';
+import { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
+import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
+import {
   extractConfigFiles,
-  log: defaultLog,
+  log as defaultLog,
   NativeRealm,
   parseEsLog,
-  parseTimeoutToMs,
   runDockerContainer,
   runServerlessCluster,
+  ServerlessOptions,
   stopServerlessCluster,
   teardownServerlessClusterSync,
-} = require('./utils');
-const { createCliError } = require('./errors');
-const { promisify } = require('util');
+} from './utils';
+import { createCliError } from './errors';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const treeKillAsync = promisify(require('tree-kill'));
-const { parseSettings, SettingsFilter } = require('./settings');
-const { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } = require('@kbn/dev-utils');
+import { parseSettings, SettingsFilter } from './settings';
+import { InstallSourceOptions } from './install/install_source';
+import { DownloadSnapshotOptions, InstallSnapshotOptions } from './install/install_snapshot';
+import { EsClusterExecOptions } from './cluster_exec_options';
+import { InstallArchiveOptions } from './install/install_archive';
 
-const DEFAULT_READY_TIMEOUT = parseTimeoutToMs('1m');
-
-/** @typedef {import('./cluster_exec_options').EsClusterExecOptions} ExecOptions */
-/** @typedef {import('./utils').DockerOptions} DockerOptions */
-/** @typedef {import('./utils').ServerlessOptions}ServerlessOptions */
+const DEFAULT_READY_TIMEOUT = 60 * 1000;
 
 // listen to data on stream until map returns anything but undefined
-const first = (stream, map) =>
+const first = (stream: Readable, map: (data: Buffer) => string | true | undefined) =>
   new Promise((resolve) => {
-    const onData = (data) => {
+    const onData = (data: any) => {
       const result = map(data);
       if (result !== undefined) {
         resolve(result);
@@ -51,61 +54,69 @@ const first = (stream, map) =>
     stream.on('data', onData);
   });
 
-exports.Cluster = class Cluster {
+export class Cluster {
+  private log: ToolingLog;
+  private ssl: boolean;
+  private stopCalled: boolean;
+  private process: execa.ExecaChildProcess | null; // execa.ExecaReturnValue<string> | undefined;
+  private outcome: Promise<void> | null;
+  private serverlessNodes: string[];
+  private setupPromise: Promise<unknown> | null;
+  private stdioTarget: NodeJS.WritableStream | null;
+
+  // private serverlessProcess: NodeJS.Process;
+
   constructor({ log = defaultLog, ssl = false } = {}) {
-    this._log = log.withType('@kbn/es Cluster');
-    this._ssl = ssl;
+    this.log = log.withType('@kbn/es Cluster');
+    this.ssl = ssl;
+    this.stopCalled = false;
+    this.serverlessNodes = [];
+    this.process = null;
+    this.outcome = null;
+    this.setupPromise = null;
+    this.stdioTarget = null;
   }
 
   /**
    * Builds and installs ES from source
-   *
-   * @param {Object} options
-   * @property {Array} options.installPath
-   * @property {Array} options.sourcePath
-   * @returns {Promise<{installPath}>}
+   * @param options InstallSourceOptions
+   * @returns Promise<{ installPath: string }>
    */
-  async installSource(options = {}) {
-    this._log.info(chalk.bold('Installing from source'));
-    return await this._log.indent(4, async () => {
-      const { installPath } = await installSource({ log: this._log, ...options });
+  async installSource(options: InstallSourceOptions) {
+    this.log.info(chalk.bold('Installing from source'));
+    return await this.log.indent(4, async () => {
+      const { installPath } = await installSource(options);
       return { installPath };
     });
   }
 
   /**
    * Download ES from a snapshot
-   *
-   * @param {Object} options
-   * @property {Array} options.installPath
-   * @property {Array} options.sourcePath
-   * @returns {Promise<{installPath}>}
+   * @param options DownloadSnapshotOptions
+   * @returns Promise<{ downloadPath: string }>
    */
-  async downloadSnapshot(options = {}) {
-    this._log.info(chalk.bold('Downloading snapshot'));
-    return await this._log.indent(4, async () => {
-      const { installPath } = await downloadSnapshot({
-        log: this._log,
+  async downloadSnapshot(options: DownloadSnapshotOptions) {
+    this.log.info(chalk.bold('Downloading snapshot'));
+    return await this.log.indent(4, async () => {
+      const { downloadPath } = await downloadSnapshot({
+        log: this.log,
         ...options,
       });
 
-      return { installPath };
+      return { downloadPath };
     });
   }
 
   /**
    * Download and installs ES from a snapshot
-   *
-   * @param {Object} options
-   * @property {Array} options.installPath
-   * @property {Array} options.sourcePath
-   * @returns {Promise<{installPath}>}
+   * @param options InstallSnapshotOptions
+   * @returns Promise<{ installPath: string }>
    */
-  async installSnapshot(options = {}) {
-    this._log.info(chalk.bold('Installing from snapshot'));
-    return await this._log.indent(4, async () => {
+  async installSnapshot(options: InstallSnapshotOptions) {
+    this.log.info(chalk.bold('Installing from snapshot'));
+    return await this.log.indent(4, async () => {
       const { installPath } = await installSnapshot({
-        log: this._log,
+        log: this.log,
         ...options,
       });
 
@@ -115,17 +126,15 @@ exports.Cluster = class Cluster {
 
   /**
    * Installs ES from a local tar
-   *
-   * @param {String} path
-   * @param {Object} options
-   * @property {Array} options.installPath
-   * @returns {Promise<{installPath}>}
+   * @param path ES archive path
+   * @param options InstallArchiveOptions
+   * @returns Promise<{ installPath }>
    */
-  async installArchive(path, options = {}) {
-    this._log.info(chalk.bold('Installing from an archive'));
-    return await this._log.indent(4, async () => {
+  async installArchive(path: string, options: InstallArchiveOptions) {
+    this.log.info(chalk.bold('Installing from an archive'));
+    return await this.log.indent(4, async () => {
       const { installPath } = await installArchive(path, {
-        log: this._log,
+        log: this.log,
         ...options,
       });
 
@@ -134,21 +143,19 @@ exports.Cluster = class Cluster {
   }
 
   /**
-   * Unpacks a tar or zip file containing the data directory for an
-   * ES cluster.
-   *
-   * @param {String} installPath
-   * @param {String} archivePath
-   * @param {String} [extractDirName]
+   * Unpacks a tar or zip file containing the data directory for an ES cluster.
+   * @param installPath
+   * @param archivePath
+   * @param extractDirName by default 'data'
    */
-  async extractDataDirectory(installPath, archivePath, extractDirName = 'data') {
-    this._log.info(chalk.bold(`Extracting data directory`));
-    await this._log.indent(4, async () => {
+  async extractDataDirectory(installPath: string, archivePath: string, extractDirName = 'data') {
+    this.log.info(chalk.bold(`Extracting data directory`));
+    await this.log.indent(4, async () => {
       // stripComponents=1 excludes the root directory as that is how our archives are
       // structured. This works in our favor as we can explicitly extract into the data dir
-      const extractPath = path.resolve(installPath, extractDirName);
-      this._log.info(`Data archive: ${archivePath}`);
-      this._log.info(`Extract path: ${extractPath}`);
+      const extractPath = pathResolve(installPath, extractDirName);
+      this.log.info(`Data archive: ${archivePath}`);
+      this.log.info(`Extract path: ${extractPath}`);
 
       await extract({
         archivePath,
@@ -160,29 +167,30 @@ exports.Cluster = class Cluster {
 
   /**
    * Starts ES and returns resolved promise once started
-   *
-   * @param {String} installPath
-   * @param {String} plugins - comma separated list of plugins to install
-   * @param {Object} options
-   * @returns {Promise}
+   * @param installPath
+   * @param plugins comma separated list of plugins to install
+   * @param esJavaOpts
    */
-  async installPlugins(installPath, plugins, options) {
-    const esJavaOpts = this.javaOptions(options);
+  async installPlugins(installPath: string, plugins: string, esJavaOpts: string | undefined) {
+    const _esJavaOpts = this.javaOptions(esJavaOpts);
     for (const plugin of plugins.split(',')) {
       await execa(ES_PLUGIN_BIN, ['install', plugin.trim()], {
         cwd: installPath,
         env: {
           JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-          ES_JAVA_OPTS: esJavaOpts.trim(),
+          ES_JAVA_OPTS: _esJavaOpts.trim(),
         },
       });
     }
   }
 
-  async configureKeystoreWithSecureSettingsFiles(installPath, secureSettingsFiles) {
+  async configureKeystoreWithSecureSettingsFiles(
+    installPath: string,
+    secureSettingsFiles: string[][]
+  ) {
     const env = { JAVA_HOME: '' };
     for (const [secureSettingName, secureSettingFile] of secureSettingsFiles) {
-      this._log.info(
+      this.log.info(
         `setting secure setting %s to %s`,
         chalk.bold(secureSettingName),
         chalk.bold(secureSettingFile)
@@ -196,49 +204,47 @@ exports.Cluster = class Cluster {
 
   /**
    * Starts ES and returns resolved promise once started
-   *
-   * @param {String} installPath
-   * @param {ExecOptions} options
-   * @returns {Promise<void>}
+   * @param installPath
+   * @param options EsClusterExecOptions
    */
-  async start(installPath, options = {}) {
+  async start(installPath: string, options: EsClusterExecOptions) {
     // _exec indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
-    await this._log.indent(0, async () => {
-      this._exec(installPath, options);
+    await this.log.indent(0, async () => {
+      this.exec(installPath, options);
 
       await Promise.race([
         // wait for native realm to be setup and es to be started
         Promise.all([
-          first(this._process.stdout, (data) => {
-            if (/started/.test(data)) {
+          first(this.process?.stdout!, (data: Buffer) => {
+            if (/started/.test(data.toString('utf-8'))) {
               return true;
             }
           }),
-          this._setupPromise,
+          this.setupPromise,
         ]),
 
         // await the outcome of the process in case it exits before starting
-        this._outcome.then(() => {
+        this.outcome?.then(() => {
           throw createCliError('ES exited without starting');
         }),
       ]);
     });
 
     if (options.onEarlyExit) {
-      this._outcome
-        .then(
+      this.outcome
+        ?.then(
           () => {
-            if (!this._stopCalled) {
+            if (!this.stopCalled && options.onEarlyExit) {
               options.onEarlyExit(`ES exitted unexpectedly`);
             }
           },
-          (error) => {
-            if (!this._stopCalled) {
+          (error: Error) => {
+            if (!this.stopCalled && options.onEarlyExit) {
               options.onEarlyExit(`ES exitted unexpectedly: ${error.stack}`);
             }
           }
         )
-        .catch((error) => {
+        .catch((error: Error) => {
           throw new Error(`failure handling early exit: ${error.stack}`);
         });
     }
@@ -246,85 +252,79 @@ exports.Cluster = class Cluster {
 
   /**
    * Starts Elasticsearch and waits for Elasticsearch to exit
-   *
-   * @param {String} installPath
-   * @param {ExecOptions} options
-   * @returns {Promise<void>}
+   * @param installPath
+   * @param options EsClusterExecOptions
    */
-  async run(installPath, options = {}) {
+  async run(installPath: string, options: EsClusterExecOptions) {
     // _exec indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
-    await this._log.indent(0, async () => {
-      this._exec(installPath, options);
+    await this.log.indent(0, async () => {
+      this.exec(installPath, options);
 
       // log native realm setup errors so they aren't uncaught
-      this._setupPromise.catch((error) => {
-        this._log.error(error);
+      this.setupPromise?.catch((error: Error) => {
+        this.log.error(error);
         this.stop();
       });
 
       // await the final outcome of the process
-      await this._outcome;
+      await this.outcome;
     });
   }
 
   /**
    * Stops ES process, if it's running
-   *
-   * @returns {Promise}
    */
   async stop() {
-    if (this._stopCalled) {
+    if (this.stopCalled) {
       return;
     }
-    this._stopCalled = true;
+    this.stopCalled = true;
 
-    if (this._serverlessNodes?.length) {
-      return await stopServerlessCluster(this._log, this._serverlessNodes);
+    if (this.serverlessNodes.length) {
+      return await stopServerlessCluster(this.log, this.serverlessNodes);
     }
 
-    if (!this._process || !this._outcome) {
+    if (!this.process || !this.outcome) {
       throw new Error('ES has not been started');
     }
 
-    await treeKillAsync(this._process.pid);
+    await treeKillAsync(this.process!.pid);
 
-    await this._outcome;
+    await this.outcome;
   }
 
   /**
    * Stops ES process, it it's running, without waiting for it to shutdown gracefully
    */
   async kill() {
-    if (this._stopCalled) {
+    if (this.stopCalled) {
       return;
     }
 
-    this._stopCalled;
+    this.stopCalled = true;
 
-    if (this._serverlessNodes?.length) {
-      return await stopServerlessCluster(this._log, this._serverlessNodes);
+    if (this.serverlessNodes.length) {
+      return await stopServerlessCluster(this.log, this.serverlessNodes);
     }
 
-    if (!this._process || !this._outcome) {
+    if (!this.process || !this.outcome) {
       throw new Error('ES has not been started');
     }
 
-    await treeKillAsync(this._process.pid, 'SIGKILL');
-    await this._outcome;
+    await treeKillAsync(this.process.pid, 'SIGKILL');
+    await this.outcome;
   }
 
   /**
    * Common logic from this.start() and this.run()
    *
-   * Start the elasticsearch process (stored at `this._process`)
-   * and "pipe" its stdio to `this._log`. Also create `this._outcome`
+   * Start the Elasticsearch process (stored at `this.process`)
+   * and "pipe" its stdio to `this.log`. Also create `this.outcome`
    * which will be resolved/rejected when the process exits.
-   *
-   * @private
-   * @param {String} installPath
-   * @param {ExecOptions} opts
+   * @param installPath
+   * @param opts EsClusterExecOptions
    */
-  _exec(installPath, opts = {}) {
+  private exec(installPath: string, opts: EsClusterExecOptions) {
     const {
       skipNativeRealmSetup = false,
       reportTime = () => {},
@@ -335,24 +335,21 @@ exports.Cluster = class Cluster {
       ...options
     } = opts;
 
-    if (this._process || this._outcome) {
+    if (this.process || this.outcome) {
       throw new Error('ES has already been started');
     }
 
-    /** @type {NodeJS.WritableStream | undefined} */
-    let stdioTarget;
-
     if (writeLogsToPath) {
-      stdioTarget = fs.createWriteStream(writeLogsToPath, 'utf8');
-      this._log.info(
+      this.stdioTarget = fs.createWriteStream(writeLogsToPath, 'utf8');
+      this.log.info(
         chalk.bold('Starting'),
-        `and writing logs to ${path.relative(process.cwd(), writeLogsToPath)}`
+        `and writing logs to ${pathRelative(process.cwd(), writeLogsToPath)}`
       );
     } else {
-      this._log.info(chalk.bold('Starting'));
+      this.log.info(chalk.bold('Starting'));
     }
 
-    this._log.indent(4);
+    this.log.indent(4);
 
     const esArgs = new Map([
       ['action.destructive_requires_name', 'true'],
@@ -362,13 +359,18 @@ exports.Cluster = class Cluster {
     ]);
 
     // options.esArgs overrides the default esArg values
-    for (const arg of [].concat(options.esArgs || [])) {
+    const _esArgs = options.esArgs
+      ? Array.isArray(options.esArgs)
+        ? options.esArgs
+        : [options.esArgs]
+      : [];
+    for (const arg of _esArgs) {
       const [key, ...value] = arg.split('=');
       esArgs.set(key.trim(), value.join('=').trim());
     }
 
     // Add to esArgs if ssl is enabled
-    if (this._ssl) {
+    if (this.ssl) {
       esArgs.set('xpack.security.http.ssl.enabled', 'true');
       // Include default keystore settings only if ssl isn't disabled by esArgs and keystore isn't configured.
       if (!esArgs.get('xpack.security.http.ssl.keystore.path')) {
@@ -383,25 +385,26 @@ exports.Cluster = class Cluster {
       extractConfigFiles(
         Array.from(esArgs).map((e) => e.join('=')),
         installPath,
-        { log: this._log }
+        { log: this.log }
       ),
       {
         filter: SettingsFilter.NonSecureOnly,
       }
     ).reduce(
-      (acc, [settingName, settingValue]) => acc.concat(['-E', `${settingName}=${settingValue}`]),
+      (acc: string[], [settingName, settingValue]) =>
+        acc.concat(['-E', `${settingName}=${settingValue}`]),
       []
     );
 
-    this._log.info('%s %s', ES_BIN, args.join(' '));
-    const esJavaOpts = this.javaOptions(options);
+    this.log.info('%s %s', ES_BIN, args.join(' '));
+    const esJavaOpts = this.javaOptions(options.esJavaOpts);
 
-    this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
+    this.log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
-    this._process = execa(ES_BIN, args, {
+    this.process = execa(ES_BIN, args, {
       cwd: installPath,
       env: {
-        ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
+        ...(installPath ? { ES_TMPDIR: pathResolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
         ES_JAVA_OPTS: esJavaOpts,
@@ -409,9 +412,9 @@ exports.Cluster = class Cluster {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    this._setupPromise = Promise.all([
+    this.setupPromise = Promise.all([
       // parse log output to find http port
-      first(this._process.stdout, (data) => {
+      first(this.process.stdout!, (data: Buffer) => {
         const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
 
         if (match) {
@@ -420,13 +423,13 @@ exports.Cluster = class Cluster {
       }),
 
       // load the CA cert from disk if necessary
-      this._ssl ? fsp.readFile(CA_CERT_PATH) : null,
+      this.ssl ? fsp.readFile(CA_CERT_PATH) : null,
     ]).then(async ([port, caCert]) => {
       const client = new Client({
         node: `${caCert ? 'https:' : 'http:'}//localhost:${port}`,
         auth: {
           username: 'elastic',
-          password: options.password,
+          password: options.password!,
         },
         tls: caCert
           ? {
@@ -437,13 +440,13 @@ exports.Cluster = class Cluster {
       });
 
       if (!skipReadyCheck) {
-        await this._waitForClusterReady(client, readyTimeout);
+        await this.waitForClusterReady(client, readyTimeout);
       }
 
       // once the cluster is ready setup the native realm
       if (!skipNativeRealmSetup) {
         const nativeRealm = new NativeRealm({
-          log: this._log,
+          log: this.log,
           elasticPassword: options.password,
           client,
         });
@@ -451,12 +454,12 @@ exports.Cluster = class Cluster {
         await nativeRealm.setPasswords(options);
       }
 
-      this._log.success('kbn/es setup complete');
+      this.log.success('kbn/es setup complete');
     });
 
     let reportSent = false;
     // parse and forward es stdout to the log
-    this._process.stdout.on('data', (data) => {
+    this.process.stdout!.on('data', (data) => {
       const chunk = data.toString();
       const lines = parseEsLog(chunk);
       lines.forEach((line) => {
@@ -467,40 +470,40 @@ exports.Cluster = class Cluster {
           });
         }
 
-        if (stdioTarget) {
-          stdioTarget.write(chunk);
+        if (this.stdioTarget) {
+          this.stdioTarget.write(chunk);
         } else {
-          this._log.info(line.formattedMessage);
+          this.log.info(line.formattedMessage);
         }
       });
     });
 
     // forward es stderr to the log
-    this._process.stderr.on('data', (data) => {
+    this.process.stderr!.on('data', (data) => {
       const chunk = data.toString();
-      if (stdioTarget) {
-        stdioTarget.write(chunk);
+      if (this.stdioTarget) {
+        this.stdioTarget.write(chunk);
       } else {
-        this._log.error(chalk.red(chunk.trim()));
+        this.log.error(chalk.red(chunk.trim()));
       }
     });
 
     // close the stdio target if we have one defined
-    if (stdioTarget) {
+    if (this.stdioTarget) {
       Rx.combineLatest([
-        Rx.fromEvent(this._process.stderr, 'end'),
-        Rx.fromEvent(this._process.stdout, 'end'),
+        Rx.fromEvent(this.process.stderr!, 'end'),
+        Rx.fromEvent(this.process.stdout!, 'end'),
       ])
         .pipe(Rx.first())
         .subscribe(() => {
-          stdioTarget.end();
+          this.stdioTarget?.end();
         });
     }
 
     // observe the exit code of the process and reflect in _outcome promises
-    const exitCode = new Promise((resolve) => this._process.once('exit', resolve));
-    this._outcome = exitCode.then((code) => {
-      if (this._stopCalled) {
+    const exitCode: Promise<number> = new Promise((resolve) => this.process?.once('exit', resolve));
+    this.outcome = exitCode.then((code) => {
+      if (this.stopCalled) {
         return;
       }
 
@@ -520,11 +523,11 @@ exports.Cluster = class Cluster {
     });
   }
 
-  async _waitForClusterReady(client, readyTimeout = DEFAULT_READY_TIMEOUT) {
+  async waitForClusterReady(client: Client, readyTimeout = DEFAULT_READY_TIMEOUT) {
     let attempt = 0;
     const start = Date.now();
 
-    this._log.info('waiting for ES cluster to report a yellow or green status');
+    this.log.info('waiting for ES cluster to report a yellow or green status');
 
     while (true) {
       attempt += 1;
@@ -545,10 +548,10 @@ exports.Cluster = class Cluster {
 
         if (error.message.startsWith('not ready,')) {
           if (timeSinceStart > 10_000) {
-            this._log.warning(error.message);
+            this.log.warning(error.message);
           }
         } else {
-          this._log.warning(
+          this.log.warning(
             `waiting for ES cluster to come online, attempt ${attempt} failed with: ${error.message}`
           );
         }
@@ -559,38 +562,37 @@ exports.Cluster = class Cluster {
     }
   }
 
-  javaOptions(options) {
-    let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
+  javaOptions(esJavaOpts: string | undefined) {
+    let _esJavaOpts = `${esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
 
     // ES now automatically sets heap size to 50% of the machine's available memory
     // so we need to set it to a smaller size for local dev and CI
     // especially because we currently run many instances of ES on the same machine during CI
     // inital and max must be the same, so we only need to check the max
-    if (!esJavaOpts.includes('Xmx')) {
+    if (!_esJavaOpts.includes('Xmx')) {
       // 1536m === 1.5g
-      esJavaOpts += ' -Xms1536m -Xmx1536m';
+      _esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
-    return esJavaOpts.trim();
+    return _esJavaOpts.trim();
   }
 
   /**
    * Run an Elasticsearch Serverless Docker cluster
-   *
-   * @param {ServerlessOptions} options
+   * @param options ServerlessOptions
    */
-  async runServerless(options = {}) {
-    if (this._process || this._outcome) {
+  async runServerless(options: ServerlessOptions) {
+    if (this.process || this.outcome) {
       throw new Error('ES has already been started');
     }
 
-    this._serverlessNodes = await runServerlessCluster(this._log, options);
+    this.serverlessNodes = await runServerlessCluster(this.log, options);
 
     if (options.teardown) {
       /**
        * Ideally would be async and an event like beforeExit or SIGINT,
        * but those events are not being triggered in FTR child process.
        */
-      process.on('exit', () => teardownServerlessClusterSync(this._log, options));
+      process.on('exit', () => teardownServerlessClusterSync(this.log, options));
     }
   }
 
@@ -600,10 +602,10 @@ exports.Cluster = class Cluster {
    * @param {DockerOptions} options
    */
   async runDocker(options = {}) {
-    if (this._process || this._outcome) {
+    if (this.process || this.outcome) {
       throw new Error('ES has already been started');
     }
 
-    this._process = await runDockerContainer(this._log, options);
+    this.process = await runDockerContainer(this.log, options);
   }
-};
+}

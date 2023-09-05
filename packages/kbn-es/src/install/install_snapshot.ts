@@ -16,7 +16,7 @@ import { installArchive } from './install_archive';
 import { log as defaultLog } from '../utils/log';
 import { Artifact, ArtifactLicense } from '../artifact';
 
-interface DownloadSnapshotOptions {
+export interface DownloadSnapshotOptions {
   version: string;
   license?: ArtifactLicense;
   basePath?: string;
@@ -49,7 +49,7 @@ export async function downloadSnapshot({
   };
 }
 
-interface InstallSnapshotOptions extends DownloadSnapshotOptions {
+export interface InstallSnapshotOptions extends DownloadSnapshotOptions {
   password?: string;
   esArgs?: string[];
 }

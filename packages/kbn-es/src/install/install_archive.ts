@@ -20,7 +20,7 @@ import { Artifact } from '../artifact';
 import { parseSettings, SettingsFilter } from '../settings';
 import { log as defaultLog } from '../utils/log';
 
-interface InstallArchiveOptions {
+export interface InstallArchiveOptions {
   license?: string;
   password?: string;
   basePath?: string;
