@@ -17,6 +17,7 @@ import { getFunctionName } from '../helpers/get_function_name';
 export const EVENT_GENERATING_ELEMENTS = [
   'EuiButton',
   'EuiButtonEmpty',
+  'EuiButtonIcon',
   'EuiLink',
   'EuiFieldText',
   'EuiFieldSearch',
