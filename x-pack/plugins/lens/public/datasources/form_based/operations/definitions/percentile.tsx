@@ -309,10 +309,13 @@ export const percentileOperation: OperationDefinition<
       i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
         defaultMessage: 'Percentile',
       });
+
+    const step = isInline ? 1 : 0.01;
+    const upperBound = isInline ? 99 : 99.99;
     const onChange = useCallback(
       (value) => {
         if (
-          !isValidNumber(value, true, 99, 1) ||
+          !isValidNumber(value, isInline, upperBound, step, 2) ||
           Number(value) === currentColumn.params.percentile
         ) {
           return;
@@ -334,7 +337,7 @@ export const percentileOperation: OperationDefinition<
           },
         } as PercentileIndexPatternColumn);
       },
-      [paramEditorUpdater, currentColumn, indexPattern]
+      [isInline, upperBound, step, currentColumn, paramEditorUpdater, indexPattern]
     );
     const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
       string | undefined
@@ -342,7 +345,7 @@ export const percentileOperation: OperationDefinition<
       onChange,
       value: String(currentColumn.params.percentile),
     });
-    const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
+    const inputValueIsValid = isValidNumber(inputValue, isInline, upperBound, step, 2);
 
     const handleInputChange = useCallback(
       (e) => handleInputChangeWithoutValidation(String(e.currentTarget.value)),
@@ -370,9 +373,9 @@ export const percentileOperation: OperationDefinition<
             data-test-subj="lns-indexPattern-percentile-input"
             compressed
             value={inputValue ?? ''}
-            min={1}
-            max={99}
-            step={1}
+            min={step}
+            max={upperBound}
+            step={step}
             onChange={handleInputChange}
             aria-label={percentileLabel}
           />
@@ -382,9 +385,9 @@ export const percentileOperation: OperationDefinition<
             data-test-subj="lns-indexPattern-percentile-input"
             compressed
             value={inputValue ?? ''}
-            min={1}
-            max={99}
-            step={1}
+            min={step}
+            max={upperBound}
+            step={step}
             onChange={handleInputChange}
             showInput
             aria-label={percentileLabel}
