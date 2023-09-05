@@ -22,7 +22,7 @@ import {
   SavedSearchData,
 } from '../services/discover_data_state_container';
 import { fetchDocuments } from './fetch_documents';
-import { fetchSql } from './fetch_sql';
+import { fetchTextBased } from './fetch_text_based';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseWarningsMock } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
@@ -31,12 +31,12 @@ jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('./fetch_sql', () => ({
-  fetchSql: jest.fn().mockResolvedValue([]),
+jest.mock('./fetch_text_based', () => ({
+  fetchTextBased: jest.fn().mockResolvedValue([]),
 }));
 
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
-const mockFetchSQL = fetchSql as unknown as jest.MockedFunction<typeof fetchSql>;
+const mockfetchTextBased = fetchTextBased as unknown as jest.MockedFunction<typeof fetchTextBased>;
 
 function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
   const promise = firstValueFrom(
@@ -88,7 +88,7 @@ describe('test fetchAll', () => {
     };
 
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
-    mockFetchSQL.mockReset().mockResolvedValue({ records: [] });
+    mockfetchTextBased.mockReset().mockResolvedValue({ records: [] });
   });
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
@@ -246,18 +246,18 @@ describe('test fetchAll', () => {
     ]);
   });
 
-  test('emits loading and documents on documents$ correctly for SQL query', async () => {
+  test('emits loading and documents on documents$ correctly for ES|QL query', async () => {
     const collect = subjectCollector(subjects.documents$);
     const hits = [
       { _id: '1', _index: 'logs' },
       { _id: '2', _index: 'logs' },
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockFetchSQL.mockResolvedValue({
+    mockfetchTextBased.mockResolvedValue({
       records: documents,
       textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
-    const query = { sql: 'SELECT * from foo' };
+    const query = { esql: 'from foo' };
     deps = {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },

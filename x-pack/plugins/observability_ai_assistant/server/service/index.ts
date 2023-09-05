@@ -7,19 +7,19 @@
 
 import * as Boom from '@hapi/boom';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
-import { createConcreteWriteIndex } from '@kbn/alerting-plugin/server';
+import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
-import { KnowledgeBaseEntry } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
-import { KnowledgeBaseService } from './kb_service';
+import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './kb_service';
 import type { ObservabilityAIAssistantResourceNames } from './types';
+import { splitKbText } from './util/split_kb_text';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -82,7 +82,7 @@ export class ObservabilityAIAssistantService {
           return {
             run: async () => {
               if (this.kbService) {
-                // await this.kbService.processQueue();
+                await this.kbService.processQueue();
               }
             },
           };
@@ -147,6 +147,7 @@ export class ObservabilityAIAssistantService {
           name: `${conversationAliasName}-000001`,
           template: this.resourceNames.indexTemplate.conversations,
         },
+        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
       await esClient.cluster.putComponentTemplate({
@@ -203,6 +204,7 @@ export class ObservabilityAIAssistantService {
           name: `${kbAliasName}-000001`,
           template: this.resourceNames.indexTemplate.kb,
         },
+        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
       this.kbService = new KnowledgeBaseService({
@@ -256,20 +258,52 @@ export class ObservabilityAIAssistantService {
     });
   }
 
-  async addToKnowledgeBase(
+  addToKnowledgeBase(
     entries: Array<
-      Omit<KnowledgeBaseEntry, 'is_correction' | 'public' | 'confidence' | '@timestamp'>
+      | {
+          id: string;
+          text: string;
+        }
+      | {
+          id: string;
+          texts: string[];
+        }
     >
-  ): Promise<void> {
-    await this.init();
-    this.kbService!.store(
-      entries.map((entry) => ({
-        ...entry,
-        '@timestamp': new Date().toISOString(),
-        public: true,
-        confidence: 'high',
-        is_correction: false,
-      }))
-    );
+  ): void {
+    this.init()
+      .then(() => {
+        this.kbService!.queue(
+          entries.flatMap((entry) => {
+            const entryWithSystemProperties = {
+              ...entry,
+              '@timestamp': new Date().toISOString(),
+              public: true,
+              confidence: 'high' as const,
+              is_correction: false,
+              labels: {
+                document_id: entry.id,
+              },
+            };
+
+            const operations =
+              'texts' in entryWithSystemProperties
+                ? splitKbText(entryWithSystemProperties)
+                : [
+                    {
+                      type: KnowledgeBaseEntryOperationType.Index,
+                      document: entryWithSystemProperties,
+                    },
+                  ];
+
+            return operations;
+          })
+        );
+      })
+      .catch((error) => {
+        this.logger.error(
+          `Could not index ${entries.length} entries because of an initialisation error`
+        );
+        this.logger.error(error);
+      });
   }
 }

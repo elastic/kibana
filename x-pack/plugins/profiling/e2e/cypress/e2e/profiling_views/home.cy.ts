@@ -19,6 +19,21 @@ describe('Home page', () => {
     cy.loginAsElastic();
   });
 
+  it('opens Profiling UI when user does not have privileges', () => {
+    cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+      body: {
+        has_setup: true,
+        pre_8_9_1_data: false,
+        has_data: true,
+        unauthorized: true,
+      },
+    }).as('getEsResources');
+    cy.visitKibana('/app/profiling', { rangeFrom, rangeTo });
+    cy.wait('@getEsResources');
+    cy.contains('Top 46');
+    cy.contains('User privilege limitation');
+  });
+
   it('navigates through the tabs', () => {
     cy.visitKibana('/app/profiling', { rangeFrom, rangeTo });
     cy.url().should('include', '/app/profiling/stacktraces/threads');

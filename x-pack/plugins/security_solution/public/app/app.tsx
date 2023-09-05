@@ -99,6 +99,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                   actionTypeRegistry={actionTypeRegistry}
                   augmentMessageCodeBlocks={augmentMessageCodeBlocks}
                   assistantAvailability={assistantAvailability}
+                  assistantLangChain={false}
                   assistantTelemetry={assistantTelemetry}
                   defaultAllow={defaultAllow}
                   defaultAllowReplacement={defaultAllowReplacement}

@@ -82,6 +82,7 @@ import {
   TIMELINE_QUERY,
   PROVIDER_BADGE,
   PROVIDER_BADGE_DELETE,
+  DISCOVER_TAB,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 import { drag, drop } from './common';
@@ -133,6 +134,11 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(NOTES_TEXT_AREA).should('exist');
 
   return cy.get(NOTES_TAB_BUTTON);
+};
+
+export const gotToDiscoverTab = () => {
+  cy.get(DISCOVER_TAB).click();
+  cy.get(DISCOVER_TAB).should('have.class', 'euiTab-isSelected');
 };
 
 export const goToCorrelationTab = () => {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import useAsync from 'react-use/lib/useAsync';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { useState } from 'react';
@@ -37,14 +36,18 @@ import { useConfirmOpenUnverified } from '../../applications/integrations/hooks/
 import type { RequestError } from './use_request';
 import { useRequest, sendRequest, sendRequestForRq } from './use_request';
 
-export function useGetAppendCustomIntegrations() {
-  const customIntegrations = getCustomIntegrations();
-  return useAsync(customIntegrations.getAppendCustomIntegrations, []);
+export function useGetAppendCustomIntegrationsQuery() {
+  return useQuery(['get-append-custom-integrations'], () => {
+    const customIntegrations = getCustomIntegrations();
+    return customIntegrations.getAppendCustomIntegrations();
+  });
 }
 
-export function useGetReplacementCustomIntegrations() {
-  const customIntegrations = getCustomIntegrations();
-  return useAsync(customIntegrations.getReplacementCustomIntegrations, []);
+export function useGetReplacementCustomIntegrationsQuery() {
+  return useQuery(['get-replacemenet-custom-integrations'], () => {
+    const customIntegrations = getCustomIntegrations();
+    return customIntegrations.getReplacementCustomIntegrations();
+  });
 }
 
 export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {}) {

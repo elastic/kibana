@@ -60,6 +60,7 @@ class DocumentationService {
   private runtimeFields: string = '';
   private indicesComponentTemplate: string = '';
   private bulkIndexAlias: string = '';
+  private indexStats: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -113,6 +114,7 @@ class DocumentationService {
     this.runtimeFields = links.runtimeFields.overview;
     this.indicesComponentTemplate = links.apis.putComponentTemplate;
     this.bulkIndexAlias = links.apis.bulkIndexAlias;
+    this.indexStats = links.apis.indexStats;
   }
 
   public getEsDocsBase() {
@@ -315,6 +317,10 @@ class DocumentationService {
 
   public getBulkIndexAlias() {
     return this.bulkIndexAlias;
+  }
+
+  public getIndexStats() {
+    return this.indexStats;
   }
 
   public getWellKnownTextLink() {

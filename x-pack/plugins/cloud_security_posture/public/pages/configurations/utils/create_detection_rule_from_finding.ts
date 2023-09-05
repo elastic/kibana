@@ -50,9 +50,23 @@ const CSP_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
 
 const STATIC_RULE_TAGS = [CSP_RULE_TAG, CSP_RULE_TAG_USE_CASE];
 
+/*
+ * Returns an array of CspFinding tags that can be used to search and filter a detection rule
+ */
+export const getFindingsDetectionRuleSearchTags = ({ rule }: CspFinding) => {
+  // ex: cis_gcp to ['CIS', 'GCP']
+  const benchmarkIdTags = rule.benchmark.id.split('_').map((tag) => tag.toUpperCase());
+  // ex: 'CIS GCP 1.1'
+  const benchmarkRuleNumberTag = `${rule.benchmark.id.replace('_', ' ').toUpperCase()} ${
+    rule.benchmark.rule_number
+  }`;
+
+  return benchmarkIdTags.concat([benchmarkRuleNumberTag]);
+};
+
 const generateFindingsTags = (finding: CspFinding) => {
   return [STATIC_RULE_TAGS]
-    .concat(finding.rule.tags)
+    .concat(getFindingsDetectionRuleSearchTags(finding))
     .concat(
       finding.rule.benchmark.posture_type
         ? [

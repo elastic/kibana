@@ -17,6 +17,7 @@ import {
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
+import { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asPercent } from '../../../../../common/utils/formatters';
 import {
@@ -59,7 +60,7 @@ export interface ErrorRateRuleParams {
   environment?: string;
   groupBy?: string[] | undefined;
   useKqlFilter?: boolean;
-  kqlFilter?: string;
+  searchConfiguration?: SearchConfigurationType;
 }
 
 export interface Props {
@@ -107,7 +108,7 @@ export function TransactionErrorRateRuleType(props: Props) {
                 start,
                 end,
                 groupBy: params.groupBy,
-                kqlFilter: params.kqlFilter,
+                searchConfiguration: JSON.stringify(params.searchConfiguration),
               },
             },
           }
@@ -122,7 +123,7 @@ export function TransactionErrorRateRuleType(props: Props) {
       params.windowSize,
       params.windowUnit,
       params.groupBy,
-      params.kqlFilter,
+      params.searchConfiguration,
     ]
   );
 
@@ -256,7 +257,9 @@ export function TransactionErrorRateRuleType(props: Props) {
     setRuleParams('transactionType', undefined);
     setRuleParams('transactionName', undefined);
     setRuleParams('environment', ENVIRONMENT_ALL.value);
-    setRuleParams('kqlFilter', undefined);
+    setRuleParams('searchConfiguration', {
+      query: { query: '', language: 'kuery' },
+    });
     setRuleParams('useKqlFilter', e.target.checked);
   };
 
