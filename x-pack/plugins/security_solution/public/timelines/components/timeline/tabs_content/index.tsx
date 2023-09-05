@@ -43,6 +43,7 @@ import {
 import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
+import { initializeTimelineSettings } from '../../../store/timeline/actions';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -377,8 +378,13 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [activeTab, conversationId, reportAssistantInvoked, setActiveTab]);
 
   const setDiscoverAsActiveTab = useCallback(() => {
+    dispatch(
+      initializeTimelineSettings({
+        id: timelineId,
+      })
+    );
     setActiveTab(TimelineTabs.discover);
-  }, [setActiveTab]);
+  }, [setActiveTab, dispatch, timelineId]);
 
   useEffect(() => {
     if (!graphEventId && activeTab === TimelineTabs.graph) {

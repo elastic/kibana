@@ -51,12 +51,11 @@ post:
             rotateEncryptionKeyResponse:
               $ref: '../components/examples/key_rotation_response.yaml'
     '400':
-      description: Bad request.
-      content:
-        application/json:
-          schema:
-            type: object
-            additionalProperties: true
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/400_response.yaml'
     '429':
       description: Already in progress.
       content:

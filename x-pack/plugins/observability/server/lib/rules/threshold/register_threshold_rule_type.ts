@@ -136,6 +136,13 @@ export function thresholdRuleType(
           ),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
+          searchConfiguration: schema.object({
+            index: schema.string(),
+            query: schema.object({
+              language: schema.string(),
+              query: schema.string(),
+            }),
+          }),
         },
         { unknowns: 'allow' }
       ),

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { TestProviders } from '../../../common/mock';
 import {
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID,
@@ -25,6 +26,7 @@ jest.mock('../hooks/use_paginated_alerts');
 
 const originalEventId = 'originalEventId';
 const scopeId = 'scopeId';
+const eventId = 'eventId';
 
 const TOGGLE_ICON = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID
@@ -72,11 +74,20 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
+      <TestProviders>
+        <RelatedAlertsBySameSourceEvent
+          originalEventId={originalEventId}
+          scopeId={scopeId}
+          eventId={eventId}
+        />
+      </TestProviders>
     );
     expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toBeInTheDocument();
+    expect(
+      getByTestId(`${CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}InvestigateInTimeline`)
+    ).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
   });
 
@@ -87,7 +98,13 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
     });
 
     const { container } = render(
-      <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
+      <TestProviders>
+        <RelatedAlertsBySameSourceEvent
+          originalEventId={originalEventId}
+          scopeId={scopeId}
+          eventId={eventId}
+        />
+      </TestProviders>
     );
     expect(container).toBeEmptyDOMElement();
   });

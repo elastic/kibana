@@ -82,6 +82,43 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.AssistantAvatar",
+        "type": "Function",
+        "tags": [],
+        "label": "AssistantAvatar",
+        "description": [
+          "\nDefault Elastic AI Assistant logo\n\nTODO: Can be removed once added to EUI"
+        ],
+        "signature": [
+          "({ size }: ",
+          "AssistantAvatarProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/assistant_avatar/assistant_avatar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantAvatar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ size = 's' }",
+            "description": [],
+            "signature": [
+              "AssistantAvatarProps"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/assistant_avatar/assistant_avatar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.AssistantOverlay",
         "type": "Function",
         "tags": [],
@@ -122,7 +159,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, baseAllow, baseAllowReplacement, defaultAllow, defaultAllowReplacement, docLinks, basePromptContexts, baseQuickPrompts, baseSystemPrompts, children, getComments, http, getInitialConversations, nameSpace, setConversations, setDefaultAllow, setDefaultAllowReplacement, title, }: React.PropsWithChildren<",
+          "({ actionTypeRegistry, assistantAvailability, assistantLangChain, assistantTelemetry, augmentMessageCodeBlocks, baseAllow, baseAllowReplacement, defaultAllow, defaultAllowReplacement, docLinks, basePromptContexts, baseQuickPrompts, baseSystemPrompts, children, getComments, http, getInitialConversations, nameSpace, setConversations, setDefaultAllow, setDefaultAllowReplacement, title, }: React.PropsWithChildren<",
           "AssistantProviderProps",
           ">) => JSX.Element"
         ],
@@ -135,7 +172,7 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  baseAllow,\n  baseAllowReplacement,\n  defaultAllow,\n  defaultAllowReplacement,\n  docLinks,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  baseSystemPrompts = BASE_SYSTEM_PROMPTS,\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  setConversations,\n  setDefaultAllow,\n  setDefaultAllowReplacement,\n  title = DEFAULT_ASSISTANT_TITLE,\n}",
+            "label": "{\n  actionTypeRegistry,\n  assistantAvailability,\n  assistantLangChain,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  baseAllow,\n  baseAllowReplacement,\n  defaultAllow,\n  defaultAllowReplacement,\n  docLinks,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  baseSystemPrompts = BASE_SYSTEM_PROMPTS,\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  setConversations,\n  setDefaultAllow,\n  setDefaultAllowReplacement,\n  title = DEFAULT_ASSISTANT_TITLE,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",

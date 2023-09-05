@@ -42,7 +42,7 @@ export async function getTransactionErrorCountChartPreview({
     start,
     end,
     groupBy: groupByFields,
-    kqlFilter,
+    searchConfiguration,
   } = alertParams;
 
   const allGroupByFields = getAllGroupByFields(
@@ -50,7 +50,7 @@ export async function getTransactionErrorCountChartPreview({
     groupByFields
   );
 
-  const termFilterQuery = !kqlFilter
+  const termFilterQuery = !searchConfiguration
     ? [
         ...termQuery(SERVICE_NAME, serviceName, {
           queryEmptyString: false,
@@ -66,7 +66,7 @@ export async function getTransactionErrorCountChartPreview({
     bool: {
       filter: [
         ...termFilterQuery,
-        ...getParsedFilterQuery(kqlFilter),
+        ...getParsedFilterQuery(searchConfiguration?.query?.query as string),
         ...rangeQuery(start, end),
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
       ],

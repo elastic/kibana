@@ -32,3 +32,6 @@ telemetry.labels.serverless: search
 
 # Alerts config
 xpack.actions.enabledActionTypes: ['.email', '.index', '.slack', '.jira', '.webhook', '.teams']
+
+# Customize empty page state for analytics apps
+no_data_page.analyticsNoDataPageFlavor: 'serverless_search'

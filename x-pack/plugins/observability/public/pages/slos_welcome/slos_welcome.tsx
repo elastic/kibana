@@ -34,7 +34,7 @@ export function SlosWelcomePage() {
     http: { basePath },
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
-  const { isError: hasErrorInGlobalDiagnosis } = useFetchSloGlobalDiagnosis();
+  const { data: globalDiagnosis } = useFetchSloGlobalDiagnosis();
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { hasAtLeast } = useLicense();
@@ -43,12 +43,15 @@ export function SlosWelcomePage() {
   const { isLoading, sloList } = useFetchSloList();
   const { total } = sloList || { total: 0 };
 
+  const hasRequiredWritePrivileges = !!globalDiagnosis?.userPrivileges.write.has_all_requested;
+  const hasRequiredReadPrivileges = !!globalDiagnosis?.userPrivileges.read.has_all_requested;
+
   const handleClickCreateSlo = () => {
     navigateToUrl(basePath.prepend(paths.observability.sloCreate));
   };
 
   const hasSlosAndHasPermissions =
-    total > 0 && hasAtLeast('platinum') === true && !hasErrorInGlobalDiagnosis;
+    total > 0 && hasAtLeast('platinum') === true && hasRequiredReadPrivileges;
 
   useEffect(() => {
     if (hasSlosAndHasPermissions) {
@@ -115,7 +118,7 @@ export function SlosWelcomePage() {
                       fill
                       color="primary"
                       onClick={handleClickCreateSlo}
-                      disabled={!hasWriteCapabilities || hasErrorInGlobalDiagnosis}
+                      disabled={!hasWriteCapabilities || !hasRequiredWritePrivileges}
                     >
                       {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.buttonLabel', {
                         defaultMessage: 'Create SLO',

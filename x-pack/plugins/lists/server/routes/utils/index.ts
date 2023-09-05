@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './remove_templates_if_exist';
 export * from './get_error_message_exception_list_item';
 export * from './get_error_message_exception_list';
 export * from './get_list_client';

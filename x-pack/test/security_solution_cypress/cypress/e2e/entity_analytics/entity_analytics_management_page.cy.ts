@@ -50,7 +50,7 @@ describe(
   () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'all_users');
+      cy.task('esArchiverLoad', { archiveName: 'all_users' });
     });
 
     beforeEach(() => {

@@ -407,7 +407,16 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       });
       setupFleetAndAgents(providerContext);
+      const createdPolicyIds: string[] = [];
       after(async () => {
+        const deletedPromises = createdPolicyIds.map((agentPolicyId) =>
+          supertest
+            .post(`/api/fleet/agent_policies/delete`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ agentPolicyId })
+            .expect(200)
+        );
+        await Promise.all(deletedPromises);
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
         if (systemPkgVersion) {
           await supertest.delete(`/api/fleet/epm/packages/system-${systemPkgVersion}`);
@@ -480,6 +489,88 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(newPolicy.inactivity_timeout).to.eql(123);
+      });
+
+      it('should copy tamper protection', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Tamper Protection test',
+            description: '',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        // add endpoint package policy, which is required for tamper protection
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'endpoint-1',
+            description: '',
+            namespace: 'default',
+            policy_id: originalPolicy.id,
+            enabled: true,
+            inputs: [
+              {
+                enabled: true,
+                streams: [],
+                type: 'ENDPOINT_INTEGRATION_CONFIG',
+                config: {
+                  _config: {
+                    value: {
+                      type: 'endpoint',
+                      endpointConfig: {
+                        preset: 'EDRComplete',
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '8.10.2',
+            },
+          })
+          .expect(200);
+
+        packagePoliciesToDeleteIds.push('endpoint-1');
+
+        // switch is protected to true
+        const {
+          body: { item: policyWithTamperProtection },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${originalPolicy.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Tamper Protection test',
+            is_managed: false,
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+            is_protected: true,
+          })
+          .expect(200);
+
+        createdPolicyIds.push(policyWithTamperProtection.id);
+
+        // test copy
+        const {
+          body: { item: newPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${policyWithTamperProtection.id}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Tamper Protection test copy',
+            description: 'Test',
+          })
+          .expect(200);
+
+        expect(newPolicy.is_protected).to.eql(true);
       });
 
       it('should increment package policy copy names', async () => {
