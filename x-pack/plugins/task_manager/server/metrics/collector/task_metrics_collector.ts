@@ -8,7 +8,6 @@
 import { Logger } from '@kbn/core/server';
 import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Subject } from 'rxjs';
-import { Result, asOk, asErr } from '../../lib/result_type';
 import { TaskStore } from '../../task_store';
 import {
   IdleTaskWithExpiredRunAt,
