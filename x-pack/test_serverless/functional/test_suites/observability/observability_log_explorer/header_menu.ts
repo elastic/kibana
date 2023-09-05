@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
         discoverLink.click();
 
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
 
         await retry.try(async () => {
           expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
