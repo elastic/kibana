@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import illustration from '../../assets/illustration.svg';
+import illustration from '../../assets/illustration.png';
 
 export function ExperimentalFeatureBanner() {
   return (
@@ -24,13 +24,7 @@ export function ExperimentalFeatureBanner() {
       <EuiPanel color="warning" paddingSize="s" hasBorder={false}>
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiImage
-              src={illustration}
-              alt="Decorative image"
-              size="xxs"
-              width={100}
-              height={30}
-            />
+            <EuiImage src={illustration} alt="Decorative image" height={30} />
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap>
@@ -42,7 +36,12 @@ export function ExperimentalFeatureBanner() {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton color="warning" href="https://ela.st/obs-ai-assistant" target="_blank">
+            <EuiButton
+              data-test-subj="observabilityAiAssistantExperimentalFeatureBannerGiveFeedbackButton"
+              color="warning"
+              href="https://ela.st/obs-ai-assistant"
+              target="_blank"
+            >
               {i18n.translate(
                 'xpack.observabilityAiAssistant.experimentalFunctionBanner.feedbackButton',
                 { defaultMessage: 'Give feedback' }

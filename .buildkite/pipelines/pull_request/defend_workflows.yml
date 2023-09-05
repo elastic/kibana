@@ -10,8 +10,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - "target/kibana-security-solution/**/*"
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_vagrant.sh
     label: 'Defend Workflows Endpoint Cypress Tests'
@@ -24,5 +22,3 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - "target/kibana-security-solution/**/*"

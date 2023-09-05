@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -18,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
 import { FunctionListPopover } from './function_list_popover';
@@ -51,6 +51,7 @@ export function ChatPromptEditor({
   const [functionPayload, setFunctionPayload] = useState<string | undefined>(
     initialFunctionPayload
   );
+  const [functionEditorLineCount, setFunctionEditorLineCount] = useState<number>(0);
 
   const { model, initialJsonString } = useJsonEditorModel({
     functionName: selectedFunctionName,
@@ -59,9 +60,12 @@ export function ChatPromptEditor({
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    setFunctionPayload(initialJsonString);
-  }, [initialJsonString, selectedFunctionName]);
+  const recalculateFunctionEditorLineCount = useCallback(() => {
+    const newLineCount = model?.getLineCount() || 0;
+    if (newLineCount !== functionEditorLineCount) {
+      setFunctionEditorLineCount(newLineCount);
+    }
+  }, [functionEditorLineCount, model]);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.currentTarget.value);
@@ -69,6 +73,7 @@ export function ChatPromptEditor({
 
   const handleChangeFunctionPayload = (params: string) => {
     setFunctionPayload(params);
+    recalculateFunctionEditorLineCount();
   };
 
   const handleClearSelection = () => {
@@ -91,7 +96,7 @@ export function ChatPromptEditor({
   };
 
   const handleSubmit = useCallback(async () => {
-    if (loading) {
+    if (loading || !prompt?.trim()) {
       return;
     }
     const currentPrompt = prompt;
@@ -128,6 +133,14 @@ export function ChatPromptEditor({
       setPrompt(currentPrompt);
     }
   }, [functionPayload, loading, onSubmit, prompt, selectedFunctionName]);
+
+  useEffect(() => {
+    setFunctionPayload(initialJsonString);
+  }, [initialJsonString, selectedFunctionName]);
+
+  useEffect(() => {
+    recalculateFunctionEditorLineCount();
+  }, [model, recalculateFunctionEditorLineCount]);
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
@@ -174,6 +187,7 @@ export function ChatPromptEditor({
                 <EuiFlexItem grow={false}>
                   {selectedFunctionName ? (
                     <EuiButtonEmpty
+                      data-test-subj="observabilityAiAssistantChatPromptEditorEmptySelectionButton"
                       iconType="cross"
                       iconSide="right"
                       size="xs"
@@ -193,8 +207,9 @@ export function ChatPromptEditor({
                 <EuiPanel borderRadius="none" color="subdued" hasShadow={false} paddingSize="xs">
                   <CodeEditor
                     aria-label="payloadEditor"
+                    data-test-subj="observabilityAiAssistantChatPromptEditorCodeEditor"
                     fullWidth
-                    height="120px"
+                    height={functionEditorLineCount > 8 ? '200px' : '120px'}
                     languageId="json"
                     isCopyable
                     languageConfiguration={{
@@ -238,6 +253,8 @@ export function ChatPromptEditor({
                 </EuiPanel>
               ) : (
                 <EuiTextArea
+                  data-test-subj="observabilityAiAssistantChatPromptEditorTextArea"
+                  css={{ maxHeight: 200 }}
                   disabled={disabled}
                   fullWidth
                   inputRef={textAreaRef}
@@ -256,8 +273,9 @@ export function ChatPromptEditor({
         <EuiFlexItem grow={false}>
           <EuiSpacer size="xl" />
           <EuiButtonIcon
+            data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
             aria-label="Submit"
-            disabled={selectedFunctionName ? false : !prompt || loading || disabled}
+            disabled={selectedFunctionName ? false : !prompt?.trim() || loading || disabled}
             display={
               selectedFunctionName ? (functionPayload ? 'fill' : 'base') : prompt ? 'fill' : 'base'
             }
