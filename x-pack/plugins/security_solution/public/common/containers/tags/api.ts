@@ -11,7 +11,7 @@ import type {
   TagAttributes,
   Tag as TagResponse,
 } from '@kbn/saved-objects-tagging-plugin/common';
-import { INTERNAL_TAGS_URL, MANAGED_TAG_NAME } from '../../../../common/constants';
+import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 
 export interface Tag {
   id: string;

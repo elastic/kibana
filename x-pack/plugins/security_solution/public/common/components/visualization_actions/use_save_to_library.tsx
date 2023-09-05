@@ -11,7 +11,6 @@ import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { unmountComponentAtNode } from 'react-dom';
 import type { SaveProps } from '@kbn/lens-plugin/public/plugin';
 import { useKibana, useToasts } from '../../lib/kibana';
-import { ADDED_TO_LIBRARY } from './translations';
 import type { LensAttributes } from './types';
 import { useRedirectToDashboardFromLens } from './use_redirect_to_dashboard_from_lens';
 import { APP_UI_ID } from '../../../../common';
