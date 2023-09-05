@@ -12,11 +12,13 @@ import {
   builtInComparators,
   builtInAggregationTypes,
   builtInGroupByTypes,
+  COMPARATORS,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EsQueryRuleParams, SearchType } from './types';
-import { isSearchSourceRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
   COMMON_EXPRESSION_ERRORS,
+  ONLY_ESQL_QUERY_EXPRESSION_ERRORS,
   ONLY_ES_QUERY_EXPRESSION_ERRORS,
   SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS,
 } from './constants';
@@ -221,6 +223,46 @@ const validateEsQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esQuery>
   return errors;
 };
 
+const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQuery>) => {
+  const errors: typeof ONLY_ESQL_QUERY_EXPRESSION_ERRORS = defaultsDeep(
+    {},
+    ONLY_ESQL_QUERY_EXPRESSION_ERRORS
+  );
+  if (!ruleParams.esqlQuery) {
+    errors.esqlQuery.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredQueryText', {
+        defaultMessage: 'ESQL query is required.',
+      })
+    );
+  }
+  if (!ruleParams.timeField) {
+    errors.timeField.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredTimeFieldText', {
+        defaultMessage: 'Time field is required.',
+      })
+    );
+  }
+  if (ruleParams.thresholdComparator !== COMPARATORS.GREATER_THAN) {
+    errors.thresholdComparator.push(
+      i18n.translate(
+        'xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThresholdComparatorText',
+        {
+          defaultMessage: 'Threshold comparator is required to be greater than.',
+        }
+      )
+    );
+  }
+  if (ruleParams.threshold && ruleParams.threshold[0] !== 0) {
+    errors.threshold0.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThreshold0Text', {
+        defaultMessage: 'Threshold is required to be 0.',
+      })
+    );
+  }
+
+  return errors;
+};
+
 export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
   const validationResult = { errors: {} };
 
@@ -234,11 +276,18 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
    * It's important to report searchSource rule related errors only into errors.searchConfiguration prop.
    * For example errors.index is a mistake to report searchSource rule related errors. It will lead to issues.
    */
-  const isSearchSource = isSearchSourceRule(ruleParams);
-  if (isSearchSource) {
+  if (isSearchSourceRule(ruleParams)) {
     validationResult.errors = {
       ...validationResult.errors,
       ...validateSearchSourceParams(ruleParams),
+    };
+    return validationResult;
+  }
+
+  if (isEsqlQueryRule(ruleParams)) {
+    validationResult.errors = {
+      ...validationResult.errors,
+      ...validateEsqlQueryParams(ruleParams),
     };
     return validationResult;
   }

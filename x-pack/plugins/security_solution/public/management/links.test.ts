@@ -93,7 +93,8 @@ describe('links', () => {
         SecurityPageName.hostIsolationExceptions,
         SecurityPageName.policies,
         SecurityPageName.responseActionsHistory,
-        SecurityPageName.trustedApps
+        SecurityPageName.trustedApps,
+        SecurityPageName.cloudDefendPolicies
       )
     );
   });
@@ -234,7 +235,9 @@ describe('links', () => {
 
       const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
-      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.policies));
+      expect(filteredLinks).toEqual(
+        getLinksWithout(SecurityPageName.policies, SecurityPageName.cloudDefendPolicies)
+      );
     });
   });
 
