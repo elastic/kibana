@@ -16,18 +16,15 @@ export const useStyles = () => {
     const descriptionList: CSSObject = {
       padding: `${euiTheme.size.base} ${euiTheme.size.s} `,
       alignItems: 'flex-start',
+      rowGap: 0,
     };
 
     const tabListTitle = {
-      width: '40%',
       display: 'flex',
-      marginTop: '0px',
     };
 
     const tabListDescription = {
-      width: '60%',
       display: 'flex',
-      marginTop: '0px',
     };
 
     return {
