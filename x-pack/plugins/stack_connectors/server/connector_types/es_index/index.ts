@@ -153,17 +153,6 @@ async function executor(
       return wrapErr(errMessage, actionId, logger);
     }
 
-    const err = find(result.items, 'index.error.reason');
-    if (err) {
-      return wrapErr(
-        `${err.index?.error?.reason}${
-          err.index?.error?.caused_by ? ` (${err.index?.error?.caused_by?.reason})` : ''
-        }`,
-        actionId,
-        logger
-      );
-    }
-
     return { status: 'ok', data: result, actionId };
   } catch (err) {
     return wrapErr(err.message, actionId, logger);
