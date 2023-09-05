@@ -103,7 +103,8 @@ export class UiSettingsService
   public async start(): Promise<InternalUiSettingsServiceStart> {
     if (this.allowlist) {
       this.validateAllowlist();
-      this.applyAllowlist();
+      this.applyAllowlist(this.uiSettingsDefaults, false);
+      this.applyAllowlist(this.uiSettingsGlobalDefaults, true);
     }
     this.validatesDefinitions();
     this.validatesOverrides();
@@ -164,6 +165,16 @@ export class UiSettingsService
     this.allowlist = new Set(keys);
   };
 
+  private validateAllowlist() {
+    this.allowlist?.forEach((key) => {
+      if (!this.uiSettingsDefaults.has(key) && !this.uiSettingsGlobalDefaults.has(key)) {
+        throw new Error(
+          `The uiSetting with key [${key}] is in the allowlist but is not registered. Make sure to remove it from the allowlist in /packages/serverless/settings`
+        );
+      }
+    });
+  }
+
   private setReadonlyMode(key: string, mode: ReadonlyModeType, isGlobal: boolean) {
     if (isGlobal) {
       const definition = this.uiSettingsGlobalDefaults.get(key);
@@ -178,27 +189,17 @@ export class UiSettingsService
     }
   }
 
-  private validateAllowlist() {
-    this.allowlist?.forEach((key) => {
-      if (!this.uiSettingsDefaults.has(key) && !this.uiSettingsGlobalDefaults.has(key)) {
-        throw new Error(
-          `The uiSetting with key [${key}] is in the allowlist but is not registered. Make sure to remove it from the allowlist in /packages/serverless/settings`
-        );
+  private applyAllowlist(settingsDefaults: Map<string, UiSettingsParams>, isGlobal: boolean) {
+    for (const [key, definition] of settingsDefaults) {
+      // Settings in the allowlist that are already read-only should have 'ui' readonly mode
+      if (this.allowlist?.has(key) && definition.readonly === true) {
+        this.setReadonlyMode(key, 'ui', isGlobal);
       }
-    });
-  }
 
-  private applyAllowlist() {
-    for (const [key, definition] of this.uiSettingsDefaults) {
+      // Setting that are not in the allowlist should have 'strict' readonly mode
       if (!this.allowlist?.has(key)) {
         definition.readonly = true;
-        this.setReadonlyMode(key, 'strict', false);
-      }
-    }
-    for (const [key, definition] of this.uiSettingsGlobalDefaults) {
-      if (!this.allowlist?.has(key)) {
-        definition.readonly = true;
-        this.setReadonlyMode(key, 'strict', true);
+        this.setReadonlyMode(key, 'strict', isGlobal);
       }
     }
   }

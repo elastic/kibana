@@ -116,9 +116,9 @@ describe('uiSettings', () => {
     describe('#setAllowlist', () => {
       it('throws if setAllowlist is called twice', async () => {
         const { setAllowlist } = await service.setup(setupDeps);
-        setAllowlist(['mySettings']);
+        setAllowlist(['mySetting']);
 
-        expect(() => setAllowlist(['newSettings'])).toThrowErrorMatchingInlineSnapshot(
+        expect(() => setAllowlist(['newSetting'])).toThrowErrorMatchingInlineSnapshot(
           `"The uiSettings allowlist has already been set up. Instead of calling setAllowlist(), add your settings to packages/serverless/settings"`
         );
       });
@@ -225,12 +225,12 @@ describe('uiSettings', () => {
         await customizedService.start();
       });
 
-      it('throws when the allowlist contains unregistered setting', async () => {
+      it('throws when the allowlist contains unregistered settings', async () => {
         const { setAllowlist } = await service.setup(setupDeps);
-        setAllowlist(['mySettings']);
+        setAllowlist(['mySetting']);
 
         await expect(service.start()).rejects.toMatchInlineSnapshot(
-          `[Error: The uiSetting with key [mySettings] is in the allowlist but is not registered. Make sure to remove it from the allowlist in /packages/serverless/settings]`
+          `[Error: The uiSetting with key [mySetting] is in the allowlist but is not registered. Make sure to remove it from the allowlist in /packages/serverless/settings]`
         );
       });
     });
