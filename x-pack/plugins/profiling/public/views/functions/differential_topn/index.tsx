@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useRef } from 'react';
 import { GridOnScrollProps } from 'react-window';
-import { TopNFunctionSortField } from '../../../../common/functions';
+import { TopNFunctionSortField } from '@kbn/profiling-utils';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import {

@@ -5,9 +5,8 @@
  * 2.0.
  */
 import { HttpFetchQuery } from '@kbn/core/public';
-import type { ElasticFlameGraph } from '@kbn/profiling-utils';
+import type { ElasticFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
 import { getRoutePaths } from '../common';
-import { TopNFunctions } from '../common/functions';
 import type {
   IndexLifecyclePhaseSelectOption,
   IndicesStorageDetailsAPIResponse,

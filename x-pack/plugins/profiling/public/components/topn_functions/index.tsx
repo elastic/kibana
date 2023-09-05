@@ -20,7 +20,7 @@ import { last } from 'lodash';
 import React, { forwardRef, Ref, useMemo, useState } from 'react';
 import { GridOnScrollProps } from 'react-window';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions';
+import { TopNFunctions, TopNFunctionSortField } from '@kbn/profiling-utils';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
