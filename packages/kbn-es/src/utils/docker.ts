@@ -642,8 +642,13 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
             auth: { bearer: kibanaDevServiceAccount.token },
             tls: {
               ca: [fs.readFileSync(CA_CERT_PATH)],
-              // Required for self signed cert
-              rejectUnauthorized: false,
+              // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
+              // for the ip which is not validated. As such we are getting the error
+              // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
+              // To work around that we are overriding the function checkServerIdentity too
+              checkServerIdentity: () => {
+                return undefined;
+              },
             },
           }
         : {}),
