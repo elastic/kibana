@@ -1943,6 +1943,38 @@
         },
         {
           "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.setDashboardsLandingCallout",
+          "type": "Function",
+          "tags": [],
+          "label": "setDashboardsLandingCallout",
+          "description": [],
+          "signature": [
+            "(dashboardsLandingCallout: React.ComponentType<{}>) => void"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginStart.setDashboardsLandingCallout.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "dashboardsLandingCallout",
+              "description": [],
+              "signature": [
+                "React.ComponentType<{}>"
+              ],
+              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
           "id": "def-public.PluginStart.getBreadcrumbsNav$",
           "type": "Function",
           "tags": [],
