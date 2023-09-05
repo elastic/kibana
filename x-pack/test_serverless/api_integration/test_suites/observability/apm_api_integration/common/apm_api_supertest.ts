@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { format } from 'url';
 import supertest from 'supertest';
 import request from 'superagent';
@@ -12,7 +11,7 @@ import type {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { Config, kbnTestConfig } from '@kbn/test';
+import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
 import { InheritedFtrProviderContext } from '../../../../services';
@@ -93,19 +92,16 @@ Body: ${JSON.stringify(res.body)}`
   }
 }
 
-async function getApmApiClient({
-  svlSharedConfig,
-  username,
-}: {
-  svlSharedConfig: Config;
-  username: ApmUsername | 'elastic_serverless';
-}) {
+async function getApmApiClient({ svlSharedConfig }: { svlSharedConfig: Config }) {
   const kibanaServer = svlSharedConfig.get('servers.kibana');
   const cAuthorities = svlSharedConfig.get('servers.kibana.certificateAuthorities');
 
+  const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username;
+  const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password;
+
   const url = format({
     ...kibanaServer,
-    auth: `${username}:${kbnTestConfig.getUrlParts().password}`,
+    auth: `${username}:${password}`,
   });
 
   return createApmApiClient(supertest.agent(url, { ca: cAuthorities }));
@@ -127,7 +123,6 @@ export async function getApmApiClientService({
   return {
     slsUser: await getApmApiClient({
       svlSharedConfig,
-      username: 'elastic_serverless',
     }),
   };
 }
