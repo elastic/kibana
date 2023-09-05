@@ -581,6 +581,7 @@ export const getExceptionFilterFromExceptionListIds = async ({
 }: GetExceptionFilterFromExceptionListIdsProps): Promise<ExceptionFilterResponse> =>
   http.fetch(INTERNAL_EXCEPTION_FILTER, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       exception_list_ids: exceptionListIds,
       type: 'exception_list_ids',
@@ -609,6 +610,7 @@ export const getExceptionFilterFromExceptions = async ({
 }: GetExceptionFilterFromExceptionsProps): Promise<ExceptionFilterResponse> =>
   http.fetch(INTERNAL_EXCEPTION_FILTER, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       exceptions,
       type: 'exception_items',

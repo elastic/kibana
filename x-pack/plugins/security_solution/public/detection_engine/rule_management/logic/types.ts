@@ -73,7 +73,7 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-  RuleCustomHighlightedFieldArray,
+  InvestigationFields,
 } from '../../../../common/api/detection_engine/model/rule_schema';
 
 import type {
@@ -202,7 +202,7 @@ export const RuleSchema = t.intersection([
     version: RuleVersion,
     execution_summary: RuleExecutionSummary,
     alert_suppression: AlertSuppression,
-    investigation_fields: RuleCustomHighlightedFieldArray,
+    investigation_fields: InvestigationFields,
   }),
 ]);
 

@@ -48,7 +48,6 @@ export type {
   AddFieldFilterHandler,
   FieldListGroups,
   FieldsGroupDetails,
-  FieldTypeKnown,
   FieldListItem,
   GetCustomFieldType,
   RenderFieldItemParams,
@@ -86,13 +85,7 @@ export {
   type QuerySubscriberParams,
 } from './src/hooks/use_query_subscriber';
 
-export {
-  getFieldTypeName,
-  getFieldTypeDescription,
-  KNOWN_FIELD_TYPES,
-  getFieldType,
-  getFieldIconType,
-} from './src/utils/field_types';
+export { getFieldTypeDescription, getFieldType, getFieldIconType } from './src/utils/field_types';
 
 export {
   UnifiedFieldListSidebarContainer,

@@ -24,7 +24,7 @@ import {
   UNSELECTED_ALERT_TAG,
 } from '../../screens/alerts';
 
-describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert tagging', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverResetKibana');
@@ -33,7 +33,7 @@ describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    cy.task('esArchiverLoad', 'endpoint');
+    cy.task('esArchiverLoad', { archiveName: 'endpoint' });
     createRule(getNewRule({ rule_id: 'new custom rule' }));
     visit(ALERTS_URL);
     waitForAlertsToPopulate();

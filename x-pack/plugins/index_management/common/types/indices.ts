@@ -64,6 +64,15 @@ export interface Index {
   hidden: boolean;
   aliases: string | string[];
   data_stream?: string;
+
+  // The types below are added by extension services if corresponding plugins are enabled (ILM, Rollup, CCR)
+  isRollupIndex?: boolean;
+  ilm?: {
+    index: string;
+    managed: boolean;
+  };
+  isFollowerIndex?: boolean;
+
   // The types from here below represent information returned from the index stats API;
   // treated optional as the stats API is not available on serverless
   health?: HealthStatus;
