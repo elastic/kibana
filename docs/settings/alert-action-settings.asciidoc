@@ -252,8 +252,30 @@ Specifies configuration details that are specific to the type of preconfigured c
 The type of preconfigured connector.
 For example: `.email`, `.index`, `.opsgenie`, `.server-log`, `.resilient`, `.slack`, and `.webhook`.
 
+`xpack.actions.preconfigured.<connector-id>.config.apiUrl`::
+A configuration URL that varies by connector:
++
+--
+* For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
+
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
+--
+
 `xpack.actions.preconfigured.<connector-id>.name`::
 The name of the preconfigured connector.
+
+`xpack.actions.preconfigured.<connector-id>.secrets`::
+Sensitive configuration details, such as username, password, and keys, which are specific to the connector type.
++
+TIP: Sensitive properties, such as passwords, should be stored in the <<creating-keystore,{kib} keystore>>.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.apikey`::
+An API key secret that varies by connector:
++
+--
+* For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} API authentication key for HTTP basic authentication.
+--
+
 
 [float]
 [[alert-settings]]
