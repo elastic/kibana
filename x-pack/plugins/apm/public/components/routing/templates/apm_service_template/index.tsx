@@ -404,6 +404,13 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Universal Profiling',
       }),
       hidden: !isProfilingAvailable,
+      append: (
+        <EuiBadge color="accent">
+          {i18n.translate('xpack.apm.universalProfiling.newLabel', {
+            defaultMessage: 'New',
+          })}
+        </EuiBadge>
+      ),
     },
   ];
 
