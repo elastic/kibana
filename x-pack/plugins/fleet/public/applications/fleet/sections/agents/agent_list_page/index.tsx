@@ -24,7 +24,6 @@ import {
   useFlyoutContext,
   sendGetAgentTags,
   useFleetServerStandalone,
-  useFleetStatus,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, UninstallCommandFlyout } from '../../../components';
 import {
@@ -63,11 +62,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { notifications, cloud } = useStartServices();
   useBreadcrumbs('agent_list');
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
-
-  // Missing encryption key callout
-  const { missingOptionalFeatures } = useFleetStatus();
-  const [isEncryptionKeyCalloutDismissed, setIsEncryptionKeyCalloutDismissed] =
-    useMissingEncryptionKeyCalloutHasBeenDismissed();
 
   // Agent data states
   const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
@@ -400,13 +394,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [agentToUnenroll, agentPoliciesIndexedById]);
 
   // Missing Encryption key
-  const showMissingEncryptKeyCallout = useMemo(() => {
-    return (
-      missingOptionalFeatures &&
-      missingOptionalFeatures.includes('encrypted_saved_object_encryption_key_required') &&
-      !isEncryptionKeyCalloutDismissed
-    );
-  }, [missingOptionalFeatures, isEncryptionKeyCalloutDismissed]);
+  const [canShowMissingEncryptionKeyCallout, dismissEncryptionKeyCallout] =
+    useMissingEncryptionKeyCalloutHasBeenDismissed();
 
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
@@ -539,11 +528,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiSpacer size="l" />
         </>
       )}
-      {showMissingEncryptKeyCallout && (
+      {canShowMissingEncryptionKeyCallout && (
         <>
-          <FleetServerMissingEncryptionKeyCallout
-            onClickHandler={setIsEncryptionKeyCalloutDismissed}
-          />
+          <FleetServerMissingEncryptionKeyCallout onClickHandler={dismissEncryptionKeyCallout} />
           <EuiSpacer size="l" />
         </>
       )}

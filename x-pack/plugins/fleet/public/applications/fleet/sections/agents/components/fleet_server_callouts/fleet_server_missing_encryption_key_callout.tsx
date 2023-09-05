@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import type { MouseEventHandler } from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useStartServices } from '../../../../hooks';
 
 export interface FleetServerMissingEncryptionKeyCalloutProps {
-  onClickHandler: MouseEventHandler<HTMLButtonElement>;
+  onClickHandler: () => void;
 }
 
 export const FleetServerMissingEncryptionKeyCallout: React.FunctionComponent<

@@ -5,27 +5,36 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useMemo, useCallback, useState, useEffect } from 'react';
+
+import { useFleetStatus, useStartServices } from '../../../../hooks';
 
 const LOCAL_STORAGE_KEY = 'fleet.missingEncryptionKeyCalloutHasBeenDismissed';
 
-export const useMissingEncryptionKeyCalloutHasBeenDismissed = (): [
-  boolean,
-  (val: boolean) => void
-] => {
-  const [isEncryptionKeyCalloutDismissed, setIsEncryptionKeyCalloutDismissed] = useState(false);
+export const useMissingEncryptionKeyCalloutHasBeenDismissed = (): [boolean, () => void] => {
+  const { missingOptionalFeatures } = useFleetStatus();
+  const { storage } = useStartServices();
+
+  const [isCalloutDismissed, setIsCalloutDismissed] = useState(false);
 
   useEffect(() => {
-    const storageValue = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const storageValue = storage.get(LOCAL_STORAGE_KEY);
     if (storageValue) {
-      setIsEncryptionKeyCalloutDismissed(Boolean(storageValue));
+      setIsCalloutDismissed(Boolean(storageValue));
     }
-  }, []);
+  }, [storage]);
+  const canShowMissingEncryptionKeyCallout = useMemo(() => {
+    if (isCalloutDismissed || !missingOptionalFeatures) {
+      return false;
+    }
 
-  const updateIsEncryptionKeyCalloutDismissed = (newValue: boolean) => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, newValue.toString());
-    setIsEncryptionKeyCalloutDismissed(newValue);
-  };
+    return missingOptionalFeatures.includes('encrypted_saved_object_encryption_key_required');
+  }, [missingOptionalFeatures, isCalloutDismissed]);
 
-  return [isEncryptionKeyCalloutDismissed, updateIsEncryptionKeyCalloutDismissed];
+  const dismissEncryptionKeyCallout = useCallback(() => {
+    storage.set(LOCAL_STORAGE_KEY, 'true');
+    setIsCalloutDismissed(true);
+  }, [storage]);
+
+  return [canShowMissingEncryptionKeyCallout, dismissEncryptionKeyCallout];
 };
