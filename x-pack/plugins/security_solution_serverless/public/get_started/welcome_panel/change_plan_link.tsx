@@ -49,6 +49,7 @@ const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | u
                 padding-left: ${euiTheme.size.m};
               `}
               href={getCloudUrl('projects', cloud)}
+              target="_blank"
             >
               {WELCOME_PANEL_PROJECT_CREATED_CHANGE_PLAN_TITLE}
               <EuiIcon type="arrowRight" />
