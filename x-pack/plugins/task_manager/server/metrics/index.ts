@@ -11,11 +11,17 @@ import { Metrics, createMetricsAggregators, createMetricsStream } from './metric
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 export type { Metrics } from './metrics_stream';
 
-export function metricsStream(
-  config: TaskManagerConfig,
-  resetMetrics$: Observable<boolean>,
-  taskPollingLifecycle?: TaskPollingLifecycle
-): Observable<Metrics> {
+interface MetricsStreamOpts {
+  config: TaskManagerConfig;
+  resetMetrics$: Observable<boolean>; // emits when counter metrics should be reset
+  taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
+}
+
+export function metricsStream({
+  config,
+  resetMetrics$,
+  taskPollingLifecycle,
+}: MetricsStreamOpts): Observable<Metrics> {
   return createMetricsStream(
     createMetricsAggregators({
       config,

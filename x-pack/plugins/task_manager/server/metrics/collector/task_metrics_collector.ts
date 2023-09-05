@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-/*
- * This module contains the logic for polling the task manager index for new work.
- */
-
-import { Observable, Subject } from 'rxjs';
-
-import { Option, none } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
 import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Subject } from 'rxjs';
 import { Result, asOk, asErr } from '../../lib/result_type';
 import { TaskStore } from '../../task_store';
 import {
@@ -21,25 +15,30 @@ import {
   RunningOrClaimingTaskWithExpiredRetryAt,
 } from '../../queries/mark_available_tasks_as_claimed';
 
+const POLL_INTERVAL = 5000; // query every 5 seconds
 interface ConstructorOpts {
   logger: Logger;
   store: TaskStore;
-  pollInterval: number;
 }
 
-export class TaskOverdueMetricsCollector {
+export class TaskManagerMetricsCollector {
   private store: TaskStore;
   private logger: Logger;
 
   private running: boolean = false;
   private timeoutId: NodeJS.Timeout | null = null;
-  private hasSubscribed: boolean = false;
+
+  private subject = new Subject<any>();
 
   constructor({ logger, store }: ConstructorOpts) {
     this.store = store;
     this.logger = logger;
 
     this.start();
+  }
+
+  public get metrics() {
+    return this.subject;
   }
 
   private start() {
@@ -81,15 +80,15 @@ export class TaskOverdueMetricsCollector {
         byTaskType: AggregationsTermsAggregateBase;
       };
       console.log(`createTaskMetricsCollector ${JSON.stringify(results)}`);
-      subject.next(asOk(results));
+      // subject.next(asOk(results));
     } catch (e) {
-      subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
+      // subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
     }
     if (this.running) {
       // Set the next runCycle call
       this.timeoutId = setTimeout(
         this.runCollectionCycle.bind(this),
-        Math.max(pollInterval - (Date.now() - start), 0)
+        Math.max(POLL_INTERVAL - (Date.now() - start), 0)
       );
     }
   }

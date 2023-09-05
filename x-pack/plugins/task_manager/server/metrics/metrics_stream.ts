@@ -11,15 +11,22 @@ import { set } from '@kbn/safer-lodash-set';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { isTaskManagerStatEvent, isTaskPollingCycleEvent, isTaskRunEvent } from '../task_events';
+import {
+  isTaskManagerStatEvent,
+  isTaskOverdueEvent,
+  isTaskPollingCycleEvent,
+  isTaskRunEvent,
+} from '../task_events';
 import { TaskClaimMetric, TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
 import { createAggregator } from './create_aggregator';
 import { TaskRunMetric, TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
+import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
 export interface Metrics {
   last_update: string;
   metrics: {
     task_claim?: Metric<TaskClaimMetric>;
     task_run?: Metric<TaskRunMetric>;
+    task_overdue?: Metric<TaskOverdueMetric>;
   };
 }
 
@@ -57,6 +64,14 @@ export function createMetricsAggregators({
         taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
           isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
         metricsAggregator: new TaskRunMetricsAggregator(),
+      }),
+      createAggregator({
+        key: 'task_overdue',
+        taskPollingLifecycle,
+        config,
+        resetMetrics$,
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskOverdueEvent(taskEvent),
+        metricsAggregator: new TaskOverdueMetricsAggregator(),
       })
     );
   }

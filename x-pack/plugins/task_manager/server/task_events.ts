@@ -28,6 +28,7 @@ export enum TaskEventType {
   TASK_RUN = 'TASK_RUN',
   TASK_RUN_REQUEST = 'TASK_RUN_REQUEST',
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
+  TASK_OVERDUE = 'TASK_OVERDUE',
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
   EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY = 'EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY',
 }
@@ -175,6 +176,8 @@ export function asTaskManagerStatEvent(
   };
 }
 
+export function asTaskOverdueEvent() {}
+
 export function asEphemeralTaskRejectedDueToCapacityEvent(
   id: string,
   event: Result<EphemeralTaskInstanceRequest, Error>,
@@ -218,6 +221,11 @@ export function isTaskManagerWorkerUtilizationStatEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskManagerStat {
   return taskEvent.type === TaskEventType.TASK_MANAGER_STAT && taskEvent.id === 'workerUtilization';
+}
+export function isTaskOverdueEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is TaskManagerStat {
+  return taskEvent.type === TaskEventType.TASK_OVERDUE;
 }
 export function isEphemeralTaskRejectedDueToCapacityEvent(
   taskEvent: TaskEvent<unknown, unknown>
