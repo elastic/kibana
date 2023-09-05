@@ -235,6 +235,46 @@ describe('uiSettings', () => {
       });
     });
 
+    describe('#applyAllowlist', () => {
+      const settingId = 'mySetting';
+      const testSetting = {
+        name: 'My setting',
+        value: 10,
+        readonly: true,
+        schema: schema.number(),
+      };
+
+      it('allowlisted readonly settings have "ui" readonly mode', async () => {
+        const { register, setAllowlist } = await service.setup(setupDeps);
+        register({[settingId]: testSetting});
+        setAllowlist([settingId]);
+
+        const expectedSetting = {
+            ...testSetting,
+          readonlyMode: 'ui',
+        };
+
+        const start = await service.start();
+        start.asScopedToClient(savedObjectsClient);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual({[settingId]: expectedSetting});
+      });
+
+      it('non-allowlisted settings have "strict" readonly mode', async () => {
+        const { register, setAllowlist } = await service.setup(setupDeps);
+        register({[settingId]: testSetting});
+        setAllowlist([]);
+
+        const expectedSetting = {
+          ...testSetting,
+          readonlyMode: 'strict',
+        };
+
+        const start = await service.start();
+        start.asScopedToClient(savedObjectsClient);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual({[settingId]: expectedSetting});
+      });
+    });
+
     describe('#asScopedToClient', () => {
       it('passes saved object type "config" to UiSettingsClient', async () => {
         await service.setup(setupDeps);
