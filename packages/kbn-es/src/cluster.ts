@@ -505,7 +505,7 @@ export class Cluster {
         });
     }
 
-    // observe the exit code of the process and reflect in _outcome promises
+    // observe the exit code of the process and reflect in `this.outcome` promises
     const exitCode: Promise<number> = new Promise((resolve) => this.process?.once('exit', resolve));
     this.outcome = exitCode.then((code) => {
       if (this.stopCalled) {
