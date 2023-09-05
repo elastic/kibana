@@ -321,7 +321,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
                 <>
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.protectionUpdates.note.tooltip"
-                    defaultMessage="Note will help you understand why you decided to deploy a particular version next time you access policy update."
+                    defaultMessage="You can add an optional note to explain the reason for selecting a particular policy version."
                   />
                 </>
               }
