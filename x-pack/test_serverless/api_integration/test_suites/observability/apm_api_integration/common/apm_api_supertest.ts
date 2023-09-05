@@ -5,14 +5,14 @@
  * 2.0.
  */
 import type { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
-import { format, UrlObject } from 'url';
+import { format } from 'url';
 import supertest from 'supertest';
 import request from 'superagent';
 import type {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { kbnTestConfig } from '@kbn/test';
+import { Config, kbnTestConfig } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
 import { InheritedFtrProviderContext } from '../../../../services';
@@ -94,18 +94,19 @@ Body: ${JSON.stringify(res.body)}`
 }
 
 async function getApmApiClient({
-  kibanaServer,
+  svlSharedConfig,
   username,
 }: {
-  kibanaServer: UrlObject;
+  svlSharedConfig: Config;
   username: ApmUsername | 'elastic_serverless';
 }) {
+  const kibanaServer = svlSharedConfig.get('servers.kibana');
+  const cAuthorities = svlSharedConfig.get('servers.kibana.certificateAuthorities');
+
   const url = format({
     ...kibanaServer,
     auth: `${username}:${kbnTestConfig.getUrlParts().password}`,
   });
-
-  const cAuthorities = kibanaServer.certificateAuthorities;
 
   return createApmApiClient(supertest.agent(url, { ca: cAuthorities }));
 }
@@ -122,11 +123,10 @@ export async function getApmApiClientService({
   getService,
 }: InheritedFtrProviderContext): Promise<ApmApiClient> {
   const svlSharedConfig = getService('config');
-  const kibanaServer = svlSharedConfig.get('servers.kibana');
 
   return {
     slsUser: await getApmApiClient({
-      kibanaServer,
+      svlSharedConfig,
       username: 'elastic_serverless',
     }),
   };
