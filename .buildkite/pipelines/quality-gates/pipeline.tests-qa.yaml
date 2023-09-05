@@ -1,10 +1,14 @@
+# These pipeline steps constitute the quality gate for your service within the QA environment.
+# Incorporate any necessary additional logic to validate the service's integrity. A failure in
+# this pipeline build will prevent further progression to the subsequent stage.
+
 steps:
   - label: ":pipeline::kibana::seedling: Trigger Kibana Serverless Tests for ${ENVIRONMENT}"
     trigger: appex-qa-kibana-serverless-ftr-tests # https://buildkite.com/elastic/appex-qa-kibana-serverless-ftr-tests
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
-      message: Triggered by pipeline.tests.qa.yaml
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
   - label: ":pipeline::weight_lifter::seedling: Trigger RAC Alert Load tests for ${ENVIRONMENT}"
     trigger: appex-qa-rac-alert-load # https://buildkite.com/elastic/appex-qa-rac-alert-load
@@ -12,19 +16,39 @@ steps:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
         SERVERLESS_ONLY: true
-      message: Triggered by pipeline.tests.qa.yaml
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
-  - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
-    command: .buildkite/scripts/pipelines/security_solution_quality_gate/pipeline.sh
+  - group: ":female-detective: Security Solution Tests"
+    key: "security"
+    steps:
+      - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/pipeline.sh
+
+      - label: ":judge::seedling: Trigger Manual Tests Phase"
+        command: "make -C /agent trigger-manual-verification-phase"
+        env:
+          TEAM_CHANNEL: "#kibana-mission-control"
+        agents:
+          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.2"
 
   - label: ":pipeline::ship::seedling: Trigger Fleet serverless smoke tests for ${ENVIRONMENT}"
     trigger: fleet-smoke-tests # https://buildkite.com/elastic/fleet-smoke-tests
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
-      message: Triggered by pipeline.tests.qa.yaml
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
+
+  - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
+    trigger: "ess-k8s-qa-e2e-tests-daily"
+    build:
+      env:
+        REGION_ID: aws-eu-west-1
+        NAME_PREFIX: ci_test_kibana-promotion_
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
   - wait: ~
 
-  - block: ":male-mechanic: Confirm QA tests"
-    prompt: "Do you confirm, that the QA testing is done and successful?"
+  - label: ":judge::seedling: Trigger Manual Tests Phase"
+    command: "make -C /agent trigger-manual-verification-phase"
+    agents:
+      image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.2"
