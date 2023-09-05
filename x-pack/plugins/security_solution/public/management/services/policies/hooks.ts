@@ -10,6 +10,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY } from '../../../../common/endpoint/constants';
 import { useHttp, useKibana } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { sendGetEndpointSecurityPackage } from './ingest';
@@ -57,7 +58,7 @@ export function useEndpointPackagePoliciesStats(enabled: boolean) {
       return firstValueFrom(
         data.search.search<{}, IKibanaSearchResponse<{ outdatedManifestsCount: number }>>(
           {},
-          { strategy: 'endpointPackagePoliciesStatsStrategy' }
+          { strategy: ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY }
         )
       );
     },

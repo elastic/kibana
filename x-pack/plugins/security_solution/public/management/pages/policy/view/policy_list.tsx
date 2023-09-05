@@ -65,7 +65,7 @@ export const PolicyList = memo(() => {
     perPage: pagination.pageSize,
   });
 
-  const { data: outdatedManifestsCount, isLoading: outdatedManifestsCountLoading } =
+  const { data: outdatedManifestsCountResponse, isLoading: isOutdatedManifestsCountLoading } =
     useEndpointPackagePoliciesStats(isProtectionUpdatesEnabled);
 
   // grab endpoint version for empty page
@@ -125,12 +125,12 @@ export const PolicyList = memo(() => {
     }
   );
 
-  const outdatedManifestsCallOut = () => {
+  const outdatedManifestsCallOut = useMemo(() => {
     if (
       !isProtectionUpdatesEnabled ||
-      outdatedManifestsCountLoading ||
-      !outdatedManifestsCount ||
-      outdatedManifestsCount.outdatedManifestsCount === 0
+      isOutdatedManifestsCountLoading ||
+      !outdatedManifestsCountResponse ||
+      outdatedManifestsCountResponse.outdatedManifestsCount === 0
     ) {
       return null;
     }
@@ -143,11 +143,11 @@ export const PolicyList = memo(() => {
         title={i18n.translate('xpack.securitySolution.policy.list.outdatedManifestsCallOut', {
           defaultMessage:
             'Updates available for {outdatedManifestsCount} {outdatedManifestsCount, plural, one {policy} other {policies}}',
-          values: { outdatedManifestsCount: outdatedManifestsCount.outdatedManifestsCount },
+          values: { outdatedManifestsCount: outdatedManifestsCountResponse.outdatedManifestsCount },
         })}
       />
     );
-  };
+  }, [isOutdatedManifestsCountLoading, isProtectionUpdatesEnabled, outdatedManifestsCountResponse]);
 
   const policyColumns = useMemo(() => {
     const updatedAtColumnName = i18n.translate('xpack.securitySolution.policy.list.updatedAt', {
@@ -391,7 +391,7 @@ export const PolicyList = memo(() => {
             />
           </EuiText>
           <EuiHorizontalRule margin="xs" />
-          {outdatedManifestsCallOut()}
+          {outdatedManifestsCallOut}
           <EuiBasicTable
             data-test-subj="policyListTable"
             items={data?.items || []}

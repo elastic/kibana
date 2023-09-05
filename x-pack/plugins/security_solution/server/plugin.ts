@@ -94,6 +94,7 @@ import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY,
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
 
@@ -365,7 +366,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       const endpointPackagePoliciesStatsStrategy =
         endpointPackagePoliciesStatsSearchStrategyProvider(this.endpointAppContextService);
       plugins.data.search.registerSearchStrategy(
-        'endpointPackagePoliciesStatsStrategy',
+        ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY,
         endpointPackagePoliciesStatsStrategy
       );
 
