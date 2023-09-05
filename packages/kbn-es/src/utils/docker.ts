@@ -641,7 +641,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         ? {
             auth: { bearer: kibanaDevServiceAccount.token },
             tls: {
-              ca: CA_CERT_PATH,
+              ca: [fs.readFileSync(CA_CERT_PATH)],
               // Required for self signed cert
               rejectUnauthorized: false,
             },
