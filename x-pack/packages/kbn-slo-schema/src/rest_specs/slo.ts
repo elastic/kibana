@@ -158,7 +158,7 @@ const findSLOResponseSchema = t.type({
   results: t.array(sloWithSummaryResponseSchema),
 });
 
-const deleteSloInstancesParamsSchema = t.type({
+const deleteSLOInstancesParamsSchema = t.type({
   body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: t.string })) }),
 });
 
@@ -243,8 +243,8 @@ type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
-type DeleteSLOInstancesInput = t.OutputOf<typeof deleteSloInstancesParamsSchema.props.body>;
-type DeleteSLOInstancesParams = t.TypeOf<typeof deleteSloInstancesParamsSchema.props.body>;
+type DeleteSLOInstancesInput = t.OutputOf<typeof deleteSLOInstancesParamsSchema.props.body>;
+type DeleteSLOInstancesParams = t.TypeOf<typeof deleteSLOInstancesParamsSchema.props.body>;
 
 type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParamsSchema.props.body>;
 type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
@@ -276,7 +276,7 @@ type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 export {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
-  deleteSloInstancesParamsSchema,
+  deleteSLOInstancesParamsSchema,
   findSLOParamsSchema,
   findSLOResponseSchema,
   getPreviewDataParamsSchema,

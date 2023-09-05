@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
 import {
   createSLOParamsSchema,
-  deleteSloInstancesParamsSchema,
+  deleteSLOInstancesParamsSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   findSloDefinitionsParamsSchema,
@@ -232,7 +232,7 @@ const deleteSloInstancesRoute = createObservabilityServerRoute({
   options: {
     tags: ['access:slo_write'],
   },
-  params: deleteSloInstancesParamsSchema,
+  params: deleteSLOInstancesParamsSchema,
   handler: async ({ context, params }) => {
     await assertPlatinumLicense(context);
 
