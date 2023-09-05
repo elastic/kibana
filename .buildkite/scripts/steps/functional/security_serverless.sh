@@ -12,4 +12,5 @@ echo "--- Security Serverless Cypress Tests"
 
 cd x-pack/test/security_solution_cypress
 
+set +e
 yarn cypress:run:serverless; status=$?; yarn junit:merge && exit $status
