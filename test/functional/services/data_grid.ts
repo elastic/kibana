@@ -206,7 +206,6 @@ export class DataGridService extends FtrService {
     const testSubj = options.isAnchorRow
       ? '~docTableExpandToggleColumnAnchor'
       : '~docTableExpandToggleColumn';
-    // can be as the second column (Discover page) and the first column (Surrounding Documents page)
     const toggle = await row[0].findByTestSubject(testSubj);
 
     await toggle.scrollIntoViewIfNecessary();
