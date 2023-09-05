@@ -36,7 +36,7 @@ export const DocumentViewModeToggle = ({
   }
 
   return (
-    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle">
+    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
       <EuiTab
         isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
