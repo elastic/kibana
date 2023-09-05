@@ -103,11 +103,6 @@ export const SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearc
 export const SERVERLESS_TAG = 'latest';
 export const SERVERLESS_IMG = `${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
 
-const DOCKER_AUTH_ERRORS = [
-  'unauthorized: authentication required', // Bad credentials
-  'denied: requested access to the resource is denied', // No credentials
-];
-
 // See for default cluster settings
 // https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/kotlin/elasticsearch.serverless-run.gradle.kts
 const SHARED_SERVERLESS_PARAMS = [
@@ -340,11 +335,12 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
   await execa('docker', ['pull', image], {
     // inherit is required to show Docker pull output
     stdio: ['ignore', 'inherit', 'pipe'],
-  }).catch(({ message, stderr }) => {
+  }).catch(({ message }) => {
     throw createCliError(
-      DOCKER_AUTH_ERRORS.some((msg) => stderr.includes(msg))
-        ? `Error authenticating with ${DOCKER_REGISTRY}. Visit https://docker-auth.elastic.co/github_auth to login.`
-        : message
+      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.      
+Visit ${chalk.bold.cyan('https://docker-auth.elastic.co/github_auth')} to login.
+
+${message}`
     );
   });
 }
