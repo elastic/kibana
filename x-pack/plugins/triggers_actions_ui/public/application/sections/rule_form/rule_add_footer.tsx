@@ -20,14 +20,14 @@ import { i18n } from '@kbn/i18n';
 import { useHealthContext } from '../../context/health_context';
 
 interface RuleAddFooterProps {
-  isSaving: boolean;
+  isSaveButtonLoading: boolean;
   isFormLoading: boolean;
   onSave: () => void;
   onCancel: () => void;
 }
 
 export const RuleAddFooter = ({
-  isSaving,
+  isSaveButtonLoading,
   onSave,
   onCancel,
   isFormLoading,
@@ -60,7 +60,7 @@ export const RuleAddFooter = ({
             type="submit"
             iconType="check"
             isDisabled={loadingHealthCheck}
-            isLoading={isSaving}
+            isLoading={isSaveButtonLoading}
             onClick={onSave}
           >
             <FormattedMessage

@@ -75,6 +75,7 @@ import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compa
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
 import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
+import { useGetScheduleFrequency } from '../../hooks/use_get_schedule_frequency';
 import { getInitialInterval } from './get_initial_interval';
 
 const ENTER_KEY = 13;
@@ -167,6 +168,8 @@ export const RuleForm = ({
     ruleTypeIndex,
     ruleTypesIsLoading,
   } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
+
+  useGetScheduleFrequency();
 
   // load rule types
   useEffect(() => {

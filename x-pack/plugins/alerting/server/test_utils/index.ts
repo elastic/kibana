@@ -60,6 +60,7 @@ export function generateAlertingConfig(): AlertingConfig {
     maxEphemeralActionsPerAlert: 10,
     cancelAlertsOnRuleTimeout: true,
     rules: {
+      maxScheduledPerMinute: 10000,
       minimumScheduleInterval: { value: '1m', enforce: false },
       run: {
         actions: {

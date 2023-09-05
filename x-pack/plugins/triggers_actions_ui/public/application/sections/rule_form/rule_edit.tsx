@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useReducer, useState, useEffect, useCallback } from 'react';
+import React, { useReducer, useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
@@ -47,6 +47,7 @@ import { ConfirmRuleClose } from './confirm_rule_close';
 import { hasRuleChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
+import { useGetScheduleFrequency } from '../../hooks/use_get_schedule_frequency';
 
 const cloneAndMigrateRule = (initialRule: Rule) => {
   const clonedRule = cloneDeep(omit(initialRule, 'notifyWhen', 'throttle'));
@@ -140,10 +141,26 @@ export const RuleEdit = ({
     }
   }, [props.ruleType, ruleType.id, serverRuleType, http]);
 
-  const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
-    rule as Rule,
-    ruleType,
-    config
+  const { data, isLoading: isLoadingScheduleFrequency } = useGetScheduleFrequency();
+
+  const isLoadingComputed = useMemo(() => {
+    return isLoading || isLoadingScheduleFrequency;
+  }, [isLoading, isLoadingScheduleFrequency]);
+
+  const isSavingComputed = useMemo(() => {
+    return isSaving || isLoadingScheduleFrequency;
+  }, [isSaving, isLoadingScheduleFrequency]);
+
+  const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = useMemo(
+    () =>
+      getRuleErrors({
+        rule: rule as Rule,
+        initialRule,
+        ruleTypeModel: ruleType,
+        remainingSchedulesPerMin: data?.remainingSchedulesPerMinute,
+        config,
+      }),
+    [rule, initialRule, ruleType, data, config]
   );
 
   const checkForChangesAndCloseFlyout = () => {
@@ -158,7 +175,7 @@ export const RuleEdit = ({
     setIsSaving(true);
     try {
       if (
-        !isLoading &&
+        !isLoadingComputed &&
         isValidRule(rule, ruleErrors, ruleActionsErrors) &&
         !hasActionsWithBrokenConnector
       ) {
@@ -261,7 +278,7 @@ export const RuleEdit = ({
                     })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-                {isLoading ? (
+                {isLoadingComputed ? (
                   <EuiFlexItem grow={false}>
                     <EuiSpacer size="s" />
                     <EuiLoadingSpinner size="l" />
@@ -294,7 +311,7 @@ export const RuleEdit = ({
                         data-test-subj="saveEditedRuleButton"
                         type="submit"
                         iconType="check"
-                        isLoading={isSaving}
+                        isLoading={isSavingComputed}
                         onClick={async () => await onSaveRule()}
                       >
                         <FormattedMessage

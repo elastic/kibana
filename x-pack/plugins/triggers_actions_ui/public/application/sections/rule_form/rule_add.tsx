@@ -37,6 +37,7 @@ import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
+import { useGetScheduleFrequency } from '../../hooks/use_get_schedule_frequency';
 
 const RuleAdd = ({
   consumer,
@@ -99,6 +100,8 @@ const RuleAdd = ({
   } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
+
+  const { data, isLoading: isLoadingScheduleFrequency } = useGetScheduleFrequency();
 
   useEffect(() => {
     (async () => {
@@ -195,12 +198,24 @@ const RuleAdd = ({
     }
   };
 
+  const isLoadingComputed = useMemo(() => {
+    return isLoading || isLoadingScheduleFrequency;
+  }, [isLoading, isLoadingScheduleFrequency]);
+
+  const isSavingComputed = useMemo(() => {
+    return isSaving || isLoadingScheduleFrequency;
+  }, [isSaving, isLoadingScheduleFrequency]);
+
   const ruleType = rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null;
 
-  const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = useMemo(
-    () => getRuleErrors(rule as Rule, ruleType, config),
-    [rule, ruleType, config]
-  );
+  const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = useMemo(() => {
+    return getRuleErrors({
+      rule: rule as Rule,
+      ruleTypeModel: ruleType,
+      config,
+      remainingSchedulesPerMin: data?.remainingSchedulesPerMinute,
+    });
+  }, [rule, ruleType, config, data]);
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule
   const shouldConfirmSave = canShowActions && rule.actions?.length === 0;
@@ -270,11 +285,11 @@ const RuleAdd = ({
               />
             </EuiFlyoutBody>
             <RuleAddFooter
-              isSaving={isSaving}
-              isFormLoading={isLoading}
+              isSaveButtonLoading={isSavingComputed}
+              isFormLoading={isLoadingComputed}
               onSave={async () => {
                 setIsSaving(true);
-                if (isLoading || !isValidRule(rule, ruleErrors, ruleActionsErrors)) {
+                if (isLoadingComputed || !isValidRule(rule, ruleErrors, ruleActionsErrors)) {
                   setRule(
                     getRuleWithInvalidatedFields(
                       rule as Rule,
