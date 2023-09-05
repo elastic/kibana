@@ -26,6 +26,10 @@ describe('Large Trace in waterfall', () => {
     });
   });
 
+  after(() => {
+    synthtrace.clean();
+  });
+
   describe('when navigating to a trace sample with default maxTraceItems', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();

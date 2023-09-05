@@ -53,19 +53,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           trace = await getTrace({ es, apmApiClient, maxTraceItems: 5000 });
         });
 
-        it('traceDocsTotal', () => {
+        it('and traceDocsTotal is correct', () => {
           expect(trace.traceItems.traceDocsTotal).to.be(15551);
         });
 
-        it('traceDocs', () => {
+        it('and traceDocs is correct', () => {
           expect(trace.traceItems.traceDocs.length).to.be(5000);
         });
 
-        it('maxTraceItems', () => {
+        it('and maxTraceItems is correct', () => {
           expect(trace.traceItems.maxTraceItems).to.be(5000);
         });
 
-        it('exceedsMax', () => {
+        it('and exceedsMax is correct', () => {
           expect(trace.traceItems.exceedsMax).to.be(true);
         });
       });
@@ -76,19 +76,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           trace = await getTrace({ es, apmApiClient, maxTraceItems: 20000 });
         });
 
-        it('traceDocsTotal', () => {
+        it('and traceDocsTotal is correct', () => {
           expect(trace.traceItems.traceDocsTotal).to.be(15551);
         });
 
-        it('traceDocs', () => {
+        it('and traceDocs is correct', () => {
           expect(trace.traceItems.traceDocs.length).to.be(15551);
         });
 
-        it('maxTraceItems', () => {
+        it('and maxTraceItems is correct', () => {
           expect(trace.traceItems.maxTraceItems).to.be(20000);
         });
 
-        it('exceedsMax', () => {
+        it('and exceedsMax is correct', () => {
           expect(trace.traceItems.exceedsMax).to.be(false);
         });
       });
