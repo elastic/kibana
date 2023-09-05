@@ -53,7 +53,12 @@ function ConfigurationValueColumn({
       </EuiText>
       {value && (
         <EuiButtonIcon
-          aria-label="Copy to clipboard"
+          aria-label={i18n.translate(
+            'xpack.apm.onboarding.column.value.copyIconText',
+            {
+              defaultMessage: 'Copy to clipboard',
+            }
+          )}
           color="text"
           iconType="copy"
           onClick={() => copyToClipboard(value)}

@@ -1,5 +1,5 @@
 {
-  "xpack.license.post": {
+  "license.post": {
     "data_autocomplete_rules": {
       "licenses": []
     }

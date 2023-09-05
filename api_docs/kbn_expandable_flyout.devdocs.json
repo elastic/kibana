@@ -629,14 +629,21 @@
           {
             "parentPluginId": "@kbn/expandable-flyout",
             "id": "def-common.FlyoutPanelProps.path",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
             "label": "path",
             "description": [
-              "\nTracks the path for what to show in a panel. We may have multiple tabs or details..., so easiest to just use a stack"
+              "\nTracks the path for what to show in a panel, such as activated tab and subtab"
             ],
             "signature": [
-              "string[] | undefined"
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "common",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-common.PanelPath",
+                "text": "PanelPath"
+              },
+              " | undefined"
             ],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
@@ -653,6 +660,49 @@
             ],
             "signature": [
               "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/expandable-flyout",
+        "id": "def-common.PanelPath",
+        "type": "Interface",
+        "tags": [],
+        "label": "PanelPath",
+        "description": [],
+        "path": "packages/kbn-expandable-flyout/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-common.PanelPath.tab",
+            "type": "string",
+            "tags": [],
+            "label": "tab",
+            "description": [
+              "\nTop level tab that to be displayed"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-common.PanelPath.subTab",
+            "type": "string",
+            "tags": [],
+            "label": "subTab",
+            "description": [
+              "\nOptional secondary level to be displayed under top level tab"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,

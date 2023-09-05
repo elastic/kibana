@@ -71,6 +71,24 @@ export const FormContext: React.FC<Props> = ({
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
   const availableOwners = useAvailableCasesOwners();
 
+  const trimUserFormData = (userFormData: CaseUI) => {
+    let formData = {
+      ...userFormData,
+      title: userFormData.title.trim(),
+      description: userFormData.description.trim(),
+    };
+
+    if (userFormData.category) {
+      formData = { ...formData, category: userFormData.category.trim() };
+    }
+
+    if (userFormData.tags) {
+      formData = { ...formData, tags: userFormData.tags.map((tag: string) => tag.trim()) };
+    }
+
+    return formData;
+  };
+
   const submitCase = useCallback(
     async (
       {
@@ -92,9 +110,11 @@ export const FormContext: React.FC<Props> = ({
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
+        const trimmedData = trimUserFormData(userFormData);
+
         const theCase = await postCase({
           request: {
-            ...userFormData,
+            ...trimmedData,
             connector: connectorToUpdate,
             settings: { syncAlerts },
             owner: selectedOwner ?? defaultOwner,

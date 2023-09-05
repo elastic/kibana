@@ -13,7 +13,7 @@ import type {
   RawEventData,
 } from '../../../../common/types/response_actions';
 import { useRightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelResponseTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelResponseTab } from '../../left';
 import { RESPONSE_BUTTON_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
 import { RESPONSE_EMPTY, RESPONSE_TITLE } from './translations';
 
@@ -33,7 +33,7 @@ export const ResponseButton: React.FC = () => {
   const goToResponseTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelResponseTabPath,
+      path: { tab: LeftPanelResponseTab },
       params: {
         id: eventId,
         indexName,
@@ -42,16 +42,20 @@ export const ResponseButton: React.FC = () => {
     });
   }, [eventId, indexName, openLeftPanel, scopeId]);
 
-  if (!responseActions) return <div data-test-subj={RESPONSE_EMPTY_TEST_ID}>{RESPONSE_EMPTY}</div>;
-
   return (
-    <EuiButton
-      onClick={goToResponseTab}
-      iconType="documentation"
-      data-test-subj={RESPONSE_BUTTON_TEST_ID}
-    >
-      {RESPONSE_TITLE}
-    </EuiButton>
+    <>
+      {!responseActions ? (
+        <div data-test-subj={RESPONSE_EMPTY_TEST_ID}>{RESPONSE_EMPTY}</div>
+      ) : (
+        <EuiButton
+          onClick={goToResponseTab}
+          iconType="documentation"
+          data-test-subj={RESPONSE_BUTTON_TEST_ID}
+        >
+          {RESPONSE_TITLE}
+        </EuiButton>
+      )}
+    </>
   );
 };
 

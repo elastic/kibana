@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { RuleSignatureId, RuleTagArray, RuleVersion } from '../../model';
-import type { DiffableRule } from '../model';
+import type { RuleTagArray } from '../../model';
+import type { RuleResponse } from '../../model/rule_schema/rule_schemas';
 
 export interface ReviewRuleInstallationResponseBody {
   /** Aggregated info about all rules available for installation */
   stats: RuleInstallationStatsForReview;
 
   /** Info about individual rules: one object per each rule available for installation */
-  rules: RuleInstallationInfoForReview[];
+  rules: RuleResponse[];
 }
 
 export interface RuleInstallationStatsForReview {
@@ -23,8 +23,3 @@ export interface RuleInstallationStatsForReview {
   /** A union of all tags of all rules available for installation */
   tags: RuleTagArray;
 }
-
-export type RuleInstallationInfoForReview = DiffableRule & {
-  rule_id: RuleSignatureId;
-  version: RuleVersion;
-};

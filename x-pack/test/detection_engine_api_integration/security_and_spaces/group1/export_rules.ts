@@ -46,6 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .expect('Content-Type', 'application/ndjson')
@@ -66,6 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             objects: [{ rule_id: 'rule-1' }],
           })
@@ -98,6 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -115,6 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -147,6 +151,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -200,6 +205,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -256,6 +262,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -314,6 +321,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -375,6 +383,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -441,6 +450,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send()
             .expect(200)
             .parse(binaryToString);
@@ -518,6 +528,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send()
             .expect(200)
             .parse(binaryToString);
@@ -636,6 +647,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send()
             .expect(200)
             .parse(binaryToString);

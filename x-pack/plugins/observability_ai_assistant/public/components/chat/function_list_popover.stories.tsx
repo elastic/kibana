@@ -24,6 +24,7 @@ const Template: ComponentStory<typeof Component> = (props: FunctionListPopover) 
 
 const defaultProps: FunctionListPopover = {
   onSelectFunction: () => {},
+  disabled: false,
 };
 
 export const ConversationList = Template.bind({});

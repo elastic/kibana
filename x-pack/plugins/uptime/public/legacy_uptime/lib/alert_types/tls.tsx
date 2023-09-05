@@ -35,6 +35,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
     <TLSAlert
       core={core}
       plugins={plugins}
+      id={params.id}
       ruleParams={params.ruleParams}
       setRuleParams={params.setRuleParams}
     />

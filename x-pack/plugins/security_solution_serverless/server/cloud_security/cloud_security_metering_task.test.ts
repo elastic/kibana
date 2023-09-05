@@ -11,9 +11,12 @@ import {
   KSPM_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { CLOUD_SECURITY_TASK_TYPE } from './cloud_security_metering';
+import { CLOUD_SECURITY_TASK_TYPE, getCloudProductTier } from './cloud_security_metering';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
+
+import type { ServerlessSecurityConfig } from '../config';
 import type { PostureType } from './types';
+import type { ProductTier } from '../../common/product';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -25,7 +28,7 @@ const postureTypes: PostureType[] = [
   CNVM_POLICY_TEMPLATE,
 ];
 
-describe('getCspmUsageRecord', () => {
+describe('getCloudSecurityUsageRecord', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -38,6 +41,8 @@ describe('getCspmUsageRecord', () => {
     const taskId = chance.guid();
     const postureType = CSPM_POLICY_TEMPLATE;
 
+    const tier = 'essentials' as ProductTier;
+
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
       projectId,
@@ -45,6 +50,7 @@ describe('getCspmUsageRecord', () => {
       taskId,
       lastSuccessfulReport: new Date(),
       postureType,
+      tier,
     });
 
     expect(result).toBeUndefined();
@@ -54,9 +60,14 @@ describe('getCspmUsageRecord', () => {
     'should return usageRecords with correct values for cspm and kspm when Elasticsearch response has aggregations',
     async (postureType) => {
       // @ts-ignore
-      mockEsClient.search.mockResolvedValue({
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [{ _id: 'someRecord', _index: 'mockIndex' }] }, // mocking for indexHasDataInDateRange
+      });
+
+      // @ts-ignore
+      mockEsClient.search.mockResolvedValueOnce({
         aggregations: {
-          unique_resources: {
+          unique_assets: {
             value: 10,
           },
           min_timestamp: {
@@ -68,6 +79,8 @@ describe('getCspmUsageRecord', () => {
       const projectId = chance.guid();
       const taskId = chance.guid();
 
+      const tier = 'essentials' as ProductTier;
+
       const result = await getCloudSecurityUsageRecord({
         esClient: mockEsClient,
         projectId,
@@ -75,10 +88,11 @@ describe('getCspmUsageRecord', () => {
         taskId,
         lastSuccessfulReport: new Date(),
         postureType,
+        tier,
       });
 
       expect(result).toEqual({
-        id: `${CLOUD_SECURITY_TASK_TYPE}:${postureType}`,
+        id: expect.stringContaining(`${CLOUD_SECURITY_TASK_TYPE}_${postureType}_${projectId}`),
         usage_timestamp: '2023-07-30T15:11:41.738Z',
         creation_timestamp: expect.any(String), // Expect a valid ISO string
         usage: {
@@ -90,6 +104,9 @@ describe('getCspmUsageRecord', () => {
         source: {
           id: taskId,
           instance_group_id: projectId,
+          metadata: {
+            tier: 'essentials',
+          },
         },
       });
     }
@@ -103,6 +120,8 @@ describe('getCspmUsageRecord', () => {
     const taskId = chance.guid();
     const postureType = CSPM_POLICY_TEMPLATE;
 
+    const tier = 'essentials' as ProductTier;
+
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
       projectId,
@@ -110,6 +129,7 @@ describe('getCspmUsageRecord', () => {
       taskId,
       lastSuccessfulReport: new Date(),
       postureType,
+      tier,
     });
 
     expect(result).toBeUndefined();
@@ -123,6 +143,8 @@ describe('getCspmUsageRecord', () => {
     const taskId = chance.guid();
     const postureType = CSPM_POLICY_TEMPLATE;
 
+    const tier = 'essentials' as ProductTier;
+
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
       projectId,
@@ -130,8 +152,38 @@ describe('getCspmUsageRecord', () => {
       taskId,
       lastSuccessfulReport: new Date(),
       postureType,
+      tier,
     });
 
     expect(result).toBeUndefined();
+  });
+});
+
+describe('should return the relevant product tier', () => {
+  it('should return the relevant product tier for cloud product line', async () => {
+    const serverlessSecurityConfig = {
+      enabled: true,
+      developer: {},
+      productTypes: [
+        { product_line: 'endpoint', product_tier: 'essentials' },
+        { product_line: 'cloud', product_tier: 'complete' },
+      ],
+    } as unknown as ServerlessSecurityConfig;
+
+    const tier = getCloudProductTier(serverlessSecurityConfig);
+
+    expect(tier).toBe('complete');
+  });
+
+  it('should return none tier in case cloud product line is missing ', async () => {
+    const serverlessSecurityConfig = {
+      enabled: true,
+      developer: {},
+      productTypes: [{ product_line: 'endpoint', product_tier: 'complete' }],
+    } as unknown as ServerlessSecurityConfig;
+
+    const tier = getCloudProductTier(serverlessSecurityConfig);
+
+    expect(tier).toBe('none');
   });
 });

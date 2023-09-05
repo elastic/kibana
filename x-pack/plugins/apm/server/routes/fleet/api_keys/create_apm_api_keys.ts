@@ -9,7 +9,7 @@ import { CoreStart, Logger } from '@kbn/core/server';
 import {
   APM_AGENT_CONFIGURATION_INDEX,
   APM_SOURCE_MAP_INDEX,
-} from '../../settings/apm_indices/get_apm_indices';
+} from '../../settings/apm_indices/apm_system_index_constants';
 
 const apiKeyMetadata = {
   application: 'apm',

@@ -9,11 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiSpacer,
-  EuiPageHeader,
-} from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common';
 
@@ -117,7 +113,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   }
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">
@@ -142,6 +138,6 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
         onSave={onSave}
         onCancel={onCancel}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

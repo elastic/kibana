@@ -34,6 +34,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
   const SEARCH_UI_DOCS = `${DOCS_WEBSITE_URL}search-ui/`;
   const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
+  const SERVERLESS_DOCS = `${DOCS_WEBSITE_URL}serverless/`;
+  const SERVERLESS_ELASTICSEARCH_DOCS = `${SERVERLESS_DOCS}elasticsearch/`;
 
   return deepFreeze({
     settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
@@ -65,6 +67,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     console: {
       guide: `${KIBANA_DOCS}console-kibana.html`,
+      serverlessGuide: `${SERVERLESS_ELASTICSEARCH_DOCS}dev-tools-console`,
     },
     dashboard: {
       guide: `${KIBANA_DOCS}dashboard.html`,
@@ -138,6 +141,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsConfluence: `${ENTERPRISE_SEARCH_DOCS}connectors-confluence.html`,
       connectorsDropbox: `${ENTERPRISE_SEARCH_DOCS}connectors-dropbox.html`,
       connectorsContentExtraction: `${ENTERPRISE_SEARCH_DOCS}connectors-content-extraction.html`,
+      connectorsGithub: `${ENTERPRISE_SEARCH_DOCS}connectors-github.html`,
+      connectorsGmail: `${ENTERPRISE_SEARCH_DOCS}connectors-gmail.html`,
       connectorsGoogleCloudStorage: `${ENTERPRISE_SEARCH_DOCS}connectors-google-cloud.html`,
       connectorsGoogleDrive: `${ENTERPRISE_SEARCH_DOCS}connectors-google-drive.html`,
       connectorsJira: `${ENTERPRISE_SEARCH_DOCS}connectors-jira.html`,
@@ -146,12 +151,15 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsMySQL: `${ENTERPRISE_SEARCH_DOCS}connectors-mysql.html`,
       connectorsNative: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-native`,
       connectorsNetworkDrive: `${ENTERPRISE_SEARCH_DOCS}connectors-network-drive.html`,
+      connectorsOneDrive: `${ENTERPRISE_SEARCH_DOCS}connectors-onedrive.html`,
       connectorsOracle: `${ENTERPRISE_SEARCH_DOCS}connectors-oracle.html`,
       connectorsPostgreSQL: `${ENTERPRISE_SEARCH_DOCS}connectors-postgresql.html`,
       connectorsS3: `${ENTERPRISE_SEARCH_DOCS}connectors-s3.html`,
+      connectorsSalesforce: `${ENTERPRISE_SEARCH_DOCS}connectors-salesforce.html`,
       connectorsServiceNow: `${ENTERPRISE_SEARCH_DOCS}connectors-servicenow.html`,
       connectorsSharepoint: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint.html`,
       connectorsSharepointOnline: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint-online.html`,
+      connectorsSlack: `${ENTERPRISE_SEARCH_DOCS}connectors-slack.html`,
       connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}workplace-search-connectors.html`,
       crawlerExtractionRules: `${ENTERPRISE_SEARCH_DOCS}crawler-extraction-rules.html`,
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
@@ -175,6 +183,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       machineLearningStart: `${ENTERPRISE_SEARCH_DOCS}machine-learning-start.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       mlDocumentEnrichment: `${ENTERPRISE_SEARCH_DOCS}document-enrichment.html`,
+      mlDocumentEnrichmentUpdateMappings: `${ENTERPRISE_SEARCH_DOCS}document-enrichment.html#document-enrichment-update-mappings`,
       searchApplicationsTemplates: `${ENTERPRISE_SEARCH_DOCS}search-applications-templates.html`,
       searchApplicationsSearchApi: `${ENTERPRISE_SEARCH_DOCS}search-applications-safe-search.html`,
       searchApplications: `${ENTERPRISE_SEARCH_DOCS}search-applications.html`,
@@ -613,6 +622,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     apis: {
       bulkIndexAlias: `${ELASTICSEARCH_DOCS}indices-aliases.html`,
+      indexStats: `${ELASTICSEARCH_DOCS}indices-stats.html`,
       byteSizeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#byte-units`,
       createAutoFollowPattern: `${ELASTICSEARCH_DOCS}ccr-put-auto-follow-pattern.html`,
       createFollower: `${ELASTICSEARCH_DOCS}ccr-put-follow.html`,
@@ -716,6 +726,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       fleetServer: `${FLEET_DOCS}fleet-server.html`,
       fleetServerAddFleetServer: `${FLEET_DOCS}add-a-fleet-server.html`,
       settings: `${FLEET_DOCS}fleet-settings.html`,
+      kafkaSettings: `${FLEET_DOCS}kafka-output-settings.html`,
+      logstashSettings: `${FLEET_DOCS}ls-output-settings.html`,
       settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
       settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
       troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
@@ -797,8 +809,29 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       appSearch: `${SEARCH_UI_DOCS}tutorials/app-search`,
       elasticsearch: `${SEARCH_UI_DOCS}tutorials/elasticsearch`,
     },
+    serverlessClients: {
+      goApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}go-apis-references`,
+      goGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}go-apis`,
+      httpApis: `${SERVERLESS_ELASTICSEARCH_DOCS}http-apis`,
+      httpApiReferences: `${SERVERLESS_ELASTICSEARCH_DOCS}http-apis-references`,
+      jsApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}nodejs-apis-references`,
+      jsGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}nodejs-apis-getting-started`,
+      phpApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}php-apis-references`,
+      phpGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}php-apis-getting-started`,
+      pythonApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-references`,
+      pythonGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-getting-started`,
+      pythonReferences: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-references`,
+      rubyApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}ruby-apis-references`,
+      rubyGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}ruby-apis-getting-started`,
+    },
     serverlessSearch: {
-      integrations: `${ELASTIC_WEBSITE_URL}/integrations`,
+      integrations: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations`,
+      integrationsLogstash: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-logstash`,
+      integrationsBeats: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-beats`,
+      integrationsConnectorClient: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client`,
+      gettingStartedExplore: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-explore`,
+      gettingStartedIngest: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-ingest`,
+      gettingStartedSearch: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-search`,
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,

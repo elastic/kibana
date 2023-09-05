@@ -94,6 +94,46 @@ export interface ChangePointAnnotation {
 
 export type SelectedChangePoint = FieldConfig & ChangePointAnnotation;
 
+export const ChangePointDetectionControlsContext = createContext<{
+  metricFieldOptions: DataViewField[];
+  splitFieldsOptions: DataViewField[];
+}>({
+  splitFieldsOptions: [],
+  metricFieldOptions: [],
+});
+
+export const useChangePointDetectionControlsContext = () => {
+  return useContext(ChangePointDetectionControlsContext);
+};
+
+export const ChangePointDetectionControlsContextProvider: FC = ({ children }) => {
+  const { dataView } = useDataSource();
+
+  const metricFieldOptions = useMemo<DataViewField[]>(() => {
+    return dataView.fields.filter(({ aggregatable, type }) => aggregatable && type === 'number');
+  }, [dataView]);
+
+  const splitFieldsOptions = useMemo<DataViewField[]>(() => {
+    return dataView.fields.filter(
+      ({ aggregatable, esTypes, displayName }) =>
+        aggregatable &&
+        esTypes &&
+        esTypes.some((el) =>
+          [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP].includes(el as ES_FIELD_TYPES)
+        ) &&
+        !['_id', '_index'].includes(displayName)
+    );
+  }, [dataView]);
+
+  const value = { metricFieldOptions, splitFieldsOptions };
+
+  return (
+    <ChangePointDetectionControlsContext.Provider value={value}>
+      {children}
+    </ChangePointDetectionControlsContext.Provider>
+  );
+};
+
 export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const { dataView, savedSearch } = useDataSource();
   const {

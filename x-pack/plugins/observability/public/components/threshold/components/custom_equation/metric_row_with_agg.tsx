@@ -25,7 +25,7 @@ import { Aggregators, CustomMetricAggTypes } from '../../../../../common/thresho
 import { MetricRowControls } from './metric_row_controls';
 import { NormalizedFields, MetricRowBaseProps } from './types';
 import { ClosablePopoverTitle } from '../closable_popover_title';
-import { MetricsExplorerKueryBar } from '../kuery_bar';
+import { RuleFlyoutKueryBar } from '../../../rule_kql_filter/kuery_bar';
 
 interface MetricRowWithAggProps extends MetricRowBaseProps {
   aggType?: CustomMetricAggTypes;
@@ -184,7 +184,7 @@ export function MetricRowWithAgg({
                         { defaultMessage: 'KQL Filter {name}', values: { name } }
                       )}
                     >
-                      <MetricsExplorerKueryBar
+                      <RuleFlyoutKueryBar
                         placeholder={' '}
                         derivedIndexPattern={dataView}
                         onChange={handleFilterChange}

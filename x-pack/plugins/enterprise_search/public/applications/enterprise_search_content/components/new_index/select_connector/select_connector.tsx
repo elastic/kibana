@@ -55,28 +55,37 @@ import { ConnectorCheckable } from './connector_checkable';
 
 export const SelectConnector: React.FC = () => {
   const { search } = useLocation();
+  const { isCloud } = useValues(KibanaLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const hasNativeAccess = isCloud;
   const { service_type: serviceType } = parseQueryParams(search);
   const [useNativeFilter, setUseNativeFilter] = useState(false);
   const [useNonGAFilter, setUseNonGAFilter] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const filteredConnectors = useMemo(
-    () =>
-      CONNECTORS.filter((connector) =>
+  const filteredConnectors = useMemo(() => {
+    const nativeConnectors = hasNativeAccess
+      ? CONNECTORS.filter((connector) => connector.isNative).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )
+      : [];
+    const nonNativeConnectors = hasNativeAccess
+      ? CONNECTORS.filter((connector) => !connector.isNative).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )
+      : CONNECTORS.sort((a, b) => a.name.localeCompare(b.name));
+    const connectors = [...nativeConnectors, ...nonNativeConnectors];
+    return connectors
+      .filter((connector) =>
         useNonGAFilter ? true : !connector.isBeta && !connector.isTechPreview
       )
-        .filter((connector) => (useNativeFilter ? connector.isNative : true))
-        .filter((connector) =>
-          searchTerm ? connector.name.toLowerCase().includes(searchTerm.toLowerCase()) : true
-        ),
-    [useNonGAFilter, useNativeFilter, searchTerm]
-  );
+      .filter((connector) => (useNativeFilter ? connector.isNative : true))
+      .filter((connector) =>
+        searchTerm ? connector.name.toLowerCase().includes(searchTerm.toLowerCase()) : true
+      );
+  }, [useNonGAFilter, useNativeFilter, searchTerm]);
   const [selectedConnector, setSelectedConnector] = useState<string | null>(
     Array.isArray(serviceType) ? serviceType[0] : serviceType ?? null
   );
-  const { isCloud } = useValues(KibanaLogic);
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
-
-  const hasNativeAccess = isCloud;
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -120,7 +129,7 @@ export const SelectConnector: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.indices.selectConnector.description.textcloud"
-                    defaultMessage="{native} are available directly within Elastic Cloud deployments. No additional infrastructure is required. Self-managed deployments must deploy the connector service to run native connectors. {learnMore}"
+                    defaultMessage="{native} are available directly within Elastic Cloud deployments. No additional infrastructure is required. {learnMore}"
                     values={{
                       learnMore: (
                         <EuiLink target="_blank" href={docLinks.connectorsNative}>
@@ -141,7 +150,7 @@ export const SelectConnector: React.FC = () => {
                   <br />
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.indices.selectConnector.description.selfManaged.text"
-                    defaultMessage="For advanced use cases, deploy {connectorsClient} on your own infrastructure. Customize existing connectors, or build your own using our connector framework. {learnMore}"
+                    defaultMessage="Deploy connectors on your own infrastructure as {connectorsClient}. You can also customize existing connector clients, or build your own using our connector framework. {learnMore}"
                     values={{
                       connectorsClient: (
                         <b>
@@ -219,7 +228,7 @@ export const SelectConnector: React.FC = () => {
                 {filteredConnectors.map((connector) => (
                   <EuiFlexItem key={connector.serviceType} grow>
                     <ConnectorCheckable
-                      disabled={connector.platinumOnly && !hasPlatinumLicense}
+                      disabled={connector.platinumOnly && (!hasPlatinumLicense || !isCloud)}
                       icon={connector.icon}
                       isBeta={connector.isBeta}
                       isTechPreview={Boolean(connector.isTechPreview)}

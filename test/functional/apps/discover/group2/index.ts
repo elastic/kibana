@@ -30,8 +30,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_data_grid_doc_table'));
     loadTestFile(require.resolve('./_data_grid_copy_to_clipboard'));
     loadTestFile(require.resolve('./_data_grid_pagination'));
+    loadTestFile(require.resolve('./_data_grid_footer'));
     loadTestFile(require.resolve('./_adhoc_data_views'));
-    loadTestFile(require.resolve('./_sql_view'));
+    loadTestFile(require.resolve('./_esql_view'));
     loadTestFile(require.resolve('./_indexpattern_with_unmapped_fields'));
     loadTestFile(require.resolve('./_runtime_fields_editor'));
     loadTestFile(require.resolve('./_huge_fields'));

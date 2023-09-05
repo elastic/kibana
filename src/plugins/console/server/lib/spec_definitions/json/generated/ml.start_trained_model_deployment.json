@@ -1,14 +1,34 @@
 {
   "ml.start_trained_model_deployment": {
     "url_params": {
-      "cache_size": "",
-      "deployment_id": "",
-      "number_of_allocations": 0,
-      "threads_per_allocation": 0,
-      "priority": "",
-      "queue_capacity": 0,
-      "timeout": "",
-      "wait_for": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "cache_size": [],
+      "number_of_allocations": [
+        "1"
+      ],
+      "priority": [
+        "normal",
+        "low"
+      ],
+      "queue_capacity": [
+        "1024"
+      ],
+      "threads_per_allocation": [
+        "1"
+      ],
+      "timeout": [
+        "20s",
+        "-1",
+        "0"
+      ],
+      "wait_for": [
+        "started",
+        "starting",
+        "fully_allocated"
+      ]
     },
     "methods": [
       "POST"
@@ -16,6 +36,10 @@
     "patterns": [
       "_ml/trained_models/{model_id}/deployment/_start"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/start-trained-model-deployment.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/start-trained-model-deployment.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

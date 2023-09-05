@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import moment from 'moment';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/threshold_rule/types';
 import { isCustom, isNotCountOrCustom } from './metric_expression_params';
@@ -21,19 +20,7 @@ import { createBucketSelector } from './create_bucket_selector';
 import { createPercentileAggregation } from './create_percentile_aggregation';
 import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
 import { wrapInCurrentPeriod } from './wrap_in_period';
-
-const getParsedFilterQuery: (filterQuery: string | undefined) => Array<Record<string, any>> = (
-  filterQuery
-) => {
-  if (!filterQuery) return [];
-
-  try {
-    const parsedQuery = toElasticsearchQuery(fromKueryExpression(filterQuery));
-    return [parsedQuery];
-  } catch (error) {
-    return [];
-  }
-};
+import { getParsedFilterQuery } from '../../../../utils/get_parsed_filtered_query';
 
 export const calculateCurrentTimeframe = (
   metricParams: MetricExpressionParams,

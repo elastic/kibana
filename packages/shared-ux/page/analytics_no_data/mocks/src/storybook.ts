@@ -51,6 +51,8 @@ export class StorybookMock extends AbstractStorybookMock<
       customBranding: {
         hasCustomBranding$: of(false),
       },
+      pageFlavor: 'kibana',
+      prependBasePath: (path) => path,
       ...kibanaNoDataMock.getServices(params),
     };
   }

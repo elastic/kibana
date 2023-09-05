@@ -6,7 +6,7 @@
  */
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProfilingESField } from '../../../common/elasticsearch';
+import { ProfilingESField } from '@kbn/profiling-data-access-plugin/common/elasticsearch';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
@@ -115,7 +115,7 @@ export async function getHostDetails({
 
         return {
           hostId,
-          hostName: hostDetails?.hostName,
+          hostName: hostDetails?.hostName || '',
           probabilisticValues: currentProjectProbabilisticValues?.probabilisticValues || [],
           projectId,
           totalEventsSize: totalPerIndex.events,

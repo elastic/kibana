@@ -33,7 +33,10 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/alerts-ui-shared",
+    "@kbn/alerting-plugin",
     "@kbn/securitysolution-ecs",
+    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",

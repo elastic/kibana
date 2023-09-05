@@ -147,7 +147,7 @@ describe('UptimeEsClient', () => {
           syntheticsIndexRemoved: true,
         },
       });
-      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { isLegacyAlert: true });
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { stackVersion: '8.9.0' });
 
       const mockSearchParams = {
         body: {
@@ -180,7 +180,7 @@ describe('UptimeEsClient', () => {
           settingsObjectId
         );
       });
-      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { isLegacyAlert: true });
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { stackVersion: '8.9.0' });
 
       const mockSearchParams = {
         body: {
@@ -206,7 +206,60 @@ describe('UptimeEsClient', () => {
         { meta: true }
       );
     });
-  });
+    it('does not append synthetics-* to index for stack version 8.10.0 or later', async () => {
+      savedObjectsClient.get = jest.fn().mockImplementation(() => {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          umDynamicSettings.name,
+          settingsObjectId
+        );
+      });
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, {
+        stackVersion: '8.11.0',
+      });
 
-  // Add more tests for other methods and edge cases
+      await uptimeEsClient.search({
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        {
+          index: 'heartbeat-8*,heartbeat-7*',
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        },
+        { meta: true }
+      );
+
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, {
+        stackVersion: '8.10.0',
+      });
+
+      await uptimeEsClient.search({
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(esClient.search).toHaveBeenLastCalledWith(
+        {
+          index: 'heartbeat-8*,heartbeat-7*',
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        },
+        { meta: true }
+      );
+    });
+  });
 });

@@ -213,7 +213,12 @@ export class UptimePlugin
     setStartServices(coreStart);
     registerUptimeFleetExtensions(registerExtension);
 
-    setUptimeAppStatus(coreStart, pluginsStart, this.uptimeAppUpdater);
+    setUptimeAppStatus(
+      this.initContext.env.packageInfo.version,
+      coreStart,
+      pluginsStart,
+      this.uptimeAppUpdater
+    );
   }
 
   public stop(): void {}
@@ -275,6 +280,7 @@ function registerUptimeFleetExtensions(registerExtension: FleetStart['registerEx
 }
 
 function setUptimeAppStatus(
+  stackVersion: string,
   coreStart: CoreStart,
   pluginsStart: ClientPluginsStart,
   updater: BehaviorSubject<AppUpdater>
@@ -283,7 +289,7 @@ function setUptimeAppStatus(
     const isEnabled = coreStart.uiSettings.get<boolean>(enableLegacyUptimeApp);
     if (isEnabled) {
       registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
-      registerAlertRules(coreStart, pluginsStart, false);
+      registerAlertRules(coreStart, pluginsStart, stackVersion, false);
       updater.next(() => ({ status: AppStatus.accessible }));
     } else {
       const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d', 'now');
@@ -291,10 +297,10 @@ function setUptimeAppStatus(
         if (indexStatus.indexExists) {
           registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
           updater.next(() => ({ status: AppStatus.accessible }));
-          registerAlertRules(coreStart, pluginsStart, false);
+          registerAlertRules(coreStart, pluginsStart, stackVersion, false);
         } else {
           updater.next(() => ({ status: AppStatus.inaccessible }));
-          registerAlertRules(coreStart, pluginsStart, true);
+          registerAlertRules(coreStart, pluginsStart, stackVersion, true);
         }
       });
     }
@@ -304,6 +310,7 @@ function setUptimeAppStatus(
 function registerAlertRules(
   coreStart: CoreStart,
   pluginsStart: ClientPluginsStart,
+  stackVersion: string,
   isHidden = false
 ) {
   uptimeAlertTypeInitializers.forEach((init) => {
@@ -311,6 +318,7 @@ function registerAlertRules(
 
     const alertInitializer = init({
       isHidden,
+      stackVersion,
       core: coreStart,
       plugins: pluginsStart,
     });
@@ -322,6 +330,7 @@ function registerAlertRules(
   legacyAlertTypeInitializers.forEach((init) => {
     const alertInitializer = init({
       isHidden,
+      stackVersion,
       core: coreStart,
       plugins: pluginsStart,
     });

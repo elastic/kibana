@@ -10,10 +10,9 @@ import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   LATEST_FINDINGS_INDEX_PATTERN,
-  LATEST_FINDINGS_RETENTION_POLICY,
   LATEST_VULNERABILITIES_INDEX_PATTERN,
-  LATEST_VULNERABILITIES_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { UsageRecord } from '../types';
 
 import {
@@ -27,18 +26,20 @@ import type {
   ResourceCountAggregation,
 } from './types';
 
+const ASSETS_SAMPLE_GRANULARITY = '24h';
+
 const queryParams = {
   [CSPM_POLICY_TEMPLATE]: {
     index: LATEST_FINDINGS_INDEX_PATTERN,
-    timeRange: LATEST_FINDINGS_RETENTION_POLICY,
+    assets_identifier: 'resource.id',
   },
   [KSPM_POLICY_TEMPLATE]: {
     index: LATEST_FINDINGS_INDEX_PATTERN,
-    timeRange: LATEST_FINDINGS_RETENTION_POLICY,
+    assets_identifier: 'agent.id',
   },
   [CNVM_POLICY_TEMPLATE]: {
     index: LATEST_VULNERABILITIES_INDEX_PATTERN,
-    timeRange: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    assets_identifier: 'cloud.instance.id',
   },
 };
 
@@ -48,12 +49,15 @@ export const getCloudSecurityUsageRecord = async ({
   logger,
   taskId,
   postureType,
+  tier,
 }: CloudSecurityMeteringCallbackInput): Promise<UsageRecord | undefined> => {
   try {
     if (!postureType) {
       logger.error('posture type is missing');
       return;
     }
+
+    if (!(await indexHasDataInDateRange(esClient, postureType))) return;
 
     const response = await esClient.search<unknown, ResourceCountAggregation>(
       getAggQueryByPostureType(postureType)
@@ -62,7 +66,7 @@ export const getCloudSecurityUsageRecord = async ({
     if (!response.aggregations) {
       return;
     }
-    const resourceCount = response.aggregations.unique_resources.value;
+    const resourceCount = response.aggregations.unique_assets.value;
     if (resourceCount > AGGREGATION_PRECISION_THRESHOLD) {
       logger.warn(
         `The number of unique resources for {${postureType}} is ${resourceCount}, which is higher than the AGGREGATION_PRECISION_THRESHOLD of ${AGGREGATION_PRECISION_THRESHOLD}.`
@@ -72,10 +76,12 @@ export const getCloudSecurityUsageRecord = async ({
       ? new Date(response.aggregations.min_timestamp.value_as_string).toISOString()
       : new Date().toISOString();
 
+    const creationTimestamp = new Date().toISOString();
+
     const usageRecord = {
-      id: `${CLOUD_SECURITY_TASK_TYPE}:${postureType}`,
+      id: `${CLOUD_SECURITY_TASK_TYPE}_${postureType}_${projectId}_${creationTimestamp}`,
       usage_timestamp: minTimestamp,
-      creation_timestamp: new Date().toISOString(),
+      creation_timestamp: creationTimestamp,
       usage: {
         type: CLOUD_SECURITY_TASK_TYPE,
         sub_type: postureType,
@@ -85,6 +91,7 @@ export const getCloudSecurityUsageRecord = async ({
       source: {
         id: taskId,
         instance_group_id: projectId,
+        metadata: { tier },
       },
     };
 
@@ -96,13 +103,24 @@ export const getCloudSecurityUsageRecord = async ({
   }
 };
 
-export const getAggQueryByPostureType = (postureType: PostureType) => {
+const indexHasDataInDateRange = async (esClient: ElasticsearchClient, postureType: PostureType) => {
+  const response = await esClient.search({
+    index: queryParams[postureType].index,
+    size: 1,
+    _source: false,
+    query: getSearchQueryByPostureType(postureType),
+  });
+
+  return response.hits.hits.length > 0;
+};
+
+export const getSearchQueryByPostureType = (postureType: PostureType) => {
   const mustFilters = [];
 
   mustFilters.push({
     range: {
       '@timestamp': {
-        gte: `now-${queryParams[postureType].timeRange}`,
+        gte: `now-${ASSETS_SAMPLE_GRANULARITY}`,
       },
     },
   });
@@ -115,18 +133,22 @@ export const getAggQueryByPostureType = (postureType: PostureType) => {
     });
   }
 
+  return {
+    bool: {
+      must: mustFilters,
+    },
+  };
+};
+
+export const getAggQueryByPostureType = (postureType: PostureType) => {
   const query = {
     index: queryParams[postureType].index,
-    query: {
-      bool: {
-        must: mustFilters,
-      },
-    },
+    query: getSearchQueryByPostureType(postureType),
     size: 0,
     aggs: {
-      unique_resources: {
+      unique_assets: {
         cardinality: {
-          field: 'resource.id',
+          field: queryParams[postureType].assets_identifier,
           precision_threshold: AGGREGATION_PRECISION_THRESHOLD,
         },
       },

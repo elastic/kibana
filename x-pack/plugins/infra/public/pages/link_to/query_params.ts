@@ -28,3 +28,13 @@ export const getFromFromLocation = (location: Location) => {
   const timeParam = getParamFromQueryString(getQueryStringFromLocation(location), 'from');
   return timeParam ? parseFloat(timeParam) : NaN;
 };
+
+export const getNodeNameFromLocation = (location: Location) => {
+  const nameParam = getParamFromQueryString(getQueryStringFromLocation(location), 'assetName');
+  return nameParam;
+};
+
+export const getStateFromLocation = (location: Location) => {
+  const nameParam = getParamFromQueryString(getQueryStringFromLocation(location), 'state');
+  return nameParam;
+};

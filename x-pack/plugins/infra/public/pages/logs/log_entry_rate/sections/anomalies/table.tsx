@@ -13,8 +13,8 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiSpacer,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';

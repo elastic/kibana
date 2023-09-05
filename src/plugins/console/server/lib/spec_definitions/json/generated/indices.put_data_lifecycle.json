@@ -1,15 +1,25 @@
 {
   "indices.put_data_lifecycle": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
+        "none"
       ],
-      "timeout": "",
-      "master_timeout": ""
+      "master_timeout": [
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "PUT"
@@ -17,6 +27,10 @@
     "patterns": [
       "_data_stream/{name}/_lifecycle"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams-put-lifecycle.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/dlm-put-lifecycle.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

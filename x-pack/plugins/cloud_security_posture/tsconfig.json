@@ -48,7 +48,8 @@
     "@kbn/shared-ux-router",
     "@kbn/core-saved-objects-server",
     "@kbn/share-plugin",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/core-http-browser"
   ],
   "exclude": [
     "target/**/*",

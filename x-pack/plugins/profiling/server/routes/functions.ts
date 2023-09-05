@@ -67,7 +67,6 @@ export function registerTopNFunctionsSearchRoute({
             stackFrames,
             stackTraces,
             startIndex,
-            totalSeconds: timeTo - timeFrom,
           });
         });
 

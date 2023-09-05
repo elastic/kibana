@@ -1379,7 +1379,15 @@
             "section": "def-common.TableId",
             "text": "TableId"
           },
-          ".alertsOnCasePage"
+          ".alertsOnCasePage | ",
+          {
+            "pluginId": "@kbn/securitysolution-data-table",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
+            "section": "def-common.TableId",
+            "text": "TableId"
+          },
+          ".alertsRiskInputs"
         ],
         "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
         "deprecated": false,
@@ -1841,6 +1849,14 @@
             "text": "TableEntityType"
           },
           "; \"alerts-case-page\": ",
+          {
+            "pluginId": "@kbn/securitysolution-data-table",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
+            "section": "def-common.TableEntityType",
+            "text": "TableEntityType"
+          },
+          "; \"alerts-risk-inputs\": ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
             "scope": "common",

@@ -10,7 +10,7 @@ import { SERVER_APP_ID } from '@kbn/security-solution-plugin/common';
 import type { LinkItem } from '@kbn/security-solution-plugin/public';
 import { ExternalPageName, SecurityPagePath } from '../constants';
 import type { ProjectLinkCategory, ProjectNavigationLink } from '../types';
-import * as i18n from './translations';
+import * as i18n from './ml_translations';
 import {
   IconLensLazy,
   IconEndpointLazy,

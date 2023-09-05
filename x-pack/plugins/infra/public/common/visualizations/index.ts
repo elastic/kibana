@@ -11,4 +11,5 @@ export type {
   HostsLensLineChartFormulas,
 } from './types';
 
+export * from './lens/dashboards';
 export { hostLensFormulas } from './constants';

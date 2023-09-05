@@ -6,110 +6,163 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { useTimelineEventsDetails } from '../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useCorrelations, type UseCorrelationsResult } from '../../shared/hooks/use_correlations';
+import { render } from '@testing-library/react';
 import { CorrelationsDetails } from './correlations_details';
-import { type GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common';
-import type { SelectedDataView } from '../../../common/store/sourcerer/model';
 import { TestProviders } from '../../../common/mock';
 import { LeftPanelContext } from '../context';
-import { CaseStatuses } from '@kbn/cases-components';
+import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
+import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
+import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
+import {
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
+  CORRELATIONS_DETAILS_TEST_ID,
+} from './test_ids';
+import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
+import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
+import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
+import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
+import { mockContextValue } from '../mocks/mock_context';
+import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../shared/components/test_ids';
 
-jest.mock('../../../timelines/containers/details');
-jest.mock('../../../common/containers/sourcerer');
-jest.mock('../../shared/hooks/use_correlations');
-
-const mockCasesByAlertId: GetRelatedCasesByAlertResponse = [
-  {
-    id: '123',
-    title: 'Mock Case',
-    description: 'This is a mock case for testing purposes',
-    status: CaseStatuses.open,
-    createdAt: '2021-10-01T12:00:00Z',
-    totals: {
-      alerts: 5,
-      userComments: 2,
-    },
-  },
-];
-
-const mockUseCorrelationsResult: UseCorrelationsResult = {
-  loading: false,
-  error: false,
-  data: [],
-  dataCount: 0,
-  alertsBySessionIds: ['alert1', 'alert2', 'alert3'],
-  sameSourceAlertsIds: ['alert1', 'alert2'],
-  ancestryAlertsIds: ['alert3'],
-  cases: mockCasesByAlertId,
-};
-
-const contextValue: LeftPanelContext = {
-  indexName: 'index',
-  eventId: 'event',
-  getFieldsData: () => null,
-  dataFormattedForFieldBrowser: [],
-  dataAsNestedObject: null,
-  scopeId: '',
-  browserFields: null,
-  searchHit: undefined,
-};
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
+jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
+jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');
+jest.mock('../../shared/hooks/use_show_related_alerts_by_session');
+jest.mock('../../shared/hooks/use_show_related_cases');
+jest.mock('../../shared/hooks/use_show_suppressed_alerts');
+jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
+jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
+jest.mock('../../shared/hooks/use_fetch_related_alerts_by_same_source_event');
+jest.mock('../../shared/hooks/use_fetch_related_cases');
 
 const renderCorrelationDetails = () => {
   return render(
     <TestProviders>
-      <LeftPanelContext.Provider value={contextValue}>
+      <LeftPanelContext.Provider value={mockContextValue}>
         <CorrelationsDetails />
       </LeftPanelContext.Provider>
     </TestProviders>
   );
 };
 
+const CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID =
+  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
+    CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID
+  );
+
 describe('CorrelationsDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    jest
-      .mocked(useSourcererDataView)
-      .mockReturnValue({ runtimeMappings: {} } as unknown as SelectedDataView);
   });
 
-  it('renders loading spinner when data is loading', () => {
+  it('renders all sections', () => {
     jest
-      .mocked(useTimelineEventsDetails)
-      .mockReturnValue([true, null, undefined, null, async () => {}]);
-    jest.mocked(useCorrelations).mockReturnValue(mockUseCorrelationsResult);
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: true, documentId: 'documentId', indices: ['index1'] });
+    jest
+      .mocked(useShowRelatedAlertsBySameSourceEvent)
+      .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
+    jest
+      .mocked(useShowRelatedAlertsBySession)
+      .mockReturnValue({ show: true, entityId: 'entityId' });
+    jest.mocked(useShowRelatedCases).mockReturnValue(true);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: true, alertSuppressionCount: 1 });
 
-    renderCorrelationDetails();
+    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 1,
+    });
+    (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 1,
+    });
+    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 1,
+    });
+    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 1,
+    });
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    const { getByTestId } = renderCorrelationDetails();
+
+    expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('renders error message when there is an error', () => {
+  it('should render no section and show error message if show values are false', () => {
     jest
-      .mocked(useTimelineEventsDetails)
-      .mockReturnValue([false, null, undefined, null, async () => {}]);
-    jest.mocked(useCorrelations).mockReturnValue({ ...mockUseCorrelationsResult, error: true });
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: false, documentId: 'documentId', indices: ['index1'] });
+    jest
+      .mocked(useShowRelatedAlertsBySameSourceEvent)
+      .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
+    jest
+      .mocked(useShowRelatedAlertsBySession)
+      .mockReturnValue({ show: false, entityId: 'entityId' });
+    jest.mocked(useShowRelatedCases).mockReturnValue(false);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
-    renderCorrelationDetails();
+    const { getByTestId, queryByTestId } = renderCorrelationDetails();
 
     expect(
-      screen.getByText('There was an error displaying Correlation Details view')
-    ).toBeInTheDocument();
+      queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(getByTestId(`${CORRELATIONS_DETAILS_TEST_ID}Error`)).toBeInTheDocument();
   });
 
-  it('renders alerts tables when data is loaded', () => {
-    jest
-      .mocked(useTimelineEventsDetails)
-      .mockReturnValue([false, null, undefined, null, async () => {}]);
-    jest.mocked(useCorrelations).mockReturnValue(mockUseCorrelationsResult);
+  it('should render no section if values are null', () => {
+    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({ show: true });
+    jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: true });
+    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true });
+    jest.mocked(useShowRelatedCases).mockReturnValue(false);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
-    renderCorrelationDetails();
+    const { queryByTestId } = renderCorrelationDetails();
 
-    expect(screen.getByText('1 alert related by ancestry')).toBeInTheDocument();
-    expect(screen.getByText('2 alerts related by source event')).toBeInTheDocument();
-    expect(screen.getByText('3 alerts related by session')).toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).not.toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)
+    ).not.toBeInTheDocument();
   });
 });

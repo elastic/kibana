@@ -9,8 +9,6 @@ import { EuiTitle, useEuiTheme, useEuiShadow } from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
-
-import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { WelcomePanel } from './welcome_panel';
 import { TogglePanel } from './toggle_panel';
 import {
@@ -114,17 +112,15 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
           padding: 0 ${euiTheme.base * 2.25}px;
         `}
       >
-        <NavigationProvider core={services}>
-          <TogglePanel
-            finishedSteps={finishedSteps}
-            activeSections={activeSections}
-            activeProducts={activeProducts}
-            expandedCardSteps={expandedCardSteps}
-            onStepClicked={onStepClicked}
-            onCardClicked={onCardClicked}
-            onStepButtonClicked={onStepButtonClicked}
-          />
-        </NavigationProvider>
+        <TogglePanel
+          finishedSteps={finishedSteps}
+          activeSections={activeSections}
+          activeProducts={activeProducts}
+          expandedCardSteps={expandedCardSteps}
+          onStepClicked={onStepClicked}
+          onCardClicked={onCardClicked}
+          onStepButtonClicked={onStepButtonClicked}
+        />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
