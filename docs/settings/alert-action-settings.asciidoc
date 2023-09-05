@@ -256,7 +256,7 @@ For example: `.email`, `.index`, `.opsgenie`, `.server-log`, `.resilient`, `.sla
 A configuration URL that varies by connector:
 +
 --
-* For a <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
+* For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
 
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
 --
