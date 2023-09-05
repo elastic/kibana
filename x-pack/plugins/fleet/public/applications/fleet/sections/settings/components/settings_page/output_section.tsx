@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiTitle, EuiText, EuiSpacer, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useLink,useStartServices } from '../../../../hooks';
+import { useLink, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { OutputsTable } from '../outputs_table';
 
