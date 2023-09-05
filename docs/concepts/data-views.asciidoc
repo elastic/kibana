@@ -143,10 +143,11 @@ all clusters having a name starting with `cluster_`:
 `cluster_*:logstash-*,cluster_*:-logstash-old*`
 ```
 
-To exclude a cluster having a name starting with `cluster_`:
+Excluding a cluster avoids sending any network calls to that cluster.
+To exclude a cluster with the name `cluster_one`:
 
 ```ts
-`cluster_*:logstash-*,cluster_one:-*`
+`cluster_*:logstash-*,-cluster_one:*`
 ```
 
 Once you configure a {data-source} to use the {ccs} syntax, all searches and

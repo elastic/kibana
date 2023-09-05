@@ -157,6 +157,16 @@ describe('Dashboards landing', () => {
       expect(screen.queryByTestId('dashboardsTable')).not.toBeInTheDocument();
     });
 
+    it('should not render loading icon if no read capability', async () => {
+      mockUseCapabilities.mockReturnValue({
+        ...DEFAULT_DASHBOARD_CAPABILITIES,
+        show: false,
+      });
+      await renderDashboardLanding();
+
+      expect(screen.queryByTestId('dashboardLoadingIcon')).not.toBeInTheDocument();
+    });
+
     describe('Create Security Dashboard button', () => {
       it('should render', async () => {
         await renderDashboardLanding();

@@ -6,19 +6,9 @@
  */
 
 import React, { useContext, FC } from 'react';
-
-import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import { MissingPrivileges } from '../../../../../common/types/privileges';
-
 import { SectionLoading } from '../../../components';
-
 import { AuthorizationContext } from './authorization_provider';
 import { NotAuthorizedSection } from './not_authorized_section';
 import {
@@ -82,31 +72,25 @@ const MissingClusterPrivileges: FC<MissingClusterPrivilegesProps> = ({
   missingPrivileges,
   privilegesCount,
 }) => (
-  <EuiFlexGroup justifyContent="spaceAround">
-    <EuiFlexItem grow={false}>
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-        <NotAuthorizedSection
-          title={
-            <FormattedMessage
-              id="xpack.transform.app.deniedPrivilegeTitle"
-              defaultMessage="You're missing cluster privileges"
-            />
-          }
-          message={
-            <FormattedMessage
-              id="xpack.transform.app.deniedPrivilegeDescription"
-              defaultMessage="To use this section of Transforms, you must have {privilegesCount,
+  <NotAuthorizedSection
+    title={
+      <FormattedMessage
+        id="xpack.transform.app.deniedPrivilegeTitle"
+        defaultMessage="You're missing cluster privileges"
+      />
+    }
+    message={
+      <FormattedMessage
+        id="xpack.transform.app.deniedPrivilegeDescription"
+        defaultMessage="To use this section of Transforms, you must have {privilegesCount,
           plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
-              values={{
-                missingPrivileges,
-                privilegesCount,
-              }}
-            />
-          }
-        />
-      </EuiPageContent>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+        values={{
+          missingPrivileges,
+          privilegesCount,
+        }}
+      />
+    }
+  />
 );
 
 export const PrivilegesWrapper: FC<{ privileges: string | string[] }> = ({

@@ -16,6 +16,5 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/deeplinks-analytics",
   ]
 }

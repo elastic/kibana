@@ -6,10 +6,15 @@
  */
 import React from 'react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const triggersActionsUiStartMock = {
   createStart() {
     return {
+      getAlertSummaryWidget: jest.fn(() => (
+        <div data-test-subj="alerts-summary-widget">mocked component</div>
+      )),
       getAlertsSearchBar: jest.fn(() => (
         <div data-test-subj="alerts-search-bar">mocked component</div>
       )),
@@ -60,26 +65,6 @@ const triggersActionsUiStartMock = {
   },
 };
 
-const data = {
-  createStart() {
-    return {
-      dataViews: {
-        create: jest.fn(),
-      },
-      query: {
-        timefilter: {
-          timefilter: jest.fn(),
-        },
-      },
-      search: {
-        searchSource: {
-          create: jest.fn(),
-        },
-      },
-    };
-  },
-};
-
 const dataViewEditor = {
   createStart() {
     return {
@@ -108,8 +93,9 @@ export const observabilityPublicPluginsStartMock = {
   createStart() {
     return {
       cases: mockCasesContract(),
+      charts: chartPluginMock.createStartContract(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
-      data: data.createStart(),
+      data: dataPluginMock.createStartContract(),
       dataViews: dataViews.createStart(),
       dataViewEditor: dataViewEditor.createStart(),
       lens: null,

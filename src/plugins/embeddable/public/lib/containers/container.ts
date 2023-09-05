@@ -37,8 +37,8 @@ import {
   PanelState,
   EmbeddableContainerSettings,
 } from './i_container';
-import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
+import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -357,6 +357,7 @@ export abstract class Container<
       explicitInput: {
         ...explicitInput,
         id: embeddableId,
+        version: factory.latestVersion,
       } as TEmbeddableInput,
     };
   }
@@ -502,6 +503,7 @@ export abstract class Container<
     } else if (embeddable === undefined) {
       this.removeEmbeddable(panel.explicitInput.id);
     }
+
     return embeddable;
   }
 

@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiIconTip,
   EuiSpacer,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
@@ -270,7 +270,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   } else {
     activateHiddenFilter(isSelectedDataStreamHidden(dataStreams!, decodedDataStreamName));
     content = (
-      <EuiPageContent hasShadow={false} paddingSize="none" data-test-subj="dataStreamList">
+      <EuiPageSection paddingSize="none" data-test-subj="dataStreamList">
         {renderHeader()}
         <EuiSpacer size="l" />
 
@@ -285,7 +285,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 

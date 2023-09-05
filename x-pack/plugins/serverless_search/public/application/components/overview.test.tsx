@@ -53,6 +53,6 @@ describe('<Overview />', () => {
   });
   test("what's next?", () => {
     const { getByRole } = render(<Overview />);
-    expect(getByRole('heading', { name: "What's next?" })).toBeDefined();
+    expect(getByRole('heading', { name: 'Do more with your data' })).toBeDefined();
   });
 });

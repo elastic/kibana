@@ -8,8 +8,7 @@
 import React, { FC } from 'react';
 
 import { EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
+import { formatDate } from '@elastic/eui';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 const TIME_FORMAT = 'HH:mm:ss';

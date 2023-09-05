@@ -13,6 +13,7 @@ export type { NavigationEmbeddableContentType } from '../types';
 export type {
   NavigationLinkType,
   NavigationLayoutType,
+  NavigationLinkOptions,
   NavigationEmbeddableLink,
   NavigationEmbeddableItem,
   NavigationEmbeddableCrudTypes,

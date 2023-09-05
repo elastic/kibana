@@ -6,12 +6,12 @@
  */
 
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE, login } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { triggerLoadData } from '../../tasks/inventory';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Inventory', () => {
+describe('ALL - Inventory', { tags: ['@ess'] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 
@@ -23,7 +23,7 @@ describe('ALL - Inventory', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');
   });
 

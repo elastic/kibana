@@ -10,7 +10,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import {
   GEN_AI_CONNECTOR_ID,
@@ -23,18 +22,14 @@ import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
 import { useConversation } from '../../assistant/use_conversation';
+import { getGenAiConfig } from '../helpers';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 interface Props {
   isDisabled?: boolean;
-  onConnectorSelectionChange: (connectorId: string, provider: OpenAiProviderType) => void;
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
   onConnectorModalVisibilityChange?: (isVisible: boolean) => void;
-}
-
-interface Config {
-  apiProvider: string;
 }
 
 const inputContainerClassName = css`
@@ -82,10 +77,9 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     onConnectorModalVisibilityChange,
     selectedConnectorId,
     selectedConversation,
-    onConnectorSelectionChange,
   }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const { actionTypeRegistry, http } = useAssistantContext();
+    const { actionTypeRegistry, assistantAvailability, http } = useAssistantContext();
     const { setApiConfig } = useConversation();
     // Connector Modal State
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
@@ -111,6 +105,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     const selectedConnectorName =
       connectors?.find((c) => c.id === selectedConnectorId)?.name ??
       i18n.INLINE_CONNECTOR_PLACEHOLDER;
+    const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
     const addNewConnectorOption = useMemo(() => {
       return {
@@ -135,9 +130,10 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     const connectorOptions = useMemo(() => {
       return (
         connectors?.map((connector) => {
-          const apiProvider: string | undefined = (
-            connector as ActionConnectorProps<Config, unknown>
-          )?.config?.apiProvider;
+          const apiProvider = getGenAiConfig(connector)?.apiProvider;
+          const connectorDetails = connector.isPreconfigured
+            ? i18n.PRECONFIGURED_CONNECTOR
+            : apiProvider;
           return {
             value: connector.id,
             inputDisplay: (
@@ -148,9 +144,9 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             dropdownDisplay: (
               <React.Fragment key={connector.id}>
                 <strong>{connector.name}</strong>
-                {apiProvider && (
+                {connectorDetails && (
                   <EuiText size="xs" color="subdued">
-                    <p>{apiProvider}</p>
+                    <p>{connectorDetails}</p>
                   </EuiText>
                 )}
               </React.Fragment>
@@ -159,6 +155,15 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         }) ?? []
       );
     }, [connectors]);
+
+    // Only include add new connector option if user has privilege
+    const allConnectorOptions = useMemo(
+      () =>
+        assistantAvailability.hasConnectorsAllPrivilege
+          ? [...connectorOptions, addNewConnectorOption]
+          : [...connectorOptions],
+      [addNewConnectorOption, assistantAvailability.hasConnectorsAllPrivilege, connectorOptions]
+    );
 
     const cleanupAndCloseModal = useCallback(() => {
       onConnectorModalVisibilityChange?.(false);
@@ -172,7 +177,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     const handleOnBlur = useCallback(() => setIsOpen(false), []);
 
     const onChange = useCallback(
-      (connectorId: string, apiProvider?: OpenAiProviderType) => {
+      (connectorId: string, apiProvider?: OpenAiProviderType, model?: string) => {
         setIsOpen(false);
 
         if (connectorId === ADD_NEW_CONNECTOR) {
@@ -181,31 +186,22 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
           return;
         }
 
-        const provider =
-          apiProvider ??
-          ((connectors?.find((c) => c.id === connectorId) as ActionConnectorProps<Config, unknown>)
-            ?.config.apiProvider as OpenAiProviderType);
-
+        const connector = connectors?.find((c) => c.id === connectorId);
+        const config = getGenAiConfig(connector);
         if (selectedConversation != null) {
           setApiConfig({
             conversationId: selectedConversation.id,
             apiConfig: {
               ...selectedConversation.apiConfig,
               connectorId,
-              provider,
+              // With the inline component, prefer config args to handle 'new connector' case
+              provider: apiProvider ?? config?.apiProvider,
+              model: model ?? config?.defaultModel,
             },
           });
         }
-
-        onConnectorSelectionChange(connectorId, provider);
       },
-      [
-        connectors,
-        selectedConversation,
-        onConnectorSelectionChange,
-        onConnectorModalVisibilityChange,
-        setApiConfig,
-      ]
+      [connectors, selectedConversation, onConnectorModalVisibilityChange, setApiConfig]
     );
 
     const placeholderComponent = useMemo(
@@ -236,13 +232,13 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             <EuiSuperSelect
               aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
               compressed={true}
-              disabled={isDisabled}
+              disabled={localIsDisabled}
               hasDividers={true}
               isLoading={isLoading}
               isOpen={isOpen}
               onBlur={handleOnBlur}
               onChange={onChange}
-              options={[...connectorOptions, addNewConnectorOption]}
+              options={allConnectorOptions}
               placeholder={placeholderComponent}
               valueOfSelected={selectedConnectorId}
             />
@@ -254,7 +250,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
                 data-test-subj="connectorSelectorPlaceholderButton"
                 iconSide={'right'}
                 iconType="arrowDown"
-                isDisabled={isDisabled}
+                isDisabled={localIsDisabled}
                 onClick={onConnectorClick}
                 size="xs"
               >
@@ -266,11 +262,9 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             <ConnectorAddModal
               actionType={actionType}
               onClose={cleanupAndCloseModal}
-              postSaveEventHandler={(savedAction: ActionConnector) => {
-                const provider = (savedAction as ActionConnectorProps<Config, unknown>)?.config
-                  .apiProvider as OpenAiProviderType;
-                onChange(savedAction.id, provider);
-                onConnectorSelectionChange(savedAction.id, provider);
+              postSaveEventHandler={(connector: ActionConnector) => {
+                const config = getGenAiConfig(connector);
+                onChange(connector.id, config?.apiProvider, config?.defaultModel);
                 refetchConnectors?.();
                 cleanupAndCloseModal();
               }}

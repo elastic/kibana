@@ -1,0 +1,10 @@
+env:
+  ENVIRONMENT: ${ENVIRONMENT?}
+
+steps:
+  - label: ":pipeline::grey_question::seedling: Trigger Kibana Tests for ${ENVIRONMENT}"
+    env:
+      QG_PIPELINE_LOCATION: ".buildkite/pipelines/quality-gates"
+    command: "make -C /agent run-environment-tests"
+    agents:
+      image: "docker.elastic.co/ci-agent-images/quality-gate-seedling:0.0.2"

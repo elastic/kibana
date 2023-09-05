@@ -76,7 +76,6 @@
     "@kbn/babel-register",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
@@ -96,7 +95,8 @@
     "@kbn/logs-shared-plugin",
     "@kbn/unified-field-list",
     "@kbn/discover-plugin",
-    "@kbn/observability-ai-assistant-plugin"
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/apm-data-access-plugin"
   ],
   "exclude": ["target/**/*"]
 }

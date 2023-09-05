@@ -4,30 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable max-classes-per-file*/
+import { Validator, type Schema, type OutputUnit } from '@cfworker/json-schema';
 
+import { HttpResponse } from '@kbn/core/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { IncomingMessage } from 'http';
 import { cloneDeep, pick } from 'lodash';
 import {
   BehaviorSubject,
-  map,
-  filter as rxJsFilter,
-  scan,
   catchError,
-  of,
   concatMap,
-  shareReplay,
-  finalize,
   delay,
+  filter as rxJsFilter,
+  finalize,
+  map,
+  of,
+  scan,
+  shareReplay,
+  tap,
 } from 'rxjs';
-import { HttpResponse } from '@kbn/core/public';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import {
-  type RegisterContextDefinition,
-  type RegisterFunctionDefinition,
-  Message,
-  MessageRole,
   ContextRegistry,
   FunctionRegistry,
+  Message,
+  MessageRole,
+  type RegisterContextDefinition,
+  type RegisterFunctionDefinition,
 } from '../../common/types';
 import { ObservabilityAIAssistantAPIClient } from '../api';
 import type {
@@ -37,6 +40,20 @@ import type {
   PendingMessage,
 } from '../types';
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
+
+class TokenLimitReachedError extends Error {
+  constructor() {
+    super(`Token limit reached`);
+  }
+}
+
+class ServerError extends Error {}
+
+export class FunctionArgsValidationError extends Error {
+  constructor(public readonly errors: OutputUnit[]) {
+    super('Function arguments are invalid');
+  }
+}
 
 export async function createChatService({
   signal: setupAbortSignal,
@@ -50,11 +67,14 @@ export async function createChatService({
   const contextRegistry: ContextRegistry = new Map();
   const functionRegistry: FunctionRegistry = new Map();
 
+  const validators = new Map<string, Validator>();
+
   const registerContext: RegisterContextDefinition = (context) => {
     contextRegistry.set(context.name, context);
   };
 
   const registerFunction: RegisterFunctionDefinition = (def, respond, render) => {
+    validators.set(def.name, new Validator(def.parameters as Schema, '2020-12', false));
     functionRegistry.set(def.name, { options: def, respond, render });
   };
 
@@ -83,6 +103,14 @@ export async function createChatService({
     registrations.map((fn) => fn({ signal: setupAbortSignal, registerContext, registerFunction }))
   );
 
+  function validate(name: string, parameters: unknown) {
+    const validator = validators.get(name)!;
+    const result = validator.validate(parameters);
+    if (!result.valid) {
+      throw new FunctionArgsValidationError(result.errors);
+    }
+  }
+
   return {
     executeFunction: async (name, args, signal) => {
       const fn = functionRegistry.get(name);
@@ -93,7 +121,7 @@ export async function createChatService({
 
       const parsedArguments = args ? JSON.parse(args) : {};
 
-      // validate
+      validate(name, parsedArguments);
 
       return await fn.respond({ arguments: parsedArguments }, signal);
     },
@@ -111,8 +139,6 @@ export async function createChatService({
         data: JSON.parse(response.data ?? '{}'),
       };
 
-      // validate
-
       return fn.render?.({ response: parsedResponse, arguments: parsedArguments });
     },
     getContexts,
@@ -120,7 +146,15 @@ export async function createChatService({
     hasRenderFunction: (name: string) => {
       return !!getFunctions().find((fn) => fn.options.name === name)?.render;
     },
-    chat({ connectorId, messages }: { connectorId: string; messages: Message[] }) {
+    chat({
+      connectorId,
+      messages,
+      function: callFunctions = 'auto',
+    }: {
+      connectorId: string;
+      messages: Message[];
+      function?: 'none' | 'auto';
+    }) {
       const subject = new BehaviorSubject<PendingMessage>({
         message: {
           role: MessageRole.Assistant,
@@ -138,7 +172,10 @@ export async function createChatService({
           body: {
             messages,
             connectorId,
-            functions: functions.map((fn) => pick(fn.options, 'name', 'description', 'parameters')),
+            functions:
+              callFunctions === 'none'
+                ? []
+                : functions.map((fn) => pick(fn.options, 'name', 'description', 'parameters')),
           },
         },
         signal: controller.signal,
@@ -164,8 +201,26 @@ export async function createChatService({
             .pipe(
               map((line) => line.substring(6)),
               rxJsFilter((line) => !!line && line !== '[DONE]'),
-              map((line) => JSON.parse(line) as CreateChatCompletionResponseChunk),
-              rxJsFilter((line) => line.object === 'chat.completion.chunk'),
+              map(
+                (line) =>
+                  JSON.parse(line) as
+                    | CreateChatCompletionResponseChunk
+                    | { error: { message: string } }
+              ),
+              tap((line) => {
+                if ('error' in line) {
+                  throw new ServerError(line.error.message);
+                }
+              }),
+              rxJsFilter(
+                (line): line is CreateChatCompletionResponseChunk =>
+                  'object' in line && line.object === 'chat.completion.chunk'
+              ),
+              tap((line) => {
+                if (line.choices[0].finish_reason === 'length') {
+                  throw new TokenLimitReachedError();
+                }
+              }),
               scan(
                 (acc, { choices }) => {
                   acc.message.content += choices[0].delta.content ?? '';
@@ -204,6 +259,16 @@ export async function createChatService({
             });
             subject.complete();
           });
+        })
+        .catch(async (err) => {
+          if ('response' in err) {
+            const body = await (err.response as HttpResponse['response'])?.json();
+            err.body = body;
+            if (body.message) {
+              err.message = body.message;
+            }
+          }
+          throw err;
         })
         .catch((err) => {
           subject.next({

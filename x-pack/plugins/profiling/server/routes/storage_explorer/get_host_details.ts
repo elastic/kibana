@@ -115,7 +115,7 @@ export async function getHostDetails({
 
         return {
           hostId,
-          hostName: hostDetails?.hostName,
+          hostName: hostDetails?.hostName || '',
           probabilisticValues: currentProjectProbabilisticValues?.probabilisticValues || [],
           projectId,
           totalEventsSize: totalPerIndex.events,

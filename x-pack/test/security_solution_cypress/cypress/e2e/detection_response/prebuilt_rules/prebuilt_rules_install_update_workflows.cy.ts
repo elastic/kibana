@@ -7,7 +7,7 @@
 
 import type { BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
 import type { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
-import { tag } from '../../../tags';
+
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   GO_BACK_TO_RULES_TABLE_BUTTON,
@@ -20,14 +20,12 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   TOASTER,
 } from '../../../screens/alerts_detection_rules';
-import { waitForRulesTableToBeLoaded } from '../../../tasks/alerts_detection_rules';
 import {
   getRuleAssets,
   createAndInstallMockedPrebuiltRules,
 } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../urls/navigation';
+import { login, visitSecurityDetectionRulesPage } from '../../../tasks/login';
 import {
   addElasticRulesButtonClick,
   assertRuleAvailableForInstallAndInstallOne,
@@ -43,7 +41,7 @@ import {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       login();
@@ -51,7 +49,7 @@ describe(
       deleteAlertsAndRules();
       cy.task('esArchiverResetKibana');
 
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
     });
 
     describe('Installation of prebuilt rules package via Fleet', () => {
@@ -60,7 +58,6 @@ describe(
         cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*').as(
           'installPackage'
         );
-        waitForRulesTableToBeLoaded();
       });
 
       it('should install package from Fleet in the background', () => {
@@ -150,7 +147,6 @@ describe(
       });
       beforeEach(() => {
         createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
-        waitForRulesTableToBeLoaded();
         cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform').as(
           'installPrebuiltRules'
         );
@@ -232,7 +228,6 @@ describe(
           rules: [UPDATED_RULE_1, UPDATED_RULE_2],
           installToKibana: false,
         });
-        waitForRulesTableToBeLoaded();
         reload();
       });
 

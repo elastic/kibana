@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import React from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
 
 interface Props {
   title: React.ReactNode;
@@ -23,17 +23,16 @@ export const SectionError: React.FunctionComponent<Props> = ({
   const errorMessage = error?.message ?? JSON.stringify(error, null, 2);
 
   return (
-    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-      <EuiEmptyPrompt
-        iconType="warning"
-        title={<h2>{title}</h2>}
-        body={
-          <p>
-            <pre>{errorMessage}</pre>
-            {actions ? actions : null}
-          </p>
-        }
-      />
-    </EuiPageContent>
+    <EuiPageTemplate.EmptyPrompt
+      color={'danger'}
+      iconType="warning"
+      title={<h2>{title}</h2>}
+      body={
+        <p>
+          <pre>{errorMessage}</pre>
+          {actions ? actions : null}
+        </p>
+      }
+    />
   );
 };

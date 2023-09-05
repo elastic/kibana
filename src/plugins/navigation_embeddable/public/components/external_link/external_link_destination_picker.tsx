@@ -7,31 +7,46 @@
  */
 
 import useMount from 'react-use/lib/useMount';
+import useUnmount from 'react-use/lib/useUnmount';
 import React, { useState } from 'react';
 
 import { EuiFieldText } from '@elastic/eui';
-import { ExternalLinkStrings } from './external_link_strings';
 
-// TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robust url validation
-const isValidUrl =
-  /^https?:\/\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+import { ExternalLinkStrings } from './external_link_strings';
+import { validateUrl } from './external_link_tools';
 
 export const ExternalLinkDestinationPicker = ({
   onDestinationPicked,
+  setDestinationError,
   initialSelection,
+  onUnmount,
   ...other
 }: {
-  onDestinationPicked: (destination?: string) => void;
   initialSelection?: string;
+  onUnmount: (destination: string) => void;
+  onDestinationPicked: (destination?: string) => void;
+  setDestinationError: (error: string | undefined) => void;
 }) => {
   const [validUrl, setValidUrl] = useState<boolean>(true);
   const [currentUrl, setCurrentUrl] = useState<string>(initialSelection ?? '');
 
   useMount(() => {
     if (initialSelection) {
-      onDestinationPicked(initialSelection);
-      setValidUrl(isValidUrl.test(initialSelection));
+      const { valid, message } = validateUrl(initialSelection);
+
+      if (!valid) {
+        setValidUrl(false);
+        setDestinationError(message);
+        onDestinationPicked(undefined); // prevent re-saving an invalid link
+      } else {
+        onDestinationPicked(initialSelection);
+      }
     }
+  });
+
+  useUnmount(() => {
+    /** Save the current selection so we can re-populate it if we switch back to this link editor */
+    onUnmount(currentUrl);
   });
 
   /* {...other} is needed so all inner elements are treated as part of the form */
@@ -41,13 +56,26 @@ export const ExternalLinkDestinationPicker = ({
         value={currentUrl}
         placeholder={ExternalLinkStrings.getPlaceholder()}
         isInvalid={!validUrl}
-        onChange={(e) => {
-          const url = e.target.value;
-          const isValid = isValidUrl.test(url);
-          setValidUrl(isValid);
+        onChange={(event) => {
+          const url = event.target.value;
           setCurrentUrl(url);
-          if (isValid) {
+
+          if (url === '') {
+            /* no need to validate the empty string - not an error, but also not a valid destination */
+            setValidUrl(true);
+            onDestinationPicked(undefined);
+            setDestinationError(undefined);
+            return;
+          }
+
+          const { valid, message } = validateUrl(url);
+          setValidUrl(valid);
+          if (valid) {
             onDestinationPicked(url);
+            setDestinationError(undefined);
+          } else {
+            onDestinationPicked(undefined);
+            setDestinationError(message);
           }
         }}
       />

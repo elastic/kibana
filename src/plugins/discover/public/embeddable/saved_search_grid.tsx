@@ -5,20 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, memo } from 'react';
+import React, { memo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
-import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
+import {
+  DiscoverGrid,
+  DiscoverGridProps,
+  DataLoadingState as DiscoverDataLoadingState,
+} from '../components/discover_grid/discover_grid';
 import './saved_search_grid.scss';
 import { DiscoverGridFlyout } from '../components/discover_grid/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
+export { DataLoadingState } from '../components/discover_grid/discover_grid';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
-  totalHitCount: number;
+  totalHitCount?: number;
   interceptedWarnings?: SearchResponseInterceptedWarning[];
 }
 
-export const DataGridMemoized = memo(DiscoverGrid);
+export const DiscoverGridMemoized = memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, ...gridProps } = props;
@@ -27,12 +32,13 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   return (
     <SavedSearchEmbeddableBase
       totalHitCount={props.totalHitCount}
-      isLoading={props.isLoading}
+      isLoading={props.loadingState === DiscoverDataLoadingState.loading}
       dataTestSubj="embeddedSavedSearchDocTable"
       interceptedWarnings={props.interceptedWarnings}
     >
-      <DataGridMemoized
+      <DiscoverGridMemoized
         {...gridProps}
+        totalHits={props.totalHitCount}
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
         DocumentView={DiscoverGridFlyout}

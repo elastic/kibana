@@ -33,7 +33,7 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
-import { AssistantTelemetry } from './types';
+import { AssistantAvailability, AssistantTelemetry } from './types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -48,6 +48,8 @@ type ShowAssistantOverlay = ({
 }: ShowAssistantOverlayProps) => void;
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
+  assistantAvailability: AssistantAvailability;
+  assistantLangChain: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
@@ -79,10 +81,12 @@ export interface AssistantProviderProps {
 
 export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
+  assistantAvailability: AssistantAvailability;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
   allSystemPrompts: Prompt[];
+  assistantLangChain: boolean;
   baseAllow: string[];
   baseAllowReplacement: string[];
   docLinks: Omit<DocLinksStart, 'links'>;
@@ -126,6 +130,8 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
+  assistantAvailability,
+  assistantLangChain,
   assistantTelemetry,
   augmentMessageCodeBlocks,
   baseAllow,
@@ -244,6 +250,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const value = useMemo(
     () => ({
       actionTypeRegistry,
+      assistantAvailability,
+      assistantLangChain,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
@@ -279,6 +287,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     }),
     [
       actionTypeRegistry,
+      assistantAvailability,
+      assistantLangChain,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       baseAllow,

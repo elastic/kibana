@@ -69,8 +69,34 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: SERVERLESS_ENVIRONMENT=observability.examples .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Observability Examples Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    soft_fail:
+      - exit_status: 10
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: SERVERLESS_ENVIRONMENT=search .buildkite/scripts/steps/functional/serverless_ftr.sh
     label: 'Serverless Search Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    soft_fail:
+      - exit_status: 10
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: SERVERLESS_ENVIRONMENT=search.examples .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Search Examples Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -94,55 +120,60 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
-  
+
+  - command: SERVERLESS_ENVIRONMENT=security.examples .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Security Examples Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    soft_fail:
+      - exit_status: 10
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: .buildkite/scripts/steps/functional/security_serverless.sh
     label: 'Serverless Security Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 40
-    parallelism: 10
-    soft_fail:
-      - exit_status: 10    
+    parallelism: 16
+    soft_fail: true
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1
     artifact_paths:
       - "target/kibana-security-solution/**/*"
 
-  - command: .buildkite/scripts/steps/functional/security_serverless_defend_workflows.sh
-    label: 'Serverless Security Defend Workflows Cypress Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 40
-    soft_fail:
-      - exit_status: 10
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '*'
-          limit: 1
-    artifact_paths:
-      - "target/kibana-security-solution/**/*"
-    
+  # status_exception: Native role management is not enabled in this Elasticsearch instance
+  # - command: .buildkite/scripts/steps/functional/security_serverless_defend_workflows.sh
+  #   label: 'Serverless Security Defend Workflows Cypress Tests'
+  #   agents:
+  #     queue: n2-4-spot
+  #   depends_on: build
+  #   timeout_in_minutes: 40
+  #   soft_fail: true
+  #   retry:
+  #     automatic:
+  #       - exit_status: '*'
+  #         limit: 1
+  #   artifact_paths:
+  #     - "target/kibana-security-solution/**/*"
+
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Security Investigations Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 40
-    parallelism: 4
-    soft_fail:
-      - exit_status: 10
+    parallelism: 6
+    soft_fail: true
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1
     artifact_paths:
@@ -155,12 +186,9 @@ steps:
     depends_on: build
     timeout_in_minutes: 40
     parallelism: 2
-    soft_fail:
-      - exit_status: 10
+    soft_fail: true
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1
     artifact_paths:

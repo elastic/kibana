@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 import {
@@ -33,7 +32,7 @@ import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 const spaceId = 'default';
 
-describe('Enable risk scores', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Enable risk scores', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -56,7 +55,7 @@ describe('Enable risk scores', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('exist');
   });
 
-  it('should install host risk score successfully', () => {
+  it('should install host risk score successfully', { tags: ['@brokenInServerless'] }, () => {
     interceptInstallRiskScoreModule();
     clickEnableRiskScore(RiskScoreEntity.host);
     waitForInstallRiskScoreModule();
@@ -90,7 +89,7 @@ describe('Enable risk scores', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('exist');
   });
 
-  it('should install user risk score successfully', () => {
+  it('should install user risk score successfully', { tags: ['@brokenInServerless'] }, () => {
     interceptInstallRiskScoreModule();
     clickEnableRiskScore(RiskScoreEntity.user);
     waitForInstallRiskScoreModule();

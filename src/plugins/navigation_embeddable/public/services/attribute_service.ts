@@ -11,6 +11,7 @@ import { AttributeService } from '@kbn/embeddable-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SharingSavedObjectProps } from '../../common/types';
 import { NavigationEmbeddableAttributes } from '../../common/content_management';
+import { extractReferences, injectReferences } from '../../common/persistable_state';
 import {
   NavigationEmbeddableByReferenceInput,
   NavigationEmbeddableByValueInput,
@@ -45,12 +46,19 @@ export function getNavigationEmbeddableAttributeService(): NavigationEmbeddableA
     NavigationEmbeddableUnwrapMetaInfo
   >(CONTENT_ID, {
     saveMethod: async (attributes: NavigationEmbeddableDocument, savedObjectId?: string) => {
-      // TODO extract references
+      const { attributes: updatedAttributes, references } = extractReferences({
+        attributes,
+        references: attributes.references,
+      });
       const {
         item: { id },
       } = await (savedObjectId
-        ? navigationEmbeddableClient.update({ id: savedObjectId, data: attributes })
-        : navigationEmbeddableClient.create({ data: attributes, options: { references: [] } }));
+        ? navigationEmbeddableClient.update({
+            id: savedObjectId,
+            data: updatedAttributes,
+            options: { references },
+          })
+        : navigationEmbeddableClient.create({ data: updatedAttributes, options: { references } }));
       return { id };
     },
     unwrapMethod: async (
@@ -65,8 +73,7 @@ export function getNavigationEmbeddableAttributeService(): NavigationEmbeddableA
       } = await navigationEmbeddableClient.get(savedObjectId);
       if (savedObject.error) throw savedObject.error;
 
-      // TODO inject references
-      const attributes = savedObject.attributes;
+      const { attributes } = injectReferences(savedObject);
       return {
         attributes,
         metaInfo: {

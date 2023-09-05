@@ -12,6 +12,7 @@ import {
   EuiForm,
   EuiTitle,
   EuiButton,
+  EuiSwitch,
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
@@ -25,7 +26,6 @@ import {
   EuiDragDropContext,
   euiDragDropReorder,
   EuiButtonGroupOptionProps,
-  EuiSwitch,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
@@ -205,7 +205,7 @@ const NavigationEmbeddablePanelEditor = ({
                               parentDashboard={parentDashboard}
                               editLink={() => addOrEditLink(link)}
                               deleteLink={() => deleteLink(link.id)}
-                              dragHandleProps={provided.dragHandleProps}
+                              dragHandleProps={provided.dragHandleProps ?? undefined} // casting `null` to `undefined`
                             />
                           )}
                         </EuiDraggable>

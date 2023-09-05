@@ -11,3 +11,10 @@ export const EMPTY_CONVERSATION_TITLE = i18n.translate(
   'xpack.observabilityAiAssistant.emptyConversationTitle',
   { defaultMessage: 'New conversation' }
 );
+
+export const UPGRADE_LICENSE_TITLE = i18n.translate(
+  'xpack.observabilityAiAssistant.incorrectLicense.title',
+  {
+    defaultMessage: 'Upgrade your license',
+  }
+);

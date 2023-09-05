@@ -11,6 +11,9 @@
 export const mockDataAsNestedObject = {
   _id: '123',
   '@timestamp': ['2023-01-01T01:01:01.000Z'],
+  agent: {
+    type: ['endpoint'],
+  },
   event: {
     category: ['malware'],
     kind: ['signal'],
@@ -28,6 +31,7 @@ export const mockDataAsNestedObject = {
   },
   process: {
     name: ['process-name'],
+    entity_id: ['process-entity_id'],
   },
 };
 
@@ -82,6 +86,20 @@ export const mockDataFormattedForFieldBrowser = [
     field: 'process.entity_id',
     values: ['process-entity_id'],
     originalValue: ['process-entity_id'],
+    isObjectArray: false,
+  },
+  {
+    category: 'event',
+    field: 'event.category',
+    values: ['registry'],
+    originalValue: ['registry'],
+    isObjectArray: false,
+  },
+  {
+    category: 'kibana',
+    field: 'kibana.alert.rule.type',
+    values: ['query'],
+    originalValue: ['query'],
     isObjectArray: false,
   },
 ];

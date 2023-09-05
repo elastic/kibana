@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// @ts-expect-error no definitions in component folder
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui/lib/components/button';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 
 import type { IBasePath } from '@kbn/core/server';

@@ -10,21 +10,19 @@ import React from 'react';
 
 import { EuiSpacer, EuiCallOut, EuiText, EuiPanelProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CodeBox } from './code_box';
 import { OverviewPanel } from './overview_panel';
-import { LanguageDefinition, Languages } from '../types';
+import { LanguageDefinition } from '../types';
 import { GithubLink } from './github_link';
 
 interface InstallClientProps {
   codeSnippet: string;
-  showTryInConsole: boolean;
+  consoleRequest?: string;
   language: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
-  http: HttpStart;
-  pluginId: string;
+  assetBasePath: string;
   application?: ApplicationStart;
   sharePlugin: SharePluginStart;
   isPanelLeft?: boolean;
@@ -32,57 +30,29 @@ interface InstallClientProps {
   overviewPanelProps?: Partial<EuiPanelProps>;
 }
 
-const Link: React.FC<{ language: Languages; http: HttpStart; pluginId: string }> = ({
+const Link: React.FC<{ language: LanguageDefinition; assetBasePath: string }> = ({
   language,
-  http,
-  pluginId,
+  assetBasePath,
 }) => {
-  switch (language) {
-    case Languages.CURL:
-      return (
-        <GithubLink
-          href="https://github.com/curl/curl"
-          label={i18n.translate('searchApiPanels.welcomeBanner.githubLink.curl.label', {
-            defaultMessage: 'curl',
-          })}
-          http={http}
-          pluginId={pluginId}
-        />
-      );
-    case Languages.JAVASCRIPT:
-      return (
-        <GithubLink
-          href="https://github.com/elastic/elasticsearch-js"
-          label={i18n.translate('searchApiPanels.welcomeBanner.githubLink.javascript.label', {
-            defaultMessage: 'elasticsearch',
-          })}
-          http={http}
-          pluginId={pluginId}
-        />
-      );
-    case Languages.RUBY:
-      return (
-        <GithubLink
-          href="https://github.com/elastic/elasticsearch-ruby"
-          label={i18n.translate('searchApiPanels.welcomeBanner.githubLink.ruby.label', {
-            defaultMessage: 'elasticsearch-ruby',
-          })}
-          http={http}
-          pluginId={pluginId}
-        />
-      );
+  if (language.github) {
+    return (
+      <GithubLink
+        href={language.github.link}
+        label={language.github.label}
+        assetBasePath={assetBasePath}
+      />
+    );
   }
   return null;
 };
 
 export const InstallClientPanel: React.FC<InstallClientProps> = ({
   codeSnippet,
-  showTryInConsole,
+  consoleRequest,
   language,
   languages,
   setSelectedLanguage,
-  http,
-  pluginId,
+  assetBasePath,
   application,
   sharePlugin,
   isPanelLeft = true,
@@ -91,19 +61,18 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
   const panelContent = (
     <>
       <CodeBox
-        showTryInConsole={showTryInConsole}
+        consoleRequest={consoleRequest}
         codeSnippet={codeSnippet}
         languageType="shell"
         languages={languages}
         selectedLanguage={language}
         setSelectedLanguage={setSelectedLanguage}
-        http={http}
-        pluginId={pluginId}
+        assetBasePath={assetBasePath}
         application={application}
         sharePlugin={sharePlugin}
       />
       <EuiSpacer />
-      <Link language={language.id} http={http} pluginId={pluginId} />
+      <Link language={language} assetBasePath={assetBasePath} />
       <EuiSpacer />
       <EuiCallOut
         iconType="iInCircle"

@@ -115,7 +115,7 @@ export async function getHostBreakdownSizeTimeseries({
 
       return {
         hostId,
-        hostName: hostDetails.hostName,
+        hostName: hostDetails?.hostName || '',
         timeseries,
       };
     }) || []

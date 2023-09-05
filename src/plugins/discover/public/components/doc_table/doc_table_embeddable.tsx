@@ -21,7 +21,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { SavedSearchEmbeddableBase } from '../../embeddable/saved_search_embeddable_base';
 
 export interface DocTableEmbeddableProps extends DocTableProps {
-  totalHitCount: number;
+  totalHitCount?: number;
   rowsPerPageState?: number;
   interceptedWarnings?: SearchResponseInterceptedWarning[];
   onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
@@ -79,7 +79,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   );
 
   const shouldShowLimitedResultsWarning = useMemo(
-    () => !hasNextPage && props.rows.length < props.totalHitCount,
+    () => !hasNextPage && props.totalHitCount && props.rows.length < props.totalHitCount,
     [hasNextPage, props.rows.length, props.totalHitCount]
   );
 

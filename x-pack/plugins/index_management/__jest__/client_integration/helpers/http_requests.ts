@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common/constants';
 
 type HttpResponse = Record<string, any> | any[];
 type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';
@@ -97,11 +97,17 @@ const registerHttpRequestMockHelpers = (
   const setLoadIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/settings/:name`, response, error);
 
-  const setLoadIndexMappingResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/mapping/:name`, response, error);
+  const setLoadIndexMappingResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/mapping/${indexName}`, response, error);
 
-  const setLoadIndexStatsResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/stats/:name`, response, error);
+  const setLoadIndexStatsResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/stats/${indexName}`, response, error);
 
   const setUpdateIndexSettingsResponse = (
     indexName: string,
@@ -121,6 +127,12 @@ const registerHttpRequestMockHelpers = (
   const setLoadTelemetryResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', '/api/ui_counters/_report', response, error);
 
+  const setLoadIndexDetailsResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${INTERNAL_API_BASE_PATH}/indices/${indexName}`, response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -139,6 +151,7 @@ const registerHttpRequestMockHelpers = (
     setLoadComponentTemplatesResponse,
     setLoadNodesPluginsResponse,
     setLoadTelemetryResponse,
+    setLoadIndexDetailsResponse,
   };
 };
 

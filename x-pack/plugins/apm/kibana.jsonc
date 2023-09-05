@@ -9,6 +9,7 @@
     "browser": true,
     "configPath": ["xpack", "apm"],
     "requiredPlugins": [
+      "apmDataAccess",
       "data",
       "dashboard",
       "controls",

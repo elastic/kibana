@@ -33,6 +33,7 @@ import { CrawlCustomSettingsFlyoutCrawlTypeSelection } from './crawl_custom_sett
 import { CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps } from './crawl_custom_settings_flyout_domains_panel';
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 import { CrawlCustomSettingsFlyoutMultipleCrawlDelete } from './crawl_custom_settings_flyout_multi_crawl_delete';
+import { CrawlCustomSettingsFlyoutMultiCrawlLogic } from './crawl_custom_settings_flyout_multi_crawl_logic';
 import { CrawlCustomSettingsFlyoutMultipleCrawlTabs } from './crawl_custom_settings_flyout_multi_crawl_tabs';
 import { CrawlCustomSettingsFlyoutMultiCrawlScheduling } from './crawl_custom_settings_flyout_mutli_crawl';
 import { CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps } from './crawl_custom_settings_flyout_seed_urls_panel';
@@ -45,6 +46,7 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
     isSingleCrawlType,
     selectedDomainUrls,
   } = useValues(CrawlCustomSettingsFlyoutLogic);
+  const { crawlerCustomSchedulingIsValid } = useValues(CrawlCustomSettingsFlyoutMultiCrawlLogic);
   const { hideFlyout, startCustomCrawl, saveCustomSchedulingConfiguration } = useActions(
     CrawlCustomSettingsFlyoutLogic
   );
@@ -125,7 +127,11 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
               data-telemetry-id="entSearchContent-crawler-customCrawlSettings-startCrawl"
               fill
               onClick={submitFunctionLogic}
-              disabled={isDataLoading || selectedDomainUrls.length === 0}
+              disabled={
+                isSingleCrawlType
+                  ? isDataLoading || selectedDomainUrls.length === 0
+                  : !crawlerCustomSchedulingIsValid
+              }
               isLoading={isFormSubmitting}
             >
               {isSingleCrawlType

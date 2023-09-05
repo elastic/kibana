@@ -44,7 +44,11 @@ export const NavigationEmbeddableComponent = () => {
                 layout={layout ?? NAV_VERTICAL_LAYOUT}
               />
             ) : (
-              <ExternalLinkComponent key={currentLink.id} link={currentLink} />
+              <ExternalLinkComponent
+                key={currentLink.id}
+                link={currentLink}
+                layout={layout ?? NAV_VERTICAL_LAYOUT}
+              />
             ),
         },
       };

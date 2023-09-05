@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, Fragment, useMemo, useCallback } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -15,21 +15,20 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
-  SearchResponseWarnings,
   type SearchResponseInterceptedWarning,
+  SearchResponseWarnings,
 } from '@kbn/search-response-warnings';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
-import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import { DataLoadingState, DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid/discover_grid_flyout';
-import { DocViewer } from '../../services/doc_views/components/doc_viewer';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -157,7 +156,6 @@ export function ContextAppContent({
           sort={sort}
           useNewFieldsApi={useNewFieldsApi}
           dataTestSubj="contextDocTable"
-          DocViewer={DocViewer}
         />
       )}
       {!isLegacy && (
@@ -169,7 +167,7 @@ export function ContextAppContent({
               rows={rows}
               dataView={dataView}
               expandedDoc={expandedDoc}
-              isLoading={isAnchorLoading}
+              loadingState={isAnchorLoading ? DataLoadingState.loading : DataLoadingState.loaded}
               sampleSize={0}
               sort={sort as SortOrder[]}
               isSortEnabled={false}

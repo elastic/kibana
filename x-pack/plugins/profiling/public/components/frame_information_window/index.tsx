@@ -34,10 +34,9 @@ export interface Props {
   };
   totalSamples: number;
   totalSeconds: number;
-  samplingRate: number;
 }
 
-export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samplingRate }: Props) {
+export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Props) {
   const aiAssistant = useObservabilityAIAssistant();
 
   const promptMessages = useMemo<Message[] | undefined>(() => {
@@ -155,23 +154,18 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samp
     sourceLine,
   });
 
-  // Are the results sampled? If yes, prepend a '~'.
-  const isApproximate = (samplingRate ?? 1.0) === 1.0;
-  const prependString = isApproximate ? undefined : '~';
-
   const impactRows = getImpactRows({
     countInclusive,
     countExclusive,
     totalSamples,
     totalSeconds,
-    isApproximate,
   });
 
   return (
     <FrameInformationPanel>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <KeyValueList rows={informationRows} />
+          <KeyValueList data-test-subj="informationRows" rows={informationRows} />
         </EuiFlexItem>
         {aiAssistant.isEnabled() && promptMessages ? (
           <>
@@ -202,7 +196,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samp
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <KeyValueList rows={impactRows} prependString={prependString} />
+              <KeyValueList data-test-subj="impactEstimates" rows={impactRows} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

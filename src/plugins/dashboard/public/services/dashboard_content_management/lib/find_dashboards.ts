@@ -80,6 +80,7 @@ export async function findDashboardById(
       id,
       status: 'success',
       attributes: cachedDashboard.item.attributes,
+      references: cachedDashboard.item.references,
     };
   }
   /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */

@@ -6,9 +6,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
-import { UpsellingService } from './common/lib/upsellings';
 import type { PluginStart, PluginSetup } from './types';
 
 const setupMock = (): PluginSetup => ({
@@ -22,6 +22,7 @@ const startMock = (): PluginStart => ({
   getNavLinks$: jest.fn(() => new BehaviorSubject<NavigationLink[]>([])),
   setIsSidebarEnabled: jest.fn(),
   setGetStartedPage: jest.fn(),
+  setIsILMAvailable: jest.fn(),
   getBreadcrumbsNav$: jest.fn(
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
   ),

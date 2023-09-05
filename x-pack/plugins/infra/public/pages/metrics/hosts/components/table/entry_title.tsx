@@ -6,9 +6,8 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip, IconType } from '@elastic/eui';
-import { TimeRange } from '@kbn/es-query';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { encode } from '@kbn/rison';
+import { useNodeDetailsRedirect } from '../../../../link_to';
 import type { CloudProvider, HostNodeRow } from '../../hooks/use_hosts_table';
 
 const cloudIcons: Record<CloudProvider, IconType> = {
@@ -20,19 +19,24 @@ const cloudIcons: Record<CloudProvider, IconType> = {
 
 interface EntryTitleProps {
   onClick: () => void;
-  time: TimeRange;
+  dateRangeTs: { from: number; to: number };
   title: HostNodeRow['title'];
 }
 
-export const EntryTitle = ({ onClick, time, title }: EntryTitleProps) => {
+export const EntryTitle = ({ onClick, dateRangeTs, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
 
   const link = useLinkProps({
-    app: 'metrics',
-    pathname: `/detail/host/${name}`,
-    search: {
-      _a: encode({ time: { ...time, interval: '>=1m' } }),
-    },
+    ...getNodeDetailUrl({
+      nodeId: name,
+      nodeType: 'host',
+      search: {
+        from: dateRangeTs.from,
+        to: dateRangeTs.to,
+        assetName: name,
+      },
+    }),
   });
 
   const iconType = (cloudProvider && cloudIcons[cloudProvider]) || cloudIcons.unknownProvider;

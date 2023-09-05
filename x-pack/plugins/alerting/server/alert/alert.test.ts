@@ -44,7 +44,7 @@ describe('isThrottled', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -58,10 +58,10 @@ describe('isThrottled', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
           actions: {
-            'slack:alert:1h': { date: new Date() },
+            'slack:alert:1h': { date: new Date().toISOString() },
           },
         },
       },
@@ -77,7 +77,7 @@ describe('isThrottled', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -91,7 +91,7 @@ describe('isThrottled', () => {
     const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -105,10 +105,10 @@ describe('isThrottled', () => {
     const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
           actions: {
-            '111-111': { date: new Date() },
+            '111-111': { date: new Date().toISOString() },
           },
         },
       },
@@ -122,10 +122,10 @@ describe('isThrottled', () => {
     const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date('2020-01-01'),
+          date: new Date('2020-01-01').toISOString(),
           group: 'default',
           actions: {
-            '111-111': { date: new Date() },
+            '111-111': { date: new Date().toISOString() },
           },
         },
       },
@@ -141,10 +141,10 @@ describe('isThrottled', () => {
     const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
           actions: {
-            '111-111': { date: new Date() },
+            '111-111': { date: new Date().toISOString() },
           },
         },
       },
@@ -165,7 +165,7 @@ describe('scheduledActionGroupHasChanged()', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -184,7 +184,7 @@ describe('scheduledActionGroupHasChanged()', () => {
     const alert = new Alert<never, never, 'default' | 'penguin'>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -274,7 +274,7 @@ describe('scheduleActions()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -288,7 +288,7 @@ describe('scheduleActions()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -302,7 +302,7 @@ describe('scheduleActions()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -396,10 +396,10 @@ describe('updateLastScheduledActions()', () => {
         flappingHistory: [],
         maintenanceWindowIds: [],
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
           actions: {
-            'slack:alert:1h': { date: new Date() },
+            'slack:alert:1h': { date: new Date().toISOString() },
           },
         },
       },
@@ -429,7 +429,7 @@ describe('getContext()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -442,7 +442,7 @@ describe('getContext()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -458,7 +458,7 @@ describe('hasContext()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -472,7 +472,7 @@ describe('hasContext()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -486,7 +486,7 @@ describe('hasContext()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -503,7 +503,7 @@ describe('toJSON', () => {
         state: { foo: true },
         meta: {
           lastScheduledActions: {
-            date: new Date(),
+            date: new Date().toISOString(),
             group: 'default',
           },
           flappingHistory: [false, true],
@@ -520,7 +520,7 @@ describe('toJSON', () => {
       },
       meta: {
         lastScheduledActions: {
-          date: expect.any(Date),
+          date: expect.any(String),
           group: 'default',
         },
         uuid: expect.any(String),
@@ -538,7 +538,7 @@ describe('toRaw', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
         flappingHistory: [false, true, true],
@@ -557,7 +557,7 @@ describe('toRaw', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
         flappingHistory: [false, true, true],

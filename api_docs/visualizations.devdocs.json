@@ -6715,7 +6715,7 @@
             "section": "def-common.SavedObjectReference",
             "text": "SavedObjectReference"
           },
-          "[]; }; isEditable: () => Promise<boolean>; getDisplayName: () => any; createFromSavedObject: (savedObjectId: string, input: Partial<",
+          "[]; }; isEditable: () => Promise<boolean>; getDisplayName: () => string; createFromSavedObject: (savedObjectId: string, input: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",

@@ -11,6 +11,7 @@ export type {
   NavigationEmbeddableCrudTypes,
   NavigationEmbeddableAttributes,
   NavigationEmbeddableLink,
+  NavigationLinkOptions,
   NavigationLayoutType,
   NavigationLinkType,
 } from './types';

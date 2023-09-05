@@ -29,9 +29,11 @@ import {
 } from '../types';
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { convertDashboardVersionToNumber } from './dashboard_versioning';
+import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
+import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import { DashboardCrudTypes, DashboardAttributes } from '../../../../common/content_management';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
-import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 
 export const serializeControlGroupInput = (
   controlGroupInput: DashboardContainerInput['controlGroupInput']
@@ -76,7 +78,6 @@ export const saveDashboardState = async ({
   savedObjectsTagging,
   dashboardSessionStorage,
   notifications: { toasts },
-  initializerContext: { kibanaVersion },
 }: SaveDashboardStateProps): Promise<SaveDashboardReturn> => {
   const {
     search: dataSearchService,
@@ -91,6 +92,7 @@ export const saveDashboardState = async ({
     title,
     panels,
     filters,
+    version,
     timeRestore,
     description,
     controlGroupInput,
@@ -129,7 +131,7 @@ export const saveDashboardState = async ({
     syncTooltips,
     hidePanelTitles,
   });
-  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, kibanaVersion));
+  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, true));
 
   /**
    * Parse global time filter settings
@@ -147,6 +149,7 @@ export const saveDashboardState = async ({
     : undefined;
 
   const rawDashboardAttributes: DashboardAttributes = {
+    version: convertDashboardVersionToNumber(version ?? LATEST_DASHBOARD_CONTAINER_VERSION),
     controlGroupInput: serializeControlGroupInput(controlGroupInput),
     kibanaSavedObjectMeta: { searchSourceJSON },
     description: description ?? '',
@@ -157,7 +160,6 @@ export const saveDashboardState = async ({
     timeFrom,
     title,
     timeTo,
-    version: 1, // todo - where does version come from? Why is it needed?
   };
 
   /**
@@ -170,6 +172,7 @@ export const saveDashboardState = async ({
     },
     { embeddablePersistableStateService: embeddable }
   );
+
   const references = savedObjectsTagging.updateTagsReferences
     ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
     : dashboardReferences;

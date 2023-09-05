@@ -51,8 +51,6 @@
     "@kbn/shared-ux-page-analytics-no-data",
     "@kbn/alerting-plugin",
     "@kbn/ui-theme",
-    "@kbn/react-field",
-    "@kbn/monaco",
     "@kbn/config-schema",
     "@kbn/storybook",
     "@kbn/shared-ux-router",
@@ -65,11 +63,15 @@
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
+    "@kbn/field-types",
     "@kbn/search-response-warnings",
     "@kbn/content-management-plugin",
+    "@kbn/unified-doc-viewer",
+    "@kbn/unified-doc-viewer-plugin",
     "@kbn/serverless",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/no-data-page-plugin"
   ],
   "exclude": [
     "target/**/*"
