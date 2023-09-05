@@ -132,6 +132,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // note: this has also the side effect to close the dimension editor
           await testSubjects.click('toastCloseButton');
 
+          await PageObjects.lens.openDimensionEditor(
+            'lnsXY_yDimensionPanel > lns-dimensionTrigger'
+          );
+
           await PageObjects.lens.selectOperation('percentile_rank');
 
           await retry.try(async () => {
