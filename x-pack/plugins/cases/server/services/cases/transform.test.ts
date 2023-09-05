@@ -285,7 +285,6 @@ describe('case transforms', () => {
 
       expect(transformedAttributes.attributes).toMatchInlineSnapshot(`
         Object {
-          "custom_fields": Array [],
           "external_service": Object {
             "connector_name": ".jira",
             "external_id": "100",
@@ -357,7 +356,6 @@ describe('case transforms', () => {
             "name": ".jira",
             "type": ".jira",
           },
-          "custom_fields": Array [],
         }
       `);
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
@@ -384,7 +382,6 @@ describe('case transforms', () => {
             "name": "none",
             "type": ".none",
           },
-          "custom_fields": Array [],
         }
       `);
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
