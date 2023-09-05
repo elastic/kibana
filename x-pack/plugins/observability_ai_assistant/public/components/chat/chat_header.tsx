@@ -99,6 +99,7 @@ export function ChatHeader({
           <ChatActionsMenu
             connectors={connectors}
             connectorsManagementHref={connectorsManagementHref}
+            disabled={licenseInvalid}
             modelsManagementHref={modelsManagementHref}
             conversationId={conversationId}
             knowledgeBase={knowledgeBase}
