@@ -77,7 +77,7 @@ export const LensWrapper = ({
     query,
   ]);
 
-  const handlOnLoad = useCallback(
+  const handleOnLoad = useCallback(
     (isLoading: boolean) => {
       if (!embeddableLoaded) {
         setEmbeddableLoaded(true);
@@ -122,7 +122,7 @@ export const LensWrapper = ({
               attributes={state.attributes}
               filters={state.filters}
               lastReloadRequestTime={state.lastReloadRequestTime}
-              onLoad={handlOnLoad}
+              onLoad={handleOnLoad}
               query={state.query}
               timeRange={parsedDateRange}
               viewMode={ViewMode.VIEW}

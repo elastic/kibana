@@ -6,9 +6,9 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { TimeRange } from '@kbn/es-query';
-import { LensAttributes } from '@kbn/lens-embeddable-utils';
-import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
 export type LensWrapperProps = Omit<
