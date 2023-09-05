@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../../common/lib';
 
@@ -19,7 +18,7 @@ export default function createWithCircuitBreakerTests({ getService }: FtrProvide
       await objectRemover.removeAll();
     });
 
-    it('should create disabled rules if max schedules have been reached', async () => {
+    it('should prevent rules from being created if max schedules have been reached', async () => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -31,12 +30,10 @@ export default function createWithCircuitBreakerTests({ getService }: FtrProvide
         .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData({ schedule: { interval: '10s' } }))
-        .expect(200);
-
-      expect(body.enabled).eql(false);
+        .expect(400);
     });
 
-    it('should create disabled rules across spaces if max schedules have been reached', async () => {
+    it('should prevent rules from being created across spaces', async () => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -48,9 +45,7 @@ export default function createWithCircuitBreakerTests({ getService }: FtrProvide
         .post(`${getUrlPrefix('space2')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData({ schedule: { interval: '10s' } }))
-        .expect(200);
-
-      expect(body.enabled).eql(false);
+        .expect(400);
     });
 
     it('should allow disabled rules to go over the circuit breaker', async () => {
