@@ -12,7 +12,7 @@ import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { APP_UI_ID } from '../../../common/constants';
+import { APP_NAME, APP_UI_ID } from '../../../common/constants';
 import { NavigationProvider, SecurityPageName } from '@kbn/security-solution-navigation';
 import { TestProviders } from '../../common/mock';
 import { useNavigateTo } from '../../common/lib/kibana';
@@ -108,6 +108,28 @@ describe('DashboardToolBar', () => {
     mockDashboardTopNav.mock.calls[0][0].redirectTo({ destination: 'listing' });
   });
 
+  it('should render the DashboardTopNav component with the correct breadcrumb', () => {
+    const mockDashboardContainer = {
+      select: jest.fn(),
+    } as unknown as DashboardAPI;
+    const mockOnLoad = jest.fn();
+
+    render(
+      <DashboardToolBar
+        dashboardContainer={mockDashboardContainer}
+        onLoad={mockOnLoad}
+        dashboardId={undefined}
+      />,
+      {
+        wrapper,
+      }
+    );
+    expect(mockGetSecuritySolutionUrl.mock.calls[1][0].deepLinkId).toEqual(
+      SecurityPageName.landing
+    );
+    expect(mockDashboardTopNav.mock.calls[0][0].customLeadingBreadCrumbs[0].text).toEqual(APP_NAME);
+  });
+
   it('should render the DashboardTopNav component with the correct redirect to create dashboard url', () => {
     const mockDashboardContainer = {
       select: jest.fn(),
@@ -127,10 +149,10 @@ describe('DashboardToolBar', () => {
 
     mockDashboardTopNav.mock.calls[0][0].redirectTo({ destination: 'dashboard' });
 
-    expect(mockGetSecuritySolutionUrl.mock.calls[1][0].deepLinkId).toEqual(
+    expect(mockGetSecuritySolutionUrl.mock.calls[2][0].deepLinkId).toEqual(
       SecurityPageName.dashboards
     );
-    expect(mockGetSecuritySolutionUrl.mock.calls[1][0].path).toEqual(`/create`);
+    expect(mockGetSecuritySolutionUrl.mock.calls[2][0].path).toEqual(`/create`);
   });
 
   it('should render the DashboardTopNav component with the correct redirect to edit dashboard url', () => {
@@ -155,11 +177,10 @@ describe('DashboardToolBar', () => {
       destination: 'dashboard',
       id: mockDashboardId,
     });
-
-    expect(mockGetSecuritySolutionUrl.mock.calls[1][0].deepLinkId).toEqual(
+    expect(mockGetSecuritySolutionUrl.mock.calls[2][0].deepLinkId).toEqual(
       SecurityPageName.dashboards
     );
-    expect(mockGetSecuritySolutionUrl.mock.calls[1][0].path).toEqual(`${mockDashboardId}/edit`);
+    expect(mockGetSecuritySolutionUrl.mock.calls[2][0].path).toEqual(`${mockDashboardId}/edit`);
   });
 
   it('should render the DashboardTopNav component with the correct props', () => {
