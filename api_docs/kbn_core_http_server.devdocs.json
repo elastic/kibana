@@ -14151,10 +14151,6 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/privileges.ts"
-              },
-              {
-                "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/transforms_audit_messages.ts"
               },
               {
