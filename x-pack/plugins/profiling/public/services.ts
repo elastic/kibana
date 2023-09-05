@@ -5,8 +5,12 @@
  * 2.0.
  */
 import { HttpFetchQuery } from '@kbn/core/public';
+import {
+  BaseFlameGraph,
+  createFlameGraph,
+  ElasticFlameGraph,
+} from '@kbn/profiling-data-access-plugin/common/flamegraph';
 import { getRoutePaths } from '../common';
-import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
 import type {
   IndexLifecyclePhaseSelectOption,

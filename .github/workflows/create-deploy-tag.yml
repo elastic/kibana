@@ -19,7 +19,7 @@ concurrency:
 jobs:
   create-deploy-tag:
     # Temporary, we need a way to limit this to a GitHub team instead of specific users
-    if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck"]', github.triggering_actor)
+    if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck","jbudz","mistic","delanni","Ikuni17"]', github.triggering_actor)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -79,6 +79,10 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
+                      "text": "*Commit:*\n<https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|${{ env.COMMIT }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
                       "text": "*Git tag:*\n<https://github.com/elastic/kibana/releases/tag/${{ env.TAG_NAME }}|${{ env.TAG_NAME }}>"
                     }
                   ]
@@ -103,7 +107,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Useful links:*\n\n • <https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr|Release process playbook>\n • <https://buildkite.com/elastic/kibana-tests/builds?branch=run-kibana-quality-gate-suites|QA Quality Gate pipeline>"
+                    "text": "*Useful links:*\n\n • <https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr|Release process playbook>\n • <https://example.com|QA Quality Gate pipeline>"
                   }
                 },
                 {
@@ -162,6 +166,10 @@ jobs:
                     {
                       "type": "mrkdwn",
                       "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit:*\n<https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|${{ env.COMMIT }}>"
                     }
                   ]
                 },

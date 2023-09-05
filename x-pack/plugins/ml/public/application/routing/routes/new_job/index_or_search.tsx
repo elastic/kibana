@@ -199,7 +199,7 @@ export const dataComparisonIndexOrSearchRouteFactory = (
       {...props}
       nextStepPath={createPath(ML_PAGES.DATA_COMPARISON)}
       deps={deps}
-      mode={MODE.DATAVISUALIZER}
+      mode={MODE.NEW_JOB}
     />
   ),
   breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),

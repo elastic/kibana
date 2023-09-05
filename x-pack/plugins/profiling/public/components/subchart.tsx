@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { StackFrameMetadata } from '../../common/profiling';
+import { StackFrameMetadata } from '@kbn/profiling-data-access-plugin/common/profiling';
 import { CountPerTime, OTHER_BUCKET_LABEL, TopNSample } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
