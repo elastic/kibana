@@ -62,6 +62,10 @@ export interface ComparisonHistogram extends Histogram {
   g: string;
 }
 
+interface Domain {
+  min: number;
+  max: number;
+}
 // Show the overview table
 export interface Feature {
   featureName: string;
@@ -71,6 +75,11 @@ export interface Feature {
   productionHistogram: Histogram[];
   referenceHistogram: Histogram[];
   comparisonDistribution: ComparisonHistogram[];
+  domain?: {
+    doc_count: Domain;
+    percentage: Domain;
+    x: Domain;
+  };
 }
 
 export interface DataComparisonField {

@@ -12,18 +12,20 @@ import { defaultValueFormatter } from './default_value_formatter';
 import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
 import { NoChartsData } from './no_charts_data';
 import { DATA_COMPARISON_TYPE } from '../constants';
-import { DataComparisonField, Histogram } from '../types';
+import { DataComparisonField, Feature, Histogram } from '../types';
 
 export const SingleDistributionChart = ({
   data,
   color,
   fieldType,
   name,
+  domain,
 }: {
   data: Histogram[];
   name: string;
   color?: SeriesColorAccessor;
   fieldType?: DataComparisonField['type'];
+  domain?: Feature['domain'];
 }) => {
   const valueFormatter = useMemo(
     () => (fieldType === DATA_COMPARISON_TYPE.NUMERIC ? defaultValueFormatter : undefined),
@@ -51,6 +53,7 @@ export const SingleDistributionChart = ({
         tickFormat={valueFormatter}
         labelFormat={valueFormatter}
         hide={true}
+        domain={fieldType === DATA_COMPARISON_TYPE.NUMERIC && domain ? domain.x : undefined}
       />
 
       <BarSeries

@@ -187,6 +187,7 @@ export const DataComparisonOverviewTable = ({
               data={referenceHistogram}
               color={colors.referenceColor}
               name={referenceDistributionLabel}
+              domain={item.domain}
             />
           </div>
         );
@@ -205,6 +206,7 @@ export const DataComparisonOverviewTable = ({
               data={productionDistribution}
               color={colors.productionColor}
               name={comparisonDistributionLabel}
+              domain={item.domain}
             />
           </div>
         );
@@ -223,6 +225,7 @@ export const DataComparisonOverviewTable = ({
               fieldType={item.fieldType}
               data={comparisonDistribution}
               colors={colors}
+              domain={item.domain}
             />
           </div>
         );

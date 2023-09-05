@@ -44,6 +44,7 @@ import {
   Feature,
   DataComparisonField,
   TimeRange,
+  ComparisonHistogram,
 } from './types';
 import { computeChi2PValue } from './data_comparison_utils';
 
@@ -61,6 +62,41 @@ export const getDataComparisonType = (kibanaType: string): DataComparisonField['
 
 type UseDataSearch = ReturnType<typeof useDataSearch>;
 
+const computeDomain = (comparisonDistribution: ComparisonHistogram[]) => {
+  const domain: NonNullable<Feature['domain']> = {
+    x: { min: 0, max: 0 },
+    percentage: { min: 0, max: 0 },
+    doc_count: { min: 0, max: 0 },
+  };
+
+  comparisonDistribution.forEach((dist) => {
+    if (isDefined<number>(dist.percentage)) {
+      if (dist.percentage >= domain.percentage.max) {
+        domain.percentage.max = dist.percentage;
+      } else {
+        domain.percentage.min = dist.percentage;
+      }
+    }
+
+    if (isDefined<number>(dist.doc_count)) {
+      if (dist.doc_count >= domain.doc_count.max) {
+        domain.doc_count.max = dist.doc_count;
+      } else {
+        domain.doc_count.min = dist.doc_count;
+      }
+    }
+
+    const parsedKey = typeof dist.key === 'number' ? dist.key : parseFloat(dist.key);
+    if (!isNaN(parsedKey)) {
+      if (parsedKey >= domain.x.max) {
+        domain.x.max = parsedKey;
+      } else {
+        domain.x.min = parsedKey;
+      }
+    }
+  });
+  return domain;
+};
 export const useDataSearch = <T>() => {
   const { data } = useDataVisualizerKibana().services;
 
@@ -137,6 +173,43 @@ const processDataComparisonResult = (
       const referenceHistogram: Histogram[] = normalizeHistogram(data.referenceHistogram);
       const productionHistogram: Histogram[] = normalizeHistogram(data.productionHistogram);
 
+      const comparisonDistribution: ComparisonHistogram[] = [
+        ...referenceHistogram.map((h) => ({ ...h, g: REFERENCE_LABEL })),
+        ...productionHistogram.map((h) => ({ ...h, g: COMPARISON_LABEL })),
+      ];
+
+      const domain = {
+        x: { min: 0, max: 0 },
+        percentage: { min: 0, max: 0 },
+        doc_count: { min: 0, max: 0 },
+      };
+      comparisonDistribution.forEach((dist) => {
+        if (isDefined<number>(dist.percentage)) {
+          if (dist.percentage >= domain.percentage.max) {
+            domain.percentage.max = dist.percentage;
+          } else {
+            domain.percentage.min = dist.percentage;
+          }
+        }
+
+        if (isDefined<number>(dist.doc_count)) {
+          if (dist.doc_count >= domain.doc_count.max) {
+            domain.doc_count.max = dist.doc_count;
+          } else {
+            domain.doc_count.min = dist.doc_count;
+          }
+        }
+
+        const parsedKey = typeof dist.key === 'number' ? dist.key : parseFloat(dist.key);
+        if (!isNaN(parsedKey)) {
+          if (parsedKey >= domain.x.max) {
+            domain.x.max = parsedKey;
+          } else {
+            domain.x.min = parsedKey;
+          }
+        }
+      });
+      console.log(`--@@domain`, domain);
       return {
         featureName,
         secondaryType: data.secondaryType,
@@ -145,10 +218,8 @@ const processDataComparisonResult = (
         similarityTestPValue: data.pValue,
         referenceHistogram: referenceHistogram ?? [],
         productionHistogram: productionHistogram ?? [],
-        comparisonDistribution: [
-          ...referenceHistogram.map((h) => ({ ...h, g: REFERENCE_LABEL })),
-          ...productionHistogram.map((h) => ({ ...h, g: COMPARISON_LABEL })),
-        ],
+        comparisonDistribution,
+        domain,
       };
     }
 
@@ -206,6 +277,10 @@ const processDataComparisonResult = (
     );
 
     const pValue: number = computeChi2PValue(normalizedBaselineTerms, normalizedDriftedTerms);
+    const comparisonDistribution = [
+      ...normalizedBaselineTerms.map((h) => ({ ...h, g: REFERENCE_LABEL })),
+      ...normalizedDriftedTerms.map((h) => ({ ...h, g: COMPARISON_LABEL })),
+    ];
     return {
       featureName,
       secondaryType: data.secondaryType,
@@ -214,10 +289,8 @@ const processDataComparisonResult = (
       similarityTestPValue: pValue,
       referenceHistogram: normalizedBaselineTerms ?? [],
       productionHistogram: normalizedDriftedTerms ?? [],
-      comparisonDistribution: [
-        ...normalizedBaselineTerms.map((h) => ({ ...h, g: REFERENCE_LABEL })),
-        ...normalizedDriftedTerms.map((h) => ({ ...h, g: COMPARISON_LABEL })),
-      ],
+      comparisonDistribution,
+      domain: computeDomain(comparisonDistribution),
     };
   });
 };

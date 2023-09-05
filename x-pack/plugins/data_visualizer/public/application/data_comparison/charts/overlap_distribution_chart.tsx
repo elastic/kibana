@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { NoChartsData } from './no_charts_data';
-import type { ComparisonHistogram, DataComparisonField } from '../types';
+import type { ComparisonHistogram, DataComparisonField, Feature } from '../types';
 import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE, REFERENCE_LABEL } from '../constants';
 import { defaultValueFormatter } from './default_value_formatter';
@@ -28,11 +28,13 @@ export const OverlapDistributionComparison = ({
   colors,
   fieldType,
   fieldName,
+  domain,
 }: {
   data: ComparisonHistogram[];
   colors: { referenceColor: string; productionColor: string };
   fieldType?: DataComparisonField['type'];
   fieldName?: DataComparisonField['field'];
+  domain?: Feature['domain'];
 }) => {
   const valueFormatter = useMemo(
     () => (fieldType === DATA_COMPARISON_TYPE.NUMERIC ? defaultValueFormatter : undefined),
@@ -57,6 +59,7 @@ export const OverlapDistributionComparison = ({
         tickFormat={valueFormatter}
         labelFormat={valueFormatter}
         hide={true}
+        domain={fieldType === DATA_COMPARISON_TYPE.NUMERIC && domain ? domain.x : undefined}
       />
 
       <Settings showLegend={false} />
