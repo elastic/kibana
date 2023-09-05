@@ -7,7 +7,7 @@
 import { InvokeCreator } from 'xstate';
 import { pick, mapValues } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import { DiscoverAppState, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   DATA_GRID_COLUMNS_PREFERENCES,
@@ -182,7 +182,7 @@ export const updateStateContainer =
   > =>
   async () => {
     const { columns, grid } = stateContainer.appState.getState();
-    const stateUpdates = {};
+    const stateUpdates: DiscoverAppState = {};
 
     // Update data grid columns list
     const shouldSetDefaultColumns =
