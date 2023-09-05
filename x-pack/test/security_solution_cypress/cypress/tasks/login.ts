@@ -106,6 +106,14 @@ export const constructUrlWithUser = (user: User, route: string) => {
   return builtUrl.href;
 };
 
+const getProviderName = () => {
+  if (Cypress.env('CLOUD_SERVERLESS')) {
+    return 'cloud-basic';
+  } else {
+    return 'basic';
+  }
+};
+
 const getCurlScriptEnvVars = () => ({
   ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
   ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
@@ -146,7 +154,7 @@ export const loginWithUser = (user: User) => {
     cy.request({
       body: {
         providerType: 'basic',
-        providerName: 'basic',
+        providerName: getProviderName(),
         currentURL: '/',
         params: {
           username: user.username,
@@ -174,7 +182,7 @@ const loginWithRole = async (role: ROLES) => {
     cy.request({
       body: {
         providerType: 'basic',
-        providerName: 'basic',
+        providerName: getProviderName(),
         currentURL: '/',
         params: {
           username: role,
@@ -235,7 +243,7 @@ const loginViaEnvironmentCredentials = () => {
     cy.request({
       body: {
         providerType: 'basic',
-        providerName: 'basic',
+        providerName: getProviderName(),
         currentURL: '/',
         params: {
           username,
@@ -270,7 +278,7 @@ const loginViaConfig = () => {
     cy.request({
       body: {
         providerType: 'basic',
-        providerName: 'basic',
+        providerName: getProviderName(),
         currentURL: '/',
         params: {
           username: config.elasticsearch.username,

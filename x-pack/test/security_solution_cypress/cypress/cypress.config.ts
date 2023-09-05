@@ -27,6 +27,7 @@ export default defineCypressConfig({
   e2e: {
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
+    experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     setupNodeEvents(on, config) {
       esArchiver(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
