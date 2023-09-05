@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { saveApmIndices } from './save_apm_indices';
+import { saveApmIndices } from './apm_indices';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('saveApmIndices', () => {

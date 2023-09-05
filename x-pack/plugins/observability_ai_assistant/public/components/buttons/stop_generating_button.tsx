@@ -11,7 +11,13 @@ import { i18n } from '@kbn/i18n';
 
 export function StopGeneratingButton(props: Partial<EuiButtonEmptyProps>) {
   return (
-    <EuiButtonEmpty size="s" {...props} iconType="stop" color="text">
+    <EuiButtonEmpty
+      data-test-subj="observabilityAiAssistantStopGeneratingButton"
+      color="text"
+      iconType="stop"
+      size="s"
+      {...props}
+    >
       {i18n.translate('xpack.observabilityAiAssistant.stopGeneratingButtonLabel', {
         defaultMessage: 'Stop generating',
       })}
