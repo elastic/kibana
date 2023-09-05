@@ -50,5 +50,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.exists('tab-indexedFields');
       await testSubjects.missingOrFail('tab-scriptedFields');
     });
+    it('Sample data loads', async () => {
+      await supertest
+        .post('/app/home#/tutorial_directory/sampleData')
+        .set('kbn-xsrf', 'some-xsrf-token');
+      await testSubjects.click('showSampleDataButton');
+      await testSubjects.click('addSampleDataSetecommerce');
+      expect(testSubjects.exists('sampleDataSetInstallToast')).toBeTruthy();
+    });
   });
 }
