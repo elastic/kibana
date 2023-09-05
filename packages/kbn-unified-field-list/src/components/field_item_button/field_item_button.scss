@@ -64,6 +64,10 @@
       opacity: 1;
     }
   }
+
+  &.domDragDrop-isDraggable {
+    box-shadow: none;
+  }
 }
 
 .unifiedFieldListItemButton--missing {

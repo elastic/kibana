@@ -57,6 +57,10 @@
   flex-direction: column;
   flex-wrap: nowrap;
   height: 100%;
+
+  .euiDataGrid__content {
+    background: transparent;
+  }
 }
 
 .unifiedDataTable__table {
