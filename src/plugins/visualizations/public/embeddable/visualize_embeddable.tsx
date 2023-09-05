@@ -353,10 +353,12 @@ export class VisualizeEmbeddable
         .start()
         .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
           if (hasUnsupportedDownsampledAggregationFailure(warning)) {
-            warnings.push(i18n.translate('visualizations.embeddable.tsdbRollupWarning', {
-              defaultMessage:
-                'Visualization uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-            }));
+            warnings.push(
+              i18n.translate('visualizations.embeddable.tsdbRollupWarning', {
+                defaultMessage:
+                  'Visualization uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+              })
+            );
             return true;
           }
           if (this.vis.type.suppressWarnings?.()) {

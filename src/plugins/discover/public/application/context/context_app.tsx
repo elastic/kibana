@@ -175,12 +175,11 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 
   const interceptedWarnings = useMemo(
-    () =>
-      [
-        ...(fetchedState.predecessorsInterceptedWarnings || []),
-        ...(fetchedState.anchorInterceptedWarnings || []),
-        ...(fetchedState.successorsInterceptedWarnings || []),
-      ],
+    () => [
+      ...(fetchedState.predecessorsInterceptedWarnings || []),
+      ...(fetchedState.anchorInterceptedWarnings || []),
+      ...(fetchedState.successorsInterceptedWarnings || []),
+    ],
     [
       fetchedState.predecessorsInterceptedWarnings,
       fetchedState.anchorInterceptedWarnings,

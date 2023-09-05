@@ -26,7 +26,7 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockInterceptedWarning = {
-  originalWarning: searchResponseIncompleteWarningLocalCluster
+  originalWarning: searchResponseIncompleteWarningLocalCluster,
 };
 
 const mockFilterManager = createFilterManagerMock();
@@ -44,9 +44,7 @@ jest.mock('../services/context', () => {
       }
       return {
         rows: type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits,
-        interceptedWarnings: mockOverrideInterceptedWarnings
-          ? [mockInterceptedWarning]
-          : undefined,
+        interceptedWarnings: mockOverrideInterceptedWarnings ? [mockInterceptedWarning] : undefined,
       };
     },
   };
@@ -59,9 +57,7 @@ jest.mock('../services/anchor', () => ({
     }
     return {
       anchorRow: mockAnchorHit,
-      interceptedWarnings: mockOverrideInterceptedWarnings
-        ? [mockInterceptedWarning]
-        : undefined,
+      interceptedWarnings: mockOverrideInterceptedWarnings ? [mockInterceptedWarning] : undefined,
     };
   },
 }));
@@ -228,13 +224,11 @@ describe('test useContextAppFetch', () => {
     expect(result.current.fetchedState.predecessors).toEqual(mockPredecessorHits);
     expect(result.current.fetchedState.successors).toEqual(mockSuccessorHits);
     expect(result.current.fetchedState.predecessorsInterceptedWarnings).toEqual([
-      mockInterceptedWarning
+      mockInterceptedWarning,
     ]);
     expect(result.current.fetchedState.successorsInterceptedWarnings).toEqual([
-      mockInterceptedWarning
+      mockInterceptedWarning,
     ]);
-    expect(result.current.fetchedState.anchorInterceptedWarnings).toEqual([
-      mockInterceptedWarning
-    ]);
+    expect(result.current.fetchedState.anchorInterceptedWarnings).toEqual([mockInterceptedWarning]);
   });
 });
