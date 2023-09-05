@@ -6,7 +6,7 @@
  */
 
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
-import type { RuleStats, StatsHistory } from './health_stats';
+import type { RuleExecutionStats, RuleStats, StatsHistory } from './health_stats';
 
 /**
  * Health calculation parameters for the whole cluster.
@@ -41,7 +41,4 @@ export type ClusterHealthStatsAtTheMoment = RuleStats;
 /**
  * Health stats calculated over a given interval.
  */
-export interface ClusterHealthStatsOverInterval {
-  // TODO: https://github.com/elastic/kibana/issues/125642 Implement and delete this `message`
-  message: 'Not implemented';
-}
+export type ClusterHealthStatsOverInterval = RuleExecutionStats;

@@ -11,16 +11,12 @@ import { healthStatsMock } from './health_stats.mock';
 const getEmptyClusterHealthSnapshot = (): ClusterHealthSnapshot => {
   return {
     stats_at_the_moment: healthStatsMock.getEmptyRuleStats(),
-    stats_over_interval: {
-      message: 'Not implemented',
-    },
+    stats_over_interval: healthStatsMock.getEmptyRuleExecutionStats(),
     history_over_interval: {
       buckets: [
         {
           timestamp: '2023-05-15T16:12:14.967Z',
-          stats: {
-            message: 'Not implemented',
-          },
+          stats: healthStatsMock.getEmptyRuleExecutionStats(),
         },
       ],
     },
