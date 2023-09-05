@@ -15,3 +15,5 @@ echo "--- Osquery Cypress tests"
 cd x-pack/plugins/osquery
 
 yarn --cwd x-pack/plugins/osquery cypress:run
+
+some changes
