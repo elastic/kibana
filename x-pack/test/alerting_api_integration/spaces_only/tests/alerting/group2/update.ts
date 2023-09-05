@@ -170,6 +170,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .send(getTestRuleData())
           .expect(200);
 
+        objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
+
         for (const propertyToOmit of ['id', 'uuid']) {
           const systemActionWithoutProperty = omit(systemAction, propertyToOmit);
 
@@ -191,6 +193,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send(getTestRuleData())
           .expect(200);
+
+        objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
 
         for (const propertyAdd of [
           { group: 'test' },
