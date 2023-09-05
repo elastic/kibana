@@ -30,7 +30,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const retry = getService('retry');
-  const logger = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
@@ -1801,12 +1800,11 @@ instanceStateValue: true
             pattern: { alertA: [true, true, false, false, false, false] },
           });
 
-          logger.error(JSON.stringify(createdRule));
-
           const ruleId = createdRule.body.id;
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all_alerts_none_actions at space1':
@@ -1814,6 +1812,7 @@ instanceStateValue: true
               break;
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+              break;
             case 'superuser at space1':
               expect(createdRule.statusCode).to.eql(200);
 
