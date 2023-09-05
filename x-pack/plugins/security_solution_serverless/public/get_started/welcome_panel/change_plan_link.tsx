@@ -34,7 +34,7 @@ const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | u
           <span
             className="eui-displayBlock"
             css={css`
-              ${cssStyles.primary};
+              ${backgroundColorStyles.primary};
               border-radius: ${euiTheme.border.radius.medium};
               padding: 0 ${euiTheme.size.m};
               line-height: ${euiTheme.base * 2}px;
