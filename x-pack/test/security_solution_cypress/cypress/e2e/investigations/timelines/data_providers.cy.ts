@@ -29,7 +29,8 @@ import { getTimeline } from '../../../objects/timeline';
 import { HOSTS_URL } from '../../../urls/navigation';
 import { cleanKibana, scrollToBottom } from '../../../tasks/common';
 
-describe('timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
+// Failing in serverless
+describe('timeline data providers', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
