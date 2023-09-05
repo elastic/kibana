@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -45,20 +45,11 @@ interface DetailsListProps {
 }
 
 const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => {
-  const groups: any[] = [];
-  let items: any[];
-
-  details.forEach((detail, index) => {
+  const descriptionListItems = details.map((detail, index) => {
     const { name, toolTip, content } = detail;
 
-    if (index % 2 === 0) {
-      items = [];
-
-      groups.push(<EuiFlexGroup key={groups.length}>{items}</EuiFlexGroup>);
-    }
-
-    items.push(
-      <EuiFlexItem key={name}>
+    return (
+      <Fragment key={`${name}-${index}`}>
         <EuiDescriptionListTitle>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>{name}</EuiFlexItem>
@@ -70,11 +61,24 @@ const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => 
         </EuiDescriptionListTitle>
 
         <EuiDescriptionListDescription>{content}</EuiDescriptionListDescription>
-      </EuiFlexItem>
+      </Fragment>
     );
   });
 
-  return <EuiDescriptionList textStyle="reverse">{groups}</EuiDescriptionList>;
+  const midpoint = Math.ceil(descriptionListItems.length / 2);
+  const descriptionListColumnOne = descriptionListItems.slice(0, midpoint);
+  const descriptionListColumnTwo = descriptionListItems.slice(-midpoint);
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiDescriptionList textStyle="reverse">{descriptionListColumnOne}</EuiDescriptionList>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiDescriptionList textStyle="reverse">{descriptionListColumnTwo}</EuiDescriptionList>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 
 interface Props {
@@ -123,7 +127,42 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       ilmPolicyName,
       storageSize,
       maxTimeStamp,
+      lifecycle,
     } = dataStream;
+
+    const getLifecycleManagement = () => {
+      if (lifecycle?.data_retention) {
+        return {
+          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionTitle', {
+            defaultMessage: 'Data retention',
+          }),
+          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionToolTip', {
+            defaultMessage: 'The minimum amount of time the data stream will be stored for.',
+          }),
+          content: lifecycle.data_retention,
+        };
+      }
+
+      if (ilmPolicyName) {
+        return {
+          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyTitle', {
+            defaultMessage: 'Index lifecycle policy',
+          }),
+          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
+            defaultMessage: `The index lifecycle policy that manages the data stream's data`,
+          }),
+          content: (
+            <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
+              {ilmPolicyName}
+            </EuiLink>
+          ),
+        };
+      }
+
+      // Neither data stream lifecycle or ILM is configured for the data stream
+      return undefined;
+    };
+
     const details = [
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.healthTitle', {
@@ -213,29 +252,13 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           </EuiLink>
         ),
       },
-      {
-        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyTitle', {
-          defaultMessage: 'Index lifecycle policy',
-        }),
-        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
-          defaultMessage: `The index lifecycle policy that manages the data stream's data`,
-        }),
-        content:
-          ilmPolicyName && ilmPolicyLink ? (
-            <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
-              {ilmPolicyName}
-            </EuiLink>
-          ) : (
-            ilmPolicyName || (
-              <em>
-                {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage', {
-                  defaultMessage: `None`,
-                })}
-              </em>
-            )
-          ),
-      },
     ];
+
+    const lifecycleManagementDetail = getLifecycleManagement();
+
+    if (lifecycleManagementDetail) {
+      details.push(lifecycleManagementDetail);
+    }
 
     content = <DetailsList details={details} />;
   }
