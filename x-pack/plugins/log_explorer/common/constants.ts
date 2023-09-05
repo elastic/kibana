@@ -8,4 +8,16 @@
 export const LOG_EXPLORER_PROFILE_ID = 'log-explorer';
 
 // Fields constants
+export const HOST_NAME_FIELD = 'host.name';
 export const MESSAGE_FIELD = 'message';
+export const SERVICE_NAME_FIELD = 'service.name';
+
+// Sizing
+export const DATA_GRID_COLUMN_WIDTH_SMALL = 300;
+
+// UI preferences
+export const DATA_GRID_DEFAULT_COLUMNS = [SERVICE_NAME_FIELD, HOST_NAME_FIELD, MESSAGE_FIELD];
+export const DATA_GRID_COLUMNS_PREFERENCES = {
+  [HOST_NAME_FIELD]: { width: DATA_GRID_COLUMN_WIDTH_SMALL },
+  [SERVICE_NAME_FIELD]: { width: DATA_GRID_COLUMN_WIDTH_SMALL },
+};

@@ -9,7 +9,10 @@ import { pick, mapValues } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { MESSAGE_FIELD } from '../../../../common/constants';
+import {
+  DATA_GRID_COLUMNS_PREFERENCES,
+  DATA_GRID_DEFAULT_COLUMNS,
+} from '../../../../common/constants';
 import {
   AllDatasetSelection,
   decodeDatasetSelectionId,
@@ -178,14 +181,24 @@ export const updateStateContainer =
     LogExplorerProfileEvent
   > =>
   async () => {
-    const { columns } = stateContainer.appState.getState();
+    const { columns, grid } = stateContainer.appState.getState();
+    const stateUpdates = {};
 
+    // Update data grid columns list
     const shouldSetDefaultColumns =
       stateContainer.appState.isEmptyURL() || !columns || columns.length === 0;
-
     if (shouldSetDefaultColumns) {
-      stateContainer.appState.update({ columns: [MESSAGE_FIELD] }, true);
+      stateUpdates.columns = DATA_GRID_DEFAULT_COLUMNS;
     }
+
+    // Configure DataGrid columns preferences
+    const initialColumnsPreferences = grid?.columns ?? {};
+    stateUpdates.grid = {
+      columns: { ...DATA_GRID_COLUMNS_PREFERENCES, ...initialColumnsPreferences },
+    };
+
+    // Finally batch update state app state
+    stateContainer.appState.update(stateUpdates, true);
   };
 
 /**
