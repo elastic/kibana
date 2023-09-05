@@ -135,7 +135,7 @@ export class SecurityUsageReportingTask {
       return;
     }
 
-    this.logger.info(`received usage records: ${usageRecords}`);
+    this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
 
