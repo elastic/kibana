@@ -14,7 +14,7 @@ export interface SloDetailsParams {
   sloId?: string;
 }
 
-interface SloDetailsLocatorParams extends SloDetailsParams, SerializableRecord {}
+export interface SloDetailsLocatorParams extends SloDetailsParams, SerializableRecord {}
 
 export const getSloDetailsPath = (sloId: string) => {
   return `/${SLOS_PATH}/${encodeURI(sloId)}`;

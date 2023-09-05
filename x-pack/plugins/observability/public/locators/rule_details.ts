@@ -19,7 +19,7 @@ import {
 import type { TabId } from '../pages/rule_details/rule_details';
 import type { AlertStatus } from '../../common/typings';
 
-interface RuleDetailsLocatorParams extends SerializableRecord {
+export interface RuleDetailsLocatorParams extends SerializableRecord {
   ruleId: string;
   tabId?: TabId;
   rangeFrom?: string;
