@@ -39,7 +39,7 @@ export function StackFrameSummary({ frame, onFrameClick }: Props) {
       <EuiFlexItem>
         <div>
           {onFrameClick ? (
-            <EuiLink onClick={handleOnClick}>
+            <EuiLink data-test-subj="profilingStackFrameSummaryLink" onClick={handleOnClick}>
               <CalleeFunctionText calleeFunctionName={calleeFunctionName} />
             </EuiLink>
           ) : (
