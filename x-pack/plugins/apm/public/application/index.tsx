@@ -20,10 +20,15 @@ import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { setHelpExtension } from '../set_help_extension';
 import { setReadonlyBadge } from '../update_badge';
 import { ApmAppRoot } from '../components/routing/app_root';
+import { ITelemetryClient } from '../services/telemetry';
 
 /**
  * This module is rendered asynchronously in the Kibana platform.
  */
+
+export type Services = {
+  telemetry: ITelemetryClient;
+};
 
 export const renderApp = ({
   coreStart,
@@ -32,6 +37,7 @@ export const renderApp = ({
   config,
   pluginsStart,
   observabilityRuleTypeRegistry,
+  services,
 }: {
   coreStart: CoreStart;
   pluginsSetup: ApmPluginSetupDeps;
@@ -39,6 +45,7 @@ export const renderApp = ({
   config: ConfigSchema;
   pluginsStart: ApmPluginStartDeps;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  services: Services;
 }) => {
   const { element, theme$ } = appMountParameters;
   const apmPluginContextValue = {
@@ -80,6 +87,7 @@ export const renderApp = ({
       <ApmAppRoot
         apmPluginContextValue={apmPluginContextValue}
         pluginsStart={pluginsStart}
+        services={services}
       />
     </KibanaThemeProvider>,
     element

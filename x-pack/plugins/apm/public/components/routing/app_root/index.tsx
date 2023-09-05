@@ -22,6 +22,7 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { Services } from '../../../application';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -49,9 +50,11 @@ const storage = new Storage(localStorage);
 export function ApmAppRoot({
   apmPluginContextValue,
   pluginsStart,
+  services,
 }: {
   apmPluginContextValue: ApmPluginContextValue;
   pluginsStart: ApmPluginStartDeps;
+  services: Services;
 }) {
   const { appMountParameters, core } = apmPluginContextValue;
   const { history } = appMountParameters;
@@ -65,7 +68,9 @@ export function ApmAppRoot({
       role="main"
     >
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...pluginsStart, storage }}>
+        <KibanaContextProvider
+          services={{ ...core, ...pluginsStart, storage, ...services }}
+        >
           <i18nCore.Context>
             <ObservabilityAIAssistantProvider
               value={apmPluginContextValue.observabilityAIAssistant}

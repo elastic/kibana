@@ -279,6 +279,10 @@ export function UnifiedSearchBar({
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
+    console.log('submit kuery', query?.query);
+    core.analytics.reportEvent('apm_ebt_submit_search', {
+      kuery: query?.query,
+    });
   };
 
   return (
