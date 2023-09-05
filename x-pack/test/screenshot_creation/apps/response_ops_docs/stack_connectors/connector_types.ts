@@ -186,7 +186,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('pagerduty-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
-    
+
     it('opsgenie connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
