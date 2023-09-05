@@ -62,10 +62,7 @@ import {
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
 import { columnActions } from '@kbn/unified-data-table';
-import {
-  VIEW_MODE,
-  getDefaultRowsPerPage,
-} from '../../common/constants';
+import { VIEW_MODE, getDefaultRowsPerPage } from '../../common/constants';
 import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import type { DiscoverServices } from '../build_services';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
