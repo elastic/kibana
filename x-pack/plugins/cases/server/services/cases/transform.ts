@@ -45,7 +45,7 @@ export function transformUpdateResponseToExternalModel(
     status,
     total_alerts,
     total_comments,
-    custom_fields,
+    customFields,
     ...restUpdateAttributes
   } =
     updatedCase.attributes ??
@@ -175,9 +175,9 @@ export function transformSavedObjectToExternalModel(
     SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
   const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
-  const custom_fields = !caseSavedObjectAttributes.custom_fields
+  const customFields = !caseSavedObjectAttributes.customFields
     ? []
-    : caseSavedObjectAttributes.custom_fields;
+    : caseSavedObjectAttributes.customFields;
 
   return {
     ...caseSavedObject,
@@ -188,7 +188,7 @@ export function transformSavedObjectToExternalModel(
       connector,
       external_service: externalService,
       category,
-      custom_fields,
+      customFields,
     },
   };
 }

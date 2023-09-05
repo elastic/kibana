@@ -112,7 +112,7 @@ const CaseBasicRt = rt.strict({
    * An array containing the possible,
    * user-configured custom fields.
    */
-  custom_fields: CaseCustomFieldsArrayRt,
+  customFields: CaseCustomFieldsArrayRt,
 });
 
 export const CaseAttributesRt = rt.intersection([

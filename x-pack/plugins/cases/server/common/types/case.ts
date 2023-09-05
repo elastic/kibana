@@ -48,7 +48,7 @@ export interface CasePersistedAttributes {
   updated_at: string | null;
   updated_by: User | null;
   category?: string | null;
-  custom_fields?: CasePersistedCustomFields;
+  customFields?: CasePersistedCustomFields;
 }
 
 type CasePersistedCustomFields = CaseCustomFields;

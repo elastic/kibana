@@ -191,7 +191,7 @@ export const createCaseSavedObjectType = (
       category: {
         type: 'keyword',
       },
-      custom_fields: {
+      customFields: {
         type: 'nested',
         properties: {
           key: {

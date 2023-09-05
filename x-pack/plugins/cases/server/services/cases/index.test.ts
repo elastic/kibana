@@ -210,7 +210,7 @@ describe('CasesService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
-            "custom_fields": Array [],
+            "customFields": Array [],
             "description": "This is a brand new case of a bad meanie defacing data",
             "duration": null,
             "owner": "securitySolution",
@@ -722,7 +722,7 @@ describe('CasesService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
-            "custom_fields": Array [],
+            "customFields": Array [],
             "description": "This is a brand new case of a bad meanie defacing data",
             "duration": null,
             "external_service": Object {
@@ -1890,7 +1890,7 @@ describe('CasesService', () => {
       'connector',
       'external_service',
       'category',
-      'custom_fields'
+      'customFields'
     );
 
     describe('getCaseIdsByAlertId', () => {
@@ -1986,7 +1986,7 @@ describe('CasesService', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
-              "custom_fields": Array [],
+              "customFields": Array [],
               "description": "This is a brand new case of a bad meanie defacing data",
               "duration": null,
               "external_service": null,
@@ -2076,7 +2076,7 @@ describe('CasesService', () => {
                   "full_name": "elastic",
                   "username": "elastic",
                 },
-                "custom_fields": Array [],
+                "customFields": Array [],
                 "description": "This is a brand new case of a bad meanie defacing data",
                 "duration": null,
                 "external_service": Object {
@@ -2169,7 +2169,7 @@ describe('CasesService', () => {
                     "full_name": "elastic",
                     "username": "elastic",
                   },
-                  "custom_fields": Array [],
+                  "customFields": Array [],
                   "description": "This is a brand new case of a bad meanie defacing data",
                   "duration": null,
                   "external_service": Object {
@@ -2262,7 +2262,7 @@ describe('CasesService', () => {
                     "full_name": "elastic",
                     "username": "elastic",
                   },
-                  "custom_fields": Array [],
+                  "customFields": Array [],
                   "description": "This is a brand new case of a bad meanie defacing data",
                   "duration": null,
                   "external_service": Object {
@@ -2368,7 +2368,7 @@ describe('CasesService', () => {
                     "full_name": "elastic",
                     "username": "elastic",
                   },
-                  "custom_fields": Array [],
+                  "customFields": Array [],
                   "description": "This is a brand new case of a bad meanie defacing data",
                   "duration": null,
                   "external_service": Object {
@@ -2424,7 +2424,7 @@ describe('CasesService', () => {
                     "full_name": "elastic",
                     "username": "elastic",
                   },
-                  "custom_fields": Array [],
+                  "customFields": Array [],
                   "description": "This is a brand new case of a bad meanie defacing data",
                   "duration": null,
                   "external_service": Object {
@@ -2526,7 +2526,7 @@ describe('CasesService', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
-              "custom_fields": Array [],
+              "customFields": Array [],
               "description": "This is a brand new case of a bad meanie defacing data",
               "duration": null,
               "external_service": Object {

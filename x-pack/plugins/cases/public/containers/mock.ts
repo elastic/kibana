@@ -539,7 +539,7 @@ export const basicCaseSnake: Case = {
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
-  custom_fields: [],
+  customFields: [],
 } as Case;
 
 export const caseWithAlertsSnake = {

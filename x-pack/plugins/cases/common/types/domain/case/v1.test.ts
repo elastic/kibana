@@ -74,7 +74,7 @@ const basicCase = {
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
   category: null,
-  custom_fields: [
+  customFields: [
     {
       key: 'first_custom_field_key',
       type: 'string',
@@ -182,7 +182,7 @@ describe('CaseAttributesRt', () => {
     updated_at: '2020-02-20T15:02:57.995Z',
     updated_by: null,
     category: null,
-    custom_fields: [
+    customFields: [
       {
         key: 'first_custom_field_key',
         type: 'string',
