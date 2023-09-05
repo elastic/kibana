@@ -10,13 +10,23 @@ import { KibanaFramework } from './lib/kibana_framework';
 import { registerGrokdebuggerRoutes } from './routes/api/grokdebugger';
 
 export const config = {
+  exposeToBrowser: {
+    enabled: true,
+  },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
 };
 
 export class Plugin {
+  constructor(initializerContext) {
+    this.config = initializerContext.config.get();
+  }
+
   setup(coreSetup, plugins) {
+    if (!this.config?.enabled) {
+      return;
+    }
     const framework = new KibanaFramework(coreSetup);
 
     plugins.licensing.license$.subscribe((license) => {

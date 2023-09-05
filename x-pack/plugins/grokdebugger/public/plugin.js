@@ -12,7 +12,15 @@ import { PLUGIN } from '../common/constants';
 import { registerFeature } from './register_feature';
 
 export class GrokDebuggerUIPlugin {
+  constructor(initializerContext) {
+    this.config = initializerContext.config.get();
+  }
+
   setup(coreSetup, plugins) {
+    if (!this.config?.enabled) {
+      return;
+    }
+
     registerFeature(plugins.home);
 
     const devTool = plugins.devTools.register({
