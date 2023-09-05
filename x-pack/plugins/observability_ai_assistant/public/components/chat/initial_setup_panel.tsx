@@ -101,6 +101,7 @@ export function InitialSetupPanel({
                   />
                 ) : (
                   <EuiButton
+                    data-test-subj="observabilityAiAssistantInitialSetupPanelButton"
                     color={knowledgeBase.status.value?.ready ? 'success' : 'primary'}
                     fill
                     isLoading={knowledgeBase.isInstalling || knowledgeBase.status.loading}
@@ -187,7 +188,12 @@ export function InitialSetupPanel({
               }
               footer={
                 !connectors.connectors?.length ? (
-                  <EuiButton fill color="primary" href={connectorsManagementHref}>
+                  <EuiButton
+                    data-test-subj="observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton"
+                    fill
+                    color="primary"
+                    href={connectorsManagementHref}
+                  >
                     {i18n.translate(
                       'xpack.observabilityAiAssistant.initialSetupPanel.setupConnector.buttonLabel',
                       {
