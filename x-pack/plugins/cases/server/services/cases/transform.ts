@@ -78,7 +78,6 @@ export function transformUpdateResponseToExternalModel(
       ...(transformedConnector && { connector: transformedConnector }),
       // if externalService is null that means we intentionally updated it to null within ES so return that as a valid value
       ...(externalService !== undefined && { external_service: externalService }),
-      ...(!custom_fields && { custom_fields: [] }), // TODO: doublecheck, should apply to undefined
     },
   };
 }
@@ -123,7 +122,6 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
       ...transformedExternalService,
       ...(severity && { severity: SEVERITY_EXTERNAL_TO_ESMODEL[severity] }),
       ...(status && { status: STATUS_EXTERNAL_TO_ESMODEL[status] }),
-      custom_fields: [], // REMOVE WHEN REQUEST TYPES UPDATED
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };

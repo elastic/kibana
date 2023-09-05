@@ -18,6 +18,8 @@ import { createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
 import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 
+import type { CaseCustomFields } from '../../../common/types/domain';
+
 describe('create', () => {
   const theCase = {
     title: 'My Case',
@@ -170,6 +172,7 @@ describe('create', () => {
             duration: null,
             status: CaseStatuses.open,
             category: null,
+            custom_fields: [],
           },
           id: expect.any(String),
           refresh: false,
@@ -235,6 +238,7 @@ describe('create', () => {
             duration: null,
             status: CaseStatuses.open,
             category: null,
+            custom_fields: [],
           },
           id: expect.any(String),
           refresh: false,
@@ -307,6 +311,7 @@ describe('create', () => {
             duration: null,
             status: CaseStatuses.open,
             category: null,
+            custom_fields: [],
           },
           id: expect.any(String),
           refresh: false,
@@ -365,6 +370,87 @@ describe('create', () => {
             external_service: null,
             duration: null,
             status: CaseStatuses.open,
+            custom_fields: [],
+          },
+          id: expect.any(String),
+          refresh: false,
+        })
+      );
+    });
+  });
+
+  describe('Custom Fields', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+
+    const theCustomFields: CaseCustomFields = [
+      {
+        key: 'first_custom_field_key',
+        type: 'string',
+        field: { value: ['this is a text field value', 'this is second'] },
+      },
+      {
+        key: 'second_custom_field_key',
+        type: 'boolean',
+        field: { value: [true] },
+      },
+    ];
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should create customFields correctly', async () => {
+      await expect(
+        create(
+          {
+            ...theCase,
+            customFields: theCustomFields,
+          },
+          clientArgs
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: {
+            ...theCase,
+            closed_by: null,
+            closed_at: null,
+            category: null,
+            created_at: expect.any(String),
+            created_by: expect.any(Object),
+            updated_at: null,
+            updated_by: null,
+            external_service: null,
+            duration: null,
+            status: CaseStatuses.open,
+            custom_fields: theCustomFields,
+          },
+          id: expect.any(String),
+          refresh: false,
+        })
+      );
+    });
+
+    it('should not throw an error and set default value when customFields are undefined', async () => {
+      await expect(create({ ...theCase }, clientArgs)).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: {
+            ...theCase,
+            closed_by: null,
+            closed_at: null,
+            category: null,
+            created_at: expect.any(String),
+            created_by: expect.any(Object),
+            updated_at: null,
+            updated_by: null,
+            external_service: null,
+            duration: null,
+            status: CaseStatuses.open,
+            custom_fields: [],
           },
           id: expect.any(String),
           refresh: false,

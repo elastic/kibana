@@ -32,8 +32,7 @@ import {
   CaseRt,
   CaseSettingsRt,
   CaseSeverityRt,
-  CustomFieldValuesRt,
-  CustomFieldTypesRt,
+  CaseCustomFieldsArrayRt,
   CasesRt,
   CaseStatusRt,
   RelatedCaseRt,
@@ -45,7 +44,6 @@ import { CasesStatusResponseRt } from '../stats/v1';
 /**
  * Create case
  */
-
 export const CasePostRequestRt = rt.intersection([
   rt.strict({
     /**
@@ -109,13 +107,7 @@ export const CasePostRequestRt = rt.intersection([
       /**
        * The list of custom field values of the case.
        */
-      customFields: rt.array(
-        rt.strict({
-          key: rt.string,
-          type: CustomFieldTypesRt,
-          field: rt.strict({ value: rt.array(CustomFieldValuesRt) }),
-        })
-      ),
+      customFields: CaseCustomFieldsArrayRt,
     })
   ),
 ]);
@@ -373,13 +365,7 @@ export const CasePatchRequestRt = rt.intersection([
       /**
        * Custom fields of the case
        */
-      customFields: rt.array(
-        rt.strict({
-          key: rt.string,
-          type: CustomFieldTypesRt,
-          field: rt.strict({ value: rt.array(CustomFieldValuesRt) }),
-        })
-      ),
+      customFields: CaseCustomFieldsArrayRt,
     })
   ),
   /**

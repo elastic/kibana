@@ -479,11 +479,9 @@ describe('CasesService', () => {
           originalCase: {} as CaseSavedObjectTransformed,
         });
 
-        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
-          Object {
-            "custom_fields": Array [],
-          }
-        `);
+        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(
+          `Object {}`
+        );
         const updateOptions = unsecuredSavedObjectsClient.update.mock
           .calls[0][3] as SavedObjectsUpdateOptions<unknown>;
         expect(updateOptions.references).toBeUndefined();
@@ -507,7 +505,6 @@ describe('CasesService', () => {
               "name": "none",
               "type": ".none",
             },
-            "custom_fields": Array [],
           }
         `);
       });
@@ -1091,15 +1088,15 @@ describe('CasesService', () => {
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`
-            Object {
-              "connector": Object {
-                "fields": null,
-                "id": "none",
-                "name": "none",
-                "type": ".none",
-              },
-            }
-          `);
+          Object {
+            "connector": Object {
+              "fields": null,
+              "id": "none",
+              "name": "none",
+              "type": ".none",
+            },
+          }
+        `);
         expect(res.references).toMatchInlineSnapshot(`Array []`);
       });
 
@@ -1115,10 +1112,10 @@ describe('CasesService', () => {
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`
-            Object {
-              "external_service": null,
-            }
-          `);
+          Object {
+            "external_service": null,
+          }
+        `);
         expect(res.references).toMatchInlineSnapshot(`Array []`);
       });
 
@@ -1147,10 +1144,10 @@ describe('CasesService', () => {
         });
 
         expect(res).toMatchInlineSnapshot(`
-            Object {
-              "attributes": Object {},
-            }
-          `);
+          Object {
+            "attributes": Object {},
+          }
+        `);
       });
 
       it('returns the default none connector when it cannot find the reference', async () => {

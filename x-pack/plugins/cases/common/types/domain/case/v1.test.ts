@@ -74,21 +74,16 @@ const basicCase = {
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
   category: null,
-  customFields: [
+  custom_fields: [
     {
-      key: 'first_custom_filed_key',
+      key: 'first_custom_field_key',
       type: 'string',
-      value: ['this is a text filed value', 'this is second'],
+      field: { value: ['this is a text field value', 'this is second'] },
     },
     {
-      key: 'second_custom_filed_key',
+      key: 'second_custom_field_key',
       type: 'boolean',
-      value: true,
-    },
-    {
-      key: 'second_custom_filed_key',
-      type: 'url',
-      value: ['www.example.com'],
+      field: { value: [true] },
     },
   ],
 };
@@ -187,6 +182,18 @@ describe('CaseAttributesRt', () => {
     updated_at: '2020-02-20T15:02:57.995Z',
     updated_by: null,
     category: null,
+    custom_fields: [
+      {
+        key: 'first_custom_field_key',
+        type: 'string',
+        field: { value: ['this is a text field value', 'this is second'] },
+      },
+      {
+        key: 'second_custom_field_key',
+        type: 'boolean',
+        field: { value: [true] },
+      },
+    ],
   };
 
   it('has expected attributes in request', () => {

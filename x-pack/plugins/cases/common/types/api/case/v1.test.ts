@@ -198,11 +198,6 @@ describe('Status', () => {
           type: 'boolean',
           field: { value: [true] },
         },
-        {
-          key: 'second_custom_field_key',
-          type: 'url',
-          field: { value: ['www.example.com'] },
-        },
       ],
     };
 

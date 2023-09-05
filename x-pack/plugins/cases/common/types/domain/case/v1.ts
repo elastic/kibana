@@ -51,21 +51,21 @@ export const CaseSettingsRt = rt.strict({
   syncAlerts: rt.boolean,
 });
 
-export const CustomFieldValuesRt = rt.union([rt.string, rt.number, rt.boolean]);
-export const CustomFieldTypesRt = rt.union([
-  rt.literal('string'),
-  rt.literal('url'),
-  rt.literal('list'),
-  rt.literal('boolean'),
-]);
+const CustomFieldString = rt.strict({
+  key: rt.string,
+  type: rt.literal('string'),
+  field: rt.strict({ value: rt.array(rt.string) }),
+});
 
-const CaseCustomFieldsRt = rt.array(
-  rt.strict({
-    key: rt.string,
-    type: CustomFieldTypesRt, // not sure yet
-    field: rt.strict({ value: rt.array(CustomFieldValuesRt) }),
-  })
-);
+const CustomFieldBoolean = rt.strict({
+  key: rt.string,
+  type: rt.literal('boolean'),
+  field: rt.strict({ value: rt.array(rt.boolean) }),
+});
+
+const CustomFieldValueTypesRt = rt.union([CustomFieldString, CustomFieldBoolean]);
+
+export const CaseCustomFieldsArrayRt = rt.array(CustomFieldValueTypesRt);
 
 const CaseBasicRt = rt.strict({
   /**
@@ -112,7 +112,7 @@ const CaseBasicRt = rt.strict({
    * An array containing the possible,
    * user-configured custom fields.
    */
-  custom_fields: CaseCustomFieldsRt,
+  custom_fields: CaseCustomFieldsArrayRt,
 });
 
 export const CaseAttributesRt = rt.intersection([
@@ -160,7 +160,7 @@ export const RelatedCaseRt = rt.strict({
   totals: AttachmentTotalsRt,
 });
 
-export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsRt>;
+export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsArrayRt>;
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;

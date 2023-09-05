@@ -73,22 +73,26 @@ export const transformNewCase = ({
 }: {
   user: User;
   newCase: CasePostRequest;
-}): CaseTransformedAttributes => ({
-  ...newCase,
-  duration: null,
-  severity: newCase.severity ?? CaseSeverity.LOW,
-  closed_at: null,
-  closed_by: null,
-  created_at: new Date().toISOString(),
-  created_by: user,
-  external_service: null,
-  status: CaseStatuses.open,
-  updated_at: null,
-  updated_by: null,
-  assignees: dedupAssignees(newCase.assignees) ?? [],
-  category: newCase.category ?? null,
-  custom_fields: newCase.customFields ?? [], // TODO: naming?
-});
+}): CaseTransformedAttributes => {
+  const { customFields, ...theCase } = newCase;
+
+  return {
+    ...theCase,
+    duration: null,
+    severity: newCase.severity ?? CaseSeverity.LOW,
+    closed_at: null,
+    closed_by: null,
+    created_at: new Date().toISOString(),
+    created_by: user,
+    external_service: null,
+    status: CaseStatuses.open,
+    updated_at: null,
+    updated_by: null,
+    assignees: dedupAssignees(newCase.assignees) ?? [],
+    category: newCase.category ?? null,
+    custom_fields: customFields ?? [], // TODO: naming?
+  };
+};
 
 export const transformCases = ({
   casesMap,
