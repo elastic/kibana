@@ -105,7 +105,6 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       [`unifiedFieldListItemButton--${type}`]: type,
       [`unifiedFieldListItemButton--exists`]: !isEmpty,
       [`unifiedFieldListItemButton--missing`]: isEmpty,
-      [`unifiedFieldListItemButton--size-${size}`]: true,
     },
     className
   );
