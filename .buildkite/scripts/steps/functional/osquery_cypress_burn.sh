@@ -14,4 +14,5 @@ buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'fals
 
 echo "--- Osquery Cypress tests, burning changed specs (Chrome)"
 
-yarn --cwd x-pack/plugins/osquery cypress:changed-specs-only
+set +e
+yarn cypress:changed-specs-only; status=$?; yarn junit:merge && exit $status
