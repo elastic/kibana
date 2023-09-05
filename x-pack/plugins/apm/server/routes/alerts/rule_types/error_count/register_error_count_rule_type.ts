@@ -124,7 +124,7 @@ export function registerErrorCountRuleType({
           savedObjectsClient,
         });
 
-        const termFilterQuery = !ruleParams.searchConfiguration
+        const termFilterQuery = !ruleParams.searchConfiguration?.query?.query
           ? [
               ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
                 queryEmptyString: false,
