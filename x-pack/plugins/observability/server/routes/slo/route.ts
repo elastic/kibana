@@ -72,6 +72,7 @@ const createSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos 2023-10-31',
   options: {
     tags: ['access:slo_write'],
+    access: 'public',
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -93,6 +94,7 @@ const updateSLORoute = createObservabilityServerRoute({
   endpoint: 'PUT /api/observability/slos/{id} 2023-10-31',
   options: {
     tags: ['access:slo_write'],
+    access: 'public',
   },
   params: updateSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -115,6 +117,7 @@ const deleteSLORoute = createObservabilityServerRoute({
   endpoint: 'DELETE /api/observability/slos/{id} 2023-10-31',
   options: {
     tags: ['access:slo_write'],
+    access: 'public',
   },
   params: deleteSLOParamsSchema,
   handler: async ({
@@ -143,6 +146,7 @@ const getSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos/{id} 2023-10-31',
   options: {
     tags: ['access:slo_read'],
+    access: 'public',
   },
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -164,6 +168,7 @@ const enableSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/enable 2023-10-31',
   options: {
     tags: ['access:slo_write'],
+    access: 'public',
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -186,6 +191,7 @@ const disableSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/disable 2023-10-31',
   options: {
     tags: ['access:slo_write'],
+    access: 'public',
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -208,6 +214,7 @@ const findSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos 2023-10-31',
   options: {
     tags: ['access:slo_read'],
+    access: 'public',
   },
   params: findSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -229,6 +236,7 @@ const findSloDefinitionsRoute = createObservabilityServerRoute({
   endpoint: 'GET /internal/observability/slos/_definitions',
   options: {
     tags: ['access:slo_read'],
+    access: 'internal',
   },
   params: findSloDefinitionsParamsSchema,
   handler: async ({ context, params }) => {
@@ -270,6 +278,7 @@ const getSLOInstancesRoute = createObservabilityServerRoute({
   endpoint: 'GET /internal/observability/slos/{id}/_instances',
   options: {
     tags: ['access:slo_read'],
+    access: 'internal',
   },
   params: getSLOInstancesParamsSchema,
   handler: async ({ context, params }) => {
@@ -291,6 +300,7 @@ const getDiagnosisRoute = createObservabilityServerRoute({
   endpoint: 'GET /internal/observability/slos/_diagnosis',
   options: {
     tags: [],
+    access: 'internal',
   },
   params: undefined,
   handler: async ({ context }) => {
@@ -313,6 +323,7 @@ const getSloBurnRates = createObservabilityServerRoute({
   endpoint: 'POST /internal/observability/slos/{id}/_burn_rates',
   options: {
     tags: ['access:slo_read'],
+    access: 'internal',
   },
   params: getSLOBurnRatesParamsSchema,
   handler: async ({ context, params }) => {
@@ -337,6 +348,7 @@ const getPreviewData = createObservabilityServerRoute({
   endpoint: 'POST /internal/observability/slos/_preview',
   options: {
     tags: ['access:slo_read'],
+    access: 'internal',
   },
   params: getPreviewDataParamsSchema,
   handler: async ({ context, params }) => {
