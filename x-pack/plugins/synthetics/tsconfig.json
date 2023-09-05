@@ -78,6 +78,8 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/stack-alerts-plugin",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",

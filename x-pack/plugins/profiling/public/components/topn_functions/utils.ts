@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
+import { StackFrameMetadata } from '@kbn/profiling-data-access-plugin/common/profiling';
 import { TopNFunctions } from '../../../common/functions';
-import { StackFrameMetadata } from '../../../common/profiling';
 import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
 
 export function getColorLabel(percent: number) {

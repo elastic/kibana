@@ -909,6 +909,22 @@
             "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx"
           },
           {
+            "plugin": "indexManagement",
+            "path": "x-pack/plugins/index_management/public/shared_imports.ts"
+          },
+          {
+            "plugin": "indexManagement",
+            "path": "x-pack/plugins/index_management/public/application/index.tsx"
+          },
+          {
+            "plugin": "indexManagement",
+            "path": "x-pack/plugins/index_management/public/application/index.tsx"
+          },
+          {
+            "plugin": "indexManagement",
+            "path": "x-pack/plugins/index_management/public/application/index.tsx"
+          },
+          {
             "plugin": "serverless",
             "path": "x-pack/plugins/serverless/public/plugin.tsx"
           },
@@ -1575,22 +1591,6 @@
           {
             "plugin": "expressionShape",
             "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/shared_imports.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/index.tsx"
           },
           {
             "plugin": "crossClusterReplication",
@@ -3167,6 +3167,26 @@
             "path": "src/plugins/saved_objects/public/saved_object/helpers/confirm_modal_promise.tsx"
           },
           {
+            "plugin": "runtimeFields",
+            "path": "x-pack/plugins/runtime_fields/public/shared_imports.ts"
+          },
+          {
+            "plugin": "runtimeFields",
+            "path": "x-pack/plugins/runtime_fields/public/load_editor.tsx"
+          },
+          {
+            "plugin": "runtimeFields",
+            "path": "x-pack/plugins/runtime_fields/public/load_editor.tsx"
+          },
+          {
+            "plugin": "indexManagement",
+            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_edit/component_template_edit.tsx"
+          },
+          {
+            "plugin": "indexManagement",
+            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_edit/component_template_edit.tsx"
+          },
+          {
             "plugin": "dataViewEditor",
             "path": "src/plugins/data_view_editor/public/shared_imports.ts"
           },
@@ -3327,14 +3347,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/components/assign_flyout/open_assign_flyout.tsx"
           },
           {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
-          },
-          {
             "plugin": "dataViewFieldEditor",
             "path": "src/plugins/data_view_field_editor/public/shared_imports.ts"
           },
@@ -3347,6 +3359,14 @@
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx"
           },
           {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/get_table_list.tsx"
+          },
+          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/confirm_modal_promise.tsx"
           },
@@ -3675,26 +3695,6 @@
             "path": "x-pack/plugins/cloud_security_posture/public/components/take_action.tsx"
           },
           {
-            "plugin": "runtimeFields",
-            "path": "x-pack/plugins/runtime_fields/public/shared_imports.ts"
-          },
-          {
-            "plugin": "runtimeFields",
-            "path": "x-pack/plugins/runtime_fields/public/load_editor.tsx"
-          },
-          {
-            "plugin": "runtimeFields",
-            "path": "x-pack/plugins/runtime_fields/public/load_editor.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_edit/component_template_edit.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_edit/component_template_edit.tsx"
-          },
-          {
             "plugin": "dashboardEnhanced",
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/actions/flyout_create_drilldown/flyout_create_drilldown.tsx"
           },
@@ -3905,122 +3905,6 @@
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/components/toast_notification_text.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/components/toast_notification_text.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_create/step_create_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_create/step_create_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_create/step_create_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_create/step_create_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_create/step_create_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_delete_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_delete_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_delete_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_delete_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_delete_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_reset_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_reset_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_reset_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_schedule_now_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_schedule_now_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_start_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_start_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_stop_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_stop_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_reauthorize_transform.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/hooks/use_reauthorize_transform.tsx"
           },
           {
             "plugin": "uptime",

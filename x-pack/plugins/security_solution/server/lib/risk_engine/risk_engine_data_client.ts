@@ -11,6 +11,7 @@ import {
   createOrUpdateComponentTemplate,
   createOrUpdateIlmPolicy,
   createOrUpdateIndexTemplate,
+  type DataStreamAdapter,
 } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -69,6 +70,7 @@ interface RiskEngineDataClientOpts {
   esClient: ElasticsearchClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
+  dataStreamAdapter: DataStreamAdapter;
 }
 
 export class RiskEngineDataClient {
@@ -285,6 +287,7 @@ export class RiskEngineDataClient {
           esClient,
           name: ilmPolicyName,
           policy: ilmPolicy,
+          dataStreamAdapter: this.options.dataStreamAdapter,
         }),
         createOrUpdateComponentTemplate({
           logger: this.options.logger,

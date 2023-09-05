@@ -32,7 +32,7 @@ import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/
 import { importRules } from '../../../rule_management/logic';
 import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
-import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview';
+import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { HeaderPage } from '../../../../common/components/header_page';
 
 const RulesPageComponent: React.FC = () => {

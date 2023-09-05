@@ -7,10 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useRouteMatch } from 'react-router-dom';
-import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { findInventoryModel } from '../../../../common/inventory_models';
@@ -19,7 +18,6 @@ import { NodeDetailsPage } from './components/node_details_page';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { MetricsPageTemplate } from '../page_template';
-import { inventoryTitle } from '../../../translations';
 
 export const MetricDetailPage = () => {
   const {
@@ -57,16 +55,7 @@ export const MetricDetailPage = () => {
     [sideNav]
   );
 
-  const inventoryLinkProps = useLinkProps({
-    app: 'metrics',
-    pathname: '/inventory',
-  });
-
   useMetricsBreadcrumbs([
-    {
-      ...inventoryLinkProps,
-      text: inventoryTitle,
-    },
     {
       text: name,
     },

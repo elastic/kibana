@@ -1,10 +1,29 @@
+# These pipeline steps constitute the quality gate for your service within the production
+# environment. Incorporate any necessary additional logic to validate the service's integrity.
+# A failure in this pipeline build will prevent further progression to the subsequent stage.
+
 steps:
   - label: ":pipeline::fleet::seedling: Trigger Observability Kibana Tests for ${ENVIRONMENT}"
     command: echo "replace me with Observability specific Kibana tests"
-    agent:
+    agents:
       image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
 
   - label: ":pipeline::lock::seedling: Trigger Security Kibana Tests for ${ENVIRONMENT}"
     command: echo "replace me with Security specific Kibana tests"
-    agent:
+    agents:
       image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
+
+  - label: ":rocket: Run cp e2e tests"
+    trigger: "ess-k8s-production-e2e-tests"
+    build:
+      message: "${BUILDKITE_MESSAGE}"
+      env:
+        REGION_ID: aws-us-east-1
+        NAME_PREFIX: ci_test_${SERVICE}-promotion_
+
+  - wait: ~
+
+  - label: ":judge::seedling: Trigger Manual Tests Phase"
+    command: "make -C /agent trigger-manual-verification-phase"
+    agents:
+      image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.2"
