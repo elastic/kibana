@@ -110,167 +110,172 @@ describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () 
     resetRulesTableState();
   });
 
-  describe('while on a happy path', () => {
-    it('activates management tab by default', () => {
-      visit(SECURITY_DETECTIONS_RULES_URL);
+  // Flaky on serverless
+  describe(
+    'while on a happy path',
+    { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+    () => {
+      it('activates management tab by default', () => {
+        visit(SECURITY_DETECTIONS_RULES_URL);
 
-      expectRulesManagementTab();
-    });
-
-    it('leads to displaying a rule according to the specified filters', () => {
-      visitRulesTableWithState({
-        searchTerm: 'rule',
-        tags: ['tag-b'],
-        source: 'custom',
-        enabled: false,
-        field: 'name',
-        order: 'asc',
-        perPage: 5,
-        page: 2,
+        expectRulesManagementTab();
       });
 
-      expectManagementTableRules(['rule 6']);
-    });
+      it('leads to displaying a rule according to the specified filters', () => {
+        visitRulesTableWithState({
+          searchTerm: 'rule',
+          tags: ['tag-b'],
+          source: 'custom',
+          enabled: false,
+          field: 'name',
+          order: 'asc',
+          perPage: 5,
+          page: 2,
+        });
 
-    it('loads from the url', () => {
-      visitRulesTableWithState({
-        searchTerm: 'rule',
-        tags: ['tag-b'],
-        source: 'custom',
-        enabled: false,
-        field: 'name',
-        order: 'asc',
-        perPage: 5,
-        page: 2,
+        expectManagementTableRules(['rule 6']);
       });
 
-      expectRulesManagementTab();
-      expectFilterSearchTerm('rule');
-      expectFilterByTags(['tag-b']);
-      expectFilterByCustomRules();
-      expectFilterByDisabledRules();
-      expectTableSorting('Rule', 'asc');
-      expectRowsPerPage(5);
-      expectTablePage(2);
-    });
+      it('loads from the url', () => {
+        visitRulesTableWithState({
+          searchTerm: 'rule',
+          tags: ['tag-b'],
+          source: 'custom',
+          enabled: false,
+          field: 'name',
+          order: 'asc',
+          perPage: 5,
+          page: 2,
+        });
 
-    it('loads from the session storage', () => {
-      setStorageState({
-        searchTerm: 'test',
-        tags: ['tag-a'],
-        source: 'prebuilt',
-        enabled: true,
-        field: 'severity',
-        order: 'desc',
-        perPage: 10,
+        expectRulesManagementTab();
+        expectFilterSearchTerm('rule');
+        expectFilterByTags(['tag-b']);
+        expectFilterByCustomRules();
+        expectFilterByDisabledRules();
+        expectTableSorting('Rule', 'asc');
+        expectRowsPerPage(5);
+        expectTablePage(2);
       });
 
-      visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
+      it('loads from the session storage', () => {
+        setStorageState({
+          searchTerm: 'test',
+          tags: ['tag-a'],
+          source: 'prebuilt',
+          enabled: true,
+          field: 'severity',
+          order: 'desc',
+          perPage: 10,
+        });
 
-      expectRulesManagementTab();
-      expectFilterSearchTerm('test');
-      expectFilterByTags(['tag-a']);
-      expectFilterByPrebuiltRules();
-      expectFilterByEnabledRules();
-      expectTableSorting('Severity', 'desc');
-    });
-
-    it('prefers url state over storage state', () => {
-      setStorageState({
-        searchTerm: 'test',
-        tags: ['tag-c'],
-        source: 'prebuilt',
-        enabled: true,
-        field: 'severity',
-        order: 'desc',
-        perPage: 10,
-      });
-
-      visitRulesTableWithState({
-        searchTerm: 'rule',
-        tags: ['tag-b'],
-        source: 'custom',
-        enabled: false,
-        field: 'name',
-        order: 'asc',
-        perPage: 5,
-        page: 2,
-      });
-
-      expectRulesManagementTab();
-      expectRulesTableState();
-      expectTablePage(2);
-    });
-
-    describe('and on the rules management tab', () => {
-      beforeEach(() => {
-        login();
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
+
+        expectRulesManagementTab();
+        expectFilterSearchTerm('test');
+        expectFilterByTags(['tag-a']);
+        expectFilterByPrebuiltRules();
+        expectFilterByEnabledRules();
+        expectTableSorting('Severity', 'desc');
       });
 
-      it('persists after reloading the page', () => {
-        changeRulesTableState();
-        goToTablePage(2);
+      it('prefers url state over storage state', () => {
+        setStorageState({
+          searchTerm: 'test',
+          tags: ['tag-c'],
+          source: 'prebuilt',
+          enabled: true,
+          field: 'severity',
+          order: 'desc',
+          perPage: 10,
+        });
 
-        cy.reload();
+        visitRulesTableWithState({
+          searchTerm: 'rule',
+          tags: ['tag-b'],
+          source: 'custom',
+          enabled: false,
+          field: 'name',
+          order: 'asc',
+          perPage: 5,
+          page: 2,
+        });
 
         expectRulesManagementTab();
         expectRulesTableState();
         expectTablePage(2);
       });
 
-      it('persists after navigating back from a rule details page', () => {
-        changeRulesTableState();
-        goToTablePage(2);
+      describe('and on the rules management tab', () => {
+        beforeEach(() => {
+          login();
+          visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
+        });
 
-        goToRuleDetails();
-        cy.go('back');
+        it('persists after reloading the page', () => {
+          changeRulesTableState();
+          goToTablePage(2);
 
-        expectRulesManagementTab();
-        expectRulesTableState();
-        expectTablePage(2);
+          cy.reload();
+
+          expectRulesManagementTab();
+          expectRulesTableState();
+          expectTablePage(2);
+        });
+
+        it('persists after navigating back from a rule details page', () => {
+          changeRulesTableState();
+          goToTablePage(2);
+
+          goToRuleDetails();
+          cy.go('back');
+
+          expectRulesManagementTab();
+          expectRulesTableState();
+          expectTablePage(2);
+        });
+
+        it('persists after navigating to another page inside Security Solution', () => {
+          changeRulesTableState();
+          goToTablePage(2);
+
+          visit(DASHBOARDS_URL);
+          visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
+
+          expectRulesManagementTab();
+          expectRulesTableState();
+          expectTablePage(1);
+        });
+
+        it('persists after navigating to another page outside Security Solution', () => {
+          changeRulesTableState();
+          goToTablePage(2);
+
+          visit(KIBANA_HOME);
+          visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
+
+          expectRulesManagementTab();
+          expectRulesTableState();
+          expectTablePage(1);
+        });
       });
 
-      it('persists after navigating to another page inside Security Solution', () => {
-        changeRulesTableState();
-        goToTablePage(2);
+      describe('and on the rules monitoring tab', () => {
+        beforeEach(() => {
+          login();
+          visit(SECURITY_DETECTIONS_RULES_MONITORING_URL);
+        });
 
-        visit(DASHBOARDS_URL);
-        visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
+        it('persists the selected tab', () => {
+          changeRulesTableState();
 
-        expectRulesManagementTab();
-        expectRulesTableState();
-        expectTablePage(1);
+          cy.reload();
+
+          expectRulesMonitoringTab();
+        });
       });
-
-      it('persists after navigating to another page outside Security Solution', () => {
-        changeRulesTableState();
-        goToTablePage(2);
-
-        visit(KIBANA_HOME);
-        visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
-
-        expectRulesManagementTab();
-        expectRulesTableState();
-        expectTablePage(1);
-      });
-    });
-
-    describe('and on the rules monitoring tab', () => {
-      beforeEach(() => {
-        login();
-        visit(SECURITY_DETECTIONS_RULES_MONITORING_URL);
-      });
-
-      it('persists the selected tab', () => {
-        changeRulesTableState();
-
-        cy.reload();
-
-        expectRulesMonitoringTab();
-      });
-    });
-  });
+    }
+  );
 
   describe('upon state format upgrade', async () => {
     beforeEach(() => {
