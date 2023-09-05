@@ -13,6 +13,4 @@ export {
   type SearchResponseWarningsProps,
 } from './src/components/search_response_warnings';
 
-export {
-  getSearchResponseInterceptedWarnings,
-} from './src/utils/get_search_response_intercepted_warnings';
+export { getSearchResponseInterceptedWarnings } from './src/utils/get_search_response_intercepted_warnings';
