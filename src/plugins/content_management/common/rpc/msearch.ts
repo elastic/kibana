@@ -22,7 +22,6 @@ export const mSearchSchemas: ProcedureSchemas = {
         }
       ),
       query: searchQuerySchema,
-      options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
   ),
