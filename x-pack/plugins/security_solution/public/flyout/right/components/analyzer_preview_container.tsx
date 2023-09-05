@@ -32,7 +32,6 @@ export const AnalyzerPreviewContainer: React.FC = () => {
 
   // decide whether to show the analyzer preview or not
   const isEnabled = isInvestigateInResolverActionEnabled(dataAsNestedObject || undefined);
-
   const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
   const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
