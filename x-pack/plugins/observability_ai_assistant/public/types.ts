@@ -65,11 +65,12 @@ export interface ObservabilityAIAssistantChatService {
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
   hasRenderFunction: (name: string) => boolean;
-  executeFunction: (
-    name: string,
-    args: string | undefined,
-    signal: AbortSignal
-  ) => Promise<{ content?: Serializable; data?: Serializable }>;
+  executeFunction: ({}: {
+    name: string;
+    args: string | undefined;
+    messages: Message[];
+    signal: AbortSignal;
+  }) => Promise<{ content?: Serializable; data?: Serializable }>;
   renderFunction: (
     name: string,
     args: string | undefined,
