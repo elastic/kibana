@@ -6,11 +6,123 @@
  */
 
 import React, { FC } from 'react';
-import { EuiPageBody, EuiPageSection } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiPageBody,
+  EuiPageSection,
+  EuiLink,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { parse } from 'query-string';
-import { MlPageHeader } from '../../components/page_header';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { createPath } from '../../routing/router';
+import { ML_PAGES } from '../../../../common/constants/locator';
 import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
+import { MlPageHeader } from '../../components/page_header';
+import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+
+export const DataDriftIndexOrSearchRedirect: FC = () => {
+  const navigateToPath = useNavigateToPath();
+  const { contentManagement, uiSettings } = useMlKibana().services;
+
+  const nextStepPath = '/data_comparison';
+  const onObjectSelection = (id: string, type: string) => {
+    navigateToPath(
+      `${nextStepPath}?${type === 'index-pattern' ? 'index' : 'savedSearchId'}=${encodeURIComponent(
+        id
+      )}`
+    );
+  };
+
+  return (
+    <div data-test-subj="mlPageSourceSelection">
+      <EuiPageBody restrictWidth={1200}>
+        <>
+          <MlPageHeader>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={true}>
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
+                  defaultMessage="Select data view or saved search"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlotAnnotations.title',
+                    {
+                      defaultMessage: 'Customize index patterns',
+                    }
+                  )}
+                >
+                  <EuiButton onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}>
+                    Customize
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </MlPageHeader>
+          <EuiPageSection>
+            <EuiLink
+              onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
+              css={{ display: 'none' }}
+            >
+              {i18n.translate(
+                'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlotAnnotations.title',
+                {
+                  defaultMessage: 'Customize index patterns',
+                }
+              )}
+            </EuiLink>
+
+            <SavedObjectFinder
+              key="searchSavedObjectFinder"
+              onChoose={onObjectSelection}
+              showFilter
+              noItemsMessage={i18n.translate(
+                'xpack.ml.newJob.wizard.searchSelection.notFoundLabel',
+                {
+                  defaultMessage: 'No matching data views or saved searches found.',
+                }
+              )}
+              savedObjectMetaData={[
+                {
+                  type: 'search',
+                  getIconForSavedObject: () => 'search',
+                  name: i18n.translate(
+                    'xpack.ml.newJob.wizard.searchSelection.savedObjectType.search',
+                    {
+                      defaultMessage: 'Saved search',
+                    }
+                  ),
+                },
+                {
+                  type: 'index-pattern',
+                  getIconForSavedObject: () => 'indexPatternApp',
+                  name: i18n.translate(
+                    'xpack.ml.newJob.wizard.searchSelection.savedObjectType.dataView',
+                    {
+                      defaultMessage: 'Data view',
+                    }
+                  ),
+                },
+              ]}
+              fixedPageSize={20}
+              services={{
+                contentClient: contentManagement.client,
+                uiSettings,
+              }}
+            />
+          </EuiPageSection>
+        </>
+      </EuiPageBody>
+    </div>
+  );
+};
 
 export const DataDriftIndexPatternsPicker: FC = () => {
   const { sourceIp, destIp } = parse(location.search, {

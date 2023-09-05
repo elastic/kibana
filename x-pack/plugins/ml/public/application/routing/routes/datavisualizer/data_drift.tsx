@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { DataDriftIndexPatternsPicker } from '../../../datavisualizer/data_comparison/index_patterns_picker';
+import {
+  DataDriftIndexOrSearchRedirect,
+  DataDriftIndexPatternsPicker,
+} from '../../../datavisualizer/data_comparison/index_patterns_picker';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute } from '../..';
 import { createPath, PageLoader, PageProps } from '../../router';
@@ -22,16 +25,18 @@ import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 
-export const dataDriftRouteFactory = (
+export const dataDriftRouteIndexOrSearchFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'data_comparison',
-  path: createPath(ML_PAGES.DATA_DRIFT),
+  id: 'data_drift',
+  path: createPath(ML_PAGES.DATA_DRIFT_INDEX_SELECT),
   title: i18n.translate('xpack.ml.dataVisualizer.dataDrift.docTitle', {
     defaultMessage: 'Data Drift',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: (props, deps) => (
+    <PageWrapper {...props} deps={deps} mode={ML_PAGES.DATA_DRIFT_INDEX_SELECT} />
+  ),
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     {
@@ -52,13 +57,50 @@ export const dataDriftRouteFactory = (
   'data-test-subj': 'mlPageDataDrift',
 });
 
-const PageWrapper: FC<PageProps> = () => {
+export const dataDriftRouteIndexPatternFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
+  id: 'data_drift',
+  path: createPath(ML_PAGES.DATA_DRIFT_CUSTOM),
+  title: i18n.translate('xpack.ml.dataVisualizer.dataDriftCustomIndexPatterns.docTitle', {
+    defaultMessage: 'Data Drift Custom Index Patterns',
+  }),
+  render: (props, deps) => <PageWrapper {...props} deps={deps} mode={ML_PAGES.DATA_DRIFT_CUSTOM} />,
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    {
+      text: DATA_VISUALIZER_BREADCRUMB.text,
+      ...(navigateToPath
+        ? {
+            href: `${basePath}/app/ml${DATA_COMPARISON_BREADCRUMB.href}`,
+            onClick: breadcrumbOnClickFactory(DATA_COMPARISON_BREADCRUMB.href, navigateToPath),
+          }
+        : {}),
+    },
+    {
+      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.dataDriftLabel', {
+        defaultMessage: 'Data Drift',
+      }),
+    },
+  ],
+  'data-test-subj': 'mlPageDataDriftCustomIndexPatterns',
+});
+
+interface DataDriftPageProps extends PageProps {
+  mode: 'data_drift_index_select' | 'data_drift_custom';
+}
+const PageWrapper: FC<DataDriftPageProps> = ({ mode }) => {
   const { context } = useRouteResolver('basic', [], basicResolvers());
 
   return (
     <PageLoader context={context}>
       <DataSourceContextProvider>
-        <DataDriftIndexPatternsPicker />
+        {mode === ML_PAGES.DATA_DRIFT_INDEX_SELECT ? (
+          <DataDriftIndexOrSearchRedirect />
+        ) : (
+          <DataDriftIndexPatternsPicker />
+        )}
       </DataSourceContextProvider>
     </PageLoader>
   );

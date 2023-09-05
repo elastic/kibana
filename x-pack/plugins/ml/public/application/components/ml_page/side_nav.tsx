@@ -236,12 +236,12 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           },
           {
             id: 'data_comparison',
-            pathId: ML_PAGES.DATA_DRIFT,
+            pathId: ML_PAGES.DATA_DRIFT_INDEX_SELECT,
             name: i18n.translate('xpack.ml.navMenu.dataComparisonText', {
-              defaultMessage: 'Data Comparison',
+              defaultMessage: 'Data Drift',
             }),
             disabled: disableLinks,
-            testSubj: 'mlMainTab dataComparison',
+            testSubj: 'mlMainTab dataDrift',
           },
         ],
       },

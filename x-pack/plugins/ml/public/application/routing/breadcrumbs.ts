@@ -122,9 +122,9 @@ export const FILTER_LISTS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
 
 export const DATA_COMPARISON_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
-    defaultMessage: 'Data comparison',
+    defaultMessage: 'Data drift',
   }),
-  href: '/data_drift',
+  href: '/data_drift_index_select',
 });
 
 const breadcrumbs = {
