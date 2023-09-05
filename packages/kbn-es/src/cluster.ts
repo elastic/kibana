@@ -20,6 +20,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
 import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
 import {
+  DockerOptions,
   extractConfigFiles,
   log as defaultLog,
   NativeRealm,
@@ -54,11 +55,14 @@ const first = (stream: Readable, map: (data: Buffer) => string | true | undefine
     stream.on('data', onData);
   });
 
+interface StopOptions {
+  gracefully: boolean;
+}
 export class Cluster {
   private log: ToolingLog;
   private ssl: boolean;
   private stopCalled: boolean;
-  private process: execa.ExecaChildProcess | null; // execa.ExecaReturnValue<string> | undefined;
+  private process: execa.ExecaChildProcess | null;
   private outcome: Promise<void> | null;
   private serverlessNodes: string[];
   private setupPromise: Promise<unknown> | null;
@@ -70,7 +74,9 @@ export class Cluster {
     this.log = log.withType('@kbn/es Cluster');
     this.ssl = ssl;
     this.stopCalled = false;
+    // Stores serverless Elasticsearch node names
     this.serverlessNodes = [];
+    // Process for the locally started Elasticsearch cluster
     this.process = null;
     this.outcome = null;
     this.setupPromise = null;
@@ -208,7 +214,7 @@ export class Cluster {
    * @param options EsClusterExecOptions
    */
   async start(installPath: string, options: EsClusterExecOptions) {
-    // _exec indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
+    // `exec` indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
     await this.log.indent(0, async () => {
       this.exec(installPath, options);
 
@@ -256,7 +262,7 @@ export class Cluster {
    * @param options EsClusterExecOptions
    */
   async run(installPath: string, options: EsClusterExecOptions) {
-    // _exec indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
+    // `exec` indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
     await this.log.indent(0, async () => {
       this.exec(installPath, options);
 
@@ -272,47 +278,47 @@ export class Cluster {
   }
 
   /**
-   * Stops ES process, if it's running
+   * Stops cluster
+   * @param options StopOptions
+   * @returns Promise
    */
-  async stop() {
+  private async stopCluster(options: StopOptions) {
     if (this.stopCalled) {
       return;
     }
     this.stopCalled = true;
 
+    // Stop ES docker containers
     if (this.serverlessNodes.length) {
       return await stopServerlessCluster(this.log, this.serverlessNodes);
     }
 
+    // Stop local ES process
     if (!this.process || !this.outcome) {
       throw new Error('ES has not been started');
     }
 
-    await treeKillAsync(this.process!.pid);
+    if (options.gracefully) {
+      await treeKillAsync(this.process!.pid);
+    } else {
+      await treeKillAsync(this.process.pid, 'SIGKILL');
+    }
 
     await this.outcome;
   }
 
   /**
-   * Stops ES process, it it's running, without waiting for it to shutdown gracefully
+   * Stops ES process, if it's running
+   */
+  async stop() {
+    await this.stopCluster({ gracefully: true });
+  }
+
+  /**
+   * Stops ES process without waiting for it to shutdown gracefully
    */
   async kill() {
-    if (this.stopCalled) {
-      return;
-    }
-
-    this.stopCalled = true;
-
-    if (this.serverlessNodes.length) {
-      return await stopServerlessCluster(this.log, this.serverlessNodes);
-    }
-
-    if (!this.process || !this.outcome) {
-      throw new Error('ES has not been started');
-    }
-
-    await treeKillAsync(this.process.pid, 'SIGKILL');
-    await this.outcome;
+    await this.stopCluster({ gracefully: false });
   }
 
   /**
@@ -581,8 +587,12 @@ export class Cluster {
    * @param options ServerlessOptions
    */
   async runServerless(options: ServerlessOptions) {
-    if (this.process || this.outcome) {
-      throw new Error('ES has already been started');
+    if (this.process) {
+      throw new Error('ES stateful cluster has already been started');
+    }
+
+    if (this.serverlessNodes.length > 0) {
+      throw new Error('ES serverless docker cluster has already been started');
     }
 
     this.serverlessNodes = await runServerlessCluster(this.log, options);
@@ -598,14 +608,13 @@ export class Cluster {
 
   /**
    * Run an Elasticsearch Docker container
-   *
-   * @param {DockerOptions} options
+   * @param options DockerOptions
    */
-  async runDocker(options = {}) {
-    if (this.process || this.outcome) {
-      throw new Error('ES has already been started');
+  async runDocker(options: DockerOptions) {
+    if (this.process) {
+      throw new Error('ES stateful cluster has already been started');
     }
 
-    this.process = await runDockerContainer(this.log, options);
+    await runDockerContainer(this.log, options);
   }
 }
