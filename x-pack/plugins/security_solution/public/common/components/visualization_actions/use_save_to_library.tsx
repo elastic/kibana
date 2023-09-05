@@ -9,13 +9,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { unmountComponentAtNode } from 'react-dom';
-import type { SaveProps } from '@kbn/lens-plugin/public/plugin';
 import type { DashboardSaveProps } from '@kbn/lens-plugin/public/app_plugin/tags_saved_object_save_modal_dashboard_wrapper';
 import { useKibana, useToasts } from '../../lib/kibana';
 import { ADDED_TO_LIBRARY } from './translations';
 import type { LensAttributes } from './types';
 import { useRedirectToDashboardFromLens } from './use_redirect_to_dashboard_from_lens';
-import { APP_UI_ID } from '../../../../common';
 
 export const useSaveToLibrary = ({
   attributes,
