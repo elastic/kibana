@@ -196,7 +196,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           registerMapExtension,
           registerCasesAttachments,
         } = await import('./register_helper');
-        registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities);
+        registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, this.isServerless);
 
         if (fullLicense) {
           registerMlUiActions(pluginsSetup.uiActions, core, this.isServerless);

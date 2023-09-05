@@ -59,7 +59,8 @@ function getSwitcher(
         basicLicenseMlCapabilities.forEach((c) => (mlCaps[c] = originalCapabilities[c]));
       }
 
-      return { ml: applyEnabledFeatures(mlCaps, enabledFeatures) };
+      return { ml: mlCaps };
+      // return { ml: applyEnabledFeatures(mlCaps, enabledFeatures) };
     } catch (e) {
       logger.debug(`Error updating capabilities for ML based on licensing: ${e}`);
       return {};
