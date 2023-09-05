@@ -51,6 +51,7 @@ export function ChatWelcomePanel({ knowledgeBase }: { knowledgeBase: UseKnowledg
 
         {!knowledgeBase.status.value?.ready ? (
           <EuiButton
+            data-test-subj="observabilityAiAssistantChatWelcomePanelSetUpKnowledgeBaseButton"
             color="primary"
             fill
             iconType={knowledgeBase.status.value?.ready ? 'checkInCircleFilled' : 'dotInCircle'}
