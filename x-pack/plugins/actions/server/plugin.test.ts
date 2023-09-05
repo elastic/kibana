@@ -580,7 +580,10 @@ describe('Actions Plugin', () => {
       pluginSetup.setEnabledConnectorTypes(['.server-log', 'non-existing']);
 
       await expect(async () =>
-        plugin.start(coreStart, { ...pluginsStart, serverless: serverlessPluginMock.createStartContract() })
+        plugin.start(coreStart, {
+          ...pluginsStart,
+          serverless: serverlessPluginMock.createStartContract(),
+        })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Action type \\"non-existing\\" is not registered."`
       );
