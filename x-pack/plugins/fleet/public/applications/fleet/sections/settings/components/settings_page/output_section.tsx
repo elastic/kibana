@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLink } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { OutputsTable } from '../outputs_table';
-import { useStartServices, useFlyoutContext } from '../../hooks';
+import { useStartServices } from '../../hooks';
 
 export interface OutputSectionProps {
   outputs: Output[];
@@ -35,15 +35,12 @@ export const OutputSection: React.FunctionComponent<OutputSectionProps> = ({
       </EuiTitle>
       <EuiSpacer size="xs" />
       <EuiText color="subdued" size="m">
-        <EuiLink href={docLinks.links.fleet.settings}
-                external
-                target="_blank"
-              >
+        <EuiLink href={docLinks.links.fleet.settings} external target="_blank">
           <FormattedMessage
             id="xpack.fleet.settings.outputSectionSubtitle"
             defaultMessage="Specify where agents will send data."
           />
-        </EuiLink>  
+        </EuiLink>
       </EuiText>
       <EuiSpacer size="m" />
       <OutputsTable outputs={outputs} deleteOutput={deleteOutput} />
