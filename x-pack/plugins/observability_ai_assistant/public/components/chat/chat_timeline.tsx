@@ -14,6 +14,7 @@ import { ChatItem } from './chat_item';
 import { ChatWelcomePanel } from './chat_welcome_panel';
 import type { Feedback } from '../feedback_buttons';
 import type { Message } from '../../../common';
+import { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -37,6 +38,7 @@ export interface ChatTimelineItem
 
 export interface ChatTimelineProps {
   items: ChatTimelineItem[];
+  knowledgeBase: UseKnowledgeBaseResult;
   onEdit: (item: ChatTimelineItem, message: Message) => Promise<void>;
   onFeedback: (item: ChatTimelineItem, feedback: Feedback) => void;
   onRegenerate: (item: ChatTimelineItem) => void;
@@ -45,6 +47,7 @@ export interface ChatTimelineProps {
 
 export function ChatTimeline({
   items = [],
+  knowledgeBase,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -77,7 +80,7 @@ export function ChatTimeline({
           />
         ))
       )}
-      {filteredItems.length === 1 ? <ChatWelcomePanel /> : null}
+      {filteredItems.length === 1 ? <ChatWelcomePanel knowledgeBase={knowledgeBase} /> : null}
     </EuiCommentList>
   );
 }
