@@ -399,7 +399,7 @@
           "ObservabilityAIAssistantRouteHandlerResources",
           ") => Promise<{}>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
-          "; \"POST /internal/observability_ai_assistant/functions/summarise\": { endpoint: \"POST /internal/observability_ai_assistant/functions/summarise\"; params?: ",
+          "; \"POST /internal/observability_ai_assistant/functions/summarize\": { endpoint: \"POST /internal/observability_ai_assistant/functions/summarize\"; params?: ",
           "TypeC",
           "<{ body: ",
           "TypeC",
@@ -764,7 +764,7 @@
           "ObservabilityAIAssistantRouteHandlerResources",
           ") => Promise<{}>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
-          "; \"POST /internal/observability_ai_assistant/functions/summarise\": { endpoint: \"POST /internal/observability_ai_assistant/functions/summarise\"; params?: ",
+          "; \"POST /internal/observability_ai_assistant/functions/summarize\": { endpoint: \"POST /internal/observability_ai_assistant/functions/summarize\"; params?: ",
           "TypeC",
           "<{ body: ",
           "TypeC",
@@ -1105,7 +1105,7 @@
         "label": "ObservabilityAIAssistantAPIEndpoint",
         "description": [],
         "signature": [
-          "\"POST /internal/observability_ai_assistant/chat\" | \"GET /internal/observability_ai_assistant/conversation/{conversationId}\" | \"POST /internal/observability_ai_assistant/conversations\" | \"POST /internal/observability_ai_assistant/conversation\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}/auto_title\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}/title\" | \"DELETE /internal/observability_ai_assistant/conversation/{conversationId}\" | \"GET /internal/observability_ai_assistant/connectors\" | \"POST /internal/observability_ai_assistant/functions/elasticsearch\" | \"POST /internal/observability_ai_assistant/functions/recall\" | \"POST /internal/observability_ai_assistant/functions/summarise\" | \"POST /internal/observability_ai_assistant/functions/setup_kb\" | \"GET /internal/observability_ai_assistant/functions/kb_status\" | \"POST /internal/observability_ai_assistant/functions/alerts\""
+          "\"POST /internal/observability_ai_assistant/chat\" | \"GET /internal/observability_ai_assistant/conversation/{conversationId}\" | \"POST /internal/observability_ai_assistant/conversations\" | \"POST /internal/observability_ai_assistant/conversation\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}/auto_title\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}/title\" | \"DELETE /internal/observability_ai_assistant/conversation/{conversationId}\" | \"GET /internal/observability_ai_assistant/connectors\" | \"POST /internal/observability_ai_assistant/functions/elasticsearch\" | \"POST /internal/observability_ai_assistant/functions/recall\" | \"POST /internal/observability_ai_assistant/functions/summarize\" | \"POST /internal/observability_ai_assistant/functions/setup_kb\" | \"GET /internal/observability_ai_assistant/functions/kb_status\" | \"POST /internal/observability_ai_assistant/functions/alerts\""
         ],
         "path": "x-pack/plugins/observability_ai_assistant/public/api/index.ts",
         "deprecated": false,
@@ -1235,7 +1235,7 @@
           "ObservabilityAIAssistantRouteHandlerResources",
           ") => Promise<{}>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
-          "; \"POST /internal/observability_ai_assistant/functions/summarise\": { endpoint: \"POST /internal/observability_ai_assistant/functions/summarise\"; params?: ",
+          "; \"POST /internal/observability_ai_assistant/functions/summarize\": { endpoint: \"POST /internal/observability_ai_assistant/functions/summarize\"; params?: ",
           "TypeC",
           "<{ body: ",
           "TypeC",
