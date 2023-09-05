@@ -99,7 +99,7 @@ const CardStepComponent: React.FC<{
         margin: 0 ${euiTheme.size.s} 0;
 
         &.step-panel-collapsed:hover {
-          ${cssStyles};
+          ${backgroundColorStyles.primary};
           border-radius: ${euiTheme.border.radius.medium};
         }
       `}
