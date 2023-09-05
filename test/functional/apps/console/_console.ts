@@ -97,35 +97,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should process PATCH requests for Kibana APIs', async () => {
-        await PageObjects.console.enterRequest(`
-          DELETE kbn:api/detection_engine/rules?rule_id=_
-          POST kbn:api/detection_engine/rules
-          {
-            "rule_id": "_",
-            "risk_score": 0,
-            "description": "_",
-            "name": "_",
-            "severity": "low",
-            "type": "query"
-          }
-          PATCH kbn:api/detection_engine/rules
-          {
-            "rule_id": "_",
-            "severity": "high"
-          }
-        `);
-        await PageObjects.console.selectAllRequests();
-        await PageObjects.console.clickPlay();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.console.collapseJsonBlock(5); // collapse response to DELETE
-        await PageObjects.console.collapseJsonBlock(6); // collapse response to POST
+        const sendRequestsSequentially = async (requests: string[]) => {
+          await asyncForEach(requests, async (request) => {
+            await PageObjects.console.enterRequest(request);
+            await PageObjects.console.clickPlay();
+            await PageObjects.header.waitUntilLoadingHasFinished();
+          });
+        };
+
+        await sendRequestsSequentially([
+          "\n DELETE kbn:api/detection_engine/rules?rule_id=_",
+          "\n POST kbn:api/detection_engine/rules\n" + JSON.stringify({
+            rule_id: '_',
+            severity: 'low',
+            description: '_',
+            name: '_',
+            type: 'query',
+            risk_score: 0
+          }),
+          "\n PATCH kbn:api/detection_engine/rules\n" + JSON.stringify({
+            rule_id: '_',
+            severity: 'high'
+          })
+        ]);
         await retry.try(async () => {
+          const status = await PageObjects.console.getResponseStatus();
+          expect(status).to.eql(200);
+
           const response = await PageObjects.console.getResponse();
           log.debug(response);
-          expect(response).to.contain('# PATCH kbn:api/detection_engine/rules 200');
-          expect(response.split('# PATCH kbn:')[1]).to.contain('"severity": "high"');
+          expect(response).to.contain('"severity": "high"');
+
+          expect(await PageObjects.console.hasErrorMarker()).to.be(false);
         });
-        expect(await PageObjects.console.hasErrorMarker()).to.be(false);
       });
     });
 
