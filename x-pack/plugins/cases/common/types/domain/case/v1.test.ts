@@ -14,6 +14,7 @@ import {
   CasesRt,
   CaseStatuses,
   RelatedCaseRt,
+  CaseCustomFieldsArrayRt,
 } from './v1';
 
 const basicCase = {
@@ -261,6 +262,50 @@ describe('CasesRt', () => {
     expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultRequest,
+    });
+  });
+});
+
+describe('CustomFieldValueTypesRt', () => {
+  const customFields = [
+    {
+      key: 'string_custom_field_1',
+      type: 'string',
+      field: { value: ['this is a text field value', 'this is second'] },
+    },
+    {
+      key: 'string_custom_field_2',
+      type: 'string',
+      field: { value: null },
+    },
+    {
+      key: 'boolean_custom_field_1',
+      type: 'boolean',
+      field: { value: [true] },
+    },
+    {
+      key: 'boolean_custom_field_2',
+      type: 'boolean',
+      field: { value: null },
+    },
+    {
+      key: 'list_custom_field_1',
+      type: 'list',
+      field: { value: ['this is a text field value'] },
+    },
+    {
+      key: 'list_custom_field_2',
+      type: 'list',
+      field: { value: null },
+    },
+  ];
+
+  it('has expected attributes in request', () => {
+    const query = CaseCustomFieldsArrayRt.decode(customFields);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: customFields,
     });
   });
 });

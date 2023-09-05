@@ -54,16 +54,22 @@ export const CaseSettingsRt = rt.strict({
 const CustomFieldString = rt.strict({
   key: rt.string,
   type: rt.literal('string'),
-  field: rt.strict({ value: rt.array(rt.string) }),
+  field: rt.strict({ value: rt.union([rt.array(rt.string), rt.null]) }),
 });
 
 const CustomFieldBoolean = rt.strict({
   key: rt.string,
   type: rt.literal('boolean'),
-  field: rt.strict({ value: rt.array(rt.boolean) }),
+  field: rt.strict({ value: rt.union([rt.array(rt.boolean), rt.null]) }),
 });
 
-const CustomFieldValueTypesRt = rt.union([CustomFieldString, CustomFieldBoolean]);
+const CustomFieldList = rt.strict({
+  key: rt.string,
+  type: rt.literal('list'),
+  field: rt.strict({ value: rt.union([rt.array(rt.string), rt.null]) }),
+});
+
+const CustomFieldValueTypesRt = rt.union([CustomFieldString, CustomFieldBoolean, CustomFieldList]);
 
 export const CaseCustomFieldsArrayRt = rt.array(CustomFieldValueTypesRt);
 
