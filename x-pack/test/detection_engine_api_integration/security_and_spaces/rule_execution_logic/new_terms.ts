@@ -622,8 +622,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).eql(100);
       });
 
-      it('should not miss alerts if execution combinations overlap historical with more than 100 values', async () => {
+      it('should not miss alerts if rule execution value combinations number is greater than 100', async () => {
         // historical window documents
+        // 100 combinations for 127.0.0.1 x host-0, host-1, ..., host-100
         const historicalDocuments = [
           {
             host: {
@@ -634,7 +635,8 @@ export default ({ getService }: FtrProviderContext) => {
         ];
 
         // rule execution documents
-        // 10 new combinations
+        // 100 old combinations for 127.0.0.1 x host-0, host-1, ..., host-99
+        // 10 new combinations 127.0.0.1 x a-0, a-1, ..., a-9
         const ruleExecutionDocuments = [
           {
             host: {
@@ -652,7 +654,6 @@ export default ({ getService }: FtrProviderContext) => {
           ruleExecutionDocuments,
         });
 
-        // ensure there are no alerts for single new terms fields, it means values are not new
         const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           index: ['new_terms'],
@@ -671,6 +672,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not miss alerts for high cardinality values in arrays, over 10.000 composite page size', async () => {
         // historical window documents
+        // number of combinations is 1,000,000
         const historicalDocuments = [
           {
             host: {
@@ -684,6 +686,7 @@ export default ({ getService }: FtrProviderContext) => {
         ];
 
         // rule execution documents
+        // number of combinations is 1,000,000 + new one
         const ruleExecutionDocuments = [
           {
             host: {
@@ -710,7 +713,6 @@ export default ({ getService }: FtrProviderContext) => {
           ruleExecutionDocuments,
         });
 
-        // ensure there are no alerts for single new terms fields, it means values are not new
         const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           index: ['new_terms'],
@@ -723,34 +725,36 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
-        // 10 alerts (with host.names a-[0-9]) should be generated
+        // only 1 alert should be generated
         expect(previewAlerts.length).eql(1);
       });
 
       it('should not generate false positive alerts if rule historical window combinations overlap execution ones, which have more than 100', async () => {
         // historical window documents
+        // number of combinations 400: [a, b] x domain-100, domain-101, ..., domain-299
         const historicalDocuments = [
           {
             host: {
               name: ['a', 'b'],
-              domain: Array.from(Array(200)).map((_, i) => 100 + i),
+              domain: Array.from(Array(200)).map((_, i) => `domain-${100 + i}`),
             },
           },
         ];
 
         // rule execution documents
+        // number of combinations 101: [a] x domain-100, domain-101, ..., domain-199 + b x domain-201
         // no new combination of values emitted
         const ruleExecutionDocuments = [
           {
             host: {
               name: 'a',
-              domain: Array.from(Array(100)).map((_, i) => 100 + i),
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
             },
           },
           {
             host: {
               name: 'b',
-              domain: 201,
+              domain: 'domain-201',
             },
           },
         ];
@@ -760,7 +764,6 @@ export default ({ getService }: FtrProviderContext) => {
           ruleExecutionDocuments,
         });
 
-        // ensure there are no alerts for single new terms fields, it means values are not new
         const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           index: ['new_terms'],
@@ -773,28 +776,29 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
-        //  0
         expect(previewAlerts.length).eql(0);
       });
 
       it('should not generate false positive alerts if rule historical window combinations overlap execution ones, which have precisely 100', async () => {
         // historical window documents
+        // number of combinations 400: [a, b] x domain-100, domain-101, ..., domain-299
         const historicalDocuments = [
           {
             host: {
               name: ['a', 'b'],
-              domain: Array.from(Array(200)).map((_, i) => 100 + i),
+              domain: Array.from(Array(200)).map((_, i) => `domain-${100 + i}`),
             },
           },
         ];
 
         // rule execution documents
+        // number of combinations 100: [a] x domain-100, domain-101, ..., domain-199
         // no new combination of values emitted
         const ruleExecutionDocuments = [
           {
             host: {
               name: 'a',
-              domain: Array.from(Array(100)).map((_, i) => 100 + i),
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
             },
           },
         ];
@@ -804,7 +808,6 @@ export default ({ getService }: FtrProviderContext) => {
           ruleExecutionDocuments,
         });
 
-        // ensure there are no alerts for single new terms fields, it means values are not new
         const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           index: ['new_terms'],
@@ -817,7 +820,6 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
-        //  0
         expect(previewAlerts.length).eql(0);
       });
     });
