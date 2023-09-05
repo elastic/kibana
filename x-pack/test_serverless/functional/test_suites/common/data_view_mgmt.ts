@@ -51,9 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('tab-scriptedFields');
     });
     it('Sample data loads', async () => {
-      await supertest
-        .post('/app/home#/tutorial_directory/sampleData')
-        .set('kbn-xsrf', 'some-xsrf-token');
+      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData')
       await testSubjects.click('showSampleDataButton');
       await testSubjects.click('addSampleDataSetecommerce');
       expect(testSubjects.exists('sampleDataSetInstallToast')).toBeTruthy();
