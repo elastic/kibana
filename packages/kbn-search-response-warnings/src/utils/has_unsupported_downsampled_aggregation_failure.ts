@@ -6,16 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { SearchResponseWarning, SearchResponseIncompleteWarning } from '@kbn/data-plugin/public';
+import type {
+  SearchResponseWarning,
+  SearchResponseIncompleteWarning,
+} from '@kbn/data-plugin/public';
 
 export function hasUnsupportedDownsampledAggregationFailure(warning: SearchResponseWarning) {
   return warning.type === 'incomplete'
-    ? Object.values((warning as SearchResponseIncompleteWarning).clusters).some((clusterDetails) => {
-        return clusterDetails.failures
-          ? clusterDetails.failures.some((shardFailure) => {
-              return shardFailure.reason?.type === 'unsupported_aggregation_on_downsampled_index';
-            })
-          : false;
-      })
+    ? Object.values((warning as SearchResponseIncompleteWarning).clusters).some(
+        (clusterDetails) => {
+          return clusterDetails.failures
+            ? clusterDetails.failures.some((shardFailure) => {
+                return shardFailure.reason?.type === 'unsupported_aggregation_on_downsampled_index';
+              })
+            : false;
+        }
+      )
     : false;
 }

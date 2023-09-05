@@ -19,10 +19,7 @@ import { groupBy, escape, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchRequest } from '@kbn/data-plugin/common';
 
-import {
-  SearchResponseWarning,
-  OpenIncompleteResultsModalButton,
-} from '@kbn/data-plugin/public';
+import { SearchResponseWarning, OpenIncompleteResultsModalButton } from '@kbn/data-plugin/public';
 
 import { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
@@ -311,9 +308,7 @@ export function getSearchWarningMessages(
               shortMessage: '',
               longMessage: (
                 <>
-                  <EuiText size="s">
-                    {warning.message}
-                  </EuiText>
+                  <EuiText size="s">{warning.message}</EuiText>
                   <EuiSpacer size="s" />
                   <OpenIncompleteResultsModalButton
                     theme={theme}
