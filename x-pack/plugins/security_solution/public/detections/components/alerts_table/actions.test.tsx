@@ -452,6 +452,7 @@ describe('alert actions', () => {
             templateTimelineId: null,
             templateTimelineVersion: null,
             version: null,
+            savedSearchId: null,
           },
           to: '2018-11-05T19:03:25.937Z',
           resolveTimelineConfig: undefined,

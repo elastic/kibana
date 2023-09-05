@@ -310,6 +310,7 @@ describe('Epic Timeline', () => {
           },
         },
         savedQueryId: 'my endgame timeline query',
+        savedSearchId: null,
         sort: [
           {
             columnId: '@timestamp',
@@ -323,7 +324,6 @@ describe('Epic Timeline', () => {
         timelineType: TimelineType.default,
         title: 'saved',
         status: TimelineStatus.active,
-        savedSeachId: null,
       });
     });
   });
