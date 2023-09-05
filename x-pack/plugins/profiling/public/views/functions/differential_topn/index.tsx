@@ -83,36 +83,31 @@ export function DifferentialTopNFunctionsView() {
     ({ http }) => {
       return fetchTopNFunctions({
         http,
-        timeFrom: timeRange.inSeconds.start,
-        timeTo: timeRange.inSeconds.end,
+        timeFrom: new Date(timeRange.start).getTime(),
+        timeTo: new Date(timeRange.end).getTime(),
         startIndex: 0,
         endIndex: 100000,
         kuery,
       });
     },
-    [timeRange.inSeconds.start, timeRange.inSeconds.end, kuery, fetchTopNFunctions]
+    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery]
   );
 
   const comparisonState = useTimeRangeAsync(
     ({ http }) => {
-      if (!comparisonTimeRange.inSeconds.start || !comparisonTimeRange.inSeconds.end) {
+      if (!comparisonTimeRange.start || !comparisonTimeRange.end) {
         return undefined;
       }
       return fetchTopNFunctions({
         http,
-        timeFrom: comparisonTimeRange.inSeconds.start,
-        timeTo: comparisonTimeRange.inSeconds.end,
+        timeFrom: new Date(comparisonTimeRange.start).getTime(),
+        timeTo: new Date(comparisonTimeRange.end).getTime(),
         startIndex: 0,
         endIndex: 100000,
         kuery: comparisonKuery,
       });
     },
-    [
-      comparisonTimeRange.inSeconds.start,
-      comparisonTimeRange.inSeconds.end,
-      comparisonKuery,
-      fetchTopNFunctions,
-    ]
+    [comparisonTimeRange.start, comparisonTimeRange.end, fetchTopNFunctions, comparisonKuery]
   );
 
   const routePath = useProfilingRoutePath() as

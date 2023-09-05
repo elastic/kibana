@@ -26,6 +26,7 @@ export {
 } from './common/profiling';
 export { getFieldNameForTopNType, TopNType, StackTracesDisplayOption } from './common/stack_traces';
 export { createFrameGroupID } from './common/frame_group';
+export { createTopNFunctions } from './common/functions';
 
 export type { CalleeTree } from './common/callee';
 export type {

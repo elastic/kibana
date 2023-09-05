@@ -29,14 +29,14 @@ export function TopNFunctionsView() {
     ({ http }) => {
       return fetchTopNFunctions({
         http,
-        timeFrom: timeRange.inSeconds.start,
-        timeTo: timeRange.inSeconds.end,
+        timeFrom: new Date(timeRange.start).getTime(),
+        timeTo: new Date(timeRange.end).getTime(),
         startIndex: 0,
         endIndex: 100000,
         kuery,
       });
     },
-    [timeRange.inSeconds.start, timeRange.inSeconds.end, kuery, fetchTopNFunctions]
+    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery]
   );
 
   const profilingRouter = useProfilingRouter();
