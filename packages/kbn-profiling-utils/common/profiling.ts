@@ -1,14 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+/**
+ * Stacktrace ID
+ */
 export type StackTraceID = string;
+/**
+ * StackFrame ID
+ */
 export type StackFrameID = string;
+/**
+ * File ID
+ */
 export type FileID = string;
 
+/**
+ * Frame type
+ */
 export enum FrameType {
   Unsymbolized = 0,
   Python,
@@ -35,94 +48,134 @@ const frameTypeDescriptions = {
   [FrameType.PHPJIT]: 'PHP JIT',
 };
 
+/**
+ * get frame type name
+ * @param ft FrameType
+ * @returns string
+ */
 export function describeFrameType(ft: FrameType): string {
   return frameTypeDescriptions[ft];
 }
 
 export interface StackTraceEvent {
+  /** stacktrace ID */
   StackTraceID: StackTraceID;
+  /** count */
   Count: number;
 }
 
+/** Stack trace */
 export interface StackTrace {
+  /** frame ids */
   FrameIDs: string[];
+  /** file ids */
   FileIDs: string[];
+  /** address or lines */
   AddressOrLines: number[];
+  /** types */
   Types: number[];
 }
-
+/**
+ * Empty stack trace
+ */
 export const emptyStackTrace: StackTrace = {
+  /** Frame IDs */
   FrameIDs: [],
+  /** File IDs */
   FileIDs: [],
+  /** Adress or lines */
   AddressOrLines: [],
+  /** Types */
   Types: [],
 };
 
+/** Stack frame */
 export interface StackFrame {
+  /** file name */
   FileName: string;
+  /** function name */
   FunctionName: string;
+  /** function offset */
   FunctionOffset: number;
+  /** line number */
   LineNumber: number;
+  /** inline */
   Inline: boolean;
 }
 
+/**
+ * Empty stack frame
+ */
 export const emptyStackFrame: StackFrame = {
+  /** File name */
   FileName: '',
+  /** Function name */
   FunctionName: '',
+  /** Function offset */
   FunctionOffset: 0,
+  /** Line number */
   LineNumber: 0,
+  /** Inline */
   Inline: false,
 };
 
+/** Executable */
 export interface Executable {
+  /** file name */
   FileName: string;
 }
 
+/**
+ * Empty exectutable
+ */
 export const emptyExecutable: Executable = {
+  /** file name */
   FileName: '',
 };
 
+/** Stack frame metadata */
 export interface StackFrameMetadata {
-  // StackTrace.FrameID
+  /** StackTrace.FrameID */
   FrameID: string;
-  // StackTrace.FileID
+  /** StackTrace.FileID */
   FileID: FileID;
-  // StackTrace.Type
+  /** StackTrace.Type */
   FrameType: FrameType;
-  // StackFrame.Inline
+  /** StackFrame.Inline */
   Inline: boolean;
-
-  // StackTrace.AddressOrLine
+  /** StackTrace.AddressOrLine */
   AddressOrLine: number;
-  // StackFrame.FunctionName
+  /** StackFrame.FunctionName */
   FunctionName: string;
-  // StackFrame.FunctionOffset
+  /** StackFrame.FunctionOffset */
   FunctionOffset: number;
-  // should this be StackFrame.SourceID?
+  /** should this be StackFrame.SourceID? */
   SourceID: FileID;
-  // StackFrame.Filename
+  /** StackFrame.Filename */
   SourceFilename: string;
-  // StackFrame.LineNumber
+  /** StackFrame.LineNumber */
   SourceLine: number;
-  // auto-generated - see createStackFrameMetadata
+  /** auto-generated - see createStackFrameMetadata */
   FunctionSourceLine: number;
-
-  // Executable.FileName
+  /** Executable.FileName */
   ExeFileName: string;
-
-  // unused atm due to lack of symbolization metadata
+  /** unused atm due to lack of symbolization metadata */
   CommitHash: string;
-  // unused atm due to lack of symbolization metadata
+  /** unused atm due to lack of symbolization metadata */
   SourceCodeURL: string;
-  // unused atm due to lack of symbolization metadata
+  /** unused atm due to lack of symbolization metadata */
   SourcePackageHash: string;
-  // unused atm due to lack of symbolization metadata
+  /** unused atm due to lack of symbolization metadata */
   SourcePackageURL: string;
-  // unused atm due to lack of symbolization metadata
-
+  /** unused atm due to lack of symbolization metadata */
   SamplingRate: number;
 }
 
+/**
+ * create stackframe metadata
+ * @param options Partial<StackFrameMetadata>
+ * @returns StackFrameMetadata
+ */
 export function createStackFrameMetadata(
   options: Partial<StackFrameMetadata> = {}
 ): StackFrameMetadata {
@@ -182,6 +235,11 @@ function getExeFileName(metadata: StackFrameMetadata) {
   return describeFrameType(metadata.FrameType);
 }
 
+/**
+ * Get callee label
+ * @param metadata StackFrameMetadata
+ * @returns string
+ */
 export function getCalleeLabel(metadata: StackFrameMetadata) {
   if (metadata.FunctionName !== '') {
     const sourceFilename = metadata.SourceFilename;
@@ -192,7 +250,11 @@ export function getCalleeLabel(metadata: StackFrameMetadata) {
   }
   return getExeFileName(metadata);
 }
-
+/**
+ * Get callee function name
+ * @param frame StackFrameMetadata
+ * @returns string
+ */
 export function getCalleeFunction(frame: StackFrameMetadata): string {
   // In the best case scenario, we have the file names, source lines,
   // and function names. However we need to deal with missing function or
@@ -202,20 +264,32 @@ export function getCalleeFunction(frame: StackFrameMetadata): string {
   // When there is no function name, only use the executable name
   return frame.FunctionName ? exeDisplayName + ': ' + frame.FunctionName : exeDisplayName;
 }
+/**
+ * Frame symbol status
+ */
 export enum FrameSymbolStatus {
   PARTIALLY_SYMBOLYZED = 'PARTIALLY_SYMBOLYZED',
   NOT_SYMBOLIZED = 'NOT_SYMBOLIZED',
   SYMBOLIZED = 'SYMBOLIZED',
 }
-export function getFrameSymbolStatus({
-  sourceFilename,
-  sourceLine,
-  exeFileName,
-}: {
+
+/** Frame symbols status params */
+interface FrameSymbolStatusParams {
+  /** source file name */
   sourceFilename: string;
+  /** source file line */
   sourceLine: number;
+  /** executable file name */
   exeFileName?: string;
-}) {
+}
+
+/**
+ * Get frame symbol status
+ * @param param FrameSymbolStatusParams
+ * @returns FrameSymbolStatus
+ */
+export function getFrameSymbolStatus(param: FrameSymbolStatusParams) {
+  const { sourceFilename, sourceLine, exeFileName } = param;
   if (sourceFilename === '' && sourceLine === 0) {
     if (exeFileName) {
       return FrameSymbolStatus.PARTIALLY_SYMBOLYZED;
@@ -228,10 +302,28 @@ export function getFrameSymbolStatus({
 }
 
 const nativeLanguages = [FrameType.Native, FrameType.Kernel];
-export function getLanguageType({ frameType }: { frameType: FrameType }) {
-  return nativeLanguages.includes(frameType) ? 'NATIVE' : 'INTERPRETED';
+
+interface LanguageTypeParams {
+  /** frame type */
+  frameType: FrameType;
 }
 
+/**
+ * Get language type
+ * @param param LanguageTypeParams
+ * @returns string
+ */
+export function getLanguageType(param: LanguageTypeParams) {
+  return nativeLanguages.includes(param.frameType) ? 'NATIVE' : 'INTERPRETED';
+}
+
+/**
+ * Get callee source information.
+ * If we don't have the executable filename, display <unsymbolized>
+ * If no source line or filename available, display the executable offset
+ * @param frame StackFrameMetadata
+ * @returns string
+ */
 export function getCalleeSource(frame: StackFrameMetadata): string {
   const frameSymbolStatus = getFrameSymbolStatus({
     sourceFilename: frame.SourceFilename,
@@ -254,6 +346,13 @@ export function getCalleeSource(frame: StackFrameMetadata): string {
   }
 }
 
+/**
+ * Group stackframe by stack trace
+ * @param stackTraces Map<StackTraceID, StackTrace>
+ * @param stackFrames Map<StackFrameID, StackFrame>
+ * @param executables Map<FileID, Executable>
+ * @returns Record<string, StackFrameMetadata[]>
+ */
 export function groupStackFrameMetadataByStackTrace(
   stackTraces: Map<StackTraceID, StackTrace>,
   stackFrames: Map<StackFrameID, StackFrame>,

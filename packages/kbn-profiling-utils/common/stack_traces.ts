@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ProfilingESField } from './elasticsearch';
@@ -15,13 +16,17 @@ import {
   StackTraceID,
 } from './profiling';
 
+/** Profiling status response */
 export interface ProfilingStatusResponse {
+  /** profiling enabled */
   profiling: {
     enabled: boolean;
   };
+  /** resource management status*/
   resource_management: {
     enabled: boolean;
   };
+  /** Indices creates / pre 8.9.1 data still available */
   resources: {
     created: boolean;
     pre_8_9_1_data: boolean;
@@ -58,24 +63,43 @@ interface ProfilingExecutables {
   [key: string]: string;
 }
 
+/** Profiling stacktrace */
 export interface StackTraceResponse {
+  /** stack trace events */
   ['stack_trace_events']?: ProfilingEvents;
+  /** stack traces */
   ['stack_traces']?: ProfilingStackTraces;
+  /** stack frames */
   ['stack_frames']?: ProfilingStackFrames;
+  /** executables */
   ['executables']?: ProfilingExecutables;
+  /** total frames */
   ['total_frames']: number;
+  /** sampling rate */
   ['sampling_rate']: number;
 }
 
+/** Decoded stack trace response */
 export interface DecodedStackTraceResponse {
+  /** Map of Stacktrace ID and event */
   events: Map<StackTraceID, number>;
+  /** Map of stacktrace ID and stacktrace */
   stackTraces: Map<StackTraceID, StackTrace>;
+  /** Map of stackframe ID and stackframe */
   stackFrames: Map<StackFrameID, StackFrame>;
+  /** Map of file ID and Executables */
   executables: Map<FileID, Executable>;
+  /** Total number of frames */
   totalFrames: number;
+  /** sampling rate */
   samplingRate: number;
 }
-
+/**
+ * Generate Frame ID
+ * @param frameID string
+ * @param n number
+ * @returns string
+ */
 export const makeFrameID = (frameID: string, n: number): string => {
   return n === 0 ? frameID : frameID + ';' + n.toString();
 };
@@ -119,6 +143,11 @@ const createInlineTrace = (
   } as StackTrace;
 };
 
+/**
+ * Decodes stack trace response
+ * @param response StackTraceResponse
+ * @returns DecodedStackTraceResponse
+ */
 export function decodeStackTraceResponse(response: StackTraceResponse): DecodedStackTraceResponse {
   const stackTraceEvents: Map<StackTraceID, number> = new Map();
   for (const [key, value] of Object.entries(response.stack_trace_events ?? {})) {
@@ -165,11 +194,17 @@ export function decodeStackTraceResponse(response: StackTraceResponse): DecodedS
   };
 }
 
+/**
+ * Stacktraces options
+ */
 export enum StackTracesDisplayOption {
   StackTraces = 'stackTraces',
   Percentage = 'percentage',
 }
 
+/**
+ * Functions TopN types definition
+ */
 export enum TopNType {
   Containers = 'containers',
   Deployments = 'deployments',
@@ -178,6 +213,11 @@ export enum TopNType {
   Traces = 'traces',
 }
 
+/**
+ * Get Profiling ES field based on TopN Type
+ * @param type TopNType
+ * @returns string
+ */
 export function getFieldNameForTopNType(type: TopNType): string {
   return {
     [TopNType.Containers]: ProfilingESField.ContainerName,
