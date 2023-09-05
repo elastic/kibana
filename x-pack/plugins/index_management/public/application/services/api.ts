@@ -33,7 +33,6 @@ import {
   UIM_TEMPLATE_UPDATE,
   UIM_TEMPLATE_CLONE,
   UIM_TEMPLATE_SIMULATE,
-  INTERNAL_API_BASE_PATH,
 } from '../../../common/constants';
 import { TemplateDeserialized, TemplateListItem, DataStream, Index } from '../../../common';
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';

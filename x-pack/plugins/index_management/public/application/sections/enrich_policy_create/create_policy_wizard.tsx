@@ -67,7 +67,6 @@ export const CreatePolicyWizard = () => {
         notificationService.showSuccessToast(toastMessage);
       }
 
-      // If there was an error while creating the policy, navigate back to the first step and show the error there
       if (error) {
         setCreateError(error);
         return;
