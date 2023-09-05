@@ -49,10 +49,11 @@ export const createLogExplorer = ({
  * Create proxy for the data service, in which session service enablement calls
  * are no-ops.
  */
-
 const createDataServiceProxy = (data: DataPublicPluginStart) => {
+  const noOpEnableStorage = () => {};
+
   const sessionServiceProxy = createPropertyGetProxy(data.search.session, {
-    enableStorage: () => () => {},
+    enableStorage: () => noOpEnableStorage,
   });
 
   const searchServiceProxy = createPropertyGetProxy(data.search, {
