@@ -23,7 +23,10 @@ import type { ChatTimelineProps } from '../components/chat/chat_timeline';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 import type { ObservabilityAIAssistantChatService, PendingMessage } from '../types';
-import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
+import {
+  getTimelineItemsfromConversation,
+  StartedFrom,
+} from '../utils/get_timeline_items_from_conversation';
 import type { UseGenAIConnectorsResult } from './use_genai_connectors';
 import { useKibana } from './use_kibana';
 
@@ -56,6 +59,7 @@ export function useTimeline({
   conversationId,
   currentUser,
   chatService,
+  startedFrom,
   onChatUpdate,
   onChatComplete,
 }: {
@@ -64,6 +68,7 @@ export function useTimeline({
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   chatService: ObservabilityAIAssistantChatService;
+  startedFrom?: StartedFrom;
   onChatUpdate: (messages: Message[]) => void;
   onChatComplete: (messages: Message[]) => void;
 }): UseTimelineResult {
@@ -77,14 +82,15 @@ export function useTimeline({
 
   const conversationItems = useMemo(() => {
     const items = getTimelineItemsfromConversation({
-      messages,
       currentUser,
-      hasConnector,
       chatService,
+      hasConnector,
+      messages,
+      startedFrom,
     });
 
     return items;
-  }, [messages, currentUser, hasConnector, chatService]);
+  }, [currentUser, chatService, hasConnector, messages, startedFrom]);
 
   const [subscription, setSubscription] = useState<Subscription | undefined>();
 
@@ -176,11 +182,12 @@ export function useTimeline({
         const name = lastMessage.message.function_call.name;
 
         try {
-          const message = await chatService!.executeFunction(
+          const message = await chatService!.executeFunction({
             name,
-            lastMessage.message.function_call.arguments,
-            controller.signal
-          );
+            args: lastMessage.message.function_call.arguments,
+            messages: messagesAfterChat.slice(0, -1),
+            signal: controller.signal,
+          });
 
           return await chat(
             messagesAfterChat.concat({

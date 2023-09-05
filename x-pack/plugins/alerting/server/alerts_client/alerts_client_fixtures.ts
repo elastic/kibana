@@ -77,6 +77,7 @@ export const getParamsByTimeQuery: GetSummarizedAlertsParams = {
 };
 
 export const getExpectedQueryByExecutionUuid = ({
+  indexName,
   uuid = getParamsByExecutionUuid.executionUuid,
   ruleId = getParamsByExecutionUuid.ruleId,
   alertType,
@@ -84,6 +85,7 @@ export const getExpectedQueryByExecutionUuid = ({
   excludedAlertInstanceIds,
   alertsFilter,
 }: {
+  indexName: string;
   uuid?: string;
   ruleId?: string;
   alertType: keyof typeof alertTypes;
@@ -184,10 +186,12 @@ export const getExpectedQueryByExecutionUuid = ({
     size: 100,
     track_total_hits: true,
   },
-  index: '.internal.alerts-test.alerts-default-*',
+  ignore_unavailable: true,
+  index: indexName,
 });
 
 export const getExpectedQueryByTimeRange = ({
+  indexName,
   end = getParamsByTimeQuery.end.toISOString(),
   start = getParamsByTimeQuery.start.toISOString(),
   ruleId = getParamsByTimeQuery.ruleId,
@@ -196,6 +200,7 @@ export const getExpectedQueryByTimeRange = ({
   excludedAlertInstanceIds,
   alertsFilter,
 }: {
+  indexName: string;
   end?: string;
   start?: string;
   ruleId?: string;
@@ -344,6 +349,7 @@ export const getExpectedQueryByTimeRange = ({
       size: 100,
       track_total_hits: true,
     },
-    index: '.internal.alerts-test.alerts-default-*',
+    ignore_unavailable: true,
+    index: indexName,
   };
 };
