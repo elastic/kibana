@@ -26,11 +26,14 @@ import type { SerializedEnrichPolicy } from '../../../../../common';
 import { useCreatePolicyContext } from '../create_policy_context';
 import { serializeAsESPolicy, getESPolicyCreationApiCall } from '../../../../../common/lib';
 
+// Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
+// levels. This way we prevent that happening for very large requests.
+const getLanguageForQuery = (query: any) =>
+ query.length < 60000 ? 'json' : undefined;
+
 const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
-  // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
-  // levels. This way we prevent that happening for very large requests.
   const queryAsString = policy.query ? JSON.stringify(policy.query, null, 2) : '';
-  const language = queryAsString.length < 60000 ? 'json' : undefined;
+  const language = getLanguageForQuery(queryAsString);
 
   return (
     <>
@@ -144,10 +147,8 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
 };
 
 const RequestTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
-  // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
-  // levels. This way we prevent that happening for very large requests.
   const request = JSON.stringify(serializeAsESPolicy(policy), null, 2);
-  const language = request.length < 60000 ? 'json' : undefined;
+  const language = getLanguageForQuery(request);
 
   return (
     <>
