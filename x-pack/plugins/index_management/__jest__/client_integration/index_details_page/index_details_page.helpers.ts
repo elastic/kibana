@@ -57,6 +57,14 @@ export interface IndexDetailsPageTestBed extends TestBed {
       isDisplayed: () => boolean;
       clickReloadButton: () => Promise<void>;
     };
+    stats: {
+      getCodeBlockContent: () => string;
+      getDocsLinkHref: () => string;
+      isErrorDisplayed: () => boolean;
+      clickErrorReloadButton: () => Promise<void>;
+      indexStatsTabExists: () => boolean;
+      isWarningDisplayed: () => boolean;
+    };
   };
 }
 
@@ -159,6 +167,30 @@ export const setup = async (
       component.update();
     },
   };
+
+  const stats = {
+    indexStatsTabExists: () => {
+      return exists('indexDetailsTab-stats');
+    },
+    getCodeBlockContent: () => {
+      return find('indexDetailsStatsCodeBlock').text();
+    },
+    getDocsLinkHref: () => {
+      return find('indexDetailsStatsDocsLink').prop('href');
+    },
+    isErrorDisplayed: () => {
+      return exists('indexDetailsStatsError');
+    },
+    isWarningDisplayed: () => {
+      return exists('indexStatsNotAvailableWarning');
+    },
+    clickErrorReloadButton: async () => {
+      await act(async () => {
+        find('reloadIndexStatsButton').simulate('click');
+      });
+      component.update();
+    },
+  };
   return {
     ...testBed,
     routerMock,
@@ -171,6 +203,7 @@ export const setup = async (
       discoverLinkExists,
       contextMenu,
       errorSection,
+      stats,
     },
   };
 };
