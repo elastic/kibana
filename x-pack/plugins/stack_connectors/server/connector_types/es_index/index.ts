@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { find, get } from 'lodash';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
