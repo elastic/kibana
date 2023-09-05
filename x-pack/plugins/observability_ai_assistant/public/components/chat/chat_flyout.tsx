@@ -78,6 +78,7 @@ export function ChatFlyout({
           >
             {conversationId ? (
               <EuiLink
+                data-test-subj="observabilityAiAssistantChatFlyoutOpenConversationLink"
                 href={router.link('/conversations/{conversationId}', {
                   path: { conversationId },
                 })}
@@ -87,7 +88,10 @@ export function ChatFlyout({
                 })}
               </EuiLink>
             ) : (
-              <EuiLink href={router.link('/conversations/new')}>
+              <EuiLink
+                data-test-subj="observabilityAiAssistantChatFlyoutGoToConversationsLink"
+                href={router.link('/conversations/new')}
+              >
                 {i18n.translate('xpack.observabilityAiAssistant.conversationListDeepLinkLabel', {
                   defaultMessage: 'Go to conversations',
                 })}
