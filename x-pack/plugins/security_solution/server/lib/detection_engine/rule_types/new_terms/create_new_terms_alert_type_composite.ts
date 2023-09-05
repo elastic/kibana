@@ -37,8 +37,7 @@ import {
 import { createEnrichEventsFunction } from '../utils/enrichments';
 
 export const createNewTermsAlertType = (
-  createOptions: CreateRuleOptions,
-  isPreview?: boolean
+  createOptions: CreateRuleOptions
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
   const { logger } = createOptions;
   return {
@@ -103,6 +102,7 @@ export const createNewTermsAlertType = (
           unprocessedExceptions,
           alertTimestampOverride,
           publicBaseUrl,
+          inputIndexFields,
         },
         services,
         params,
@@ -126,6 +126,7 @@ export const createNewTermsAlertType = (
         type: params.type,
         query: params.query,
         exceptionFilter,
+        fields: inputIndexFields,
       });
 
       const parsedHistoryWindowSize = parseDateString({
@@ -218,6 +219,7 @@ export const createNewTermsAlertType = (
             type: params.type,
             query: params.query,
             exceptionFilter,
+            fields: inputIndexFields,
           });
 
           const {
