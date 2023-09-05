@@ -11,9 +11,12 @@ import { CREATE_DASHBOARD_TITLE } from '../pages/translations';
 import { DASHBOARD_NOT_FOUND_TITLE } from '../pages/details/translations';
 import { REQUEST_NAMES, useFetch } from '../../common/hooks/use_fetch';
 import { useKibana } from '../../common/lib/kibana';
-import { fetchTags, isManagedTag } from '../../common/containers/tags/api';
+import { fetchTags } from '../../common/containers/tags/api';
+import { MANAGED_TAG_NAME } from '../../../common/constants';
 
 type DashboardDetails = Record<string, string>;
+
+const isManagedTag = ({ name }: { name: string }) => name === MANAGED_TAG_NAME;
 
 export const useDashboardRenderer = (savedObjectId: string | undefined) => {
   const { savedObjectsTagging } = useKibana().services;

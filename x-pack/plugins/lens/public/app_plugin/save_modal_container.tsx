@@ -45,6 +45,7 @@ export function SaveModalContainer({
   runSave,
   persistedDoc,
   originatingApp,
+  originatingPath,
   initialInput,
   redirectTo,
   redirectToOrigin,
@@ -100,7 +101,7 @@ export function SaveModalContainer({
       isMounted = false;
     };
   }, [initialInput, lensServices]);
-  debugger;
+
   const tagsIds =
     persistedDoc && savedObjectsTagging
       ? savedObjectsTagging.ui.getTagIdsFromReferences(persistedDoc.references)
@@ -120,6 +121,7 @@ export function SaveModalContainer({
           redirectTo,
           redirectToOrigin,
           originatingApp,
+          originatingPath,
           getIsByValueMode: () => false,
           onAppLeave: () => {},
           savedObjectStore: lensServices.savedObjectStore,
@@ -138,6 +140,7 @@ export function SaveModalContainer({
   return (
     <SaveModal
       originatingApp={originatingApp}
+      originatingPath={originatingPath}
       savingToLibraryPermitted={savingToLibraryPermitted}
       allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
       savedObjectsTagging={savedObjectsTagging}
@@ -151,7 +154,7 @@ export function SaveModalContainer({
       description={description}
       savedObjectId={savedObjectId}
       returnToOriginSwitchLabel={returnToOriginSwitchLabel}
-      // returnToOrigin={saveProps.returnToOrigin}
+      returnToOrigin={redirectToOrigin != null}
     />
   );
 }
@@ -180,7 +183,7 @@ const redirectToDashboard = ({
     type: LENS_EMBEDDABLE_TYPE,
   };
 
-  const path = originatingPath ?? dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+  const path = originatingPath ?? (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`);
   const appId = originatingApp ?? 'dashboards';
   stateTransfer.navigateToWithEmbeddablePackage(appId, {
     state,
@@ -250,7 +253,6 @@ export const runSaveLensVisualization = async (
   }
 
   let references = lastKnownDoc.references;
-  debugger;
 
   if (savedObjectsTagging) {
     const tagsIds =
@@ -313,7 +315,6 @@ export const runSaveLensVisualization = async (
         timeRange: saveProps.panelTimeRange,
       };
     }
-
     if (saveProps.returnToOrigin && redirectToOrigin) {
       // disabling the validation on app leave because the document has been saved.
       onAppLeave?.((actions) => {

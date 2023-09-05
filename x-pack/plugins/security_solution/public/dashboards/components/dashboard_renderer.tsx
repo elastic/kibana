@@ -112,7 +112,7 @@ const DashboardRendererComponent = ({
     return () => {
       setDashboardContainerRenderer(undefined);
     };
-  }, [getCreationOptions, onDashboardContainerLoaded, savedObjectId]);
+  }, [embeddable, getCreationOptions, onDashboardContainerLoaded, savedObjectId]);
 
   return canReadDashboard ? <div ref={wrapperRef}>{dashboardContainerRenderer}</div> : null;
 };

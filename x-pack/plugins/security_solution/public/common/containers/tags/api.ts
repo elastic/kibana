@@ -42,5 +42,3 @@ export const fetchTags = ({
 }) => {
   return Promise.all(tagIds.map((tagId) => savedObjectsTaggingClient.get(tagId)));
 };
-
-export const isManagedTag = ({ name }: { name: string }) => name === MANAGED_TAG_NAME;

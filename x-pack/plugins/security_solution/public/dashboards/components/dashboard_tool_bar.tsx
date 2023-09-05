@@ -13,6 +13,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { APP_UI_ID } from '../../../common';
 import { useRedirectToDashboardFromLens } from '../../common/components/visualization_actions/use_redirect_to_dashboard_from_lens';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 
 const DashboardToolBarComponent = ({
   dashboardContainer,
@@ -26,8 +27,8 @@ const DashboardToolBarComponent = ({
   const { euiTheme } = useEuiTheme();
   const viewMode =
     dashboardContainer?.select((state) => state.explicitInput.viewMode) ?? ViewMode.VIEW;
-
-  const redirectTo = useRedirectToDashboardFromLens();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const redirectTo = useRedirectToDashboardFromLens({ getSecuritySolutionUrl });
 
   useEffect(() => {
     onLoad(viewMode);
