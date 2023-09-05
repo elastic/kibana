@@ -22,6 +22,10 @@ import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import {
+  DISCOVER_SEARCH_SAVE_ERROR_TITLE,
+  DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
+} from './translations';
 
 export const defaultDiscoverTimeRange: TimeRange = {
   from: 'now-15m',
@@ -32,7 +36,7 @@ export const defaultDiscoverTimeRange: TimeRange = {
 export const useDiscoverInTimelineActions = (
   discoverStateContainer: RefObject<DiscoverStateContainer | undefined>
 ) => {
-  const { addSuccess, addError } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const {
     services: { customDataService: discoverDataService, savedSearch: savedSearchService },
@@ -104,7 +108,7 @@ export const useDiscoverInTimelineActions = (
     (savedSearch: SavedSearch) => {
       const { appState } = getAppStateFromSavedSearch(savedSearch);
       if (!appState) return;
-      discoverStateContainer.current?.appState.replaceUrlState(appState);
+      discoverStateContainer.current?.appState.set(appState);
       const timeRangeFromSavedSearch = savedSearch.timeRange;
       discoverStateContainer.current?.globalState.set({
         ...discoverStateContainer.current?.globalState.get(),
@@ -120,12 +124,11 @@ export const useDiscoverInTimelineActions = (
    * */
   const resetDiscoverAppState = useCallback(() => {
     discoverStateContainer.current?.appState.set(defaultDiscoverAppState);
-    discoverDataService.query.timefilter.timefilter.setTime(defaultDiscoverTimeRange);
-  }, [
-    defaultDiscoverAppState,
-    discoverStateContainer,
-    discoverDataService.query.timefilter.timefilter,
-  ]);
+    discoverStateContainer.current?.globalState.set({
+      ...discoverStateContainer.current?.globalState.get(),
+      time: defaultDiscoverTimeRange,
+    });
+  }, [defaultDiscoverAppState, discoverStateContainer]);
 
   const persistSavedSearch = useCallback(
     async (savedSearch: SavedSearch, savedSearchOption: SaveSavedSearchOptions) => {
@@ -136,17 +139,8 @@ export const useDiscoverInTimelineActions = (
       }
       if (!savedSearch) return;
 
-      function onSuccess(id: string) {
-        if (!savedSearch) return;
-        if (id) {
-          addSuccess({
-            title: `Saved new Search ${savedSearch.title}`,
-          });
-        }
-      }
-
       function onError(error: Error) {
-        addError(error, { title: 'Error while saving saved Search' });
+        addError(error, { title: DISCOVER_SEARCH_SAVE_ERROR_TITLE });
       }
 
       try {
@@ -155,14 +149,15 @@ export const useDiscoverInTimelineActions = (
           savedSearchOptions: savedSearchOption,
         });
         if (id) {
-          onSuccess(id);
+          return { id };
+        } else {
+          addError(DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN, { title: DISCOVER_SEARCH_SAVE_ERROR_TITLE });
         }
-        return { id };
       } catch (err) {
         onError(err);
       }
     },
-    [addSuccess, addError, discoverStateContainer, saveSavedSearch]
+    [addError, discoverStateContainer, saveSavedSearch]
   );
 
   /*
@@ -171,10 +166,11 @@ export const useDiscoverInTimelineActions = (
    * */
   const updateSavedSearch = useCallback(
     async (savedSearch: SavedSearch) => {
-      savedSearch.title = `Saved Search for timeline - ${title} `;
+      savedSearch.title = `Saved Search for timeline - ${title}`;
       savedSearch.description = description;
       savedSearch.timeRestore = true;
-      savedSearch.timeRange = discoverDataService.query.timefilter.timefilter.getTime();
+      savedSearch.timeRange =
+        savedSearch.timeRange ?? discoverDataService.query.timefilter.timefilter.getTime();
       savedSearch.tags = ['security-solution-default'];
 
       if (savedSearchId) {
@@ -199,8 +195,8 @@ export const useDiscoverInTimelineActions = (
           );
         }
       } catch (err) {
-        addError('Error saving Discover Saved Search', {
-          title: 'Error saving Discover Saved Search',
+        addError(DISCOVER_SEARCH_SAVE_ERROR_TITLE, {
+          title: DISCOVER_SEARCH_SAVE_ERROR_TITLE,
           toastMessage: String(err),
         });
       }

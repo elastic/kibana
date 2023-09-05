@@ -16,7 +16,6 @@ export const savedSearchComparator = (
     'columns',
     'grid',
     'hideChart',
-    'refreshInterval',
     'sort',
     'timeRange',
     'searchSource.fields.filter',

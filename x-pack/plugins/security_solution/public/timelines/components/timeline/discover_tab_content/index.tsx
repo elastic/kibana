@@ -258,7 +258,7 @@ export const DiscoverTabContent = () => {
 
   const DiscoverContainer = discover.DiscoverContainer;
 
-  const isLoading = Boolean(!dataView || (savedSearchId && !savedSearchById));
+  const isLoading = Boolean(!dataView);
 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">
