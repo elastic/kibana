@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'timePicker']);
 
   describe('Header menu', () => {
@@ -51,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
         await retry.try(async () => {
-          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
+          expect(await testSubjects.getVisibleText('discover-dataView-switch-link')).to.eql(
             'All log datasets'
           );
         });
