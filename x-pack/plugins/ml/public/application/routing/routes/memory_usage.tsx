@@ -40,7 +40,7 @@ const PageWrapper: FC = () => {
     'full',
     // only enabled in non-serverless mode
     // if a serverless project ever contains all three features
-    // this check will have have to be changed to an
+    // this check will have to be changed to an
     // explicit isServerless check which will probably
     // require a change in useRouteResolver
     ['isADEnabled', 'isDFAEnabled', 'isNLPEnabled'],
