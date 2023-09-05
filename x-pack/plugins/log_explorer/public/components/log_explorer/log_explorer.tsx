@@ -13,7 +13,7 @@ import {
   createLogExplorerProfileCustomizations,
   CreateLogExplorerProfileCustomizationsDeps,
 } from '../../customizations/log_explorer_profile';
-import { createPropertyGetProxy } from '../../utils/proxies';
+import { createPropertyGetProxy, createPropertyGetProxySingleton } from '../../utils/proxies';
 
 export interface CreateLogExplorerArgs extends CreateLogExplorerProfileCustomizationsDeps {
   discover: DiscoverStart;
@@ -49,12 +49,13 @@ export const createLogExplorer = ({
  * Create proxy for the data service, in which session service enablement calls
  * are no-ops.
  */
+
 const createDataServiceProxy = (data: DataPublicPluginStart) => {
   return createPropertyGetProxy(data, {
     search: (searchService: ISearchStart) =>
       createPropertyGetProxy(searchService, {
         session: (sessionService: ISessionService) =>
-          createPropertyGetProxy(sessionService, {
+          createPropertyGetProxySingleton('data.search.session', sessionService, {
             enableStorage: () => () => {},
           }),
       }),
