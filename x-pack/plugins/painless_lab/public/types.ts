@@ -14,3 +14,7 @@ export interface PluginDependencies {
   home: HomePublicPluginSetup;
   devTools: DevToolsSetup;
 }
+
+export interface ClientConfigType {
+  enabled: boolean;
+}

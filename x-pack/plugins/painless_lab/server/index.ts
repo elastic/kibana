@@ -5,8 +5,21 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { PainlessLabServerPlugin } from './plugin';
+
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+});
+export type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  exposeToBrowser: {
+    enabled: true,
+  },
+  schema: configSchema,
+};
 
 export const plugin = (ctx: PluginInitializerContext) => {
   return new PainlessLabServerPlugin(ctx);
