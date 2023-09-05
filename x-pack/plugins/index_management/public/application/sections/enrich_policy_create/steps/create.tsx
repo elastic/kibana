@@ -28,8 +28,7 @@ import { serializeAsESPolicy, getESPolicyCreationApiCall } from '../../../../../
 
 // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
 // levels. This way we prevent that happening for very large requests.
-const getLanguageForQuery = (query: any) =>
- query.length < 60000 ? 'json' : undefined;
+const getLanguageForQuery = (query: any) => (query.length < 60000 ? 'json' : undefined);
 
 const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
   const queryAsString = policy.query ? JSON.stringify(policy.query, null, 2) : '';
