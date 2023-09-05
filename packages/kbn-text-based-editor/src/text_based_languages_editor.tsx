@@ -55,6 +55,7 @@ import {
   getInlineEditorText,
   getDocumentationSections,
   MonacoError,
+  getWrappedInPipesCode,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
@@ -554,12 +555,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     wordWrap: isWordWrapped ? 'off' : 'on',
                   });
                   setIsWordWrapped(!isWordWrapped);
-
-                  const pipes = code?.split('|');
-                  const codeNoLines = pipes?.map((pipe) => {
-                    return pipe.replaceAll('\n', '');
-                  });
-                  const updatedCode = codeNoLines.join(isWordWrapped ? '|' : '\n|');
+                  const updatedCode = getWrappedInPipesCode(code, isWordWrapped);
                   if (code !== updatedCode) {
                     setCode(updatedCode);
                     onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
