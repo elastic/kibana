@@ -147,7 +147,7 @@ async function getTraceDocsPaginated({
   traceId,
   start,
   end,
-  results = [],
+  hits = [],
   searchAfter,
 }: {
   apmEventClient: APMEventClient;
@@ -155,23 +155,28 @@ async function getTraceDocsPaginated({
   traceId: string;
   start: number;
   end: number;
-  results?: any[];
+  hits?: Awaited<ReturnType<typeof getTraceDocsPerPage>>['hits'];
   searchAfter?: SortResults;
-}): Promise<ReturnType<typeof getTraceDocsPerPage>> {
-  const { hits, total } = await getTraceDocsPerPage({
+}): ReturnType<typeof getTraceDocsPerPage> {
+  const response = await getTraceDocsPerPage({
     apmEventClient,
     maxTraceItems,
     traceId,
     start,
     end,
     searchAfter,
-    hitsRetrievedCount: results.length,
+    hitsRetrievedCount: hits.length,
   });
 
-  const newResults = [...results, ...hits];
-
-  if (newResults.length >= maxTraceItems || newResults.length >= total) {
-    return { hits: newResults, total };
+  const mergedHits = [...hits, ...response.hits];
+  if (
+    mergedHits.length >= maxTraceItems ||
+    mergedHits.length >= response.total
+  ) {
+    return {
+      hits: mergedHits,
+      total: response.total,
+    };
   }
 
   return getTraceDocsPaginated({
@@ -180,7 +185,7 @@ async function getTraceDocsPaginated({
     traceId,
     start,
     end,
-    results: newResults,
+    hits: mergedHits,
     searchAfter: last(hits)?.sort,
   });
 }
