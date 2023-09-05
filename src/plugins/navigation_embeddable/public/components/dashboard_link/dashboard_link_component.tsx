@@ -149,7 +149,7 @@ export const DashboardLinkComponent = ({
       color="text"
       {...onClickProps}
       id={`dashboardLink--${link.id}`}
-      showToolTip={Boolean(error)}
+      showToolTip={true}
       toolTipProps={{
         title: tooltipTitle,
         content: tooltipMessage,
