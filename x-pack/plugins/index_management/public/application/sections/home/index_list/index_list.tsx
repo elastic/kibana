@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { ScopedHistory } from '@kbn/core/public';
@@ -28,16 +28,9 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
   }, []);
-
-  const openDetailPanel = useCallback(
-    (indexName: string) => {
-      return history.push(getIndexDetailsLink(indexName));
-    },
-    [history]
-  );
   return (
     <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">
-      <IndexTable history={history as ScopedHistory} openDetailPanel={openDetailPanel} />
+      <IndexTable history={history as ScopedHistory} />
     </div>
   );
 };

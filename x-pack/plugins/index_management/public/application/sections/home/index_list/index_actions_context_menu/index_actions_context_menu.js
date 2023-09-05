@@ -57,11 +57,6 @@ export class IndexActionsContextMenu extends Component {
       flushIndices,
       refreshIndices,
       clearCacheIndices,
-      editIndex,
-      showMapping,
-      showStats,
-      showSettings,
-      isOnListView,
       indexNames,
       indexStatusByName,
       performExtensionAction,
@@ -75,52 +70,6 @@ export class IndexActionsContextMenu extends Component {
     const allFrozen = every(indices, (index) => index.isFrozen);
     const selectedIndexCount = indexNames.length;
     const items = [];
-    if (isOnListView && selectedIndexCount === 1) {
-      items.push({
-        'data-test-subj': 'showSettingsIndexMenuButton',
-        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel', {
-          defaultMessage:
-            'Show {selectedIndexCount, plural, one {index} other {indices} } settings',
-          values: { selectedIndexCount },
-        }),
-        onClick: () => {
-          this.closePopoverAndExecute(showSettings);
-        },
-      });
-      items.push({
-        'data-test-subj': 'showMappingsIndexMenuButton',
-        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexMappingLabel', {
-          defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } mapping',
-          values: { selectedIndexCount },
-        }),
-        onClick: () => {
-          this.closePopoverAndExecute(showMapping);
-        },
-      });
-      if (allOpen && enableIndexActions) {
-        items.push({
-          'data-test-subj': 'showStatsIndexMenuButton',
-          name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexStatsLabel', {
-            defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } stats',
-            values: { selectedIndexCount },
-          }),
-          onClick: () => {
-            this.closePopoverAndExecute(showStats);
-          },
-        });
-      }
-      items.push({
-        'data-test-subj': 'editIndexMenuButton',
-        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.editIndexSettingsLabel', {
-          defaultMessage:
-            'Edit {selectedIndexCount, plural, one {index} other {indices} } settings',
-          values: { selectedIndexCount },
-        }),
-        onClick: () => {
-          this.closePopoverAndExecute(editIndex);
-        },
-      });
-    }
     if (allOpen && enableIndexActions) {
       items.push({
         'data-test-subj': 'closeIndexMenuButton',
