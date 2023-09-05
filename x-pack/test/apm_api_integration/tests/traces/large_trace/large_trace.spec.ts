@@ -43,6 +43,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
+      after(async () => {
+        await synthtraceEsClient.clean();
+      });
+
       describe('when maxTraceItems is 5000 (default)', () => {
         let trace: APIReturnType<'GET /internal/apm/traces/{traceId}'>;
         before(async () => {
