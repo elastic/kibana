@@ -107,6 +107,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 === Examples
 
 * <<preconfigured-index-configuration>>
+* <<preconfigured-opsgenie-configuration>>
 * <<preconfigured-server-log-configuration>>
 * <<preconfigured-webhook-configuration>>
 
@@ -129,6 +130,26 @@ xpack.actions.preconfigured:
 --
 <1> The {es} index to be written to.
 <2> A time field that will indicate when each alert condition occurs.
+
+[float]
+[[preconfigured-opsgenie-configuration]]
+==== {opsgenie} connectors
+
+The following example creates an <<opsgenie-action-type,{opsgenie} connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-opsgenie:
+    name: preconfigured-opsgenie-connector-type
+    actionTypeId: .opsgenie
+    config:
+      apiUrl: https://api.opsgenie.com <1>
+    secrets:
+      apiKey: apikey <2>
+--
+<1> The {opsgenie} URL.
+<2> The {opsgenie} API authentication key for HTTP basic authentication.
 
 [float]
 [[preconfigured-server-log-configuration]]

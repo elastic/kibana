@@ -1334,6 +1334,7 @@
           "enabled",
           "groupBy",
           "instanceId",
+          "tags",
           "createdAt",
           "updatedAt"
         ],
@@ -1416,6 +1417,13 @@
             "description": "the value derived from the groupBy field, if present, otherwise '*'",
             "type": "string",
             "example": "host-abcde"
+          },
+          "tags": {
+            "description": "List of tags",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "createdAt": {
             "description": "The creation date",
@@ -1607,6 +1615,13 @@
             "description": "optional group by field to use to generate an SLO per distinct value",
             "type": "string",
             "example": "some.field"
+          },
+          "tags": {
+            "description": "List of tags",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1689,6 +1704,13 @@
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
+          },
+          "tags": {
+            "description": "List of tags",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

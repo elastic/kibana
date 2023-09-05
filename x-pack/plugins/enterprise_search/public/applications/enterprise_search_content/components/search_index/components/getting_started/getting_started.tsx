@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 import dedent from 'dedent';
@@ -29,6 +29,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   SelectClientPanel,
   LanguageDefinition,
+  LanguageDefinitionSnippetArguments,
   LanguageClientPanel,
   InstallClientPanel,
   OverviewPanel,
@@ -50,30 +51,41 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { OverviewLogic } from '../../overview.logic';
 import { GenerateApiKeyModal } from '../generate_api_key_modal/modal';
 
-import { javascriptDefinition } from './languages/javascript';
+import { consoleDefinition } from './languages/console';
+import { curlDefinition } from './languages/curl';
 import { languageDefinitions } from './languages/languages';
 
 const DEFAULT_URL = 'https://localhost:9200';
 
 export const APIGettingStarted = () => {
   const { http } = useValues(HttpLogic);
-  const { apiKey, isGenerateModalOpen } = useValues(OverviewLogic);
-  const { openGenerateModal, closeGenerateModal } = useActions(OverviewLogic);
+  const { apiKey, isGenerateModalOpen, indexPipelineParameters } = useValues(OverviewLogic);
+  const { fetchIndexPipelineParameters, openGenerateModal, closeGenerateModal } =
+    useActions(OverviewLogic);
   const { indexName } = useValues(IndexViewLogic);
   const { services } = useKibana<KibanaDeps>();
 
   const cloudContext = useCloudDetails();
 
-  const codeArgs = {
+  useEffect(() => {
+    fetchIndexPipelineParameters({ indexName });
+  }, [indexName]);
+
+  const codeArgs: LanguageDefinitionSnippetArguments = {
     apiKey,
     cloudId: cloudContext.cloudId,
+    extraIngestDocumentValues: {
+      _extract_binary_content: indexPipelineParameters.extract_binary_content,
+      _reduce_whitespace: indexPipelineParameters.reduce_whitespace,
+      _run_ml_inference: indexPipelineParameters.run_ml_inference,
+    },
     indexName,
+    ingestPipeline: indexPipelineParameters.name,
     url: cloudContext.elasticsearchUrl || DEFAULT_URL,
   };
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/client_libraries/`);
 
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<LanguageDefinition>(javascriptDefinition);
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
   return (
     <>
       {isGenerateModalOpen && (
@@ -344,7 +356,11 @@ export const APIGettingStarted = () => {
           <CodeBox
             languages={languageDefinitions}
             codeSnippet={getLanguageDefinitionCodeSnippet(selectedLanguage, 'ingestData', codeArgs)}
-            consoleRequest={getConsoleRequest('ingestData')}
+            consoleRequest={getLanguageDefinitionCodeSnippet(
+              consoleDefinition,
+              'ingestData',
+              codeArgs
+            )}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             assetBasePath={assetBasePath}
@@ -375,7 +391,11 @@ export const APIGettingStarted = () => {
               'buildSearchQuery',
               codeArgs
             )}
-            consoleRequest={getConsoleRequest('buildSearchQuery')}
+            consoleRequest={getLanguageDefinitionCodeSnippet(
+              consoleDefinition,
+              'buildSearchQuery',
+              codeArgs
+            )}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             assetBasePath={assetBasePath}

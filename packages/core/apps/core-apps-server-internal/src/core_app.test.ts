@@ -17,6 +17,7 @@ import { PluginType } from '@kbn/core-base-common';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { CoreAppsService } from './core_app';
+import { of } from 'rxjs';
 
 const emptyPlugins = (): UiPlugins => ({
   internal: new Map(),
@@ -56,10 +57,43 @@ describe('CoreApp', () => {
     registerBundleRoutesMock.mockReset();
   });
 
+  describe('`/internal/core/_settings` route', () => {
+    it('is not registered by default', async () => {
+      const routerMock = mockRouter.create();
+      internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+
+      const localCoreApp = new CoreAppsService(coreContext);
+      await localCoreApp.setup(internalCoreSetup, emptyPlugins());
+
+      expect(routerMock.versioned.put).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/internal/core/_settings',
+        })
+      );
+    });
+
+    it('is registered when enabled', async () => {
+      const routerMock = mockRouter.create();
+      internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+
+      coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
+      const localCoreApp = new CoreAppsService(coreContext);
+      await localCoreApp.setup(internalCoreSetup, emptyPlugins());
+
+      expect(routerMock.versioned.put).toHaveBeenCalledWith({
+        path: '/internal/core/_settings',
+        access: 'internal',
+        options: {
+          tags: ['access:updateDynamicConfig'],
+        },
+      });
+    });
+  });
+
   describe('`/status` route', () => {
-    it('is registered with `authRequired: false` is the status page is anonymous', () => {
+    it('is registered with `authRequired: false` is the status page is anonymous', async () => {
       internalCoreSetup.status.isStatusPageAnonymous.mockReturnValue(true);
-      coreApp.setup(internalCoreSetup, emptyPlugins());
+      await coreApp.setup(internalCoreSetup, emptyPlugins());
 
       expect(httpResourcesRegistrar.register).toHaveBeenCalledWith(
         {
@@ -73,9 +107,9 @@ describe('CoreApp', () => {
       );
     });
 
-    it('is registered with `authRequired: true` is the status page is not anonymous', () => {
+    it('is registered with `authRequired: true` is the status page is not anonymous', async () => {
       internalCoreSetup.status.isStatusPageAnonymous.mockReturnValue(false);
-      coreApp.setup(internalCoreSetup, emptyPlugins());
+      await coreApp.setup(internalCoreSetup, emptyPlugins());
 
       expect(httpResourcesRegistrar.register).toHaveBeenCalledWith(
         {
@@ -185,8 +219,8 @@ describe('CoreApp', () => {
   });
 
   describe('`/app/{id}/{any*}` route', () => {
-    it('is registered with the correct parameters', () => {
-      coreApp.setup(internalCoreSetup, emptyPlugins());
+    it('is registered with the correct parameters', async () => {
+      await coreApp.setup(internalCoreSetup, emptyPlugins());
 
       expect(httpResourcesRegistrar.register).toHaveBeenCalledWith(
         {
@@ -201,9 +235,9 @@ describe('CoreApp', () => {
     });
   });
 
-  it('`setup` calls `registerBundleRoutes` with the correct options', () => {
+  it('`setup` calls `registerBundleRoutes` with the correct options', async () => {
     const uiPlugins = emptyPlugins();
-    coreApp.setup(internalCoreSetup, uiPlugins);
+    await coreApp.setup(internalCoreSetup, uiPlugins);
 
     expect(registerBundleRoutesMock).toHaveBeenCalledTimes(1);
     expect(registerBundleRoutesMock).toHaveBeenCalledWith({

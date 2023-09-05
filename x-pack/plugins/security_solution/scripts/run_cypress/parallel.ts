@@ -17,13 +17,7 @@ import { findChangedFiles } from 'find-cypress-specs';
 import path from 'path';
 import grep from '@cypress/grep/src/plugin';
 
-import {
-  EsVersion,
-  FunctionalTestRunner,
-  readConfigFile,
-  runElasticsearch,
-  runKibanaServer,
-} from '@kbn/test';
+import { EsVersion, FunctionalTestRunner, runElasticsearch, runKibanaServer } from '@kbn/test';
 
 import {
   Lifecycle,
@@ -34,8 +28,8 @@ import {
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
-import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 import { isSkipped, parseTestFileConfig } from './utils';
+import { getFTRConfig } from './get_ftr_config';
 
 /**
  * Retrieve test files using a glob pattern.
@@ -69,34 +63,35 @@ const retrieveIntegrations = (integrationsPaths: string[]) => {
 export const cli = () => {
   run(
     async () => {
-      const { argv } = yargs(process.argv.slice(2)).coerce('env', (arg: string) =>
-        arg.split(',').reduce((acc, curr) => {
-          const [key, value] = curr.split('=');
-          if (key === 'burn') {
-            acc[key] = parseInt(value, 10);
-          } else {
-            acc[key] = value;
-          }
-          return acc;
-        }, {} as Record<string, string | number>)
-      );
+      const { argv } = yargs(process.argv.slice(2))
+        .coerce('spec', (arg) => (_.isArray(arg) ? [_.last(arg)] : [arg]))
+        .coerce('env', (arg: string) =>
+          arg.split(',').reduce((acc, curr) => {
+            const [key, value] = curr.split('=');
+            if (key === 'burn') {
+              acc[key] = parseInt(value, 10);
+            } else {
+              acc[key] = value;
+            }
+            return acc;
+          }, {} as Record<string, string | number>)
+        );
 
       const isOpen = argv._[0] === 'open';
       const cypressConfigFilePath = require.resolve(
         `../../${_.isArray(argv.configFile) ? _.last(argv.configFile) : argv.configFile}`
       ) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
-      const spec: string | undefined = argv?.spec as string;
       const grepSpecPattern = grep({
         ...cypressConfigFile,
-        specPattern: spec ?? cypressConfigFile.e2e.specPattern,
+        specPattern: argv.spec ?? cypressConfigFile.e2e.specPattern,
         excludeSpecPattern: [],
       }).specPattern;
 
       let files = retrieveIntegrations(
         _.isArray(grepSpecPattern)
           ? grepSpecPattern
-          : globby.sync(spec ? [spec] : cypressConfigFile.e2e.specPattern)
+          : globby.sync(argv.spec ?? cypressConfigFile.e2e.specPattern)
       );
 
       if (argv.changedSpecsOnly) {
@@ -177,8 +172,6 @@ export const cli = () => {
         _.pull(fleetServerPorts, fleetServerPort);
       };
 
-      const hostRealIp = getLocalhostRealIp();
-
       await pMap(
         files,
         async (filePath) => {
@@ -197,120 +190,21 @@ export const cli = () => {
             const esPort: number = getEsPort();
             const kibanaPort: number = getKibanaPort();
             const fleetServerPort: number = getFleetServerPort();
-            const configFromTestFile = parseTestFileConfig(filePath);
-
-            const config = await readConfigFile(
-              log,
-              EsVersion.getDefault(),
-              path.resolve(
-                _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile
-              ),
-              {
-                servers: {
-                  elasticsearch: {
-                    port: esPort,
-                  },
-                  kibana: {
-                    port: kibanaPort,
-                  },
-                  fleetserver: {
-                    port: fleetServerPort,
-                  },
-                },
-                kbnTestServer: {
-                  serverArgs: [
-                    `--server.port=${kibanaPort}`,
-                    `--elasticsearch.hosts=http://localhost:${esPort}`,
-                  ],
-                },
-              },
-              (vars) => {
-                const hasFleetServerArgs = _.some(
-                  vars.kbnTestServer.serverArgs,
-                  (value) =>
-                    value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
-                    value.includes('--xpack.fleet.agents.elasticsearch.host')
-                );
-
-                vars.kbnTestServer.serverArgs = _.filter(
-                  vars.kbnTestServer.serverArgs,
-                  (value) =>
-                    !(
-                      value.includes('--elasticsearch.hosts=http://localhost:9220') ||
-                      value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
-                      value.includes('--xpack.fleet.agents.elasticsearch.host')
-                    )
-                );
-
-                if (
-                  configFromTestFile?.enableExperimental?.length &&
-                  _.some(vars.kbnTestServer.serverArgs, (value) =>
-                    value.includes('--xpack.securitySolution.enableExperimental')
-                  )
-                ) {
-                  vars.kbnTestServer.serverArgs = _.filter(
-                    vars.kbnTestServer.serverArgs,
-                    (value) => !value.includes('--xpack.securitySolution.enableExperimental')
-                  );
-                  vars.kbnTestServer.serverArgs.push(
-                    `--xpack.securitySolution.enableExperimental=${JSON.stringify(
-                      configFromTestFile?.enableExperimental
-                    )}`
-                  );
-                }
-
-                if (configFromTestFile?.license) {
-                  if (vars.serverless) {
-                    log.warning(
-                      `'ftrConfig.license' ignored. Value does not apply to kibana when running in serverless.\nFile: ${filePath}`
-                    );
-                  } else {
-                    vars.esTestCluster.license = configFromTestFile.license;
-                  }
-                }
-
-                if (hasFleetServerArgs) {
-                  vars.kbnTestServer.serverArgs.push(
-                    `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
-                  );
-                  vars.kbnTestServer.serverArgs.push(
-                    `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
-                  );
-
-                  if (vars.serverless) {
-                    vars.kbnTestServer.serverArgs.push(
-                      `--xpack.fleet.internal.fleetServerStandalone=false`
-                    );
-                  }
-                }
-
-                // Serverless Specific
-                if (vars.serverless) {
-                  log.info(`Serverless mode detected`);
-
-                  if (configFromTestFile?.productTypes) {
-                    vars.kbnTestServer.serverArgs.push(
-                      `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
-                        ...configFromTestFile.productTypes,
-                        // Why spread it twice?
-                        // The `serverless.security.yml` file by default includes two product types as of this change.
-                        // Because it's an array, we need to ensure that existing values are "removed" and the ones
-                        // defined here are added. To do that, we duplicate the `productTypes` passed so that all array
-                        // elements in that YAML file are updated. The Security serverless plugin has code in place to
-                        // dedupe.
-                        ...configFromTestFile.productTypes,
-                      ])}`
-                    );
-                  }
-                } else if (configFromTestFile?.productTypes) {
-                  log.warning(
-                    `'ftrConfig.productTypes' ignored. Value applies only when running kibana is serverless.\nFile: ${filePath}`
-                  );
-                }
-
-                return vars;
-              }
+            const specFileFTRConfig = parseTestFileConfig(filePath);
+            const ftrConfigFilePath = path.resolve(
+              _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile
             );
+
+            const config = await getFTRConfig({
+              log,
+              esPort,
+              kibanaPort,
+              fleetServerPort,
+              ftrConfigFilePath,
+              specFilePath: filePath,
+              specFileFTRConfig,
+              isOpen,
+            });
 
             log.info(`
 ----------------------------------------------
@@ -344,26 +238,22 @@ ${JSON.stringify(config.getAll(), null, 2)}
                   config,
                   log,
                   name: `ftr-${esPort}`,
-                  esFrom: 'snapshot',
+                  esFrom: config.get('esTestCluster')?.from || 'snapshot',
                   onEarlyExit,
                 }),
               { retries: 2, forever: false }
             );
 
-            await pRetry(
-              async () =>
-                runKibanaServer({
-                  procs,
-                  config,
-                  installDir: options?.installDir,
-                  extraKbnOpts:
-                    options?.installDir || options?.ci || !isOpen
-                      ? []
-                      : ['--dev', '--no-dev-config', '--no-dev-credentials'],
-                  onEarlyExit,
-                }),
-              { retries: 2, forever: false }
-            );
+            await runKibanaServer({
+              procs,
+              config,
+              installDir: options?.installDir,
+              extraKbnOpts:
+                options?.installDir || options?.ci || !isOpen
+                  ? []
+                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+              onEarlyExit,
+            });
 
             await providers.loadAll();
 
@@ -431,6 +321,8 @@ ${JSON.stringify(config.getAll(), null, 2)}
               KIBANA_URL_WITH_AUTH: createUrlFromFtrConfig('kibana', true),
               KIBANA_USERNAME: config.get('servers.kibana.username'),
               KIBANA_PASSWORD: config.get('servers.kibana.password'),
+
+              IS_SERVERLESS: config.get('serverless'),
 
               ...argv.env,
             };

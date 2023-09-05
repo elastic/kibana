@@ -111,12 +111,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                 selectedPlatform
               );
               return (
-                <StepStatus
-                  key={stepId}
-                  status={status}
-                  title={title}
-                  message={message}
-                />
+                <StepStatus status={status} title={title} message={message} />
               );
             })}
           </EuiFlexGroup>
@@ -184,6 +179,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
         download="elastic-agent.yml"
         target="_blank"
         isDisabled={autoDownloadConfig}
+        data-test-subj="obltOnboardingConfigureElasticAgentStepDownloadConfig"
       >
         {i18n.translate(
           'xpack.observability_onboarding.installElasticAgent.configStep.downloadConfigButton',
@@ -209,6 +205,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
     <EuiSteps
       steps={[
         {
+          'data-test-subj': 'obltOnboardingInstallElasticAgentStep',
           title: i18n.translate(
             'xpack.observability_onboarding.installElasticAgent.installStep.title',
             { defaultMessage: 'Install the Elastic Agent' }
@@ -274,6 +271,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                 checked={autoDownloadConfig}
                 onChange={onToggleAutoDownloadConfig}
                 disabled={disableSteps || isInstallStarted}
+                data-test-subj="obltOnboardingInstallElasticAgentAutoDownloadConfig"
               />
               <EuiSpacer size="l" />
               {autoDownloadConfig && (
@@ -288,6 +286,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                     )}
                     color="warning"
                     iconType="warning"
+                    data-test-subj="obltOnboardingInstallElasticAgentAutoDownloadConfigCallout"
                   />
                   <EuiSpacer size="l" />
                 </>
@@ -318,6 +317,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
           ),
         },
         {
+          'data-test-subj': 'obltOnboardingConfigureElasticAgentStep',
           title: i18n.translate(
             'xpack.observability_onboarding.installElasticAgent.configureStep.title',
             { defaultMessage: 'Configure the Elastic agent' }
@@ -329,6 +329,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
           children: null,
           ...euiStep,
           status: disableSteps ? 'disabled' : euiStep.status,
+          'data-test-subj': euiStep['data-test-subj'],
         })),
       ]}
     />
