@@ -10,7 +10,25 @@ import { ElasticsearchOverview as Overview } from './overview';
 
 describe('<Overview />', () => {
   beforeEach(() => {
-    core.http.fetch.mockResolvedValueOnce({ apiKeys: [] });
+    core.http.fetch.mockImplementation((url) => {
+      let fetchedUrl: string;
+      if (typeof url === 'string') {
+        fetchedUrl = url;
+      }
+
+      return new Promise((resolve, reject) => {
+        switch (fetchedUrl) {
+          case '/internal/serverless_search/api_keys':
+            resolve({ apiKeys: [] });
+            return;
+          case '/internal/serverless_search/connectors':
+            resolve({});
+            return;
+          default:
+            return reject(`unknown path requested ${fetchedUrl}`);
+        }
+      });
+    });
   });
 
   test('renders without throwing an error', () => {
@@ -33,7 +51,11 @@ describe('<Overview />', () => {
   });
   test('api key', () => {
     const { getByRole } = render(<Overview />);
-    expect(getByRole('heading', { name: 'Store your API key and Cloud ID' })).toBeDefined();
+    expect(getByRole('heading', { level: 2, name: 'Prepare an API Key' })).toBeDefined();
+  });
+  test('cloud id', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Copy your connection details' })).toBeDefined();
   });
   test('configure client', () => {
     const { getByRole } = render(<Overview />);
