@@ -52,7 +52,6 @@ export const logsTSDBSpecProvider = function (): SampleDatasetSchema {
         },
       },
     ],
-    withIndexSettings: true,
     status: 'not_installed',
     iconPath: GLOBE_ICON_PATH,
   };
