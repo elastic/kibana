@@ -51,22 +51,25 @@ export const CaseSettingsRt = rt.strict({
   syncAlerts: rt.boolean,
 });
 
+const customFieldValue = <C extends rt.Mixed>(codec: C) =>
+  rt.strict({ value: rt.union([rt.array(codec), rt.null]) });
+
 const CustomFieldString = rt.strict({
   key: rt.string,
   type: rt.literal('string'),
-  field: rt.strict({ value: rt.union([rt.array(rt.string), rt.null]) }),
+  field: customFieldValue(rt.string),
 });
 
 const CustomFieldBoolean = rt.strict({
   key: rt.string,
   type: rt.literal('boolean'),
-  field: rt.strict({ value: rt.union([rt.array(rt.boolean), rt.null]) }),
+  field: customFieldValue(rt.boolean),
 });
 
 const CustomFieldList = rt.strict({
   key: rt.string,
   type: rt.literal('list'),
-  field: rt.strict({ value: rt.union([rt.array(rt.string), rt.null]) }),
+  field: customFieldValue(rt.string),
 });
 
 const CustomFieldValueTypesRt = rt.union([CustomFieldString, CustomFieldBoolean, CustomFieldList]);
