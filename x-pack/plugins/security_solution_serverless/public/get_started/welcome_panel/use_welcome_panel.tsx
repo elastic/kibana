@@ -45,7 +45,7 @@ export const useWelcomePanel = ({
             defaultMessage="View all projects {link}."
             values={{
               link: (
-                <EuiLink href={getCloudUrl('projects', cloud)} target="_blank">
+                <EuiLink href={getCloudUrl('projects', cloud)} target="_blank" external={false}>
                   <FormattedMessage
                     id="xpack.securitySolutionServerless.getStarted.welcomePanel.projectCreated.description.link"
                     defaultMessage="here"
