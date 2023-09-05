@@ -259,6 +259,13 @@ export interface FilterOptions {
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
 }
 
+export interface AdHocRunProps {
+  id: string;
+  from: string;
+  to: string;
+  signal?: AbortSignal;
+}
+
 export interface FetchRulesResponse {
   page: number;
   perPage: number;

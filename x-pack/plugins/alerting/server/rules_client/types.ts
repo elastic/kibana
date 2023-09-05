@@ -108,6 +108,8 @@ export interface ScheduleTaskOptions {
   ruleTypeId: string;
   schedule: IntervalSchedule;
   throwOnConflict: boolean; // whether to throw conflict errors or swallow them
+  from?: string;
+  to?: string;
 }
 
 export interface IndexType {

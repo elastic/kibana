@@ -38,6 +38,7 @@ import {
   FILTER_OPEN,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { AdHocRunModal } from '../../../../detections/components/rules/ad_hoc_run';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
@@ -232,6 +233,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: ruleLoading,
     isExistingRule,
   } = useRuleWithFallback(ruleId);
+
+  const [isAdHocModalVisible, setIsAdHocModalVisible] = useState(false);
+  const closeAdHocRunModal = () => setIsAdHocModalVisible(false);
+  const showAdHocRunModal = () => setIsAdHocModalVisible(true);
+  let adHocRunModal;
+  if (isAdHocModalVisible) {
+    adHocRunModal = <AdHocRunModal ruleId={ruleId} closeModal={closeAdHocRunModal} />;
+  }
 
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
@@ -559,6 +568,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           {i18n.DELETE_CONFIRMATION_BODY}
         </EuiConfirmModal>
       )}
+      {adHocRunModal}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
@@ -645,6 +655,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           )}
                           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
                           confirmDeletion={confirmDeletion}
+                          showAdHocRunModal={showAdHocRunModal}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

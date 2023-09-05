@@ -57,6 +57,7 @@ import { runSoon } from './methods/run_soon';
 import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
 import { getTags, GetTagsParams } from './methods/get_tags';
+import { adHocRun } from './methods/ad_hoc_run';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -162,6 +163,9 @@ export class RulesClient {
   public unmuteInstance = (options: MuteOptions) => unmuteInstance(this.context, options);
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
+
+  public adHocRun = (options: { id: string; from: string; to: string }) =>
+    adHocRun(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
 

@@ -14,6 +14,7 @@ import { registerFleetIntegrationsRoutes } from '../lib/detection_engine/fleet_i
 import { registerPrebuiltRulesRoutes } from '../lib/detection_engine/prebuilt_rules';
 // eslint-disable-next-line no-restricted-imports
 import { registerLegacyRuleActionsRoutes } from '../lib/detection_engine/rule_actions_legacy';
+import { registerRuleExecutionRoutes } from '../lib/detection_engine/rule_execution';
 import { registerRuleExceptionsRoutes } from '../lib/detection_engine/rule_exceptions';
 import { registerRuleManagementRoutes } from '../lib/detection_engine/rule_management';
 import { registerRuleMonitoringRoutes } from '../lib/detection_engine/rule_monitoring';
@@ -102,6 +103,7 @@ export const initRoutes = (
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
   registerPrebuiltRulesRoutes(router, security);
+  registerRuleExecutionRoutes(router);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);

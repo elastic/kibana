@@ -36,6 +36,7 @@ import {
 } from '../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
+  DETECTION_ENGINE_RULES_AD_HOC_RUN,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
@@ -64,6 +65,7 @@ import type { PreviewResponse, RuleResponse } from '../../../../common/api/detec
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
 import type {
+  AdHocRunProps,
   CreateRulesProps,
   ExportDocumentsProps,
   FetchCoverageOverviewProps,
@@ -154,6 +156,14 @@ export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<
   KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
     method: 'POST',
     body: JSON.stringify(rule),
+    signal,
+  });
+
+export const adHocRun = async ({ id, from, to, signal }: AdHocRunProps): Promise<void> =>
+  KibanaServices.get().http.fetch<void>(DETECTION_ENGINE_RULES_AD_HOC_RUN, {
+    method: 'POST',
+    version: '2023-10-31',
+    body: JSON.stringify({ id, from, to }),
     signal,
   });
 

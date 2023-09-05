@@ -135,6 +135,8 @@ export interface RuleExecutorOptions<
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
+  adHocIntervalFrom?: string;
+  adHocIntervalTo?: string;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {

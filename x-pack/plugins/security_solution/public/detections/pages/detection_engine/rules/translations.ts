@@ -490,6 +490,13 @@ export const DELETE_RULE = i18n.translate(
   }
 );
 
+export const AD_HOC_RUN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.adHocRunDescription',
+  {
+    defaultMessage: 'Ad-hoc run',
+  }
+);
+
 export const COLUMN_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.ruleTitle',
   {

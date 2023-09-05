@@ -122,18 +122,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             executionId,
             params,
             previousStartedAt,
-            startedAt,
             services,
             spaceId,
             state,
             rule,
+            adHocIntervalFrom,
+            adHocIntervalTo,
           } = options;
+          let { startedAt } = options;
           let runState = state;
           let inputIndex: string[] = [];
           let inputIndexFields: DataViewFieldBase[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
-          const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
-            params;
+          let { from, to } = params;
+          const { maxSignals, timestampOverride, timestampOverrideFallbackDisabled } = params;
           const {
             alertWithPersistence,
             alertWithSuppression,
@@ -168,10 +170,21 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             alertId: rule.id,
           };
 
-          const {
-            actions,
+          const { actions } = completeRule.ruleConfig;
+          let {
             schedule: { interval },
           } = completeRule.ruleConfig;
+
+          const isAdHocRuleRun = !!adHocIntervalFrom && !!adHocIntervalTo;
+          if (isAdHocRuleRun) {
+            from = adHocIntervalFrom;
+            to = adHocIntervalTo;
+            interval = '1s';
+            startedAt = new Date(adHocIntervalTo);
+          }
+          ruleExecutionLogger.debug(
+            `[AD-HOC] adHocIntervalFrom: ${adHocIntervalFrom}, adHocIntervalTo: ${adHocIntervalTo}`
+          );
 
           const refresh = actions.length ? 'wait_for' : false;
 
