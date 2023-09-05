@@ -15,11 +15,13 @@ import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_sh
 import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
+import { SuppressedAlerts } from './suppressed_alerts';
+import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
-import { CORRELATIONS_TITLE } from './translations';
+import { CORRELATIONS_ERROR, CORRELATIONS_TITLE } from './translations';
 import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 
@@ -68,6 +70,16 @@ export const CorrelationsOverview: React.FC = () => {
   });
   const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
   const showCases = useShowRelatedCases();
+  const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
+    getFieldsData,
+  });
+
+  const canShowAtLeastOneInsight =
+    showAlertsByAncestry ||
+    showSameSourceAlerts ||
+    showAlertsBySession ||
+    showCases ||
+    showSuppressedAlerts;
 
   return (
     <ExpandablePanel
@@ -78,18 +90,25 @@ export const CorrelationsOverview: React.FC = () => {
       }}
       data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
     >
-      <EuiFlexGroup direction="column" gutterSize="none">
-        {showAlertsByAncestry && documentId && indices && (
-          <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
-        )}
-        {showSameSourceAlerts && originalEventId && (
-          <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
-        )}
-        {showAlertsBySession && entityId && (
-          <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
-        )}
-        {showCases && <RelatedCases eventId={eventId} />}
-      </EuiFlexGroup>
+      {canShowAtLeastOneInsight ? (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {showSuppressedAlerts && (
+            <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} />
+          )}
+          {showCases && <RelatedCases eventId={eventId} />}
+          {showSameSourceAlerts && originalEventId && (
+            <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
+          )}
+          {showAlertsBySession && entityId && (
+            <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
+          )}
+          {showAlertsByAncestry && documentId && indices && (
+            <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+          )}
+        </EuiFlexGroup>
+      ) : (
+        <div data-test-subj={`${INSIGHTS_CORRELATIONS_TEST_ID}Error`}>{CORRELATIONS_ERROR}</div>
+      )}
     </ExpandablePanel>
   );
 };

@@ -11,37 +11,52 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../../../shared/doc_links';
 
 export const goDefinition: LanguageDefinition = {
-  buildSearchQuery: `searchResp, err := es.Search().
-  Index("books").
-  Q("snow").
-  Do(context.Background())
+  buildSearchQuery: ({ indexName }) => `searchResp, err := es.Search(
+  es.Search.WithContext(context.Background()),
+  es.Search.WithIndex("${indexName}"),
+  es.Search.WithQuery("snow"),
+  es.Search.WithTrackTotalHits(true),
+  es.Search.WithPretty(),
+)
 
 fmt.Println(searchResp, err)`,
-  configureClient: ({ url, apiKey }) => `import (
+  configureClient: ({ url, apiKey, cloudId }) => `import (
+  "bytes"
   "context"
   "fmt"
   "log"
-  "strings"
-​
-  "github.com/elastic/elasticsearch-serverless-go"
+
+  "github.com/elastic/go-elasticsearch/v8"
 )
 
-func main() {
-  cfg := elasticsearch.Config{
-    Address: "${url}",
-    APIKey: "${apiKey}",
+// ...
+
+cfg := elasticsearch.Config{
+  ${
+    cloudId
+      ? `CloudID:"${cloudId}",`
+      : `Addresses: []string{
+    "${url}",
+  },`
   }
-  es, err := elasticsearch.NewClient(cfg)
-  if err != nil {
-    log.Fatalf("Error creating the client: %s", err)
-  }
-}`,
+  APIKey: "${apiKey}",
+}
+
+es, err := elasticsearch.NewClient(cfg)
+if err != nil {
+  log.Fatalf("Error creating the client: %s", err)
+}
+`,
   docLink: docLinks.clientsGoIndex,
+  github: {
+    label: i18n.translate('xpack.enterpriseSearch.languages.go.githubLink', {
+      defaultMessage: 'go-elasticsearch',
+    }),
+    link: 'https://github.com/elastic/go-elasticsearch',
+  },
   iconType: 'go.svg',
   id: Languages.GO,
-  ingestData: `ingestResult, err := es.Bulk().
-  Index("books").
-  Raw(strings.NewReader(\`
+  ingestData: ({ indexName }) => `buf := bytes.NewBufferString(\`
 {"index":{"_id":"9780553351927"}}
 {"name":"Snow Crash","author":"Neal Stephenson","release_date":"1992-06-01","page_count": 470}
 { "index": { "_id": "9780441017225"}}
@@ -53,8 +68,13 @@ func main() {
 { "index": { "_id": "9780060850524"}}
 {"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268}
 { "index": { "_id": "9780385490818"}}
-{"name": "The Handmaid's Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}\n\`)).
-  Do(context.Background())
+{"name": "The Handmaid's Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}
+\`)
+
+ingestResult, err := es.Bulk(
+  bytes.NewReader(buf.Bytes()),
+  es.Bulk.WithIndex("${indexName}"),
+)
 
 fmt.Println(ingestResult, err)`,
   ingestDataIndex: '',
@@ -62,10 +82,11 @@ fmt.Println(ingestResult, err)`,
   name: i18n.translate('xpack.enterpriseSearch.languages.go', {
     defaultMessage: 'Go',
   }),
-  testConnection: `infores, err := es.Info().Do(context.Background())
-  if err != nil {
-    log.Fatalf("Error getting response: %s", err)
-  }
+  testConnection: `// API Key should have cluster monitoring rights
+infores, err := es.Info()
+if err != nil {
+  log.Fatalf("Error getting response: %s", err)
+}
 
-  fmt.Println(infores)`,
+fmt.Println(infores)`,
 };

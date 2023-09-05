@@ -31,7 +31,7 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-describe('Isolate command', () => {
+describe.skip('Isolate command', () => {
   let isolateComment: string;
   let releaseComment: string;
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;

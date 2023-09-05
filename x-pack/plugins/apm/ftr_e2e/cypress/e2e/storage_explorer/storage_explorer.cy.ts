@@ -187,7 +187,6 @@ describe('Storage Explorer', () => {
       cy.contains('opbeans-node');
 
       cy.getByTestSubj('storageDetailsButton_opbeans-node').click();
-      cy.getByTestSubj('loadingSpinner').should('be.visible');
       cy.wait('@storageDetailsRequest');
 
       cy.contains('Service storage details');

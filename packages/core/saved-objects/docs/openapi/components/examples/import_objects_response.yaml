@@ -3,7 +3,6 @@ value:
   {
     "successCount":1,
     "success":true,
-    "warnings":[],
     "successResults":[
       {
         "type":"index-pattern",

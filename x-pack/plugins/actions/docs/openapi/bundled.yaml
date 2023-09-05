@@ -1768,7 +1768,8 @@ components:
             The type of authentication to use: basic, SSL, or none.
         ca:
           type: string
-          description: A base64 encoded version of the certificate authority file, which is used to sign and validate certificates.
+          description: |
+            A base64 encoded version of the certificate authority file that the connector can trust to sign and validate certificates. This option is available for all authentication types.
         certType:
           type: string
           description: |
@@ -1804,7 +1805,7 @@ components:
             - none
           default: full
           description: |
-            Controls the verification of certificates. Use `full` to validate that the provided certificate has an issue date that is within the `not_before` and `not_after` dates, chains to a trusted certificate authority (CA), and has a hostname or IP address that matches the names within the certificate. Use `certificate` to validate the provided certificate and verifies that it is signed by a trusted authority; this option does not check the certificate hostname. Use `none` to skip certificate validation.
+            Controls the verification of certificates. Use `full` to validate that the certificate has an issue date within the `not_before` and `not_after` dates, chains to a trusted certificate authority (CA), and has a hostname or IP address that matches the names within the certificate. Use `certificate` to validate the certificate and verify that it is signed by a trusted authority; this option does not check the certificate hostname. Use `none` to skip certificate validation.
     secrets_properties_webhook:
       title: Connector secrets properties for a Webhook connector
       description: Defines secrets for connectors when type is `.webhook`.

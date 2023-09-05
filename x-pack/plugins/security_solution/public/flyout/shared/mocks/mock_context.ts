@@ -82,10 +82,31 @@ export const mockDataFormattedForFieldBrowser = [
     isObjectArray: false,
   },
   {
+    category: 'kibana',
+    field: 'kibana.alert.rule.indices',
+    values: ['rule-indices'],
+    originalValue: ['rule-indices'],
+    isObjectArray: false,
+  },
+  {
     category: 'process',
     field: 'process.entity_id',
     values: ['process-entity_id'],
     originalValue: ['process-entity_id'],
+    isObjectArray: false,
+  },
+  {
+    category: 'event',
+    field: 'event.category',
+    values: ['registry'],
+    originalValue: ['registry'],
+    isObjectArray: false,
+  },
+  {
+    category: 'kibana',
+    field: 'kibana.alert.rule.type',
+    values: ['query'],
+    originalValue: ['query'],
     isObjectArray: false,
   },
 ];

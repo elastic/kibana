@@ -565,6 +565,7 @@ export class IndexTable extends Component {
                       render={() => (
                         <IndexActionsContextMenu
                           indexNames={Object.keys(selectedIndicesMap)}
+                          isOnListView={true}
                           resetSelection={() => {
                             this.setState({ selectedIndicesMap: {} });
                           }}

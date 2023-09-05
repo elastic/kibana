@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { ProtectionUpdatesLayout } from '../protection_updates/protection_updates_layout';
 import { PolicySettingsLayout } from '../policy_settings_layout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
@@ -24,6 +26,7 @@ import {
   getPolicyDetailsArtifactsListPath,
   getBlocklistsListPath,
   getPolicyBlocklistsPath,
+  getPolicyProtectionUpdatesPath,
 } from '../../../../common/routing';
 import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
@@ -35,6 +38,7 @@ import {
   isOnBlocklistsView,
   policyDetails,
   policyIdFromParams,
+  isOnProtectionUpdatesView,
 } from '../../store/policy_details/selectors';
 import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
 import { usePolicyDetailsSelector } from '../policy_hooks';
@@ -58,6 +62,7 @@ enum PolicyTabKeys {
   EVENT_FILTERS = 'eventFilters',
   HOST_ISOLATION_EXCEPTIONS = 'hostIsolationExceptions',
   BLOCKLISTS = 'blocklists',
+  PROTECTION_UPDATES = 'protectionUpdates',
 }
 
 interface PolicyTab {
@@ -76,6 +81,7 @@ export const PolicyTabs = React.memo(() => {
   const isInEventFiltersTab = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
   const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
   const isInBlocklistsTab = usePolicyDetailsSelector(isOnBlocklistsView);
+  const isInProtectionUpdatesTab = usePolicyDetailsSelector(isOnProtectionUpdatesView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
 
   // By the time the tabs load, we know that we already have a `policyItem` since a conditional
@@ -95,6 +101,7 @@ export const PolicyTabs = React.memo(() => {
   } = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
+  const isProtectionUpdatesEnabled = useIsExperimentalFeatureEnabled('protectionUpdatesEnabled');
   // move the user out of this route if they can't access it
   useEffect(() => {
     if (
@@ -120,6 +127,7 @@ export const PolicyTabs = React.memo(() => {
     isInBlocklistsTab,
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
+    isInProtectionUpdatesTab,
     isInTrustedAppsTab,
     policyId,
     toasts,
@@ -301,21 +309,40 @@ export const PolicyTabs = React.memo(() => {
             ),
           }
         : undefined,
+
+      [PolicyTabKeys.PROTECTION_UPDATES]: isProtectionUpdatesEnabled
+        ? {
+            id: PolicyTabKeys.PROTECTION_UPDATES,
+            name: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.tabs.protectionUpdates',
+              {
+                defaultMessage: 'Protection updates',
+              }
+            ),
+            content: (
+              <>
+                <EuiSpacer />
+                <ProtectionUpdatesLayout policy={policyItem} />
+              </>
+            ),
+          }
+        : undefined,
     };
   }, [
+    policyItem,
     canReadTrustedApplications,
+    getTrustedAppsApiClientInstance,
     canWriteTrustedApplications,
     canReadEventFilters,
+    getEventFiltersApiClientInstance,
     canWriteEventFilters,
     canReadHostIsolationExceptions,
+    getHostIsolationExceptionsApiClientInstance,
     canWriteHostIsolationExceptions,
     canReadBlocklist,
-    canWriteBlocklist,
-    getEventFiltersApiClientInstance,
-    getHostIsolationExceptionsApiClientInstance,
     getBlocklistsApiClientInstance,
-    getTrustedAppsApiClientInstance,
-    policyItem,
+    canWriteBlocklist,
+    isProtectionUpdatesEnabled,
   ]);
 
   // convert tabs object into an array EuiTabbedContent can understand
@@ -338,6 +365,8 @@ export const PolicyTabs = React.memo(() => {
       selectedTab = tabs[PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS];
     } else if (isInBlocklistsTab) {
       selectedTab = tabs[PolicyTabKeys.BLOCKLISTS];
+    } else if (isInProtectionUpdatesTab) {
+      selectedTab = tabs[PolicyTabKeys.PROTECTION_UPDATES];
     }
 
     return selectedTab || defaultTab;
@@ -348,6 +377,7 @@ export const PolicyTabs = React.memo(() => {
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
     isInBlocklistsTab,
+    isInProtectionUpdatesTab,
   ]);
 
   const onTabClickHandler = useCallback(
@@ -368,6 +398,9 @@ export const PolicyTabs = React.memo(() => {
           break;
         case PolicyTabKeys.BLOCKLISTS:
           path = getPolicyBlocklistsPath(policyId);
+          break;
+        case PolicyTabKeys.PROTECTION_UPDATES:
+          path = getPolicyProtectionUpdatesPath(policyId);
           break;
       }
       history.push(path, routeState?.backLink ? { backLink: routeState.backLink } : null);

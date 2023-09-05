@@ -26,12 +26,11 @@ import {
   typeInECSFieldInput,
 } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
-import { tag } from '../../tags';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe(
   'Alert Event Details - Response Actions Form',
-  { browser: 'electron', tags: [tag.ESS, tag.SERVERLESS] },
+  { browser: 'electron', tags: ['@ess', '@serverless'] },
   () => {
     let multiQueryPackId: string;
     let multiQueryPackName: string;

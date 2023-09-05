@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { SAVED_QUERY_ID } from '../../../public/saved_queries/constants';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -24,9 +23,9 @@ import {
 } from '../../tasks/api_fixtures';
 import type { ServerlessRoleName } from '../../support/roles';
 
-describe(`T1 and T2 analysts`, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
   ['t1_analyst', 't2_analyst'].forEach((role: string) => {
-    describe(`${role}- READ + runSavedQueries `, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+    describe(`${role}- READ + runSavedQueries `, { tags: ['@ess', '@serverless'] }, () => {
       let savedQueryName: string;
       let savedQueryId: string;
       let packName: string;
