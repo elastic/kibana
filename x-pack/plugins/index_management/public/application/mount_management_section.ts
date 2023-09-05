@@ -56,7 +56,6 @@ export async function mountManagementSection({
   kibanaVersion,
   enableIndexActions = true,
   enableLegacyTemplates = true,
-  enableIndexDetailsPage = false,
   enableIndexStats = true,
   cloud,
 }: {
@@ -119,7 +118,6 @@ export async function mountManagementSection({
     config: {
       enableIndexActions,
       enableLegacyTemplates,
-      enableIndexDetailsPage,
       enableIndexStats,
     },
     history,
