@@ -207,7 +207,7 @@ async function getTraceDocsPerPage({
   searchAfter?: SortResults;
   hitsRetrievedCount: number;
 }) {
-  const MAX_ITEMS_PER_PAGE = 100; // 10000 is the max allowed by ES
+  const MAX_ITEMS_PER_PAGE = 10000; // 10000 is the max allowed by ES
   const hitsRemaining = maxTraceItems - hitsRetrievedCount;
   const size = Math.min(hitsRemaining, MAX_ITEMS_PER_PAGE);
 
