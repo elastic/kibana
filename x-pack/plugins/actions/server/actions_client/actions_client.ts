@@ -113,7 +113,6 @@ export interface ConstructorOptions {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
-  executionEnqueuer: ExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
   request: KibanaRequest;
@@ -139,7 +138,6 @@ export interface ActionsClientContext {
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
-  executionEnqueuer: ExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
   auditLogger?: AuditLogger;
@@ -159,7 +157,6 @@ export class ActionsClient {
     unsecuredSavedObjectsClient,
     inMemoryConnectors,
     actionExecutor,
-    executionEnqueuer,
     ephemeralExecutionEnqueuer,
     bulkExecutionEnqueuer,
     request,
@@ -177,7 +174,6 @@ export class ActionsClient {
       kibanaIndices,
       inMemoryConnectors,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -768,25 +764,6 @@ export class ActionsClient {
       relatedSavedObjects,
       actionExecutionId: uuidv4(),
     });
-  }
-
-  public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
-    const { source } = options;
-    if (
-      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
-      AuthorizationMode.RBAC
-    ) {
-      /**
-       * For scheduled executions the additional authorization check
-       * for system actions (kibana privileges) will be performed
-       * inside the ActionExecutor at execution time
-       */
-
-      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
-    } else {
-      trackLegacyRBACExemption('enqueueExecution', this.context.usageCounter);
-    }
-    return this.context.executionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
   }
 
   public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {

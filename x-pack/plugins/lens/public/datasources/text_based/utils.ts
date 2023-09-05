@@ -8,7 +8,11 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
-import { type AggregateQuery, getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import {
+  type AggregateQuery,
+  getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
+} from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
@@ -134,6 +138,9 @@ export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string
   // sql queries
   if ('sql' in query) {
     indexPattern = getIndexPatternFromSQLQuery(query.sql);
+  }
+  if ('esql' in query) {
+    indexPattern = getIndexPatternFromESQLQuery(query.esql);
   }
   // other textbased queries....
 

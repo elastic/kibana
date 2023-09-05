@@ -9,10 +9,13 @@
 export enum DynamicAutocompleteItem {
   SourceIdentifier = 'SourceIdentifier',
   FieldIdentifier = 'FieldIdentifier',
+  PolicyIdentifier = 'PolicyIdentifier',
+  PolicyFieldIdentifier = 'PolicyFieldIdentifier',
+  PolicyMatchingFieldIdentifier = 'PolicyMatchingFieldIdentifier',
 }
 
+const DynamicAutocompleteItems = Object.values(DynamicAutocompleteItem);
+
 export function isDynamicAutocompleteItem(v: unknown): v is DynamicAutocompleteItem {
-  return (
-    v === DynamicAutocompleteItem.SourceIdentifier || v === DynamicAutocompleteItem.FieldIdentifier
-  );
+  return DynamicAutocompleteItems.some((dai) => dai === v);
 }

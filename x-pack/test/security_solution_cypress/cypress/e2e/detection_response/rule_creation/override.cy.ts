@@ -48,16 +48,16 @@ import {
 } from '../../../screens/rule_details';
 
 import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { getDetails } from '../../../tasks/rule_details';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
@@ -71,6 +71,7 @@ describe('Detection rules, override', { tags: ['@ess', '@brokenInServerless'] },
 
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
   });
 
   it('Creates and enables a new custom rule with override option', function () {
