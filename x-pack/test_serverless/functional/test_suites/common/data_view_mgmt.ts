@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 const archivePath = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['settings', 'common', 'header']);
+  const PageObjects = getPageObjects(['settings', 'common', 'header', 'home']);
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
@@ -51,10 +51,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('tab-scriptedFields');
     });
     it('Sample data loads', async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData')
-      await testSubjects.click('showSampleDataButton');
-      await testSubjects.click('addSampleDataSetecommerce');
-      expect(testSubjects.exists('sampleDataSetInstallToast')).toBeTruthy();
+      await PageObjects.home.addSampleDataSet('ecommerce')
+      const ecommerce = await PageObjects.home.isSampleDataSetInstalled('ecommerce')
+      expect(ecommerce).toBe(true);
     });
   });
 }
