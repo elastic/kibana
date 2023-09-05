@@ -38,6 +38,12 @@ export interface IndexDetailsPageTestBed extends TestBed {
     getHeader: () => string;
     clickIndexDetailsTab: (tab: IndexDetailsSection) => Promise<void>;
     getActiveTabContent: () => string;
+    mappings: {
+      getCodeBlockContent: () => string;
+      getDocsLinkHref: () => string;
+      isErrorDisplayed: () => boolean;
+      clickErrorReloadButton: () => Promise<void>;
+    };
     clickBackToIndicesButton: () => Promise<void>;
     discoverLinkExists: () => boolean;
     contextMenu: {
@@ -50,6 +56,14 @@ export interface IndexDetailsPageTestBed extends TestBed {
     errorSection: {
       isDisplayed: () => boolean;
       clickReloadButton: () => Promise<void>;
+    };
+    stats: {
+      getCodeBlockContent: () => string;
+      getDocsLinkHref: () => string;
+      isErrorDisplayed: () => boolean;
+      clickErrorReloadButton: () => Promise<void>;
+      indexStatsTabExists: () => boolean;
+      isWarningDisplayed: () => boolean;
     };
   };
 }
@@ -89,6 +103,24 @@ export const setup = async (
 
   const getActiveTabContent = () => {
     return find('indexDetailsContent').text();
+  };
+
+  const mappings = {
+    getCodeBlockContent: () => {
+      return find('indexDetailsMappingsCodeBlock').text();
+    },
+    getDocsLinkHref: () => {
+      return find('indexDetailsMappingsDocsLink').prop('href');
+    },
+    isErrorDisplayed: () => {
+      return exists('indexDetailsMappingsError');
+    },
+    clickErrorReloadButton: async () => {
+      await act(async () => {
+        find('indexDetailsMappingsReloadButton').simulate('click');
+      });
+      component.update();
+    },
   };
 
   const clickBackToIndicesButton = async () => {
@@ -135,6 +167,30 @@ export const setup = async (
       component.update();
     },
   };
+
+  const stats = {
+    indexStatsTabExists: () => {
+      return exists('indexDetailsTab-stats');
+    },
+    getCodeBlockContent: () => {
+      return find('indexDetailsStatsCodeBlock').text();
+    },
+    getDocsLinkHref: () => {
+      return find('indexDetailsStatsDocsLink').prop('href');
+    },
+    isErrorDisplayed: () => {
+      return exists('indexDetailsStatsError');
+    },
+    isWarningDisplayed: () => {
+      return exists('indexStatsNotAvailableWarning');
+    },
+    clickErrorReloadButton: async () => {
+      await act(async () => {
+        find('reloadIndexStatsButton').simulate('click');
+      });
+      component.update();
+    },
+  };
   return {
     ...testBed,
     routerMock,
@@ -142,10 +198,12 @@ export const setup = async (
       getHeader,
       clickIndexDetailsTab,
       getActiveTabContent,
+      mappings,
       clickBackToIndicesButton,
       discoverLinkExists,
       contextMenu,
       errorSection,
+      stats,
     },
   };
 };

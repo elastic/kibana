@@ -588,7 +588,7 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              "{ beats: string; connectors: string; logStash: string; }"
+              "{ beats: string; connectors: string; logstash: string; }"
             ],
             "path": "packages/kbn-search-api-panels/components/integrations_panel.tsx",
             "deprecated": false,
@@ -905,6 +905,20 @@
             "type": "string",
             "tags": [],
             "label": "indexName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinitionSnippetArguments.cloudId",
+            "type": "string",
+            "tags": [],
+            "label": "cloudId",
             "description": [],
             "signature": [
               "string | undefined"

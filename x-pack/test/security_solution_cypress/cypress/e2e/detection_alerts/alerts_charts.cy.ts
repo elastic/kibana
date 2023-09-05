@@ -24,46 +24,50 @@ import {
 } from '../../screens/search_bar';
 import { TOASTER } from '../../screens/alerts_detection_rules';
 
-describe('Histogram legend hover actions', { tags: ['@ess', '@serverless'] }, () => {
-  const ruleConfigs = getNewRule();
+describe(
+  'Histogram legend hover actions',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
+    const ruleConfigs = getNewRule();
 
-  before(() => {
-    cleanKibana();
-  });
+    before(() => {
+      cleanKibana();
+    });
 
-  beforeEach(() => {
-    login();
-    createRule(getNewRule({ rule_id: 'new custom rule' }));
-    visit(ALERTS_URL);
-    selectAlertsHistogram();
-  });
+    beforeEach(() => {
+      login();
+      createRule(getNewRule({ rule_id: 'new custom rule' }));
+      visit(ALERTS_URL);
+      selectAlertsHistogram();
+    });
 
-  it('Filter in/out should add a filter to KQL bar', function () {
-    const expectedNumberOfAlerts = 2;
-    clickAlertsHistogramLegend();
-    clickAlertsHistogramLegendFilterFor(ruleConfigs.name);
-    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
-      'have.text',
-      `kibana.alert.rule.name: ${ruleConfigs.name}`
-    );
-    cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+    it('Filter in/out should add a filter to KQL bar', function () {
+      const expectedNumberOfAlerts = 2;
+      clickAlertsHistogramLegend();
+      clickAlertsHistogramLegendFilterFor(ruleConfigs.name);
+      cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
+        'have.text',
+        `kibana.alert.rule.name: ${ruleConfigs.name}`
+      );
+      cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 
-    clickAlertsHistogramLegend();
-    clickAlertsHistogramLegendFilterOut(ruleConfigs.name);
-    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
-      'have.text',
-      `NOT kibana.alert.rule.name: ${ruleConfigs.name}`
-    );
-    cy.get(ALERTS_COUNT).should('not.exist');
+      clickAlertsHistogramLegend();
+      clickAlertsHistogramLegendFilterOut(ruleConfigs.name);
+      cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
+        'have.text',
+        `NOT kibana.alert.rule.name: ${ruleConfigs.name}`
+      );
+      cy.get(ALERTS_COUNT).should('not.exist');
 
-    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE).click();
-    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('not.exist');
-  });
+      cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE).click();
+      cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('not.exist');
+    });
 
-  it('Add To Timeline', function () {
-    clickAlertsHistogramLegend();
-    clickAlertsHistogramLegendAddToTimeline(ruleConfigs.name);
+    it('Add To Timeline', function () {
+      clickAlertsHistogramLegend();
+      clickAlertsHistogramLegendAddToTimeline(ruleConfigs.name);
 
-    cy.get(TOASTER).should('have.text', `Added ${ruleConfigs.name} to timeline`);
-  });
-});
+      cy.get(TOASTER).should('have.text', `Added ${ruleConfigs.name} to timeline`);
+    });
+  }
+);

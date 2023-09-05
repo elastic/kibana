@@ -11,8 +11,8 @@ import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
-import { Cluster } from '../cluster';
-import { SERVERLESS_REPO, SERVERLESS_TAG, SERVERLESS_IMG } from '../utils';
+import { Cluster, type ServerlessOptions } from '../cluster';
+import { SERVERLESS_REPO, SERVERLESS_TAG, SERVERLESS_IMG, DEFAULT_PORT } from '../utils';
 import { Command } from './types';
 
 export const serverless: Command = {
@@ -22,10 +22,15 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --tag               Image tag of ES Serverless to run from ${SERVERLESS_REPO} [default: ${SERVERLESS_TAG}]
-      --image             Full path of ES Serverless image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
+      --tag               Image tag of ESS to run from ${SERVERLESS_REPO} [default: ${SERVERLESS_TAG}]
+      --image             Full path of ESS image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
       --clean             Remove existing file system object store before running
+      --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
+      --ssl               Sets up SSL and enables security plugin on Elasticsearch
+      --kill              Kill running ESS nodes if detected
+      --background        Start ESS without attaching to the first node's logs
       -E                  Additional key=value settings to pass to Elasticsearch
+      -F                  Absolute paths for files to mount into containers
 
     Examples:
 
@@ -46,13 +51,14 @@ export const serverless: Command = {
       alias: {
         basePath: 'base-path',
         esArgs: 'E',
+        files: 'F',
       },
 
       string: ['tag', 'image'],
-      boolean: ['clean'],
+      boolean: ['clean', 'ssl', 'kill', 'background'],
 
       default: defaults,
-    });
+    }) as unknown as ServerlessOptions;
 
     const cluster = new Cluster();
     await cluster.runServerless({
