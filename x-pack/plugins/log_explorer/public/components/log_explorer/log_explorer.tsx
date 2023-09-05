@@ -6,14 +6,14 @@
  */
 
 import { ScopedHistory } from '@kbn/core-application-browser';
-import { DataPublicPluginStart, ISearchStart, ISessionService } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import React from 'react';
 import {
   createLogExplorerProfileCustomizations,
   CreateLogExplorerProfileCustomizationsDeps,
 } from '../../customizations/log_explorer_profile';
-import { createPropertyGetProxy, createPropertyGetProxySingleton } from '../../utils/proxies';
+import { createPropertyGetProxy } from '../../utils/proxies';
 
 export interface CreateLogExplorerArgs extends CreateLogExplorerProfileCustomizationsDeps {
   discover: DiscoverStart;
@@ -51,13 +51,15 @@ export const createLogExplorer = ({
  */
 
 const createDataServiceProxy = (data: DataPublicPluginStart) => {
+  const sessionServiceProxy = createPropertyGetProxy(data.search.session, {
+    enableStorage: () => () => {},
+  });
+
+  const searchServiceProxy = createPropertyGetProxy(data.search, {
+    session: () => sessionServiceProxy,
+  });
+
   return createPropertyGetProxy(data, {
-    search: (searchService: ISearchStart) =>
-      createPropertyGetProxy(searchService, {
-        session: (sessionService: ISessionService) =>
-          createPropertyGetProxySingleton('data.search.session', sessionService, {
-            enableStorage: () => () => {},
-          }),
-      }),
+    search: () => searchServiceProxy,
   });
 };

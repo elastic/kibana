@@ -30,30 +30,6 @@ export const createPropertyGetProxy = <Target extends object, Key extends keyof 
     },
   });
 
-const proxySingletonCache = new Map();
-/**
- * An enhanced version of createPropertyGetProxy that stores in cache the created proxy
- * to keep referential stability for certain use cases
- *
- * @param export the key to store the proxy
- * @param target the object to proxy
- * @param replacements a map of keys to replacement factories
- * @returns a proxy of the object
- */
-export const createPropertyGetProxySingleton = <Target extends object, Key extends keyof Target>(
-  proxyKey: string,
-  target: Target,
-  replacements: {
-    [key in Key]: (value: Target[Key]) => Target[Key];
-  }
-): Target => {
-  if (!proxySingletonCache.has(proxyKey)) {
-    proxySingletonCache.set(proxyKey, createPropertyGetProxy(target, replacements));
-  }
-
-  return proxySingletonCache.get(proxyKey);
-};
-
 const hasKey = <T extends object, K extends keyof T>(
   obj: T,
   key: string | number | symbol
