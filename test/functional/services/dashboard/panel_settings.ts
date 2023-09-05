@@ -59,7 +59,7 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async clickToggleQuickMenuButton(open?: boolean) {
       log.debug('clickToggleQuickMenuButton');
       const button = await this.findToggleQuickMenuButton();
-      if (typeof open === 'undefined' || open !== await button.isSelected()) {
+      if (typeof open === 'undefined' || open !== (await button.isSelected())) {
         await button.click();
       }
     }
