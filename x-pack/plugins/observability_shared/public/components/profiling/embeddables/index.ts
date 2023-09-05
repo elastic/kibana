@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+/** Profiling flamegraph embeddable key */
 export const EMBEDDABLE_FLAMEGRAPH = 'EMBEDDABLE_FLAMEGRAPH';
