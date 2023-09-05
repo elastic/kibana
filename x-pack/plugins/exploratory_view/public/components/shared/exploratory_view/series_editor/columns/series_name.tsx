@@ -101,6 +101,7 @@ export function SeriesName({ series, seriesId }: Props) {
       )}
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
+          data-test-subj="exploratoryViewSeriesNameButton"
           onClick={() => setIsEditingEnabled(!isEditingEnabled)}
           iconType="pencil"
           aria-label={i18n.translate('xpack.exploratoryView.expView.seriesEditor.editName', {
