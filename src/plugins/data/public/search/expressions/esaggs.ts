@@ -74,7 +74,7 @@ export function getFunctionDefinition({
             searchSourceService: searchSource,
             timeFields: args.timeFields,
             timeRange: get(input, 'timeRange', undefined),
-            disableWarningToasts: disableWarningToasts ?? false,
+            disableWarningToasts: (disableWarningToasts || false) as boolean,
             getNow,
             executionContext: getExecutionContext(),
           });
