@@ -8,6 +8,9 @@
 
 import { UnionToIntersection, ValuesType } from 'utility-types';
 
+/**
+ * Profiling Elasticsearch fields
+ */
 export enum ProfilingESField {
   Timestamp = '@timestamp',
   ContainerName = 'container.name',

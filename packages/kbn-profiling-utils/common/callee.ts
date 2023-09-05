@@ -21,24 +21,48 @@ import {
 
 type NodeID = number;
 
+/**
+ * Callee tree
+ */
 export interface CalleeTree {
+  /** size */
   Size: number;
+  /** edges */
   Edges: Array<Map<FrameGroupID, NodeID>>;
-
+  /** file ids */
   FileID: string[];
+  /** frame types */
   FrameType: number[];
+  /** inlines */
   Inline: boolean[];
+  /** executable file names */
   ExeFilename: string[];
+  /** adress or lines */
   AddressOrLine: number[];
+  /** function names */
   FunctionName: string[];
+  /** function offsets */
   FunctionOffset: number[];
+  /** source file names */
   SourceFilename: string[];
+  /** source lines */
   SourceLine: number[];
-
+  /** total cpu */
   CountInclusive: number[];
+  /** self cpu */
   CountExclusive: number[];
 }
 
+/**
+ * Create a callee tree
+ * @param events Map<StackTraceID, number>
+ * @param stackTraces Map<StackTraceID, StackTrace>
+ * @param stackFrames Map<StackFrameID, StackFrame>
+ * @param executables Map<FileID, Executable>
+ * @param totalFrames number
+ * @param samplingRate number
+ * @returns
+ */
 export function createCalleeTree(
   events: Map<StackTraceID, number>,
   stackTraces: Map<StackTraceID, StackTrace>,

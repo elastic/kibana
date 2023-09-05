@@ -11,28 +11,49 @@ import { createFrameGroupID } from './frame_group';
 import { fnv1a64 } from './hash';
 import { createStackFrameMetadata, getCalleeLabel } from './profiling';
 
+/**
+ * Base Flamegraph
+ */
 export interface BaseFlameGraph {
+  /** size */
   Size: number;
+  /** edges */
   Edges: number[][];
-
+  /** file ids */
   FileID: string[];
+  /** frame types */
   FrameType: number[];
+  /** inlines */
   Inline: boolean[];
+  /** executable file names */
   ExeFilename: string[];
+  /** address ot line */
   AddressOrLine: number[];
+  /** function names */
   FunctionName: string[];
+  /** function offsets */
   FunctionOffset: number[];
+  /** source file names */
   SourceFilename: string[];
+  /** source lines */
   SourceLine: number[];
-
+  /** total cpu */
   CountInclusive: number[];
+  /** self cpu */
   CountExclusive: number[];
-
+  /** total seconds */
   TotalSeconds: number;
+  /** sampling rate */
   SamplingRate: number;
 }
 
-// createBaseFlameGraph encapsulates the tree representation into a serialized form.
+/**
+ * reateBaseFlameGraph encapsulates the tree representation into a serialized form.
+ * @param tree CalleeTree
+ * @param samplingRate number
+ * @param totalSeconds number
+ * @returns BaseFlameGraph
+ */
 export function createBaseFlameGraph(
   tree: CalleeTree,
   samplingRate: number,
@@ -72,14 +93,22 @@ export function createBaseFlameGraph(
   return graph;
 }
 
+/** Elasticsearch flamegraph */
 export interface ElasticFlameGraph extends BaseFlameGraph {
+  /** ID */
   ID: string[];
+  /** Label */
   Label: string[];
 }
 
-// createFlameGraph combines the base flamegraph with CPU-intensive values.
-// This allows us to create a flamegraph in two steps (e.g. first on the server
-// and finally in the browser).
+/**
+ *
+ * createFlameGraph combines the base flamegraph with CPU-intensive values.
+ * This allows us to create a flamegraph in two steps (e.g. first on the server
+ * and finally in the browser).
+ * @param base BaseFlameGraph
+ * @returns ElasticFlameGraph
+ */
 export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
   const graph: ElasticFlameGraph = {
     Size: base.Size,
