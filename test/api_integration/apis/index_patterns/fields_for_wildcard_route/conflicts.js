@@ -12,7 +12,8 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('conflicts', () => {
+  // FAILING ES FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/165633
+  describe.skip('conflicts', () => {
     before(() =>
       esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
     );
