@@ -54,15 +54,15 @@ export function DifferentialFlameGraphsView() {
       return Promise.all([
         fetchElasticFlamechart({
           http,
-          timeFrom: timeRange.inSeconds.start,
-          timeTo: timeRange.inSeconds.end,
+          timeFrom: new Date(timeRange.start).getTime(),
+          timeTo: new Date(timeRange.end).getTime(),
           kuery,
         }),
-        comparisonTimeRange.inSeconds.start && comparisonTimeRange.inSeconds.end
+        comparisonTimeRange.start && comparisonTimeRange.end
           ? fetchElasticFlamechart({
               http,
-              timeFrom: comparisonTimeRange.inSeconds.start,
-              timeTo: comparisonTimeRange.inSeconds.end,
+              timeFrom: new Date(comparisonTimeRange.start).getTime(),
+              timeTo: new Date(comparisonTimeRange.end).getTime(),
               kuery: comparisonKuery,
             })
           : Promise.resolve(undefined),
@@ -74,13 +74,13 @@ export function DifferentialFlameGraphsView() {
       });
     },
     [
-      timeRange.inSeconds.start,
-      timeRange.inSeconds.end,
-      kuery,
-      comparisonTimeRange.inSeconds.start,
-      comparisonTimeRange.inSeconds.end,
-      comparisonKuery,
       fetchElasticFlamechart,
+      timeRange.start,
+      timeRange.end,
+      kuery,
+      comparisonTimeRange.start,
+      comparisonTimeRange.end,
+      comparisonKuery,
     ]
   );
 

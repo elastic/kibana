@@ -44,8 +44,8 @@ const profilingFlamegraphRoute = createApmServerRoute({
       const flamegraph =
         await profilingDataAccessStart?.services.fetchFlamechartData({
           esClient: esClient.asCurrentUser,
-          rangeFrom: start / 1000,
-          rangeTo: end / 1000,
+          rangeFromMs: start,
+          rangeToMs: end,
           kuery: hostNamesToKuery(serviceHostNames),
         });
 

@@ -31,12 +31,12 @@ export function FlameGraphView() {
     ({ http }) => {
       return fetchElasticFlamechart({
         http,
-        timeFrom: timeRange.inSeconds.start,
-        timeTo: timeRange.inSeconds.end,
+        timeFrom: new Date(timeRange.start).getTime(),
+        timeTo: new Date(timeRange.end).getTime(),
         kuery,
       });
     },
-    [timeRange.inSeconds.start, timeRange.inSeconds.end, kuery, fetchElasticFlamechart]
+    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery]
   );
 
   const { data } = state;

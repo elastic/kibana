@@ -401,7 +401,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       label: i18n.translate('xpack.apm.home.profilingTabLabel', {
-        defaultMessage: 'Profiling',
+        defaultMessage: 'Universal Profiling',
       }),
       hidden: !isProfilingAvailable,
     },
