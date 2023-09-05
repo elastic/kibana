@@ -24,14 +24,13 @@ import type { SearchResponseInterceptedWarning } from '../types';
 export const getSearchResponseInterceptedWarnings = ({
   services,
   adapter,
-  options,
 }: {
   services: {
     data: DataPublicPluginStart;
     theme: CoreStart['theme'];
   };
   adapter: RequestAdapter;
-}): SearchResponseInterceptedWarning[] | undefined => {
+}): SearchResponseInterceptedWarning[] => {
   const interceptedWarnings: SearchResponseInterceptedWarning[] = [];
 
   services.data.search.showWarnings(adapter, (warning, meta) => {

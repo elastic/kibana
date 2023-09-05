@@ -15,5 +15,4 @@ export {
 
 export {
   getSearchResponseInterceptedWarnings,
-  removeInterceptedWarningDuplicates,
 } from './src/utils/get_search_response_intercepted_warnings';
