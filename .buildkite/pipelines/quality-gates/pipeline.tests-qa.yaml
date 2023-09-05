@@ -1,20 +1,31 @@
+env:
+  TEAM_CHANNEL: "#kibana-serverless-release"
+  ENVIRONMENT: "qa"
+
 steps:
   - label: ":pipeline::kibana::seedling: Trigger Kibana Tests for ${ENVIRONMENT}"
     command: echo "replace me with Kibana specific tests"
-    agent:
+    agents:
       image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
 
   - label: ":pipeline::fleet::seedling: Trigger Fleet Kibana Tests for ${ENVIRONMENT}"
     command: echo "replace me with Fleet specific Kibana tests"
-    agent:
+    agents:
       image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
 
   - label: ":pipeline::lock::seedling: Trigger Security Kibana Tests for ${ENVIRONMENT}"
     command: echo "replace me with Security specific Kibana tests"
-    agent:
+    agents:
       image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
 
   - label: ":pipeline::lock::seedling: Trigger Control Plane Kibana Tests for ${ENVIRONMENT}"
     command: echo "replace me with Control Plane specific Kibana tests"
-    agent:
+    agents:
       image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
+
+  - wait: ~
+
+  - label: ":judge::seedling: Trigger Manual Tests Phase"
+    command: "make -C /agent trigger-manual-verification-phase"
+    agents:
+      image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.1"
