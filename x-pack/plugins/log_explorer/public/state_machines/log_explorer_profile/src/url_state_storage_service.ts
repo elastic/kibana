@@ -9,6 +9,7 @@ import { pick, mapValues } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { DiscoverAppState, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import {
   DATA_GRID_COLUMNS_PREFERENCES,
   DATA_GRID_DEFAULT_COLUMNS,
@@ -181,7 +182,7 @@ export const updateStateContainer =
     LogExplorerProfileEvent
   > =>
   async () => {
-    const { columns, grid } = stateContainer.appState.getState();
+    const { columns, grid, rowHeight } = stateContainer.appState.getState();
     const stateUpdates: DiscoverAppState = {};
 
     // Update data grid columns list
@@ -196,6 +197,9 @@ export const updateStateContainer =
     stateUpdates.grid = {
       columns: { ...DATA_GRID_COLUMNS_PREFERENCES, ...initialColumnsPreferences },
     };
+
+    // Configure rowHeight preference
+    stateUpdates.rowHeight = rowHeight ?? ROWS_HEIGHT_OPTIONS.single;
 
     // Finally batch update state app state
     stateContainer.appState.update(stateUpdates, true);
