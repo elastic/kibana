@@ -229,7 +229,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
           />
         </EuiButton>
       </EuiToolTip>
-      {hideFrozenDataTierChoice ? null : (
+      {isServerless || hideFrozenDataTierChoice ? null : (
         <EuiFlexItem grow={false}>
           <EuiPopover
             id={'mlFullTimeRangeSelectorOption'}
