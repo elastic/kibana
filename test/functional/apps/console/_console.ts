@@ -76,8 +76,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const actualResponse = await PageObjects.console.getResponse();
         log.debug(actualResponse);
         expect(actualResponse).to.contain(expectedResponseContains);
+
+        expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
       });
-      expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
     });
 
     describe('with kbn: prefix in request', () => {
