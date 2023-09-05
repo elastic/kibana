@@ -52,9 +52,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
         await retry.try(async () => {
-          expect(await testSubjects.getVisibleText('discover-dataView-switch-link')).to.eql(
-            'All log datasets'
-          );
+          expect(
+            await (
+              await testSubjects.find(
+                'discover-dataView-switch-link',
+                config.get('timeouts.find') * 10
+              )
+            ).getVisibleText()
+          ).to.eql('All log datasets');
         });
 
         await retry.try(async () => {
