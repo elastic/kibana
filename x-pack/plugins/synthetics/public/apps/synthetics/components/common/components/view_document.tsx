@@ -53,7 +53,8 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
   return (
     <>
       <EuiButtonIcon
-        iconType="discoverApp"
+        iconType="inspect"
+        title={INSPECT_DOCUMENT}
         onClick={() => {
           setIsFlyoutVisible(true);
         }}
@@ -62,9 +63,9 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
         <EuiFlyout onClose={() => setIsFlyoutVisible(false)} ownFocus={true}>
           <EuiFlyoutHeader>
             <EuiTitle size="m">
-              <h2>
-                {SUMMARY_DOCUMENT} - {formatter(ping.timestamp)}
-              </h2>
+              <h4>
+                {INDEXED_AT} {formatter(ping.timestamp)}
+              </h4>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -80,6 +81,13 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
   );
 };
 
-const SUMMARY_DOCUMENT = i18n.translate('xpack.synthetics.monitorDetails.summary.document', {
-  defaultMessage: 'Summary document',
+const INDEXED_AT = i18n.translate('xpack.synthetics.monitorDetails.summary.indexedAt', {
+  defaultMessage: 'Indexed at',
 });
+
+export const INSPECT_DOCUMENT = i18n.translate(
+  'xpack.synthetics.monitorDetails.action.inspectDocument',
+  {
+    defaultMessage: 'Inspect document',
+  }
+);

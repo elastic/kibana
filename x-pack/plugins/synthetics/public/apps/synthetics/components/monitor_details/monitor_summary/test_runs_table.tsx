@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
-import { ViewDocument } from '../../common/components/view_document';
+import { INSPECT_DOCUMENT, ViewDocument } from '../../common/components/view_document';
 import {
   ExpandRowColumn,
   toggleDetails,
@@ -208,9 +208,18 @@ export const TestRunsTable = ({
       },
     },
     {
-      align: 'center',
-      name: 'Document',
-      render: (ping: Ping) => <ViewDocument ping={ping} />,
+      align: 'right' as const,
+      actions: [
+        {
+          'data-test-subj': 'syntheticsViewPingDocument',
+          isPrimary: true,
+          name: INSPECT_DOCUMENT,
+          description: INSPECT_DOCUMENT,
+          icon: 'inspect' as const,
+          type: 'button' as const,
+          render: (ping: Ping) => <ViewDocument ping={ping} />,
+        },
+      ],
     },
     ...(!isBrowserMonitor
       ? [
