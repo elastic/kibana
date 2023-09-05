@@ -209,7 +209,6 @@ const processDataComparisonResult = (
           }
         }
       });
-      console.log(`--@@domain`, domain);
       return {
         featureName,
         secondaryType: data.secondaryType,

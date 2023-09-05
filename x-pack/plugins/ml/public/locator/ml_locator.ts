@@ -78,7 +78,7 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
         path = formatMemoryUsageUrl('', params.pageState);
         break;
       case ML_PAGES.DATA_DRIFT_INDEX_SELECT:
-      case ML_PAGES.DATA_COMPARISON:
+      case ML_PAGES.DATA_DRIFT_CUSTOM:
       case ML_PAGES.DATA_DRIFT:
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB:
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER:

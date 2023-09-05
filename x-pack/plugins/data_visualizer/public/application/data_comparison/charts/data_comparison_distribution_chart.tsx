@@ -21,6 +21,7 @@ export const DataComparisonDistributionChart = ({
 }: {
   item: Feature | undefined;
   colors: { referenceColor: string; productionColor: string };
+  domain?: Feature['domain'];
 }) => {
   const valueFormatter = useMemo(
     () => (item?.fieldType === DATA_COMPARISON_TYPE.NUMERIC ? defaultValueFormatter : undefined),

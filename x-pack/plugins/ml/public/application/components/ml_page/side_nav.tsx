@@ -235,7 +235,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             testSubj: 'mlMainTab indexDataVisualizer',
           },
           {
-            id: 'data_comparison',
+            id: 'data_drift',
             pathId: ML_PAGES.DATA_DRIFT_INDEX_SELECT,
             name: i18n.translate('xpack.ml.navMenu.dataComparisonText', {
               defaultMessage: 'Data Drift',

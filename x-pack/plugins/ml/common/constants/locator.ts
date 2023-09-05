@@ -17,7 +17,6 @@ export const ML_PAGES = {
   TRAINED_MODELS_MANAGE: 'trained_models',
   DATA_DRIFT_INDEX_SELECT: 'data_drift_index_select',
   DATA_DRIFT_CUSTOM: 'data_drift_custom',
-  DATA_COMPARISON: 'data_comparison',
   DATA_DRIFT: 'data_drift',
   NODES: 'nodes',
   MEMORY_USAGE: 'memory_usage',

@@ -29,7 +29,7 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
   const navigateToPath = useNavigateToPath();
   const { contentManagement, uiSettings } = useMlKibana().services;
 
-  const nextStepPath = '/data_comparison';
+  const nextStepPath = '/data_drift';
   const onObjectSelection = (id: string, type: string) => {
     navigateToPath(
       `${nextStepPath}?${type === 'index-pattern' ? 'index' : 'savedSearchId'}=${encodeURIComponent(

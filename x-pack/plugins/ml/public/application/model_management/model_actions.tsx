@@ -548,16 +548,16 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         available: (item) => {
-          return Array.isArray(item.indices) && item.indices.length > 0;
+          return (
+            item?.metadata?.analytics_config !== undefined ||
+            (Array.isArray(item.indices) && item.indices.length > 0)
+          );
         },
         onClick: async (item) => {
-          if (!item.indices) return;
-          if (item.indices.length === 0) return;
-
-          const indexPatterns = item.indices.map((o) => Object.keys(o));
+          const indexPatterns = item?.indices?.map((o) => Object.keys(o));
           const path = await urlLocator.getUrl({
-            page: ML_PAGES.DATA_DRIFT,
-            pageState: { destIp: indexPatterns.join(',') },
+            page: ML_PAGES.DATA_DRIFT_CUSTOM,
+            pageState: indexPatterns ? { destIp: indexPatterns.join(',') } : {},
           });
 
           await navigateToPath(path, false);

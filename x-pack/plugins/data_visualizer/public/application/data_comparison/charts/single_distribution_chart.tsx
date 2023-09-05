@@ -19,7 +19,6 @@ export const SingleDistributionChart = ({
   color,
   fieldType,
   name,
-  domain,
 }: {
   data: Histogram[];
   name: string;
@@ -53,7 +52,6 @@ export const SingleDistributionChart = ({
         tickFormat={valueFormatter}
         labelFormat={valueFormatter}
         hide={true}
-        domain={fieldType === DATA_COMPARISON_TYPE.NUMERIC && domain ? domain.x : undefined}
       />
 
       <BarSeries

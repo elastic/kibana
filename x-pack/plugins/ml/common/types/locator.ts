@@ -58,7 +58,7 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.FILTER_LISTS_MANAGE
   | typeof ML_PAGES.FILTER_LISTS_NEW
   | typeof ML_PAGES.SETTINGS
-  | typeof ML_PAGES.DATA_COMPARISON
+  | typeof ML_PAGES.DATA_DRIFT_CUSTOM
   | typeof ML_PAGES.DATA_DRIFT_INDEX_SELECT
   | typeof ML_PAGES.DATA_DRIFT
   | typeof ML_PAGES.DATA_VISUALIZER

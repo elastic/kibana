@@ -165,7 +165,7 @@ export const Controls: FC<Props> = React.memo(
     const onAnalyzeDataDrift = useCallback(async () => {
       closePopover();
       const path = await mlLocator.getUrl({
-        page: ML_PAGES.DATA_DRIFT,
+        page: ML_PAGES.DATA_DRIFT_CUSTOM,
         pageState: { destIp: nodeLabel },
       });
       await navigateToPath(path);

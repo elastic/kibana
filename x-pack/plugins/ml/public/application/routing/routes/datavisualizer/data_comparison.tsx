@@ -21,14 +21,14 @@ import {
 } from '../../breadcrumbs';
 import { basicResolvers } from '../../resolvers';
 
-export const dataComparisonRouteFactory = (
+export const dataDriftRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'data_comparison',
-  path: createPath(ML_PAGES.DATA_COMPARISON),
-  title: i18n.translate('xpack.ml.dataVisualizer.dataComparison.docTitle', {
-    defaultMessage: 'Data Comparison',
+  id: 'data_drift',
+  path: createPath(ML_PAGES.DATA_DRIFT),
+  title: i18n.translate('xpack.ml.dataVisualizer.dataDrift.docTitle', {
+    defaultMessage: 'Data Drift',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
@@ -43,12 +43,12 @@ export const dataComparisonRouteFactory = (
         : {}),
     },
     {
-      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.dataComparisonLabel', {
-        defaultMessage: 'Data Comparison',
+      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.dataDriftLabel', {
+        defaultMessage: 'Data Drift',
       }),
     },
   ],
-  'data-test-subj': 'mlPageDataComparison',
+  'data-test-subj': 'mlPagedataDrift',
 });
 
 const PageWrapper: FC<PageProps> = () => {

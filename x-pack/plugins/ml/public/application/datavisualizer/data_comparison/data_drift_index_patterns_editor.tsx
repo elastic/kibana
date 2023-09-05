@@ -221,7 +221,7 @@ export function DataDriftIndexPatternsEditor({
     }
     const dataViewId = foundDataViewId ?? dataView?.id;
     const url = await locator.getUrl({
-      page: ML_PAGES.DATA_COMPARISON,
+      page: ML_PAGES.DATA_DRIFT,
       pageState: {
         index: dataViewId,
         reference: referenceIndexPattern,
