@@ -106,19 +106,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         };
 
         await sendRequestsSequentially([
-          "\n DELETE kbn:api/detection_engine/rules?rule_id=_",
-          "\n POST kbn:api/detection_engine/rules\n" + JSON.stringify({
-            rule_id: '_',
-            severity: 'low',
-            description: '_',
-            name: '_',
-            type: 'query',
-            risk_score: 0
-          }),
-          "\n PATCH kbn:api/detection_engine/rules\n" + JSON.stringify({
-            rule_id: '_',
-            severity: 'high'
-          })
+          '\n DELETE kbn:api/detection_engine/rules?rule_id=_',
+          '\n POST kbn:api/detection_engine/rules\n' +
+            JSON.stringify({
+              rule_id: '_',
+              severity: 'low',
+              description: '_',
+              name: '_',
+              type: 'query',
+              risk_score: 0,
+            }),
+          '\n PATCH kbn:api/detection_engine/rules\n' +
+            JSON.stringify({
+              rule_id: '_',
+              severity: 'high',
+            }),
         ]);
         await retry.try(async () => {
           const status = await PageObjects.console.getResponseStatus();
