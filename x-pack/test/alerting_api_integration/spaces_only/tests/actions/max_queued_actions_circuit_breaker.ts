@@ -6,8 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Spaces } from '../../scenarios';
-import { getEventLog, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { getEventLog, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
@@ -23,7 +22,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
     it('completes execution and reports back whether it reached the limit', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -38,7 +37,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const actionId = response.body.id;
-      objectRemover.add(Spaces.space1.id, actionId, 'action', 'actions');
+      objectRemover.add('default', actionId, 'action', 'actions');
 
       const actions = [];
       for (var i = 0; i < 510; i++) {
@@ -59,12 +58,12 @@ export default function createActionTests({ getService }: FtrProviderContext) {
       }
 
       const resp = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .post('/api/alerting/rule')
         .set('kbn-xsrf', 'foo')
         .send(
           getTestRuleData({
             rule_type_id: 'test.always-firing-alert-as-data',
-            schedule: { interval: '10m' },
+            schedule: { interval: '1h' },
             throttle: undefined,
             notify_when: undefined,
             params: {
@@ -77,12 +76,12 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
       expect(resp.status).to.eql(200);
       const ruleId = resp.body.id;
-      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+      objectRemover.add('default', ruleId, 'rule', 'alerting');
 
       const events = await retry.try(async () => {
         return await getEventLog({
           getService,
-          spaceId: Spaces.space1.id,
+          spaceId: 'default',
           type: 'alert',
           id: ruleId,
           provider: 'alerting',
