@@ -61,7 +61,11 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   const embeddableFactories = getEmbeddableFactories();
 
   const availableSavedObjects = Array.from(embeddableFactories)
-    .filter((factory) => isByValueEnabled || availableEmbeddables.includes(factory.type))
+    .filter(
+      (factory) =>
+        factory.type !== 'navigation_embeddable' && // Links panels only exist on Dashboards
+        (isByValueEnabled || availableEmbeddables.includes(factory.type))
+    )
     .map((factory) => factory.savedObjectMetaData)
     .filter<SavedObjectMetaData<{}>>(function (
       maybeSavedObjectMetaData
