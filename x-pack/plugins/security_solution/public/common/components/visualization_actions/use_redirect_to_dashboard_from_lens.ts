@@ -7,12 +7,15 @@
 
 import { useMemo, useCallback } from 'react';
 import { SecurityPageName } from '../../../../common';
-import { useGetSecuritySolutionUrl } from '../link_to';
 import { useNavigateTo } from '../../lib/kibana';
+import type { GetSecuritySolutionUrl } from '../link_to';
 
-export const useRedirectToDashboardFromLens = () => {
+export const useRedirectToDashboardFromLens = ({
+  getSecuritySolutionUrl,
+}: {
+  getSecuritySolutionUrl: GetSecuritySolutionUrl;
+}) => {
   const { navigateTo } = useNavigateTo();
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const dashboardListingUrl = useMemo(
     () =>
       `${getSecuritySolutionUrl({
