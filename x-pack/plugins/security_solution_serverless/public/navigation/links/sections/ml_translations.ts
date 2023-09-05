@@ -201,6 +201,18 @@ export const INDEX_DATA_VISUALIZER_DESC = i18n.translate(
     defaultMessage: 'Data view data visualizer page',
   }
 );
+export const DATA_COMPARISON_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.ml.datComparison.title',
+  {
+    defaultMessage: 'Data comparison',
+  }
+);
+export const DATA_COMPARISON_DESC = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.ml.datComparison.desc',
+  {
+    defaultMessage: 'Data comparison page',
+  }
+);
 export const LOG_RATE_ANALYSIS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.explainLogRateSpikes.title',
   {

@@ -268,7 +268,7 @@ function createDeepLinks(
           defaultMessage: 'Data Comparison',
         }),
         path: `/${ML_PAGES.DATA_COMPARISON_INDEX_SELECT}`,
-        navLinkStatus: getNavStatus(false),
+        navLinkStatus: getNavStatus(true),
       };
     },
   };
