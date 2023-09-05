@@ -177,7 +177,7 @@ const CardStepComponent: React.FC<{
                 .step-panel-expanded &:hover,
                 .step-panel-expanded &:active,
                 .step-panel-expanded &:focus {
-                  ${cssStyles};
+                  ${backgroundColorStyles.primary};
                 }
               `}
               onClick={toggleStep}
