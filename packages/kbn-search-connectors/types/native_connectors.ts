@@ -10,51 +10,51 @@ import { i18n } from '@kbn/i18n';
 
 import { DisplayType, FeatureName, FieldType, NativeConnector } from './connectors';
 
-const USERNAME_LABEL = i18n.translate('xpack.enterpriseSearch.nativeConnectors.usernameLabel', {
+const USERNAME_LABEL = i18n.translate('searchConnectors.nativeConnectors.usernameLabel', {
   defaultMessage: 'Username',
 });
 
-const PASSWORD_LABEL = i18n.translate('xpack.enterpriseSearch.nativeConnectors.passwordLabel', {
+const PASSWORD_LABEL = i18n.translate('searchConnectors.nativeConnectors.passwordLabel', {
   defaultMessage: 'Password',
 });
 
-const ENABLE_SSL_LABEL = i18n.translate('xpack.enterpriseSearch.nativeConnectors.enableSSL.label', {
+const ENABLE_SSL_LABEL = i18n.translate('searchConnectors.nativeConnectors.enableSSL.label', {
   defaultMessage: 'Enable SSL',
 });
 
 const SSL_CERTIFICATE_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.nativeConnectors.sslCertificate.label',
+  'searchConnectors.nativeConnectors.sslCertificate.label',
   {
     defaultMessage: 'SSL certificate',
   }
 );
 
 const RETRIES_PER_REQUEST_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.nativeConnectors.retriesPerRequest.label',
+  'searchConnectors.nativeConnectors.retriesPerRequest.label',
   {
     defaultMessage: 'Retries per request',
   }
 );
 
 const ADVANCED_RULES_IGNORED_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.nativeConnectors.advancedRulesIgnored.label',
+  'searchConnectors.nativeConnectors.advancedRulesIgnored.label',
   {
     defaultMessage: 'This configurable field is ignored when Advanced Sync Rules are used.',
   }
 );
 
 const MAX_CONCURRENT_DOWNLOADS_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.nativeConnectors.nativeConnectors.maximumConcurrentLabel',
+  'searchConnectors.nativeConnectors.nativeConnectors.maximumConcurrentLabel',
   {
     defaultMessage: 'Maximum concurrent downloads',
   }
 );
 
-const DATABASE_LABEL = i18n.translate('xpack.enterpriseSearch.nativeConnectors.databaseLabel', {
+const DATABASE_LABEL = i18n.translate('searchConnectors.nativeConnectors.databaseLabel', {
   defaultMessage: 'Database',
 });
 
-const PORT_LABEL = i18n.translate('xpack.enterpriseSearch.nativeConnectors.portLabel', {
+const PORT_LABEL = i18n.translate('searchConnectors.nativeConnectors.portLabel', {
   defaultMessage: 'Port',
 });
 
@@ -66,7 +66,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.azureBlobStorage.accountNameLabel',
+          'searchConnectors.nativeConnectors.azureBlobStorage.accountNameLabel',
           {
             defaultMessage: 'Account name',
           }
@@ -86,7 +86,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.azureBlobStorage.accountKeyLabel',
+          'searchConnectors.nativeConnectors.azureBlobStorage.accountKeyLabel',
           {
             defaultMessage: 'Account key',
           }
@@ -106,7 +106,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.azureBlobStorage.blobEndpointLabel',
+          'searchConnectors.nativeConnectors.azureBlobStorage.blobEndpointLabel',
           {
             defaultMessage: 'Blob endpoint',
           }
@@ -164,7 +164,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
     },
-    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.azureBlobStorage.name', {
+    name: i18n.translate('searchConnectors.nativeConnectors.azureBlobStorage.name', {
       defaultMessage: 'Azure Blob Storage',
     }),
     serviceType: 'azure_blob_storage',
@@ -175,18 +175,18 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.DROPDOWN,
-        label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.confluenceSource.label', {
+        label: i18n.translate('searchConnectors.nativeConnectors.confluenceSource.label', {
           defaultMessage: 'Confluence data source',
         }),
         options: [
           {
-            label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.confluenceCloud.name', {
+            label: i18n.translate('searchConnectors.nativeConnectors.confluenceCloud.name', {
               defaultMessage: 'Confluence Cloud',
             }),
             value: 'confluence_cloud',
           },
           {
-            label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.confluenceServer.name', {
+            label: i18n.translate('searchConnectors.nativeConnectors.confluenceServer.name', {
               defaultMessage: 'Confluence Server',
             }),
             value: 'confluence_server',
@@ -210,12 +210,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.confluenceServer.usernameLabel',
-          {
-            defaultMessage: 'Confluence Server username',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.confluenceServer.usernameLabel', {
+          defaultMessage: 'Confluence Server username',
+        }),
         options: [],
         order: 2,
         required: true,
@@ -235,12 +232,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.confluenceServer.passwordLabel',
-          {
-            defaultMessage: 'Confluence Server password',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.confluenceServer.passwordLabel', {
+          defaultMessage: 'Confluence Server password',
+        }),
         options: [],
         order: 3,
         required: true,
@@ -261,7 +255,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.confluenceCloud.accountEmailLabel',
+          'searchConnectors.nativeConnectors.confluenceCloud.accountEmailLabel',
           {
             defaultMessage: 'Confluence Cloud account email',
           }
@@ -286,12 +280,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.confluenceServer.apiTokenLabel',
-          {
-            defaultMessage: 'Confluence Cloud API token',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.confluenceServer.apiTokenLabel', {
+          defaultMessage: 'Confluence Cloud API token',
+        }),
         options: [],
         order: 5,
         required: true,
@@ -306,7 +297,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.confluence.urlLabel', {
+        label: i18n.translate('searchConnectors.nativeConnectors.confluence.urlLabel', {
           defaultMessage: 'Confluence URL label',
         }),
         options: [],
@@ -324,7 +315,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.confluence.spaceKeysLabel', {
+        label: i18n.translate('searchConnectors.nativeConnectors.confluence.spaceKeysLabel', {
           defaultMessage: 'Confluence space keys',
         }),
         options: [],
@@ -414,7 +405,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
     },
-    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.confluence.name', {
+    name: i18n.translate('searchConnectors.nativeConnectors.confluence.name', {
       defaultMessage: 'Confluence',
     }),
     serviceType: 'confluence',
@@ -519,7 +510,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
     },
-    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.dropbox.name', {
+    name: i18n.translate('searchConnectors.nativeConnectors.dropbox.name', {
       defaultMessage: 'Dropbox',
     }),
     serviceType: 'dropbox',
@@ -530,18 +521,18 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.DROPDOWN,
-        label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.jira.dataSourceLabel', {
+        label: i18n.translate('searchConnectors.nativeConnectors.jira.dataSourceLabel', {
           defaultMessage: 'Jira data source',
         }),
         options: [
           {
-            label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.jira.jiraCloudLabel', {
+            label: i18n.translate('searchConnectors.nativeConnectors.jira.jiraCloudLabel', {
               defaultMessage: 'Jira Cloud',
             }),
             value: 'jira_cloud',
           },
           {
-            label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.jira.jiraServerLabel', {
+            label: i18n.translate('searchConnectors.nativeConnectors.jira.jiraServerLabel', {
               defaultMessage: 'Jira Server',
             }),
             value: 'jira_server',
@@ -565,7 +556,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.jira.serverUsername', {
+        label: i18n.translate('searchConnectors.nativeConnectors.jira.serverUsername', {
           defaultMessage: 'Jira Server username',
         }),
         options: [],
@@ -587,7 +578,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.jira.serverPasswordLabel', {
+        label: i18n.translate('searchConnectors.nativeConnectors.jira.serverPasswordLabel', {
           defaultMessage: 'Jira Server password',
         }),
         options: [],
@@ -609,12 +600,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.jira.cloudServiceAccountLabel',
-          {
-            defaultMessage: 'Jira Cloud service account id',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.jira.cloudServiceAccountLabel', {
+          defaultMessage: 'Jira Cloud service account id',
+        }),
         options: [],
         order: 4,
         placeholder: 'me@example.com',
@@ -635,7 +623,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.jira.cloudApiTokenLabel', {
+        label: i18n.translate('searchConnectors.nativeConnectors.jira.cloudApiTokenLabel', {
           defaultMessage: 'Jira Cloud API token',
         }),
         options: [],
@@ -652,7 +640,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.jira.hostUrlLabel', {
+        label: i18n.translate('searchConnectors.nativeConnectors.jira.hostUrlLabel', {
           defaultMessage: 'Jira host url',
         }),
         options: [],
@@ -670,7 +658,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.jira.projectKeysLabel', {
+        label: i18n.translate('searchConnectors.nativeConnectors.jira.projectKeysLabel', {
           defaultMessage: 'Jira project keys',
         }),
         options: [],
@@ -760,7 +748,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
     },
-    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.jira.name', {
+    name: i18n.translate('searchConnectors.nativeConnectors.jira.name', {
       defaultMessage: 'Jira',
     }),
     serviceType: 'jira',
@@ -771,12 +759,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.hostLabel',
-          {
-            defaultMessage: 'Server hostname',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.mongodb.configuration.hostLabel', {
+          defaultMessage: 'Server hostname',
+        }),
         options: [],
         order: 1,
         required: true,
@@ -837,7 +822,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.collectionLabel',
+          'searchConnectors.nativeConnectors.mongodb.configuration.collectionLabel',
           {
             defaultMessage: 'Collection',
           }
@@ -857,7 +842,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.directConnectionLabel',
+          'searchConnectors.nativeConnectors.mongodb.configuration.directConnectionLabel',
           {
             defaultMessage: 'Direct connection',
           }
@@ -881,7 +866,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
     },
-    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.mongodb.name', {
+    name: i18n.translate('searchConnectors.nativeConnectors.mongodb.name', {
       defaultMessage: 'MongoDB',
     }),
     serviceType: 'mongodb',
@@ -892,12 +877,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mssql.configuration.hostLabel',
-          {
-            defaultMessage: 'Host',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.mssql.configuration.hostLabel', {
+          defaultMessage: 'Host',
+        }),
         options: [],
         order: 1,
         required: true,
@@ -928,7 +910,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mssql.configuration.usernameLabel',
+          'searchConnectors.nativeConnectors.mssql.configuration.usernameLabel',
           {
             defaultMessage: 'Username',
           }
@@ -948,7 +930,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mssql.configuration.passwordLabel',
+          'searchConnectors.nativeConnectors.mssql.configuration.passwordLabel',
           {
             defaultMessage: 'Password',
           }
@@ -982,12 +964,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mssql.configuration.tablesLabel',
-          {
-            defaultMessage: 'Comma-separated list of tables',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.mssql.configuration.tablesLabel', {
+          defaultMessage: 'Comma-separated list of tables',
+        }),
         options: [],
         order: 6,
         required: true,
@@ -1032,12 +1011,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mssql.configuration.schemaLabel',
-          {
-            defaultMessage: 'Schema',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.mssql.configuration.schemaLabel', {
+          defaultMessage: 'Schema',
+        }),
         options: [],
         order: 9,
         required: true,
@@ -1053,7 +1029,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.NUMERIC,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mssql.configuration.rowsFetchedLabel',
+          'searchConnectors.nativeConnectors.mssql.configuration.rowsFetchedLabel',
           {
             defaultMessage: 'Rows fetched per request',
           }
@@ -1073,7 +1049,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.NUMERIC,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mssql.configuration.retriesLabel',
+          'searchConnectors.nativeConnectors.mssql.configuration.retriesLabel',
           {
             defaultMessage: 'Retries per request',
           }
@@ -1093,7 +1069,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mssql.configuration.validateHostLabel',
+          'searchConnectors.nativeConnectors.mssql.configuration.validateHostLabel',
           {
             defaultMessage: 'Validate host',
           }
@@ -1115,7 +1091,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
     },
-    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.mssql.name', {
+    name: i18n.translate('searchConnectors.nativeConnectors.mssql.name', {
       defaultMessage: 'Microsoft SQL',
     }),
     serviceType: 'mssql',
@@ -1126,12 +1102,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.hostLabel',
-          {
-            defaultMessage: 'Host',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.mysql.configuration.hostLabel', {
+          defaultMessage: 'Host',
+        }),
         options: [],
         order: 1,
         required: true,
@@ -1162,7 +1135,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.usernameLabel',
+          'searchConnectors.nativeConnectors.mysql.configuration.usernameLabel',
           {
             defaultMessage: 'Username',
           }
@@ -1182,7 +1155,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.passwordLabel',
+          'searchConnectors.nativeConnectors.mysql.configuration.passwordLabel',
           {
             defaultMessage: 'Password',
           }
@@ -1216,12 +1189,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: '',
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.tablesLabel',
-          {
-            defaultMessage: 'Comma-separated list of tables',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.mysql.configuration.tablesLabel', {
+          defaultMessage: 'Comma-separated list of tables',
+        }),
         options: [],
         order: 6,
         required: true,
@@ -1267,7 +1237,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.NUMERIC,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.rowsFetchedLabel',
+          'searchConnectors.nativeConnectors.mysql.configuration.rowsFetchedLabel',
           {
             defaultMessage: 'Rows fetched per request',
           }
@@ -1287,7 +1257,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.NUMERIC,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.retriesLabel',
+          'searchConnectors.nativeConnectors.mysql.configuration.retriesLabel',
           {
             defaultMessage: 'Retries per request',
           }
@@ -1309,7 +1279,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
     },
-    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.mysql.name', {
+    name: i18n.translate('searchConnectors.nativeConnectors.mysql.name', {
       defaultMessage: 'MySQL',
     }),
     serviceType: 'mysql',
@@ -1350,12 +1320,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.networkDrive.ipAddressLabel',
-          {
-            defaultMessage: 'IP address',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.networkDrive.ipAddressLabel', {
+          defaultMessage: 'IP address',
+        }),
         options: [],
         order: 3,
         placeholder: '127.0.0.1',
@@ -1386,7 +1353,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('xpack.enterpriseSearch.nativeConnectors.networkDrive.pathLabel', {
+        label: i18n.translate('searchConnectors.nativeConnectors.networkDrive.pathLabel', {
           defaultMessage: 'Path',
         }),
         options: [],
@@ -1407,7 +1374,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
     },
-    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.networkDrive.name', {
+    name: i18n.translate('searchConnectors.nativeConnectors.networkDrive.name', {
       defaultMessage: 'Network drive',
     }),
     serviceType: 'network_drive',
@@ -1419,7 +1386,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.postgresql.configuration.hostLabel',
+          'searchConnectors.nativeConnectors.postgresql.configuration.hostLabel',
           {
             defaultMessage: 'Host',
           }
@@ -1499,7 +1466,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTAREA,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.postgresql.configuration.tablesLabel',
+          'searchConnectors.nativeConnectors.postgresql.configuration.tablesLabel',
           {
             defaultMessage: 'Comma-separated list of tables',
           }
@@ -1549,7 +1516,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.NUMERIC,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.postgresql.configuration.rowsFetchedLabel',
+          'searchConnectors.nativeConnectors.postgresql.configuration.rowsFetchedLabel',
           {
             defaultMessage: 'Rows fetched per request',
           }
@@ -1569,7 +1536,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.NUMERIC,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.postgresql.configuration.retriesLabel',
+          'searchConnectors.nativeConnectors.postgresql.configuration.retriesLabel',
           {
             defaultMessage: 'Retries per request',
           }
@@ -1591,7 +1558,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
     },
-    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.postgresql.name', {
+    name: i18n.translate('searchConnectors.nativeConnectors.postgresql.name', {
       defaultMessage: 'PostgreSQL',
     }),
     serviceType: 'postgresql',
@@ -1695,7 +1662,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         basic: { enabled: true },
       },
     },
-    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.servicenow.name', {
+    name: i18n.translate('searchConnectors.nativeConnectors.servicenow.name', {
       defaultMessage: 'ServiceNow',
     }),
     serviceType: 'servicenow',
@@ -1707,7 +1674,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.tenantIdLabel',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.tenantIdLabel',
           {
             defaultMessage: 'Tenant ID',
           }
@@ -1727,7 +1694,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.tenantNameLabel',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.tenantNameLabel',
           {
             defaultMessage: 'Tenant name',
           }
@@ -1747,7 +1714,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.clientIdLabel',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.clientIdLabel',
           {
             defaultMessage: 'Client ID',
           }
@@ -1767,7 +1734,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.secretValueLabel',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.secretValueLabel',
           {
             defaultMessage: 'Secret value',
           }
@@ -1787,7 +1754,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTAREA,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.siteCollectionsLabel',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.siteCollectionsLabel',
           {
             defaultMessage: 'Comma-separated list of sites',
           }
@@ -1797,7 +1764,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.siteCollectionsTooltip',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.siteCollectionsTooltip',
           {
             defaultMessage:
               'A comma-separated list of sites to ingest data from. ' +
@@ -1814,7 +1781,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.textExtractionServiceLabel',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.textExtractionServiceLabel',
           {
             defaultMessage: 'Use text extraction service',
           }
@@ -1824,7 +1791,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.textExtractionServiceTooltip',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.textExtractionServiceTooltip',
           {
             defaultMessage:
               'Requires a separate deployment of the Elastic Data Extraction Service. ' +
@@ -1841,7 +1808,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.useDocumentLevelSecurityLabel',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.useDocumentLevelSecurityLabel',
           {
             defaultMessage: 'Enable document level security',
           }
@@ -1851,7 +1818,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.useDocumentLevelSecurityTooltip',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.useDocumentLevelSecurityTooltip',
           {
             defaultMessage:
               'Document level security ensures identities and permissions set in Sharepoint Online are maintained in Elasticsearch. This metadata is added to your Elasticsearch documents, so you can control user and group read-access. Access control syncs ensure this metadata is kept up to date.',
@@ -1872,7 +1839,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: DisplayType.TOGGLE,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchDriveItemPermissionsLabel',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchDriveItemPermissionsLabel',
           {
             defaultMessage: 'Fetch drive item permissions',
           }
@@ -1882,7 +1849,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchDriveItemPermissionsTooltip',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchDriveItemPermissionsTooltip',
           {
             defaultMessage:
               'Enable this option to fetch drive item specific permissions. This setting can increase sync time.',
@@ -1903,7 +1870,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: DisplayType.TOGGLE,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniquePagePermissionsLabel',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchUniquePagePermissionsLabel',
           {
             defaultMessage: 'Fetch unique page permissions',
           }
@@ -1913,7 +1880,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniquePagePermissionsTooltip',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchUniquePagePermissionsTooltip',
           {
             defaultMessage:
               'Enable this option to fetch unique page permissions. This setting can increase sync time. If this setting is disabled a page will inherit permissions from its parent site.',
@@ -1934,7 +1901,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: DisplayType.TOGGLE,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListPermissionsLabel',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchUniqueListPermissionsLabel',
           {
             defaultMessage: 'Fetch unique list permissions',
           }
@@ -1944,7 +1911,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListPermissionsTooltip',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchUniqueListPermissionsTooltip',
           {
             defaultMessage:
               'Enable this option to fetch unique list permissions. This setting can increase sync time. If this setting is disabled a list will inherit permissions from its parent site.',
@@ -1965,7 +1932,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: DisplayType.TOGGLE,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListItemPermissionsLabel',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchUniqueListItemPermissionsLabel',
           {
             defaultMessage: 'Fetch unique list item permissions',
           }
@@ -1975,7 +1942,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListItemPermissionsTooltip',
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchUniqueListItemPermissionsTooltip',
           {
             defaultMessage:
               'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
@@ -1999,7 +1966,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         enabled: true,
       },
     },
-    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.sharepoint_online.name', {
+    name: i18n.translate('searchConnectors.nativeConnectors.sharepoint_online.name', {
       defaultMessage: 'Sharepoint Online',
     }),
     serviceType: 'sharepoint_online',

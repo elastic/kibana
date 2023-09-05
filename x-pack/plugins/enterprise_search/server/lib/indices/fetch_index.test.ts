@@ -8,7 +8,7 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { fetchConnectorByIndexName, SyncStatus } from '@kbn/search-connectors';
+import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
@@ -17,6 +17,15 @@ import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { fetchIndex } from './fetch_index';
 
 jest.mock('@kbn/search-connectors', () => ({
+  SyncStatus: {
+    CANCELED: 'canceled',
+    CANCELING: 'canceling',
+    COMPLETED: 'completed',
+    ERROR: 'error',
+    IN_PROGRESS: 'in_progress',
+    PENDING: 'pending',
+    SUSPENDED: 'suspended',
+  },
   fetchConnectorByIndexName: jest.fn(),
 }));
 
@@ -35,10 +44,7 @@ describe('fetchIndex lib function', () => {
       },
       search: jest.fn().mockReturnValue({
         hits: {
-          hits: [
-            { _source: { status: SyncStatus.IN_PROGRESS } },
-            { _source: { status: SyncStatus.PENDING } },
-          ],
+          hits: [{ _source: { status: 'in_progress' } }, { _source: { status: 'pending' } }],
         },
       }),
     },
@@ -111,10 +117,7 @@ describe('fetchIndex lib function', () => {
   it('should return data and stats for index and connector if connector is present', async () => {
     mockClient.asCurrentUser.search.mockReturnValue({
       hits: {
-        hits: [
-          { _source: { status: SyncStatus.CANCELED } },
-          { _source: { status: SyncStatus.PENDING } },
-        ],
+        hits: [{ _source: { status: 'canceled' } }, { _source: { status: 'pending' } }],
       },
     });
     mockClient.asCurrentUser.indices.get.mockImplementation(() =>
@@ -169,10 +172,7 @@ describe('fetchIndex lib function', () => {
     mockClient.asCurrentUser.count.mockReturnValue({ count: 0 });
     mockClient.asCurrentUser.search.mockReturnValue({
       hits: {
-        hits: [
-          { _source: { status: SyncStatus.IN_PROGRESS } },
-          { _source: { status: SyncStatus.COMPLETED } },
-        ],
+        hits: [{ _source: { status: 'in_progress' } }, { _source: { status: 'completed' } }],
       },
     });
     mockClient.asCurrentUser.indices.get.mockImplementation(() =>
