@@ -38,11 +38,11 @@
   }
 
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
-    padding: $euiSizeS 0 0 $euiSizeS;
+    padding: $euiSizeS+2 0 0 $euiSizeXS;
   }
 
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'] {
-    padding: $euiSizeXS 0 0 $euiSizeXS;
+    padding: $euiSizeXS+1 0 0 0;
   }
 
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover,
