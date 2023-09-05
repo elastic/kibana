@@ -181,7 +181,7 @@ export function ConfigureLogs() {
               isDisabled={
                 logFilePathNotConfigured || !datasetName || !namespace
               }
-              data-test-subj={`obltOnboardingCustomLogsContinue`}
+              data-test-subj="obltOnboardingCustomLogsContinue"
             >
               {isCreatingIntegration
                 ? i18n.translate(
@@ -254,6 +254,7 @@ export function ConfigureLogs() {
                           iconType="trash"
                           aria-label="Delete"
                           onClick={() => removeLogFilePath(index)}
+                          data-test-subj={`obltOnboardingLogFilePathDelete-${index}`}
                         />
                       </EuiFlexItem>
                     )}
@@ -358,6 +359,7 @@ export function ConfigureLogs() {
                     defaultMessage: 'Advanced settings',
                   }
                 )}
+                data-test-subj="obltOnboardingCustomLogsAdvancedSettings"
               >
                 <EuiSpacer size="l" />
                 <EuiFormRow
@@ -423,6 +425,7 @@ export function ConfigureLogs() {
                     )}
                     value={namespace}
                     onChange={(event) => setNamespace(event.target.value)}
+                    data-test-subj="obltOnboardingCustomLogsNamespace"
                   />
                 </EuiFormRow>
                 <EuiSpacer size="l" />
@@ -463,6 +466,7 @@ export function ConfigureLogs() {
                     onChange={(event) =>
                       setCustomConfigurations(event.target.value)
                     }
+                    data-test-subj="obltOnboardingCustomLogsCustomConfig"
                   />
                 </OptionalFormRow>
               </EuiAccordion>
@@ -621,13 +625,23 @@ const getIntegrationErrorCallout = (integrationError: IntegrationError) => {
         }
       );
       return (
-        <EuiCallOut title={title} color="danger" iconType="error">
+        <EuiCallOut
+          title={title}
+          color="danger"
+          iconType="error"
+          data-test-subj="obltOnboardingCustomIntegrationUnauthorized"
+        >
           <p>{authorizationDescription}</p>
         </EuiCallOut>
       );
     case 'UnknownError':
       return (
-        <EuiCallOut title={title} color="danger" iconType="error">
+        <EuiCallOut
+          title={title}
+          color="danger"
+          iconType="error"
+          data-test-subj="obltOnboardingCustomIntegrationUnknownError"
+        >
           <p>{integrationError.message}</p>
         </EuiCallOut>
       );
