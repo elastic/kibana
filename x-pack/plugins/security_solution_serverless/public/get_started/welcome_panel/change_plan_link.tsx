@@ -25,7 +25,7 @@ import { useKibana } from '../../common/services';
 const ChangePlanLinkComponent = ({ productTier }: { productTier: ProductTier | undefined }) => {
   const { euiTheme } = useEuiTheme();
   const { cloud } = useKibana().services;
-  const cssStyles = useEuiBackgroundColorCSS();
+  const backgroundColorStyles = useEuiBackgroundColorCSS();
   return productTier ? (
     <>
       {/* <div> cannot appear as a descendant of <p>, EuiSpacer is a div */}
