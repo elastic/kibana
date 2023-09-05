@@ -170,6 +170,7 @@ export type {
   Reason,
   WaitUntilNextSessionCompletesOptions,
   SearchResponseWarning,
+  SearchResponseIncompleteWarning,
 } from './search';
 
 export {
