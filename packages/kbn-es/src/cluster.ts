@@ -58,6 +58,7 @@ const first = (stream: Readable, map: (data: Buffer) => string | true | undefine
 interface StopOptions {
   gracefully: boolean;
 }
+
 export class Cluster {
   private log: ToolingLog;
   private ssl: boolean;
@@ -68,15 +69,13 @@ export class Cluster {
   private setupPromise: Promise<unknown> | null;
   private stdioTarget: NodeJS.WritableStream | null;
 
-  // private serverlessProcess: NodeJS.Process;
-
   constructor({ log = defaultLog, ssl = false } = {}) {
     this.log = log.withType('@kbn/es Cluster');
     this.ssl = ssl;
     this.stopCalled = false;
-    // Stores serverless Elasticsearch node names
+    // Serverless Elasticsearch node names, started via Docker
     this.serverlessNodes = [];
-    // Process for the locally started Elasticsearch cluster
+    // properties used exclusively for the locally started Elasticsearch cluster
     this.process = null;
     this.outcome = null;
     this.setupPromise = null;
