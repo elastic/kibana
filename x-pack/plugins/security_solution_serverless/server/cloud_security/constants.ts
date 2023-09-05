@@ -32,7 +32,7 @@ export const METERING_CONFIGS = {
   },
   [KSPM]: {
     index: LATEST_FINDINGS_INDEX_PATTERN,
-    assets_identifier: 'agent.id',
+    assets_identifier: 'host.name',
   },
   [CNVM]: {
     index: LATEST_VULNERABILITIES_INDEX_PATTERN,
