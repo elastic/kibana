@@ -298,7 +298,7 @@ export class Cluster {
     }
 
     if (options.gracefully) {
-      await treeKillAsync(this.process!.pid);
+      await treeKillAsync(this.process.pid);
     } else {
       await treeKillAsync(this.process.pid, 'SIGKILL');
     }
@@ -586,7 +586,7 @@ export class Cluster {
    * @param options ServerlessOptions
    */
   async runServerless(options: ServerlessOptions) {
-    if (this.process) {
+    if (this.process || this.outcome) {
       throw new Error('ES stateful cluster has already been started');
     }
 
@@ -610,7 +610,7 @@ export class Cluster {
    * @param options DockerOptions
    */
   async runDocker(options: DockerOptions) {
-    if (this.process) {
+    if (this.process || this.outcome) {
       throw new Error('ES stateful cluster has already been started');
     }
 
