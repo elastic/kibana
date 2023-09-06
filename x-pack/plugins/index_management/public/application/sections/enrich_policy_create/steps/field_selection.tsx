@@ -142,7 +142,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
 
   return (
     <Form form={form}>
-      {(hasSelectedMultipleIndices && matchFieldOptions.length === 0) && (
+      {hasSelectedMultipleIndices && matchFieldOptions.length === 0 && (
         <>
           <EuiCallOut
             title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.errorTitle', {
