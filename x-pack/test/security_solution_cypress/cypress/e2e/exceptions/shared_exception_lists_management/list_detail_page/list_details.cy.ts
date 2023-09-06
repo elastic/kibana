@@ -40,7 +40,8 @@ const getExceptionList1 = () => ({
 
 const EXCEPTION_LIST_NAME = 'Newly created list';
 
-describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165640
+describe('Exception list detail page', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     login();
