@@ -178,7 +178,7 @@ async function getTraceDocsPaginated({
   const mergedHits = [...hits, ...response.hits];
 
   logger.debug(
-    `retrieved: ${response.hits.length}, total retrieved: ${mergedHits.length}), max: ${maxTraceItems}, total is ${response.total}`
+    `Paginating traces: retrieved: ${response.hits.length}, (total: ${mergedHits.length} of ${response.total}), maxTraceItems: ${maxTraceItems}`
   );
 
   if (
@@ -277,16 +277,8 @@ async function getTraceDocsPerPage({
           order: 'desc',
         },
       },
-      {
-        _script: {
-          type: 'string',
-          script: {
-            lang: 'painless',
-            source: `if (doc['${TRANSACTION_ID}'].size() > 0) { return doc['${TRANSACTION_ID}'].value } else { return doc['${SPAN_ID}'].value }`,
-          },
-          order: 'desc',
-        },
-      },
+      { '@timestamp': 'asc' },
+      { _doc: 'asc' },
     ] as Sort,
   };
 
