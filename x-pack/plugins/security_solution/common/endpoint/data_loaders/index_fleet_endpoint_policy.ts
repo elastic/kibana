@@ -71,9 +71,6 @@ export const indexFleetEndpointPolicy = async (
         },
         method: 'POST',
         body: newAgentPolicyData,
-        headers: {
-          'elastic-api-version': API_VERSIONS.public.v1,
-        },
       })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreateAgentPolicyResponse>;
   } catch (error) {
@@ -155,9 +152,6 @@ export const deleteIndexedFleetEndpointPolicies = async (
           method: 'POST',
           body: {
             packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
-          },
-          headers: {
-            'elastic-api-version': API_VERSIONS.public.v1,
           },
         })
         .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostDeletePackagePoliciesResponse>
