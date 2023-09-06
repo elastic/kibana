@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/165804
+  // FLAKY: https://github.com/elastic/kibana/issues/165796
   describe.skip('Data View Management', function () {
     let dataViewId = '';
 
