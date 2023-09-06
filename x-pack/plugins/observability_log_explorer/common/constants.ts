@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export const LOG_EXPLORER_PROFILE_ID = 'log-explorer';
-
-// Fields constants
-export const TIMESTAMP_FIELD = '@timestamp';
-export const MESSAGE_FIELD = 'message';
+export const OBSERVABILITY_LOG_EXPLORER_APP_ID = 'observability-log-explorer';
