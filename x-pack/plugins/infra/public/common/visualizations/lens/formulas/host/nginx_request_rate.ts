@@ -16,4 +16,5 @@ export const nginxRequestRate: FormulaValueConfig = {
       decimals: 0,
     },
   },
+  timeScale: 's',
 };
