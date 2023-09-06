@@ -46,7 +46,7 @@ export function IncompleteResultsModal({ request, response, warning, onClose }: 
           description: 'Name of the tab displaying cluster details',
         }
       ),
-      content: <ShardFailureTable failures={response._shards.failures as any ?? []} />,
+      content: <ShardFailureTable failures={response._shards.failures ?? []} />,
       ['data-test-subj']: 'showClusterDetailsButton',
     },
     {
