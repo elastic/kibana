@@ -33,7 +33,6 @@ export interface Props {
 }
 
 export function IncompleteResultsModal({ request, response, warning, onClose }: Props) {
-  const failures = response._shards.failures ?? [];
   const requestJSON = JSON.stringify(request, null, 2);
   const responseJSON = JSON.stringify(response, null, 2);
 
@@ -47,7 +46,7 @@ export function IncompleteResultsModal({ request, response, warning, onClose }: 
           description: 'Name of the tab displaying cluster details',
         }
       ),
-      content: <ShardFailureTable failures={response._shards.failures ?? []} />,
+      content: <ShardFailureTable failures={response._shards.failures as any ?? []} />,
       ['data-test-subj']: 'showClusterDetailsButton',
     },
     {

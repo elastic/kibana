@@ -274,8 +274,6 @@ export type {
 } from './query';
 
 // TODO: move to @kbn/search-response-warnings
-export type { ShardFailureRequest } from './shard_failure_modal';
-export { ShardFailureOpenModalButton } from './shard_failure_modal';
 export { OpenIncompleteResultsModalButton } from './incomplete_results_modal';
 
 export type { AggsStart } from './search/aggs';
