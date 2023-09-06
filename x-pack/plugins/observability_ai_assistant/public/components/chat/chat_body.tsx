@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { last } from 'lodash';
 import {
   EuiFlexGroup,
@@ -104,48 +104,39 @@ export function ChatBody({
       : '100%'};
   `;
 
+  const [stickToBottom, setStickToBottom] = useState(true);
+
+  const isAtBottom = (parent: HTMLElement) =>
+    parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
+
   useEffect(() => {
     const parent = timelineContainerRef.current?.parentElement;
     if (!parent) {
       return;
     }
 
-    let rafId: number | undefined;
-
-    const isAtBottom = () => parent.scrollTop >= parent.scrollHeight - parent.offsetHeight;
-
-    const stick = () => {
-      if (!isAtBottom()) {
-        parent.scrollTop = parent.scrollHeight - parent.offsetHeight;
-      }
-      rafId = requestAnimationFrame(stick);
-    };
-
-    const unstick = () => {
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = undefined;
-      }
-    };
-
-    const onScroll = (event: Event) => {
-      if (isAtBottom()) {
-        stick();
-      } else {
-        unstick();
-      }
-    };
+    function onScroll() {
+      setStickToBottom(isAtBottom(parent!));
+    }
 
     parent.addEventListener('scroll', onScroll);
 
-    stick();
-
     return () => {
-      unstick();
       parent.removeEventListener('scroll', onScroll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timelineContainerRef.current]);
+
+  useEffect(() => {
+    const parent = timelineContainerRef.current?.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    if (stickToBottom) {
+      parent.scrollTop = parent.scrollHeight;
+    }
+  });
 
   const handleCopyConversation = () => {
     const content = JSON.stringify({ title, messages });
@@ -210,7 +201,10 @@ export function ChatBody({
             <ChatPromptEditor
               loading={isLoading}
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
-              onSubmit={timeline.onSubmit}
+              onSubmit={(message) => {
+                setStickToBottom(true);
+                return timeline.onSubmit(message);
+              }}
             />
             <EuiSpacer size="s" />
           </EuiPanel>

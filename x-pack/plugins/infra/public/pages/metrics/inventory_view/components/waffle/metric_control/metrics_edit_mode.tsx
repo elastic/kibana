@@ -39,6 +39,7 @@ export const MetricsEditMode = withTheme(
           >
             <EuiFlexItem grow={false} style={{ width: ICON_WIDTH }}>
               <EuiButtonIcon
+                data-test-subj="infraMetricsEditModeButton"
                 iconType="pencil"
                 onClick={() => onEdit(metric)}
                 aria-label={i18n.translate(
@@ -55,6 +56,7 @@ export const MetricsEditMode = withTheme(
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ width: ICON_WIDTH, textAlign: 'right' }}>
               <EuiButtonIcon
+                data-test-subj="infraMetricsEditModeButton"
                 iconType="trash"
                 color="danger"
                 onClick={() => onDelete(metric)}
