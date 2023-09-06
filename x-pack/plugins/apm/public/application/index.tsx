@@ -26,9 +26,9 @@ import { ITelemetryClient } from '../services/telemetry';
  * This module is rendered asynchronously in the Kibana platform.
  */
 
-export type Services = {
+export interface Services {
   telemetry: ITelemetryClient;
-};
+}
 
 export const renderApp = ({
   coreStart,
