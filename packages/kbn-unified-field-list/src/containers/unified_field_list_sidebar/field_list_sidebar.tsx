@@ -320,7 +320,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 {typeof isSidebarCollapsed === 'boolean' && onToggleSidebar && (
                   <EuiFlexItem grow={false}>
                     <SidebarToggleButton
-                      data-test-subj="unifiedFieldListSidebar__toggle"
                       isSidebarCollapsed={isSidebarCollapsed}
                       onChange={onToggleSidebar}
                     />

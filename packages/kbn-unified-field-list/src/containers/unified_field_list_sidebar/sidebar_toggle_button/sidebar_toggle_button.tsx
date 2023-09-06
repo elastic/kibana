@@ -31,38 +31,41 @@ export interface SidebarToggleButtonProps {
  * @constructor
  */
 export const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
-  'data-test-subj': dataTestSubj,
+  'data-test-subj': dataTestSubj = 'unifiedFieldListSidebar__toggle',
   isSidebarCollapsed,
   onChange,
 }) => {
   return (
-    <IconButtonGroup
-      data-test-subj={dataTestSubj}
-      legend={i18n.translate('unifiedFieldList.fieldListSidebar.toggleSidebarLegend', {
-        defaultMessage: 'Toggle sidebar',
-      })}
-      buttonSize="s"
-      buttons={[
-        ...(isSidebarCollapsed
-          ? [
-              {
-                label: i18n.translate('unifiedFieldList.fieldListSidebar.expandSidebarButton', {
-                  defaultMessage: 'Show sidebar',
-                }),
-                iconType: iconExpand,
-                onClick: () => onChange(false),
-              },
-            ]
-          : [
-              {
-                label: i18n.translate('unifiedFieldList.fieldListSidebar.collapseSidebarButton', {
-                  defaultMessage: 'Hide sidebar',
-                }),
-                iconType: iconCollapse,
-                onClick: () => onChange(true),
-              },
-            ]),
-      ]}
-    />
+    <div data-test-subj={dataTestSubj}>
+      <IconButtonGroup
+        legend={i18n.translate('unifiedFieldList.fieldListSidebar.toggleSidebarLegend', {
+          defaultMessage: 'Toggle sidebar',
+        })}
+        buttonSize="s"
+        buttons={[
+          ...(isSidebarCollapsed
+            ? [
+                {
+                  label: i18n.translate('unifiedFieldList.fieldListSidebar.expandSidebarButton', {
+                    defaultMessage: 'Show sidebar',
+                  }),
+                  iconType: iconExpand,
+                  'data-test-subj': `${dataTestSubj}-expand`,
+                  onClick: () => onChange(false),
+                },
+              ]
+            : [
+                {
+                  label: i18n.translate('unifiedFieldList.fieldListSidebar.collapseSidebarButton', {
+                    defaultMessage: 'Hide sidebar',
+                  }),
+                  iconType: iconCollapse,
+                  'data-test-subj': `${dataTestSubj}-collapse`,
+                  onClick: () => onChange(true),
+                },
+              ]),
+        ]}
+      />
+    </div>
   );
 };
