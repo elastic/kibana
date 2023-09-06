@@ -36,6 +36,7 @@ import {
   hasNonCollapsedSliceBy,
   isCollapsed,
 } from './visualization';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
 type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   paletteService: PaletteRegistry;
@@ -178,11 +179,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       label="Use new color mapping (tech preview)"
                       compressed
                       checked={useNewColorMapping}
-                      onChange={(e) => {
-                        setColorMapping(
-                          e.target.checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined
+                      onChange={({ target: { checked } }) => {
+                        trackUiCounterEvents(
+                          `color_mapping_switch_${checked ? 'enabled' : 'disabled'}`
                         );
-                        setUseNewColorMapping(e.target.checked);
+                        setColorMapping(checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined);
+                        setUseNewColorMapping(checked);
                       }}
                     />
                   </EuiFlexItem>

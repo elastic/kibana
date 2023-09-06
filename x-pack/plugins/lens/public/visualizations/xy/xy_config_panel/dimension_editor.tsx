@@ -40,6 +40,7 @@ import { getDataLayers } from '../visualization_helpers';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { getSortedAccessors } from '../to_expression';
 import { getColorAssignments, getAssignedColorConfig } from '../color_assignment';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -204,11 +205,12 @@ export function DataDimensionEditor(
                     label="Use new color mapping (tech preview)"
                     compressed
                     checked={useNewColorMapping}
-                    onChange={(e) => {
-                      setColorMapping(
-                        e.target.checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined
+                    onChange={({ target: { checked } }) => {
+                      trackUiCounterEvents(
+                        `color_mapping_switch_${checked ? 'enabled' : 'disabled'}`
                       );
-                      setUseNewColorMapping(e.target.checked);
+                      setColorMapping(checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined);
+                      setUseNewColorMapping(checked);
                     }}
                   />
                 </EuiFlexItem>

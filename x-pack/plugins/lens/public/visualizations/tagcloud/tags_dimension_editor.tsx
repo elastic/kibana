@@ -31,6 +31,7 @@ import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { TagcloudState } from './types';
 import { PalettePanelContainer } from '../../shared_components';
 import { FramePublicAPI } from '../../types';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
 interface Props {
   paletteService: PaletteRegistry;
@@ -133,11 +134,12 @@ export function TagsDimensionEditor({
                   label="Use new color mapping (tech preview)"
                   compressed
                   checked={useNewColorMapping}
-                  onChange={(e) => {
-                    setColorMapping(
-                      e.target.checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined
+                  onChange={({ target: { checked } }) => {
+                    trackUiCounterEvents(
+                      `color_mapping_switch_${checked ? 'enabled' : 'disabled'}`
                     );
-                    setUseNewColorMapping(e.target.checked);
+                    setColorMapping(checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined);
+                    setUseNewColorMapping(checked);
                   }}
                 />
               </EuiFlexItem>

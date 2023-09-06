@@ -669,6 +669,7 @@ export const getXyVisualization = ({
       formatFactory: fieldFormats.deserialize,
       paletteService,
     };
+
     const darkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
