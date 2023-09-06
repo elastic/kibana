@@ -1056,6 +1056,12 @@ export default function ({
       return context;
     }
 
+    const t = editor.getTokenAt(pos);
+    if (t && t.type === 'punctuation.end_triple_quote' && pos.column !== t.position.column + 3) {
+      // skip to populate context as the current position is not on the edge of end_triple_quote
+      return context;
+    }
+
     // needed for scope linking + global term resolving
     context.endpointComponentResolver = getEndpointBodyCompleteComponents;
     context.globalComponentResolver = getGlobalAutocompleteComponents;

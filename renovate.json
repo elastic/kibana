@@ -278,6 +278,7 @@
     {
       "groupName": "platform security modules",
       "matchPackageNames": [
+        "css.escape",
         "node-forge",
         "formik",
         "@types/node-forge",
