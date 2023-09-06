@@ -9,7 +9,8 @@ import { connectorIndex, crawlerIndex, apiIndex } from '../__mocks__/view_index.
 
 import moment from 'moment';
 
-import { ConnectorStatus, SyncStatus } from '../../../../common/types/connectors';
+import { ConnectorStatus, SyncStatus } from '@kbn/search-connectors';
+
 import { IngestionMethod, IngestionStatus } from '../types';
 
 import {
