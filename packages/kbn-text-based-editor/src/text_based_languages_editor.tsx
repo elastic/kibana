@@ -77,6 +77,7 @@ export interface TextBasedLanguagesEditorProps {
   editorIsInline?: boolean;
   disableSubmitAction?: boolean;
   hideMinimizeButton?: boolean;
+  hideRunQueryText?: boolean;
 }
 
 interface TextBasedEditorDeps {
@@ -124,6 +125,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   editorIsInline,
   disableSubmitAction,
   hideMinimizeButton,
+  hideRunQueryText,
   dataTestSubj,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
@@ -798,6 +800,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           detectTimestamp={detectTimestamp}
           editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}
+          hideRunQueryText={hideRunQueryText}
         />
       )}
       {isCodeEditorExpanded && (

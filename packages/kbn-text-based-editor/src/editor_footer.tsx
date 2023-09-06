@@ -159,6 +159,7 @@ interface EditorFooterProps {
   refreshErrors: () => void;
   editorIsInline?: boolean;
   disableSubmitAction?: boolean;
+  hideRunQueryText?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -171,6 +172,7 @@ export const EditorFooter = memo(function EditorFooter({
   disableSubmitAction,
   onErrorClick,
   refreshErrors,
+  hideRunQueryText,
 }: EditorFooterProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
@@ -242,11 +244,11 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!Boolean(editorIsInline) && (
+      {!Boolean(editorIsInline) && !Boolean(hideRunQueryText) && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
+              <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-run-query">
                 <p>
                   {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
                     defaultMessage: 'Run query',

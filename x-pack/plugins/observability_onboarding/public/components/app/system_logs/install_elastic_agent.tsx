@@ -171,7 +171,11 @@ export function InstallElasticAgent() {
           : stepStatus === 'complete'
           ? CHECK_LOGS_LABELS.completed
           : CHECK_LOGS_LABELS.incomplete;
-      return { title, status: stepStatus };
+      return {
+        title,
+        status: stepStatus,
+        'data-test-subj': 'obltOnboardingCheckLogsStep',
+      };
     }
     return {
       title: CHECK_LOGS_LABELS.incomplete,
@@ -190,7 +194,11 @@ export function InstallElasticAgent() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="text" onClick={onBack}>
+            <EuiButton
+              data-test-subj="observabilityOnboardingInstallElasticAgentBackButton"
+              color="text"
+              onClick={onBack}
+            >
               {i18n.translate(
                 'xpack.observability_onboarding.systemLogs.back',
                 { defaultMessage: 'Back' }
@@ -203,6 +211,7 @@ export function InstallElasticAgent() {
                   fill
                   iconType="magnifyWithPlus"
                   onClick={onContinue}
+                  data-test-subj="obltOnboardingExploreLogs"
                 >
                   {i18n.translate(
                     'xpack.observability_onboarding.steps.exploreLogs',
