@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiSpacer, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiComboBoxOptionOption, EuiCallOut } from '@elastic/eui';
 import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
 import {
   useForm,
@@ -142,6 +142,24 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
 
   return (
     <Form form={form}>
+      {(hasSelectedMultipleIndices && matchFieldOptions.length === 0) && (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.errorTitle', {
+              defaultMessage: 'No common fields found',
+            })}
+            color="danger"
+            iconType="error"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldError"
+              defaultMessage="The selected indices don't have any fields in common. Please select different indices."
+            />
+          </EuiCallOut>
+
+          <EuiSpacer />
+        </>
+      )}
       <UseField
         path="matchField"
         component={ComboBoxField}
