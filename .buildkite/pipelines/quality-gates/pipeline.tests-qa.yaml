@@ -40,7 +40,7 @@ steps:
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
   - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
-    trigger: "ess-k8s-qa-e2e-tests-daily"
+    trigger: "ess-k8s-qa-e2e-tests-daily" # https://buildkite.com/elastic/ess-k8s-qa-e2e-tests-daily
     build:
       env:
         REGION_ID: aws-eu-west-1

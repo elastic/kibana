@@ -4,7 +4,7 @@
 
 steps:
   - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
-    trigger: "ess-k8s-staging-e2e-tests"
+    trigger: "ess-k8s-staging-e2e-tests" # https://buildkite.com/elastic/ess-k8s-staging-e2e-tests
     build:
       env:
         REGION_ID: aws-us-east-1
