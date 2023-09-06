@@ -347,7 +347,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
 
     context('Edition', () => {
       const editedRuleData = getEditedRule();
-      const expectedEditedtags = editedRuleData.tags?.join('');
+      const expectedEditedTags = editedRuleData.tags?.join('');
       const expectedEditedIndexPatterns = editedRuleData.index;
 
       describe('on rule details page', () => {
@@ -440,7 +440,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
           cy.get(ABOUT_DETAILS).within(() => {
             getDetails(SEVERITY_DETAILS).should('have.text', 'Medium');
             getDetails(RISK_SCORE_DETAILS).should('have.text', `${getEditedRule().risk_score}`);
-            getDetails(TAGS_DETAILS).should('have.text', expectedEditedtags);
+            getDetails(TAGS_DETAILS).should('have.text', expectedEditedTags);
           });
           cy.get(INVESTIGATION_NOTES_TOGGLE).click();
           cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', getEditedRule().note);
