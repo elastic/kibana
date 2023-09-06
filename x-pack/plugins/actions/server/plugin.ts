@@ -40,7 +40,8 @@ import {
 } from '@kbn/event-log-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
-import { ActionsConfig, getValidatedConfig } from './config';
+import { ServerlessPluginSetup } from '@kbn/serverless/server';
+import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
@@ -100,10 +101,8 @@ import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
-import {
-  type IUnsecuredActionsClient,
-  UnsecuredActionsClient,
-} from './unsecured_actions_client/unsecured_actions_client';
+import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
+import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { createSystemConnectors } from './create_system_actions';
 
@@ -130,6 +129,7 @@ export interface PluginSetupContract {
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
+  setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
 }
 
 export interface PluginStartContract {
@@ -169,6 +169,7 @@ export interface ActionsPluginsSetup {
   features: FeaturesPluginSetup;
   spaces?: SpacesPluginSetup;
   monitoringCollection?: MonitoringCollectionSetup;
+  serverless?: ServerlessPluginSetup;
 }
 
 export interface ActionsPluginsStart {
@@ -178,6 +179,7 @@ export interface ActionsPluginsStart {
   eventLog: IEventLogClientService;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
+  serverless?: ServerlessPluginSetup;
 }
 
 const includedHiddenTypes = [
@@ -375,6 +377,20 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         };
       },
       getActionsConfigurationUtilities: () => actionsConfigUtils,
+      setEnabledConnectorTypes: (connectorTypes) => {
+        if (
+          !!plugins.serverless &&
+          this.actionsConfig.enabledActionTypes.length === 1 &&
+          this.actionsConfig.enabledActionTypes[0] === AllowedHosts.Any
+        ) {
+          this.actionsConfig.enabledActionTypes.pop();
+          this.actionsConfig.enabledActionTypes.push(...connectorTypes);
+        } else {
+          throw new Error(
+            "Enabled connector types can be set only if they haven't already been set in the config"
+          );
+        }
+      },
     };
   }
 
@@ -542,6 +558,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     }
 
+    this.validateEnabledConnectorTypes(plugins);
+
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
@@ -693,6 +711,19 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
       };
     };
+  };
+
+  private validateEnabledConnectorTypes = (plugins: ActionsPluginsStart) => {
+    if (
+      !!plugins.serverless &&
+      this.actionsConfig.enabledActionTypes.length > 0 &&
+      this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any
+    ) {
+      this.actionsConfig.enabledActionTypes.forEach((connectorType) => {
+        // Throws error if action type doesn't exist
+        this.actionTypeRegistry?.get(connectorType);
+      });
+    }
   };
 
   public stop() {
