@@ -424,6 +424,7 @@ export class LensAttributes {
             operationType: capitalize(operationType),
           },
         }),
+      customLabel: true,
       filter: columnFilter,
       operationType,
       params:
