@@ -9,11 +9,12 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import DiscoverTabContent from '.';
 import { render, screen, waitFor } from '@testing-library/react';
+import { TimelineId } from '../../../../../common/types';
 
 const TestComponent = () => {
   return (
     <TestProviders>
-      <DiscoverTabContent />
+      <DiscoverTabContent timelineId={TimelineId.test} />
     </TestProviders>
   );
 };
