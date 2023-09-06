@@ -175,8 +175,6 @@ export class AlertingAuthorization {
   }: EnsureAuthorizedOpts) {
     const { authorization } = this;
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
-    // We have some rules with consumer of "alerts" which indirectly means the same as
-    // a consumer of the rule type producer. Let's simplify the code and set it accordingly
     const consumer = getValidConsumer({
       validLegacyConsumers: ruleType.validLegacyConsumers,
       legacyConsumer,
@@ -366,6 +364,9 @@ export class AlertingAuthorization {
                   ruleTypeAuth.producer === feature,
                 ]
               );
+              // FUTURE ENGINEER
+              // We are just trying to add back the legacy consumers associated
+              // to the rule type to get back the privileges that was given at one point
               if (!isEmpty(ruleTypeAuth.validLegacyConsumers)) {
                 ruleTypeAuth.validLegacyConsumers.forEach((legacyConsumer) => {
                   if (addLegacyConsumerPrivileges(legacyConsumer)) {

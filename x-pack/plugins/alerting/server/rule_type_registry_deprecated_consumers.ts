@@ -7,7 +7,7 @@
 
 import { ALERTS_FEATURE_ID } from './types';
 
-const ruleTypeIdWithValidLegacyConsumers: Record<string, string[]> = {
+export const ruleTypeIdWithValidLegacyConsumers: Record<string, string[]> = {
   'example.always-firing': [ALERTS_FEATURE_ID],
   transform_health: [ALERTS_FEATURE_ID],
   '.index-threshold': [ALERTS_FEATURE_ID],
