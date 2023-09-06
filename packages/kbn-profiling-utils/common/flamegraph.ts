@@ -27,7 +27,7 @@ export interface BaseFlameGraph {
   Inline: boolean[];
   /** executable file names */
   ExeFilename: string[];
-  /** address ot line */
+  /** address or line */
   AddressOrLine: number[];
   /** function names */
   FunctionName: string[];
@@ -48,7 +48,7 @@ export interface BaseFlameGraph {
 }
 
 /**
- * reateBaseFlameGraph encapsulates the tree representation into a serialized form.
+ * createBaseFlameGraph encapsulates the tree representation into a serialized form.
  * @param tree CalleeTree
  * @param samplingRate number
  * @param totalSeconds number

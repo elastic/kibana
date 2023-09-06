@@ -37,7 +37,7 @@ export interface CalleeTree {
   Inline: boolean[];
   /** executable file names */
   ExeFilename: string[];
-  /** adress or lines */
+  /** address or lines */
   AddressOrLine: number[];
   /** function names */
   FunctionName: string[];
