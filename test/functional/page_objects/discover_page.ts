@@ -381,8 +381,9 @@ export class DiscoverPageObject extends FtrService {
 
   public async closeSidebar() {
     await this.retry.tryForTime(2 * 1000, async () => {
-      await this.toggleSidebarCollapse();
-      await this.testSubjects.missingOrFail('discover-sidebar');
+      await this.testSubjects.click('unifiedFieldListSidebar__toggle-collapse');
+      await this.testSubjects.missingOrFail('unifiedFieldListSidebar__toggle-collapse');
+      await this.testSubjects.missingOrFail('fieldList');
     });
   }
 
