@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
 
-  describe('Data View Management', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165804
+  describe.skip('Data View Management', function () {
     let dataViewId = '';
 
     before(async () => {
