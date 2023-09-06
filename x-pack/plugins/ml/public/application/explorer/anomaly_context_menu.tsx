@@ -245,7 +245,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             disabled={!isMaxSeriesToPlotValid}
           >
             <FormattedMessage
-              id="xxpack.ml.explorer.anomalies.submitAttachLabel"
+              id="xpack.ml.explorer.anomalies.submitAttachLabel"
               defaultMessage="Attach"
             />
           </EuiButton>

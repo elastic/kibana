@@ -229,6 +229,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             />
           ),
           panel: 'addToDashboardPanel',
+          'data-test-subj': 'mlAnomalyTimelinePanelAddToDashboardButton',
         });
 
         panels.push({
