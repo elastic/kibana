@@ -93,6 +93,7 @@ export const ChartGrid = React.memo(
               overrides={overrides}
               visualizationType="lnsXY"
               onBrushEnd={handleBrushEnd}
+              data-test-subj={`${props['data-test-subj']}${id}`}
             />
           </EuiFlexItem>
         ))}
