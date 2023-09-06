@@ -74,7 +74,6 @@ describe('Alerting Plugin', () => {
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
           features: featuresPluginMock.createSetup(),
           unifiedSearch: autocompletePluginMock.createSetupContract(),
-          // serverless setup is currently empty, and there is no mock
           ...(useDataStreamForAlerts
             ? { serverless: serverlessPluginMock.createSetupContract() }
             : {}),

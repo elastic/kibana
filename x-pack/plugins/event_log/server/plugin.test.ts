@@ -19,7 +19,6 @@ describe('event_log plugin', () => {
     const coreStart = coreMock.createStart() as CoreStart;
 
     const plugin = new Plugin(initializerContext);
-    // serverless setup is currently empty, and there is no mock
     const setup = plugin.setup(coreSetup, {
       serverless: serverlessPluginMock.createSetupContract(),
     });
@@ -44,7 +43,6 @@ describe('event_log plugin', () => {
 
     const plugin = new Plugin(initializerContext);
     const spaces = spacesMock.createStart();
-    // serverless setup is currently empty, and there is no mock
     plugin.setup(coreSetup, { serverless: serverlessPluginMock.createSetupContract() });
     plugin.start(coreStart, { spaces });
     await plugin.stop();
