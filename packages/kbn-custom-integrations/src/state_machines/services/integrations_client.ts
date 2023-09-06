@@ -54,6 +54,7 @@ export class IntegrationsClient implements IIntegrationsClient {
   ): Promise<CreateCustomIntegrationValue> {
     try {
       const response = await this.http.post(CUSTOM_INTEGRATIONS_URL, {
+        version: '2023-10-31',
         body: JSON.stringify(params),
       });
 
@@ -85,7 +86,7 @@ export class IntegrationsClient implements IIntegrationsClient {
     try {
       await this.http.delete(
         DELETE_PACKAGE_URL.replace('{pkgName}', integrationName).replace('{pkgVersion}', version),
-        {}
+        { version: '2023-10-31' }
       );
     } catch (error) {
       throw new UnknownError(error?.body?.message ?? GENERIC_DELETE_ERROR_MESSAGE);

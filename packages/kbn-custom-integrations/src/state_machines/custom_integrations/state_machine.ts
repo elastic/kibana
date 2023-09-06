@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import deepmerge from 'deepmerge';
 import { ActorRefFrom, createMachine, EmittedFrom } from 'xstate';
 import { OmitDeprecatedState } from '@kbn/xstate-utils';
 import { DEFAULT_CONTEXT } from './defaults';
@@ -94,7 +93,18 @@ export const createCustomIntegrationsStateMachine = ({
           integrationsClient,
           initialContext:
             initialState.mode === 'create'
-              ? deepmerge(DEFAULT_CREATE_CONTEXT, initialState.context ?? {})
+              ? {
+                  ...DEFAULT_CREATE_CONTEXT,
+                  ...(initialState?.context ? initialState?.context : {}),
+                  options: {
+                    ...DEFAULT_CREATE_CONTEXT.options,
+                    ...(initialState?.context?.options ? initialState.context.options : {}),
+                  },
+                  fields: {
+                    ...DEFAULT_CREATE_CONTEXT.fields,
+                    ...(initialState?.context?.fields ? initialState.context.fields : {}),
+                  },
+                }
               : DEFAULT_CREATE_CONTEXT,
         });
       },
