@@ -14,8 +14,7 @@ import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_EVALUATION_VALUE, ALERT_REASON } from '@kbn/rule-data-utils';
 import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
-import { stackAlertsAADConfig } from '..';
-import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '../es_query/fields';
+import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
 import {
   ComparatorFns,
   getComparatorScript,
@@ -209,7 +208,7 @@ export function getRuleType(
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
-    alerts: stackAlertsAADConfig,
+    alerts: STACK_ALERTS_AAD_CONFIG,
   };
 
   async function executor(

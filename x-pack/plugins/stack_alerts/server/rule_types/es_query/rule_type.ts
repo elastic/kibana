@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
-import { stackAlertsAADConfig } from '..';
+import { STACK_ALERTS_AAD_CONFIG } from '..';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
@@ -201,6 +201,6 @@ export function getRuleType(
     },
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
-    alerts: stackAlertsAADConfig,
+    alerts: STACK_ALERTS_AAD_CONFIG,
   };
 }
