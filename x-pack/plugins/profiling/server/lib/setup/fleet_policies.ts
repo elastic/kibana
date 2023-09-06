@@ -201,7 +201,7 @@ export async function validateProfilingInApmPackagePolicy({
       },
     };
   } catch (e) {
-    // In case apm server is not available ignore the error and return as profiling is not enabled on apm
+    // In case apm integration is not available ignore the error and return as profiling is not enabled on the integration
     return {
       policies: { apm: { profilingEnabled: false } },
     };
