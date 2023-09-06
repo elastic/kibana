@@ -38,7 +38,6 @@ export interface Services {
   notifyError: NotifyFn;
   TagList?: FC<{ references: SavedObjectsReference[] }>;
   TagSelector?: React.FC<TagSelectorProps>;
-  theme$: Observable<Theme>;
 }
 
 const ContentEditorContext = React.createContext<Services | null>(null);
@@ -126,9 +125,9 @@ export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = 
 
   const openFlyout = useCallback(
     (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
-      return coreOpenFlyout(toMountPoint(node), options);
+      return coreOpenFlyout(toMountPoint(node, { theme$: core.theme.theme$ }), options);
     },
-    [toMountPoint, coreOpenFlyout]
+    [coreOpenFlyout, toMountPoint, core]
   );
 
   return (
@@ -139,7 +138,6 @@ export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = 
       }}
       TagList={TagList}
       TagSelector={savedObjectsTagging?.ui.components.SavedObjectSaveModalTagSelector}
-      theme$={core.theme.theme$}
     >
       {children}
     </ContentEditorProvider>
