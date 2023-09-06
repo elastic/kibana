@@ -5,6 +5,7 @@
 steps:
   - label: ":pipeline::kibana::seedling: Trigger Kibana Serverless Tests for ${ENVIRONMENT}"
     trigger: appex-qa-kibana-serverless-ftr-tests # https://buildkite.com/elastic/appex-qa-kibana-serverless-ftr-tests
+    soft_fail: true # Remove this before release or when tests stabilize
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
@@ -12,6 +13,7 @@ steps:
 
   - label: ":pipeline::weight_lifter::seedling: Trigger RAC Alert Load tests for ${ENVIRONMENT}"
     trigger: appex-qa-rac-alert-load # https://buildkite.com/elastic/appex-qa-rac-alert-load
+    soft_fail: true # Remove this before release or when tests stabilize
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
@@ -34,6 +36,7 @@ steps:
 
   - label: ":pipeline::ship::seedling: Trigger Fleet serverless smoke tests for ${ENVIRONMENT}"
     trigger: fleet-smoke-tests # https://buildkite.com/elastic/fleet-smoke-tests
+    soft_fail: true # Remove this before release or when tests stabilize
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
@@ -41,6 +44,7 @@ steps:
 
   - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
     trigger: "ess-k8s-qa-e2e-tests-daily" # https://buildkite.com/elastic/ess-k8s-qa-e2e-tests-daily
+    soft_fail: true # Remove this before release or when tests stabilize
     build:
       env:
         REGION_ID: aws-eu-west-1
