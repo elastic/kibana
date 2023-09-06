@@ -676,6 +676,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           updateLinesFromModel = true;
                         });
 
+                        editor.onKeyDown(() => {
+                          setIsCompactFocused(true);
+                          setIsCodeEditorExpandedFocused(true);
+                          setShowLineNumbers(true);
+                          setCodeOneLiner('');
+                          clickedOutside = false;
+                          initialRender = false;
+                          updateLinesFromModel = true;
+                        });
+
                         // on CMD/CTRL + Enter submit the query
                         editor.addCommand(
                           // eslint-disable-next-line no-bitwise
