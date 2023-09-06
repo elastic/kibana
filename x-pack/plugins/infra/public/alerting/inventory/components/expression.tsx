@@ -578,6 +578,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
+            data-test-subj="infraExpressionRowButton"
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             onClick={toggle}
             aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
@@ -629,6 +630,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   />
                 </StyledHealth>
                 <EuiButtonIcon
+                  data-test-subj="infraExpressionRowButton"
                   aria-label={i18n.translate(
                     'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
                     {
@@ -668,6 +670,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         {canDelete && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="infraExpressionRowButton"
               aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
                 defaultMessage: 'Remove condition',
               })}
