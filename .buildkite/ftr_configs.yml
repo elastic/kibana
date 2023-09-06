@@ -90,10 +90,13 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/common/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -168,6 +171,7 @@ enabled:
   - x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group3/config.ts
+  - x-pack/test/alerting_api_integration/security_and_spaces/group3/config_with_schedule_circuit_breaker.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group1/config.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group2/config.ts
@@ -279,7 +283,6 @@ enabled:
   - x-pack/test/functional/apps/data_views/config.ts
   - x-pack/test/functional/apps/dev_tools/config.ts
   - x-pack/test/functional/apps/discover/config.ts
-  - x-pack/test/functional/apps/discover_log_explorer/config.ts
   - x-pack/test/functional/apps/graph/config.ts
   - x-pack/test/functional/apps/grok_debugger/config.ts
   - x-pack/test/functional/apps/home/config.ts
@@ -313,6 +316,7 @@ enabled:
   - x-pack/test/functional/apps/ml/short_tests/config.ts
   - x-pack/test/functional/apps/ml/stack_management_jobs/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
+  - x-pack/test/functional/apps/observability_log_explorer/config.ts
   - x-pack/test/functional/apps/remote_clusters/config.ts
   - x-pack/test/functional/apps/reporting_management/config.ts
   - x-pack/test/functional/apps/rollup_job/config.ts

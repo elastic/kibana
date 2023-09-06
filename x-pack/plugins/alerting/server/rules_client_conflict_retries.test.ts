@@ -8,7 +8,11 @@
 import { cloneDeep } from 'lodash';
 
 import { RulesClient, ConstructorOptions } from './rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
@@ -21,6 +25,10 @@ import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+
+jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
+  validateScheduleLimit: jest.fn(),
+}));
 
 let rulesClient: RulesClient;
 
@@ -35,6 +43,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const logger = loggingSystemMock.create().get();
@@ -49,10 +58,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger,
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),

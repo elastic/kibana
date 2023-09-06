@@ -422,7 +422,7 @@ export class AlertingPlugin {
       },
       getConfig: () => {
         return {
-          ...pick(this.config.rules, 'minimumScheduleInterval'),
+          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute']),
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
@@ -488,6 +488,7 @@ export class AlertingPlugin {
       taskManager: plugins.taskManager,
       securityPluginSetup: security,
       securityPluginStart: plugins.security,
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {
@@ -499,6 +500,7 @@ export class AlertingPlugin {
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+      maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
     });
 

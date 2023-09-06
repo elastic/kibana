@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
+
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading',
@@ -16,3 +20,10 @@ export enum FetchStatus {
 }
 
 export type DiscoverDisplayMode = 'embedded' | 'standalone';
+
+export interface RecordsFetchResponse {
+  records: DataTableRecord[];
+  textBasedQueryColumns?: DatatableColumn[];
+  textBasedHeaderWarning?: string;
+  interceptedWarnings?: SearchResponseInterceptedWarning[];
+}

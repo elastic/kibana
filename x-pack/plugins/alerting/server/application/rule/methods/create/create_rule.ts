@@ -37,6 +37,7 @@ import { RuleAttributes } from '../../../../data/rule/types';
 import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
+import { validateScheduleLimit } from '../get_schedule_frequency';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -69,6 +70,12 @@ export async function createRule<Params extends RuleParams = never>(
 
   try {
     createRuleDataSchema.validate(data);
+    if (data.enabled) {
+      await validateScheduleLimit({
+        context,
+        updatedInterval: data.schedule.interval,
+      });
+    }
   } catch (error) {
     throw Boom.badRequest(`Error validating create data - ${error.message}`);
   }

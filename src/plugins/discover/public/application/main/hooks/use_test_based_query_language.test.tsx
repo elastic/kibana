@@ -50,7 +50,7 @@ function getHookProps(
     replaceUrlState,
   };
 }
-const query = { sql: 'SELECT * from the-data-view-title' };
+const query = { esql: 'from the-data-view-title' };
 const msgComplete = {
   recordRawType: RecordRawType.PLAIN,
   fetchStatus: FetchStatus.PARTIAL,
@@ -103,19 +103,16 @@ describe('useTextBasedQueryLanguage', () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(true);
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    expect(replaceUrlState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        index: 'the-data-view-id',
+      });
+    });
 
     replaceUrlState.mockReset();
 
     stateContainer.dataState.data$.documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
-        columns: ['field1', 'field2'],
-      });
-    });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
   test('should change viewMode to DOCUMENT_LEVEL if it was AGGREGATED_LEVEL', async () => {
     const { replaceUrlState } = renderHookWithContext(false, {
@@ -132,7 +129,7 @@ describe('useTextBasedQueryLanguage', () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -145,7 +142,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title' },
+      query: { esql: 'from the-data-view-title | keep field1' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
 
@@ -162,7 +159,7 @@ describe('useTextBasedQueryLanguage', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -175,7 +172,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title' },
+      query: { esql: 'from the-data-view-title | keep field1' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockReset();
@@ -190,17 +187,17 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
+      query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
   });
   test('if its not a text based query coming along, it should be ignored', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -225,7 +222,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
+      query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
     await waitFor(() => {
@@ -253,7 +250,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
+      query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
     documents$.next({
@@ -266,9 +263,9 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title' },
+      query: { esql: 'from the-data-view-title | keep field1' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
       columns: ['field1'],
     });
@@ -284,9 +281,9 @@ describe('useTextBasedQueryLanguage', () => {
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
-      query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
+      query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
@@ -297,9 +294,9 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
+      query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
     stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
@@ -308,7 +305,7 @@ describe('useTextBasedQueryLanguage', () => {
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
-      query: { sql: 'SELECT field1; from the-data-view-title WHERE field1=2' },
+      query: { esql: 'from the-data-view-title | keep field 1; | WHERE field1=2' },
     });
 
     documents$.next({
@@ -319,7 +316,7 @@ describe('useTextBasedQueryLanguage', () => {
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
-      query: { sql: 'SELECT field1 from the-data-view-title' },
+      query: { esql: 'from the-data-view-title | keep field1' },
     });
 
     documents$.next({
@@ -332,7 +329,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title' },
+      query: { esql: 'from the-data-view-title | keep field1' },
     });
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
@@ -350,7 +347,7 @@ describe('useTextBasedQueryLanguage', () => {
     renderHook(() => useTextBasedQueryLanguage(props), { wrapper: getHookContext(stateContainer) });
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -363,7 +360,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-*' },
+      query: { esql: 'from the-data-view-* | keep field1' },
     });
     props.stateContainer.actions.setDataView(dataViewAdHoc);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
