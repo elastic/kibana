@@ -306,6 +306,35 @@ describe('Create case', () => {
       });
     });
 
+    it('should trim fields correctly while submit', async () => {
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+
+      const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
+
+      userEvent.paste(titleInput, `${sampleDataWithoutTags.title}       `);
+    
+      const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+        'euiMarkdownEditorTextArea'
+      );
+    
+      userEvent.paste(descriptionInput, `${sampleDataWithoutTags.description}           `);
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags } });
+    });
+
     it('should toggle sync settings', async () => {
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,

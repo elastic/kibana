@@ -134,6 +134,27 @@ describe('Description', () => {
     });
   });
 
+  it('trims the description correctly when saved', async () => {
+    const descriptionWithSpaces = 'New updated description               ';
+    const res = appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} />
+    );
+
+    userEvent.click(await res.findByTestId('description-edit-icon'));
+
+    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), descriptionWithSpaces);
+
+    userEvent.click(screen.getByTestId('editable-save-markdown'));
+
+    await waitFor(() => {
+      expect(onUpdateField).toHaveBeenCalledWith({
+        key: 'description',
+        value: descriptionWithSpaces.trim(),
+      });
+    });
+  });
+
   it('should hide the edit button when the user does not have update permissions', () => {
     appMockRender.render(
       <TestProviders permissions={noUpdateCasesPermissions()}>
