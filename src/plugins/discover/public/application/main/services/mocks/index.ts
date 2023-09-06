@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { DataView } from '@kbn/data-views-plugin/common';
 import { createBrowserHistory, History } from 'history';
+import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverStateContainer } from '../discover_state';
-
-const discoverServiceMock = createDiscoverServicesMock();
 
 const getMockHistory = () => {
   const history: History = createBrowserHistory();
@@ -18,9 +18,26 @@ const getMockHistory = () => {
   return history;
 };
 
-export const getMockDiscoverStateContainer = ({ history }: { history?: History }) => {
-  return getDiscoverStateContainer({
+function getStateContainer({ dataView, history }: { dataView?: DataView; history?: History } = {}) {
+  const discoverServiceMock = createDiscoverServicesMock();
+  const savedSearch = savedSearchMock;
+  discoverServiceMock.savedSearch.getNew = jest.fn().mockReturnValue(savedSearch);
+  const currentHistory = history ?? getMockHistory();
+
+  const stateContainer = getDiscoverStateContainer({
     services: discoverServiceMock,
-    history: history ?? getMockHistory(),
+    history: currentHistory,
   });
+  stateContainer.savedSearchState.set(savedSearch);
+  stateContainer.appState.getState = jest.fn(() => ({
+    rowsPerPage: 250,
+  }));
+  if (dataView) {
+    stateContainer.internalState.transitions.setDataView(dataView);
+  }
+  return stateContainer;
+}
+
+export const getMockDiscoverStateContainer = ({ history }: { history?: History }) => {
+  return getStateContainer({ history });
 };

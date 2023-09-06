@@ -14,6 +14,8 @@ import { useDiscoverInTimelineActions } from '../use_discover_in_timeline_action
 
 type Props = PropsWithChildren<{}>;
 
+jest.mock('../use_discover_in_timeline_actions');
+
 export const MockDiscoverInTimelineContext: FC<Props> = ({ children }) => {
   const discoverStateContainer = useRef(discoverPluginMock.getMockDiscoverStateContainer({}));
 
