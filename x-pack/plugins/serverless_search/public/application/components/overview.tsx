@@ -38,7 +38,7 @@ import type {
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 import { useQuery } from '@tanstack/react-query';
-import { Connector } from '@kbn/enterprise-search-plugin/common/types/connectors';
+import { Connector } from '@kbn/search-connectors';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
