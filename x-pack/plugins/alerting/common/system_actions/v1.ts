@@ -33,3 +33,14 @@ export const updateSystemActionSchema = schema.object({
   uuid: schema.string(),
   type: schema.literal(RuleActionTypes.SYSTEM),
 });
+
+/**
+ * id is missing. actionRef is added.
+ */
+export const rawSystemActionSchema = schema.object({
+  actionTypeId: schema.string(),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
+  uuid: schema.string(),
+  type: schema.literal(RuleActionTypes.SYSTEM),
+  actionRef: schema.string(),
+});

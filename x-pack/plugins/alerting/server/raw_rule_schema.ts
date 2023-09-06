@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RuleActionTypes } from '../common';
+import { rawSystemActionSchema } from '../common/system_actions/latest';
 
 const executionStatusWarningReason = schema.oneOf([
   schema.literal('maxExecutableActions'),
@@ -190,7 +192,7 @@ const rawRuleAlertsFilterSchema = schema.object({
   ),
 });
 
-const rawRuleActionSchema = schema.object({
+const rawRuleDefaultActionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   group: schema.string(),
   actionRef: schema.string(),
@@ -208,6 +210,7 @@ const rawRuleActionSchema = schema.object({
     })
   ),
   alertsFilter: schema.maybe(rawRuleAlertsFilterSchema),
+  type: schema.maybe(schema.literal(RuleActionTypes.DEFAULT)),
 });
 
 export const rawRuleSchema = schema.object({
@@ -245,7 +248,7 @@ export const rawRuleSchema = schema.object({
     )
   ),
   meta: schema.maybe(schema.object({ versionApiKeyLastmodified: schema.maybe(schema.string()) })),
-  actions: schema.arrayOf(rawRuleActionSchema),
+  actions: schema.arrayOf(schema.oneOf([rawRuleDefaultActionSchema, rawSystemActionSchema])),
   executionStatus: rawRuleExecutionStatusSchema,
   notifyWhen: schema.maybe(
     schema.nullable(
