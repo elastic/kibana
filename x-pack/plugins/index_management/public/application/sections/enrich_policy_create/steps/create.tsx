@@ -208,7 +208,11 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
 
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" onClick={() => onSubmit(CREATE_AND_EXECUTE_POLICY)} isDisabled={isLoading}>
+          <EuiButton
+            color="primary"
+            onClick={() => onSubmit(CREATE_AND_EXECUTE_POLICY)}
+            isDisabled={isLoading}
+          >
             <FormattedMessage
               id="xpack.idxMgmt.enrichPolicyCreate.createStep.createAndExecuteButtonLabel"
               defaultMessage="Create and execute policy"
