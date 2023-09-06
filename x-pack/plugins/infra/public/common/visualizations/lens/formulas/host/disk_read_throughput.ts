@@ -16,4 +16,5 @@ export const diskReadThroughput: FormulaValueConfig = {
       decimals: 1,
     },
   },
+  timeScale: 's',
 };
