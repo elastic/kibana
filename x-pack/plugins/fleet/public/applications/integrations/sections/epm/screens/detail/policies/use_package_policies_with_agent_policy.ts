@@ -7,6 +7,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { API_VERSIONS } from '../../../../../../../../common/constants';
+
 import type {
   PackagePolicy,
   GetAgentPoliciesResponse,
@@ -75,6 +77,7 @@ export const usePackagePoliciesWithAgentPolicy = (
         full: true,
         ignoreMissing: true,
       },
+      version: API_VERSIONS.public.v1,
       shouldSendRequest: agentPoliciesIds.length > 0,
     } as SendConditionalRequestConfig);
 
