@@ -204,7 +204,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     [embeddable, getEmbeddableInput]
   );
 
-  const panels = useMemo<EuiContextMenuProps['panels']>(() => {
+  const panels = useMemo<Exclude<EuiContextMenuProps['panels'], undefined>>(() => {
     const rootItems: EuiContextMenuPanelItemDescriptor[] = [];
     const menuPanels: EuiContextMenuPanelDescriptor[] = [{ id: 'panelActions', items: rootItems }];
 
@@ -319,7 +319,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
   return (
     <>
-      {panels[0].items.length > 0 && chartsCount > 0 ? (
+      {!!panels[0]?.items?.length && chartsCount > 0 ? (
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
           <EuiPopover
             button={
