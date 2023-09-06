@@ -130,9 +130,11 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       lifecycle,
     } = dataStream;
 
-    const getLifecycleManagement = () => {
+    const getManagementDetails = () => {
+      const managementDetails = [];
+
       if (lifecycle?.data_retention) {
-        return {
+        managementDetails.push({
           name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionTitle', {
             defaultMessage: 'Data retention',
           }),
@@ -140,11 +142,11 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             defaultMessage: 'The minimum amount of time the data stream will be stored for.',
           }),
           content: lifecycle.data_retention,
-        };
+        });
       }
 
       if (ilmPolicyName) {
-        return {
+        managementDetails.push({
           name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyTitle', {
             defaultMessage: 'Index lifecycle policy',
           }),
@@ -156,14 +158,13 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               {ilmPolicyName}
             </EuiLink>
           ),
-        };
+        });
       }
 
-      // Neither data stream lifecycle or ILM is configured for the data stream
-      return undefined;
+      return managementDetails;
     };
 
-    const details = [
+    const defaultDetails = [
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.healthTitle', {
           defaultMessage: 'Health',
@@ -254,11 +255,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       },
     ];
 
-    const lifecycleManagementDetail = getLifecycleManagement();
-
-    if (lifecycleManagementDetail) {
-      details.push(lifecycleManagementDetail);
-    }
+    const managementDetails = getManagementDetails();
+    const details = managementDetails ? [...defaultDetails, ...managementDetails] : defaultDetails;
 
     content = <DetailsList details={details} />;
   }
