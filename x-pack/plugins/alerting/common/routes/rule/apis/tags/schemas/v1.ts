@@ -12,3 +12,10 @@ export const ruleTagsRequestQuerySchema = schema.object({
   per_page: schema.maybe(schema.number({ defaultValue: DEFAULT_TAGS_PER_PAGE, min: 1 })),
   search: schema.maybe(schema.string()),
 });
+
+export const ruleTagsFormattedResponseSchema = schema.object({
+  total: schema.number(),
+  page: schema.number(),
+  perPage: schema.number(),
+  data: schema.arrayOf(schema.string()),
+});

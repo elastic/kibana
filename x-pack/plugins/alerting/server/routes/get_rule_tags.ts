@@ -6,6 +6,7 @@
  */
 // FIXME: move file to server/routes/rule/apis
 import { IRouter } from '@kbn/core/server';
+import { transformRuleTagsBodyResponseV1 } from './rule/apis/tags/transforms';
 import { transformRuleTagsQueryRequestV1 } from './rule/apis/tags/transforms';
 import {
   ruleTagsRequestQuerySchemaV1,
@@ -13,16 +14,7 @@ import {
 } from '../../common/routes/rule/apis/tags';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { ILicenseState } from '../lib';
-import { RewriteResponseCase, verifyAccessAndContext } from './lib';
-import { GetTagsResult } from '../rules_client/methods/get_tags';
-
-// FIXME: import {transformRuleTagsBodyResponseV1} from './transforms';
-// FIXME: remove spread operator
-// FIXME: use RuleTagsResponse type in common/routes/rule/response/types
-const rewriteBodyRes: RewriteResponseCase<GetTagsResult> = ({ perPage, ...rest }) => ({
-  ...rest,
-  per_page: perPage,
-});
+import { verifyAccessAndContext } from './lib';
 
 export const getRuleTagsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -45,7 +37,7 @@ export const getRuleTagsRoute = (
         const tagsResult = await rulesClient.getTags(options);
 
         return res.ok({
-          body: rewriteBodyRes(tagsResult),
+          body: transformRuleTagsBodyResponseV1(tagsResult),
         });
       })
     )

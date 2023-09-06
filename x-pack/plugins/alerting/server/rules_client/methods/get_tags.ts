@@ -6,6 +6,7 @@
  */
 import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import type { RuleTagsFormattedResponse } from '../../../common/routes/rule/apis/tags';
 import { ruleTagsParamsSchema } from '../../application/rule/schemas';
 import { RuleTagsParams } from '../../application/rule/types';
 import { DEFAULT_TAGS_PER_PAGE } from '../../../common/routes/rule/apis/tags';
@@ -27,17 +28,10 @@ export interface RuleTagsAggregationResult {
   };
 }
 
-export interface GetTagsResult {
-  total: number;
-  page: number;
-  perPage: number;
-  data: string[];
-}
-
 export async function getTags(
   context: RulesClientContext,
   params: RuleTagsParams
-): Promise<GetTagsResult> {
+): Promise<RuleTagsFormattedResponse> {
   let validatedParams: RuleTagsParams;
 
   try {

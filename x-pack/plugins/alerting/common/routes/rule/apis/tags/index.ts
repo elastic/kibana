@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-export { ruleTagsRequestQuerySchema } from './schemas/latest';
+export { ruleTagsRequestQuerySchema, ruleTagsFormattedResponseSchema } from './schemas/latest';
 export { DEFAULT_TAGS_PER_PAGE } from './constants/latest';
-export type { RuleTagsRequestQuery } from './types/latest';
+export type { RuleTagsRequestQuery, RuleTagsFormattedResponse } from './types/latest';
 
-export { ruleTagsRequestQuerySchema as ruleTagsRequestQuerySchemaV1 } from './schemas/v1';
+export {
+  ruleTagsRequestQuerySchema as ruleTagsRequestQuerySchemaV1,
+  ruleTagsFormattedResponseSchema as ruleTagsFormattedResponseSchemaV1,
+} from './schemas/v1';
 export { DEFAULT_TAGS_PER_PAGE as DEFAULT_TAGS_PER_PAGE_V1 } from './constants/v1';
-export type { RuleTagsRequestQuery as RuleTagsRequestQueryV1 } from './types/v1';
+export type {
+  RuleTagsRequestQuery as RuleTagsRequestQueryV1,
+  RuleTagsFormattedResponse as RuleTagsFormattedResponseV1,
+} from './types/v1';
