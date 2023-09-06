@@ -19,8 +19,6 @@ export const MetricDetail = () => {
     params: { type: nodeType, node: nodeName },
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
 
-  const PageContent = () => (nodeType === 'host' ? <AssetDetailPage /> : <MetricDetailPage />);
-
   useMetricsBreadcrumbs([
     {
       text: nodeName,
@@ -30,7 +28,7 @@ export const MetricDetail = () => {
   return (
     <EuiErrorBoundary>
       <MetricsTimeProvider>
-        <PageContent />
+        {nodeType === 'host' ? <AssetDetailPage /> : <MetricDetailPage />}
       </MetricsTimeProvider>
     </EuiErrorBoundary>
   );

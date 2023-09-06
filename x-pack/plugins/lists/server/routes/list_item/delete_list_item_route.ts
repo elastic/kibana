@@ -19,76 +19,83 @@ import { buildRouteValidation, buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const deleteListItemRoute = (router: ListsPluginRouter): void => {
-  router.delete(
-    {
+  router.versioned
+    .delete({
+      access: 'public',
       options: {
         tags: ['access:lists-all'],
       },
       path: LIST_ITEM_URL,
-      validate: {
-        query: buildRouteValidation(deleteListItemRequestQuery),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            query: buildRouteValidation(deleteListItemRequestQuery),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const { id, list_id: listId, value } = request.query;
-        const lists = await getListClient(context);
-        if (id != null) {
-          const deleted = await lists.deleteListItem({ id });
-          if (deleted == null) {
-            return siemResponse.error({
-              body: `list item with id: "${id}" not found`,
-              statusCode: 404,
-            });
-          } else {
-            const [validated, errors] = validate(deleted, deleteListItemResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
-          }
-        } else if (listId != null && value != null) {
-          const list = await lists.getList({ id: listId });
-          if (list == null) {
-            return siemResponse.error({
-              body: `list_id: "${listId}" does not exist`,
-              statusCode: 404,
-            });
-          } else {
-            const deleted = await lists.deleteListItemByValue({
-              listId,
-              type: list.type,
-              value,
-            });
-            if (deleted == null || deleted.length === 0) {
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const { id, list_id: listId, value } = request.query;
+          const lists = await getListClient(context);
+          if (id != null) {
+            const deleted = await lists.deleteListItem({ id });
+            if (deleted == null) {
               return siemResponse.error({
-                body: `list_id: "${listId}" with ${value} was not found`,
+                body: `list item with id: "${id}" not found`,
                 statusCode: 404,
               });
             } else {
-              const [validated, errors] = validate(deleted, deleteListItemArrayResponse);
+              const [validated, errors] = validate(deleted, deleteListItemResponse);
               if (errors != null) {
                 return siemResponse.error({ body: errors, statusCode: 500 });
               } else {
                 return response.ok({ body: validated ?? {} });
               }
             }
+          } else if (listId != null && value != null) {
+            const list = await lists.getList({ id: listId });
+            if (list == null) {
+              return siemResponse.error({
+                body: `list_id: "${listId}" does not exist`,
+                statusCode: 404,
+              });
+            } else {
+              const deleted = await lists.deleteListItemByValue({
+                listId,
+                type: list.type,
+                value,
+              });
+              if (deleted == null || deleted.length === 0) {
+                return siemResponse.error({
+                  body: `list_id: "${listId}" with ${value} was not found`,
+                  statusCode: 404,
+                });
+              } else {
+                const [validated, errors] = validate(deleted, deleteListItemArrayResponse);
+                if (errors != null) {
+                  return siemResponse.error({ body: errors, statusCode: 500 });
+                } else {
+                  return response.ok({ body: validated ?? {} });
+                }
+              }
+            }
+          } else {
+            return siemResponse.error({
+              body: 'Either "list_id" or "id" needs to be defined in the request',
+              statusCode: 400,
+            });
           }
-        } else {
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
-            body: 'Either "list_id" or "id" needs to be defined in the request',
-            statusCode: 400,
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

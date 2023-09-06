@@ -12,4 +12,5 @@ echo "--- Defend Workflows Endpoint Cypress tests"
 
 cd x-pack/plugins/security_solution
 
+set +e
 yarn cypress:dw:endpoint:run; status=$?; yarn junit:merge && exit $status

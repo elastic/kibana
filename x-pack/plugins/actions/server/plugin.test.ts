@@ -348,6 +348,163 @@ describe('Actions Plugin', () => {
         expect(pluginSetup.isPreconfiguredConnector('anotherConnectorId')).toEqual(false);
       });
     });
+
+    describe('setEnabledConnectorTypes (works only on serverless)', () => {
+      function setup(config: ActionsConfig) {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>(config);
+        plugin = new ActionsPlugin(context);
+        coreSetup = coreMock.createSetup();
+        pluginsSetup = {
+          taskManager: taskManagerMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+          licensing: licensingMock.createSetup(),
+          eventLog: eventLogMock.createSetup(),
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          features: featuresPluginMock.createSetup(),
+          serverless: {},
+        };
+      }
+
+      it('should set connector type enabled', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        const coreStart = coreMock.createStart();
+        const pluginsStart = {
+          licensing: licensingMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+        };
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.registerType({
+          id: '.slack',
+          name: 'Slack',
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.setEnabledConnectorTypes(['.server-log']);
+        expect(pluginStart.isActionTypeEnabled('.server-log')).toBeTruthy();
+        expect(pluginStart.isActionTypeEnabled('.slack')).toBeFalsy();
+      });
+
+      it('should set all the connector types enabled when null or ["*"] passed', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        const coreStart = coreMock.createStart();
+        const pluginsStart = {
+          licensing: licensingMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+        };
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.registerType({
+          id: '.index',
+          name: 'Index',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.setEnabledConnectorTypes(['*']);
+        expect(pluginStart.isActionTypeEnabled('.server-log')).toBeTruthy();
+        expect(pluginStart.isActionTypeEnabled('.index')).toBeTruthy();
+      });
+
+      it('should set all the connector types disabled when [] passed', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        const coreStart = coreMock.createStart();
+        const pluginsStart = {
+          licensing: licensingMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+        };
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.registerType({
+          id: '.index',
+          name: 'Index',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.setEnabledConnectorTypes([]);
+        expect(pluginStart.isActionTypeEnabled('.server-log')).toBeFalsy();
+        expect(pluginStart.isActionTypeEnabled('.index')).toBeFalsy();
+      });
+
+      it('should throw if the enabledActionTypes is already set by the config', async () => {
+        setup({ ...getConfig(), enabledActionTypes: ['.email'] });
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        expect(() => pluginSetup.setEnabledConnectorTypes(['.index'])).toThrow(
+          "Enabled connector types can be set only if they haven't already been set in the config"
+        );
+      });
+    });
   });
 
   describe('start()', () => {
@@ -394,6 +551,38 @@ describe('Actions Plugin', () => {
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
         eventLog: eventLogMock.createStart(),
       };
+    });
+
+    it('should throw when there is an invalid connector type in enabledActionTypes', async () => {
+      const pluginSetup = await plugin.setup(coreSetup, {
+        ...pluginsSetup,
+        encryptedSavedObjects: {
+          ...pluginsSetup.encryptedSavedObjects,
+          canEncrypt: true,
+        },
+        serverless: {},
+      });
+
+      pluginSetup.registerType({
+        id: '.server-log',
+        name: 'Server log',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+
+      pluginSetup.setEnabledConnectorTypes(['.server-log', 'non-existing']);
+
+      await expect(async () =>
+        plugin.start(coreStart, { ...pluginsStart, serverless: {} })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Action type \\"non-existing\\" is not registered."`
+      );
     });
 
     describe('getActionsClientWithRequest()', () => {

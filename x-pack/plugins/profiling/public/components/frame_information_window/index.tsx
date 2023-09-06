@@ -13,7 +13,10 @@ import {
   useObservabilityAIAssistant,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo } from 'react';
-import { FrameSymbolStatus, getFrameSymbolStatus } from '../../../common/profiling';
+import {
+  FrameSymbolStatus,
+  getFrameSymbolStatus,
+} from '@kbn/profiling-data-access-plugin/common/profiling';
 import { FrameInformationPanel } from './frame_information_panel';
 import { getImpactRows } from './get_impact_rows';
 import { getInformationRows } from './get_information_rows';

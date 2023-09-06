@@ -101,7 +101,7 @@ describe(
           .within(() => {
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON)
               .should('be.visible')
-              .and('have.text', 'Rule summary');
+              .and('have.text', 'Show rule summary');
           });
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS)
           .should('be.visible')
@@ -257,7 +257,7 @@ describe(
         ).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER)
           .should('be.visible')
-          .and('have.text', 'Threat Intelligence');
+          .and('have.text', 'Threat intelligence');
         cy.get(
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_CONTENT
         ).scrollIntoView();
