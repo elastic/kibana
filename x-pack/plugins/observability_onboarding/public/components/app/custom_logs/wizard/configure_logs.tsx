@@ -238,6 +238,7 @@ export function ConfigureLogs() {
                   <EuiFlexGroup alignItems="center" gutterSize="xs">
                     <EuiFlexItem>
                       <EuiFieldText
+                        data-test-subj="observabilityOnboardingConfigureLogsFieldText"
                         placeholder={i18n.translate(
                           'xpack.observability_onboarding.configureLogs.logFile.placeholder',
                           {
@@ -398,6 +399,7 @@ export function ConfigureLogs() {
                       values={{
                         learnMoreLink: (
                           <EuiLink
+                            data-test-subj="observabilityOnboardingConfigureLogsLearnMoreLink"
                             external
                             target="_blank"
                             href={
@@ -443,6 +445,7 @@ export function ConfigureLogs() {
                       values={{
                         learnMoreLink: (
                           <EuiLink
+                            data-test-subj="observabilityOnboardingConfigureLogsLearnMoreLink"
                             external
                             target="_blank"
                             href={

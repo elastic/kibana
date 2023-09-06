@@ -94,3 +94,15 @@ export const setCustomProtectionUpdatesManifestVersion = (
     });
   });
 };
+
+export const setCustomProtectionUpdatesNote = (
+  endpointPolicyId: string,
+  note: string
+): Cypress.Chainable<Cypress.Response<{ note: string }>> => {
+  return request<{ note: string }>({
+    method: 'POST',
+    url: `/api/endpoint/protection_updates_note/${endpointPolicyId}`,
+    body: { note },
+    headers: { 'Elastic-Api-Version': '2023-10-31' },
+  });
+};
