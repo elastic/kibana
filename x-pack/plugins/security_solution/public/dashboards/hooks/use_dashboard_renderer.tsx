@@ -18,8 +18,7 @@ export const useDashboardRenderer = () => {
   const { savedObjectsTagging } = useKibana().services;
 
   const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();
-  const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails | undefined>();
-  const [isManaged, setIsManaged] = useState<boolean>();
+  const [hasManagedTag, setHasManagedTag] = useState<boolean>();
 
   const { fetch: fetchDashboardTags, data: dashboardTags } = useFetch(
     REQUEST_NAMES.FETCH_DASHBOARD_TAGS,
@@ -32,11 +31,6 @@ export const useDashboardRenderer = () => {
       const tagIds = container?.getExplicitInput().tags;
       if (savedObjectsTagging) {
         await fetchDashboardTags({ tagIds, savedObjectsTaggingClient: savedObjectsTagging.client });
-        if (dashboardTags?.some(isManagedTag)) {
-          setIsManaged(true);
-        } else {
-          setIsManaged(false);
-        }
       }
     },
     [fetchDashboardTags, savedObjectsTagging]

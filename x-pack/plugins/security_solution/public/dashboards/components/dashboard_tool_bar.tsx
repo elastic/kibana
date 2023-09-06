@@ -11,11 +11,12 @@ import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { APP_UI_ID } from '../../../common';
 import { useRedirectToDashboardFromLens } from '../../common/components/visualization_actions/use_redirect_to_dashboard_from_lens';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 
-import { APP_NAME } from '../../../common/constants';
+import { APP_NAME, SecurityPageName } from '../../../common/constants';
 
 const DashboardToolBarComponent = ({
   dashboardContainer,
