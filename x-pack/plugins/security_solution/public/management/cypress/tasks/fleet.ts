@@ -15,9 +15,9 @@ import {
   agentRouteService,
   epmRouteService,
   packagePolicyRouteService,
+  API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
 import type { PutAgentReassignResponse } from '@kbn/fleet-plugin/common/types';
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { request } from './common';
 

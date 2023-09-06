@@ -95,9 +95,6 @@ const getFleetServerPackagePolicy = async (): Promise<PackagePolicy | undefined>
         perPage: 1,
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${FLEET_SERVER_PACKAGE}"`,
       },
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
     })
     .then((response) => response.data.items[0]);
 };
@@ -140,9 +137,6 @@ const getOrCreateFleetServerAgentPolicyId = async (): Promise<string> => {
         // is also created and added to the agent policy
         has_fleet_server: true,
       },
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
     })
     .then((response) => response.data.item);
 
@@ -167,9 +161,6 @@ const generateFleetServiceToken = async (): Promise<string> => {
         'elastic-api-version': API_VERSIONS.public.v1,
       },
       body: {},
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
     })
     .then((response) => response.data.value);
 
@@ -302,9 +293,6 @@ const configureFleetIfNeeded = async () => {
           'elastic-api-version': API_VERSIONS.public.v1,
         },
         path: outputRoutesService.getListPath(),
-        headers: {
-          'elastic-api-version': API_VERSIONS.public.v1,
-        },
       })
       .then((response) => response.data);
 
@@ -348,9 +336,6 @@ const configureFleetIfNeeded = async () => {
                 },
                 path: outputRoutesService.getUpdatePath(id),
                 body: update,
-                headers: {
-                  'elastic-api-version': API_VERSIONS.public.v1,
-                },
               })
               .catch(catchAxiosErrorFormatAndThrow);
           }
@@ -391,9 +376,6 @@ const addFleetServerHostToFleetSettings = async (
           'elastic-api-version': API_VERSIONS.public.v1,
         },
         body: newFleetHostEntry,
-        headers: {
-          'elastic-api-version': API_VERSIONS.public.v1,
-        },
       })
       .catch(catchAxiosErrorFormatAndThrow)
       .catch((error: FormattedAxiosError) => {

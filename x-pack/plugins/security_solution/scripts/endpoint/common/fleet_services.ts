@@ -37,7 +37,6 @@ import type {
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
@@ -112,9 +111,6 @@ export const fetchFleetAgents = async (
         'elastic-api-version': API_VERSIONS.public.v1,
       },
       query: options,
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);
@@ -174,9 +170,6 @@ export const fetchFleetServerUrl = async (kbnClient: KbnClient): Promise<string 
       query: {
         perPage: 100,
       },
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);
@@ -215,10 +208,6 @@ export const fetchAgentPolicyEnrollmentKey = async (
         'elastic-api-version': API_VERSIONS.public.v1,
       },
       query: { kuery: `policy_id: "${agentPolicyId}"` },
-
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data.items[0]);
@@ -247,9 +236,6 @@ export const fetchAgentPolicyList = async (
         'elastic-api-version': API_VERSIONS.public.v1,
       },
       query: options,
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);

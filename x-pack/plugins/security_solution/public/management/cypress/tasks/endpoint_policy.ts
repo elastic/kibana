@@ -10,8 +10,7 @@ import type {
   UpdatePackagePolicy,
   UpdatePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
-import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
+import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { request } from './common';
 import { ProtectionModes } from '../../../../common/endpoint/types';
 
