@@ -35,16 +35,6 @@
   position: relative; // This is temporary for apps that relied on this being present on `.application`
 }
 
-@mixin kbnAffordForHeader($headerHeight) {
-  @include euiBreakpoint('xl', 'l') {
-    .kbnStickyMenu {
-      position: sticky;
-      max-height: calc(100vh - #{$headerHeight + $euiSize});
-      top: $headerHeight + $euiSize;
-    }
-  }
-}
-
 .kbnBody {
   padding-top: var(--euiFixedHeadersOffset, 0);
 }
