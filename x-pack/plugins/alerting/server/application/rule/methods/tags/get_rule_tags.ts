@@ -6,18 +6,18 @@
  */
 import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
-import { RuleAttributes } from '../../data/rule/types';
-import type { RuleTagsFormattedResponse } from '../../../common/routes/rule/apis/tags';
-import { ruleTagsParamsSchema } from '../../application/rule/schemas';
-import { RuleTagsParams } from '../../application/rule/types';
-import { DEFAULT_TAGS_PER_PAGE_LATEST as DEFAULT_TAGS_PER_PAGE } from '../../../common/routes/rule/apis/tags';
-import { RulesClientContext } from '../types';
-import { AlertingAuthorizationEntity } from '../../authorization';
-import { alertingAuthorizationFilterOpts } from '../common/constants';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { ruleTagsParamsSchema, RuleTagsParams } from '.';
+import { RuleAttributes } from '../../../../data/rule/types';
+import type { RuleTagsFormattedResponse } from '../../../../../common/routes/rule/apis/tags';
+import { DEFAULT_TAGS_PER_PAGE_LATEST as DEFAULT_TAGS_PER_PAGE } from '../../../../../common/routes/rule/apis/tags';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { AlertingAuthorizationEntity } from '../../../../authorization';
+import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 
 const MAX_TAGS = 10000;
 
+// FIXME: move this
 export interface RuleTagsAggregationResult {
   tags: {
     buckets: Array<{
@@ -27,7 +27,7 @@ export interface RuleTagsAggregationResult {
   };
 }
 
-export async function getTags(
+export async function getRuleTags(
   context: RulesClientContext,
   params: RuleTagsParams
 ): Promise<RuleTagsFormattedResponse> {

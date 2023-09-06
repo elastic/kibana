@@ -4,13 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { TypeOf } from '@kbn/config-schema';
+import { ruleTagsParamsSchema } from '..';
 
-export type {
-  Rule,
-  RuleDomain,
-  RuleLastRun,
-  Monitoring,
-  RuleParams,
-  RuleNotifyWhen,
-  RuleSnoozeSchedule,
-} from './rule';
+export type RuleTagsParams = TypeOf<typeof ruleTagsParamsSchema>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleTagsParams } from '../application/rule/types';
+import { getRuleTags, RuleTagsParams } from '../application/rule/methods/tags';
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions, MuteOptions } from './types';
@@ -57,7 +57,6 @@ import { unmuteInstance } from './methods/unmute_instance';
 import { runSoon } from './methods/run_soon';
 import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
-import { getTags } from './methods/get_tags';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -178,8 +177,7 @@ export class RulesClient {
     return this.context.auditLogger;
   }
 
-  // FIXME: public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
-  public getTags = (params: RuleTagsParams) => getTags(this.context, params);
+  public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
 
   public getAlertFromRaw = (params: GetAlertFromRawParams) =>
     getAlertFromRaw(

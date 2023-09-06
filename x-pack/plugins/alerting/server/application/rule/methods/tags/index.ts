@@ -4,13 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export { ruleTagsParamsSchema } from './schemas';
+export type { RuleTagsParams } from './types';
 
-export type {
-  Rule,
-  RuleDomain,
-  RuleLastRun,
-  Monitoring,
-  RuleParams,
-  RuleNotifyWhen,
-  RuleSnoozeSchedule,
-} from './rule';
+export { getRuleTags } from './get_rule_tags';

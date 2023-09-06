@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export type {
-  Rule,
-  RuleDomain,
-  RuleLastRun,
-  Monitoring,
-  RuleParams,
-  RuleNotifyWhen,
-  RuleSnoozeSchedule,
-} from './rule';
+export type { RuleTagsParams } from './rule_tags_params';

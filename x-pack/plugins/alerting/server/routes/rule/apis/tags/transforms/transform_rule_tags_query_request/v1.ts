@@ -6,7 +6,7 @@
  */
 
 import { RewriteRequestCase } from '@kbn/actions-plugin/common';
-import type { RuleTagsParams } from '../../../../../../application/rule/types';
+import type { RuleTagsParams } from '../../../../../../application/rule/methods/tags';
 
 export const transformRuleTagsQueryRequest: RewriteRequestCase<RuleTagsParams> = ({
   per_page: perPage,
