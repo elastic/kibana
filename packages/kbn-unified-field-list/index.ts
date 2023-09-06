@@ -92,8 +92,3 @@ export {
   type UnifiedFieldListSidebarContainerApi,
   type UnifiedFieldListSidebarContainerProps,
 } from './src/containers/unified_field_list_sidebar';
-
-export {
-  SidebarToggleButton,
-  type SidebarToggleButtonProps,
-} from './src/containers/unified_field_list_sidebar/sidebar_toggle_button';

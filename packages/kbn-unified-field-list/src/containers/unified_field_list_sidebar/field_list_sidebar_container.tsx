@@ -120,7 +120,6 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     services,
     dataView,
     workspaceSelectedFieldNames,
-    isSidebarCollapsed, // TODO later: pull the logic of collapsing the sidebar to this component
     prependInFlyout,
     variant = 'responsive',
     onFieldEdited,
@@ -339,12 +338,12 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   }
 
   if (variant === 'list-always') {
-    return (!isSidebarCollapsed && renderListVariant()) || null;
+    return renderListVariant();
   }
 
   return (
     <>
-      {!isSidebarCollapsed && <EuiHideFor sizes={['xs', 's']}>{renderListVariant()}</EuiHideFor>}
+      <EuiHideFor sizes={['xs', 's']}>{renderListVariant()}</EuiHideFor>
       <EuiShowFor sizes={['xs', 's']}>{renderButtonVariant()}</EuiShowFor>
     </>
   );

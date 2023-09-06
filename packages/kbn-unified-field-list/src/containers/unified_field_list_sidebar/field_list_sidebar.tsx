@@ -10,10 +10,13 @@ import './field_list_sidebar.scss';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import classnames from 'classnames';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHideFor,
   EuiPageSidebar,
+  EuiPageSidebarProps,
   useEuiBackgroundColor,
   useEuiTheme,
 } from '@elastic/eui';
@@ -277,24 +280,36 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     return null;
   }
 
+  const pageSidebarProps: Partial<EuiPageSidebarProps> = {
+    className: classnames('unifiedFieldListSidebar', {
+      'unifiedFieldListSidebar--collapsed': isSidebarCollapsed,
+    }),
+    'aria-label': i18n.translate(
+      'unifiedFieldList.fieldListSidebar.indexAndFieldsSectionAriaLabel',
+      {
+        defaultMessage: 'Index and fields',
+      }
+    ),
+    id:
+      stateService.creationOptions.dataTestSubj?.fieldListSidebarDataTestSubj ??
+      'unifiedFieldListSidebarId',
+    'data-test-subj':
+      stateService.creationOptions.dataTestSubj?.fieldListSidebarDataTestSubj ??
+      'unifiedFieldListSidebarId',
+  };
+
+  if (isSidebarCollapsed && onToggleSidebar) {
+    return (
+      <EuiHideFor sizes={['xs', 's']}>
+        <div {...pageSidebarProps}>
+          <SidebarToggleButton isSidebarCollapsed={isSidebarCollapsed} onChange={onToggleSidebar} />
+        </div>
+      </EuiHideFor>
+    );
+  }
+
   return (
-    <EuiPageSidebar
-      className="unifiedFieldListSidebar"
-      aria-label={i18n.translate(
-        'unifiedFieldList.fieldListSidebar.indexAndFieldsSectionAriaLabel',
-        {
-          defaultMessage: 'Index and fields',
-        }
-      )}
-      id={
-        stateService.creationOptions.dataTestSubj?.fieldListSidebarDataTestSubj ??
-        'unifiedFieldListSidebarId'
-      }
-      data-test-subj={
-        stateService.creationOptions.dataTestSubj?.fieldListSidebarDataTestSubj ??
-        'unifiedFieldListSidebarId'
-      }
-    >
+    <EuiPageSidebar {...pageSidebarProps}>
       <EuiFlexGroup
         className="unifiedFieldListSidebar__group"
         direction="column"

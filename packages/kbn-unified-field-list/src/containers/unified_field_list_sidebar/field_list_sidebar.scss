@@ -6,6 +6,11 @@
   width: $euiSize * 19;
   height: 100%;
 
+  &--collapsed {
+    width: auto;
+    padding: $euiSizeS $euiSizeS 0;
+  }
+
   @include euiBreakpoint('xs', 's') {
     width: 100%;
     padding: $euiSize;

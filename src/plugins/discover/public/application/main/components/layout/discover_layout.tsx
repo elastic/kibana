@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { SidebarToggleButton } from '@kbn/unified-field-list/src/containers/unified_field_list_sidebar/sidebar_toggle_button';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import {
@@ -311,17 +310,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               css={css`
                 border-right: ${euiTheme.border.thin};
               `}
-            >
-              {isSidebarClosed && (
-                <div
-                  css={css`
-                    padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
-                  `}
-                >
-                  <SidebarToggleButton isSidebarCollapsed={true} onChange={onToggleSidebar} />
-                </div>
-              )}
-            </EuiFlexItem>
+            />
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper">
             {resultState === 'none' ? (
