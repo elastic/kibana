@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const security = getService('security');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe.only('search with scripted fields', function () {
+  describe('search with scripted fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
