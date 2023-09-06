@@ -187,26 +187,32 @@ describe(
       });
     });
     context('saved search tags', () => {
-      it('should save discover saved search with `Security Solution` tag', () => {
-        const timelineSuffix = Date.now();
-        const timelineName = `SavedObject timeline-${timelineSuffix}`;
-        const kqlQuery = '_id: *';
-        addDiscoverKqlQuery(kqlQuery);
-        addNameToTimeline(timelineName);
-        cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
-        openKibanaNavigation();
-        navigateFromKibanaCollapsibleTo(STACK_MANAGEMENT_PAGE);
-        cy.get(LOADING_INDICATOR).should('not.exist');
-        goToSavedObjectSettings();
-        cy.get(LOADING_INDICATOR).should('not.exist');
-        cy.get(SAVED_OBJECTS_TAGS_FILTER).trigger('click');
-        cy.get(GET_SAVED_OBJECTS_TAGS_OPTION('Security_Solution')).trigger('click');
-        cy.get(BASIC_TABLE_LOADING).should('not.exist');
-        cy.get(SAVED_OBJECTS_ROW_TITLES).should(
-          'contain.text',
-          `Saved Search for timeline - ${timelineName}`
-        );
-      });
+      it(
+        'should save discover saved search with `Security Solution` tag',
+        {
+          tags: ['@brokenInServerless'],
+        },
+        () => {
+          const timelineSuffix = Date.now();
+          const timelineName = `SavedObject timeline-${timelineSuffix}`;
+          const kqlQuery = '_id: *';
+          addDiscoverKqlQuery(kqlQuery);
+          addNameToTimeline(timelineName);
+          cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
+          openKibanaNavigation();
+          navigateFromKibanaCollapsibleTo(STACK_MANAGEMENT_PAGE);
+          cy.get(LOADING_INDICATOR).should('not.exist');
+          goToSavedObjectSettings();
+          cy.get(LOADING_INDICATOR).should('not.exist');
+          cy.get(SAVED_OBJECTS_TAGS_FILTER).trigger('click');
+          cy.get(GET_SAVED_OBJECTS_TAGS_OPTION('Security_Solution')).trigger('click');
+          cy.get(BASIC_TABLE_LOADING).should('not.exist');
+          cy.get(SAVED_OBJECTS_ROW_TITLES).should(
+            'contain.text',
+            `Saved Search for timeline - ${timelineName}`
+          );
+        }
+      );
     });
     context('saved search', () => {
       it('should rename the saved search on timeline rename', () => {
@@ -238,7 +244,8 @@ describe(
       });
     });
 
-    context('Advanced Settings', () => {
+    // Issue for enabling below tests: https://github.com/elastic/kibana/issues/165913
+    context.skip('Advanced Settings', () => {
       it('rows per page in saved search should be according to the user selected number of pages', () => {});
       it('rows per page in new search should be according to the value selected in advanced settings', () => {});
     });
