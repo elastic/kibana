@@ -23,6 +23,7 @@ export const getDashboardsByTagIds = (
   abortSignal?: AbortSignal
 ): Promise<Dashboard[] | null> =>
   http.post(INTERNAL_DASHBOARDS_URL, {
+    version: '1',
     body: JSON.stringify({ tagIds }),
     signal: abortSignal,
   });
