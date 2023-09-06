@@ -10,7 +10,7 @@ import type { AxiosResponse } from 'axios';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KbnClient } from '@kbn/test';
 import type { Agent, FleetServerAgent, GetOneAgentResponse } from '@kbn/fleet-plugin/common';
-import { AGENT_API_ROUTES } from '@kbn/fleet-plugin/common';
+import { AGENT_API_ROUTES, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import type { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
 import { wrapErrorAndRejectPromise } from './utils';
@@ -90,6 +90,7 @@ const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<A
       .request({
         path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
         method: 'GET',
+        headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
       })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<GetOneAgentResponse>
   ).data.item;
