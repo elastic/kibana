@@ -6,9 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-
-import { IngestPipelineParams } from '../../../common/types/connectors';
-import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
+import { IngestPipelineParams, fetchConnectorByIndexName } from '@kbn/search-connectors';
 
 import { getDefaultPipeline } from './get_default_pipeline';
 
@@ -20,7 +18,7 @@ export const getIndexPipelineParameters = async (
   // we want to throw the error if getDefaultPipeline() fails so we're not catching it on purpose
   const [defaultPipeline, connector, customPipelineResp] = await Promise.all([
     getDefaultPipeline(client),
-    fetchConnectorByIndexName(client, indexName),
+    fetchConnectorByIndexName(client.asCurrentUser, indexName),
     client.asCurrentUser.ingest
       .getPipeline({
         id: `${indexName}`,
@@ -30,11 +28,7 @@ export const getIndexPipelineParameters = async (
   if (connector && connector.pipeline) {
     return connector.pipeline;
   }
-  let pipelineName = defaultPipeline.name;
-
-  if (customPipelineResp && customPipelineResp[indexName]) {
-    pipelineName = indexName;
-  }
+  const pipelineName = customPipelineResp?.[indexName] ? indexName : defaultPipeline.name;
 
   return {
     ...defaultPipeline,
