@@ -190,8 +190,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.select = reduxTools.select;
   }
 
-  public getDashboardSavedObjectId() {
-    return this.getState().componentState.lastSavedId;
+  public getDashboardId() {
+    return this.getState().componentState.lastSavedId ?? this.creationOptions?.byValueId;
   }
 
   public reportPerformanceMetrics(stats: DashboardRenderPerformanceStats) {

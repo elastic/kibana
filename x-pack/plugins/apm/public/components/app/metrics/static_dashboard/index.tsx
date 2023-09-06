@@ -100,6 +100,7 @@ async function getCreationOptions(
         panels,
         controlGroupInput,
       }),
+      byValueId: 'apmMetricsStaticDashboard',
     };
   } catch (error) {
     notifications.toasts.addDanger(

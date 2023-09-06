@@ -58,6 +58,11 @@ export interface DashboardCreationOptions {
   validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
 
   isEmbeddedExternally?: boolean;
+
+  /**
+   * A backup ID to be used for by value Dashboards in cases where the Saved Object ID would normally be used.
+   */
+  byValueId?: string;
 }
 
 export class DashboardContainerFactoryDefinition

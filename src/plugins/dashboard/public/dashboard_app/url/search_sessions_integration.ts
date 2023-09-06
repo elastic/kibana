@@ -90,7 +90,7 @@ function getLocatorParams({
     preserveSavedFilters: false,
     filters: filterManager.getFilters(),
     query: queryString.formatQuery(query) as Query,
-    dashboardId: container.getDashboardSavedObjectId(),
+    dashboardId: container.getDashboardId(),
     searchSessionId: shouldRestoreSearchSession ? session.getSessionId() : undefined,
     timeRange: shouldRestoreSearchSession ? timefilter.getAbsoluteTime() : timefilter.getTime(),
     refreshInterval: shouldRestoreSearchSession
