@@ -23,6 +23,7 @@ import {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SearchRequest } from '..';
 import type { SearchResponseIncompleteWarning } from '../search';
+import { ShardFailureTable } from '../shard_failure_modal/shard_failure_table';
 
 export interface Props {
   onClose: () => void;
@@ -32,6 +33,7 @@ export interface Props {
 }
 
 export function IncompleteResultsModal({ request, response, warning, onClose }: Props) {
+  const failures = response._shards.failures ?? [];
   const requestJSON = JSON.stringify(request, null, 2);
   const responseJSON = JSON.stringify(response, null, 2);
 
@@ -41,11 +43,11 @@ export function IncompleteResultsModal({ request, response, warning, onClose }: 
       name: i18n.translate(
         'data.search.searchSource.fetch.incompleteResultsModal.tabHeaderClusterDetails',
         {
-          defaultMessage: 'Cluster details',
+          defaultMessage: 'Shard failures',
           description: 'Name of the tab displaying cluster details',
         }
       ),
-      content: <div>cluster details</div>,
+      content: <ShardFailureTable failures={response._shards.failures ?? []} />,
       ['data-test-subj']: 'showClusterDetailsButton',
     },
     {
@@ -96,7 +98,7 @@ export function IncompleteResultsModal({ request, response, warning, onClose }: 
         <EuiModalHeaderTitle size="xs">
           <FormattedMessage
             id="data.search.searchSource.fetch.incompleteResultsModal.headerTitle"
-            defaultMessage="Incomplete result details"
+            defaultMessage="Response contains incomplete results"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
