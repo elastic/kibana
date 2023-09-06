@@ -216,6 +216,7 @@ export function AlertActions({
             })}
           >
             <EuiButtonIcon
+              data-test-subj="o11yAlertActionsButton"
               aria-label={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
                 defaultMessage: 'View in app',
               })}

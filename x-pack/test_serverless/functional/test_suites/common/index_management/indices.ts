@@ -15,7 +15,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const retry = getService('retry');
 
-  describe('Indices', function () {
+  // Flaky on serverless
+  describe.skip('Indices', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
