@@ -7,6 +7,7 @@
 
 import React, { type FC } from 'react';
 
+import { isDefined } from '@kbn/ml-is-defined';
 import { Stat, StatsBarStat } from './stat';
 
 interface Stats {
@@ -18,6 +19,7 @@ export interface TransformStatsBarStats extends Stats {
   batch: StatsBarStat;
   continuous: StatsBarStat;
   started: StatsBarStat;
+  nodes?: StatsBarStat;
 }
 
 type StatsBarStats = TransformStatsBarStats;
@@ -29,7 +31,9 @@ interface StatsBarProps {
 }
 
 export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
-  const statsList = Object.keys(stats).map((k) => stats[k as StatsKey]);
+  const statsList = Object.keys(stats)
+    .map((k) => stats[k as StatsKey])
+    .filter<StatsBarStat>(isDefined);
   return (
     <div className="transformStatsBar" data-test-subj={dataTestSub}>
       {statsList
