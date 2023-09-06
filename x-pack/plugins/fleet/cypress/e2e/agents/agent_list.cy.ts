@@ -13,6 +13,8 @@ import { deleteFleetServerDocs, deleteAgentDocs, cleanupAgentPolicies } from '..
 import type { CreateAgentPolicyRequest } from '../../../common/types';
 import { setUISettings } from '../../tasks/ui_settings';
 
+import { API_VERSIONS } from '../../../common/constants';
+
 const createAgentDocs = (kibanaVersion: string) => [
   createAgentDoc('agent-1', 'policy-1'), // this agent will have upgrade available
   createAgentDoc('agent-2', 'policy-2', 'error', kibanaVersion),
@@ -66,7 +68,7 @@ function createAgentPolicy(body: CreateAgentPolicyRequest['body']) {
   cy.request({
     method: 'POST',
     url: '/api/fleet/agent_policies',
-    headers: { 'kbn-xsrf': 'xx' },
+    headers: { 'kbn-xsrf': 'xx', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     body,
   });
 }
