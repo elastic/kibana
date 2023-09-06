@@ -255,6 +255,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       );
       CrawlerLogic.actions.fetchCrawlerData();
       DomainManagementLogic.actions.getDomains(DEFAULT_META);
+      actions.clearDomainFormInputValue();
     },
     performDomainValidationStep: async ({ stepName, checks }) => {
       const { http } = HttpLogic.values;
