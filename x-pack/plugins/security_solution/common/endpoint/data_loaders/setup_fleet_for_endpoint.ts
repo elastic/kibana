@@ -70,6 +70,9 @@ export const setupFleetForEndpoint = async (
       .request({
         path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
         method: 'POST',
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
       })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
 
@@ -123,6 +126,9 @@ export const installOrUpgradeEndpointFleetPackage = async (
         },
         query: {
           prerelease: true,
+        },
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
         },
       })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;

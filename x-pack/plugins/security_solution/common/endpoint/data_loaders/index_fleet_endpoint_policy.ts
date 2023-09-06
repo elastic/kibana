@@ -108,6 +108,9 @@ export const indexFleetEndpointPolicy = async (
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       method: 'POST',
       body: newPackagePolicyData,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreatePackagePolicyResponse>;
 
