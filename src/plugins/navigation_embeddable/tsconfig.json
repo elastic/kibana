@@ -21,6 +21,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/saved-objects-plugin",
     "@kbn/utility-types",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ui-actions-plugin",
   ],
   "exclude": ["target/**/*"]
 }
