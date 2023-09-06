@@ -30,6 +30,7 @@ export const startRuntimeServices = async ({
   password,
   ...otherOptions
 }: StartRuntimeServicesOptions) => {
+  console.log({ kibanaUrl });
   const stackServices = await createRuntimeServices({
     kibanaUrl,
     elasticsearchUrl: elasticUrl,
@@ -39,6 +40,8 @@ export const startRuntimeServices = async ({
     log,
     asSuperuser: otherOptions?.asSuperuser,
   });
+
+  console.log({ stackServices });
 
   runtimeServices = {
     ...stackServices,

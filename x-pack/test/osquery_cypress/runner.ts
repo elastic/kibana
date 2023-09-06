@@ -26,8 +26,10 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
     hostname: config.get('servers.kibana.hostname'),
     port: config.get('servers.fleetserver.port'),
   });
+  console.log({ elasticUrl, kibanaUrl, fleetServerUrl });
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
+  console.log({ username, password });
 
   await startRuntimeServices({
     log,
@@ -39,10 +41,14 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
     version: await getLatestAvailableAgentVersion(kbnClient),
   });
 
+  console.log('11111111');
   await new FleetManager(log).setup();
+  console.log('222222222');
 
   const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, 'Default policy');
   const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, 'Osquery policy');
+
+  console.log('333333333');
 
   await new AgentManager(policyEnrollmentKey, config.get('servers.fleetserver.port'), log).setup();
   await new AgentManager(
@@ -55,9 +61,9 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
 export async function startOsqueryCypress(context: FtrProviderContext) {
   const config = context.getService('config');
 
-  // await setupFleetAgent(context);
+  await setupFleetAgent(context);
 
-  return {
+  const osqueryConfig = {
     FORCE_COLOR: '1',
     baseUrl: Url.format({
       protocol: config.get('servers.kibana.protocol'),
@@ -76,4 +82,7 @@ export async function startOsqueryCypress(context: FtrProviderContext) {
       port: config.get('servers.kibana.port'),
     }),
   };
+
+  console.log({ osqueryConfig });
+  return osqueryConfig;
 }

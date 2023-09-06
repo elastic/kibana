@@ -210,8 +210,8 @@ export const startFleetServerWithDocker = async ({
 
     //   '--detach',
 
-    //   '--name',
-    //   containerName,
+    // '--name',
+    // containerName,
 
     //   // The container's hostname will appear in Fleet when the agent enrolls
     //   '--hostname',
@@ -289,22 +289,25 @@ export const startFleetServerWithDocker = async ({
 
       // `--env`,
       // `KIBANA_FLEET_CA=/elasticsearch.crt`,
-
+      //
       // `--env`,
       // `KIBANA_CA=/elasticsearch.crt`,
-
+      //
       // `--env`,
       // `FLEET_CA=/kibana.crt`,
 
       '--env',
       'FLEET_SERVER_ENABLE=1',
 
+      // '--env',
+      // 'ELASTICSEARCH_USERNAME=elastic_serverless',
+
       '--env',
       // `FLEET_SERVER_ELASTICSEARCH_HOST=${esUrlWithRealIp}`,
       `FLEET_SERVER_ELASTICSEARCH_HOST=https://host.docker.internal:9200`,
 
       '--env',
-      'FLEET_URL=https://localhost:8220',
+      'FLEET_URL=https://host.docker.internal:8220',
 
       '--env',
       `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
@@ -312,8 +315,11 @@ export const startFleetServerWithDocker = async ({
       '--env',
       'FLEET_SERVER_ELASTICSEARCH_INSECURE=1',
 
-      // '--env',
-      // 'FLEET_SERVER_INSECURE_HTTP=1',
+      '--env',
+      'KIBANA_HOST=https://host.docker.internal:5620',
+
+      '--env',
+      'FLEET_SERVER_INSECURE_HTTP=1',
 
       '--env',
       'FLEET_INSECURE=1',
@@ -330,22 +336,22 @@ export const startFleetServerWithDocker = async ({
       '--env',
       'FLEET_SERVER_ELASTICSEARCH_HOSTS=https://host.docker.internal:9200',
 
-      // '--env',
-      // `ELASTICSEARCH_CA=/elasticsearch.crt`,
+      '--env',
+      `ELASTICSEARCH_CA=/elasticsearch.crt`,
 
-      // '--env',
-      // 'FLEET_SERVER_ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
+      '--env',
+      'FLEET_SERVER_ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
 
-      // '--env',
-      // 'FLEET_SERVER_CERT=/fleet-server.crt',
+      '--env',
+      'FLEET_SERVER_CERT=/fleet-server.crt',
 
-      // '--env',
-      // 'FLEET_SERVER_CERT_KEY=/fleet-server.key',
+      '--env',
+      'FLEET_SERVER_CERT_KEY=/fleet-server.key',
 
-      // '--env',
-      // 'FLEET_SERVER_ELASTICSEARCH_CA=/elasticsearch.crt',
-      // '--env',
-      // 'FLEET_SERVER_ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',
+      '--env',
+      'FLEET_SERVER_ELASTICSEARCH_CA=/elasticsearch.crt',
+      '--env',
+      'FLEET_SERVER_ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',
 
       '--env',
       `FLEET_SERVER_POLICY=${policyId}`,
@@ -353,7 +359,8 @@ export const startFleetServerWithDocker = async ({
       '--publish',
       `${fleetServerPort}:8220`,
 
-      `docker.elastic.co/beats/elastic-agent:8.10.0-SNAPSHOT`,
+      `docker.elastic.co/cloud-release/elastic-agent-cloud:8.11.0-SNAPSHOT`,
+      // `docker.elastic.co/beats/elastic-agent:8.10.0-SNAPSHOT`,
     ];
 
     console.error(`docker arguments:\n${dockerArgs.join(' ')}`);
@@ -370,7 +377,7 @@ export const startFleetServerWithDocker = async ({
 (This is ok if one was not running already)`);
       });
 
-    // await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:${fleetServerPort}`);
+    await addFleetServerHostToFleetSettings(`https://host.docker.internal:${fleetServerPort}`);
 
     log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 
@@ -477,6 +484,7 @@ const addFleetServerHostToFleetSettings = async (
   try {
     const exitingFleetServerHostUrl = await fetchFleetServerUrl(kbnClient);
 
+    console.log({ exitingFleetServerHostUrl, fleetServerHostUrl });
     const newFleetHostEntry: PostFleetServerHostsRequest['body'] = {
       name: `Dev fleet server running on localhost`,
       host_urls: [fleetServerHostUrl],
@@ -515,6 +523,7 @@ ${chalk.bold(chalk.cyan('xpack.fleet.internal.fleetServerStandalone: false'))}
 
     return item;
   } catch (error) {
+    console.log({ error });
     log.error(dump(error));
     log.indent(-4);
     throw error;
