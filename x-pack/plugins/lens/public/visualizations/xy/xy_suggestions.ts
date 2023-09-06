@@ -502,7 +502,6 @@ function buildSuggestion({
   }
   const existingLayer = getExistingLayer(currentState, layerId) || null;
   const accessors = yValues.map((col) => col.columnId);
-  console.log('XY suggestions, ', mainPalette);
   const newLayer: XYDataLayerConfig = {
     ...(existingLayer || {}),
     palette:

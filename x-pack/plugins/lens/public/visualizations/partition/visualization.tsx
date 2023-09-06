@@ -162,7 +162,6 @@ export const getPieVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   initialize(addNewLayer, state, mainPalette) {
-    console.log('initialize', { state, mainPalette });
     return (
       state || {
         shape: PieChartTypes.DONUT,
