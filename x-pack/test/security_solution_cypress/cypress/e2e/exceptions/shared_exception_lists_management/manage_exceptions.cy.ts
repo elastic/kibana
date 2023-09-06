@@ -39,32 +39,32 @@ import {
 } from '../../../tasks/exceptions_table';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165795
-describe('Add, edit and delete exception', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  before(() => {
-    cy.task('esArchiverResetKibana');
-    cy.task('esArchiverLoad', { archiveName: 'exceptions' });
+describe(
+  'Add, edit and delete exception',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
+    before(() => {
+      cy.task('esArchiverResetKibana');
+      cy.task('esArchiverLoad', { archiveName: 'exceptions' });
 
-    createRule(getNewRule());
-  });
+      createRule(getNewRule());
+    });
 
-  beforeEach(() => {
-    login();
-    visitWithoutDateRange(EXCEPTIONS_URL);
-    waitForExceptionsTableToBeLoaded();
-  });
-  after(() => {
-    cy.task('esArchiverUnload', 'exceptions');
-  });
+    beforeEach(() => {
+      login();
+      visitWithoutDateRange(EXCEPTIONS_URL);
+      waitForExceptionsTableToBeLoaded();
+    });
+    after(() => {
+      cy.task('esArchiverUnload', 'exceptions');
+    });
 
-  const exceptionName = 'My item name';
-  const exceptionNameEdited = 'My item name edited';
-  const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
-  const EXCEPTION_LIST_NAME = 'Newly created list';
+    const exceptionName = 'My item name';
+    const exceptionNameEdited = 'My item name edited';
+    const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
+    const EXCEPTION_LIST_NAME = 'Newly created list';
 
-  describe(
-    'Add, Edit and delete Exception item',
-    { tags: ['@ess', '@serverless'] },
-    () => {
+    describe('Add, Edit and delete Exception item', { tags: ['@ess', '@serverless'] }, () => {
       it('should create exception item from Shared Exception List page and linked to a Rule', () => {
         // Click on "Create shared exception list" button on the header
         // Click on "Create exception item"
@@ -148,6 +148,6 @@ describe('Add, edit and delete exception', { tags: ['@ess', '@serverless', '@bro
 
         cy.get(EMPTY_EXCEPTIONS_VIEWER).should('exist');
       });
-    }
-  );
-});
+    });
+  }
+);
