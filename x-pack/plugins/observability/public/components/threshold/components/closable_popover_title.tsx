@@ -21,6 +21,7 @@ export function ClosablePopoverTitle({ children, onClose }: ClosablePopoverTitle
         <EuiFlexItem>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
+            data-test-subj="o11yClosablePopoverTitleButton"
             iconType="cross"
             color="danger"
             aria-label={i18n.translate(

@@ -17,4 +17,5 @@ export const tx: FormulaValueConfig = {
       decimals: 1,
     },
   },
+  timeScale: 's',
 };
