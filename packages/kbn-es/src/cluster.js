@@ -36,7 +36,7 @@ const DEFAULT_READY_TIMEOUT = parseTimeoutToMs('1m');
 
 /** @typedef {import('./cluster_exec_options').EsClusterExecOptions} ExecOptions */
 /** @typedef {import('./utils').DockerOptions} DockerOptions */
-/** @typedef {import('./utils').ServerlessOptions}ServerlessrOptions */
+/** @typedef {import('./utils').ServerlessOptions}ServerlessOptions */
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>

@@ -10,11 +10,13 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../../../../../shared/doc_links';
 
+import { ingestKeysToJSON } from './helpers';
+
 export const javascriptDefinition: LanguageDefinition = {
   buildSearchQuery: ({ indexName }) => `// Let's search!
 const searchResult = await client.search({
   index: '${indexName}',
-  q: '9HY9SWR'
+  q: 'snow'
 });
 
 console.log(searchResult.hits.hits)
@@ -35,34 +37,38 @@ const client = new Client({
   },
   iconType: 'javascript.svg',
   id: Languages.JAVASCRIPT,
-  ingestData: ({ indexName }) => `// Sample flight data
+  ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
+    const ingestDocumentKeys = ingestPipeline ? ingestKeysToJSON(extraIngestDocumentValues) : '';
+    return `// Sample data books
 const dataset = [
-  {'flight': '9HY9SWR', 'price': 841.2656419677076, 'delayed': false},
-  {'flight': 'X98CCZO', 'price': 882.9826615595518, 'delayed': false},
-  {'flight': 'UFK2WIZ', 'price': 190.6369038508356, 'delayed': true},
+  {"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470${ingestDocumentKeys}},
+  {"name": "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585${ingestDocumentKeys}},
+  {"name": "1984", "author": "George Orwell", "release_date": "1985-06-01", "page_count": 328${ingestDocumentKeys}},
+  {"name": "Fahrenheit 451", "author": "Ray Bradbury", "release_date": "1953-10-15", "page_count": 227${ingestDocumentKeys}},
+  {"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268${ingestDocumentKeys}},
+  {"name": "The Handmaid's Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311${ingestDocumentKeys}},
 ];
 
 // Index with the bulk helper
 const result = await client.helpers.bulk({
-  datasource: dataset,
-  onDocument (doc) {
-    return { index: { _index: '${indexName}' }};
-  }
+  datasource: dataset,${ingestPipeline ? `\n  pipeline: "${ingestPipeline}",` : ''}
+  onDocument: (doc) => ({ index: { _index: '${indexName}' }}),
 });
 
 console.log(result);
 /**
 {
-  total: 3,
+  total: 6,
   failed: 0,
   retry: 0,
-  successful: 3,
+  successful: 6,
   noop: 0,
-  time: 421,
-  bytes: 293,
+  time: 82,
+  bytes: 1273,
   aborted: false
 }
-*/`,
+*/`;
+  },
   ingestDataIndex: '',
   installClient: 'npm install @elastic/elasticsearch@8',
   name: i18n.translate('xpack.enterpriseSearch.languages.javascript', {
@@ -80,10 +86,10 @@ console.log(resp);
   version: {
     build_flavor: 'default',
     build_type: 'docker',
-    build_hash: 'c94b4700cda13820dad5aa74fae6db185ca5c304',
-    build_date: '2022-10-24T16:54:16.433628434Z',
-    build_snapshot: false,
-    lucene_version: '9.4.1',
+    build_hash: 'ca3dc3a882d76f14d2765906ce3b1cf421948d19',
+    build_date: '2023-08-28T11:24:16.383660553Z',
+    build_snapshot: true,
+    lucene_version: '9.7.0',
     minimum_wire_compatibility_version: '7.17.0',
     minimum_index_compatibility_version: '7.0.0'
   },
