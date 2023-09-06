@@ -6,18 +6,17 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
-import React from 'react';
-
-const AlertsButtonComponent = () => (
-  <LinkButton id={SecurityPageName.alerts} fill>
+const AddElasticRulesButtonComponent = () => (
+  <LinkButton id={SecurityPageName.rules} fill>
     <FormattedMessage
-      id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.button"
-      defaultMessage="View alerts"
+      id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4.description2.button"
+      defaultMessage="Add Elastic rules"
     />
   </LinkButton>
 );
 
-export const AlertsButton = React.memo(AlertsButtonComponent);
+export const AddElasticRulesButton = React.memo(AddElasticRulesButtonComponent);
