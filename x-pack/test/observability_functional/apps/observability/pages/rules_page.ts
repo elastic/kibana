@@ -163,6 +163,17 @@ export default ({ getService }: FtrProviderContext) => {
           return true;
         });
       });
+
+      it('should navigate to the details page when clicking on a rule in event logs tab', async () => {
+        await observability.alerts.rulesPage.clickLogsTab();
+        await observability.alerts.rulesPage.clickOnRuleInEventLogs();
+        await testSubjects.existOrFail('ruleDetails');
+      });
+
+      it('shows the rule event log when navigating by URL', async () => {
+        await observability.alerts.common.navigateToRulesLogsPage();
+        await testSubjects.existOrFail('ruleEventLogListTable');
+      });
     });
 
     describe('User permissions', () => {

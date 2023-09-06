@@ -8,6 +8,7 @@ import 'cypress-real-events/support';
 import { Interception } from 'cypress/types/net-stubbing';
 import 'cypress-axe';
 import moment from 'moment';
+import '@frsource/cypress-plugin-visual-regression-diff';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 import { ApmUsername } from '../../../server/test_helpers/create_apm_users/authentication';
 

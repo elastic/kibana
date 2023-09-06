@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SyncStatus } from '../../../../common/types/connectors';
+import { SyncStatus } from '@kbn/search-connectors';
 
 import { syncStatusToColor, syncStatusToText } from './sync_status_to_text';
 
