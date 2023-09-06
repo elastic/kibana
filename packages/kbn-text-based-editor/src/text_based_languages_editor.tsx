@@ -75,6 +75,7 @@ export interface TextBasedLanguagesEditorProps {
   isDarkMode?: boolean;
   dataTestSubj?: string;
   hideMinimizeButton?: boolean;
+  hideRunQueryText?: boolean;
 }
 
 interface TextBasedEditorDeps {
@@ -120,6 +121,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   isDisabled,
   isDarkMode,
   hideMinimizeButton,
+  hideRunQueryText,
   dataTestSubj,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
@@ -781,6 +783,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           onErrorClick={onErrorClick}
           refreshErrors={onTextLangQuerySubmit}
           detectTimestamp={detectTimestamp}
+          hideRunQueryText={hideRunQueryText}
         />
       )}
       {isCodeEditorExpanded && (
