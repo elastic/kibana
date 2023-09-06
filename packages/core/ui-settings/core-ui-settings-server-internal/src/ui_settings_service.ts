@@ -15,8 +15,11 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
-import type { UiSettingsParams, UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { ReadonlyModeType } from '@kbn/core-ui-settings-common/src/ui_settings';
+import type {
+  ReadonlyModeType,
+  UiSettingsParams,
+  UiSettingsScope,
+} from '@kbn/core-ui-settings-common';
 import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
 import type {
