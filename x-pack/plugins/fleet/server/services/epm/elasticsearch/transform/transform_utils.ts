@@ -32,9 +32,14 @@ export const getDestinationIndexAliases = (aliasSettings: unknown): TransformAli
     });
   }
   if (Array.isArray(aliasSettings)) {
-    aliases = aliasSettings.reduce<TransformAliasSetting[]>((acc, alias) => {
-      if (typeof alias === 'string') {
-        acc.push({ alias, move_on_creation: alias.endsWith('.latest') ? true : false });
+    aliases = aliasSettings.reduce<TransformAliasSetting[]>((acc, aliasGroup) => {
+      if (typeof aliasGroup === 'string') {
+        acc.push({ alias: aliasGroup, move_on_creation: aliasGroup.endsWith('.latest') ? true : false });
+      }
+      if (isPopulatedObject(aliasGroup, ['alias', 'move_on_creation'])) {
+          if (typeof aliasGroup['alias'] === 'string' && typeof aliasGroup['move_on_creation'] === 'boolean') {
+            acc.push({ alias: aliasGroup['alias'], move_on_creation: aliasGroup['move_on_creation'] });
+          }
       }
       return acc;
     }, []);
