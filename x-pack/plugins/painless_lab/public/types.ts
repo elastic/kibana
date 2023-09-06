@@ -16,5 +16,5 @@ export interface PluginDependencies {
 }
 
 export interface ClientConfigType {
-  enabled: boolean;
+  enabled?: boolean;
 }

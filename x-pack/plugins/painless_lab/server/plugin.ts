@@ -26,7 +26,7 @@ export class PainlessLabServerPlugin implements Plugin {
   }
 
   setup({ http }: CoreSetup, { licensing }: Dependencies) {
-    if (!this.config.enabled) {
+    if (this.config?.enabled === false) {
       return;
     }
 

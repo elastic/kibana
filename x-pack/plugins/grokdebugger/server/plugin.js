@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import { KibanaFramework } from './lib/kibana_framework';
 import { registerGrokdebuggerRoutes } from './routes/api/grokdebugger';
 
@@ -14,7 +14,9 @@ export const config = {
     enabled: true,
   },
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
   }),
 };
 
@@ -24,7 +26,7 @@ export class Plugin {
   }
 
   setup(coreSetup, plugins) {
-    if (!this.config?.enabled) {
+    if (this.config?.enabled === false) {
       return;
     }
     const framework = new KibanaFramework(coreSetup);

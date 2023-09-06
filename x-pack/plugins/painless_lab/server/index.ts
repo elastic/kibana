@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { PainlessLabServerPlugin } from './plugin';
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: true }),
+  }),
 });
 export type ConfigType = TypeOf<typeof configSchema>;
 

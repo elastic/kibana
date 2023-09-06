@@ -31,7 +31,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
     { http, getStartServices, uiSettings }: CoreSetup,
     { devTools, home, licensing }: PluginDependencies
   ) {
-    if (!this.config.enabled) {
+    if (this.config?.enabled === false) {
       return;
     }
 

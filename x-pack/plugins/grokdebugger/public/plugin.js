@@ -17,7 +17,7 @@ export class GrokDebuggerUIPlugin {
   }
 
   setup(coreSetup, plugins) {
-    if (!this.config?.enabled) {
+    if (this.config?.enabled === false) {
       return;
     }
 
