@@ -47,7 +47,12 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
           }),
-          children: [{ link: 'dev_tools:console' }, { link: 'dev_tools:searchprofiler' }],
+          children: [
+            { link: 'dev_tools:console' },
+            { link: 'dev_tools:searchprofiler' },
+            { link: 'dev_tools:grokdebugger', sideNavStatus: 'hidden' as const },
+            { link: 'dev_tools:painless_lab', sideNavStatus: 'hidden' as const },
+          ],
         },
         {
           id: 'explore',

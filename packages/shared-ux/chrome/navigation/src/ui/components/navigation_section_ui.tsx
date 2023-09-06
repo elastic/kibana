@@ -89,31 +89,34 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   // but once the user manually expand a group we don't want to close it afterward automatically.
   const [doCollapseFromActiveState, setDoCollapseFromActiveState] = useState(true);
 
-  // If the item has no link and no cildren, we don't want to render it
-  const itemHasLinkOrChildren = (item: ChromeProjectNavigationNodeEnhanced) => {
+  const shouldRenderItem = (item: ChromeProjectNavigationNodeEnhanced) => {
+    // if the item is hidden, we don't want to render it
+    if (item.sideNavStatus === 'hidden') return false;
+
+    // If the item has no link and no children, we don't want to render it
     const hasLink = Boolean(item.deepLink) || Boolean(item.href);
     if (hasLink) {
       return true;
     }
     const hasChildren = Boolean(item.children?.length);
     if (hasChildren) {
-      return item.children!.some(itemHasLinkOrChildren);
+      return item.children!.some(shouldRenderItem);
     }
     return false;
   };
 
-  const filteredItems = items.filter(itemHasLinkOrChildren).map((item) => {
+  const filteredItems = items.filter(shouldRenderItem).map((item) => {
     if (item.children) {
       return {
         ...item,
-        children: item.children.filter(itemHasLinkOrChildren),
+        children: item.children.filter(shouldRenderItem),
       };
     }
     return item;
   });
 
   const groupHasLink = Boolean(navNode.deepLink) || Boolean(navNode.href);
-  const groupHasChildren = filteredItems.some(itemHasLinkOrChildren);
+  const groupHasChildren = filteredItems.some(shouldRenderItem);
   // Group with a link and no children will be rendered as a link and not an EUI accordion
   const groupIsLink = groupHasLink && !groupHasChildren;
   const groupHref = navNode.deepLink?.url ?? navNode.href!;
