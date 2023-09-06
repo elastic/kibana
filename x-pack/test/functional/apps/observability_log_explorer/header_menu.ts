@@ -9,11 +9,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'timePicker']);
 
   describe('Header menu', () => {
     before(async () => {
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
@@ -21,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
@@ -49,6 +52,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverLink.click();
 
         await PageObjects.discover.waitForDocTableLoadingComplete();
+
+        await retry.try(async () => {
+          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
+            'All log datasets'
+          );
+        });
 
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql(['@timestamp', 'message']);
