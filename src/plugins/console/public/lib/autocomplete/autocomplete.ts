@@ -986,18 +986,22 @@ export default function ({
         Array.isArray(context.urlTokenPath) && context.urlTokenPath.length !== 0
           ? context.urlTokenPath[context.urlTokenPath.length - 1]
           : null;
+      // Checking the last chunk of path like 'c,d,' of 'GET /a/b/c,d,'
       if (
         Array.isArray(lastUrlTokenPath) &&
+        // true if neither c nor d equals to every ConstantComponent's name (such as _search)
         !_.find(
           components,
           (c) => c instanceof ConstantComponent && _.find(lastUrlTokenPath, (p) => c.name === p)
         )
       ) {
+        // will simulate autocomplete on 'GET /a/b/' with a filter by index
         return {
           tokenPath: context.urlTokenPath.slice(0, -1),
           predicate: (term) => term.meta === 'index',
         };
       } else {
+        // will do nothing special
         return { tokenPath: context.urlTokenPath, predicate: (term) => true };
       }
     })();
