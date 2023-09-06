@@ -6,22 +6,11 @@
  */
 // FIXME: move file to server/routes/rule/apis
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { ruleTagsRequestQuerySchemaV1 } from '../../common/routes/rule/apis/tags';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { ILicenseState } from '../lib';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
-import {
-  DEFAULT_TAGS_PER_PAGE,
-  GetTagsParams,
-  GetTagsResult,
-} from '../rules_client/methods/get_tags';
-
-// FIXME: import {aggregateRulesRequestQuerySchemaV1} from '../../../../../common/routes/rule/apis/tags';
-const querySchema = schema.object({
-  page: schema.number({ defaultValue: 1, min: 1 }),
-  per_page: schema.maybe(schema.number({ defaultValue: DEFAULT_TAGS_PER_PAGE, min: 1 })),
-  search: schema.maybe(schema.string()),
-});
+import { GetTagsParams, GetTagsResult } from '../rules_client/methods/get_tags';
 
 // FIXME: import {transformRuleTagsQueryRequestV1} from './transforms';
 // FIXME: remove spread operator
@@ -47,7 +36,7 @@ export const getRuleTagsRoute = (
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_tags`,
       validate: {
-        query: querySchema,
+        query: ruleTagsRequestQuerySchemaV1,
       },
     },
     router.handleLegacyErrors(

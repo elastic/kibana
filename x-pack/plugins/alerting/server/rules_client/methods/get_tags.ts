@@ -7,15 +7,16 @@
 import Boom from '@hapi/boom';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { DEFAULT_TAGS_PER_PAGE } from '../../../common/routes/rule/apis/tags';
 import { RulesClientContext } from '../types';
 import { AlertingAuthorizationEntity } from '../../authorization';
 import { alertingAuthorizationFilterOpts } from '../common/constants';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RawRule } from '../../types';
 
-export const DEFAULT_TAGS_PER_PAGE = 50;
 const MAX_TAGS = 10000;
 
+// FIXME: application schema definition to be used for type
 const getTagsParamsSchema = schema.object({
   page: schema.number({ defaultValue: 1, min: 1 }),
   perPage: schema.maybe(schema.number({ defaultValue: DEFAULT_TAGS_PER_PAGE, min: 1 })),
