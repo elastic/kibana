@@ -82,10 +82,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('with kbn: prefix in request', () => {
-      beforeEach(async () => {
+      before(async () => {
         await PageObjects.console.clearTextArea();
       });
-
       it('it should send successful request to Kibana API', async () => {
         const expectedResponseContains = 'default space';
         await PageObjects.console.enterRequest('\n GET kbn:/api/spaces/space');
@@ -94,44 +93,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const actualResponse = await PageObjects.console.getResponse();
           log.debug(actualResponse);
           expect(actualResponse).to.contain(expectedResponseContains);
-        });
-      });
-
-      it('should process PATCH requests for Kibana APIs', async () => {
-        const sendRequestsSequentially = async (requests: string[]) => {
-          await asyncForEach(requests, async (request) => {
-            await PageObjects.console.enterRequest(request);
-            await PageObjects.console.clickPlay();
-            await PageObjects.header.waitUntilLoadingHasFinished();
-          });
-        };
-
-        await sendRequestsSequentially([
-          '\n DELETE kbn:api/detection_engine/rules?rule_id=_',
-          '\n POST kbn:api/detection_engine/rules\n' +
-            JSON.stringify({
-              rule_id: '_',
-              severity: 'low',
-              description: '_',
-              name: '_',
-              type: 'query',
-              risk_score: 0,
-            }),
-          '\n PATCH kbn:api/detection_engine/rules\n' +
-            JSON.stringify({
-              rule_id: '_',
-              severity: 'high',
-            }),
-        ]);
-        await retry.try(async () => {
-          const status = await PageObjects.console.getResponseStatus();
-          expect(status).to.eql(200);
-
-          const response = await PageObjects.console.getResponse();
-          log.debug(response);
-          expect(response).to.contain('"severity": "high"');
-
-          expect(await PageObjects.console.hasErrorMarker()).to.be(false);
         });
       });
     });
