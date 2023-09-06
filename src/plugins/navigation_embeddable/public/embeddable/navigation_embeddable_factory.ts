@@ -14,6 +14,14 @@ import {
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
+import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import {
+  MigrateFunctionsObject,
+  GetMigrationFunctionObjectFn,
+} from '@kbn/kibana-utils-plugin/common';
+import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
 import {
   NavigationEmbeddableByReferenceInput,
   NavigationEmbeddableEditorFlyoutReturn,
@@ -24,16 +32,8 @@ import type { NavigationEmbeddable } from './navigation_embeddable';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 import { extract, inject } from '../../common/embeddable';
-import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import {
-  MigrateFunctionsObject,
-  GetMigrationFunctionObjectFn,
-} from '@kbn/kibana-utils-plugin/common';
-import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
 
 import { NavigationEmbeddableAttributes } from '../../common/content_management';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 

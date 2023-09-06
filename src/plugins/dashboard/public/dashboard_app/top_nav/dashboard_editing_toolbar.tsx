@@ -15,6 +15,7 @@ import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-but
 import { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
+import { isExplicitInputWithPanelStateMeta } from '@kbn/embeddable-plugin/public';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
 import { useDashboardAPI } from '../dashboard_app';
@@ -22,7 +23,6 @@ import { pluginServices } from '../../services/plugin_services';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
-import { isExplicitInputWithPanelStateMeta } from '@kbn/embeddable-plugin/public';
 
 export function DashboardEditingToolbar() {
   const {
