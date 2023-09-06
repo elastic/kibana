@@ -11,7 +11,12 @@ import { i18n } from '@kbn/i18n';
 
 export function RegenerateResponseButton(props: Partial<EuiButtonEmptyProps>) {
   return (
-    <EuiButtonEmpty size="s" {...props} iconType="sparkles">
+    <EuiButtonEmpty
+      size="s"
+      data-test-subj="observabilityAiAssistantRegenerateResponseButton"
+      iconType="sparkles"
+      {...props}
+    >
       {i18n.translate('xpack.observabilityAiAssistant.regenerateResponseButtonLabel', {
         defaultMessage: 'Regenerate',
       })}
