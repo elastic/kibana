@@ -16,7 +16,11 @@ import type {
   DeleteAgentPolicyResponse,
   PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
-import { AGENT_POLICY_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common';
+import {
+  AGENT_POLICY_API_ROUTES,
+  PACKAGE_POLICY_API_ROUTES,
+  API_VERSIONS,
+} from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
 import { getEndpointPackageInfo } from '../utils/package';
 import type { PolicyData } from '../types';
@@ -61,6 +65,9 @@ export const indexFleetEndpointPolicy = async (
     agentPolicy = (await kbnClient
       .request({
         path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
         method: 'POST',
         body: newAgentPolicyData,
       })
@@ -135,6 +142,9 @@ export const deleteIndexedFleetEndpointPolicies = async (
       (await kbnClient
         .request({
           path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
+          headers: {
+            'elastic-api-version': API_VERSIONS.public.v1,
+          },
           method: 'POST',
           body: {
             packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
@@ -153,6 +163,9 @@ export const deleteIndexedFleetEndpointPolicies = async (
           (await kbnClient
             .request({
               path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
+              headers: {
+                'elastic-api-version': API_VERSIONS.public.v1,
+              },
               method: 'POST',
               body: {
                 agentPolicyId: agentPolicy.id,

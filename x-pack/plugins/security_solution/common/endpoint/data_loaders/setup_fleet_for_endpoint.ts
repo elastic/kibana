@@ -13,7 +13,12 @@ import type {
   IBulkInstallPackageHTTPError,
   PostFleetSetupResponse,
 } from '@kbn/fleet-plugin/common';
-import { AGENTS_SETUP_API_ROUTES, EPM_API_ROUTES, SETUP_API_ROUTE } from '@kbn/fleet-plugin/common';
+import {
+  AGENTS_SETUP_API_ROUTES,
+  EPM_API_ROUTES,
+  SETUP_API_ROUTE,
+  API_VERSIONS,
+} from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import { UsageTracker } from './usage_tracker';
 import { EndpointDataLoadingError, retryOnError, wrapErrorAndRejectPromise } from './utils';
@@ -43,6 +48,7 @@ export const setupFleetForEndpoint = async (
     const setupResponse = (await kbnClient
       .request({
         path: SETUP_API_ROUTE,
+        headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
         method: 'POST',
       })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
