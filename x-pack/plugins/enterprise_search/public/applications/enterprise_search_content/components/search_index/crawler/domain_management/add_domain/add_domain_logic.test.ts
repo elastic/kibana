@@ -302,13 +302,6 @@ describe('AddDomainLogic', () => {
 
   describe('listeners', () => {
     describe('onSubmitNewDomainSuccess', () => {
-      // beforeEach(() => {
-      //   const { mount: indexNameMount } = new LogicMounter(IndexNameLogic);
-      //   const indexNameLogic = indexNameMount();
-      //   indexNameLogic.actions.setIndexName('test-index');
-      //   mountDomainManagementLogic();
-      // });
-
       it('should flash a success toast', () => {
         const { navigateToUrl } = mockKibanaValues;
 
