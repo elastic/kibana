@@ -28,6 +28,7 @@ interface CreateTestConfigOptions {
   reportName?: string;
   useDedicatedTaskRunner: boolean;
   enableFooterInEmail?: boolean;
+  maxScheduledPerMinute?: number;
 }
 
 // test.not-enabled is specifically not enabled
@@ -82,6 +83,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     reportName = undefined,
     useDedicatedTaskRunner,
     enableFooterInEmail = true,
+    maxScheduledPerMinute,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -151,6 +153,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [`--xpack.actions.email.domain_allowlist=${JSON.stringify(emailDomainsAllowed)}`]
       : [];
 
+    const maxScheduledPerMinuteSettings =
+      typeof maxScheduledPerMinute === 'number'
+        ? [`--xpack.alerting.rules.maxScheduledPerMinute=${maxScheduledPerMinute}`]
+        : [];
+
     return {
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
@@ -199,6 +206,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...actionsProxyUrl,
           ...customHostSettings,
           ...emailSettings,
+          ...maxScheduledPerMinuteSettings,
           '--xpack.eventLog.logEntries=true',
           '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([

@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   // Flaky on serverless
+  // FLAKY: https://github.com/elastic/kibana/issues/165768
   describe.skip('Indices', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
