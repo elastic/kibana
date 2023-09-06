@@ -201,6 +201,7 @@ async function getAgentPolicy(id: string) {
       'Content-Type': 'application/json',
       'kbn-xsrf': 'kibana',
       'x-elastic-product-origin': 'fleet',
+      'Elastic-Api-Version': PUBLIC_VERSION_V1,
     },
   });
   const data = await res.json();
@@ -346,6 +347,7 @@ async function bumpAgentPolicyRevision(id: string, policy: any) {
       'Content-Type': 'application/json',
       'kbn-xsrf': 'kibana',
       'x-elastic-product-origin': 'fleet',
+      'Elastic-Api-Version': PUBLIC_VERSION_V1,
     },
   });
 
