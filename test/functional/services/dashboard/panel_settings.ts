@@ -14,7 +14,6 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
   const retry = getService('retry');
   const toasts = getService('toasts');
   const testSubjects = getService('testSubjects');
-  const common = getPageObject('common');
 
   return new (class DashboardCustomizePanel {
     public readonly FLYOUT_TEST_SUBJ = 'customizePanel';
@@ -56,10 +55,18 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       return await this.findFlyoutTestSubject('superDatePickerToggleQuickMenuButton');
     }
 
-    public async clickToggleQuickMenuButton(open?: boolean) {
-      log.debug('clickToggleQuickMenuButton');
+    public async openDatePickerQuickMenu() {
+      log.debug('openDatePickerQuickMenu');
       const button = await this.findToggleQuickMenuButton();
-      if (typeof open === 'undefined' || open !== (await button.isSelected())) {
+      if (!(await button.isSelected())) {
+        await button.click();
+      }
+    }
+
+    public async closeDatePickerQuickMenu() {
+      log.debug('closeDatePickerQuickMenu');
+      const button = await this.findToggleQuickMenuButton();
+      if (await button.isSelected()) {
         await button.click();
       }
     }
@@ -115,10 +122,18 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       });
     }
 
-    public async clickToggleShowCustomTimeRange(enable?: boolean) {
-      log.debug('clickToggleShowCustomTimeRange');
+    public async enableCustomTimeRange() {
+      log.debug('enableCustomTimeRange');
       const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
-      if (typeof enable !== 'undefined' || enable !== toggle.isSelected()) {
+      if (!(await toggle.isSelected())) {
+        await toggle.click();
+      }
+    }
+
+    public async disableCustomTimeRange() {
+      log.debug('disableCustomTimeRange');
+      const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
+      if (await toggle.isSelected()) {
         await toggle.click();
       }
     }
