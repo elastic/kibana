@@ -189,9 +189,7 @@ describe(
     context('saved search tags', () => {
       it(
         'should save discover saved search with `Security Solution` tag',
-        {
-          tags: ['@brokenInServerless'],
-        },
+        { tags: '@brokenInServerless' },
         () => {
           const timelineSuffix = Date.now();
           const timelineName = `SavedObject timeline-${timelineSuffix}`;
