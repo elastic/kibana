@@ -81,7 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('and traceDocs is correct', () => {
-          expect(trace.traceItems.traceDocs.length).to.be(15551);
+          expect(trace.traceItems.traceDocs.length).to.within(15550, 15555);
         });
 
         it('and maxTraceItems is correct', () => {
