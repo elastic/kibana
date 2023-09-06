@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
@@ -18,6 +19,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   describe('Configure Case', function () {
     before(async () => {
+      await svlCommonPage.login();
+
       await svlObltNavigation.navigateToLandingPage();
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
@@ -27,6 +30,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     after(async () => {
       await cases.api.deleteAllCases();
+      await svlCommonPage.forceLogout({ waitForLoginPage: false });
     });
 
     describe('Closure options', function () {

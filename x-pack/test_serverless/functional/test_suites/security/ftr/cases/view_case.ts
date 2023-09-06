@@ -27,8 +27,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Case View', () => {
+    before(async () => {
+      await svlCommonPage.login();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout({ waitForLoginPage: false });
+    });
+
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
