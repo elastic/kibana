@@ -7,6 +7,7 @@
 
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import {
   AlertingEventLogger,
   RuleContextOpts,
@@ -19,7 +20,6 @@ import {
 } from './alerting_event_logger';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import {
-  ActionsCompletion,
   RecoveredActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,

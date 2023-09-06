@@ -34,11 +34,12 @@ export function ObservabilityAIAssistantActionMenuItem() {
 
   const [conversationId, setConversationId] = useState<string>();
 
-  const { conversation, displayedMessages, setDisplayedMessages, save } = useConversation({
-    conversationId,
-    connectorId: connectors.selectedConnector,
-    chatService: chatService.value,
-  });
+  const { conversation, displayedMessages, setDisplayedMessages, save, saveTitle } =
+    useConversation({
+      conversationId,
+      connectorId: connectors.selectedConnector,
+      chatService: chatService.value,
+    });
 
   if (!service.isEnabled()) {
     return null;
@@ -48,6 +49,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
     <>
       <EuiHeaderLink
         color="primary"
+        data-test-subj="observabilityAiAssistantNewChatHeaderLink"
         onClick={() => {
           setIsOpen(() => true);
         }}
@@ -74,6 +76,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
             title={conversation.value?.conversation.title ?? EMPTY_CONVERSATION_TITLE}
             messages={displayedMessages}
             conversationId={conversationId}
+            startedFrom="appTopNavbar"
             onClose={() => {
               setIsOpen(() => false);
             }}
@@ -86,6 +89,9 @@ export function ObservabilityAIAssistantActionMenuItem() {
             }}
             onChatUpdate={(nextMessages) => {
               setDisplayedMessages(nextMessages);
+            }}
+            onChatTitleSave={(newTitle) => {
+              saveTitle(newTitle);
             }}
           />
         </ObservabilityAIAssistantChatServiceProvider>

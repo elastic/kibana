@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 
 import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -48,7 +48,7 @@ import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plu
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import type { RouteProps } from 'react-router-dom';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -133,7 +133,7 @@ export interface StartPlugins {
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
   savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
 }
 
@@ -142,6 +142,7 @@ export interface ContractStartServices {
   isILMAvailable$: Observable<boolean>;
   isSidebarEnabled$: Observable<boolean>;
   getStartedComponent$: Observable<React.ComponentType | null>;
+  dashboardsLandingCalloutComponent$: Observable<React.ComponentType | null>;
   upselling: UpsellingService;
 }
 
@@ -161,9 +162,8 @@ export type StartServices = CoreStart &
     securityLayout: {
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
-    savedObjectsManagement: SavedObjectsManagementPluginStart;
+    contentManagement: ContentManagementPublicStart;
     telemetry: TelemetryClientStart;
-    discoverFilterManager: FilterManager;
     customDataService: DataPublicPluginStart;
     topValuesPopover: TopValuesPopoverService;
   };
@@ -179,6 +179,7 @@ export interface PluginStart {
   setIsILMAvailable: (isILMAvailable: boolean) => void;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
+  setDashboardsLandingCallout: (dashboardsLandingCallout: React.ComponentType) => void;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
 }

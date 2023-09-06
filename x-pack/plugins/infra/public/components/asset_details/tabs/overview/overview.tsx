@@ -14,14 +14,14 @@ import { MetadataSummaryList } from './metadata_summary/metadata_summary_list';
 import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
 import { MetricsGrid } from './metrics/metrics_grid';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 
 export const Overview = () => {
   const { dateRange } = useDateRangeProviderContext();
-  const { asset, assetType, renderMode } = useAssetDetailsStateContext();
+  const { asset, assetType, renderMode } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,
@@ -80,6 +80,7 @@ export const Overview = () => {
           logsDataView={logs.dataView}
           metricsDataView={metrics.dataView}
           nodeName={asset.name}
+          isCompactView={renderMode?.mode === 'flyout'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

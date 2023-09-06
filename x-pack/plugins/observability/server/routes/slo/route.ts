@@ -9,13 +9,13 @@ import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
 import {
   createSLOParamsSchema,
+  deleteSLOInstancesParamsSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   findSloDefinitionsParamsSchema,
   findSLOParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
-  getSLODiagnosisParamsSchema,
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
@@ -27,6 +27,7 @@ import {
   DefaultSummaryClient,
   DefaultTransformManager,
   DeleteSLO,
+  DeleteSLOInstances,
   FindSLO,
   GetSLO,
   KibanaSavedObjectsSLORepository,
@@ -35,7 +36,7 @@ import {
 import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
 import { FindSLODefinitions } from '../../services/slo/find_slo_definitions';
 import { getBurnRates } from '../../services/slo/get_burn_rates';
-import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
+import { getGlobalDiagnosis } from '../../services/slo/get_diagnosis';
 import { GetPreviewData } from '../../services/slo/get_preview_data';
 import { GetSLOInstances } from '../../services/slo/get_slo_instances';
 import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
@@ -226,6 +227,22 @@ const findSLORoute = createObservabilityServerRoute({
   },
 });
 
+const deleteSloInstancesRoute = createObservabilityServerRoute({
+  endpoint: 'POST /api/observability/slos/_delete_instances 2023-10-31',
+  options: {
+    tags: ['access:slo_write'],
+  },
+  params: deleteSLOInstancesParamsSchema,
+  handler: async ({ context, params }) => {
+    await assertPlatinumLicense(context);
+
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const deleteSloInstances = new DeleteSLOInstances(esClient);
+
+    await deleteSloInstances.execute(params.body);
+  },
+});
+
 const findSloDefinitionsRoute = createObservabilityServerRoute({
   endpoint: 'GET /internal/observability/slos/_definitions',
   options: {
@@ -310,21 +327,6 @@ const getDiagnosisRoute = createObservabilityServerRoute({
   },
 });
 
-const getSloDiagnosisRoute = createObservabilityServerRoute({
-  endpoint: 'GET /internal/observability/slos/{id}/_diagnosis',
-  options: {
-    tags: [],
-  },
-  params: getSLODiagnosisParamsSchema,
-  handler: async ({ context, params }) => {
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const soClient = (await context.core).savedObjects.client;
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
-
-    return getSloDiagnosis(params.path.id, { esClient, repository });
-  },
-});
-
 const getSloBurnRates = createObservabilityServerRoute({
   endpoint: 'POST /internal/observability/slos/{id}/_burn_rates',
   options: {
@@ -367,6 +369,7 @@ const getPreviewData = createObservabilityServerRoute({
 export const sloRouteRepository = {
   ...createSLORoute,
   ...deleteSLORoute,
+  ...deleteSloInstancesRoute,
   ...disableSLORoute,
   ...enableSLORoute,
   ...fetchHistoricalSummary,
@@ -375,7 +378,6 @@ export const sloRouteRepository = {
   ...getSLORoute,
   ...updateSLORoute,
   ...getDiagnosisRoute,
-  ...getSloDiagnosisRoute,
   ...getSloBurnRates,
   ...getPreviewData,
   ...getSLOInstancesRoute,

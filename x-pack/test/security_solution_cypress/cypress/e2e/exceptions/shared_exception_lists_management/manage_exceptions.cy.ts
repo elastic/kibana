@@ -41,7 +41,7 @@ import {
 describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
-    cy.task('esArchiverLoad', 'exceptions');
+    cy.task('esArchiverLoad', { archiveName: 'exceptions' });
 
     createRule(getNewRule());
   });

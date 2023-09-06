@@ -216,10 +216,14 @@ export const createLifecycleExecutor =
       `[Rule Registry] Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
     );
 
-    const trackedAlertsDataMap: Record<
-      string,
-      { indexName: string; fields: Partial<ParsedTechnicalFields & ParsedExperimentalFields> }
-    > = {};
+    interface TrackedAlertData {
+      indexName: string;
+      fields: Partial<ParsedTechnicalFields & ParsedExperimentalFields>;
+      seqNo: number | undefined;
+      primaryTerm: number | undefined;
+    }
+
+    const trackedAlertsDataMap: Record<string, TrackedAlertData> = {};
 
     if (trackedAlertStates.length) {
       const result = await fetchExistingAlerts(
@@ -230,10 +234,19 @@ export const createLifecycleExecutor =
       result.forEach((hit) => {
         const alertInstanceId = hit._source ? hit._source[ALERT_INSTANCE_ID] : void 0;
         if (alertInstanceId && hit._source) {
-          trackedAlertsDataMap[alertInstanceId] = {
-            indexName: hit._index,
-            fields: hit._source,
-          };
+          const alertLabel = `${rule.ruleTypeId}:${rule.id} ${alertInstanceId}`;
+          if (hit._seq_no == null) {
+            logger.error(`missing _seq_no on alert instance ${alertLabel}`);
+          } else if (hit._primary_term == null) {
+            logger.error(`missing _primary_term on alert instance ${alertLabel}`);
+          } else {
+            trackedAlertsDataMap[alertInstanceId] = {
+              indexName: hit._index,
+              fields: hit._source,
+              seqNo: hit._seq_no,
+              primaryTerm: hit._primary_term,
+            };
+          }
         }
       });
     }
@@ -308,6 +321,8 @@ export const createLifecycleExecutor =
 
         return {
           indexName: alertData?.indexName,
+          seqNo: alertData?.seqNo,
+          primaryTerm: alertData?.primaryTerm,
           event,
           flappingHistory,
           flapping,
@@ -335,10 +350,22 @@ export const createLifecycleExecutor =
       logger.debug(`[Rule Registry] Preparing to index ${allEventsToIndex.length} alerts.`);
 
       await ruleDataClientWriter.bulk({
-        body: allEventsToIndex.flatMap(({ event, indexName }) => [
+        body: allEventsToIndex.flatMap(({ event, indexName, seqNo, primaryTerm }) => [
           indexName
-            ? { index: { _id: event[ALERT_UUID]!, _index: indexName, require_alias: false } }
-            : { index: { _id: event[ALERT_UUID]! } },
+            ? {
+                index: {
+                  _id: event[ALERT_UUID]!,
+                  _index: indexName,
+                  if_seq_no: seqNo,
+                  if_primary_term: primaryTerm,
+                  require_alias: false,
+                },
+              }
+            : {
+                create: {
+                  _id: event[ALERT_UUID]!,
+                },
+              },
           event,
         ]),
         refresh: 'wait_for',

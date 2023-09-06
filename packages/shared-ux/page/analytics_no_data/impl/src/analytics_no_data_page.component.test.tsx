@@ -10,7 +10,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
+import { render, screen } from '@testing-library/react';
 
 import { AnalyticsNoDataPage } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPageProvider } from './services';
@@ -28,6 +31,7 @@ describe('AnalyticsNoDataPageComponent', () => {
           onDataViewCreated={onDataViewCreated}
           kibanaGuideDocLink={'http://www.test.com'}
           showPlainSpinner={false}
+          prependBasePath={(path: string) => path}
         />
       </AnalyticsNoDataPageProvider>
     );
@@ -52,6 +56,7 @@ describe('AnalyticsNoDataPageComponent', () => {
           kibanaGuideDocLink={'http://www.test.com'}
           allowAdHocDataView={true}
           showPlainSpinner={false}
+          prependBasePath={(path: string) => path}
         />
       </AnalyticsNoDataPageProvider>
     );
@@ -60,5 +65,87 @@ describe('AnalyticsNoDataPageComponent', () => {
 
     expect(component.find(KibanaNoDataPage).length).toBe(1);
     expect(component.find(KibanaNoDataPage).props().allowAdHocDataView).toBe(true);
+  });
+
+  describe('no data state', () => {
+    describe('kibana flavor', () => {
+      it('renders add integrations card', async () => {
+        render(
+          <I18nProvider>
+            <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
+              <AnalyticsNoDataPage
+                onDataViewCreated={onDataViewCreated}
+                kibanaGuideDocLink={'http://www.test.com'}
+                showPlainSpinner={false}
+                prependBasePath={(path: string) => path}
+              />
+            </AnalyticsNoDataPageProvider>
+          </I18nProvider>
+        );
+
+        await screen.findByTestId('kbnOverviewAddIntegrations');
+        await screen.getAllByText('Add integrations');
+      });
+
+      it('renders disabled add integrations card when fleet is not available', async () => {
+        render(
+          <I18nProvider>
+            <AnalyticsNoDataPageProvider
+              {...{ ...services, hasESData: async () => false, canAccessFleet: false }}
+            >
+              <AnalyticsNoDataPage
+                onDataViewCreated={onDataViewCreated}
+                kibanaGuideDocLink={'http://www.test.com'}
+                showPlainSpinner={false}
+                prependBasePath={(path: string) => path}
+              />
+            </AnalyticsNoDataPageProvider>
+          </I18nProvider>
+        );
+
+        await screen.findByTestId('kbnOverviewAddIntegrations');
+        await screen.getByText('Contact your administrator');
+      });
+    });
+
+    describe('serverless_search flavor', () => {
+      it('renders getting started card', async () => {
+        render(
+          <I18nProvider>
+            <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
+              <AnalyticsNoDataPage
+                pageFlavor={'serverless_search'}
+                onDataViewCreated={onDataViewCreated}
+                kibanaGuideDocLink={'http://www.test.com'}
+                showPlainSpinner={false}
+                prependBasePath={(path: string) => path}
+              />
+            </AnalyticsNoDataPageProvider>
+          </I18nProvider>
+        );
+
+        await screen.findByTestId('kbnOverviewElasticsearchGettingStarted');
+      });
+
+      it('renders the same getting started card when fleet is not available', async () => {
+        render(
+          <I18nProvider>
+            <AnalyticsNoDataPageProvider
+              {...{ ...services, hasESData: async () => false, canAccessFleet: false }}
+            >
+              <AnalyticsNoDataPage
+                onDataViewCreated={onDataViewCreated}
+                kibanaGuideDocLink={'http://www.test.com'}
+                showPlainSpinner={false}
+                prependBasePath={(path: string) => path}
+                pageFlavor={'serverless_search'}
+              />
+            </AnalyticsNoDataPageProvider>
+          </I18nProvider>
+        );
+
+        await screen.findByTestId('kbnOverviewElasticsearchGettingStarted');
+      });
+    });
   });
 });
