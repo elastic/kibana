@@ -16,7 +16,6 @@ import {
   AgentIds,
   Commands,
   Page,
-  PageSize,
   StartDate,
   EndDate,
   UserIds,
@@ -29,7 +28,10 @@ export const ListRequestQuery = z.object({
   agentIds: AgentIds.optional(),
   commands: Commands.optional(),
   page: Page.optional(),
-  pageSize: PageSize.optional(),
+  /**
+   * Number of items per page
+   */
+  pageSize: z.number().min(1).max(10000).optional().default(10),
   startDate: StartDate.optional(),
   endDate: EndDate.optional(),
   userIds: UserIds.optional(),
