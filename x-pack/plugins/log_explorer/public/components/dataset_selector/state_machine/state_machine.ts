@@ -7,7 +7,7 @@
 
 import { actions, assign, createMachine, raise } from 'xstate';
 import { AllDatasetSelection, SingleDatasetSelection } from '../../../utils/dataset_selection';
-import { UNMANAGED_STREAMS_PANEL_ID } from '../constants';
+import { INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from '../constants';
 import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {
   DatasetsSelectorContext,
@@ -20,7 +20,7 @@ import {
 export const createPureDatasetsSelectorStateMachine = (
   initialContext: Partial<DefaultDatasetsSelectorContext> = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6AB3PoDcwaTDzsIBiAFQHkA4gIAyAUQDaABgC6iUPVgBLdIvIA7OSAAeiALQBmAKzUALAEZDAdgBslk4ckAmEwA5HhkwBoQAT0T6LakdHFzMLMLN9dzsAXxjvNExsXAJiMio6BnJmGgYwNS4AYWE+PAkZTQVlVQ0kbUQzSQBOY0szd31zE0lrJutrbz8EVxdTM0solya3YP64hIwsHHwiUgoaeiYWajyC-iExKVk6qpV1TR0ERr7qa0cwx0lJE0tLF0l9QcQTbtveyXa1gB+j6LnmIESSxSq3SGyyOR2tHy1EIilgKjUUAAkmp0GAoJQMDVYEUABIAQQAcgJRAB9AAKVNEwiOlQ41XOdUu+iit0MhjMtgsnQFjgGvkQTQBQV6YXMhncj0c4MhyRWaXWmS2uSRahRaIx2Nx+MJZzUJMKFOpdMZlOZ4jMx3k7LNF0QhiBpn6Hh+7kMTU+EoQ70s1EkHmBjiM+ksTWV8QhizVqTWGU22W2u316MUmJxeIJRPUJLwhQASnxhMJafxaVjKTxRAIy+SeFi+JS8LSAEJ8Hj8ACyrJOLpqboQujMJn01Bad2e7m6Fi8QcsYuoCpMTXGTl9thVSeWKdhWozOuRqJzeeNhbNJdE5LLlp7AE1aZTyQPyk6QKcx1y9DMJomlnBxHDjacWhcCZLC+YN3GoSwekkN4106awpgPJIjxhTV0wRLNL0NfMTSLc0uDwPgyx4V9aSo5BRDLYdnSUV0AInMJjHuCYxSaJDgiQww4MaZ5Z3MZxXHcFwFUsLCoXVVM4W1RELwNXMjQLU1iQo5lREKGjySrWkSgELtkFbckyh4Zjf1HTlQEuRobDDGwjG3cwzCmcUhhcEEgj6R4XGsF5DDk5NcLTeFM11bNiJvLT1DwdBKDAVAAFsLStGkGSZFkKhHVj-wc-wFWoRoRRE-QAUMFw4N6UNrE8qwWgmHkarCnCNUi5TCLU69NLIpKUvS+9H2fbs3w-L8bL-ez6gQBwTFMKMozXUIPSqoSgy3JbBOA-R-iicZQoTVVOsU08CJioj1JI28aiG1KMooqiaImuiywYpj8pYjlamKhBYyW7pmmeMIWhMZw4J2xDkMkKYtzCeGOuhLqlLPFS9Ru-rSLNR6Rp0sR9NpcyeEs0RrJ+2zCrmxz4eMH4mheYCXmeWqgwwyRqCCtdGtsD0ejBU7D1Ri78Oi1SrygABVNQ0tQNRUBgCB8eey0qWy217Sp2b-vmzpHGoEE7n5qMQ1goNGnMI2mYO6YpJklGFJPcXzyxvqZblhWlcgVXRqfUlaKm782RpvXLhko2nPpxwkMFQMhk44wHHCaN-T4kwnePPCord2L1Nl+XFeVv2Xuo2j6MYma7PDxA3FGPjt1trcmYmYSLGT6rIkMNyM6ziL0auyXDUL72S+Sp77yJmjSfJymf118cnOsMNIZMDC1wcBUtsT54QKlF4tysRH1-7tHqGwDUagv9TiEJvSDKMkyzIsqzq7D8cMKCbpIOcRqgpQnBAUG43BAm6Hbe4LghYLGwqLE8l81jXyUJiO+ZRp4k1fhTd+f1xy6D-rDDwrVRS2G8noA6MpBRAjXNuAB8YYHyWzhkBBZBr6oEIIQe+xNZ5vx1jXcc25uYBACL5VwUppgJz0K8bm1gapRgBFOeucQExqHIBAOAmgzpwPWKHHB7EDDTlAk4CCIIap2Dgng0qQVZEfGnAEV40DEywOdjnbUOi2IAzwS0Qx4FnAmOgiuIYAlEIhGXLxHunQz5i1ztQNgHBIBuKKvNSIRhubTFavYSIHw4IxlDN0f+bwarhkaNYSJLtom7ASbTPQzhQwtCMb4qCMFoY9GkeBKc0xXABBKcLJxjDB4Sz1AACwNJU2uE4lpPHlL5HofRmqOGhkzI2dxtwHQcHYbcpSXEY16lLO6CVzSjKXlzIw9gpRVTuCCdmPlgE2G3FOCwionCbO6ts66Hs9mDQniNQ57F-SG3kSEIK3EXD2DqlORCnk2gRBsSEZ5-S87Y09kXH2KsvkZR+QDGqS0oFM39HYFOUxhJPC5j-dZx93LdPoeFc+zD3HU10R48Cu1wwvDaoCGwATAIyKWbIwUrwQawp6QwgeF9cJINvmADF81dC2EQrGEFTgeRFLaHBN4phtz+k2h6DCvk4WiqvuoagbDCBSu5NymMwV3BOCsDGTlwYubAQsAGcM2qoH6CUTEIAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6AB3PoDcwaTDzsIBiAFQHkA4gIAyAUQDaABgC6iUPVgBLdIvIA7OSAAeiAJySAbNQAcu3QFYA7Od0BmA7au2ANCACeiW7YAs1S98ljACYLb0dbYwMAXyjXNExsXAJiMio6BnJmGgYwNS4AYWE+PAkZTQVlVQ0kbT0ggEZqc0lzINt6g2MfY0tdVw8EK19OrwjbMzNvIJi4jCwcfCJSChp6JhZqHLz+ITEpWRqKlXVNHQRdevM-QJDLB0kLa37EVqvJIIN66w-eh-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 */
   createMachine<DatasetsSelectorContext, DatasetsSelectorEvent, DatasetsSelectorTypestate>(
     {
       context: { ...DEFAULT_CONTEXT, ...initialContext },
@@ -39,56 +39,69 @@ export const createPureDatasetsSelectorStateMachine = (
               },
             },
             open: {
-              initial: 'listingIntegrations',
+              initial: 'integrationsTab',
               on: {
                 CLOSE: 'closed',
                 TOGGLE: 'closed',
+                SELECT_ALL_LOGS_DATASET: 'closed',
               },
               states: {
                 hist: {
                   type: 'history',
                 },
-                listingIntegrations: {
-                  entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
+                integrationsTab: {
+                  entry: ['storeIntegrationsTabId'],
                   on: {
-                    CHANGE_PANEL: [
-                      {
-                        cond: 'isUnmanagedStreamsId',
-                        target: 'listingUnmanagedStreams',
+                    SWITCH_TO_UNCATEGORIZED_TAB: 'uncategorizedTab',
+                  },
+                  initial: 'listingIntegrations',
+                  states: {
+                    listingIntegrations: {
+                      entry: [
+                        'storePanelId',
+                        'retrieveSearchFromCache',
+                        'maybeRestoreSearchResult',
+                      ],
+                      on: {
+                        CHANGE_PANEL: 'listingIntegrationStreams',
+                        SCROLL_TO_INTEGRATIONS_BOTTOM: {
+                          actions: 'loadMoreIntegrations',
+                        },
+                        SEARCH_BY_NAME: {
+                          actions: ['storeSearch', 'searchIntegrations'],
+                        },
+                        SORT_BY_ORDER: {
+                          actions: ['storeSearch', 'sortIntegrations'],
+                        },
                       },
-                      {
-                        target: 'listingIntegrationStreams',
+                    },
+                    listingIntegrationStreams: {
+                      entry: [
+                        'storePanelId',
+                        'retrieveSearchFromCache',
+                        'maybeRestoreSearchResult',
+                      ],
+                      on: {
+                        CHANGE_PANEL: 'listingIntegrations',
+                        SEARCH_BY_NAME: {
+                          actions: ['storeSearch', 'searchIntegrationsStreams'],
+                        },
+                        SORT_BY_ORDER: {
+                          actions: ['storeSearch', 'sortIntegrationsStreams'],
+                        },
+                        SELECT_DATASET: '#closed',
                       },
-                    ],
-                    SCROLL_TO_INTEGRATIONS_BOTTOM: {
-                      actions: 'loadMoreIntegrations',
                     },
-                    SEARCH_BY_NAME: {
-                      actions: ['storeSearch', 'searchIntegrations'],
-                    },
-                    SORT_BY_ORDER: {
-                      actions: ['storeSearch', 'sortIntegrations'],
-                    },
-                    SELECT_ALL_LOGS_DATASET: '#closed',
                   },
                 },
-                listingIntegrationStreams: {
-                  entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
+                uncategorizedTab: {
+                  entry: [
+                    'storeUncategorizedTabId',
+                    'retrieveSearchFromCache',
+                    'maybeRestoreSearchResult',
+                  ],
                   on: {
-                    CHANGE_PANEL: 'listingIntegrations',
-                    SEARCH_BY_NAME: {
-                      actions: ['storeSearch', 'searchIntegrationsStreams'],
-                    },
-                    SORT_BY_ORDER: {
-                      actions: ['storeSearch', 'sortIntegrationsStreams'],
-                    },
-                    SELECT_DATASET: '#closed',
-                  },
-                },
-                listingUnmanagedStreams: {
-                  entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
-                  on: {
-                    CHANGE_PANEL: 'listingIntegrations',
+                    SWITCH_TO_INTEGRATIONS_TAB: 'integrationsTab',
                     SEARCH_BY_NAME: {
                       actions: ['storeSearch', 'searchUnmanagedStreams'],
                     },
@@ -130,6 +143,8 @@ export const createPureDatasetsSelectorStateMachine = (
     },
     {
       actions: {
+        storeIntegrationsTabId: assign((_context) => ({ tabId: INTEGRATIONS_TAB_ID })),
+        storeUncategorizedTabId: assign((_context) => ({ tabId: UNCATEGORIZED_TAB_ID })),
         storePanelId: assign((_context, event) =>
           'panelId' in event ? { panelId: event.panelId } : {}
         ),
@@ -159,11 +174,6 @@ export const createPureDatasetsSelectorStateMachine = (
             return raise({ type: 'SORT_BY_ORDER', search: context.search });
           }
         }),
-      },
-      guards: {
-        isUnmanagedStreamsId: (_context, event) => {
-          return 'panelId' in event && event.panelId === UNMANAGED_STREAMS_PANEL_ID;
-        },
       },
     }
   );

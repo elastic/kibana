@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiContextMenuItem, EuiEmptyPrompt, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ReloadDatasets } from '../../../hooks/use_datasets';
 import {
@@ -17,23 +17,20 @@ import {
 } from '../constants';
 import { Dataset } from '../../../../common/datasets';
 import { DatasetSkeleton } from './datasets_skeleton';
-import { DatasetSelectionHandler } from '../types';
 
-interface DatasetListProps {
+export interface UncategorizedListStatusProps {
   datasets: Dataset[] | null;
   error: Error | null;
   isLoading: boolean;
   onRetry: ReloadDatasets;
-  onDatasetClick: DatasetSelectionHandler;
 }
 
-export const DatasetsList = ({
+export const UncategorizedListStatus = ({
   datasets,
   error,
   isLoading,
   onRetry,
-  onDatasetClick,
-}: DatasetListProps) => {
+}: UncategorizedListStatusProps) => {
   const isEmpty = datasets == null || datasets.length <= 0;
   const hasError = error !== null;
 
@@ -81,12 +78,8 @@ export const DatasetsList = ({
     );
   }
 
-  return datasets.map((dataset) => (
-    <EuiContextMenuItem key={dataset.id} onClick={() => onDatasetClick(dataset)}>
-      {dataset.name}
-    </EuiContextMenuItem>
-  ));
+  return null;
 };
 
 // eslint-disable-next-line import/no-default-export
-export default DatasetsList;
+export default UncategorizedListStatus;

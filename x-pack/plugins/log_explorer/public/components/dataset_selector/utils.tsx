@@ -6,24 +6,23 @@
  */
 
 import React, { RefCallback } from 'react';
-import {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { Dataset, Integration } from '../../../common/datasets';
-import {
-  DATA_VIEW_POPOVER_CONTENT_WIDTH,
-  uncategorizedLabel,
-  UNMANAGED_STREAMS_PANEL_ID,
-} from './constants';
+import { DATA_VIEW_POPOVER_CONTENT_WIDTH } from './constants';
 import { DatasetSelectionHandler } from './types';
-import { LoadDatasets } from '../../hooks/use_datasets';
 import { dynamic } from '../../utils/dynamic';
 import type { IntegrationsListStatusProps } from './sub_components/integrations_list_status';
+import type { UncategorizedListStatusProps } from './sub_components/uncategorized_list_status';
+import { DatasetSkeleton } from './sub_components/datasets_skeleton';
 
-const IntegrationsListStatus = dynamic(() => import('./sub_components/integrations_list_status'));
+const IntegrationsListStatus = dynamic(() => import('./sub_components/integrations_list_status'), {
+  fallback: <DatasetSkeleton />,
+});
+const UncategorizedListStatus = dynamic(
+  () => import('./sub_components/uncategorized_list_status'),
+  { fallback: <DatasetSkeleton /> }
+);
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,
@@ -87,18 +86,8 @@ export const createAllLogDatasetsItem = ({ onClick }: { onClick(): void }) => {
   return {
     name: allLogDataset.title,
     'data-test-subj': 'allLogDatasets',
-    icon: allLogDataset.iconType && <EuiIcon type={allLogDataset.iconType} />,
+    iconType: allLogDataset.iconType,
     onClick,
-  };
-};
-
-export const createUnmanagedDatasetsItem = ({ onClick }: { onClick: LoadDatasets }) => {
-  return {
-    name: uncategorizedLabel,
-    'data-test-subj': 'unmanagedDatasets',
-    icon: <EuiIcon type="documents" />,
-    onClick,
-    panel: UNMANAGED_STREAMS_PANEL_ID,
   };
 };
 
@@ -107,5 +96,13 @@ export const createIntegrationStatusItem = (props: IntegrationsListStatusProps) 
     disabled: true,
     name: <IntegrationsListStatus {...props} />,
     'data-test-subj': 'integrationStatusItem',
+  };
+};
+
+export const createUncategorizedStatusItem = (props: UncategorizedListStatusProps) => {
+  return {
+    disabled: true,
+    name: <UncategorizedListStatus {...props} />,
+    'data-test-subj': 'uncategorizedStatusItem',
   };
 };
