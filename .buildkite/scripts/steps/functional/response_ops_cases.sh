@@ -13,4 +13,4 @@ echo "--- Response Ops Cases Cypress Tests on Security Solution"
 cd x-pack/test/security_solution_cypress
 
 set +e
-yarn cypress:run:cases:ess; status=$?; yarn junit:merge && exit $status
+yarn cypress:run:cases:ess; status=$?; yarn junit:merge || :; exit $status
