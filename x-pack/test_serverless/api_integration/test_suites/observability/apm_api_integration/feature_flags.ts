@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { APMFtrContextProvider } from './common/services';
+import { ApmApiClient } from './common/apm_api_supertest';
 
 const fleetMigrationResponse = {
   statusCode: 404,
@@ -48,7 +49,7 @@ const SAMPLE_SOURCEMAP = {
   mappings: 'A,AAAB;;ABCDE;',
 };
 
-async function uploadSourcemap(apmApiClient: any) {
+async function uploadSourcemap(apmApiClient: ApmApiClient) {
   const response = await apmApiClient.slsUser({
     endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
     type: 'form-data',
@@ -67,8 +68,7 @@ async function uploadSourcemap(apmApiClient: any) {
 export default function ({ getService }: APMFtrContextProvider) {
   const apmApiClient = getService('apmApiClient');
 
-  // Issue: https://github.com/elastic/kibana/issues/165138
-  describe.skip('apm feature flags', () => {
+  describe('apm feature flags', () => {
     describe('fleet migrations', () => {
       it('rejects requests to save apm server schema', async () => {
         try {
