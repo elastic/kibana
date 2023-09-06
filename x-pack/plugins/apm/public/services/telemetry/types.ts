@@ -14,7 +14,6 @@ export interface TelemetryServiceSetupParams {
 
 export interface SearchQuerySubmittedParams {
   kuery_fields: string[];
-  pathname: string;
   interval: string;
   action: 'submit' | 'refresh' | 'update';
 }

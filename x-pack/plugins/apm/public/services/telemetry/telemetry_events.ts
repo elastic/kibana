@@ -18,12 +18,6 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
         },
       },
     },
-    pathname: {
-      type: 'text',
-      _meta: {
-        description: 'The pathname the event recorded',
-      },
-    },
     interval: {
       type: 'text',
       _meta: {

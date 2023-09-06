@@ -394,7 +394,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           import('./application'),
           core.getStartServices(),
         ]);
-        ``;
         return renderApp({
           coreStart,
           pluginsSetup: pluginSetupDeps,

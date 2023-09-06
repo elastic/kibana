@@ -21,13 +21,11 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportSearchQuerySubmitted = ({
     kuery_fields,
-    pathname,
     interval,
     action,
   }: SearchQuerySubmittedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.SEARCH_QUERY_SUBMITTED, {
       kuery_fields,
-      pathname,
       interval,
       action,
     });

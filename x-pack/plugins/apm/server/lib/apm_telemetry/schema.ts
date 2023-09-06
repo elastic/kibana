@@ -27,8 +27,6 @@ const aggregatedTransactionCountSchema: MakeSchemaFrom<
   },
 };
 
-const keyword: { type: 'keyword' } = { type: 'keyword' };
-
 const agentSchema: MakeSchemaFrom<APMUsage, true>['agents'][ElasticAgentName] =
   {
     agent: {
@@ -953,38 +951,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
               _meta: {
                 description:
                   'Size of the metric indicess in byte units overall.',
-              },
-            },
-          },
-        },
-      },
-    },
-    traces: {
-      shards: {
-        total: {
-          type: 'long',
-          _meta: {
-            description:
-              'Total number of shards for span and trasnaction indices',
-          },
-        },
-      },
-      all: {
-        total: {
-          docs: {
-            count: {
-              type: 'long',
-              _meta: {
-                description:
-                  'Total number of transaction and span documents overall',
-              },
-            },
-          },
-          store: {
-            size_in_bytes: {
-              type: 'long',
-              _meta: {
-                description: 'Size of the index in byte units overall.',
               },
             },
           },
