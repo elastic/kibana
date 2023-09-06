@@ -52,7 +52,8 @@ describe('Sourcerer', () => {
     });
   });
 
-  describe('Default scope', { tags: ['@ess', '@serverless'] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/165766
+  describe('Default scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
     beforeEach(() => {
       cy.clearLocalStorage();
       login();
