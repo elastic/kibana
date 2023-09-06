@@ -37,6 +37,7 @@ import type {
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
@@ -111,6 +112,9 @@ export const fetchFleetAgents = async (
         'elastic-api-version': API_VERSIONS.public.v1,
       },
       query: options,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);
@@ -170,6 +174,9 @@ export const fetchFleetServerUrl = async (kbnClient: KbnClient): Promise<string 
       query: {
         perPage: 100,
       },
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);
@@ -208,6 +215,10 @@ export const fetchAgentPolicyEnrollmentKey = async (
         'elastic-api-version': API_VERSIONS.public.v1,
       },
       query: { kuery: `policy_id: "${agentPolicyId}"` },
+
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data.items[0]);
@@ -236,6 +247,9 @@ export const fetchAgentPolicyList = async (
         'elastic-api-version': API_VERSIONS.public.v1,
       },
       query: options,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);
@@ -336,6 +350,7 @@ export const getAgentDownloadUrl = async (
  * Given a stack version number, function will return the closest Agent download version available
  * for download. THis could be the actual version passed in or lower.
  * @param version
+ * @param log
  */
 export const getLatestAgentDownloadVersion = async (
   version: string,
@@ -399,6 +414,9 @@ export const unEnrollFleetAgent = async (
       method: 'POST',
       path: agentRouteService.getUnenrollPath(agentId),
       body: { revoke: force },
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .catch(catchAxiosErrorFormatAndThrow);
 

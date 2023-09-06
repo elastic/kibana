@@ -11,6 +11,7 @@ import type {
   UpdatePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { request } from './common';
 import { ProtectionModes } from '../../../../common/endpoint/types';
 
@@ -24,6 +25,9 @@ export const enableAllPolicyProtections = (
   return request<GetOnePackagePolicyResponse>({
     method: 'GET',
     url: packagePolicyRouteService.getInfoPath(endpointPolicyId),
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
   }).then(({ body: { item: endpointPolicy } }) => {
     const {
       created_by: _createdBy,
@@ -58,6 +62,9 @@ export const enableAllPolicyProtections = (
       method: 'PUT',
       url: packagePolicyRouteService.getUpdatePath(endpointPolicyId),
       body: updatedEndpointPolicy,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     });
   });
 };
@@ -69,6 +76,9 @@ export const setCustomProtectionUpdatesManifestVersion = (
   return request<GetOnePackagePolicyResponse>({
     method: 'GET',
     url: packagePolicyRouteService.getInfoPath(endpointPolicyId),
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
   }).then(({ body: { item: endpointPolicy } }) => {
     const {
       created_by: _createdBy,
@@ -91,6 +101,9 @@ export const setCustomProtectionUpdatesManifestVersion = (
       method: 'PUT',
       url: packagePolicyRouteService.getUpdatePath(endpointPolicyId),
       body: updatedEndpointPolicy,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     });
   });
 };
@@ -103,6 +116,6 @@ export const setCustomProtectionUpdatesNote = (
     method: 'POST',
     url: `/api/endpoint/protection_updates_note/${endpointPolicyId}`,
     body: { note },
-    headers: { 'Elastic-Api-Version': '2023-10-31' },
+    headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
   });
 };
