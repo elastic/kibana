@@ -12,7 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./management'));
 
-    // platform security
+    // Platform Security
     loadTestFile(require.resolve('./security/api_keys'));
     loadTestFile(require.resolve('./security/navigation/avatar_menu'));
 
@@ -21,5 +21,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     // Data View Management
     loadTestFile(require.resolve('./data_view_mgmt'));
+
+    // Visualizations
+    loadTestFile(require.resolve('./visualizations'));
   });
 }
