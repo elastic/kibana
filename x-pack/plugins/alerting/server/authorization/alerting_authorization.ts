@@ -339,7 +339,8 @@ export class AlertingAuthorization {
         [RegistryAlertTypeWithAuth, string, HasPrivileges, IsAuthorizedAtProducerLevel]
       >();
       const allPossibleConsumers = await this.allPossibleConsumers;
-
+      const addLegacyConsumerPrivileges = (legacyConsumer: string) =>
+        legacyConsumer === ALERTS_FEATURE_ID || isEmpty(featuresIds);
       for (const feature of fIds) {
         const featureDef = this.features
           .getKibanaFeatures()
@@ -366,10 +367,10 @@ export class AlertingAuthorization {
                 ]
               );
               if (!isEmpty(ruleTypeAuth.validLegacyConsumers)) {
-                ruleTypeAuth.validLegacyConsumers.forEach((consumer) => {
-                  if (consumer === ALERTS_FEATURE_ID || isEmpty(featuresIds)) {
-                    if (!allPossibleConsumers[consumer]) {
-                      allPossibleConsumers[consumer] = {
+                ruleTypeAuth.validLegacyConsumers.forEach((legacyConsumer) => {
+                  if (addLegacyConsumerPrivileges(legacyConsumer)) {
+                    if (!allPossibleConsumers[legacyConsumer]) {
+                      allPossibleConsumers[legacyConsumer] = {
                         read: true,
                         all: true,
                       };
@@ -378,11 +379,11 @@ export class AlertingAuthorization {
                     privilegeToRuleType.set(
                       this.authorization!.actions.alerting.get(
                         ruleTypeId,
-                        consumer,
+                        legacyConsumer,
                         authorizationEntity,
                         operation
                       ),
-                      [ruleTypeAuth, consumer, hasPrivilegeByOperation(operation), false]
+                      [ruleTypeAuth, legacyConsumer, hasPrivilegeByOperation(operation), false]
                     );
                   }
                 });
@@ -419,11 +420,11 @@ export class AlertingAuthorization {
 
                     if (isAuthorizedAtProducerLevel) {
                       // granting privileges under the producer automatically authorized the Rules Management UI as well
-                      ruleType.validLegacyConsumers.forEach((consumer) => {
-                        if (consumer === ALERTS_FEATURE_ID || isEmpty(featuresIds)) {
-                          ruleType.authorizedConsumers[consumer] = mergeHasPrivileges(
+                      ruleType.validLegacyConsumers.forEach((legacyConsumer) => {
+                        if (addLegacyConsumerPrivileges(legacyConsumer)) {
+                          ruleType.authorizedConsumers[legacyConsumer] = mergeHasPrivileges(
                             hasPrivileges,
-                            ruleType.authorizedConsumers[consumer]
+                            ruleType.authorizedConsumers[legacyConsumer]
                           );
                         }
                       });
@@ -478,10 +479,10 @@ function asAuthorizedConsumers(
   consumers: string[],
   hasPrivileges: HasPrivileges
 ): AuthorizedConsumers {
-  return consumers.reduce<AuthorizedConsumers>(
-    (acc, feature) => Object.assign(acc, { [feature]: hasPrivileges }),
-    {}
-  );
+  return consumers.reduce<AuthorizedConsumers>((acc, feature) => {
+    acc[feature] = hasPrivileges;
+    return acc;
+  }, {});
 }
 
 function getUnauthorizedMessage(
