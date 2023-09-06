@@ -2994,6 +2994,14 @@
       }
     }
   },
+  "policy-settings-protection-updates-note": {
+    "properties": {
+      "note": {
+        "type": "text",
+        "index": false
+      }
+    }
+  },
   "infrastructure-ui-source": {
     "dynamic": false,
     "properties": {}
