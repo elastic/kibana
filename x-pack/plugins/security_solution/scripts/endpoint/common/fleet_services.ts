@@ -336,6 +336,7 @@ export const getAgentDownloadUrl = async (
  * Given a stack version number, function will return the closest Agent download version available
  * for download. THis could be the actual version passed in or lower.
  * @param version
+ * @param log
  */
 export const getLatestAgentDownloadVersion = async (
   version: string,
@@ -399,6 +400,9 @@ export const unEnrollFleetAgent = async (
       method: 'POST',
       path: agentRouteService.getUnenrollPath(agentId),
       body: { revoke: force },
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .catch(catchAxiosErrorFormatAndThrow);
 
