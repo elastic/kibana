@@ -211,8 +211,9 @@ export const ConfigurationStep = ({ onNext }: Props) => {
         labelAppend={
           <EuiText size="xs">
             <EuiLink
-              href={getUrlForApp('home', { path: '#/tutorial_directory/fileDataViz' })}
+              target="_blank"
               data-test-subj="uploadFileLink"
+              href={getUrlForApp('home', { path: '#/tutorial_directory/fileDataViz' })}
             >
               <FormattedMessage
                 id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.uploadFileLink"

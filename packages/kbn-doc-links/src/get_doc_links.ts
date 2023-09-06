@@ -337,6 +337,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
       deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
       enrichApis: `${ELASTICSEARCH_DOCS}enrich-apis.html`,
+      createEnrichPolicy: `${ELASTICSEARCH_DOCS}put-enrich-policy-api.html`,
       matchAllQuery: `${ELASTICSEARCH_DOCS}query-dsl-match-all-query.html`,
       createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
       frozenIndices: `${ELASTICSEARCH_DOCS}frozen-indices.html`,

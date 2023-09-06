@@ -35,7 +35,7 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
         bottomBorder
         rightSideItems={[
           <EuiButtonEmpty
-            href={documentationService.getEnrichApisLink()}
+            href={documentationService.getCreateEnrichPolicyLink()}
             target="_blank"
             iconType="help"
             data-test-subj="documentationLink"

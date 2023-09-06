@@ -14,7 +14,6 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiText,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTabbedContent,
@@ -209,16 +208,16 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
 
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={() => onSubmit(CREATE_AND_EXECUTE_POLICY)} isLoading={isLoading}>
+          <EuiButton color="primary" onClick={() => onSubmit(CREATE_AND_EXECUTE_POLICY)} isDisabled={isLoading}>
             <FormattedMessage
               id="xpack.idxMgmt.enrichPolicyCreate.createStep.createAndExecuteButtonLabel"
               defaultMessage="Create and execute policy"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton fill color="primary" onClick={() => onSubmit()} isLoading={isLoading}>
+          <EuiButton fill color="primary" onClick={() => onSubmit()} isDisabled={isLoading}>
             <FormattedMessage
               id="xpack.idxMgmt.enrichPolicyCreate.createStep.createButtonLabel"
               defaultMessage="Create policy"
