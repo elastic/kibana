@@ -14,12 +14,26 @@ import {
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationEmbeddableByReferenceInput, NavigationEmbeddableInput } from './types';
+import {
+  NavigationEmbeddableByReferenceInput,
+  NavigationEmbeddableEditorFlyoutReturn,
+  NavigationEmbeddableInput,
+} from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import type { NavigationEmbeddable } from './navigation_embeddable';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 import { extract, inject } from '../../common/embeddable';
+import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import {
+  MigrateFunctionsObject,
+  GetMigrationFunctionObjectFn,
+} from '@kbn/kibana-utils-plugin/common';
+import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
+
+import { NavigationEmbeddableAttributes } from '../../common/content_management';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -28,9 +42,24 @@ const getDefaultNavigationEmbeddableInput = (): Partial<NavigationEmbeddableInpu
   disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
+const placementMetaContainsAttributes = (meta: unknown): meta is NavigationEmbeddableAttributes => {
+  return Boolean(
+    (meta as NavigationEmbeddableAttributes).layout ||
+      (meta as NavigationEmbeddableAttributes).links
+  );
+};
+
 export class NavigationEmbeddableFactoryDefinition
-  implements EmbeddableFactoryDefinition<NavigationEmbeddableInput>
+  implements
+    EmbeddableFactoryDefinition<NavigationEmbeddableInput>,
+    IProvidesPanelPlacementSettings<NavigationEmbeddableInput>
 {
+  latestVersion?: string | undefined;
+  telemetry?:
+    | ((state: EmbeddableStateWithType, stats: Record<string, any>) => Record<string, any>)
+    | undefined;
+  migrations?: MigrateFunctionsObject | GetMigrationFunctionObjectFn | undefined;
+  grouping?: UiActionsPresentableGrouping<unknown> | undefined;
   public readonly type = CONTENT_ID;
 
   public readonly isContainerType = false;
@@ -40,6 +69,20 @@ export class NavigationEmbeddableFactoryDefinition
     type: CONTENT_ID,
     getIconForSavedObject: () => APP_ICON,
   };
+
+  public getPanelPlacementSettings: IProvidesPanelPlacementSettings<NavigationEmbeddableInput>['getPanelPlacementSettings'] =
+    (input, placementMeta) => {
+      if (!placementMetaContainsAttributes(placementMeta) || !placementMeta.layout) {
+        // if we have no information about the layout of this nav embeddable defer to default panel size.
+        return { strategy: 'placeAtTop' };
+      }
+
+      console.log(placementMeta);
+      const width = placementMeta.layout === 'horizontal' ? DASHBOARD_GRID_COLUMN_COUNT : 8;
+      const height =
+        placementMeta.layout === 'horizontal' ? 4 : (placementMeta.links?.length ?? 1 * 3) + 4;
+      return { width, height, strategy: 'placeAtTop' };
+    };
 
   public async isEditable() {
     await untilPluginStartServicesReady();
@@ -84,12 +127,12 @@ export class NavigationEmbeddableFactoryDefinition
   public async getExplicitInput(
     initialInput: NavigationEmbeddableInput,
     parent?: DashboardContainer
-  ): Promise<Omit<NavigationEmbeddableInput, 'id'>> {
-    if (!parent) return {};
+  ): Promise<NavigationEmbeddableEditorFlyoutReturn> {
+    if (!parent) return { newInput: {} };
 
     const { openEditorFlyout } = await import('../editor/open_editor_flyout');
 
-    const input = await openEditorFlyout(
+    const { newInput, panelStateMeta } = await openEditorFlyout(
       {
         ...getDefaultNavigationEmbeddableInput(),
         ...initialInput,
@@ -97,7 +140,7 @@ export class NavigationEmbeddableFactoryDefinition
       parent
     );
 
-    return input;
+    return { newInput, panelStateMeta };
   }
 
   public getDisplayName() {

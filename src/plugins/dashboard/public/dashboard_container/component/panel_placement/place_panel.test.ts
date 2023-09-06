@@ -11,7 +11,7 @@ import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../dashboard_constants';
 
-import { createPanelState } from './create_panel_state';
+import { placePanel } from './place_panel';
 
 interface TestInput extends EmbeddableInput {
   test: string;
@@ -19,7 +19,7 @@ interface TestInput extends EmbeddableInput {
 const panels: { [key: string]: DashboardPanelState } = {};
 
 test('createPanelState adds a new panel state in 0,0 position', () => {
-  const { newPanel: panelState } = createPanelState<TestInput>(
+  const { newPanel: panelState } = placePanel<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'hi', id: '123' },
@@ -38,7 +38,7 @@ test('createPanelState adds a new panel state in 0,0 position', () => {
 });
 
 test('createPanelState adds a second new panel state', () => {
-  const { newPanel: panelState } = createPanelState<TestInput>(
+  const { newPanel: panelState } = placePanel<TestInput>(
     { type: CONTACT_CARD_EMBEDDABLE, explicitInput: { test: 'bye', id: '456' } },
     panels
   );
@@ -52,7 +52,7 @@ test('createPanelState adds a second new panel state', () => {
 });
 
 test('createPanelState adds a third new panel state', () => {
-  const { newPanel: panelState } = createPanelState<TestInput>(
+  const { newPanel: panelState } = placePanel<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'bye', id: '789' },
@@ -69,7 +69,7 @@ test('createPanelState adds a third new panel state', () => {
 
 test('createPanelState adds a new panel state in the top most position', () => {
   delete panels['456'];
-  const { newPanel: panelState } = createPanelState<TestInput>(
+  const { newPanel: panelState } = placePanel<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'bye', id: '987' },

@@ -77,7 +77,10 @@ export const isKeyEqual = (
  */
 export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
   panels: async ({ currentValue, lastValue, container }) => {
-    if (!getPanelLayoutsAreEqual(currentValue ?? {}, lastValue ?? {})) return false;
+    if (!getPanelLayoutsAreEqual(currentValue ?? {}, lastValue ?? {})) {
+      console.log('DEM DARN PANEL LAYOUTS AREN EQUAL');
+      return false;
+    }
 
     const explicitInputComparePromises = Object.values(currentValue ?? {}).map(
       (panel) =>
