@@ -94,6 +94,12 @@ test('pulls state from dashboard saved object when given a saved object id', asy
   expect(dashboard!.getState().explicitInput.description).toBe(`wow would you look at that? Wow.`);
 });
 
+test('falls back to a given by value ID when not created with a saved object ID', async () => {
+  const dashboard = await createDashboard({ byValueId: 'byValueId' }, 0);
+  expect(dashboard).toBeDefined();
+  expect(dashboard?.getDashboardId()).toBe('byValueId');
+});
+
 test('pulls state from session storage which overrides state from saved object', async () => {
   pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
