@@ -6,7 +6,10 @@
  */
 // FIXME: move file to server/routes/rule/apis
 import { IRouter } from '@kbn/core/server';
-import { ruleTagsRequestQuerySchemaV1 } from '../../common/routes/rule/apis/tags';
+import {
+  ruleTagsRequestQuerySchemaV1,
+  RuleTagsRequestQueryV1,
+} from '../../common/routes/rule/apis/tags';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { ILicenseState } from '../lib';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
@@ -42,9 +45,7 @@ export const getRuleTagsRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        // FIXME: import type {RuleTagsRequestQueryV1} from '../../../../../common/routes/rule/apis/tags';
-        // FIXME: const query: RuleTagsRequestQueryV1 = req.query;
-        const query = req.query;
+        const query: RuleTagsRequestQueryV1 = req.query;
 
         const options = rewriteQueryReq(query);
 
