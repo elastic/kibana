@@ -162,7 +162,7 @@ export const getInlineEditorText = (queryString: string, isMultiLine: boolean) =
 export const getWrappedInPipesCode = (code: string, isWrapped: boolean): string => {
   const pipes = code?.split('|');
   const codeNoLines = pipes?.map((pipe) => {
-    return pipe.replaceAll('\n', '');
+    return pipe.replaceAll('\n', '').trim();
   });
-  return codeNoLines.join(isWrapped ? '|' : '\n|');
+  return codeNoLines.join(isWrapped ? ' | ' : '\n| ');
 };
