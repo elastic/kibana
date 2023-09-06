@@ -18,7 +18,7 @@ import {
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
-import { APP_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
+import { API_VERSIONS, APP_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
 import type {
   FleetServerHost,
   GenerateServiceTokenResponse,
@@ -91,6 +91,9 @@ const getFleetServerPackagePolicy = async (): Promise<PackagePolicy | undefined>
         perPage: 1,
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${FLEET_SERVER_PACKAGE}"`,
       },
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .then((response) => response.data.items[0]);
 };
@@ -130,6 +133,9 @@ const getOrCreateFleetServerAgentPolicyId = async (): Promise<string> => {
         // is also created and added to the agent policy
         has_fleet_server: true,
       },
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .then((response) => response.data.item);
 
@@ -151,6 +157,9 @@ const generateFleetServiceToken = async (): Promise<string> => {
       method: 'POST',
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
       body: {},
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .then((response) => response.data.value);
 
@@ -280,6 +289,9 @@ const configureFleetIfNeeded = async () => {
       .request<GetOutputsResponse>({
         method: 'GET',
         path: outputRoutesService.getListPath(),
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
       })
       .then((response) => response.data);
 
@@ -320,6 +332,9 @@ const configureFleetIfNeeded = async () => {
                 method: 'PUT',
                 path: outputRoutesService.getUpdatePath(id),
                 body: update,
+                headers: {
+                  'elastic-api-version': API_VERSIONS.public.v1,
+                },
               })
               .catch(catchAxiosErrorFormatAndThrow);
           }
@@ -357,6 +372,9 @@ const addFleetServerHostToFleetSettings = async (
         method: 'POST',
         path: fleetServerHostsRoutesService.getCreatePath(),
         body: newFleetHostEntry,
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
       })
       .catch(catchAxiosErrorFormatAndThrow)
       .catch((error: FormattedAxiosError) => {

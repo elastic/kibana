@@ -18,6 +18,7 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import { AGENT_POLICY_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { getEndpointPackageInfo } from '../utils/package';
 import type { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
@@ -63,6 +64,9 @@ export const indexFleetEndpointPolicy = async (
         path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
         method: 'POST',
         body: newAgentPolicyData,
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
       })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreateAgentPolicyResponse>;
   } catch (error) {
@@ -101,6 +105,9 @@ export const indexFleetEndpointPolicy = async (
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       method: 'POST',
       body: newPackagePolicyData,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreatePackagePolicyResponse>;
 
@@ -139,6 +146,9 @@ export const deleteIndexedFleetEndpointPolicies = async (
           body: {
             packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
           },
+          headers: {
+            'elastic-api-version': API_VERSIONS.public.v1,
+          },
         })
         .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostDeletePackagePoliciesResponse>
     ).data;
@@ -156,6 +166,9 @@ export const deleteIndexedFleetEndpointPolicies = async (
               method: 'POST',
               body: {
                 agentPolicyId: agentPolicy.id,
+              },
+              headers: {
+                'elastic-api-version': API_VERSIONS.public.v1,
               },
             })
             .catch(wrapErrorAndRejectPromise)) as AxiosResponse<DeleteAgentPolicyResponse>
