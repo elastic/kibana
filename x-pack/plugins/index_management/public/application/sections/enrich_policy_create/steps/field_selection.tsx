@@ -145,7 +145,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
       {hasSelectedMultipleIndices && matchFieldOptions.length === 0 && (
         <>
           <EuiCallOut
-            title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.errorTitle', {
+            title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.noCommonFieldsFoundError', {
               defaultMessage: 'No common fields found',
             })}
             color="danger"
