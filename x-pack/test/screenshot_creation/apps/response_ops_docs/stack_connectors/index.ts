@@ -57,6 +57,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./email_connector'));
     loadTestFile(require.resolve('./generative_ai_connector'));
     loadTestFile(require.resolve('./index_connector'));
+    loadTestFile(require.resolve('./jira_connector'));
     loadTestFile(require.resolve('./opsgenie_connector'));
     loadTestFile(require.resolve('./pagerduty_connector'));
     loadTestFile(require.resolve('./server_log_connector'));
