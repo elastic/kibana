@@ -6,22 +6,15 @@
  */
 // FIXME: move file to server/routes/rule/apis
 import { IRouter } from '@kbn/core/server';
+import { transformRuleTagsQueryRequestV1 } from './rule/apis/tags/transforms';
 import {
   ruleTagsRequestQuerySchemaV1,
   RuleTagsRequestQueryV1,
 } from '../../common/routes/rule/apis/tags';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { ILicenseState } from '../lib';
-import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
-import { GetTagsParams, GetTagsResult } from '../rules_client/methods/get_tags';
-
-// FIXME: import {transformRuleTagsQueryRequestV1} from './transforms';
-// FIXME: remove spread operator
-// FIXME: use RuleTagsParams type in server/application/rule/types (convert from schema)
-const rewriteQueryReq: RewriteRequestCase<GetTagsParams> = ({ per_page: perPage, ...rest }) => ({
-  ...rest,
-  perPage,
-});
+import { RewriteResponseCase, verifyAccessAndContext } from './lib';
+import { GetTagsResult } from '../rules_client/methods/get_tags';
 
 // FIXME: import {transformRuleTagsBodyResponseV1} from './transforms';
 // FIXME: remove spread operator
@@ -47,7 +40,7 @@ export const getRuleTagsRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const query: RuleTagsRequestQueryV1 = req.query;
 
-        const options = rewriteQueryReq(query);
+        const options = transformRuleTagsQueryRequestV1(query);
 
         const tagsResult = await rulesClient.getTags(options);
 

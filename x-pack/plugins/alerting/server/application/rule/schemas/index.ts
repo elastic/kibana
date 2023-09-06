@@ -23,3 +23,5 @@ export {
 } from './action_schemas';
 
 export { notifyWhenSchema } from './notify_when_schema';
+
+export { ruleTagsParamsSchema } from './tags';

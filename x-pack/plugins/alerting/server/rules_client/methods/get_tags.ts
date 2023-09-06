@@ -5,25 +5,18 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { TypeOf, schema } from '@kbn/config-schema';
 import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { ruleTagsParamsSchema } from '../../application/rule/schemas';
+import { RuleTagsParams } from '../../application/rule/types';
 import { DEFAULT_TAGS_PER_PAGE } from '../../../common/routes/rule/apis/tags';
 import { RulesClientContext } from '../types';
 import { AlertingAuthorizationEntity } from '../../authorization';
 import { alertingAuthorizationFilterOpts } from '../common/constants';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+// FIXME: import { RuleAttributes } from '../../../../data/rule/types';
 import { RawRule } from '../../types';
 
 const MAX_TAGS = 10000;
-
-// FIXME: application schema definition to be used for type
-const getTagsParamsSchema = schema.object({
-  page: schema.number({ defaultValue: 1, min: 1 }),
-  perPage: schema.maybe(schema.number({ defaultValue: DEFAULT_TAGS_PER_PAGE, min: 1 })),
-  search: schema.maybe(schema.string()),
-});
-
-export type GetTagsParams = TypeOf<typeof getTagsParamsSchema>;
 
 export interface RuleTagsAggregationResult {
   tags: {
@@ -43,12 +36,12 @@ export interface GetTagsResult {
 
 export async function getTags(
   context: RulesClientContext,
-  params: GetTagsParams
+  params: RuleTagsParams
 ): Promise<GetTagsResult> {
-  let validatedParams: GetTagsParams;
+  let validatedParams: RuleTagsParams;
 
   try {
-    validatedParams = getTagsParamsSchema.validate(params);
+    validatedParams = ruleTagsParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
