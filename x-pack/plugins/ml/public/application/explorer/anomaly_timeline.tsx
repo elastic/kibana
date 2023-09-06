@@ -347,7 +347,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     }, []);
 
     const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-      ({ dashboardId }) => {
+      ({ dashboardId, newTitle, newDescription }) => {
         if (!selectedJobs) return;
 
         const stateTransfer = embeddable!.getStateTransfer();
@@ -357,7 +357,9 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
 
         const embeddableInput: Partial<AnomalySwimlaneEmbeddableInput> = {
-          ...config,
+          id: config.id,
+          title: newTitle,
+          description: newDescription,
           jobIds,
           swimlaneType: selectedSwimlane,
           ...(selectedSwimlane === SWIMLANE_TYPE.VIEW_BY
