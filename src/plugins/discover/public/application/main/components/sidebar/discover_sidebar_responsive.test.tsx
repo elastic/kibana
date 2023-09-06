@@ -168,6 +168,7 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
     trackUiMetric: jest.fn(),
     onFieldEdited: jest.fn(),
     onDataViewCreated: jest.fn(),
+    onToggleSidebar: jest.fn(),
   };
 }
 
@@ -747,6 +748,24 @@ describe('discover responsive sidebar', function () {
       await comp.update();
 
       expect(comp.find('[data-test-subj="custom-data-view-picker"]').exists()).toBe(true);
+    });
+
+    it('should allow to collapse sidebar', async function () {
+      const comp = await mountComponent({
+        ...props,
+        isSidebarCollapsed: false,
+      });
+      findTestSubject(comp, 'unifiedFieldListSidebar__toggle-collapse').simulate('click');
+      expect(props.onToggleSidebar).toHaveBeenCalledWith(true);
+    });
+
+    it('should allow to expand sidebar', async function () {
+      const comp = await mountComponent({
+        ...props,
+        isSidebarCollapsed: true,
+      });
+      findTestSubject(comp, 'unifiedFieldListSidebar__toggle-expand').simulate('click');
+      expect(props.onToggleSidebar).toHaveBeenCalledWith(false);
     });
   });
 });
