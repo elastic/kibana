@@ -57,6 +57,7 @@ export const SelectConnector: React.FC = () => {
   const { search } = useLocation();
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+  console.log(hasPlatinumLicense);
   const hasNativeAccess = isCloud;
   const { service_type: serviceType } = parseQueryParams(search);
   const [useNativeFilter, setUseNativeFilter] = useState(false);
@@ -228,7 +229,7 @@ export const SelectConnector: React.FC = () => {
                 {filteredConnectors.map((connector) => (
                   <EuiFlexItem key={connector.serviceType} grow>
                     <ConnectorCheckable
-                      disabled={connector.platinumOnly && (!hasPlatinumLicense || !isCloud)}
+                      disabled={connector.platinumOnly && !(hasPlatinumLicense || isCloud)}
                       icon={connector.icon}
                       isBeta={connector.isBeta}
                       isTechPreview={Boolean(connector.isTechPreview)}
