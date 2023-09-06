@@ -28,10 +28,6 @@ import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { languageDefinitions, curlDefinition } from './languages';
 
-const unknownLabel = i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.unknownLabel', {
-  defaultMessage: 'Unknown',
-});
-
 interface Props {
   indexDetails: Index;
 }
@@ -110,31 +106,37 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
         <EuiFlexItem data-test-subj="overviewTabIndexDetails">
           <EuiPanel>
             <EuiFlexGroup>
+              {primary && (
+                <EuiFlexItem>
+                  <EuiStat
+                    title={primary}
+                    description={i18n.translate(
+                      'xpack.idxMgmt.indexDetails.overviewTab.primaryLabel',
+                      {
+                        defaultMessage: 'Primaries',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+              )}
+
+              {replica && (
+                <EuiFlexItem>
+                  <EuiStat
+                    title={replica}
+                    description={i18n.translate(
+                      'xpack.idxMgmt.indexDetails.overviewTab.replicaLabel',
+                      {
+                        defaultMessage: 'Replicas',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+              )}
+
               <EuiFlexItem>
                 <EuiStat
-                  title={primary ? primary : unknownLabel}
-                  description={i18n.translate(
-                    'xpack.idxMgmt.indexDetails.overviewTab.primaryLabel',
-                    {
-                      defaultMessage: 'Primaries',
-                    }
-                  )}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  title={replica ? replica : unknownLabel}
-                  description={i18n.translate(
-                    'xpack.idxMgmt.indexDetails.overviewTab.replicaLabel',
-                    {
-                      defaultMessage: 'Replicas',
-                    }
-                  )}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  title={aliases}
+                  title={Array.isArray(aliases) ? aliases.length : aliases}
                   description={i18n.translate(
                     'xpack.idxMgmt.indexDetails.overviewTab.aliasesLabel',
                     {
