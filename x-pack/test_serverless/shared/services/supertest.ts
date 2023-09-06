@@ -14,7 +14,7 @@ export function SupertestProvider({ getService }: FtrProviderContext) {
   const kbnUrl = formatUrl(config.get('servers.kibana'));
   const cAuthorities = config.get('servers.kibana').certificateAuthorities;
 
-  return supertest.agent(kbnUrl, { ca: cAuthorities });
+  return supertest.agent(kbnUrl, process.env.TEST_CLOUD ? {} : { ca: cAuthorities });
 }
 
 export function SupertestWithoutAuthProvider({ getService }: FtrProviderContext) {
@@ -25,5 +25,5 @@ export function SupertestWithoutAuthProvider({ getService }: FtrProviderContext)
   });
   const cAuthorities = config.get('servers.kibana').certificateAuthorities;
 
-  return supertest.agent(kbnUrl, { ca: cAuthorities });
+  return supertest.agent(kbnUrl, process.env.TEST_CLOUD ? {} : { ca: cAuthorities });
 }
