@@ -218,14 +218,22 @@ export default ({ getService }: FtrProviderContext) => {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
-            case 'global_read at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: 'No rules found for bulk disable',
               });
               expect(response.statusCode).to.eql(400);
+              break;
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'global_read at space1':
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message:
+                  'Unauthorized by "alertsFixture" to bulkDisable "test.restricted-noop" rule',
+              });
+              expect(response.statusCode).to.eql(403);
               break;
             case 'superuser at space1':
               expect(response.body).to.eql({

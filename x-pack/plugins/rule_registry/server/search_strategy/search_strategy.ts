@@ -73,7 +73,7 @@ export const ruleRegistrySearchStrategyProvider = (
         ]);
         let authzFilter;
         const fIds = new Set(featureIds);
-        if (!siemRequest) {
+        if (!siemRequest && featureIds.length > 0) {
           authzFilter = (await getAuthzFilter(
             authorization,
             ReadOperations.Find,

@@ -137,6 +137,7 @@ interface SingleSearchAfterAndAudit {
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   sort?: estypes.SortOptions[] | undefined;
   lastSortIds?: Array<string | number> | undefined;
+  featureIds?: string[];
 }
 
 /**
@@ -283,6 +284,7 @@ export class AlertsClient {
     operation,
     sort,
     lastSortIds = [],
+    featureIds,
   }: SingleSearchAfterAndAudit) {
     try {
       const alertSpaceId = this.spaceId;
@@ -296,7 +298,14 @@ export class AlertsClient {
 
       let queryBody: estypes.SearchRequest['body'] = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
-        query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
+        query: await this.buildEsQueryWithAuthz(
+          query,
+          id,
+          alertSpaceId,
+          operation,
+          config,
+          featureIds ? new Set(featureIds) : undefined
+        ),
         aggs,
         _source,
         track_total_hits: trackTotalHits,
@@ -435,10 +444,15 @@ export class AlertsClient {
     id: string | null | undefined,
     alertSpaceId: string,
     operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
-    config: EsQueryConfig
+    config: EsQueryConfig,
+    featuresIds?: Set<string>
   ) {
     try {
-      const authzFilter = (await getAuthzFilter(this.authorization, operation)) as Filter;
+      const authzFilter = (await getAuthzFilter(
+        this.authorization,
+        operation,
+        featuresIds
+      )) as Filter;
       const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
       let esQuery;
       if (id != null) {
@@ -683,6 +697,7 @@ export class AlertsClient {
           },
         },
         size: 0,
+        featureIds,
       });
 
       let activeAlertCount = 0;
