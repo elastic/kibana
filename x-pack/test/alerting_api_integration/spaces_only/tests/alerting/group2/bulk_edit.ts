@@ -139,6 +139,43 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .expect(400);
         }
       });
+
+      it('should throw 400 if the system action is missing required params', async () => {
+        const { body: rule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
+
+        const payload = {
+          ids: [rule.id],
+          operations: [
+            {
+              operation: 'add',
+              field: 'actions',
+              value: [
+                {
+                  ...systemAction,
+                  params: {},
+                  id: 'system-connector-test.system-action-connector-adapter',
+                },
+              ],
+            },
+          ],
+        };
+
+        const res = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send(payload)
+          .expect(200);
+
+        expect(res.body.errors[0].message).to.eql(
+          'Invalid system action params. System action type: test.system-action-connector-adapter - [myParam]: expected value of type [string] but got [undefined]'
+        );
+      });
     });
   });
 }
