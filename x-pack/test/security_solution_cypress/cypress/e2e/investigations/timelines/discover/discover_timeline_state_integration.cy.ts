@@ -186,8 +186,10 @@ describe(
           });
       });
     });
-    context('saved search tags', { tags: '@brokenInServerless' }, () => {
-      it('should save discover saved search with `Security Solution` tag', () => {
+    it(
+      'should save discover saved search with `Security Solution` tag',
+      { tags: '@brokenInServerless' },
+      () => {
         const timelineSuffix = Date.now();
         const timelineName = `SavedObject timeline-${timelineSuffix}`;
         const kqlQuery = '_id: *';
@@ -206,8 +208,8 @@ describe(
           'contain.text',
           `Saved Search for timeline - ${timelineName}`
         );
-      });
-    });
+      }
+    );
     context('saved search', () => {
       it('should rename the saved search on timeline rename', () => {
         const timelineSuffix = Date.now();
