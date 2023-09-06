@@ -11,11 +11,10 @@ import {
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
-import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_EVALUATION_VALUE, ALERT_REASON } from '@kbn/rule-data-utils';
 import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
-import { STACK_AAD_INDEX_NAME } from '..';
+import { stackAlertsAADConfig } from '..';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '../es_query/fields';
 import {
   ComparatorFns,
@@ -173,18 +172,6 @@ export function getRuleType(
     }
   );
 
-  const alerts: IRuleTypeAlerts<StackAlert> = {
-    context: STACK_AAD_INDEX_NAME,
-    mappings: {
-      fieldMap: {
-        [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
-        [ALERT_EVALUATION_CONDITIONS]: { type: 'keyword', array: false, required: false },
-        [ALERT_EVALUATION_VALUE]: { type: 'keyword', array: false, required: false },
-      },
-    },
-    shouldWrite: true,
-  };
-
   return {
     id: ID,
     name: ruleTypeName,
@@ -222,7 +209,7 @@ export function getRuleType(
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
-    alerts,
+    alerts: stackAlertsAADConfig,
   };
 
   async function executor(
@@ -329,8 +316,7 @@ export function getRuleType(
         conditions: humanFn,
       };
       const actionContext = addMessages(name, baseContext, params);
-      // const alert = alertFactory.create(alertId);
-      // alert.scheduleActions(ActionGroupId, actionContext);
+
       alertsClient!.report({
         id: alertId,
         actionGroup: ActionGroupId,
