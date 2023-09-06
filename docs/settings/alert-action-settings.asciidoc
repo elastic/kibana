@@ -265,7 +265,7 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the h
 --
 
 `xpack.actions.preconfigured.<connector-id>.config.executionTimeField`::
-For an <<index-action-type,index connector>>, specifies a time field that will indicate when each alert condition occurs.
+For an <<index-action-type,index connector>>, a field that indicates when the document was indexed.
 
 `xpack.actions.preconfigured.<connector-id>.config.index`::
 For an <<index-action-type,index connector>>, specifies the {es} index.

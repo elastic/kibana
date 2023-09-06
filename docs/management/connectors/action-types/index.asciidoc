@@ -26,8 +26,8 @@ image::management/connectors/images/index-connector.png[Index connector]
 [[index-connector-configuration]]
 ==== Connector configuration
 
-Index connectors must have a name and an {es} index. You can optionally set the time field, which contains the
-details about when each alert condition was detected.
+Index connectors must have a name and an {es} index.
+You can optionally choose a field that indicates when the document was indexed.
 
 [float]
 [[index-action-configuration]]

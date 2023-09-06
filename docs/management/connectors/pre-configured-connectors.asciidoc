@@ -129,7 +129,7 @@ xpack.actions.preconfigured:
       executionTimeField: my-field <2>
 --
 <1> The {es} index to be written to.
-<2> A time field that will indicate when each alert condition occurs.
+<2> A field that indicates when the document was indexed.
 
 [float]
 [[preconfigured-opsgenie-configuration]]
