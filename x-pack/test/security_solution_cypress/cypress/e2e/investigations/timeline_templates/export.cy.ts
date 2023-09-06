@@ -17,7 +17,8 @@ import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../../tasks/common';
 import { searchByTitle } from '../../../tasks/table_pagination';
 
-describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165760
+describe('Export timelines', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
 
