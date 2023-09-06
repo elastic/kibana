@@ -57,7 +57,6 @@ export const SelectConnector: React.FC = () => {
   const { search } = useLocation();
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
-  console.log(hasPlatinumLicense);
   const hasNativeAccess = isCloud;
   const { service_type: serviceType } = parseQueryParams(search);
   const [useNativeFilter, setUseNativeFilter] = useState(false);
