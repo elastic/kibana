@@ -10,6 +10,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { agentRouteService } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { useHttp } from '../../../common/lib/kibana';
 
 type EndpointPolicyAgentSummary = GetAgentStatusResponse['results'];
@@ -30,7 +31,7 @@ export const useFetchAgentByAgentPolicySummary = (
       return (
         await http.get<GetAgentStatusResponse>(agentRouteService.getStatusPath(), {
           query: { policyId: agentPolicyId },
-          version: '2023-10-31',
+          version: API_VERSIONS.public.v1,
         })
       ).results;
     },

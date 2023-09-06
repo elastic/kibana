@@ -12,6 +12,7 @@ import type {
   GetInfoResponse,
 } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 
 import type { NewPolicyData } from '../../../../common/endpoint/types';
 import type { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
@@ -36,7 +37,7 @@ export const sendGetPackagePolicy = (
 ) => {
   return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
     ...options,
-    version: '2023-10-31',
+    version: API_VERSIONS.public.v1,
   });
 };
 
@@ -53,7 +54,7 @@ export const sendBulkGetPackagePolicies = (
 ) => {
   return http.post<GetPackagePoliciesResponse>(`${INGEST_API_PACKAGE_POLICIES}/_bulk_get`, {
     ...options,
-    version: '2023-10-31',
+    version: API_VERSIONS.public.v1,
     body: JSON.stringify({
       ids: packagePolicyIds,
       ignoreMissing: true,
@@ -77,7 +78,7 @@ export const sendPutPackagePolicy = (
 ): Promise<UpdatePolicyResponse> => {
   return http.put(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
     ...options,
-    version: '2023-10-31',
+    version: API_VERSIONS.public.v1,
     body: JSON.stringify(packagePolicy),
   });
 };
@@ -97,7 +98,7 @@ export const sendGetFleetAgentStatusForPolicy = (
 ): Promise<GetAgentStatusResponse> => {
   return http.get(INGEST_API_FLEET_AGENT_STATUS, {
     ...options,
-    version: '2023-10-31',
+    version: API_VERSIONS.public.v1,
     query: {
       policyId,
     },
@@ -112,7 +113,7 @@ export const sendGetEndpointSecurityPackage = async (
 ): Promise<GetInfoResponse['item']> => {
   const path = epmRouteService.getInfoPath('endpoint');
   const endpointPackageResponse = await http.get<GetInfoResponse>(path, {
-    version: '2023-10-31',
+    version: API_VERSIONS.public.v1,
   });
   const endpointPackageInfo = endpointPackageResponse.item;
   if (!endpointPackageInfo) {

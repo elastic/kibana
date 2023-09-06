@@ -9,6 +9,7 @@ import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-quer
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useMutation } from '@tanstack/react-query';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
 import { useHttp } from '../../../common/lib/kibana';
 import type { PolicyData } from '../../../../common/endpoint/types';
@@ -39,7 +40,7 @@ export const useUpdateEndpointPolicy = (
 
     return http.put(packagePolicyRouteService.getUpdatePath(policy.id), {
       body: JSON.stringify(update),
-      version: '2023-10-31',
+      version: API_VERSIONS.public.v1,
     });
   }, options);
 };

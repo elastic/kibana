@@ -9,6 +9,7 @@ import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
@@ -46,7 +47,7 @@ export const useFetchEndpointPolicy = (
     queryFn: async () => {
       const apiResponse = await http.get<GetPolicyResponse>(
         packagePolicyRouteService.getInfoPath(policyId),
-        { version: '2023-10-31' }
+        { version: API_VERSIONS.public.v1 }
       );
 
       applyDefaultsToPolicyIfNeeded(apiResponse.item);
