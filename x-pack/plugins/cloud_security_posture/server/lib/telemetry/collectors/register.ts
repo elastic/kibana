@@ -35,14 +35,18 @@ export function registerCspmUsageCollector(
       return true;
     },
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
-      const [
-        indicesStats,
-        accountsStats,
-        resourcesStats,
-        rulesStats,
-        installationStats,
-        alertsStats,
-      ] = await Promise.all([
+      const handleResult = <T>(taskName: string, result: PromiseSettledResult<T>) => {
+        if (result.status === 'fulfilled') {
+          return result.value;
+        } else {
+          // Handle the error and log it
+          logger.error(`${taskName} task failed: ${result.reason}`);
+
+          // Return null or some default value, depending on your needs
+          return [];
+        }
+      };
+      const results = await Promise.allSettled([
         getIndicesStats(
           collectorFetchContext.esClient,
           collectorFetchContext.soClient,
@@ -60,6 +64,13 @@ export function registerCspmUsageCollector(
         ),
         getAlertsStats(collectorFetchContext.esClient, logger),
       ]);
+
+      const indicesStats = handleResult('Indices', results[0]);
+      const accountsStats = handleResult('Accounts', results[1]);
+      const resourcesStats = handleResult('Resources', results[2]);
+      const rulesStats = handleResult('Rules', results[3]);
+      const installationStats = handleResult('Installation', results[4]);
+      const alertsStats = handleResult('Alerts', results[5]);
 
       return {
         indices: indicesStats,

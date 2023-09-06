@@ -8,7 +8,7 @@
 import { CspStatusCode } from '../../../../common/types';
 
 export interface CspmUsage {
-  indices: CspmIndicesStats;
+  indices: CspmIndicesStats | never[];
   resources_stats: CspmResourcesStats[];
   accounts_stats: CspmAccountsStats[];
   rules_stats: CspmRulesStats[];
