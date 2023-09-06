@@ -81,6 +81,7 @@ const findLists = async ({
       sort_order,
     },
     signal,
+    version,
   });
 };
 
