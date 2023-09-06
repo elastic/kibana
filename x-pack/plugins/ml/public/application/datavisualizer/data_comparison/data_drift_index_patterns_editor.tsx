@@ -278,7 +278,7 @@ export function DataDriftIndexPatternsEditor({
         <EuiFlexGroup direction="column">
           {combinedTimeFieldOptions.length > 0 ? (
             <EuiFormRow
-              label={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.timestampField', {
+              label={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.timestampFieldLabel', {
                 defaultMessage: 'Timestamp field',
               })}
               fullWidth
@@ -287,7 +287,7 @@ export function DataDriftIndexPatternsEditor({
               <>
                 <EuiComboBox<string>
                   placeholder={i18n.translate(
-                    'xpack.ml.dataDrift.indexPatternsEditor.timestampField',
+                    'xpack.ml.dataDrift.indexPatternsEditor.timestampFieldOptions',
                     {
                       defaultMessage: 'Select an optional timestamp field',
                     }
@@ -326,15 +326,18 @@ export function DataDriftIndexPatternsEditor({
                   defaultMessage: 'Optional data view name.',
                 }) +
                 (referenceIndexPattern && productionIndexPattern
-                  ? i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.dataViewHelpText', {
-                      defaultMessage: 'Default to {defaultDataViewName} if not set.',
-                      values: {
-                        defaultDataViewName: getDefaultIndexPattern(
-                          referenceIndexPattern,
-                          productionIndexPattern
-                        ),
-                      },
-                    })
+                  ? i18n.translate(
+                      'xpack.ml.dataDrift.indexPatternsEditor.defaultDataViewHelpText',
+                      {
+                        defaultMessage: 'Default to {defaultDataViewName} if not set.',
+                        values: {
+                          defaultDataViewName: getDefaultIndexPattern(
+                            referenceIndexPattern,
+                            productionIndexPattern
+                          ),
+                        },
+                      }
+                    )
                   : '')
               }
               fullWidth
@@ -372,7 +375,7 @@ export function DataDriftIndexPatternsEditor({
                   >
                     <FormattedMessage
                       id="xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftWithoutSavingLabel"
-                      defaultMessage="Analyze data drift saving"
+                      defaultMessage="Analyze data drift without saving"
                     />
                   </EuiButton>
                 </EuiFlexItem>

@@ -9,7 +9,6 @@ import React, { FC } from 'react';
 import {
   EuiPageBody,
   EuiPageSection,
-  EuiLink,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -52,33 +51,21 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlotAnnotations.title',
-                    {
-                      defaultMessage: 'Customize index patterns',
-                    }
-                  )}
+                  content={i18n.translate('xpack.ml.dataDrift.customizeIndexPatternsTooltip', {
+                    defaultMessage: 'Customize index patterns',
+                  })}
                 >
                   <EuiButton onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}>
-                    Customize
+                    <FormattedMessage
+                      id="xpack.ml.dataDrift.customizeIndexPatternsButton"
+                      defaultMessage="Customize"
+                    />
                   </EuiButton>
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </MlPageHeader>
           <EuiPageSection>
-            <EuiLink
-              onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
-              css={{ display: 'none' }}
-            >
-              {i18n.translate(
-                'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlotAnnotations.title',
-                {
-                  defaultMessage: 'Customize index patterns',
-                }
-              )}
-            </EuiLink>
-
             <SavedObjectFinder
               key="searchSavedObjectFinder"
               onChoose={onObjectSelection}

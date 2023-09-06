@@ -212,11 +212,11 @@ function getIndexDataVisualizerDeepLink(mlCapabilities: MlCapabilities): AppDeep
 
 function getDataComparisonDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
   return {
-    id: 'dataComparison',
-    title: i18n.translate('xpack.ml.deepLink.dataComparison', {
-      defaultMessage: 'Data Comparison',
+    id: 'dataDrift',
+    title: i18n.translate('xpack.ml.deepLink.dataDrift', {
+      defaultMessage: 'Data Drift',
     }),
-    path: `/${ML_PAGES.DATA_DRIFT}`,
+    path: `/${ML_PAGES.DATA_DRIFT_INDEX_SELECT}`,
     navLinkStatus: getNavStatus(mlCapabilities, false),
   };
 }

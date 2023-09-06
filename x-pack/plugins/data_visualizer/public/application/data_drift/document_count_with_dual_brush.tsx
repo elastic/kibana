@@ -99,7 +99,7 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
         <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
           <EuiFlexItem>
             <SearchBar
-              key={`dataComparison-${stateManager.id}`}
+              key={`dataDrift-${stateManager.id}`}
               dataTestSubj="dataVisualizerQueryInput"
               appName={'dataVisualizer'}
               showFilterBar={true}
@@ -153,7 +153,7 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
       <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
         <EuiFlexItem>
           <SearchBar
-            key={`dataComparison-${stateManager.id}`}
+            key={`dataDrift-${stateManager.id}`}
             dataTestSubj="dataVisualizerQueryInput"
             appName={'dataVisualizer'}
             showFilterBar={true}
