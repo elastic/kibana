@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export type { RuleTagsParams } from './rule_tags_params';
-export type { RuleTagsAggregationResult } from './rule_tags_aggregation_result';
+import { TypeOf } from '@kbn/config-schema';
+import { ruleTagsAggregationResultSchema } from '../schemas';
+
+export type RuleTagsAggregationResult = TypeOf<typeof ruleTagsAggregationResultSchema>;

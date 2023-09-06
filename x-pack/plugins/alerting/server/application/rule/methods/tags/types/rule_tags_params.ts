@@ -5,6 +5,6 @@
  * 2.0.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { ruleTagsParamsSchema } from '..';
+import { ruleTagsParamsSchema } from '../schemas';
 
 export type RuleTagsParams = TypeOf<typeof ruleTagsParamsSchema>;
