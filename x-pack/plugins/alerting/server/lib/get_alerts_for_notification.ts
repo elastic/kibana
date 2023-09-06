@@ -57,7 +57,8 @@ export function getAlertsForNotification<
           );
           activeAlerts[id] = newAlert;
 
-          // rules with at least one action with "on status change" should return notifications
+          // rule with "on status change" or rule with at least one
+          // action with "on status change" should return notifications
           if (notifyOnActionGroupChange) {
             currentActiveAlerts[id] = newAlert;
           }

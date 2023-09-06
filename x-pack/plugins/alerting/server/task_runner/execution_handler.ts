@@ -577,8 +577,8 @@ export class ExecutionHandler<
           continue;
         }
 
-        // Actions with notifyWhen set to "on status change" should return
-        // notifications for flapping and pending recovered alerts
+        // only actions with notifyWhen set to "on status change" should return
+        // notifications for flapping pending recovered alerts
         if (
           alert.getPendingRecoveredCount() > 0 &&
           action.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE

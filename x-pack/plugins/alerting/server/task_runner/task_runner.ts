@@ -547,10 +547,9 @@ export class TaskRunner<
         ruleRunMetricsStore,
         shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
         flappingSettings,
-        notifyOnActionGroupChange: some(
-          actions,
-          (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE
-        ),
+        notifyOnActionGroupChange:
+          notifyWhen === RuleNotifyWhen.CHANGE ||
+          some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
         maintenanceWindowIds,
       });
     });
