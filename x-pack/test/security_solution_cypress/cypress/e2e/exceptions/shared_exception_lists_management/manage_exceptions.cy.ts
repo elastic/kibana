@@ -38,7 +38,8 @@ import {
   waitForExceptionsTableToBeLoaded,
 } from '../../../tasks/exceptions_table';
 
-describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165795
+describe('Add, edit and delete exception', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     cy.task('esArchiverLoad', { archiveName: 'exceptions' });
@@ -60,10 +61,9 @@ describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, ()
   const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
   const EXCEPTION_LIST_NAME = 'Newly created list';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165795
   describe(
     'Add, Edit and delete Exception item',
-    { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+    { tags: ['@ess', '@serverless'] },
     () => {
       it('should create exception item from Shared Exception List page and linked to a Rule', () => {
         // Click on "Create shared exception list" button on the header
