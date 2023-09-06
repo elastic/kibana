@@ -25,10 +25,13 @@ import {
   UnifiedFieldListItemStats,
   type UnifiedFieldListItemStatsProps,
 } from './field_list_item_stats';
+import { FieldListItemHandle } from './field_list_item_handle';
 import type {
   UnifiedFieldListSidebarContainerStateService,
   AddFieldFilterHandler,
 } from '../../types';
+
+const DRAG_HANDLE = <FieldListItemHandle />;
 
 interface GetCommonFieldItemButtonPropsParams {
   stateService: UnifiedFieldListSidebarContainerStateService;
@@ -315,6 +318,8 @@ function UnifiedFieldListItemComponent({
     [field, itemIndex]
   );
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
+  const isDragDisabled =
+    alwaysShowActionButton || stateService.creationOptions.disableFieldListItemDragAndDrop;
 
   return (
     <FieldPopover
@@ -325,9 +330,7 @@ function UnifiedFieldListItemComponent({
           order={order}
           value={value}
           onDragStart={closePopover}
-          isDisabled={
-            alwaysShowActionButton || stateService.creationOptions.disableFieldListItemDragAndDrop
-          }
+          isDisabled={isDragDisabled}
           dataTestSubj={`${
             stateService.creationOptions.dataTestSubj?.fieldListItemDndDataTestSubjPrefix ??
             'unifiedFieldListItemDnD'
@@ -340,6 +343,7 @@ function UnifiedFieldListItemComponent({
             isActive={infoIsOpen}
             flush={alwaysShowActionButton ? 'both' : undefined}
             shouldAlwaysShowAction={alwaysShowActionButton}
+            dragHandle={isDragDisabled ? undefined : DRAG_HANDLE}
             onClick={field.type !== '_source' ? togglePopover : undefined}
             {...getCommonFieldItemButtonProps({ stateService, field, isSelected, toggleDisplay })}
           />

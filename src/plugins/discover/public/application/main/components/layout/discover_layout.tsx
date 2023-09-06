@@ -285,7 +285,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           history={history}
         />
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
-          <EuiFlexItem grow={false} className="dscPageBody__sidebar">
+          <EuiFlexItem grow={false}>
             <SidebarMemoized
               documents$={stateContainer.dataState.data$.documents$}
               onAddField={onAddColumn}
