@@ -6,6 +6,7 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
+import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   API_BASE_PATH,
   UIM_UPDATE_SETTINGS,
@@ -323,6 +324,13 @@ export function loadIndex(indexName: string) {
 export function useLoadIndexMappings(indexName: string) {
   return useRequest({
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
+    method: 'get',
+  });
+}
+
+export function loadIndexStatistics(indexName: string) {
+  return sendRequest<IndicesStatsResponse>({
+    path: `${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`,
     method: 'get',
   });
 }

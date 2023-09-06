@@ -36,7 +36,7 @@ import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../../screens/alerts';
 import { getLocalstorageEntryAsObject } from '../../../helpers/common';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 
-describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('Basic functions', () => {
     beforeEach(() => {
       cleanKibana();
@@ -135,7 +135,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Url state management', () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', { archiveName: 'query_alert' });
+      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
     beforeEach(() => {
@@ -181,7 +181,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Localstorage management', () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', { archiveName: 'query_alert' });
+      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
     beforeEach(() => {

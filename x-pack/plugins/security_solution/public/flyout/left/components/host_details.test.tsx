@@ -254,7 +254,7 @@ describe('<HostDetails />', () => {
         </TestProviders>
       );
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID).textContent).toContain(
-        'No items found'
+        'No users identified'
       );
     });
   });

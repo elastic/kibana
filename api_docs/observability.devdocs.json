@@ -155,9 +155,7 @@
         "label": "AlertSummary",
         "description": [],
         "signature": [
-          "({ alertSummaryFields }: ",
-          "AlertSummaryProps",
-          ") => JSX.Element"
+          "({ alertSummaryFields }: AlertSummaryProps) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability/public/pages/alert_details/components/alert_summary.tsx",
         "deprecated": false,
@@ -418,9 +416,7 @@
         "label": "DatePicker",
         "description": [],
         "signature": [
-          "({\n  rangeFrom,\n  rangeTo,\n  refreshPaused,\n  refreshInterval,\n  width = 'restricted',\n  onTimeRangeRefresh,\n}: ",
-          "DatePickerProps",
-          ") => JSX.Element"
+          "({\n  rangeFrom,\n  rangeTo,\n  refreshPaused,\n  refreshInterval,\n  width = 'restricted',\n  onTimeRangeRefresh,\n}: DatePickerProps) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability/public/pages/overview/components/date_picker/date_picker.tsx",
         "deprecated": false,
@@ -2647,6 +2643,26 @@
               " & { activeCursor: ",
               "ActiveCursor",
               "; }"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.contentManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "contentManagement",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "public",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-public.ContentManagementPublicStart",
+                "text": "ContentManagementPublicStart"
+              }
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -9211,6 +9227,34 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
+          "; \"POST /api/observability/slos/_delete_instances 2023-10-31\": { endpoint: \"POST /api/observability/slos/_delete_instances 2023-10-31\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ list: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ sloId: ",
+          "StringC",
+          "; instanceId: ",
+          "StringC",
+          "; }>>; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { list: { sloId: string; instanceId: string; }[]; }; }; }) => Promise<void>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
           "; \"DELETE /api/observability/slos/{id} 2023-10-31\": { endpoint: \"DELETE /api/observability/slos/{id} 2023-10-31\"; params?: ",
           "TypeC",
           "<{ path: ",
@@ -10910,6 +10954,34 @@
             "text": "ObservabilityRouteHandlerResources"
           },
           " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /api/observability/slos/_delete_instances 2023-10-31\": { endpoint: \"POST /api/observability/slos/_delete_instances 2023-10-31\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ list: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ sloId: ",
+          "StringC",
+          "; instanceId: ",
+          "StringC",
+          "; }>>; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { list: { sloId: string; instanceId: string; }[]; }; }; }) => Promise<void>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
