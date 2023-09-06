@@ -67,7 +67,7 @@ describe(
   'Discover Timeline State Integration',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
-    tags: ['@ess', '@serverless', '@brokenInServerless'],
+    tags: ['@ess', '@brokenInServerless'],
   },
 
   () => {
