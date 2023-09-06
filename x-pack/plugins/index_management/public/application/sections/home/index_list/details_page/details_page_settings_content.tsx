@@ -204,7 +204,16 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           {updateError && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut title="Unable to save the settings" color="danger" iconType="error">
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.idxMgmt.indexDetails.settings.saveSettingsErrorMessage',
+                  {
+                    defaultMessage: 'Unable to save the settings',
+                  }
+                )}
+                color="danger"
+                iconType="error"
+              >
                 <p>
                   {updateError.error}
                   {updateError.message && <span>: {updateError.message}</span>}

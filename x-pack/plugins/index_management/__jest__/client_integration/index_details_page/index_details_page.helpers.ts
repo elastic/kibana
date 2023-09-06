@@ -160,6 +160,7 @@ export const setup = async (
       return find('indexDetailsSettingsEditor').prop('data-currentvalue');
     },
     updateCodeEditorContent: async (value: string) => {
+      // the code editor is mocked as an input so need to set data-currentvalue attribute to change the value
       find('indexDetailsSettingsEditor').getDOMNode().setAttribute('data-currentvalue', value);
       await act(async () => {
         find('indexDetailsSettingsEditor').simulate('change');
