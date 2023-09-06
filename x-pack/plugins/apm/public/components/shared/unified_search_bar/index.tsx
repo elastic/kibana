@@ -36,6 +36,7 @@ import {
   toBoolean,
   toNumber,
 } from '../../../context/url_params_context/helpers';
+import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
 
 export const DEFAULT_REFRESH_INTERVAL = 60000;
 
@@ -143,6 +144,7 @@ export function UnifiedSearchBar({
     data: {
       query: { queryString: queryStringService, timefilter: timeFilterService },
     },
+    telemetry,
   } = services;
 
   const {
@@ -241,6 +243,7 @@ export function UnifiedSearchBar({
     payload: { dateRange: TimeRange; query?: Query },
     isUpdate?: boolean
   ) => {
+    let action = 'submit';
     if (dataView == null) {
       return;
     }
@@ -256,6 +259,9 @@ export function UnifiedSearchBar({
       if (!res) {
         return;
       }
+      const kueryFields = getKueryFields([
+        fromKueryExpression(query?.query as string),
+      ]);
 
       const existingQueryParams = toQuery(location.search);
       const updatedQueryWithTime = {
@@ -269,20 +275,23 @@ export function UnifiedSearchBar({
       };
 
       if (isUpdate) {
+        action = 'update';
         history.push({
           ...location,
           search: fromQuery(newSearchParams),
         });
       } else {
+        action = 'refresh';
         onRefresh();
       }
+      telemetry.reportSearchQuerySubmitted({
+        kuery_fields: kueryFields,
+        action,
+        interval: `${rangeFrom} - ${rangeTo}`,
+      });
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
-    console.log('submit kuery', query?.query);
-    core.analytics.reportEvent('apm_ebt_submit_search', {
-      kuery: query?.query,
-    });
   };
 
   return (

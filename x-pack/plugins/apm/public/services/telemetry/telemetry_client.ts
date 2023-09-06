@@ -12,10 +12,6 @@ import {
   SearchQuerySubmittedParams,
 } from './types';
 
-/**
- * Client which aggregate all the available telemetry tracking functions
- * for the Infra plugin
- */
 export class TelemetryClient implements ITelemetryClient {
   constructor(private analytics: AnalyticsServiceSetup) {}
 
