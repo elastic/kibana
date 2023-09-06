@@ -7,11 +7,14 @@
 import { RewriteResponseCase } from '@kbn/actions-plugin/common';
 import type { RuleTagsFormattedResponse } from '../../../../../../../common/routes/rule/apis/tags';
 
-// FIXME: remove spread operator
 export const transformRuleTagsBodyResponse: RewriteResponseCase<RuleTagsFormattedResponse> = ({
   perPage,
-  ...rest
+  total,
+  page,
+  data,
 }) => ({
-  ...rest,
+  total,
+  page,
+  data,
   per_page: perPage,
 });

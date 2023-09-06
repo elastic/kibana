@@ -8,11 +8,12 @@
 import { RewriteRequestCase } from '@kbn/actions-plugin/common';
 import type { RuleTagsParams } from '../../../../../../application/rule/types';
 
-// FIXME: remove spread operator
 export const transformRuleTagsQueryRequest: RewriteRequestCase<RuleTagsParams> = ({
   per_page: perPage,
-  ...rest
+  page,
+  search,
 }) => ({
-  ...rest,
+  page,
+  search,
   perPage,
 });
