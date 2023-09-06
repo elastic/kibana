@@ -215,6 +215,15 @@ export class VisualizeEditorPageObject extends FtrService {
     await input.type(newValue);
   }
 
+  public async setPercentileValue(newValue: string, index: number = 0) {
+    const correctIndex = index ? index + 2 : 1;
+    const input = await this.find.byCssSelector(
+      `[data-test-subj="visEditorPercentile"]>div:nth-child(2)>div:nth-child(${correctIndex}) input`
+    );
+    await input.clearValue();
+    await input.type(newValue);
+  }
+
   public async clickEditorSidebarCollapse() {
     await this.testSubjects.click('collapseSideBarButton');
   }
