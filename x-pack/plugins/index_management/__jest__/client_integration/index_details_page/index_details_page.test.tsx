@@ -8,6 +8,10 @@
 import { setupEnvironment } from '../helpers';
 import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
+import {
+  breadcrumbService,
+  IndexManagementBreadcrumb,
+} from '../../../public/application/services/breadcrumbs';
 import { IndexDetailsSection } from '../../../public/application/sections/home/index_list/details_page';
 import {
   testIndexEditableSettings,
@@ -41,6 +45,7 @@ describe('<IndexDetailsPage />', () => {
   let testBed: IndexDetailsPageTestBed;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   beforeEach(async () => {
     const mockEnvironment = setupEnvironment();
@@ -89,6 +94,13 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Stats tab', () => {
+    it('updates the breadcrumbs to index details stats', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsStats
+      );
+    });
+
     it('loads index stats from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
       expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/stats/${testIndexName}`, {
@@ -198,6 +210,12 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Mappings tab', () => {
+    it('updates the breadcrumbs to index details mappings', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsMappings
+      );
+    });
     it('loads mappings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
