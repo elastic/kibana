@@ -206,7 +206,11 @@ export const buildOtherBucketAgg = (
   ) => {
     // make sure there are actually results for the buckets
     const agg = aggregations[aggId];
-    if (!agg || !agg.buckets.length) {
+    if (
+      !agg ||
+      // buckets can be either an array or an object in case there's also a filter at the same level
+      (Array.isArray(agg.buckets) ? !agg.buckets.length : !Object.values(agg.buckets).length)
+    ) {
       noAggBucketResults = true;
       return;
     }
