@@ -6,14 +6,14 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import type { ElasticFlameGraph } from '@kbn/profiling-utils';
+import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilitySharedStart } from '../../../plugin';
 import { EMBEDDABLE_FLAMEGRAPH } from '.';
 
 interface Props {
-  data?: ElasticFlameGraph;
+  data?: BaseFlameGraph;
   height?: string;
   isLoading: boolean;
 }
