@@ -8,23 +8,23 @@
 import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataComparisonSpec } from '@kbn/data-visualizer-plugin/public';
+import type { DataDriftSpec } from '@kbn/data-visualizer-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
 import { useDataSource } from '../../contexts/ml';
 import { MlPageHeader } from '../../components/page_header';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
 
-export const DataComparisonPage: FC = () => {
+export const DataDriftPage: FC = () => {
   const {
     services: { dataVisualizer },
   } = useMlKibana();
 
-  const [DataComparisonView, setDataComparisonView] = useState<DataComparisonSpec | null>(null);
+  const [DataDriftView, setDataDriftView] = useState<DataDriftSpec | null>(null);
 
   useEffect(() => {
     if (dataVisualizer !== undefined) {
-      const { getDataComparisonComponent } = dataVisualizer;
-      getDataComparisonComponent().then(setDataComparisonView);
+      const { getDataDriftComponent } = dataVisualizer;
+      getDataDriftComponent().then(setDataDriftView);
     }
   }, [dataVisualizer]);
 
@@ -36,8 +36,8 @@ export const DataComparisonPage: FC = () => {
         <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
           <EuiFlexItem grow={false}>
             <FormattedMessage
-              id="xpack.ml.dataComparisonWithDocCount.pageHeader"
-              defaultMessage="Data comparison"
+              id="xpack.ml.dataDruiftWithDocCount.pageHeader"
+              defaultMessage="Data drift"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -45,8 +45,8 @@ export const DataComparisonPage: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      {dataView && DataComparisonView ? (
-        <DataComparisonView dataView={dataView} savedSearch={savedSearch} />
+      {dataView && DataDriftView ? (
+        <DataDriftView dataView={dataView} savedSearch={savedSearch} />
       ) : null}
     </>
   );

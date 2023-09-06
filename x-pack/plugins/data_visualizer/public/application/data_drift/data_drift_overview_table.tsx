@@ -21,26 +21,23 @@ import { FieldTypeIcon } from '../common/components/field_type_icon';
 import { COLLAPSE_ROW, EXPAND_ROW } from '../../../common/i18n_constants';
 import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
-import { DataComparisonField, Feature, FETCH_STATUS } from './types';
-import { formatSignificanceLevel } from './data_comparison_utils';
+import { DataDriftField, Feature, FETCH_STATUS } from './types';
+import { formatSignificanceLevel } from './data_drift_utils';
 import { SingleDistributionChart } from './charts/single_distribution_chart';
 import { OverlapDistributionComparison } from './charts/overlap_distribution_chart';
-import { DataComparisonDistributionChart } from './charts/data_comparison_distribution_chart';
+import { DataDriftDistributionChart } from './charts/data_drift_distribution_chart';
 
-const dataComparisonYesLabel = i18n.translate(
-  'xpack.dataVisualizer.dataComparison.fieldTypeYesLabel',
-  {
-    defaultMessage: 'Yes',
-  }
-);
+const dataComparisonYesLabel = i18n.translate('xpack.dataVisualizer.dataDrift.fieldTypeYesLabel', {
+  defaultMessage: 'Yes',
+});
 const dataComparisonNoLabel = i18n.translate(
-  'xpack.dataVisualizer.dataComparison.driftDetectedNoLabel',
+  'xpack.dataVisualizer.dataDrift.driftDetectedNoLabel',
   {
     defaultMessage: 'No',
   }
 );
 
-export const DataComparisonOverviewTable = ({
+export const DataDriftOverviewTable = ({
   data,
   onTableChange,
   pagination,
@@ -55,21 +52,19 @@ export const DataComparisonOverviewTable = ({
     referenceColor: euiTheme.euiColorVis2,
     productionColor: euiTheme.euiColorVis1,
   };
-  // const [featureNamesToExpandRow, setFeatureNamesToExpandRow] = useState<string[]>([]);
-
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
 
   const referenceDistributionLabel = i18n.translate(
-    'xpack.dataVisualizer.dataComparison.dataComparisonDistributionLabel',
+    'xpack.dataVisualizer.dataDrift.dataComparisonDistributionLabel',
     {
       defaultMessage: '{label} distribution',
       values: { label: REFERENCE_LABEL },
     }
   );
   const comparisonDistributionLabel = i18n.translate(
-    'xpack.dataVisualizer.dataComparison.dataComparisonDistributionLabel',
+    'xpack.dataVisualizer.dataDrift.dataComparisonDistributionLabel',
     {
       defaultMessage: '{label} distribution',
       values: { label: COMPARISON_LABEL },
@@ -85,7 +80,7 @@ export const DataComparisonOverviewTable = ({
         const { featureName } = item;
 
         updatedItemIdToExpandedRowMap[featureName] = (
-          <DataComparisonDistributionChart item={item} colors={colors} />
+          <DataDriftDistributionChart item={item} colors={colors} />
         );
       }
     });
@@ -119,31 +114,31 @@ export const DataComparisonOverviewTable = ({
 
     {
       field: 'featureName',
-      name: i18n.translate('xpack.dataVisualizer.dataComparison.fieldNameLabel', {
+      name: i18n.translate('xpack.dataVisualizer.dataDrift.fieldNameLabel', {
         defaultMessage: 'Name',
       }),
-      'data-test-subj': 'mlDataComparisonOverviewTableFeatureName',
+      'data-test-subj': 'mlDataDriftOverviewTableFeatureName',
       sortable: true,
       textOnly: true,
     },
     {
       field: 'secondaryType',
-      name: i18n.translate('xpack.dataVisualizer.dataComparison.fieldTypeLabel', {
+      name: i18n.translate('xpack.dataVisualizer.dataDrift.fieldTypeLabel', {
         defaultMessage: 'Type',
       }),
-      'data-test-subj': 'mlDataComparisonOverviewTableFeatureType',
+      'data-test-subj': 'mlDataDriftOverviewTableFeatureType',
       sortable: true,
       textOnly: true,
-      render: (secondaryType: DataComparisonField['secondaryType']) => {
+      render: (secondaryType: DataDriftField['secondaryType']) => {
         return <FieldTypeIcon type={secondaryType} tooltipEnabled={true} />;
       },
     },
     {
       field: 'driftDetected',
-      name: i18n.translate('xpack.dataVisualizer.dataComparison.driftDetectedLabel', {
+      name: i18n.translate('xpack.dataVisualizer.dataDrift.driftDetectedLabel', {
         defaultMessage: 'Drift detected',
       }),
-      'data-test-subj': 'mlDataComparisonOverviewTableDriftDetected',
+      'data-test-subj': 'mlDataDriftOverviewTableDriftDetected',
       sortable: true,
       textOnly: true,
       render: (driftDetected: boolean) => {
@@ -154,20 +149,20 @@ export const DataComparisonOverviewTable = ({
       field: 'similarityTestPValue',
       name: (
         <EuiToolTip
-          content={i18n.translate('xpack.dataVisualizer.dataComparison.pValueTooltip', {
+          content={i18n.translate('xpack.dataVisualizer.dataDrift.pValueTooltip', {
             defaultMessage:
               'Indicates how extreme the change is. Lower values indicate greater change.',
           })}
         >
           <span>
-            {i18n.translate('xpack.dataVisualizer.dataComparison.pValueLabel', {
+            {i18n.translate('xpack.dataVisualizer.dataDrift.pValueLabel', {
               defaultMessage: 'Similarity p-value',
             })}
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),
-      'data-test-subj': 'mlDataComparisonOverviewTableSimilarityTestPValue',
+      'data-test-subj': 'mlDataDriftOverviewTableSimilarityTestPValue',
       sortable: true,
       textOnly: true,
       render: (similarityTestPValue: number) => {
@@ -177,7 +172,7 @@ export const DataComparisonOverviewTable = ({
     {
       field: 'referenceHistogram',
       name: referenceDistributionLabel,
-      'data-test-subj': 'mlDataComparisonOverviewTableReferenceDistribution',
+      'data-test-subj': 'mlDataDriftOverviewTableReferenceDistribution',
       sortable: false,
       render: (referenceHistogram: Feature['referenceHistogram'], item) => {
         return (
@@ -187,7 +182,6 @@ export const DataComparisonOverviewTable = ({
               data={referenceHistogram}
               color={colors.referenceColor}
               name={referenceDistributionLabel}
-              domain={item.domain}
             />
           </div>
         );
@@ -196,7 +190,7 @@ export const DataComparisonOverviewTable = ({
     {
       field: 'productionHistogram',
       name: comparisonDistributionLabel,
-      'data-test-subj': 'mlDataComparisonOverviewTableDataComparisonDistributionChart',
+      'data-test-subj': 'mlDataDriftOverviewTableDataComparisonDistributionChart',
       sortable: false,
       render: (productionDistribution: Feature['productionHistogram'], item) => {
         return (
@@ -206,7 +200,6 @@ export const DataComparisonOverviewTable = ({
               data={productionDistribution}
               color={colors.productionColor}
               name={comparisonDistributionLabel}
-              domain={item.domain}
             />
           </div>
         );
@@ -215,7 +208,7 @@ export const DataComparisonOverviewTable = ({
     {
       field: 'comparisonDistribution',
       name: 'Comparison',
-      'data-test-subj': 'mlDataComparisonOverviewTableDataComparisonDistributionChart',
+      'data-test-subj': 'mlDataDriftOverviewTableDataComparisonDistributionChart',
       sortable: false,
       render: (comparisonDistribution: Feature['comparisonDistribution'], item) => {
         return (
@@ -225,7 +218,6 @@ export const DataComparisonOverviewTable = ({
               fieldType={item.fieldType}
               data={comparisonDistribution}
               colors={colors}
-              domain={item.domain}
             />
           </div>
         );
@@ -235,8 +227,8 @@ export const DataComparisonOverviewTable = ({
 
   const getRowProps = (item: Feature) => {
     return {
-      'data-test-subj': `mlDataComparisonOverviewTableRow row-${item.featureName}`,
-      className: 'mlDataComparisonOverviewTableRow',
+      'data-test-subj': `mlDataDriftOverviewTableRow row-${item.featureName}`,
+      className: 'mlDataDriftOverviewTableRow',
       onClick: () => {},
     };
   };
@@ -244,8 +236,8 @@ export const DataComparisonOverviewTable = ({
   const getCellProps = (item: Feature, column: EuiTableFieldDataColumnType<Feature>) => {
     const { field } = column;
     return {
-      className: 'mlDataComparisonOverviewTableCell',
-      'data-test-subj': `mlDataComparisonOverviewTableCell row-${item.featureName}-column-${String(
+      className: 'mlDataDriftOverviewTableCell',
+      'data-test-subj': `mlDataDriftOverviewTableCell row-${item.featureName}-column-${String(
         field
       )}`,
       textOnly: true,
@@ -259,7 +251,7 @@ export const DataComparisonOverviewTable = ({
       delete itemIdToExpandedRowMapValues[item.featureName];
     } else {
       itemIdToExpandedRowMapValues[item.featureName] = (
-        <DataComparisonDistributionChart item={item} colors={colors} />
+        <DataDriftDistributionChart item={item} colors={colors} />
       );
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
@@ -268,11 +260,11 @@ export const DataComparisonOverviewTable = ({
   const tableMessage = useMemo(() => {
     switch (status) {
       case FETCH_STATUS.NOT_INITIATED:
-        return i18n.translate('xpack.dataVisualizer.dataComparison.dataComparisonRunAnalysisMsg', {
+        return i18n.translate('xpack.dataVisualizer.dataDrift.dataComparisonRunAnalysisMsg', {
           defaultMessage: 'Run analysis to compare reference and comparison data',
         });
       case FETCH_STATUS.LOADING:
-        return i18n.translate('xpack.dataVisualizer.dataComparison.dataComparisonLoadingMsg', {
+        return i18n.translate('xpack.dataVisualizer.dataDrift.dataComparisonLoadingMsg', {
           defaultMessage: 'Analyzing',
         });
       default:
@@ -282,12 +274,9 @@ export const DataComparisonOverviewTable = ({
 
   return (
     <EuiInMemoryTable<Feature>
-      tableCaption={i18n.translate(
-        'xpack.dataVisualizer.dataComparison.dataComparisonTableCaption',
-        {
-          defaultMessage: 'Data comparison overview',
-        }
-      )}
+      tableCaption={i18n.translate('xpack.dataVisualizer.dataDrift.dataComparisonTableCaption', {
+        defaultMessage: 'Data drift overview',
+      })}
       items={data}
       rowHeader="featureName"
       columns={columns}

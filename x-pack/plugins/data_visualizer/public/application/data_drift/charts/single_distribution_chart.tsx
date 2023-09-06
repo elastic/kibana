@@ -9,10 +9,10 @@ import { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/u
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import React, { useMemo } from 'react';
 import { defaultValueFormatter } from './default_value_formatter';
-import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
+import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
 import { NoChartsData } from './no_charts_data';
 import { DATA_COMPARISON_TYPE } from '../constants';
-import { DataComparisonField, Feature, Histogram } from '../types';
+import { DataDriftField, Feature, Histogram } from '../types';
 
 export const SingleDistributionChart = ({
   data,
@@ -23,7 +23,7 @@ export const SingleDistributionChart = ({
   data: Histogram[];
   name: string;
   color?: SeriesColorAccessor;
-  fieldType?: DataComparisonField['type'];
+  fieldType?: DataDriftField['type'];
   domain?: Feature['domain'];
 }) => {
   const valueFormatter = useMemo(

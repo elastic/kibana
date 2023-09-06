@@ -18,8 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { NoChartsData } from './no_charts_data';
-import type { ComparisonHistogram, DataComparisonField } from '../types';
-import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
+import type { ComparisonHistogram, DataDriftField } from '../types';
+import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE, REFERENCE_LABEL } from '../constants';
 import { defaultValueFormatter } from './default_value_formatter';
 
@@ -31,8 +31,8 @@ export const OverlapDistributionComparison = ({
 }: {
   data: ComparisonHistogram[];
   colors: { referenceColor: string; productionColor: string };
-  fieldType?: DataComparisonField['type'];
-  fieldName?: DataComparisonField['field'];
+  fieldType?: DataDriftField['type'];
+  fieldName?: DataDriftField['field'];
 }) => {
   const valueFormatter = useMemo(
     () => (fieldType === DATA_COMPARISON_TYPE.NUMERIC ? defaultValueFormatter : undefined),
@@ -62,18 +62,15 @@ export const OverlapDistributionComparison = ({
       <Settings showLegend={false} />
       <AreaSeries
         id="dataVisualizer.overlapDistributionComparisonChart"
-        name={i18n.translate(
-          'xpack.dataVisualizer.dataComparison.distributionComparisonChartName',
-          {
-            defaultMessage:
-              'Distribution comparison of {referenceLabel} and {comparisonLabel} data for {fieldName}',
-            values: {
-              referenceLabel: REFERENCE_LABEL.toLowerCase(),
-              comparisonLabel: COMPARISON_LABEL.toLowerCase(),
-              fieldName,
-            },
-          }
-        )}
+        name={i18n.translate('xpack.dataVisualizer.dataDrift.distributionComparisonChartName', {
+          defaultMessage:
+            'Distribution comparison of {referenceLabel} and {comparisonLabel} data for {fieldName}',
+          values: {
+            referenceLabel: REFERENCE_LABEL.toLowerCase(),
+            comparisonLabel: COMPARISON_LABEL.toLowerCase(),
+            fieldName,
+          },
+        })}
         xScaleType={
           fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
         }

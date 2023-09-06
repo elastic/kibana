@@ -69,7 +69,7 @@ interface Domain {
 // Show the overview table
 export interface Feature {
   featureName: string;
-  fieldType: DataComparisonField['type'];
+  fieldType: DataDriftField['type'];
   driftDetected: boolean;
   similarityTestPValue: number;
   productionHistogram: Histogram[];
@@ -82,7 +82,7 @@ export interface Feature {
   };
 }
 
-export interface DataComparisonField {
+export interface DataDriftField {
   field: string;
   type: DataComparisonType;
   secondaryType: string;

@@ -10,12 +10,12 @@ import React, { useMemo } from 'react';
 import { NoChartsData } from './no_charts_data';
 import type { Feature } from '../types';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE } from '../constants';
-import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
+import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
 import { defaultValueFormatter } from './default_value_formatter';
 
 const CHART_HEIGHT = 200;
 
-export const DataComparisonDistributionChart = ({
+export const DataDriftDistributionChart = ({
   item,
   colors,
 }: {

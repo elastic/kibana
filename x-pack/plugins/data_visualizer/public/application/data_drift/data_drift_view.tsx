@@ -22,15 +22,15 @@ import {
   InitialSettings,
   useFetchDataComparisonResult,
 } from './use_data_drift_result';
-import type { DataComparisonField, Feature, TimeRange } from './types';
-import { DataComparisonOverviewTable } from './data_comparison_overview_table';
+import type { DataDriftField, Feature, TimeRange } from './types';
+import { DataDriftOverviewTable } from './data_drift_overview_table';
 
 const showOnlyDriftedFieldsOptionLabel = i18n.translate(
-  'xpack.dataVisualizer.dataComparison.showOnlyDriftedFieldsOptionLabel',
+  'xpack.dataVisualizer.dataDrift.showOnlyDriftedFieldsOptionLabel',
   { defaultMessage: 'Show only fields with drifted data' }
 );
 
-interface DataComparisonViewProps {
+interface DataDriftViewProps {
   windowParameters?: WindowParameters;
   dataView: DataView;
   searchString: Query['query'];
@@ -43,7 +43,7 @@ interface DataComparisonViewProps {
   initialSettings: InitialSettings;
 }
 // Data drift view
-export const DataComparisonView = ({
+export const DataDriftView = ({
   windowParameters,
   dataView,
   searchString,
@@ -53,7 +53,7 @@ export const DataComparisonView = ({
   lastRefresh,
   forceRefresh,
   initialSettings,
-}: DataComparisonViewProps) => {
+}: DataDriftViewProps) => {
   const [showDataComparisonOnly, setShowDataComparisonOnly] = useState(false);
 
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
@@ -62,7 +62,7 @@ export const DataComparisonView = ({
 
   const [fetchInfo, setFetchIno] = useState<
     | {
-        fields: DataComparisonField[];
+        fields: DataDriftField[];
         currentDataView: DataView;
         timeRanges?: { reference: TimeRange; production: TimeRange };
       }
@@ -71,7 +71,7 @@ export const DataComparisonView = ({
 
   const onRefresh = useCallback(() => {
     setCurrentAnalysisWindowParameters(windowParameters);
-    const mergedFields: DataComparisonField[] = [];
+    const mergedFields: DataDriftField[] = [];
     if (dataView) {
       mergedFields.push(
         ...dataView.fields
@@ -162,7 +162,7 @@ export const DataComparisonView = ({
       title={
         <h2>
           <FormattedMessage
-            id="xpack.dataVisualizer.dataComparison.emptyPromptTitle"
+            id="xpack.dataVisualizer.dataDrift.emptyPromptTitle"
             defaultMessage="Select a time range for reference and comparison data in the histogram chart to compare data distribution."
           />
         </h2>
@@ -171,7 +171,7 @@ export const DataComparisonView = ({
       body={
         <p>
           <FormattedMessage
-            id="xpack.dataVisualizer.dataComparison.emptyPromptBody"
+            id="xpack.dataVisualizer.dataDrift.emptyPromptBody"
             defaultMessage="The Data Comparison View compares the statistical properties of features in the 'reference' and 'comparison' data sets.
 "
           />
@@ -215,7 +215,7 @@ export const DataComparisonView = ({
           body={<span>{result.errorBody}</span>}
         />
       ) : (
-        <DataComparisonOverviewTable
+        <DataDriftOverviewTable
           data={filteredData}
           onTableChange={onTableChange}
           pagination={pagination}

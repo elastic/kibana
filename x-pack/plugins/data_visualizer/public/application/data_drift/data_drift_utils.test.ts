@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { computeChi2PValue } from './data_comparison_utils';
+import { computeChi2PValue } from './data_drift_utils';
 import { Histogram } from './types';
 
 describe('computeChi2PValue()', () => {

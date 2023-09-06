@@ -36,7 +36,7 @@ import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
 import { InitialSettings } from './use_data_drift_result';
-import { useDataComparisonStateManagerContext } from './use_state_manager';
+import { useDataDriftStateManagerContext } from './use_state_manager';
 import { useData } from '../common/hooks/use_data';
 import {
   DV_FROZEN_TIER_PREFERENCE,
@@ -47,7 +47,7 @@ import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
 import { DataComparisonFullAppState, getDefaultDataComparisonState } from './types';
 import { useDataSource } from '../common/hooks/data_source_context';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { DataComparisonView } from './data_comparison_view';
+import { DataDriftView } from './data_drift_view';
 import { COMPARISON_LABEL, PRODUCTION_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
 import { useSearch } from '../common/hooks/use_search';
@@ -122,29 +122,29 @@ export const PageHeader: FC = () => {
   );
 };
 
-const getDataComparisonDataLabel = (label: string, indexPattern?: string) =>
-  i18n.translate('xpack.dataVisualizer.dataComparison.dataLabel', {
-    defaultMessage: '{label} data: {indexPattern}',
-    values: { label, indexPattern },
-  });
+const getDataDriftDataLabel = (label: string, indexPattern?: string) =>
+  i18n.translate('xpack.dataVisualizer.dataDrift.dataLabel', {
+    defaultMessage: '{label} data',
+    values: { label },
+  }) + (indexPattern ? `: ${indexPattern}` : '');
 
 interface Props {
   initialSettings: InitialSettings;
 }
 
-export const DataComparisonPage: FC<Props> = ({ initialSettings }) => {
+export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const {
     services: { data: dataService },
   } = useDataVisualizerKibana();
   const { dataView, savedSearch } = useDataSource();
 
   const { reference: referenceStateManager, production: productionStateManager } =
-    useDataComparisonStateManagerContext();
+    useDataDriftStateManagerContext();
 
   const [dataComparisonListState, setDataComparisonListState] = usePageUrlState<{
-    pageKey: 'DV_DATA_COMP';
+    pageKey: 'DV_DATA_DRIFT';
     pageUrlState: DataComparisonFullAppState;
-  }>('DV_DATA_COMP', getDefaultDataComparisonState());
+  }>('DV_DATA_DRIFT', getDefaultDataComparisonState());
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
@@ -289,18 +289,14 @@ export const DataComparisonPage: FC<Props> = ({ initialSettings }) => {
   );
 
   const referenceIndexPatternLabel = initialSettings?.reference
-    ? getDataComparisonDataLabel(REFERENCE_LABEL, initialSettings.reference)
-    : getDataComparisonDataLabel(REFERENCE_LABEL);
+    ? getDataDriftDataLabel(REFERENCE_LABEL, initialSettings.reference)
+    : getDataDriftDataLabel(REFERENCE_LABEL);
   const productionIndexPatternLabel = initialSettings?.production
-    ? getDataComparisonDataLabel(PRODUCTION_LABEL, initialSettings?.production)
-    : getDataComparisonDataLabel(COMPARISON_LABEL);
+    ? getDataDriftDataLabel(PRODUCTION_LABEL, initialSettings?.production)
+    : getDataDriftDataLabel(COMPARISON_LABEL);
 
   return (
-    <EuiPageBody
-      data-test-subj="dataComparisonDataComparisonPage"
-      paddingSize="none"
-      panelled={false}
-    >
+    <EuiPageBody data-test-subj="dataComparisonDataDriftPage" paddingSize="none" panelled={false}>
       <PageHeader />
       <EuiSpacer size="m" />
       <EuiPageSection paddingSize="none">
@@ -392,7 +388,7 @@ export const DataComparisonPage: FC<Props> = ({ initialSettings }) => {
 
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
-              <DataComparisonView
+              <DataDriftView
                 initialSettings={initialSettings}
                 isBrushCleared={isBrushCleared}
                 onReset={clearSelection}

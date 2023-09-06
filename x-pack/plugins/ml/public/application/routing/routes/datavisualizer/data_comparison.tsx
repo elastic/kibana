@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DataSourceContextProvider } from '../../../contexts/ml';
-import { DataComparisonPage } from '../../../datavisualizer/data_comparison/data_comparison_page';
+import { DataDriftPage } from '../../../datavisualizer/data_comparison/data_comparison_page';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
@@ -48,7 +48,7 @@ export const dataDriftRouteFactory = (
       }),
     },
   ],
-  'data-test-subj': 'mlPagedataDrift',
+  'data-test-subj': 'mlPageDataDrift',
 });
 
 const PageWrapper: FC<PageProps> = () => {
@@ -57,7 +57,7 @@ const PageWrapper: FC<PageProps> = () => {
   return (
     <PageLoader context={context}>
       <DataSourceContextProvider>
-        <DataComparisonPage />
+        <DataDriftPage />
       </DataSourceContextProvider>
     </PageLoader>
   );

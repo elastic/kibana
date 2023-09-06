@@ -26,13 +26,13 @@ interface StateManagerInitialParams {
   timeField?: string;
 }
 
-export const DataComparisonStateManagerContext = createContext<{
+export const DataDriftStateManagerContext = createContext<{
   dataView: DataView | never;
   reference: DataDriftStateManager;
   production: DataDriftStateManager;
 }>({
   get dataView(): never {
-    throw new Error('DataComparisonStateManagerContext is not implemented');
+    throw new Error('DataDriftStateManagerContext is not implemented');
   },
   get reference(): never {
     throw new Error('reference is not implemented');
@@ -79,6 +79,6 @@ export const useDataDriftStateManager = ({
   };
 };
 
-export function useDataComparisonStateManagerContext() {
-  return useContext(DataComparisonStateManagerContext);
+export function useDataDriftStateManagerContext() {
+  return useContext(DataDriftStateManagerContext);
 }

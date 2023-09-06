@@ -22,29 +22,29 @@ import { parse } from 'query-string';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { InitialSettings } from './use_data_drift_result';
 import {
-  DataComparisonStateManagerContext,
+  DataDriftStateManagerContext,
   defaultSearchQuery,
   useDataDriftStateManager,
 } from './use_state_manager';
 import { DV_STORAGE_KEYS } from '../index_data_visualizer/types/storage';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
-import { DataComparisonPage } from './data_comparison_page';
+import { DataDriftPage } from './data_drift_page';
 import { DataSourceContext } from '../common/hooks/data_source_context';
 
 const localStorage = new Storage(window.localStorage);
 
-export interface DataComparisonDetectionAppStateProps {
+export interface DataDriftDetectionAppStateProps {
   /** The data view to analyze. */
   dataView: DataView;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
 }
 
-export type DataComparisonSpec = typeof DataComparisonDetectionAppState;
+export type DataDriftSpec = typeof DataDriftDetectionAppState;
 
 const getStr = (arg: string | string[] | null) => `${arg ? arg : ''}`;
 
-export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppStateProps> = ({
+export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = ({
   dataView,
   savedSearch,
 }) => {
@@ -125,15 +125,15 @@ export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppState
           <DataSourceContext.Provider value={{ dataView, savedSearch }}>
             <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <DataComparisonStateManagerContext.Provider
+                <DataDriftStateManagerContext.Provider
                   value={{
                     dataView,
                     reference: referenceStateManager,
                     production: productionStateManager,
                   }}
                 >
-                  <DataComparisonPage initialSettings={initialSettings} />
-                </DataComparisonStateManagerContext.Provider>
+                  <DataDriftPage initialSettings={initialSettings} />
+                </DataDriftStateManagerContext.Provider>
               </DatePickerContextProvider>
             </StorageContextProvider>
           </DataSourceContext.Provider>

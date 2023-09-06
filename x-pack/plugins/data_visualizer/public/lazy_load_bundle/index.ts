@@ -7,7 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import type {
-  DataComparisonSpec,
+  DataDriftSpec,
   FileDataVisualizerSpec,
   IndexDataVisualizerSpec,
 } from '../application';
@@ -18,7 +18,7 @@ let loadModulesPromise: Promise<LazyLoadedModules>;
 interface LazyLoadedModules {
   FileDataVisualizer: FileDataVisualizerSpec;
   IndexDataVisualizer: IndexDataVisualizerSpec;
-  DataComparison: DataComparisonSpec;
+  DataDrift: DataDriftSpec;
   getHttp: () => HttpSetup;
 }
 

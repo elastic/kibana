@@ -190,7 +190,7 @@ export function DataDriftIndexPatternsEditor({
       unmounted = true;
     };
   }, [referenceIndexPattern, productionIndexPattern, timeField, dataViews]);
-  const createDataViewAndRedirectToDataComparisonPage = async (createAdHocDV = false) => {
+  const createDataViewAndRedirectToDataDriftPage = async (createAdHocDV = false) => {
     // Create adhoc data view
     const indicesName = getDefaultIndexPattern(referenceIndexPattern, productionIndexPattern);
 
@@ -360,7 +360,7 @@ export function DataDriftIndexPatternsEditor({
                   <EuiButton
                     color="primary"
                     disabled={!productionIndexPattern || !referenceIndexPattern}
-                    onClick={createDataViewAndRedirectToDataComparisonPage.bind(null, true)}
+                    onClick={createDataViewAndRedirectToDataDriftPage.bind(null, true)}
                     iconType="visTagCloud"
                     data-test-subj="analyzeDataDriftButton"
                     aria-label={i18n.translate(
@@ -382,7 +382,7 @@ export function DataDriftIndexPatternsEditor({
                 <EuiButton
                   disabled={!productionIndexPattern || !referenceIndexPattern}
                   fill
-                  onClick={createDataViewAndRedirectToDataComparisonPage.bind(null, false)}
+                  onClick={createDataViewAndRedirectToDataDriftPage.bind(null, false)}
                   iconType="visTagCloud"
                   data-test-subj="analyzeDataDriftButton"
                   aria-label={i18n.translate(

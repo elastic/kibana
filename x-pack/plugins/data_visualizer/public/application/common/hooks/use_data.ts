@@ -14,7 +14,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { merge } from 'rxjs';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
-import { InitialSettings } from '../../data_comparison/use_data_drift_result';
+import { InitialSettings } from '../../data_drift/use_data_drift_result';
 import {
   DocumentStatsSearchStrategyParams,
   useDocumentCountStats,
