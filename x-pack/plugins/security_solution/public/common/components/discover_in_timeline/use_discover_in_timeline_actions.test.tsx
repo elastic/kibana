@@ -216,8 +216,6 @@ describe('useDiscoverInTimelineActions', () => {
       expect(startServicesMock.savedSearch.save).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          title: 'Saved Search for timeline - Active Timeline',
-          description: 'Active Timeline Description',
           timeRestore: true,
           timeRange: {
             from: 'now-20d',
@@ -254,8 +252,6 @@ describe('useDiscoverInTimelineActions', () => {
       expect(startServicesMock.savedSearch.save).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          title: 'Saved Search for timeline - Active Timeline',
-          description: 'Active Timeline Description',
           timeRestore: true,
           timeRange: {
             from: 'now-20d',

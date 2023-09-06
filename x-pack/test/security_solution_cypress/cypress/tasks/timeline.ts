@@ -143,7 +143,10 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
 export const gotToDiscoverTab = () => {
   recurse(
     () => cy.get(DISCOVER_TAB).click(),
-    ($el) => expect($el).to.have.class('euiTab-isSelected')
+    ($el) => expect($el).to.have.class('euiTab-isSelected'),
+    {
+      delay: 500,
+    }
   );
 };
 

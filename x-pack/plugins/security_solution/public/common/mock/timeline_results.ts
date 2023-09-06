@@ -2207,6 +2207,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     templateTimelineId: null,
     version: null,
     savedSearchId: null,
+    isDiscoverSavedSearchLoaded: false,
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,

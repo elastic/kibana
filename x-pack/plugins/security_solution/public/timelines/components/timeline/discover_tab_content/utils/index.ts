@@ -21,6 +21,8 @@ export const savedSearchComparator = (
     'searchSource.fields.filter',
     'searchSource.fields.index.id',
     'searchSource.fields.query',
+    'title',
+    'description',
   ];
   const modifiedInputSavedSearch = pick(inputSavedSearch, keysToSelect);
   const modifiedExistingSavedSearch = pick(existingSavedSearch, keysToSelect);

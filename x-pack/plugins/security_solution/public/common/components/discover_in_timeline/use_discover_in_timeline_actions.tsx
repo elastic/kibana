@@ -50,7 +50,7 @@ export const useDiscoverInTimelineActions = (
   const timeline = useShallowEqualSelector(
     (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
   );
-  const { title, description, savedSearchId } = timeline;
+  const { savedSearchId } = timeline;
 
   const queryClient = useQueryClient();
 
@@ -166,8 +166,6 @@ export const useDiscoverInTimelineActions = (
    * */
   const updateSavedSearch = useCallback(
     async (savedSearch: SavedSearch) => {
-      savedSearch.title = `Saved Search for timeline - ${title}`;
-      savedSearch.description = description;
       savedSearch.timeRestore = true;
       savedSearch.timeRange =
         savedSearch.timeRange ?? discoverDataService.query.timefilter.timefilter.getTime();
@@ -201,7 +199,7 @@ export const useDiscoverInTimelineActions = (
         });
       }
     },
-    [title, description, persistSavedSearch, savedSearchId, addError, dispatch, discoverDataService]
+    [persistSavedSearch, savedSearchId, addError, dispatch, discoverDataService]
   );
 
   return {

@@ -135,6 +135,7 @@ export interface TimelineModel {
   selectAll: boolean;
   /* discover saved search Id */
   savedSearchId: string | null;
+  isDiscoverSavedSearchLoaded?: boolean;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -189,6 +190,7 @@ export type SubsetTimelineModel = Readonly<
     | 'filters'
     | 'filterManager'
     | 'savedSearchId'
+    | 'isDiscoverSavedSearchLoaded'
   >
 >;
 
