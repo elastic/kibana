@@ -44,7 +44,8 @@ import {
 } from '../../../screens/exceptions';
 import { createEndpointExceptionList } from '../../../tasks/api_calls/exceptions';
 
-describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165736
+describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const ITEM_NAME = 'Sample Exception List Item';
 
   before(() => {
