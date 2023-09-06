@@ -46,7 +46,7 @@ import { bulkDisableRulesRoute } from './bulk_disable_rules';
 import { cloneRuleRoute } from './clone_rule';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
-import { getRuleTagsRoute } from './get_rule_tags';
+import { getRuleTagsRoute } from './rule/apis/tags/get_rule_tags';
 
 import { createMaintenanceWindowRoute } from './maintenance_window/create_maintenance_window';
 import { getMaintenanceWindowRoute } from './maintenance_window/get_maintenance_window';

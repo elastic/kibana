@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// FIXME: move file to server/routes/rule/apis
 import { IRouter } from '@kbn/core/server';
-import { transformRuleTagsBodyResponseV1 } from './rule/apis/tags/transforms';
-import { transformRuleTagsQueryRequestV1 } from './rule/apis/tags/transforms';
+import { transformRuleTagsBodyResponseV1 } from './transforms';
+import { transformRuleTagsQueryRequestV1 } from './transforms';
 import {
   ruleTagsRequestQuerySchemaV1,
   RuleTagsRequestQueryV1,
-} from '../../common/routes/rule/apis/tags';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { ILicenseState } from '../lib';
-import { verifyAccessAndContext } from './lib';
+} from '../../../../../common/routes/rule/apis/tags';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { ILicenseState } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
 
 export const getRuleTagsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

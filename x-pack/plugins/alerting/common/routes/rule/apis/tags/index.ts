@@ -6,7 +6,7 @@
  */
 
 export { ruleTagsRequestQuerySchema, ruleTagsFormattedResponseSchema } from './schemas/latest';
-export { DEFAULT_TAGS_PER_PAGE } from './constants/latest';
+export { DEFAULT_TAGS_PER_PAGE_LATEST } from './constants/latest';
 export type { RuleTagsRequestQuery, RuleTagsFormattedResponse } from './types/latest';
 
 export {

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-// FIXME: export get_tags method
+export { getRuleTagsRoute } from './get_rule_tags';

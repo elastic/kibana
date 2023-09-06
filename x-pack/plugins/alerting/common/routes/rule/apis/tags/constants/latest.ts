@@ -4,4 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { DEFAULT_TAGS_PER_PAGE } from './v1';
+export { DEFAULT_TAGS_PER_PAGE as DEFAULT_TAGS_PER_PAGE_LATEST } from './v1';

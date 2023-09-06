@@ -6,15 +6,15 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
 import { getRuleTagsRoute } from './get_rule_tags';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
