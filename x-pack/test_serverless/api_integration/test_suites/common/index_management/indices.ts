@@ -17,7 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Indices', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165565
+  describe.skip('Indices', function () {
     const indexName = `index-${Math.random()}`;
 
     before(async () => {
