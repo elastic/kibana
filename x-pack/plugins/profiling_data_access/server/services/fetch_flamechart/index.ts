@@ -6,10 +6,9 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { createBaseFlameGraph, createFlameGraph } from '@kbn/profiling-utils';
-import { createCalleeTree } from '@kbn/profiling-utils';
-import { RegisterServicesParams } from '../register_services';
+import { createBaseFlameGraph, createCalleeTree } from '@kbn/profiling-utils';
 import { withProfilingSpan } from '../../utils/with_profiling_span';
+import { RegisterServicesParams } from '../register_services';
 import { searchStackTraces } from '../search_stack_traces';
 
 export interface FetchFlamechartParams {
@@ -48,8 +47,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
         samplingRate
       );
 
-      const baseFlamegraph = createBaseFlameGraph(tree, samplingRate, totalSeconds);
-      return createFlameGraph(baseFlamegraph);
+      return createBaseFlameGraph(tree, samplingRate, totalSeconds);
     });
 
     return flamegraph;

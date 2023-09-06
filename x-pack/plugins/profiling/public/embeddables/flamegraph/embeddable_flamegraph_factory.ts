@@ -9,11 +9,11 @@ import {
   EmbeddableInput,
   EmbeddableFactoryDefinition,
 } from '@kbn/embeddable-plugin/public';
-import type { ElasticFlameGraph } from '@kbn/profiling-utils';
+import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
 
 interface EmbeddableFlamegraphInput {
-  data?: ElasticFlameGraph;
+  data?: BaseFlameGraph;
   isLoading: boolean;
 }
 
