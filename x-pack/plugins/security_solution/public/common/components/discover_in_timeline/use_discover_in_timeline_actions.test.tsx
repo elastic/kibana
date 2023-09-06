@@ -51,6 +51,11 @@ const mockState: State = {
   },
 };
 
+jest.mock('./use_discover_in_timeline_actions', () => {
+  const actual = jest.requireActual('./use_discover_in_timeline_actions');
+  return actual;
+});
+
 const { storage } = createSecuritySolutionStorageMock();
 
 const getTestProviderWithCustomState = (state: State = mockState) => {

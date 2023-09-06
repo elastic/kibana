@@ -23,7 +23,7 @@ export const TIMELINE = (id: string | undefined) => {
   if (id == null) {
     throw new TypeError('id should never be null or undefined');
   }
-  return `[data-test-subj="title-${id}"]`;
+  return `[data-test-subj="timeline-title-${id}"]`;
 };
 
 export const TIMELINE_CHECKBOX = (id: string) => {

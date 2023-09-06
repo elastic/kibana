@@ -29,9 +29,6 @@ function getStateContainer({ dataView, history }: { dataView?: DataView; history
     history: currentHistory,
   });
   stateContainer.savedSearchState.set(savedSearch);
-  stateContainer.appState.getState = jest.fn(() => ({
-    rowsPerPage: 250,
-  }));
   if (dataView) {
     stateContainer.internalState.transitions.setDataView(dataView);
   }
