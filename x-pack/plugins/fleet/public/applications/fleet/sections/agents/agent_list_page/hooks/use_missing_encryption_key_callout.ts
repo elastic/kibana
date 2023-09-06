@@ -11,7 +11,7 @@ import { useFleetStatus, useStartServices } from '../../../../hooks';
 
 const LOCAL_STORAGE_KEY = 'fleet.missingEncryptionKeyCalloutHasBeenDismissed';
 
-export const useMissingEncryptionKeyCalloutHasBeenDismissed = (): [boolean, () => void] => {
+export const useMissingEncryptionKeyCallout = (): [boolean, () => void] => {
   const { missingOptionalFeatures } = useFleetStatus();
   const { storage } = useStartServices();
 

@@ -52,7 +52,7 @@ import { AgentActivityFlyout, AgentSoftLimitCallout } from './components';
 import { TableRowActions } from './components/table_row_actions';
 import { AgentListTable } from './components/agent_list_table';
 import { getKuery } from './utils/get_kuery';
-import { useAgentSoftLimit, useMissingEncryptionKeyCalloutHasBeenDismissed } from './hooks';
+import { useAgentSoftLimit, useMissingEncryptionKeyCallout } from './hooks';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -395,7 +395,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   // Missing Encryption key
   const [canShowMissingEncryptionKeyCallout, dismissEncryptionKeyCallout] =
-    useMissingEncryptionKeyCalloutHasBeenDismissed();
+    useMissingEncryptionKeyCallout();
 
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
