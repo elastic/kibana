@@ -10,8 +10,8 @@ import {
   createCalleeTree,
   createFlameGraph,
   decodeStackTraceResponse,
+  stackTraceFixtures,
 } from '@kbn/profiling-utils';
-import { stackTraceFixtures } from './__fixtures__/stacktraces';
 import { sum } from 'lodash';
 import { createColumnarViewModel } from './columnar_view_model';
 
