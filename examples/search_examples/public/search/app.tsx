@@ -311,7 +311,7 @@ export const SearchExamplesApp = ({
       const result = await lastValueFrom(
         searchSource.fetch$({
           abortSignal: abortController.signal,
-          disableShardFailureWarning: !showWarningToastNotifications,
+          disableWarningToasts: !showWarningToastNotifications,
           inspector,
         })
       );

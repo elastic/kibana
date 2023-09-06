@@ -232,7 +232,7 @@ describe('context app', function () {
       ).then(({ anchorRow, interceptedWarnings }) => {
         expect(anchorRow).toHaveProperty('raw._id', '1');
         expect(anchorRow).toHaveProperty('isAnchor', true);
-        expect(interceptedWarnings.length).toBe(1);
+        expect(interceptedWarnings?.length).toBe(1);
       });
     });
   });
