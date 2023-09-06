@@ -66,6 +66,7 @@ const enabledActionTypes = [
   'test.capped',
   'test.system-action',
   'test.system-action-kibana-privileges',
+  'test.system-action-connector-adapter',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {

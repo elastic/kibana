@@ -15,17 +15,13 @@ import { CombinedSummarizedAlerts } from '../types';
 
 type ActionTypeParams = Record<string, unknown>;
 
-type Rule<RuleParams extends RuleTypeParams = RuleTypeParams> = Pick<
-  SanitizedRule<RuleParams>,
-  'id' | 'name' | 'tags'
->;
+type Rule = Pick<SanitizedRule<RuleTypeParams>, 'id' | 'name' | 'tags'>;
 
 interface BuildActionParamsArgs<
-  RuleParams extends RuleTypeParams = RuleTypeParams,
   RuleActionParams extends GenericRuleActionParams = GenericRuleActionParams
 > {
   alerts: CombinedSummarizedAlerts;
-  rule: Rule<RuleParams>;
+  rule: Rule;
   params: RuleActionParams;
   spaceId: string;
   ruleUrl?: string;
@@ -42,11 +38,7 @@ export interface ConnectorAdapter {
    * changes.
    */
   ruleActionParamsSchema: ObjectType;
-  buildActionParams: <
-    RuleParams extends RuleTypeParams = RuleTypeParams,
-    RuleActionParams extends GenericRuleActionParams = GenericRuleActionParams,
-    ActionParams extends ActionTypeParams = ActionTypeParams
-  >(
-    args: BuildActionParamsArgs<RuleParams, RuleActionParams>
-  ) => ActionParams;
+  buildActionParams: <RuleActionParams extends GenericRuleActionParams>(
+    args: BuildActionParamsArgs<RuleActionParams>
+  ) => ActionTypeParams;
 }

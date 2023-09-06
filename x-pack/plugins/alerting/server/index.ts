@@ -66,6 +66,7 @@ export {
   installWithTimeout,
 } from './alerts_service';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
+export type { ConnectorAdapter } from './connector_adapters/types';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 
