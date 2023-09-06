@@ -236,6 +236,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     setEditorHeight(contentHeight);
   }, []);
 
+  const onEditorFocus = useCallback(() => {
+    setIsCompactFocused(true);
+    setIsCodeEditorExpandedFocused(true);
+    setShowLineNumbers(true);
+    setCodeOneLiner('');
+    clickedOutside = false;
+    initialRender = false;
+    updateLinesFromModel = true;
+  }, []);
+
   useDebounceWithOptions(
     () => {
       if (!editorModel.current) return;
@@ -667,23 +677,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         });
 
                         editor.onDidFocusEditorText(() => {
-                          setIsCompactFocused(true);
-                          setIsCodeEditorExpandedFocused(true);
-                          setShowLineNumbers(true);
-                          setCodeOneLiner('');
-                          clickedOutside = false;
-                          initialRender = false;
-                          updateLinesFromModel = true;
+                          onEditorFocus();
                         });
 
                         editor.onKeyDown(() => {
-                          setIsCompactFocused(true);
-                          setIsCodeEditorExpandedFocused(true);
-                          setShowLineNumbers(true);
-                          setCodeOneLiner('');
-                          clickedOutside = false;
-                          initialRender = false;
-                          updateLinesFromModel = true;
+                          onEditorFocus();
                         });
 
                         // on CMD/CTRL + Enter submit the query
