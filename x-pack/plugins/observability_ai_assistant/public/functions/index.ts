@@ -49,11 +49,14 @@ export async function registerFunctions({
         In KQL, escaping happens with double quotes, not single quotes. Some characters that need escaping are: ':()\\\
         /\". Always put a field value in double quotes. Best: service.name:\"opbeans-go\". Wrong: service.name:opbeans-go. This is very important!
 
-        You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.`
+        You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.
+        
+        If multiple functions are suitable, use the most specific and easy one. E.g., when the user asks to visualise APM data, use the APM functions (if available) rather than Lens.
+        `
       );
 
       if (isReady) {
-        description += `You can use the "summarize" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. 
+        description += `You can use the "summarize" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. Don't create a new summarization if you see a similar summarization in the conversation, instead, update the existing one by re-using its ID.
 
         Additionally, you can use the "recall" function to retrieve relevant information from the knowledge database.
         `;

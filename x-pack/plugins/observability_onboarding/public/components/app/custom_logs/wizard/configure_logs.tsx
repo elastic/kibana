@@ -174,6 +174,7 @@ export function ConfigureLogs() {
           items={[
             <BackButton onBack={goBack} />,
             <EuiButton
+              data-test-subj="observabilityOnboardingConfigureLogsButton"
               color="primary"
               fill
               onClick={onContinue}
@@ -234,6 +235,7 @@ export function ConfigureLogs() {
                   <EuiFlexGroup alignItems="center" gutterSize="xs">
                     <EuiFlexItem>
                       <EuiFieldText
+                        data-test-subj="observabilityOnboardingConfigureLogsFieldText"
                         placeholder={i18n.translate(
                           'xpack.observability_onboarding.configureLogs.logFile.placeholder',
                           {
@@ -247,6 +249,7 @@ export function ConfigureLogs() {
                     {index > 0 && (
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
+                          data-test-subj="observabilityOnboardingConfigureLogsButton"
                           iconType="trash"
                           aria-label="Delete"
                           onClick={() => removeLogFilePath(index)}
@@ -265,7 +268,11 @@ export function ConfigureLogs() {
             gutterSize="xs"
           >
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="plusInCircle" onClick={addLogFilePath}>
+              <EuiButtonEmpty
+                data-test-subj="observabilityOnboardingConfigureLogsAddRowButton"
+                iconType="plusInCircle"
+                onClick={addLogFilePath}
+              >
                 {i18n.translate(
                   'xpack.observability_onboarding.configureLogs.logFile.addRow',
                   {
@@ -313,6 +320,7 @@ export function ConfigureLogs() {
             }
           >
             <EuiFieldText
+              data-test-subj="observabilityOnboardingConfigureLogsFieldText"
               placeholder={i18n.translate(
                 'xpack.observability_onboarding.configureLogs.serviceName.placeholder',
                 {
@@ -387,6 +395,7 @@ export function ConfigureLogs() {
                       values={{
                         learnMoreLink: (
                           <EuiLink
+                            data-test-subj="observabilityOnboardingConfigureLogsLearnMoreLink"
                             external
                             target="_blank"
                             href={
@@ -406,6 +415,7 @@ export function ConfigureLogs() {
                   }
                 >
                   <EuiFieldText
+                    data-test-subj="observabilityOnboardingConfigureLogsFieldText"
                     placeholder={i18n.translate(
                       'xpack.observability_onboarding.configureLogs.namespace.placeholder',
                       {
@@ -431,6 +441,7 @@ export function ConfigureLogs() {
                       values={{
                         learnMoreLink: (
                           <EuiLink
+                            data-test-subj="observabilityOnboardingConfigureLogsLearnMoreLink"
                             external
                             target="_blank"
                             href={
@@ -450,6 +461,7 @@ export function ConfigureLogs() {
                   }
                 >
                   <EuiTextArea
+                    data-test-subj="observabilityOnboardingConfigureLogsTextArea"
                     value={customConfigurations}
                     onChange={(event) =>
                       setCustomConfigurations(event.target.value)
@@ -514,6 +526,7 @@ export function ConfigureLogs() {
             error={integrationNameError}
           >
             <EuiFieldText
+              data-test-subj="observabilityOnboardingConfigureLogsFieldText"
               placeholder={i18n.translate(
                 'xpack.observability_onboarding.configureLogs.integration.placeholder',
                 {
@@ -568,6 +581,7 @@ export function ConfigureLogs() {
             error={datasetNameError}
           >
             <EuiFieldText
+              data-test-subj="observabilityOnboardingConfigureLogsFieldText"
               placeholder={i18n.translate(
                 'xpack.observability_onboarding.configureLogs.dataset.placeholder',
                 {
