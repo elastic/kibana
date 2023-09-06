@@ -41,12 +41,13 @@ interface DetailsListProps {
     name: string;
     toolTip: string;
     content: any;
+    dataTestSubj: string;
   }>;
 }
 
 const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => {
   const descriptionListItems = details.map((detail, index) => {
-    const { name, toolTip, content } = detail;
+    const { name, toolTip, content, dataTestSubj } = detail;
 
     return (
       <Fragment key={`${name}-${index}`}>
@@ -60,7 +61,9 @@ const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => 
           </EuiFlexGroup>
         </EuiDescriptionListTitle>
 
-        <EuiDescriptionListDescription>{content}</EuiDescriptionListDescription>
+        <EuiDescriptionListDescription data-test-subj={dataTestSubj}>
+          {content}
+        </EuiDescriptionListDescription>
       </Fragment>
     );
   });
@@ -142,6 +145,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             defaultMessage: 'The minimum amount of time the data stream will be stored for.',
           }),
           content: lifecycle.data_retention,
+          dataTestSubj: 'dataRetentionDetail',
         });
       }
 
@@ -153,11 +157,14 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
             defaultMessage: `The index lifecycle policy that manages the data stream's data`,
           }),
-          content: (
+          content: ilmPolicyLink ? (
             <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
               {ilmPolicyName}
             </EuiLink>
+          ) : (
+            ilmPolicyName
           ),
+          dataTestSubj: 'ilmPolicyDetail',
         });
       }
 
@@ -173,6 +180,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: `The health of the data stream's current backing indices`,
         }),
         content: <DataHealth health={health} />,
+        dataTestSubj: 'healthDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampTitle', {
@@ -190,6 +198,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             })}
           </em>
         ),
+        dataTestSubj: 'lastUpdatedDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeTitle', {
@@ -199,6 +208,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: `Total size of all shards in the data stream’s backing indices`,
         }),
         content: storageSize,
+        dataTestSubj: 'storageSizeDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indicesTitle', {
@@ -217,6 +227,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             {indices.length}
           </EuiLink>
         ),
+        dataTestSubj: 'indicesDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.timestampFieldTitle', {
@@ -226,6 +237,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Timestamp field shared by all documents in the data stream',
         }),
         content: timeStampField.name,
+        dataTestSubj: 'timestampDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.generationTitle', {
@@ -235,6 +247,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Cumulative count of backing indices created for the data stream',
         }),
         content: generation,
+        dataTestSubj: 'generationDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexTemplateTitle', {
@@ -252,6 +265,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             {indexTemplateName}
           </EuiLink>
         ),
+        dataTestSubj: 'indexTemplateDetail',
       },
     ];
 
