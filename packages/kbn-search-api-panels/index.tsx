@@ -24,11 +24,9 @@ export * from './types';
 export * from './utils';
 
 export interface WelcomeBannerProps {
-  userProfile: {
-    user: {
-      full_name?: string;
-      username?: string;
-    };
+  userProfile?: {
+    full_name?: string;
+    username?: string;
   };
   assetBasePath?: string;
   image?: string;
@@ -54,16 +52,18 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxxs">
-            <h2>
-              {i18n.translate('searchApiPanels.welcomeBanner.header.greeting.title', {
-                defaultMessage: 'Hi {name}!',
-                values: { name: userProfile?.user?.full_name || userProfile?.user?.username },
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
+        {Boolean(userProfile) && (
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxxs">
+              <h2>
+                {i18n.translate('searchApiPanels.welcomeBanner.header.greeting.title', {
+                  defaultMessage: 'Hi {name}!',
+                  values: { name: userProfile?.full_name || userProfile?.username },
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer />
       {showDescription && (
