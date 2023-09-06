@@ -24,7 +24,7 @@ export interface Props {
   savingToLibraryPermitted?: boolean;
 
   originatingApp?: string;
-  originatingPath?: string;
+  getOriginatingPath?: (dashboardId: string) => string;
   allowByValueEmbeddables: boolean;
 
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
@@ -44,7 +44,7 @@ export interface Props {
 export const SaveModal = (props: Props) => {
   const {
     originatingApp,
-    originatingPath,
+    getOriginatingPath,
     savingToLibraryPermitted,
     savedObjectsTagging,
     tagsIds,
@@ -103,7 +103,7 @@ export const SaveModal = (props: Props) => {
         defaultMessage: 'Lens visualization',
       })}
       data-test-subj="lnsApp_saveModalDashboard"
-      originatingPath={originatingPath}
+      getOriginatingPath={getOriginatingPath}
     />
   );
 };

@@ -25,7 +25,7 @@ type ExtraProps = Pick<LensAppProps, 'initialInput'> &
 
 export type SaveModalContainerProps = {
   originatingApp?: string;
-  originatingPath?: string;
+  getOriginatingPath?: (dashboardId: string) => string;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
   returnToOriginSwitchLabel?: string;
@@ -45,7 +45,7 @@ export function SaveModalContainer({
   runSave,
   persistedDoc,
   originatingApp,
-  originatingPath,
+  getOriginatingPath,
   initialInput,
   redirectTo,
   redirectToOrigin,
@@ -121,7 +121,7 @@ export function SaveModalContainer({
           redirectTo,
           redirectToOrigin,
           originatingApp,
-          originatingPath,
+          getOriginatingPath,
           getIsByValueMode: () => false,
           onAppLeave: () => {},
           savedObjectStore: lensServices.savedObjectStore,
@@ -140,7 +140,7 @@ export function SaveModalContainer({
   return (
     <SaveModal
       originatingApp={originatingApp}
-      originatingPath={originatingPath}
+      getOriginatingPath={getOriginatingPath}
       savingToLibraryPermitted={savingToLibraryPermitted}
       allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
       savedObjectsTagging={savedObjectsTagging}
@@ -164,14 +164,14 @@ const redirectToDashboard = ({
   dashboardFeatureFlag,
   dashboardId,
   originatingApp,
-  originatingPath,
+  getOriginatingPath,
   stateTransfer,
 }: {
   embeddableInput: LensEmbeddableInput;
   dashboardId: string;
   dashboardFeatureFlag: LensAppServices['dashboardFeatureFlag'];
   originatingApp?: string;
-  originatingPath?: string;
+  getOriginatingPath?: (dashboardId: string) => string | undefined;
   stateTransfer: LensAppServices['stateTransfer'];
 }) => {
   if (!dashboardFeatureFlag.allowByValueEmbeddables) {
@@ -183,7 +183,9 @@ const redirectToDashboard = ({
     type: LENS_EMBEDDABLE_TYPE,
   };
 
-  const path = originatingPath ?? (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`);
+  const path =
+    getOriginatingPath?.(dashboardId) ??
+    (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`);
   const appId = originatingApp ?? 'dashboards';
   stateTransfer.navigateToWithEmbeddablePackage(appId, {
     state,
@@ -218,7 +220,7 @@ export const runSaveLensVisualization = async (
     getIsByValueMode: () => boolean;
     persistedDoc?: Document;
     originatingApp?: string;
-    originatingPath?: string;
+    getOriginatingPath?: (dashboardId: string) => string;
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
     savedObjectStore: SavedObjectIndexStore;
@@ -333,7 +335,7 @@ export const runSaveLensVisualization = async (
         stateTransfer,
         dashboardFeatureFlag,
         originatingApp: props.originatingApp,
-        originatingPath: props.originatingPath,
+        getOriginatingPath: props.getOriginatingPath,
       });
       return;
     }
