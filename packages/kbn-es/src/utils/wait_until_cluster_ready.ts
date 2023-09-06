@@ -46,13 +46,13 @@ export async function waitUntilClusterReady({
         throw new Error(`ES cluster failed to come online with the ${sec} second timeout`);
       }
 
-      if (error.message.startsWith('not ready,')) {
+      if (error?.message?.startsWith('not ready,')) {
         if (timeSinceStart > 10_000) {
           log.warning(error.message);
         }
       } else {
         log.warning(
-          `waiting for ES cluster to come online, attempt ${attempt} failed with: ${error.message}`
+          `waiting for ES cluster to come online, attempt ${attempt} failed with: ${error?.message}`
         );
       }
 
