@@ -10,6 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
 
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { ComponentTemplateDeserialized } from '../../shared_imports';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { ComponentTemplateForm } from '../component_template_form';
@@ -28,7 +29,7 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const { api, breadcrumbs } = useComponentTemplatesContext();
+  const { api } = useComponentTemplatesContext();
 
   const onSave = async (componentTemplate: ComponentTemplateDeserialized) => {
     const { name } = componentTemplate;
@@ -55,8 +56,8 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
   };
 
   useEffect(() => {
-    breadcrumbs.setCreateBreadcrumbs();
-  }, [breadcrumbs]);
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplateCreate);
+  }, []);
 
   return (
     <EuiPageSection restrictWidth style={{ width: '100%' }}>
