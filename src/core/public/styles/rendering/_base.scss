@@ -59,26 +59,29 @@
 }
 
 .kbnBody {
-  @include kbnAffordForHeader($kbnHeaderOffset);
+  padding-top: var(--euiFixedHeadersOffset, 0);
+}
 
-  &.kbnBody--hasHeaderBanner {
-    padding-top: $kbnHeaderBannerHeight;
+// Conditionally override :root CSS fixed header variable. Updating `--euiFixedHeadersOffset`
+// on the body will cause all child EUI components to automatically update their offsets
 
-    @include kbnAffordForHeader($kbnHeaderOffsetWithBanner);
+.kbnBody--hasHeaderBanner {
+  --euiFixedHeadersOffset: var(--kbnHeaderOffsetWithBanner);
 
-    // Prevents banners from covering full screen data grids
-    .euiDataGrid--fullScreen {
-      height: calc(100vh - #{$kbnHeaderBannerHeight});
-      top: $kbnHeaderBannerHeight;
-    }
+  // Offset fixed EuiHeaders by the top banner
+  .euiHeader[data-fixed-header] {
+    margin-top: var(--kbnHeaderBannerHeight);
   }
-  &.kbnBody--chromeHidden {
-    @include kbnAffordForHeader(0);
+
+  // Prevent banners from covering full screen data grids
+  .euiDataGrid--fullScreen {
+    height: calc(100vh - var(--kbnHeaderBannerHeight));
+    top: var(--kbnHeaderBannerHeight);
   }
-  &.kbnBody--projectLayout {
-    @include kbnAffordForHeader($euiHeaderHeightCompensation);
-  }
-  &.kbnBody--chromeHidden.kbnBody--hasHeaderBanner {
-    @include kbnAffordForHeader($kbnHeaderBannerHeight);
-  }
+}
+.kbnBody--chromeHidden {
+  --euiFixedHeadersOffset: 0;
+}
+.kbnBody--chromeHidden.kbnBody--hasHeaderBanner {
+  --euiFixedHeadersOffset: var(--kbnHeaderBannerHeight);
 }
