@@ -6,13 +6,13 @@
  */
 export {
   aggregateRulesRequestBodySchema,
-  ruleAggregationFormattedResultSchema,
+  ruleAggregationFormattedResponse,
 } from './schemas/latest';
 export type { AggregateRulesRequestBody, RuleAggregationFormattedResult } from './types/latest';
 
 export {
   aggregateRulesRequestBodySchema as aggregateRulesRequestBodySchemaV1,
-  ruleAggregationFormattedResultSchema as ruleAggregationFormattedResultSchemaV1,
+  ruleAggregationFormattedResponse as ruleAggregationFormattedResponseV1,
 } from './schemas/v1';
 export type {
   AggregateRulesRequestBody as AggregateRulesRequestBodyV1,

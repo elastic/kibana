@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleAggregationFormattedResult } from '../../../../../../../common/routes/rule/apis/aggregate';
+import { RuleAggregationFormattedResult } from '../../../../../../../common/routes/rule/apis/aggregate/types/latest';
 import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../../../../../../../common';
 import { DefaultRuleAggregationResultV1 } from '../../types';
 

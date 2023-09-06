@@ -13,10 +13,10 @@ import { buildKueryNodeFilter } from '../../../../rules_client/common';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import { RulesClientContext } from '../../../../rules_client/types';
 
-import type { AggregateParams } from './types';
+import type { AggregateParams } from './types/v1';
 import { validateRuleAggregationFields } from './validation';
 
-export async function aggregate<T = Record<string, unknown>>(
+export async function aggregateRules<T = Record<string, unknown>>(
   context: RulesClientContext,
   params: AggregateParams<T>
 ): Promise<T> {

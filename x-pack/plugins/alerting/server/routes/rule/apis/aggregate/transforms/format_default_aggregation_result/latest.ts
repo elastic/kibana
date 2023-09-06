@@ -4,5 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export type { DefaultRuleAggregationResult } from './latest';
-export type { DefaultRuleAggregationResult as DefaultRuleAggregationResultV1 } from './v1';
+export { formatDefaultAggregationResult } from './v1';

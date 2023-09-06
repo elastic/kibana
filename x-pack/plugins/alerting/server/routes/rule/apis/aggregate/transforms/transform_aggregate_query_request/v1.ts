@@ -6,8 +6,9 @@
  */
 
 import { RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { AggregateOptions } from '../../../../../../application/rule/methods/aggregate';
+import { AggregateOptions } from '../../../../../../application/rule/methods/aggregate/types/latest';
 
+// FIXME: avoid spreading
 export const transformAggregateQueryRequest: RewriteRequestCase<AggregateOptions> = ({
   default_search_operator: defaultSearchOperator,
   has_reference: hasReference,

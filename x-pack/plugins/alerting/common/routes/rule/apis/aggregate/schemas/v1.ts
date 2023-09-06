@@ -26,7 +26,7 @@ export const aggregateRulesRequestBodySchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
 
-export const ruleAggregationFormattedResultSchema = schema.object({
+export const ruleAggregationFormattedResponse = schema.object({
   ruleExecutionStatus: schema.recordOf(schema.string(), schema.number()),
   ruleLastRunOutcome: schema.recordOf(schema.string(), schema.number()),
   ruleEnabledStatus: schema.object({

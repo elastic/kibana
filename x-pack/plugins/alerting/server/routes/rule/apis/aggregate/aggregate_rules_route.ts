@@ -8,7 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { getDefaultRuleAggregationV1 } from '../../../../application/rule/methods/aggregate/factories';
+import { getDefaultRuleAggregationV1 } from '../../../../application/rule/methods/aggregate';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';

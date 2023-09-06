@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { aggregateRulesRoute } from './aggregate_rules';
+import { aggregateRulesRoute } from './aggregate_rules_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';

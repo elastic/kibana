@@ -6,10 +6,10 @@
  */
 
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-import { GetDefaultRuleAggregationParams } from '../..';
+import { GetDefaultRuleAggregationParamsV1 } from '../..';
 
 export const getDefaultRuleAggregation = (
-  params?: GetDefaultRuleAggregationParams
+  params?: GetDefaultRuleAggregationParamsV1
 ): Record<string, AggregationsAggregationContainer> => {
   const { maxTags = 50 } = params || {};
   return {
