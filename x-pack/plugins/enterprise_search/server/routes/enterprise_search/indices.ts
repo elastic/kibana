@@ -14,15 +14,18 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
+import { deleteConnectorById } from '@kbn/search-connectors';
+import {
+  fetchConnectorByIndexName,
+  fetchConnectors,
+} from '@kbn/search-connectors/lib/fetch_connectors';
+
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { AlwaysShowPattern } from '../../../common/types/indices';
 
 import type { AttachMlInferencePipelineResponse } from '../../../common/types/pipelines';
 
-import { deleteConnectorById } from '../../lib/connectors/delete_connector';
-
-import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors/fetch_connectors';
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
@@ -113,7 +116,7 @@ export function registerIndexRoutes({
         from,
         size
       );
-      const connectors = await fetchConnectors(client, indexNames);
+      const connectors = await fetchConnectors(client.asCurrentUser, indexNames);
       const crawlers = await fetchCrawlers(client, indexNames);
       const enrichedIndices = indices.map((index) => ({
         ...index,
@@ -186,7 +189,7 @@ export function registerIndexRoutes({
 
       try {
         const crawler = await fetchCrawlerByIndexName(client, indexName);
-        const connector = await fetchConnectorByIndexName(client, indexName);
+        const connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
 
         if (crawler) {
           const crawlerRes = await enterpriseSearchRequestHandler.createRequest({
@@ -199,7 +202,7 @@ export function registerIndexRoutes({
         }
 
         if (connector) {
-          await deleteConnectorById(client, connector.id);
+          await deleteConnectorById(client.asCurrentUser, connector.id);
         }
 
         await deleteIndexPipelines(client, indexName);
@@ -575,7 +578,10 @@ export function registerIndexRoutes({
         });
       }
 
-      const connector = await fetchConnectorByIndexName(client, request.body.index_name);
+      const connector = await fetchConnectorByIndexName(
+        client.asCurrentUser,
+        request.body.index_name
+      );
 
       if (connector) {
         return createError({
