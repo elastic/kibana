@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('webhook-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
-    
+
     it('pagerduty connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -199,7 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('opsgenie-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
-      
+
     it('generative ai connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
