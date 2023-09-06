@@ -265,6 +265,12 @@ A configuration URL that varies by connector:
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
 --
 
+`xpack.actions.preconfigured.<connector-id>.config.executionTimeField`::
+For an <<index-action-type,index connector>>, a field that indicates when the document was indexed.
+
+`xpack.actions.preconfigured.<connector-id>.config.index`::
+For an <<index-action-type,index connector>>, specifies the {es} index.
+
 `xpack.actions.preconfigured.<connector-id>.name`::
 The name of the preconfigured connector.
 
