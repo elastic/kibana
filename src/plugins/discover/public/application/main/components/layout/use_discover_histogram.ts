@@ -59,6 +59,7 @@ export const useDiscoverHistogram = ({
    */
 
   const [unifiedHistogram, ref] = useState<UnifiedHistogramApi | null>();
+  unifiedHistogram?.setIsSugggestionLoading(isPlainRecord);
 
   const getCreationOptions = useCallback(() => {
     const {
@@ -101,6 +102,7 @@ export const useDiscoverHistogram = ({
 
         if ('lensRequestAdapter' in changes) {
           inspectorAdapters.lensRequests = lensRequestAdapter;
+          unifiedHistogram?.setIsSugggestionLoading(false);
         }
 
         if (!isEqual(oldState, newState)) {
@@ -112,7 +114,7 @@ export const useDiscoverHistogram = ({
     return () => {
       subscription?.unsubscribe();
     };
-  }, [inspectorAdapters, stateContainer.appState, unifiedHistogram?.state$]);
+  }, [inspectorAdapters, stateContainer.appState, unifiedHistogram, unifiedHistogram?.state$]);
 
   /**
    * Override Unified Histgoram total hits with Discover partial results

@@ -16,3 +16,5 @@ export const totalHitsResultSelector = (state: UnifiedHistogramState) => state.t
 export const totalHitsStatusSelector = (state: UnifiedHistogramState) => state.totalHitsStatus;
 export const currentSuggestionSelector = (state: UnifiedHistogramState) => state.currentSuggestion;
 export const lensTablesAdapterSelector = (state: UnifiedHistogramState) => state.lensTablesAdapter;
+export const suggestionIsLoadingSelector = (state: UnifiedHistogramState) =>
+  state.suggestionIsLoading;
