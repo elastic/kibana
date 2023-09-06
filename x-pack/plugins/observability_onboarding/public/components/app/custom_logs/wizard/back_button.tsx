@@ -17,6 +17,7 @@ export function BackButton({ onBack }: { onBack: () => void }) {
 
   return (
     <EuiButtonEmpty
+      data-test-subj="observabilityOnboardingBackButtonBackButton"
       iconType="arrowLeft"
       color="primary"
       onClick={onBack}
