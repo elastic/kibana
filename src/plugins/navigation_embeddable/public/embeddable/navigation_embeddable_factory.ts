@@ -73,14 +73,13 @@ export class NavigationEmbeddableFactoryDefinition
   public getPanelPlacementSettings: IProvidesPanelPlacementSettings<NavigationEmbeddableInput>['getPanelPlacementSettings'] =
     (input, placementMeta) => {
       if (!placementMetaContainsAttributes(placementMeta) || !placementMeta.layout) {
-        // if we have no information about the layout of this nav embeddable defer to default panel size.
-        return { strategy: 'placeAtTop' };
+        // if we have no information about the layout of this nav embeddable defer to default panel size and placement.
+        return {};
       }
 
-      console.log(placementMeta);
-      const width = placementMeta.layout === 'horizontal' ? DASHBOARD_GRID_COLUMN_COUNT : 8;
-      const height =
-        placementMeta.layout === 'horizontal' ? 4 : (placementMeta.links?.length ?? 1 * 3) + 4;
+      const isHorizontal = placementMeta.layout === 'horizontal';
+      const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
+      const height = isHorizontal ? 4 : (placementMeta.links?.length ?? 1 * 3) + 4;
       return { width, height, strategy: 'placeAtTop' };
     };
 

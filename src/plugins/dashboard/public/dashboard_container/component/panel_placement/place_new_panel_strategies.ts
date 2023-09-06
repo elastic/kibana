@@ -10,34 +10,14 @@ import { cloneDeep } from 'lodash';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../dashboard_constants';
 import { PanelPlacementProps, PanelPlacementReturn } from './types';
 
-const overlapsOnXAxis = (
-  panelALeft: number,
-  panelARight: number,
-  panelBLeft: number,
-  panelBRight: number
-) => {
-  if (panelALeft > panelBRight) return false;
-  if (panelARight < panelBLeft) return false;
-  return true;
-};
-
 export const panelPlacementStrategies = {
-  // Place on the very top of the Dashboard, add the height of this panel to all panels that it will move down.
+  // Place on the very top of the Dashboard, add the height of this panel to all other panels.
   placeAtTop: ({ width, height, currentPanels }: PanelPlacementProps): PanelPlacementReturn => {
     const otherPanels = { ...currentPanels };
     for (const [id, panel] of Object.entries(currentPanels)) {
       const currentPanel = cloneDeep(panel);
-      if (
-        overlapsOnXAxis(
-          currentPanel.gridData.x,
-          currentPanel.gridData.x + currentPanel.gridData.w,
-          0,
-          width
-        )
-      ) {
-        console.log('MOVING PANEL', currentPanel.explicitInput.title);
-        currentPanel.gridData.y = currentPanel.gridData.y + height;
-      }
+      console.log('MOVING PANEL', currentPanel.explicitInput.title);
+      currentPanel.gridData.y = currentPanel.gridData.y + height;
       otherPanels[id] = currentPanel;
     }
     return {
