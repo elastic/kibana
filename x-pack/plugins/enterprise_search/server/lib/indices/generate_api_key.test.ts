@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
+import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 
 import { generateApiKey } from './generate_api_key';
 
