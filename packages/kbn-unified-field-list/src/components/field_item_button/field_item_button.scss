@@ -75,6 +75,7 @@
 .unifiedFieldListItemButton--withDragHandle {
   &.kbnFieldButton {
     padding: 0;
+    margin-bottom: $euiSizeXS / 2;
   }
 
   .kbnFieldButton__dragHandle {
