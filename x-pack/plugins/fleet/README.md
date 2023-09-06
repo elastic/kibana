@@ -67,6 +67,14 @@ yarn kbn bootstrap
 
 #### Useful tips
 
+To avoid the enforcing of version headers when running in dev mode, add the following to your `kibana.dev.yml`:
+
+```
+server.versioned.versionResolution: oldest
+```
+This will provide a default version for the public apis.
+
+
 If Kibana fails to start, it is possible that your local setup got corrupted. An easy fix is to run:
 
 ```
@@ -80,6 +88,7 @@ To avoid losing all your data when you restart Elasticsearch, you can provide a 
 ```
 
 Refer to the [Running Elasticsearch during development](https://www.elastic.co/guide/en/kibana/current/running-elasticsearch.html) page of the guide for other options.
+
 
 ### Running Fleet Server Locally in a Container
 
