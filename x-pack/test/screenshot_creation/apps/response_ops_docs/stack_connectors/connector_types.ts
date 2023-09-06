@@ -199,18 +199,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('opsgenie-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
-
-    it('generative ai connector screenshots', async () => {
-      await pageObjects.common.navigateToApp('connectors');
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      await actions.common.openNewConnectorForm('gen-ai');
-      await testSubjects.setValue('nameInput', 'OpenAI test connector');
-      await testSubjects.setValue('secrets.apiKey-input', 'testkey');
-      await commonScreenshots.takeScreenshot('gen-ai-connector', screenshotDirectories, 1920, 1200);
-      await testSubjects.click('create-connector-flyout-save-test-btn');
-      await testSubjects.click('toastCloseButton');
-      await commonScreenshots.takeScreenshot('gen-ai-params-test', screenshotDirectories);
-      await testSubjects.click('euiFlyoutCloseButton');
-    });
   });
 }
