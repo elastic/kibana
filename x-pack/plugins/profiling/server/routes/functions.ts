@@ -51,38 +51,6 @@ export function registerTopNFunctionsSearchRoute({
         return response.ok({
           body: topNFunctions,
         });
-
-        // const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
-        // const esClient = await getClient(context);
-        // const profilingElasticsearchClient = createProfilingEsClient({ request, esClient });
-        // const filter = createCommonFilter({
-        //   timeFrom,
-        //   timeTo,
-        //   kuery,
-        // });
-
-        // const { events, stackTraces, executables, stackFrames, samplingRate } =
-        //   await searchStackTraces({
-        //     client: profilingElasticsearchClient,
-        //     filter,
-        //     sampleSize: targetSampleSize,
-        //   });
-
-        // const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
-        //   return createTopNFunctions({
-        //     endIndex,
-        //     events,
-        //     executables,
-        //     samplingRate,
-        //     stackFrames,
-        //     stackTraces,
-        //     startIndex,
-        //   });
-        // });
-
-        // return response.ok({
-        //   body: topNFunctions,
-        // });
       } catch (error) {
         return handleRouteHandlerError({
           error,
