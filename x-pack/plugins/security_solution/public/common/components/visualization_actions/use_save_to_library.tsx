@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { unmountComponentAtNode } from 'react-dom';
 import type { SaveProps } from '@kbn/lens-plugin/public/plugin';
-import { useKibana, useToasts } from '../../lib/kibana';
-import { ADDED_TO_LIBRARY } from './translations';
+import { useKibana } from '../../lib/kibana';
 import type { LensAttributes } from './types';
 import { useRedirectToDashboardFromLens } from './use_redirect_to_dashboard_from_lens';
 import { APP_UI_ID } from '../../../../common';
@@ -23,8 +22,6 @@ export const useSaveToLibrary = ({
   attributes: LensAttributes | undefined | null;
 }) => {
   const { lens, theme, i18n } = useKibana().services;
-  const { addSuccess } = useToasts();
-  const [saveModalProps, setSaveModalProps] = useState<SaveProps | undefined>(undefined);
   const { SaveModalComponent, canUseEditor } = lens;
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const redirectTo = useRedirectToDashboardFromLens({ getSecuritySolutionUrl });
@@ -35,20 +32,16 @@ export const useSaveToLibrary = ({
       <SaveModalComponent
         initialInput={attributes as unknown as LensEmbeddableInput}
         onSave={(saveProps: SaveProps) => {
-          setSaveModalProps(saveProps);
-          // unmountComponentAtNode(targetDomElement);
-          // addSuccess(ADDED_TO_LIBRARY);
+          unmountComponentAtNode(targetDomElement);
         }}
         onClose={() => {
           unmountComponentAtNode(targetDomElement);
         }}
         originatingApp={APP_UI_ID}
-        originatingPath={
-          saveModalProps?.dashboardId
-            ? saveModalProps.dashboardId !== 'new'
-              ? `dashboards/${saveModalProps.dashboardId}/edit`
-              : `dashboards/create`
-            : `dashboards/create`
+        getOriginatingPath={(dashboardId) =>
+          dashboardId == null || dashboardId === 'new'
+            ? `dashboards/create`
+            : `dashboards/${dashboardId}/edit`
         }
         redirectTo={redirectTo}
       />,
@@ -56,7 +49,7 @@ export const useSaveToLibrary = ({
     );
 
     mount(targetDomElement);
-  }, [SaveModalComponent, attributes, i18n, redirectTo, saveModalProps?.dashboardId, theme]);
+  }, [SaveModalComponent, attributes, i18n, redirectTo, theme]);
 
   const disableVisualizations = useMemo(
     () => !canUseEditor() || attributes == null,
