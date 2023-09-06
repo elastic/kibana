@@ -29,5 +29,6 @@ export const sendGetEndpointSpecificPackagePolicies = (
         options?.query?.kuery ? `${options.query.kuery} and ` : ''
       }${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
     },
+    version: '2023-10-31',
   });
 };

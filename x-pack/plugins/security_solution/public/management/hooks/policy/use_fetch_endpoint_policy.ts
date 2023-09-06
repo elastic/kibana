@@ -45,7 +45,8 @@ export const useFetchEndpointPolicy = (
     ...options,
     queryFn: async () => {
       const apiResponse = await http.get<GetPolicyResponse>(
-        packagePolicyRouteService.getInfoPath(policyId)
+        packagePolicyRouteService.getInfoPath(policyId),
+        { version: '2023-10-31' }
       );
 
       applyDefaultsToPolicyIfNeeded(apiResponse.item);

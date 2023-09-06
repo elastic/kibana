@@ -30,6 +30,7 @@ export const useFetchAgentByAgentPolicySummary = (
       return (
         await http.get<GetAgentStatusResponse>(agentRouteService.getStatusPath(), {
           query: { policyId: agentPolicyId },
+          version: '2023-10-31',
         })
       ).results;
     },

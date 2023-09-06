@@ -39,6 +39,7 @@ export const useUpdateEndpointPolicy = (
 
     return http.put(packagePolicyRouteService.getUpdatePath(policy.id), {
       body: JSON.stringify(update),
+      version: '2023-10-31',
     });
   }, options);
 };

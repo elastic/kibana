@@ -34,7 +34,10 @@ export const sendGetPackagePolicy = (
   packagePolicyId: string,
   options?: HttpFetchOptions
 ) => {
-  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, options);
+  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
+    ...options,
+    version: '2023-10-31',
+  });
 };
 
 /**
@@ -50,6 +53,7 @@ export const sendBulkGetPackagePolicies = (
 ) => {
   return http.post<GetPackagePoliciesResponse>(`${INGEST_API_PACKAGE_POLICIES}/_bulk_get`, {
     ...options,
+    version: '2023-10-31',
     body: JSON.stringify({
       ids: packagePolicyIds,
       ignoreMissing: true,
@@ -73,6 +77,7 @@ export const sendPutPackagePolicy = (
 ): Promise<UpdatePolicyResponse> => {
   return http.put(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
     ...options,
+    version: '2023-10-31',
     body: JSON.stringify(packagePolicy),
   });
 };
@@ -92,6 +97,7 @@ export const sendGetFleetAgentStatusForPolicy = (
 ): Promise<GetAgentStatusResponse> => {
   return http.get(INGEST_API_FLEET_AGENT_STATUS, {
     ...options,
+    version: '2023-10-31',
     query: {
       policyId,
     },
@@ -105,7 +111,9 @@ export const sendGetEndpointSecurityPackage = async (
   http: HttpStart
 ): Promise<GetInfoResponse['item']> => {
   const path = epmRouteService.getInfoPath('endpoint');
-  const endpointPackageResponse = await http.get<GetInfoResponse>(path);
+  const endpointPackageResponse = await http.get<GetInfoResponse>(path, {
+    version: '2023-10-31',
+  });
   const endpointPackageInfo = endpointPackageResponse.item;
   if (!endpointPackageInfo) {
     throw new Error('Endpoint package was not found.');
