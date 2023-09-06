@@ -142,7 +142,7 @@ describe('Search service', () => {
 
         expect(notifications.toasts.addWarning).toBeCalledTimes(1);
         expect(notifications.toasts.addWarning).toBeCalledWith({
-          title: '2 of 4 shards failed',
+          title: 'The data might be incomplete or wrong.',
           text: expect.any(Function),
         });
       });
