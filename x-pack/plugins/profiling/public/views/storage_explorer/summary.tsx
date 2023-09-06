@@ -121,6 +121,7 @@ export function Summary({ data, isLoading }: Props) {
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
               <EuiLink
+                data-test-subj="profilingSummaryGoToUniversalProfilingLink"
                 href={profilingRouter.link('/stacktraces/{topNType}', {
                   path: { topNType: TopNType.Hosts },
                   query: {
@@ -139,6 +140,7 @@ export function Summary({ data, isLoading }: Props) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiLink
+                data-test-subj="profilingSummaryGoToIndexManagementLink"
                 href={core.http.basePath.prepend(
                   '/app/management/data/index_management/data_streams'
                 )}
