@@ -29,7 +29,7 @@ export const ListRequestQuery = z.object({
   agentIds: AgentIds.optional(),
   commands: Commands.optional(),
   page: Page.optional(),
-  pageSize: PageSize.and(z.unknown()),
+  pageSize: PageSize.optional(),
   startDate: StartDate.optional(),
   endDate: EndDate.optional(),
   userIds: UserIds.optional(),

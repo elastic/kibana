@@ -3,7 +3,6 @@ info:
   title: Common Endpoint Attributes
   version: '2023-10-31'
 paths: { }
-x-codegen-enabled: true
 components:
   schemas:
     Id:

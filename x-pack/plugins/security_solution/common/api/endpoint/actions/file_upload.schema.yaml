@@ -38,7 +38,7 @@ components:
                 overwrite:
                   type: boolean
                   default: false
-            # TODO double check file type
+            # File extends Blob - any binary data will be base-64 encoded
             file:
               type: string
               format: binary
