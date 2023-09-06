@@ -78,9 +78,9 @@ function createServerlessES() {
         teardown: true,
         background: true,
         clean: true,
+        kill: true,
+        waitForReady: true,
       });
-      // runServerless doesn't wait until the nodes are up
-      await waitUntilClusterReady(getServerlessESClient());
       return {
         getClient: getServerlessESClient,
         stop: async () => {
@@ -90,22 +90,6 @@ function createServerlessES() {
     },
   };
 }
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const waitUntilClusterReady = async (client: Client, timeoutMs = 60 * 1000) => {
-  const started = Date.now();
-
-  while (started + timeoutMs > Date.now()) {
-    try {
-      await client.info();
-      break;
-    } catch (e) {
-      await delay(1000);
-      /* trap to continue */
-    }
-  }
-};
 
 const getServerlessESClient = () => {
   return new Client({

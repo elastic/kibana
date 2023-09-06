@@ -16,7 +16,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
 
-  describe('dashboard lens by value', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165461
+  describe.skip('dashboard lens by value', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(

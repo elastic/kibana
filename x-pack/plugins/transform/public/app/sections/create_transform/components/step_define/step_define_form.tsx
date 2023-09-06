@@ -78,6 +78,9 @@ const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
 const advancedEditorsSidebarWidth = '220px';
 
+type PopulatedFields = Set<string>;
+const isPopulatedFields = (arg: unknown): arg is PopulatedFields => arg instanceof Set;
+
 export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
   <>
     <EuiSpacer size="m" />
@@ -132,7 +135,9 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       transformConfigQuery,
       runtimeMappings,
       timeRangeMs,
-      fieldStatsContext?.populatedFields ?? null
+      isPopulatedFields(fieldStatsContext?.populatedFields)
+        ? [...fieldStatsContext.populatedFields]
+        : []
     ),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
