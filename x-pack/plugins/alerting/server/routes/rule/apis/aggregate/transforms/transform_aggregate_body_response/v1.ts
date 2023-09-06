@@ -8,7 +8,6 @@
 import { RewriteResponseCase } from '@kbn/actions-plugin/common';
 import { RuleAggregationFormattedResult } from '../../../../../../../common/routes/rule/apis/aggregate/types/latest';
 
-// FIXME: avoid spreading
 export const transformAggregateBodyResponse: RewriteResponseCase<
   RuleAggregationFormattedResult
 > = ({
@@ -18,9 +17,7 @@ export const transformAggregateBodyResponse: RewriteResponseCase<
   ruleMutedStatus,
   ruleSnoozedStatus,
   ruleTags,
-  ...rest
 }) => ({
-  ...rest,
   rule_execution_status: ruleExecutionStatus,
   rule_last_run_outcome: ruleLastRunOutcome,
   rule_enabled_status: ruleEnabledStatus,

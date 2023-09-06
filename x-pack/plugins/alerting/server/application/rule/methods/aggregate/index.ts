@@ -18,3 +18,5 @@ export type {
   AggregateParams as AggregateParamsV1,
   GetDefaultRuleAggregationParams as GetDefaultRuleAggregationParamsV1,
 } from './types/v1';
+
+export { aggregateRules } from './aggregate_rules';
