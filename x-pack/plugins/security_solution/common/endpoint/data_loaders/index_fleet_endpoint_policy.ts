@@ -63,8 +63,8 @@ export const indexFleetEndpointPolicy = async (
       .request({
         path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
         method: 'POST',
-        body: newAgentPolicyData,
         headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+        body: newAgentPolicyData,
       })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreateAgentPolicyResponse>;
   } catch (error) {
@@ -102,6 +102,7 @@ export const indexFleetEndpointPolicy = async (
     .request({
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       method: 'POST',
+      headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
       body: newPackagePolicyData,
     })
     .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreatePackagePolicyResponse>;
@@ -138,6 +139,7 @@ export const deleteIndexedFleetEndpointPolicies = async (
         .request({
           path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
           method: 'POST',
+          headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
           body: {
             packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
           },
@@ -156,6 +158,7 @@ export const deleteIndexedFleetEndpointPolicies = async (
             .request({
               path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
               method: 'POST',
+              headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
               body: {
                 agentPolicyId: agentPolicy.id,
               },
