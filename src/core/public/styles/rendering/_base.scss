@@ -19,7 +19,7 @@
   pointer-events: none;
   visibility: hidden;
   position: fixed;
-  top: 0;
+  top: var(--euiFixedHeadersOffset, 0);
   right: 0;
   bottom: 0;
   left: 0;
@@ -36,13 +36,6 @@
 }
 
 @mixin kbnAffordForHeader($headerHeight) {
-  @include euiHeaderAffordForFixed($headerHeight);
-
-  #securitySolutionStickyKQL,
-  #app-fixed-viewport {
-    top: $headerHeight;
-  }
-
   @include euiBreakpoint('xl', 'l') {
     .kbnStickyMenu {
       position: sticky;
