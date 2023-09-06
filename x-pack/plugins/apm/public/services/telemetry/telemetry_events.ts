@@ -18,16 +18,17 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
         },
       },
     },
-    interval: {
+    timerange: {
       type: 'text',
       _meta: {
-        description: 'The interval of the search',
+        description: 'The timerange of the search',
       },
     },
     action: {
-      type: 'text',
+      type: 'keyword',
       _meta: {
-        description: 'Which action perfomed. Sumitted, refresh update',
+        description:
+          'The action performed (e.g., submitted, refreshed, updated)',
       },
     },
   },

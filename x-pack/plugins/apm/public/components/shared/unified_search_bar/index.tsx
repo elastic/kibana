@@ -287,7 +287,7 @@ export function UnifiedSearchBar({
       telemetry.reportSearchQuerySubmitted({
         kuery_fields: kueryFields,
         action,
-        interval: `${rangeFrom} - ${rangeTo}`,
+        timerange: `${rangeFrom} - ${rangeTo}`,
       });
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
