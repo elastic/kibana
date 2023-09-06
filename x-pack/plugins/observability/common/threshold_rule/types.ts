@@ -234,7 +234,7 @@ export type CustomMetricAggTypes = Exclude<
   Aggregators.CUSTOM | Aggregators.RATE | Aggregators.P95 | Aggregators.P99
 >;
 
-export interface MetricExpressionMetrics {
+export interface CustomThresholdExpressionMetric {
   name: string;
   aggType: CustomMetricAggTypes;
   field?: string;
@@ -243,7 +243,7 @@ export interface MetricExpressionMetrics {
 
 export interface CustomMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Aggregators.CUSTOM;
-  metrics: MetricExpressionMetrics[];
+  metrics: CustomThresholdExpressionMetric[];
   equation?: string;
   label?: string;
 }

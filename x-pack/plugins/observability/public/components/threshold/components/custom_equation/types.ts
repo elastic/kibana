@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { MetricExpressionMetrics } from '../../../../../common/threshold_rule/types';
+import { CustomThresholdExpressionMetric } from '../../../../../common/threshold_rule/types';
 import { MetricExpression } from '../../types';
 
 export type CustomMetrics = MetricExpression['metrics'];
@@ -27,7 +27,7 @@ export interface MetricRowBaseProps {
   onDelete: (name: string) => void;
   disableDelete: boolean;
   disableAdd: boolean;
-  onChange: (metric: MetricExpressionMetrics) => void;
+  onChange: (metric: CustomThresholdExpressionMetric) => void;
   aggregationTypes: AggregationTypes;
   errors: IErrorObject;
 }

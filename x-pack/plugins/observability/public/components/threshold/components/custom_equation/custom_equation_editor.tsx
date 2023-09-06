@@ -25,7 +25,7 @@ import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/t
 import {
   Aggregators,
   CustomMetricAggTypes,
-  MetricExpressionMetrics,
+  CustomThresholdExpressionMetric,
 } from '../../../../../common/threshold_rule/types';
 
 import { MetricExpression } from '../../types';
@@ -87,7 +87,7 @@ export function CustomEquationEditor({
   );
 
   const handleChange = useCallback(
-    (metric: MetricExpressionMetrics) => {
+    (metric: CustomThresholdExpressionMetric) => {
       setCustomMetrics((previous) => {
         const nextMetrics = previous?.map((m) => (m.name === metric.name ? metric : m));
         debouncedOnChange({ ...expression, metrics: nextMetrics, equation });
