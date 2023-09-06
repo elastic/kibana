@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiDragDropContext,
   EuiDroppable,
@@ -18,8 +19,9 @@ import {
   EuiInlineEditText,
   EuiSpacer,
   EuiButtonEmpty,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
-import { AddListOption } from './add_list_option';
+
 import * as i18n from '../translations';
 
 export interface ListOption {
@@ -34,7 +36,8 @@ export interface Props {
 }
 
 const ListOptionsComponent: React.FC<Props> = ({ disabled, isLoading, listValues, onChange }) => {
-  const [addOption, setAddOption] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isEditingEnabled, setIsEditingEnabled] = useState(false);
 
   const onDragEnd = useCallback(
     ({ source, destination }) => {
@@ -47,52 +50,81 @@ const ListOptionsComponent: React.FC<Props> = ({ disabled, isLoading, listValues
   );
 
   const onAddOption = useCallback(() => {
-    setAddOption(true);
-  }, [setAddOption]);
+    const newOption = { id: `${listValues.length + 1}`, content: '' };
+
+    setIsEditingEnabled(true);
+
+    onChange([...listValues, newOption]);
+  }, [onChange, listValues, setIsEditingEnabled]);
 
   const handleOptionSave = useCallback(
-    (id: string | undefined, value: string) => {
-      if (id) {
-        const updatedValues = listValues.map((item) =>
-          item.id === id ? { id, content: value } : item
-        );
+    (id: string, value: string) => {
+      const updatedValues = listValues.map((item) =>
+        item.id === id ? { id, content: value } : item
+      );
 
-        onChange(updatedValues);
-      } else {
-        const newOption = { id: `${value}-${listValues.length + 1}`, content: value };
+      setIsEditingEnabled(false);
 
-        onChange([...listValues, newOption]);
-      }
-      setAddOption(false);
+      onChange(updatedValues);
     },
-    [setAddOption, onChange, listValues]
+    [onChange, setIsEditingEnabled, listValues]
   );
 
   const onDeleteOption = useCallback(
-    (id?: string) => {
-      if (!id) {
-        return;
-      }
+    (id: string) => {
+      setIsEditingEnabled(false);
 
       onChange(listValues.filter((item) => item.id !== id));
     },
-    [onChange, listValues]
+    [onChange, setIsEditingEnabled, listValues]
   );
 
-  const renderInlineEdit = (id?: string, content?: string) => (
-    <EuiInlineEditText
-      size="m"
-      data-test-subj="custom-field-edit-list-inline"
-      inputAriaLabel="custom-field-edit-list-inline"
-      defaultValue={content ?? ''}
-      placeholder={!content ? i18n.LIST_OPTION_PLACEHOLDER : undefined}
-      onSave={(value: string) => handleOptionSave(id, value)}
-    />
-  );
+  useEffect(() => {
+    if (isEditingEnabled && inputRef.current) {
+      inputRef.current.focus();
+      setIsEditingEnabled(false);
+    }
+  }, [isEditingEnabled, inputRef]);
 
-  const renderInlineOption = (id?: string, content?: string) => (
-    <EuiFlexGroup justifyContent="flexEnd">
-      <EuiFlexItem grow={true}>{renderInlineEdit(id, content)}</EuiFlexItem>
+  const renderInlineOption = (id: string, content?: string) => (
+    <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
+      <EuiFlexItem grow={true}>
+        <EuiInlineEditText
+          size="m"
+          data-test-subj="custom-field-edit-list-inline"
+          inputAriaLabel="custom-field-edit-list-inline"
+          defaultValue={content ?? ''}
+          css={css`
+            text-align: left;
+          `}
+          placeholder={!content ? i18n.LIST_OPTION_PLACEHOLDER : undefined}
+          readModeProps={{
+            iconType: undefined,
+          }}
+          editModeProps={{
+            inputProps: {
+              inputRef,
+            },
+            cancelButtonProps: {
+              onClick: () => setIsEditingEnabled(false),
+              'data-test-subj': 'custom-field-edit-list-cancel-btn',
+            },
+          }}
+          startWithEditOpen
+          onSave={(value: string) => handleOptionSave(id, value)}
+        />
+      </EuiFlexItem>
+      {/* <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          color="primary"
+          isDisabled={disabled}
+          isLoading={isLoading}
+          size="s"
+          onClick={() => setIsEditingEnabled(true)}
+          iconType="pencil"
+          data-test-subj="custom-field-remove-list-option"
+        />
+      </EuiFlexItem> */}
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           color="danger"
@@ -107,51 +139,86 @@ const ListOptionsComponent: React.FC<Props> = ({ disabled, isLoading, listValues
     </EuiFlexGroup>
   );
 
+  const renderPromptBody = () => (
+    <>
+      <EuiFlexGroup justifyContent="flexStart">
+        <EuiFlexItem grow={false}>
+          <h5>{i18n.LIST_VALUES_LABEL}</h5>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup justifyContent="flexStart">
+        <EuiFlexItem>
+          {listValues.length ? (
+            <EuiDragDropContext onDragEnd={onDragEnd}>
+              <EuiDroppable droppableId="droppable-area" spacing="m" withPanel>
+                {listValues.map(({ content, id }, idx) => (
+                  <EuiDraggable
+                    spacing="m"
+                    key={id}
+                    index={idx}
+                    draggableId={id}
+                    customDragHandle={true}
+                    hasInteractiveChildren={true}
+                  >
+                    {(provided) => (
+                      <EuiPanel paddingSize="s">
+                        <EuiFlexGroup alignItems="center" gutterSize="s">
+                          <EuiFlexItem grow={false}>
+                            <EuiPanel
+                              color="transparent"
+                              paddingSize="s"
+                              {...provided.dragHandleProps}
+                              aria-label="Drag Handle"
+                            >
+                              <EuiIcon type="grab" />
+                            </EuiPanel>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={true}>{renderInlineOption(id, content)}</EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiPanel>
+                    )}
+                  </EuiDraggable>
+                ))}
+              </EuiDroppable>
+            </EuiDragDropContext>
+          ) : null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+
   return (
     <>
-      {listValues.length ? (
-        <EuiDragDropContext onDragEnd={onDragEnd}>
-          <EuiDroppable droppableId="droppable-area" spacing="m" withPanel>
-            {listValues.map(({ content, id }, idx) => (
-              <EuiDraggable
-                spacing="m"
-                key={id}
-                index={idx}
-                draggableId={id}
-                customDragHandle={true}
-                hasInteractiveChildren={true}
-              >
-                {(provided) => (
-                  <EuiPanel paddingSize="s">
-                    <EuiFlexGroup alignItems="center" gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiPanel
-                          color="transparent"
-                          paddingSize="s"
-                          {...provided.dragHandleProps}
-                          aria-label="Drag Handle"
-                        >
-                          <EuiIcon type="grab" />
-                        </EuiPanel>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={true}>{renderInlineOption(id, content)}</EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
-                )}
-              </EuiDraggable>
-            ))}
-          </EuiDroppable>
-        </EuiDragDropContext>
-      ) : null}
       {listValues.length ? <EuiSpacer size="l" /> : null}
-      {addOption ? (
-        <>
-          {renderInlineEdit()} <EuiSpacer />
-        </>
-      ) : null}
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={true}>
-          <AddListOption disabled={disabled} isLoading={isLoading} handleAddOption={onAddOption} />
+          <EuiEmptyPrompt
+            body={renderPromptBody()}
+            color="subdued"
+            className="eui-fullWidth"
+            css={css`
+              max-width: 100%;
+              .euiEmptyPrompt__main {
+                padding: 12px;
+              }
+              .euiEmptyPrompt__contentInner {
+                max-width: none;
+              }
+            `}
+            actions={
+              <EuiButtonEmpty
+                isDisabled={disabled}
+                isLoading={isLoading}
+                size="s"
+                onClick={onAddOption}
+                iconType="plusInCircle"
+                data-test-subj="cases-add-custom-field"
+              >
+                {i18n.LIST_ADD_OPTION}
+              </EuiButtonEmpty>
+            }
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

@@ -60,24 +60,10 @@ export const FIELD_OPTION_REQUIRED = i18n.translate(
   }
 );
 
-export const CHARACTER_LIMIT = i18n.translate(
-  'xpack.cases.customFields.fieldOptions.characterLimit',
-  {
-    defaultMessage: 'Limit character count to 120',
-  }
-);
-
 export const MULTIPLE_SELECTIONS = i18n.translate(
   'xpack.cases.configureCases.fieldOptions.multipleSelections',
   {
     defaultMessage: 'Allow multiple selections',
-  }
-);
-
-export const CUSTOM_VALUES = i18n.translate(
-  'xpack.cases.configureCases.fieldOptions.customValues',
-  {
-    defaultMessage: 'Allow custom values',
   }
 );
 

@@ -8,8 +8,10 @@
 import type { CustomFieldBuilderMap } from './types';
 import { createTextCustomFieldBuilder } from './text_field';
 import { createListCustomFieldBuilder } from './list_field';
+import { createBooleanCustomFieldBuilder } from './boolean_field';
 
 export const builderMap: CustomFieldBuilderMap = {
   Text: createTextCustomFieldBuilder,
   List: createListCustomFieldBuilder,
+  Boolean: createBooleanCustomFieldBuilder,
 };

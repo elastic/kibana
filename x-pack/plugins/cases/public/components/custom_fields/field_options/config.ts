@@ -17,13 +17,8 @@ export interface BasicOptions {
   required: Options;
 }
 
-export interface TextOptions extends BasicOptions {
-  characterLimit: Options;
-}
-
 export interface ListOptions extends BasicOptions {
   multipleSelections: Options;
-  customValues: Options;
 }
 
 export const getConfig = (selectedType: CustomFieldTypesUI) => {
@@ -35,27 +30,12 @@ export const getConfig = (selectedType: CustomFieldTypesUI) => {
   };
 
   switch (selectedType) {
-    case 'Text':
-      config = {
-        ...config,
-        characterLimit: {
-          id: 'character_limit',
-          label: i18n.CHARACTER_LIMIT,
-        },
-      } as TextOptions;
-
-      return config;
-
     case 'List':
       config = {
         ...config,
         multipleSelections: {
           id: 'multiple_selections',
           label: i18n.MULTIPLE_SELECTIONS,
-        },
-        customValues: {
-          id: 'custom_values',
-          label: i18n.CUSTOM_VALUES,
         },
       } as ListOptions;
 

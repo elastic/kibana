@@ -9,16 +9,16 @@ import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from './translations';
 import type { CustomFieldTypesUI } from './types';
-import type { TextOptions, ListOptions, BasicOptions } from './field_options/config';
+import type { ListOptions, BasicOptions } from './field_options/config';
 
 const { emptyField } = fieldValidators;
 
-export const customFieldTypes: CustomFieldTypesUI[] = ['Text', 'List'];
+export const customFieldTypes: CustomFieldTypesUI[] = ['Text', 'List', 'Boolean'];
 
 export interface FormProps {
   fieldLabel: string;
   fieldType: CustomFieldTypesUI;
-  fieldOptions: BasicOptions | TextOptions | ListOptions;
+  fieldOptions: BasicOptions | ListOptions;
   textAreaHeight?: string;
 }
 

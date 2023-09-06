@@ -61,34 +61,32 @@ describe('FieldOptions', () => {
     }
   });
 
-  it('toggles checkbox options correctly', async () => {
+  it('toggles group of checkbox options correctly', async () => {
     appMockRender.render(
       <FieldOptions {...{ ...props, selectedType: 'List' as CustomFieldTypesUI }} />
     );
 
-    expect(screen.getByText(i18n.MULTIPLE_SELECTIONS)).toBeInTheDocument();
+    userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
 
     userEvent.click(screen.getByText(i18n.MULTIPLE_SELECTIONS));
 
-    expect(props.handleOptionChange).toHaveBeenCalledWith({ multiple_selections: true });
-
-    userEvent.click(screen.getByText(i18n.MULTIPLE_SELECTIONS));
-
-    expect(props.handleOptionChange).toHaveBeenCalledWith({ multiple_selections: false });
+    expect(props.handleOptionChange).toHaveBeenCalledWith({
+      required_option: true,
+      multiple_selections: true,
+    });
   });
 
-  it('toggles group of checkbox options correctly', async () => {
+  it('toggles checkbox options correctly', async () => {
     appMockRender.render(<FieldOptions {...props} />);
 
     userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
 
     expect(props.handleOptionChange).toHaveBeenCalledWith({ required_option: true });
 
-    userEvent.click(screen.getByText(i18n.CHARACTER_LIMIT));
+    userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
 
     expect(props.handleOptionChange).toHaveBeenCalledWith({
-      required_option: true,
-      character_limit: true,
+      required_option: false,
     });
   });
 });

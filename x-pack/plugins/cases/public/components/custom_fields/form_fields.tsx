@@ -58,7 +58,7 @@ const FormFieldsComponent: React.FC = () => {
   return (
     <>
       <UseField
-        path="custom-field-label"
+        path="fieldLabel"
         component={Field}
         componentProps={{
           euiFieldProps: { 'data-test-subj': 'custom-field-label-input', fullWidth: true },

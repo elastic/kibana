@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import type { EuiCheckboxGroupOption } from '@elastic/eui';
-import { EuiCheckboxGroup } from '@elastic/eui';
+import { EuiSpacer, EuiCheckboxGroup } from '@elastic/eui';
 import type { CustomFieldTypesUI } from '../types';
 import { getConfig } from './config';
 
@@ -49,13 +49,16 @@ export const FieldOptionsComponent = ({
   const checkboxOptions: EuiCheckboxGroupOption[] = [...Object.values(config)];
 
   return (
-    <EuiCheckboxGroup
-      options={checkboxOptions}
-      idToSelectedMap={checkboxIdToSelectedMap}
-      onChange={onChange}
-      disabled={disabled}
-      data-test-subj="custom-field-options-checkbox-group"
-    />
+    <>
+      <EuiSpacer size="xs" />
+      <EuiCheckboxGroup
+        options={checkboxOptions}
+        idToSelectedMap={checkboxIdToSelectedMap}
+        onChange={onChange}
+        disabled={disabled}
+        data-test-subj="custom-field-options-checkbox-group"
+      />
+    </>
   );
 };
 
