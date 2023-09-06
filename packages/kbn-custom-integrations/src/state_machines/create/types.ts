@@ -7,6 +7,7 @@
  */
 
 import { CustomIntegrationOptions, IntegrationError } from '../../types';
+import { CreateCustomIntegrationValue } from '../services/integrations_client';
 import { IndexedValidationErrors, ValidationErrors } from '../services/validation';
 
 export type CreateCustomIntegrationOptions = CustomIntegrationOptions;
@@ -100,15 +101,20 @@ export type CreateCustomIntegrationEvent =
   | {
       type: 'RETRY';
     }
+  // NOTE: These aren't ideal but they're more helpful than the DoneInvokeEvent<> and ErrorPlatformEvent types
   | {
-      type: 'done.invoke.validateFields';
+      type: 'error.platform.validating:invocation[0]';
       data: { errors: ValidationErrors };
     }
   | {
-      type: 'done.invoke.cleanup';
-      data: { error: IntegrationError };
+      type: 'error.platform.submitting:invocation[0]';
+      data: IntegrationError;
     }
   | {
-      type: 'done.invoke.save';
-      data: CreateCustomIntegrationOptions | { error: IntegrationError };
+      type: 'done.invoke.submitting:invocation[0]';
+      data: CreateCustomIntegrationValue;
+    }
+  | {
+      type: 'error.platform.CreateCustomIntegration.deletingPrevious:invocation[0]';
+      data: IntegrationError;
     };

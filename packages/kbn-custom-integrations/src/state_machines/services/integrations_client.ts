@@ -114,7 +114,7 @@ export const createCustomIntegrationResponseRT = rt.exact(
   })
 );
 
-interface CreateCustomIntegrationValue {
+export interface CreateCustomIntegrationValue {
   integrationName: string;
   installedAssets: AssetList;
 }

@@ -188,7 +188,7 @@ export const createPureCreateCustomIntegrationStateMachine = (
           return { errors: null };
         }),
         storePreviouslyCreatedIntegration: actions.assign((context, event) => {
-          return 'data' in event && event.type === 'done.invoke.save' && !('error' in event.data)
+          return 'data' in event && !(event.data instanceof IntegrationError)
             ? ({
                 previouslyCreatedIntegration: context.fields,
               } as WithPreviouslyCreatedIntegration)
