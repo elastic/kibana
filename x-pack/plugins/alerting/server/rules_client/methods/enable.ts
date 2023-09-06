@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RawRule, IntervalSchedule } from '../../types';
@@ -13,6 +14,7 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { updateMeta, createNewAPIKeySet, scheduleTask, migrateLegacyActions } from '../lib';
+import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
 
 export async function enable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -44,6 +46,15 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     attributes = alert.attributes;
     version = alert.version;
     references = alert.references;
+  }
+
+  try {
+    await validateScheduleLimit({
+      context,
+      updatedInterval: attributes.schedule.interval,
+    });
+  } catch (error) {
+    throw Boom.badRequest(`Error validating enable rule data - ${error.message}`);
   }
 
   try {
