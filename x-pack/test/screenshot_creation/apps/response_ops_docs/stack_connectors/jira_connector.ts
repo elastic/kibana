@@ -30,10 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('secrets.email-input', 'testuser@example.com');
       await testSubjects.setValue('secrets.apiToken-input', 'test');
       await commonScreenshots.takeScreenshot('jira-connector', screenshotDirectories);
-      // const saveTestButton = await testSubjects.find('create-connector-flyout-save-test-btn');
-      // await saveTestButton.click();
-      // await testSubjects.setValue('actionJsonEditor', indexDocument);
-      // await commonScreenshots.takeScreenshot('index-params-test', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await commonScreenshots.takeScreenshot('jira-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });
