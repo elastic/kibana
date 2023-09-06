@@ -54,6 +54,7 @@ export class ServerlessSearchPlugin
         defaultMessage: 'Connectors',
       }),
       appRoute: '/app/connectors',
+      searchable: false,
       async mount({ element }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();

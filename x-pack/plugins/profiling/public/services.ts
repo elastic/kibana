@@ -5,8 +5,12 @@
  * 2.0.
  */
 import { HttpFetchQuery } from '@kbn/core/public';
+import {
+  BaseFlameGraph,
+  createFlameGraph,
+  ElasticFlameGraph,
+} from '@kbn/profiling-data-access-plugin/common/flamegraph';
 import { getRoutePaths } from '../common';
-import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
 import type {
   IndexLifecyclePhaseSelectOption,
@@ -17,6 +21,13 @@ import type {
 import { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/lib/setup/get_setup_instructions';
 import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
+
+export interface ProfilingSetupStatus {
+  has_setup: boolean;
+  has_data: boolean;
+  pre_8_9_1_data: boolean;
+  unauthorized?: boolean;
+}
 
 export interface Services {
   fetchTopN: (params: {
@@ -40,9 +51,7 @@ export interface Services {
     timeTo: number;
     kuery: string;
   }) => Promise<ElasticFlameGraph>;
-  fetchHasSetup: (params: {
-    http: AutoAbortedHttpService;
-  }) => Promise<{ has_setup: boolean; has_data: boolean }>;
+  fetchHasSetup: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingSetupStatus>;
   postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
   setupDataCollectionInstructions: (params: {
     http: AutoAbortedHttpService;
@@ -101,10 +110,7 @@ export function getServices(): Services {
       return createFlameGraph(baseFlamegraph);
     },
     fetchHasSetup: async ({ http }) => {
-      const hasSetup = (await http.get(paths.HasSetupESResources, {})) as {
-        has_setup: boolean;
-        has_data: boolean;
-      };
+      const hasSetup = (await http.get(paths.HasSetupESResources, {})) as ProfilingSetupStatus;
       return hasSetup;
     },
     postSetupResources: async ({ http }) => {

@@ -182,10 +182,24 @@ export const INDEX_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const DATA_VIEW_FIELD_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.dataViewFieldLabel',
+export const DATA_VIEW_ID_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.dataViewIdFieldLabel',
   {
-    defaultMessage: 'Data View',
+    defaultMessage: 'Data view',
+  }
+);
+
+export const DATA_VIEW_INDEX_PATTERN_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.dataViewIndexPatternFieldLabel',
+  {
+    defaultMessage: 'Data view index pattern',
+  }
+);
+
+export const DATA_VIEW_INDEX_PATTERN_FETCH_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.dataViewIndexPatternFetchErrorMessage',
+  {
+    defaultMessage: 'Could not load data view index pattern',
   }
 );
 

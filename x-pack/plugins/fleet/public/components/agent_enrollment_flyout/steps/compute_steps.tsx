@@ -273,6 +273,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           isK8s,
           cloudSecurityIntegration,
+          fleetServerHost: fleetServerHosts?.[0],
           enrollToken,
         })
       );
@@ -310,16 +311,17 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     setSelectedPolicyId,
     refreshAgentPolicies,
     selectionType,
-    isK8s,
     cloudSecurityIntegration,
-    installManagedCommands,
     apiKeyData,
-    enrolledAgentIds,
     mode,
     setMode,
     enrollToken,
+    installManagedCommands,
+    isK8s,
+    fleetServerHosts,
     onClickViewAgents,
     link,
+    enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
   ]);

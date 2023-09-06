@@ -33,3 +33,8 @@ export const getNodeNameFromLocation = (location: Location) => {
   const nameParam = getParamFromQueryString(getQueryStringFromLocation(location), 'assetName');
   return nameParam;
 };
+
+export const getStateFromLocation = (location: Location) => {
+  const nameParam = getParamFromQueryString(getQueryStringFromLocation(location), 'state');
+  return nameParam;
+};
