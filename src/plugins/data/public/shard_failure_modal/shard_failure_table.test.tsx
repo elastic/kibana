@@ -13,7 +13,9 @@ import { shardFailureResponse } from './__mocks__/shard_failure_response';
 
 describe('ShardFailureTable', () => {
   it('renders matching snapshot given valid properties', () => {
-    const component = shallowWithIntl(<ShardFailureTable failures={shardFailureResponse._shards.failures!} />);
+    const component = shallowWithIntl(
+      <ShardFailureTable failures={shardFailureResponse._shards.failures!} />
+    );
     expect(component).toMatchSnapshot();
   });
 });
