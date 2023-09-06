@@ -112,6 +112,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(testDataStream).to.eql({
           name: testDataStreamName,
+          lifecycle: {
+            enabled: true,
+          },
           privileges: {
             delete_index: true,
           },
