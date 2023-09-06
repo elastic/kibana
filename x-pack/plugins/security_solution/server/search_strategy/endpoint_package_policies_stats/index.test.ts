@@ -11,13 +11,9 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { requestEndpointPackagePoliciesStatsSearch } from '.';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import moment from 'moment';
 
-const mockPackagePolicyResponse = (
-  inputs: string[],
-  total?: number,
-  perPage?: number,
-  page?: number
-) => ({
+const mockPackagePolicyResponse = (inputs: string[]) => ({
   items: inputs.map((input) => ({
     package: { name: 'endpoint' },
     inputs: [
@@ -27,9 +23,9 @@ const mockPackagePolicyResponse = (
       },
     ],
   })),
-  total: total || inputs.length,
-  page: page || 1,
-  per_page: perPage || 10000,
+  total: inputs.length,
+  page: 1,
+  per_page: 10000,
 });
 
 describe('Endpoint package policies stats', () => {
@@ -85,21 +81,24 @@ describe('Endpoint package policies stats', () => {
       });
     });
 
-    it('when results on multiple pages.', async () => {
+    it('when all manifests are outdated but some of them not more than a month', async () => {
       const listMock = endpointAppContextService.getInternalFleetServices().packagePolicy
         .list as jest.Mock;
 
-      listMock
-        .mockResolvedValueOnce(mockPackagePolicyResponse(['2020-01-01', 'latest'], 4, 2))
-        .mockResolvedValueOnce(mockPackagePolicyResponse(['2020-01-01', 'latest'], 4, 2, 2));
+      listMock.mockResolvedValueOnce(
+        mockPackagePolicyResponse([
+          '2020-01-01',
+          'latest',
+          '2020-01-01',
+          'latest',
+          moment().subtract(1, 'week').format('YYYY-MM-DD'),
+          moment().subtract(2, 'week').format('YYYY-MM-DD'),
+        ])
+      );
       const response = await requestEndpointPackagePoliciesStatsSearch(
         endpointAppContextService,
         deps
       );
-      expect(
-        endpointAppContextService.getInternalFleetServices().packagePolicy.list
-      ).toBeCalledTimes(2);
-
       expect(response).toEqual({
         isPartial: false,
         isRunning: false,
