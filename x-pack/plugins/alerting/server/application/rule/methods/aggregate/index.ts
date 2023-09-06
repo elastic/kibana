@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { getDefaultRuleAggregation } from './factories/get_default_rule_aggregation/latest';
-export { getDefaultRuleAggregation as getDefaultRuleAggregationV1 } from './factories/get_default_rule_aggregation/v1';
+export { defaultRuleAggregationFactory } from './factories/default_rule_aggregation_factory/latest';
+export { defaultRuleAggregationFactory as defaultRuleAggregationFactoryV1 } from './factories/default_rule_aggregation_factory/v1';
 
 export type {
   AggregateOptions,

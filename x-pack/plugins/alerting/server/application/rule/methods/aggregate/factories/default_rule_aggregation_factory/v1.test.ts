@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { getDefaultRuleAggregation } from './v1';
+import { defaultRuleAggregationFactory } from './v1';
 
 describe('getDefaultRuleAggregation', () => {
   it('should return aggregation with default maxTags', () => {
-    const result = getDefaultRuleAggregation();
+    const result = defaultRuleAggregationFactory();
     expect(result.tags).toEqual({
       terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
     });
   });
 
   it('should return aggregation with custom maxTags', () => {
-    const result = getDefaultRuleAggregation({ maxTags: 100 });
+    const result = defaultRuleAggregationFactory({ maxTags: 100 });
     expect(result.tags).toEqual({
       terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 100 },
     });

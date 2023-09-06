@@ -21,7 +21,7 @@ import { RegistryRuleType } from '../../../../rule_type_registry';
 import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 import { RecoveredActionGroup } from '../../../../../common';
 import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types/v1';
-import { getDefaultRuleAggregation } from './factories';
+import { defaultRuleAggregationFactory } from '.';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -168,7 +168,7 @@ describe('aggregate()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.aggregate<DefaultRuleAggregationResult>({
       options: {},
-      aggs: getDefaultRuleAggregation(),
+      aggs: defaultRuleAggregationFactory(),
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -324,7 +324,7 @@ describe('aggregate()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.aggregate({
       options: { filter: 'foo: someTerm' },
-      aggs: getDefaultRuleAggregation(),
+      aggs: defaultRuleAggregationFactory(),
     });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -377,7 +377,9 @@ describe('aggregate()', () => {
     const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
     authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Unauthorized'));
 
-    await expect(rulesClient.aggregate({ aggs: getDefaultRuleAggregation() })).rejects.toThrow();
+    await expect(
+      rulesClient.aggregate({ aggs: defaultRuleAggregationFactory() })
+    ).rejects.toThrow();
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
         event: expect.objectContaining({
@@ -396,7 +398,7 @@ describe('aggregate()', () => {
     test('sets to default (50) if it is not provided', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
 
-      await rulesClient.aggregate({ aggs: getDefaultRuleAggregation() });
+      await rulesClient.aggregate({ aggs: defaultRuleAggregationFactory() });
 
       expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([
         {
@@ -413,7 +415,7 @@ describe('aggregate()', () => {
       const rulesClient = new RulesClient(rulesClientParams);
 
       await rulesClient.aggregate({
-        aggs: getDefaultRuleAggregation({ maxTags: 1000 }),
+        aggs: defaultRuleAggregationFactory({ maxTags: 1000 }),
       });
 
       expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([

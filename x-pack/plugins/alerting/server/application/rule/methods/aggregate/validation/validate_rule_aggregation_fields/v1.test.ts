@@ -7,7 +7,7 @@
 
 import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getRuleTagsAggregation } from '../../../../../../../common';
-import { getDefaultRuleAggregation } from '../../factories';
+import { defaultRuleAggregationFactory } from '../..';
 
 import { validateRuleAggregationFields } from './v1';
 
@@ -97,7 +97,7 @@ describe('validateAggregationTerms', () => {
   });
 
   it('should allow for default and tags aggregations', () => {
-    expect(() => validateRuleAggregationFields(getDefaultRuleAggregation())).not.toThrowError();
+    expect(() => validateRuleAggregationFields(defaultRuleAggregationFactory())).not.toThrowError();
     expect(() => validateRuleAggregationFields(getRuleTagsAggregation())).not.toThrowError();
   });
 
