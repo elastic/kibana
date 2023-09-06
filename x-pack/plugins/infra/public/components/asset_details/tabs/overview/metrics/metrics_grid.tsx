@@ -9,13 +9,9 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import {
-  nginxStubstatusMetrics,
-  nginxAccessMetrics,
-} from '../../../../../common/visualizations/lens/dashboards/asset_details/host/nginx_charts';
 import { assetDetailsDashboards } from '../../../../../common/visualizations';
 import { ChartGrid, Section } from './metrics_charts_section';
-import { MetricsSectionTitle, NginxMetricsSectionTitle } from './metrics_title';
+import { MetricsSectionTitle, NginxMetricsSectionTitle } from '../../../components/section_titles';
 
 interface Props {
   assetName: string;
@@ -44,11 +40,11 @@ export const MetricsGrid = React.memo(
             assetName={assetName}
             timeRange={timeRange}
             charts={[
-              ...nginxStubstatusMetrics.map((n) => ({
+              ...assetDetailsDashboards.nginxDashboard.nginxStubstatusCharts.map((n) => ({
                 ...n,
                 dependsOn: ['nginx.stubstatus'],
               })),
-              ...nginxAccessMetrics.map((n) => ({
+              ...assetDetailsDashboards.nginxDashboard.nginxAccessCharts.map((n) => ({
                 ...n,
                 dependsOn: ['nginx.access'],
               })),

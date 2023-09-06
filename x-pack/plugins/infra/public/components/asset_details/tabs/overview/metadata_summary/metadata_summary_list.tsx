@@ -16,7 +16,6 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
 import type { InfraMetadata } from '../../../../../../common/http_api';
 import { NOT_AVAILABLE_LABEL } from '../../../translations';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
@@ -24,6 +23,7 @@ import { FlyoutTabIds } from '../../../types';
 import { ExpandableContent } from '../../../components/expandable_content';
 import { MetadataHeader } from './metadata_header';
 import { MetadataExplanationMessage } from '../../../components/metadata_explanation';
+import { MetadataSectionTitle } from '../../../components/section_titles';
 
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
@@ -83,14 +83,7 @@ const MetadataSummaryListWrapper = ({
     <>
       <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
         <EuiFlexGroup alignItems="flexStart">
-          <EuiTitle data-test-subj="infraAssetDetailsMetadataTitle" size="xxs">
-            <span>
-              <FormattedMessage
-                id="xpack.infra.assetDetails.overview.metadataSectionTitle"
-                defaultMessage="Metadata"
-              />
-            </span>
-          </EuiTitle>
+          <MetadataSectionTitle />
         </EuiFlexGroup>
         <EuiFlexItem grow={false} key="metadata-link">
           <EuiButtonEmpty

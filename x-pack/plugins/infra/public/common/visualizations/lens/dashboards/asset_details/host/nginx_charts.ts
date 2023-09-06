@@ -12,10 +12,10 @@ import {
 } from '../metric_charts/nginx';
 import type { XYConfig } from '../metric_charts/types';
 
-export const nginxStubstatusMetrics: XYConfig[] = [
+export const nginxStubstatusCharts: XYConfig[] = [
   nginxActiveConnections,
   nginxRequestRate,
   nginxRequestsPerConnection,
 ];
 
-export const nginxAccessMetrics: XYConfig[] = [nginxResponseStatusCodes];
+export const nginxAccessCharts: XYConfig[] = [nginxResponseStatusCodes];

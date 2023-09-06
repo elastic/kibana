@@ -34,28 +34,26 @@ export const Overview = () => {
 
   const isFullPageView = renderMode.mode !== 'flyout';
 
-  const MetricsSection = () =>
-    isFullPageView ? (
-      <MetricsGrid
-        timeRange={dateRange}
-        logsDataView={logs.dataView}
-        metricsDataView={metrics.dataView}
-        assetName={asset.name}
-      />
-    ) : (
-      <MetricsGridCompact
-        timeRange={dateRange}
-        logsDataView={logs.dataView}
-        metricsDataView={metrics.dataView}
-        assetName={asset.name}
-      />
-    );
-  const MetadataSummarySection = () =>
-    isFullPageView ? (
-      <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
-    ) : (
-      <MetadataSummaryListCompact metadata={metadata} metadataLoading={metadataLoading} />
-    );
+  const metricsSection = isFullPageView ? (
+    <MetricsGrid
+      timeRange={dateRange}
+      logsDataView={logs.dataView}
+      metricsDataView={metrics.dataView}
+      assetName={asset.name}
+    />
+  ) : (
+    <MetricsGridCompact
+      timeRange={dateRange}
+      logsDataView={logs.dataView}
+      metricsDataView={metrics.dataView}
+      assetName={asset.name}
+    />
+  );
+  const metadataSummarySection = isFullPageView ? (
+    <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
+  ) : (
+    <MetadataSummaryListCompact metadata={metadata} metadataLoading={metadataLoading} />
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -90,7 +88,7 @@ export const Overview = () => {
             />
           </EuiCallOut>
         ) : (
-          <MetadataSummarySection />
+          <>{metadataSummarySection}</>
         )}
         <SectionSeparator />
       </EuiFlexItem>
@@ -98,9 +96,7 @@ export const Overview = () => {
         <AlertsSummaryContent assetName={asset.name} assetType={assetType} dateRange={dateRange} />
         <SectionSeparator />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <MetricsSection />
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{metricsSection}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
