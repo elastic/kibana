@@ -4,16 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { FailedToLoadResponse } from './failed_to_load_response';
 
 interface Props {
   error?: Error;
@@ -28,18 +21,7 @@ export function MessagePanel(props: Props) {
       {props.error ? (
         <>
           {props.body ? <EuiSpacer size="xs" /> : null}
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="alert" color="danger" size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="danger">
-                {i18n.translate('xpack.observabilityAiAssistant.messagePanel.failedLoadingText', {
-                  defaultMessage: 'Failed to load response',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <FailedToLoadResponse />
         </>
       ) : null}
       {props.controls ? (

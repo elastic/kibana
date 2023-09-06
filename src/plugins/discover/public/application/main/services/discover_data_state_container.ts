@@ -25,7 +25,7 @@ import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from '../utils/validate_time_range';
-import { fetchAll } from '../utils/fetch_all';
+import { fetchAll, fetchMoreDocuments } from '../utils/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
 import { InternalState } from './discover_internal_state_container';
@@ -42,7 +42,10 @@ export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 export type DataFetch$ = Observable<{
-  reset: boolean;
+  options: {
+    reset: boolean;
+    fetchMore: boolean;
+  };
   searchSessionId: string;
 }>;
 
@@ -54,12 +57,12 @@ export enum RecordRawType {
    */
   DOCUMENT = 'document',
   /**
-   * Data returned e.g. SQL queries, flat structure
+   * Data returned e.g. ES|QL queries, flat structure
    * */
   PLAIN = 'plain',
 }
 
-export type DataRefetchMsg = 'reset' | undefined;
+export type DataRefetchMsg = 'reset' | 'fetch_more' | undefined;
 
 export interface DataMsg {
   fetchStatus: FetchStatus;
@@ -75,6 +78,7 @@ export interface DataMainMsg extends DataMsg {
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[]; // columns from text-based request
+  textBasedHeaderWarning?: string;
   interceptedWarnings?: SearchResponseInterceptedWarning[]; // warnings (like shard failures)
 }
 
@@ -95,6 +99,10 @@ export interface DiscoverDataStateContainer {
    * Implicitly starting fetching data from ES
    */
   fetch: () => void;
+  /**
+   * Fetch more data from ES
+   */
+  fetchMore: () => void;
   /**
    * Observable emitting when a next fetch is triggered
    */
@@ -197,22 +205,22 @@ export function getDataStateContainer({
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
     tap(() => inspectorAdapters.requests.reset()),
     map((val) => ({
-      reset: val === 'reset',
-      searchSessionId: searchSessionManager.getNextSearchSessionId(),
+      options: {
+        reset: val === 'reset',
+        fetchMore: val === 'fetch_more',
+      },
+      searchSessionId:
+        (val === 'fetch_more' && searchSessionManager.getCurrentSearchSessionId()) ||
+        searchSessionManager.getNextSearchSessionId(),
     })),
     share()
   );
   let abortController: AbortController;
+  let abortControllerFetchMore: AbortController;
 
   function subscribe() {
-    const subscription = fetch$.subscribe(async ({ reset, searchSessionId }) => {
-      abortController?.abort();
-      abortController = new AbortController();
-      const prevAutoRefreshDone = autoRefreshDone;
-
-      const fetchAllStartTime = window.performance.now();
-      await fetchAll(dataSubjects, reset, {
-        abortController,
+    const subscription = fetch$.subscribe(async ({ options, searchSessionId }) => {
+      const commonFetchDeps = {
         initialFetchStatus: getInitialFetchStatus(),
         inspectorAdapters,
         searchSessionId,
@@ -221,6 +229,34 @@ export function getDataStateContainer({
         getInternalState,
         savedSearch: getSavedSearch(),
         useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
+      };
+
+      abortController?.abort();
+      abortControllerFetchMore?.abort();
+
+      if (options.fetchMore) {
+        abortControllerFetchMore = new AbortController();
+
+        const fetchMoreStartTime = window.performance.now();
+        await fetchMoreDocuments(dataSubjects, {
+          abortController: abortControllerFetchMore,
+          ...commonFetchDeps,
+        });
+        const fetchMoreDuration = window.performance.now() - fetchMoreStartTime;
+        reportPerformanceMetricEvent(services.analytics, {
+          eventName: 'discoverFetchMore',
+          duration: fetchMoreDuration,
+        });
+        return;
+      }
+
+      abortController = new AbortController();
+      const prevAutoRefreshDone = autoRefreshDone;
+
+      const fetchAllStartTime = window.performance.now();
+      await fetchAll(dataSubjects, options.reset, {
+        abortController,
+        ...commonFetchDeps,
       });
       const fetchAllDuration = window.performance.now() - fetchAllStartTime;
       reportPerformanceMetricEvent(services.analytics, {
@@ -240,6 +276,7 @@ export function getDataStateContainer({
 
     return () => {
       abortController?.abort();
+      abortControllerFetchMore?.abort();
       subscription.unsubscribe();
     };
   }
@@ -263,6 +300,11 @@ export function getDataStateContainer({
     return refetch$;
   };
 
+  const fetchMore = () => {
+    refetch$.next('fetch_more');
+    return refetch$;
+  };
+
   const reset = (savedSearch: SavedSearch) => {
     const recordType = getRawRecordType(savedSearch.searchSource.getField('query'));
     sendResetMsg(dataSubjects, getInitialFetchStatus(), recordType);
@@ -270,6 +312,7 @@ export function getDataStateContainer({
 
   return {
     fetch: fetchQuery,
+    fetchMore,
     fetch$,
     data$: dataSubjects,
     refetch$,

@@ -10,9 +10,9 @@
 import { Client } from '@elastic/elasticsearch';
 import fs from 'fs/promises';
 import axios, { AxiosInstance } from 'axios';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 import { getDiagnosticsBundle } from '../../server/routes/diagnostics/get_diagnostics_bundle';
-import { ApmIndicesConfig } from '../../server/routes/settings/apm_indices/get_apm_indices';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
@@ -51,7 +51,6 @@ export async function initDiagnosticsBundle({
   const kibanaClient = axios.create({
     baseURL: kbHost ?? kibanaHost,
     auth,
-    // @ts-expect-error
     headers: { 'kbn-xsrf': 'true', ...apiKeyHeader },
   });
   const apmIndices = await getApmIndices(kibanaClient);
@@ -100,7 +99,7 @@ async function getApmIndices(kibanaClient: AxiosInstance) {
         savedValue ?? defaultValue,
       ]
     )
-  ) as ApmIndicesConfig;
+  ) as APMIndices;
 }
 
 async function getFleetPackageInfo(kibanaClient: AxiosInstance) {

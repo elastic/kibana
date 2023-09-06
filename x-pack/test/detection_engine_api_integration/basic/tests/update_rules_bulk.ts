@@ -52,6 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule])
           .expect(200);
 
@@ -69,6 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(getSimpleRuleUpdate('rule-2'))
           .expect(200);
 
@@ -82,6 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
@@ -111,6 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1])
           .expect(200);
 
@@ -139,6 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
@@ -168,6 +173,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1])
           .expect(200);
 
@@ -189,6 +195,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1])
           .expect(200);
 
@@ -212,6 +219,7 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([ruleUpdate])
           .expect(200);
 
@@ -222,6 +230,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([ruleUpdate2])
           .expect(200);
 
@@ -241,6 +250,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([ruleUpdate])
           .expect(200);
 
@@ -263,6 +273,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([ruleUpdate])
           .expect(200);
 
@@ -289,6 +300,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([ruleUpdate, ruleUpdate2])
           .expect(200);
 
@@ -326,6 +338,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([rule1, rule2])
           .expect(200);
 

@@ -497,7 +497,7 @@ describe('discover responsive sidebar', function () {
     expect(findTestSubject(comp, 'dataView-add-field_btn').length).toBe(1);
   });
 
-  it('should render correctly in the sql mode', async () => {
+  it('should render correctly in the ES|QL mode', async () => {
     const propsWithTextBasedMode = {
       ...props,
       columns: ['extension', 'bytes'],
@@ -514,7 +514,7 @@ describe('discover responsive sidebar', function () {
       }) as DataDocuments$,
     };
     const compInTextBasedMode = await mountComponent(propsWithTextBasedMode, {
-      query: { sql: 'SELECT * FROM `index`' },
+      query: { esql: 'FROM `index`' },
     });
 
     await act(async () => {

@@ -56,7 +56,7 @@ export function validateMetricThreshold({
   } & { filterQuery?: string[]; searchConfiguration?: string[] } = {};
   validationResult.errors = errors;
 
-  if (!searchConfiguration) {
+  if (!searchConfiguration || !searchConfiguration.index) {
     errors.searchConfiguration = [
       i18n.translate(
         'xpack.observability.threshold.rule.alertFlyout.error.invalidSearchConfiguration',

@@ -11,33 +11,32 @@ import {
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE, login } from '../../tasks/login';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('Add to Cases', () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
-
   before(() => {
     loadLiveQuery({
       agent_all: true,
       query: "SELECT * FROM os_version where name='Ubuntu';",
+      kuery: '',
     }).then((liveQuery) => {
       liveQueryId = liveQuery.action_id;
       liveQueryQuery = liveQuery.queries[0].query;
     });
   });
 
-  describe('observability', () => {
+  describe('observability', { tags: ['@ess'] }, () => {
     let caseId: string;
     let caseTitle: string;
-
     before(() => {
       loadCase('observability').then((caseInfo) => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      login(ROLE.soc_manager);
+      cy.login(ServerlessRoleName.SOC_MANAGER);
       navigateTo('/app/osquery');
     });
 
@@ -60,7 +59,7 @@ describe('Add to Cases', () => {
     });
   });
 
-  describe('security', () => {
+  describe('security', { tags: ['@ess', '@serverless'] }, () => {
     let caseId: string;
     let caseTitle: string;
 
@@ -69,7 +68,7 @@ describe('Add to Cases', () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      login(ROLE.soc_manager);
+      cy.login(ServerlessRoleName.SOC_MANAGER);
       navigateTo('/app/osquery');
     });
 

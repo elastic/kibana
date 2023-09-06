@@ -61,7 +61,7 @@ export const PanelsResizable = ({
     []
   );
   const resizeWithPortalsHackButtonCss = css`
-    z-index: 3 !important; // !important can be removed once EuiResizableButton is converted to Emotion
+    z-index: 3;
   `;
   const resizeWithPortalsHackOverlayCss = css`
     position: absolute;
@@ -164,12 +164,8 @@ export const PanelsResizable = ({
 
   const { euiTheme } = useEuiTheme();
   const buttonCss = css`
-    // The selectors here are intended to override EuiResizableButtons's Sass styles
-    // it can be removed once EuiResizableButton has been converted to Emotion
-    &.euiResizableButton.euiResizableButton--vertical {
-      margin-top: -${euiTheme.size.base};
-      margin-bottom: 0;
-    }
+    margin-top: -${euiTheme.size.base};
+    margin-bottom: 0;
   `;
 
   return (

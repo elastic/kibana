@@ -78,6 +78,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       selectedApiKeyId: enrollmentAPIKey.id,
       isComplete: commandCopied || !!enrolledAgentIds.length,
       fullCopyButton: true,
+      fleetServerHost: fleetServerHosts?.[0],
       onCopy: () => setCommandCopied(true),
     }),
   ];

@@ -525,3 +525,7 @@ export interface HasDataService {
   hasUserDataView: () => Promise<boolean>;
   hasDataView: () => Promise<boolean>;
 }
+
+export interface ClientConfigType {
+  scriptedFieldsEnabled?: boolean;
+}

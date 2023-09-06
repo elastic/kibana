@@ -16,6 +16,7 @@ import pMap from 'p-map';
 import { FLEET_PROXY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 import { FleetProxyUnauthorizedError } from '../errors';
 import type {
+  DownloadSource,
   FleetProxy,
   FleetProxySOAttributes,
   FleetServerHost,
@@ -25,6 +26,7 @@ import type {
 
 import { listFleetServerHostsForProxyId, updateFleetServerHost } from './fleet_server_host';
 import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 
 function savedObjectToFleetProxy(so: SavedObject<FleetProxySOAttributes>): FleetProxy {
   const { proxy_headers: proxyHeaders, ...rest } = so.attributes;
@@ -100,9 +102,13 @@ export async function deleteFleetProxy(
   if (fleetProxy.is_preconfigured && !options?.fromPreconfiguration) {
     throw new FleetProxyUnauthorizedError(`Cannot delete ${id} preconfigured proxy`);
   }
-  const { outputs, fleetServerHosts } = await getFleetProxyRelatedSavedObjects(soClient, id);
+  const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(
+    soClient,
+    id
+  );
 
   if (
+    // download sources cannot be preconfigured
     [...fleetServerHosts, ...outputs].some(
       (fleetServerHostOrOutput) => fleetServerHostOrOutput.is_preconfigured
     ) &&
@@ -113,7 +119,7 @@ export async function deleteFleetProxy(
     );
   }
 
-  await updateRelatedSavedObject(soClient, esClient, fleetServerHosts, outputs);
+  await updateRelatedSavedObject(soClient, esClient, fleetServerHosts, outputs, downloadSources);
 
   return await soClient.delete(FLEET_PROXY_SAVED_OBJECT_TYPE, id);
 }
@@ -179,7 +185,8 @@ async function updateRelatedSavedObject(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   fleetServerHosts: FleetServerHost[],
-  outputs: Output[]
+  outputs: Output[],
+  downloadSources: DownloadSource[]
 ) {
   await pMap(
     fleetServerHosts,
@@ -202,19 +209,29 @@ async function updateRelatedSavedObject(
     },
     { concurrency: 20 }
   );
+
+  await pMap(downloadSources, (downloadSource) => {
+    downloadSourceService.update(soClient, downloadSource.id, {
+      ...omit(downloadSource, 'id'),
+      proxy_id: null,
+    });
+  });
 }
 
 export async function getFleetProxyRelatedSavedObjects(
   soClient: SavedObjectsClientContract,
   proxyId: string
 ) {
-  const [{ items: fleetServerHosts }, { items: outputs }] = await Promise.all([
-    listFleetServerHostsForProxyId(soClient, proxyId),
-    outputService.listAllForProxyId(soClient, proxyId),
-  ]);
+  const [{ items: fleetServerHosts }, { items: outputs }, { items: downloadSources }] =
+    await Promise.all([
+      listFleetServerHostsForProxyId(soClient, proxyId),
+      outputService.listAllForProxyId(soClient, proxyId),
+      downloadSourceService.listAllForProxyId(soClient, proxyId),
+    ]);
 
   return {
     fleetServerHosts,
     outputs,
+    downloadSources,
   };
 }

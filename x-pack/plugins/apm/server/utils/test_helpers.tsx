@@ -6,11 +6,11 @@
  */
 
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APMConfig } from '..';
 import { APMEventClient } from '../lib/helpers/create_es_client/create_apm_event_client';
 import { APMInternalESClient } from '../lib/helpers/create_es_client/create_internal_es_client';
 import { ApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
-import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 
 interface Options {
   mockResponse?: (
@@ -30,7 +30,7 @@ export async function inspectSearchParams(
     mockApmEventClient: APMEventClient;
     mockConfig: APMConfig;
     mockInternalESClient: APMInternalESClient;
-    mockIndices: ApmIndicesConfig;
+    mockIndices: APMIndices;
     mockApmAlertsClient: ApmAlertsClient;
   }) => Promise<any>,
   options: Options = {}
@@ -53,7 +53,7 @@ export async function inspectSearchParams(
   let error;
   const mockApmEventClient = { search: spy } as any;
   const indices: {
-    [Property in keyof APMConfig['indices']]: string;
+    [Property in keyof APMIndices]: string;
   } = {
     error: 'myIndex',
     onboarding: 'myIndex',
@@ -61,6 +61,7 @@ export async function inspectSearchParams(
     transaction: 'myIndex',
     metric: 'myIndex',
   };
+
   const mockConfig = new Proxy(
     {},
     {
@@ -73,8 +74,6 @@ export async function inspectSearchParams(
         switch (key) {
           default:
             return 'myIndex';
-          case 'indices':
-            return indices;
           case 'ui':
             return {
               enabled: true,

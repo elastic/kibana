@@ -15,8 +15,8 @@ import { ELASTIC_CLOUD_APM_POLICY, getApmPolicy } from './get_apm_policy';
 import { ProfilingSetupOptions } from './types';
 
 const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
-const COLLECTOR_PACKAGE_POLICY_NAME = 'Universal Profiling Collector';
-const SYMBOLIZER_PACKAGE_POLICY_NAME = 'Universal Profiling Symbolizer';
+const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
+const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
 
 async function getPackagePolicy({
   soClient,
@@ -103,7 +103,7 @@ export async function createCollectorPackagePolicy({
     enabled: true,
     package: {
       name: packageName,
-      title: COLLECTOR_PACKAGE_POLICY_NAME,
+      title: 'Universal Profiling Collector',
       version,
     },
     name: COLLECTOR_PACKAGE_POLICY_NAME,
@@ -161,7 +161,7 @@ export async function createSymbolizerPackagePolicy({
     enabled: true,
     package: {
       name: packageName,
-      title: SYMBOLIZER_PACKAGE_POLICY_NAME,
+      title: 'Universal Profiling Symbolizer',
       version,
     },
     name: SYMBOLIZER_PACKAGE_POLICY_NAME,
@@ -189,17 +189,23 @@ export async function validateProfilingInApmPackagePolicy({
   soClient,
   packagePolicyClient,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
-
-  return {
-    policies: {
-      apm: {
-        profilingEnabled: !!(
-          apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling
-        ),
+  try {
+    const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
+    return {
+      policies: {
+        apm: {
+          profilingEnabled: !!(
+            apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling
+          ),
+        },
       },
-    },
-  };
+    };
+  } catch (e) {
+    // In case apm integration is not available ignore the error and return as profiling is not enabled on the integration
+    return {
+      policies: { apm: { profilingEnabled: false } },
+    };
+  }
 }
 
 export async function removeProfilingFromApmPackagePolicy({

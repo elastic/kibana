@@ -51,6 +51,7 @@ export const getAllCustomMarkdownComments = ({
   formatNumber,
   ilmPhase,
   indexName,
+  isILMAvailable,
   partitionedFieldMetadata,
   patternDocsCount,
   sizeInBytes,
@@ -59,6 +60,7 @@ export const getAllCustomMarkdownComments = ({
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
+  isILMAvailable: boolean;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
@@ -71,6 +73,7 @@ export const getAllCustomMarkdownComments = ({
     formatNumber,
     ilmPhase,
     indexName,
+    isILMAvailable,
     partitionedFieldMetadata,
     patternDocsCount,
     sizeInBytes,

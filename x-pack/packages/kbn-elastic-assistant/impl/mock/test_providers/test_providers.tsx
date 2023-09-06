@@ -15,9 +15,10 @@ import { ThemeProvider } from 'styled-components';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
-import { Conversation } from '../../assistant_context/types';
+import { AssistantAvailability, Conversation } from '../../assistant_context/types';
 
 interface Props {
+  assistantAvailability?: AssistantAvailability;
   children: React.ReactNode;
   getInitialConversations?: () => Record<string, Conversation>;
   providerContext?: Partial<AssistantProviderProps>;
@@ -28,8 +29,16 @@ window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 const mockGetInitialConversations = () => ({});
 
+const mockAssistantAvailability: AssistantAvailability = {
+  hasAssistantPrivilege: false,
+  hasConnectorsAllPrivilege: true,
+  hasConnectorsReadPrivilege: true,
+  isAssistantEnabled: true,
+};
+
 /** A utility for wrapping children in the providers required to run tests */
 export const TestProvidersComponent: React.FC<Props> = ({
+  assistantAvailability = mockAssistantAvailability,
   children,
   getInitialConversations = mockGetInitialConversations,
   providerContext,
@@ -56,6 +65,8 @@ export const TestProvidersComponent: React.FC<Props> = ({
         <QueryClientProvider client={queryClient}>
           <AssistantProvider
             actionTypeRegistry={actionTypeRegistry}
+            assistantAvailability={assistantAvailability}
+            assistantLangChain={false}
             augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
             baseAllow={[]}
             baseAllowReplacement={[]}
