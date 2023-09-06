@@ -926,6 +926,34 @@
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinitionSnippetArguments.ingestPipeline",
+            "type": "string",
+            "tags": [],
+            "label": "ingestPipeline",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinitionSnippetArguments.extraIngestDocumentValues",
+            "type": "Object",
+            "tags": [],
+            "label": "extraIngestDocumentValues",
+            "description": [],
+            "signature": [
+              "Record<string, boolean> | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

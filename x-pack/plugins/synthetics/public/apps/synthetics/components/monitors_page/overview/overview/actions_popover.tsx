@@ -244,6 +244,7 @@ export function ActionsPopover({
         button={
           <IconPanel hasPanel={iconHasPanel}>
             <EuiButtonIcon
+              data-test-subj="syntheticsActionsPopoverButton"
               aria-label={openActionsMenuAria}
               iconType="boxesHorizontal"
               color="primary"
