@@ -11,15 +11,6 @@ steps:
         ENVIRONMENT: ${ENVIRONMENT}
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
-  - label: ":pipeline::weight_lifter::seedling: Trigger RAC Alert Load tests for ${ENVIRONMENT}"
-    trigger: appex-qa-rac-alert-load # https://buildkite.com/elastic/appex-qa-rac-alert-load
-    soft_fail: true # Remove this before release or when tests stabilize
-    build:
-      env:
-        ENVIRONMENT: ${ENVIRONMENT}
-        SERVERLESS_ONLY: true
-      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
-
   - group: ":female-detective: Security Solution Tests"
     key: "security"
     steps:
