@@ -8,7 +8,14 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiLink,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { DataStream } from '../../../../../../common/types';
@@ -120,9 +127,21 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
 
   columns.push({
     field: 'lifecycle',
-    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
-      defaultMessage: 'Data retention',
-    }),
+    name: (
+      <EuiToolTip
+        content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
+          defaultMessage:
+            'The minimum amount of time the data stream will be stored for. Only applicable for data streams managed by data stream lifecycle.',
+        })}
+      >
+        <span>
+          {i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
+            defaultMessage: 'Data retention',
+          })}{' '}
+          <EuiIcon size="s" color="subdued" type="questionInCircle" />
+        </span>
+      </EuiToolTip>
+    ),
     truncateText: true,
     sortable: true,
     render: (lifecycle: DataStream['lifecycle']) => lifecycle?.data_retention,
