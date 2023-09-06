@@ -116,15 +116,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           await retry.try(async () => {
+            const value = '60.5';
             // Can not use testSubjects because data-test-subj is placed range input and number input
             const percentileInput = await PageObjects.lens.getNumericFieldReady(
               'lns-indexPattern-percentile-input'
             );
-            await percentileInput.type('60.5');
+            await percentileInput.type(value);
 
             const percentileValue = await percentileInput.getAttribute('value');
-            if (percentileValue !== '60.5') {
-              throw new Error('layerPanelTopHitsSize not set to 60');
+            if (percentileValue !== value) {
+              throw new Error(`layerPanelTopHitsSize not set to ${value}`);
             }
           });
 
@@ -139,14 +140,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.lens.selectOperation('percentile_rank');
 
           await retry.try(async () => {
+            const value = '600.5';
             const percentileRankInput = await testSubjects.find(
               'lns-indexPattern-percentile_ranks-input'
             );
-            await percentileRankInput.type('600.5');
+            await percentileRankInput.type(value);
 
             const percentileRankValue = await percentileRankInput.getAttribute('value');
-            if (percentileRankValue !== '60.5') {
-              throw new Error('layerPanelTopHitsSize not set to 60');
+            if (percentileRankValue !== value) {
+              throw new Error(`layerPanelTopHitsSize not set to ${value}`);
             }
           });
           // note: this has also the side effect to close the dimension editor
