@@ -22,7 +22,7 @@ import {
 } from './alerting_authorization';
 import { v4 as uuidv4 } from 'uuid';
 import { RecoveredActionGroup } from '../../common';
-import { RegistryRuleType } from '../rule_type_registry';
+import { NormalizedRuleType, RegistryRuleType } from '../rule_type_registry';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
 import { schema } from '@kbn/config-schema';
 
@@ -1890,6 +1890,628 @@ describe('AlertingAuthorization', () => {
           "username": "some-user",
         }
       `);
+    });
+  });
+
+  describe('8.11+', () => {
+    let alertAuthorization: AlertingAuthorization;
+
+    const setOfRuleTypes: RegistryRuleType[] = [
+      {
+        actionGroups: [],
+        actionVariables: undefined,
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        id: '.esQuery',
+        name: 'ES Query',
+        producer: 'stackAlerts',
+        enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: ['discover', 'alerts'],
+      },
+      {
+        actionGroups: [],
+        actionVariables: undefined,
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        id: '.threshold-rule-o11y',
+        name: 'New threshold 011y',
+        producer: 'observability',
+        enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: [],
+      },
+      {
+        actionGroups: [],
+        actionVariables: undefined,
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        id: '.infrastructure-threshold-o11y',
+        name: 'Metrics o11y',
+        producer: 'infrastructure',
+        enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: ['alerts'],
+      },
+      {
+        actionGroups: [],
+        actionVariables: undefined,
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        id: '.logs-threshold-o11y',
+        name: 'Logs o11y',
+        producer: 'logs',
+        enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: ['alerts'],
+      },
+    ];
+
+    const onlyStackAlertsKibanaPrivileges = [
+      {
+        privilege: mockAuthorizationAction('.esQuery', 'stackAlerts', 'rule', 'create'),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction('.esQuery', 'stackAlerts', 'rule', 'find'),
+        authorized: true,
+      },
+    ];
+    const only011yKibanaPrivileges = [
+      {
+        privilege: mockAuthorizationAction(
+          '.infrastructure-threshold-o11y',
+          'infrastructure',
+          'rule',
+          'create'
+        ),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction(
+          '.infrastructure-threshold-o11y',
+          'infrastructure',
+          'rule',
+          'find'
+        ),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction(
+          '.threshold-rule-o11y',
+          'infrastructure',
+          'rule',
+          'create'
+        ),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction(
+          '.threshold-rule-o11y',
+          'infrastructure',
+          'rule',
+          'find'
+        ),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction('.logs-threshold-o11y', 'logs', 'rule', 'create'),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction('.logs-threshold-o11y', 'logs', 'rule', 'find'),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction('.threshold-rule-o11y', 'logs', 'rule', 'create'),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction('.threshold-rule-o11y', 'logs', 'rule', 'find'),
+        authorized: true,
+      },
+    ];
+    const onlyLogsAndStackAlertsKibanaPrivileges = [
+      {
+        privilege: mockAuthorizationAction('.esQuery', 'stackAlerts', 'rule', 'create'),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction('.esQuery', 'stackAlerts', 'rule', 'find'),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction('.logs-threshold-o11y', 'logs', 'rule', 'create'),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction('.logs-threshold-o11y', 'logs', 'rule', 'find'),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction('.threshold-rule-o11y', 'logs', 'rule', 'create'),
+        authorized: true,
+      },
+      {
+        privilege: mockAuthorizationAction('.threshold-rule-o11y', 'logs', 'rule', 'find'),
+        authorized: true,
+      },
+    ];
+
+    beforeEach(async () => {
+      ruleTypeRegistry.list.mockReturnValue(new Set(setOfRuleTypes));
+      ruleTypeRegistry.get.mockImplementation((id: string) => {
+        if (setOfRuleTypes.some((rt) => rt.id === id)) {
+          const ruleType = setOfRuleTypes.find((rt) => rt.id === id);
+          return (ruleType ?? {}) as NormalizedRuleType<{}, {}, {}, {}, {}, '', '', {}>;
+        }
+        return {} as NormalizedRuleType<{}, {}, {}, {}, {}, '', '', {}>;
+      });
+    });
+
+    describe('user only access to stack alerts + discover', () => {
+      beforeEach(() => {
+        const { authorization } = mockSecurity();
+        const checkPrivileges: jest.MockedFunction<
+          ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+        > = jest.fn();
+        authorization.mode.useRbacForRequest.mockReturnValue(true);
+
+        features.getKibanaFeatures.mockReset();
+        features.getKibanaFeatures.mockReturnValue([
+          mockFeature('stackAlerts', ['.esQuery']),
+          mockFeature('discover', []),
+        ]);
+        checkPrivileges.mockReset();
+        checkPrivileges.mockResolvedValue({
+          username: 'onlyStack',
+          hasAllRequested: true,
+          privileges: {
+            kibana: onlyStackAlertsKibanaPrivileges,
+          },
+        });
+        authorization.checkPrivilegesDynamicallyWithRequest.mockReset();
+        authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+        alertAuthorization = new AlertingAuthorization({
+          request,
+          authorization,
+          ruleTypeRegistry,
+          features,
+          getSpace,
+          getSpaceId,
+        });
+      });
+
+      describe('ensureAuthorized', () => {
+        test('should allow to create .esquery rule type with stackAlerts consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'stackAlerts',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should allow to create .esquery rule type with discover consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'discover',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should allow to create .esquery rule type with alerts consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'alerts',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should throw an error to create .esquery rule type with logs consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'logs',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unauthorized by \\"logs\\" to create \\".esQuery\\" rule"`
+          );
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should throw an error to create .esquery rule type with infrastructure consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'infrastructure',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unauthorized by \\"infrastructure\\" to create \\".esQuery\\" rule"`
+          );
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.threshold-rule-o11y',
+              consumer: 'alerts',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unauthorized by \\"alerts\\" to create \\".threshold-rule-o11y\\" rule"`
+          );
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should throw an error to create .logs-threshold-o11y rule type with alerts infrastructure', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.logs-threshold-o11y',
+              consumer: 'alerts',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unauthorized by \\"alerts\\" to create \\".logs-threshold-o11y\\" rule"`
+          );
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+      });
+      test('creates a filter based on the privileged types', async () => {
+        expect(
+          (
+            await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
+              type: AlertingAuthorizationFilterType.KQL,
+              fieldNames: {
+                ruleTypeId: 'path.to.rule_type_id',
+                consumer: 'consumer-field',
+              },
+            })
+          ).filter
+        ).toEqual(
+          fromKueryExpression(
+            `path.to.rule_type_id:.esQuery and consumer-field:(alerts or stackAlerts or discover)`
+          )
+        );
+      });
+    });
+
+    describe('user only access to o11y', () => {
+      beforeEach(() => {
+        const { authorization } = mockSecurity();
+        const checkPrivileges: jest.MockedFunction<
+          ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+        > = jest.fn();
+        authorization.mode.useRbacForRequest.mockReturnValue(true);
+
+        features.getKibanaFeatures.mockReset();
+        features.getKibanaFeatures.mockReturnValue([
+          mockFeature('infrastructure', [
+            '.infrastructure-threshold-o11y',
+            '.threshold-rule-o11y',
+            '.esQuery',
+          ]),
+          mockFeature('logs', ['.threshold-rule-o11y', '.esQuery', '.logs-threshold-o11y']),
+        ]);
+        checkPrivileges.mockReset();
+        checkPrivileges.mockResolvedValue({
+          username: 'onlyO11y',
+          hasAllRequested: true,
+          privileges: {
+            kibana: only011yKibanaPrivileges,
+          },
+        });
+        authorization.checkPrivilegesDynamicallyWithRequest.mockReset();
+        authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+        alertAuthorization = new AlertingAuthorization({
+          request,
+          authorization,
+          ruleTypeRegistry,
+          features,
+          getSpace,
+          getSpaceId,
+        });
+      });
+
+      describe('ensureAuthorized', () => {
+        test('should throw an error to create .esquery rule type with stackAlerts consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'stackAlerts',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unauthorized by \\"stackAlerts\\" to create \\".esQuery\\" rule"`
+          );
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should throw an error to create .esquery rule type with discover consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'discover',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unauthorized by \\"discover\\" to create \\".esQuery\\" rule"`
+          );
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.threshold-rule-o11y',
+              consumer: 'alerts',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unauthorized by \\"alerts\\" to create \\".threshold-rule-o11y\\" rule"`
+          );
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should allow to create .esquery rule type with logs consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'logs',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should allow to create .esquery rule type with logs infrastructure', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'infrastructure',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should allow to create .logs-threshold-o11y rule type with alerts consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.logs-threshold-o11y',
+              consumer: 'alerts',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should throw an error to create .threshold-rule-o11y rule type with logs consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.threshold-rule-o11y',
+              consumer: 'logs',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+      });
+      test('creates a filter based on the privileged types', async () => {
+        expect(
+          (
+            await alertAuthorization.getFindAuthorizationFilter(
+              AlertingAuthorizationEntity.Rule,
+              {
+                type: AlertingAuthorizationFilterType.KQL,
+                fieldNames: {
+                  ruleTypeId: 'path.to.rule_type_id',
+                  consumer: 'consumer-field',
+                },
+              },
+              new Set(['infrastructure', 'logs'])
+            )
+          ).filter
+        ).toEqual(
+          fromKueryExpression(
+            `(path.to.rule_type_id:.infrastructure-threshold-o11y and consumer-field:(infrastructure or alerts or logs)) or (path.to.rule_type_id:.threshold-rule-o11y and consumer-field:(infrastructure or alerts or logs)) or (path.to.rule_type_id:.logs-threshold-o11y and consumer-field:(infrastructure or alerts or logs))`
+          )
+        );
+      });
+    });
+
+    describe('user only access to logs and stackAlerts', () => {
+      beforeEach(() => {
+        const { authorization } = mockSecurity();
+        const checkPrivileges: jest.MockedFunction<
+          ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+        > = jest.fn();
+        authorization.mode.useRbacForRequest.mockReturnValue(true);
+
+        features.getKibanaFeatures.mockClear();
+        features.getKibanaFeatures.mockReturnValue([
+          mockFeature('stackAlerts', ['.esQuery']),
+          mockFeature('logs', ['.logs-threshold-o11y', '.threshold-rule-o11y', '.esQuery']),
+        ]);
+        checkPrivileges.mockClear();
+        checkPrivileges.mockResolvedValue({
+          username: 'stackAndLogs',
+          hasAllRequested: true,
+          privileges: {
+            kibana: onlyLogsAndStackAlertsKibanaPrivileges,
+          },
+        });
+        authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+        alertAuthorization = new AlertingAuthorization({
+          request,
+          authorization,
+          ruleTypeRegistry,
+          features,
+          getSpace,
+          getSpaceId,
+        });
+      });
+
+      describe('ensureAuthorized', () => {
+        test('should allow to create .esquery rule type with stackAlerts consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'stackAlerts',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should allow to create .esquery rule type with discover consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'discover',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should allow to create .esquery rule type with logs consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'logs',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should allow to create .logs-threshold-o11y rule type with alerts consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.logs-threshold-o11y',
+              consumer: 'alerts',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should throw an error to create .threshold-rule-o11y rule type with logs consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.threshold-rule-o11y',
+              consumer: 'logs',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).resolves.toEqual(undefined);
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should throw an error to create .esquery rule type with logs infrastructure', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'infrastructure',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unauthorized by \\"infrastructure\\" to create \\".esQuery\\" rule"`
+          );
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should throw an error to create .threshold-rule-o11y rule type with alerts consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.threshold-rule-o11y',
+              consumer: 'alerts',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unauthorized by \\"alerts\\" to create \\".threshold-rule-o11y\\" rule"`
+          );
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+        test('should throw an error to create .esquery rule type with infrastructure consumer', async () => {
+          await expect(
+            alertAuthorization.ensureAuthorized({
+              ruleTypeId: '.esQuery',
+              consumer: 'infrastructure',
+              operation: WriteOperations.Create,
+              entity: AlertingAuthorizationEntity.Rule,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unauthorized by \\"infrastructure\\" to create \\".esQuery\\" rule"`
+          );
+
+          expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
+        });
+      });
+      test('creates a filter based on the privileged types', async () => {
+        expect(
+          (
+            await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
+              type: AlertingAuthorizationFilterType.KQL,
+              fieldNames: {
+                ruleTypeId: 'path.to.rule_type_id',
+                consumer: 'consumer-field',
+              },
+            })
+          ).filter
+        ).toEqual(
+          fromKueryExpression(
+            `(path.to.rule_type_id:.esQuery and consumer-field:(alerts or stackAlerts or logs or discover)) or (path.to.rule_type_id:.logs-threshold-o11y and consumer-field:(alerts or stackAlerts or logs or discover)) or (path.to.rule_type_id:.threshold-rule-o11y and consumer-field:(alerts or stackAlerts or logs or discover))`
+          )
+        );
+      });
     });
   });
 });
