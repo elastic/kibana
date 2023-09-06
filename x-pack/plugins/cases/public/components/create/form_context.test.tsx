@@ -307,7 +307,7 @@ describe('Create case', () => {
     });
 
     it('should trim fields correctly while submit', async () => {
-      const newTags =  ['coke     ', '     pepsi'];
+      const newTags = ['coke     ', '     pepsi'];
       const newCategory = 'First           ';
 
       appMockRender.render(
@@ -322,11 +322,11 @@ describe('Create case', () => {
       const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
 
       userEvent.paste(titleInput, `${sampleDataWithoutTags.title}       `);
-    
+
       const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
         'euiMarkdownEditorTextArea'
       );
-    
+
       userEvent.paste(descriptionInput, `${sampleDataWithoutTags.description}           `);
 
       const caseTags = screen.getByTestId('caseTags');
