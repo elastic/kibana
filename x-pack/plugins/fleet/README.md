@@ -89,7 +89,6 @@ To avoid losing all your data when you restart Elasticsearch, you can provide a 
 
 Refer to the [Running Elasticsearch during development](https://www.elastic.co/guide/en/kibana/current/running-elasticsearch.html) page of the guide for other options.
 
-
 ### Running Fleet Server Locally in a Container
 
 It can be useful to run Fleet Server in a container on your local machine in order to free up your actual "bare metal" machine to run Elastic Agent for testing purposes. Otherwise, you'll only be able to a single instance of Elastic Agent dedicated to Fleet Server on your local machine, and this can make testing integrations and policies difficult.
