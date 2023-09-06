@@ -6,16 +6,15 @@
  */
 import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { RuleAttributes } from '../../data/rule/types';
 import type { RuleTagsFormattedResponse } from '../../../common/routes/rule/apis/tags';
 import { ruleTagsParamsSchema } from '../../application/rule/schemas';
 import { RuleTagsParams } from '../../application/rule/types';
-import { DEFAULT_TAGS_PER_PAGE } from '../../../common/routes/rule/apis/tags';
+import { DEFAULT_TAGS_PER_PAGE_LATEST as DEFAULT_TAGS_PER_PAGE } from '../../../common/routes/rule/apis/tags';
 import { RulesClientContext } from '../types';
 import { AlertingAuthorizationEntity } from '../../authorization';
 import { alertingAuthorizationFilterOpts } from '../common/constants';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-// FIXME: import { RuleAttributes } from '../../../../data/rule/types';
-import { RawRule } from '../../types';
 
 const MAX_TAGS = 10000;
 
@@ -69,7 +68,7 @@ export async function getTags(
       : authorizationFilter;
 
   const response = await context.unsecuredSavedObjectsClient.find<
-    RawRule,
+    RuleAttributes,
     RuleTagsAggregationResult
   >({
     filter,
