@@ -389,6 +389,141 @@ describe('<Navigation />', () => {
       ]);
     });
 
+    test('should not render hidden item', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item1',
+          title: 'Title from deeplink',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+        {
+          id: 'item2',
+          title: 'Title from deeplink',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+      const onProjectNavigationChange = jest.fn();
+
+      const { queryByTestId } = render(
+        <NavigationProvider
+          {...services}
+          navLinks$={navLinks$}
+          onProjectNavigationChange={onProjectNavigationChange}
+        >
+          <Navigation>
+            <Navigation.Group id="root">
+              <Navigation.Group id="group1">
+                <Navigation.Item<any> id="item1" link="item1" sideNavStatus={'hidden'} />
+              </Navigation.Group>
+              <Navigation.Group id="group2">
+                <Navigation.Item<any> id="item2" link="item2" />
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
+      expect(queryByTestId(/nav-group-root.group1/)).toBeNull();
+      expect(queryByTestId(/nav-item-root.group2.item2/)).toBeVisible();
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTree] = lastCall;
+
+      expect(navTree.navigationTree).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": Array [
+                  Object {
+                    "children": undefined,
+                    "deepLink": Object {
+                      "baseUrl": "",
+                      "href": "",
+                      "id": "item1",
+                      "title": "Title from deeplink",
+                      "url": "",
+                    },
+                    "href": undefined,
+                    "id": "item1",
+                    "isActive": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item1",
+                    ],
+                    "renderItem": undefined,
+                    "sideNavStatus": "hidden",
+                    "title": "Title from deeplink",
+                  },
+                ],
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group1",
+                "isActive": false,
+                "path": Array [
+                  "root",
+                  "group1",
+                ],
+                "title": "",
+              },
+              Object {
+                "children": Array [
+                  Object {
+                    "children": undefined,
+                    "deepLink": Object {
+                      "baseUrl": "",
+                      "href": "",
+                      "id": "item2",
+                      "title": "Title from deeplink",
+                      "url": "",
+                    },
+                    "href": undefined,
+                    "id": "item2",
+                    "isActive": false,
+                    "path": Array [
+                      "root",
+                      "group2",
+                      "item2",
+                    ],
+                    "renderItem": undefined,
+                    "title": "Title from deeplink",
+                  },
+                ],
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group2",
+                "isActive": false,
+                "path": Array [
+                  "root",
+                  "group2",
+                ],
+                "title": "",
+              },
+            ],
+            "deepLink": undefined,
+            "href": undefined,
+            "id": "root",
+            "isActive": false,
+            "path": Array [
+              "root",
+            ],
+            "title": "",
+          },
+        ]
+      `);
+    });
+
     test('should render custom react element', async () => {
       const navLinks$: Observable<ChromeNavLink[]> = of([
         {

@@ -161,6 +161,12 @@ export interface NodeDefinition<
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
+
+  /**
+   * If should be hidden in the side nav
+   * @default 'visible'
+   */
+  sideNavStatus?: 'hidden' | 'visible';
 }
 
 /**
