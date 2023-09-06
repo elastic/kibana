@@ -44,13 +44,19 @@ export interface IndexDetailsPageTestBed extends TestBed {
       isErrorDisplayed: () => boolean;
       clickErrorReloadButton: () => Promise<void>;
     };
+    settings: {
+      getCodeBlockContent: () => string;
+      getDocsLinkHref: () => string;
+      isErrorDisplayed: () => boolean;
+      clickErrorReloadButton: () => Promise<void>;
+      clickEditModeSwitch: () => Promise<void>;
+      getCodeEditorContent: () => string;
+      updateCodeEditorContent: (value: string) => Promise<void>;
+      saveSettings: () => Promise<void>;
+      resetChanges: () => Promise<void>;
+    };
     clickBackToIndicesButton: () => Promise<void>;
     discoverLinkExists: () => boolean;
-    overview: {
-      indexStatsContentExists: () => boolean;
-      indexDetailsContentExists: () => boolean;
-      addDocCodeBlockExists: () => boolean;
-    };
     contextMenu: {
       clickManageIndexButton: () => Promise<void>;
       isOpened: () => boolean;
@@ -69,6 +75,11 @@ export interface IndexDetailsPageTestBed extends TestBed {
       clickErrorReloadButton: () => Promise<void>;
       indexStatsTabExists: () => boolean;
       isWarningDisplayed: () => boolean;
+    };
+    overview: {
+      indexStatsContentExists: () => boolean;
+      indexDetailsContentExists: () => boolean;
+      addDocCodeBlockExists: () => boolean;
     };
   };
 }
@@ -110,15 +121,16 @@ export const setup = async (
     return find('indexDetailsContent').text();
   };
 
-  const clickBackToIndicesButton = async () => {
-    await act(async () => {
-      find('indexDetailsBackToIndicesButton').simulate('click');
-    });
-    component.update();
-  };
-
-  const discoverLinkExists = () => {
-    return exists('discoverButtonLink');
+  const overview = {
+    indexStatsContentExists: () => {
+      return exists('overviewTabIndexStats');
+    },
+    indexDetailsContentExists: () => {
+      return exists('overviewTabIndexDetails');
+    },
+    addDocCodeBlockExists: () => {
+      return exists('codeBlockControlsPanel');
+    },
   };
 
   const mappings = {
@@ -139,16 +151,62 @@ export const setup = async (
     },
   };
 
-  const overview = {
-    indexStatsContentExists: () => {
-      return exists('overviewTabIndexStats');
+  const settings = {
+    getCodeBlockContent: () => {
+      return find('indexDetailsSettingsCodeBlock').text();
     },
-    indexDetailsContentExists: () => {
-      return exists('overviewTabIndexDetails');
+    getDocsLinkHref: () => {
+      return find('indexDetailsSettingsDocsLink').prop('href');
     },
-    addDocCodeBlockExists: () => {
-      return exists('codeBlockControlsPanel');
+    isErrorDisplayed: () => {
+      return exists('indexDetailsSettingsError');
     },
+    clickErrorReloadButton: async () => {
+      await act(async () => {
+        find('indexDetailsSettingsReloadButton').simulate('click');
+      });
+      component.update();
+    },
+    clickEditModeSwitch: async () => {
+      await act(async () => {
+        find('indexDetailsSettingsEditModeSwitch').simulate('click');
+      });
+      component.update();
+    },
+    getCodeEditorContent: () => {
+      return find('indexDetailsSettingsEditor').prop('data-currentvalue');
+    },
+    updateCodeEditorContent: async (value: string) => {
+      // the code editor is mocked as an input so need to set data-currentvalue attribute to change the value
+      find('indexDetailsSettingsEditor').getDOMNode().setAttribute('data-currentvalue', value);
+      await act(async () => {
+        find('indexDetailsSettingsEditor').simulate('change');
+      });
+      component.update();
+    },
+    saveSettings: async () => {
+      await act(async () => {
+        find('indexDetailsSettingsSave').simulate('click');
+      });
+      component.update();
+    },
+    resetChanges: async () => {
+      await act(async () => {
+        find('indexDetailsSettingsResetChanges').simulate('click');
+      });
+      component.update();
+    },
+  };
+
+  const clickBackToIndicesButton = async () => {
+    await act(async () => {
+      find('indexDetailsBackToIndicesButton').simulate('click');
+    });
+    component.update();
+  };
+
+  const discoverLinkExists = () => {
+    return exists('discoverButtonLink');
   };
 
   const contextMenu = {
@@ -216,9 +274,10 @@ export const setup = async (
       clickIndexDetailsTab,
       getActiveTabContent,
       mappings,
+      settings,
+      overview,
       clickBackToIndicesButton,
       discoverLinkExists,
-      overview,
       contextMenu,
       errorSection,
       stats,
