@@ -108,21 +108,31 @@ export const updateIndexMappings = async ({
   totalFieldsLimit,
   concreteIndices,
 }: UpdateIndexMappingsOpts) => {
+  const validConcreteIndices = [];
+  for (const cIdx of concreteIndices) {
+    if (!cIdx.index.startsWith('.internal.alerts') && !cIdx.index.startsWith('.alerts')) {
+      logger.warn(
+        `Found unexpected concrete index "${cIdx.index}". Not updating mappings or settings for this index.`
+      );
+    } else {
+      validConcreteIndices.push(cIdx);
+    }
+  }
   logger.debug(
-    `Updating underlying mappings for ${concreteIndices.length} indices / data streams.`
+    `Updating underlying mappings for ${validConcreteIndices.length} indices / data streams.`
   );
 
   // Update total field limit setting of found indices
   // Other index setting changes are not updated at this time
   await Promise.all(
-    concreteIndices.map((index) =>
+    validConcreteIndices.map((index) =>
       updateTotalFieldLimitSetting({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
     )
   );
 
   // Update mappings of the found indices.
   await Promise.all(
-    concreteIndices.map((index) =>
+    validConcreteIndices.map((index) =>
       updateUnderlyingMapping({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
     )
   );
