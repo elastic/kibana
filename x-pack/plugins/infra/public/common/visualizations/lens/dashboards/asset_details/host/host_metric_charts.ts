@@ -22,6 +22,7 @@ export const hostMetricCharts: XYConfig[] = [
   normalizedLoad1m,
   logRate,
   diskSpaceUsageAvailable,
+  diskSpaceUsageByMountPoint,
   diskThroughputReadWrite,
   diskIOReadWrite,
   rxTx,
