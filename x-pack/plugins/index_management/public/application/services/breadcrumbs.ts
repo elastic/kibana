@@ -73,6 +73,52 @@ class BreadcrumbService {
       },
     ];
 
+    const indexDetailsBreadcrumb = {
+      text: i18n.translate('xpack.idxMgmt.breadcrumb.indexDetailsLabel', {
+        defaultMessage: 'Index details',
+      }),
+    };
+
+    this.breadcrumbs.indexDetailsOverview = [
+      ...this.breadcrumbs.indices,
+      indexDetailsBreadcrumb,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.indexDetailsOverviewLabel', {
+          defaultMessage: 'Overview',
+        }),
+      },
+    ];
+
+    this.breadcrumbs.indexDetailsMappings = [
+      ...this.breadcrumbs.indices,
+      indexDetailsBreadcrumb,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.indexDetailsMappingsLabel', {
+          defaultMessage: 'Mappings',
+        }),
+      },
+    ];
+
+    this.breadcrumbs.indexDetailsSettings = [
+      ...this.breadcrumbs.indices,
+      indexDetailsBreadcrumb,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.indexDetailsSettingsLabel', {
+          defaultMessage: 'Settings',
+        }),
+      },
+    ];
+
+    this.breadcrumbs.indexDetailsStats = [
+      ...this.breadcrumbs.indices,
+      indexDetailsBreadcrumb,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.indexDetailsStatsLabel', {
+          defaultMessage: 'Stats',
+        }),
+      },
+    ];
+
     this.breadcrumbs.templates = [
       ...this.breadcrumbs.home,
       {
