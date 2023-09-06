@@ -17,13 +17,12 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { Connector } from '@kbn/enterprise-search-plugin/common/types/connectors';
+import { Connector, ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 
-import { ConnectorServerSideDefinition } from '@kbn/enterprise-search-plugin/common/connectors/connectors';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
