@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiContextMenuItem,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
   EuiFieldNumber,
@@ -243,6 +242,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             fullWidth
             onClick={callback}
             disabled={!isMaxSeriesToPlotValid}
+            data-test-subj={'mlAnomalyChartsSubmitAttachment'}
           >
             <FormattedMessage
               id="xpack.ml.explorer.anomalies.submitAttachLabel"
@@ -313,75 +313,9 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     timeRangeToPlot,
   ]);
 
-  const menuItems = useMemo(() => {
-    const items = [];
-    if (canEditDashboards) {
-      items.push(
-        <EuiContextMenuItem
-          key="addToDashboard"
-          onClick={closePopoverOnAction.bind(null, setIsAddDashboardActive.bind(null, true))}
-          data-test-subj="mlAnomalyAddChartsToDashboardButton"
-        >
-          <FormattedMessage
-            id="xpack.ml.explorer.anomalies.addToDashboardLabel"
-            defaultMessage="Add to dashboard"
-          />
-        </EuiContextMenuItem>
-      );
-    }
-
-    if (!!casesPrivileges?.create || !!casesPrivileges?.update) {
-      const selectionInfluencers = getSelectionInfluencers(
-        selectedCells,
-        selectedCells?.viewByFieldName!
-      );
-
-      const queryFromSelectedCells = Array.isArray(selectionInfluencers)
-        ? selectionInfluencers
-            .map((s) => escapeKueryForFieldValuePair(s.fieldName, s.fieldValue))
-            .join(' or ')
-        : '';
-
-      items.push(
-        <EuiContextMenuItem
-          key="attachToCase"
-          onClick={closePopoverOnAction.bind(
-            null,
-            openCasesModal.bind(null, {
-              jobIds: selectedJobs?.map((v) => v.id),
-              timeRange: timeRangeToPlot,
-              maxSeriesToPlot: DEFAULT_MAX_SERIES_TO_PLOT,
-              ...((isDefined(queryString) && queryString !== '') || queryFromSelectedCells !== ''
-                ? {
-                    query: {
-                      query: queryString === '' ? queryFromSelectedCells : queryString,
-                      language: SEARCH_QUERY_LANGUAGE.KUERY,
-                    } as Query,
-                  }
-                : {}),
-            })
-          )}
-          data-test-subj="mlAnomalyAttachChartsToCasesButton"
-        >
-          <FormattedMessage id="xpack.ml.explorer.attachToCaseLabel" defaultMessage="Add to case" />
-        </EuiContextMenuItem>
-      );
-    }
-    return items;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    canEditDashboards,
-    globalTimeRange,
-    closePopoverOnAction,
-    selectedJobs,
-    selectedCells,
-    queryString,
-    timeRangeToPlot,
-  ]);
-
   return (
     <>
-      {menuItems.length > 0 && chartsCount > 0 ? (
+      {panels[0].items.length > 0 && chartsCount > 0 ? (
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
           <EuiPopover
             button={

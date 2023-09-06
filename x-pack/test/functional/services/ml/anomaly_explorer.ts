@@ -230,6 +230,7 @@ export function MachineLearningAnomalyExplorerProvider(
     async attachAnomalyChartsToCase(params: CreateCaseParams) {
       await testSubjects.click('mlExplorerAnomalyPanelMenu');
       await testSubjects.click('mlAnomalyAttachChartsToCasesButton');
+      await testSubjects.click('mlAnomalyChartsSubmitAttachment');
 
       await cases.create.createCaseFromModal(params);
     },
