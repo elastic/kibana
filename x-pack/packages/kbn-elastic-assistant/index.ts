@@ -71,6 +71,9 @@ export { useAssistantOverlay } from './impl/assistant/use_assistant_overlay';
 /** a helper that enriches content returned from a query with action buttons */
 export { analyzeMarkdown } from './impl/assistant/use_conversation/helpers';
 
+/** Default Elastic AI Assistant logo, can be removed once included in EUI **/
+export { AssistantAvatar } from './impl/assistant/assistant_avatar/assistant_avatar';
+
 export {
   ELASTIC_AI_ASSISTANT_TITLE,
   WELCOME_CONVERSATION_TITLE,
@@ -89,8 +92,16 @@ export type {
   QueryType,
 } from './impl/assistant/use_conversation/helpers';
 
-/** serialized conversations */
-export type { AssistantTelemetry, Conversation, Message } from './impl/assistant_context/types';
+export type {
+  /** Feature Availability Interface */
+  AssistantAvailability,
+  /** Telemetry Interface */
+  AssistantTelemetry,
+  /** Conversation Interface */
+  Conversation,
+  /** Message Interface */
+  Message,
+} from './impl/assistant_context/types';
 
 /** Interface for defining system/user prompts */
 export type { Prompt } from './impl/assistant/types';

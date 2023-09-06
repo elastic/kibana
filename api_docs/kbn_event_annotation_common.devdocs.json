@@ -543,13 +543,10 @@
       {
         "parentPluginId": "@kbn/event-annotation-common",
         "id": "def-common.defaultAnnotationLabel",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "defaultAnnotationLabel",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "packages/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -22,7 +22,7 @@ import type {
   ActionDetailsStrategyResponse,
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
-import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
+import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getActionResponses } from './utils';
 import {
   getLiveQueryResultsRequestParamsSchema,
@@ -61,7 +61,7 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
-                filterQuery: createFilter(request.query.filterQuery),
+                kuery: request.query.kuery,
                 factoryQueryType: OsqueryQueries.actionDetails,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
@@ -83,7 +83,7 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.results,
-                filterQuery: createFilter(request.query.filterQuery),
+                kuery: request.query.kuery,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100

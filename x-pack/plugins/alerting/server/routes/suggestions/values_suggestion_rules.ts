@@ -40,7 +40,7 @@ export const RulesSuggestionsSchema = {
   }),
 };
 
-export function registerValueSuggestionsRoute(
+export function registerRulesValueSuggestionsRoute(
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState,
   config$: Observable<ConfigSchema>,

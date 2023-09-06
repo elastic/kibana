@@ -23,6 +23,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     `"rule_name": "{{rule.name}}",\n` +
     `"alert_id": "{{alert.id}}",\n` +
     `"context_message": "{{context.message}}"\n`;
+  const webhookJson =
+    `{\n` +
+    `"short_description": "{{context.rule.name}}",\n` +
+    `"description": "{{context.rule.description}}"`;
   const emailConnectorName = 'my-email-connector';
 
   describe('connector types', function () {
@@ -150,6 +154,50 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
+    });
+
+    it('webhook connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('webhook');
+      await testSubjects.setValue('nameInput', 'Webhook test connector');
+      await testSubjects.setValue('webhookUrlText', 'https://example.com');
+      await testSubjects.setValue('webhookUserInput', 'testuser');
+      await testSubjects.setValue('webhookPasswordInput', 'password');
+      await commonScreenshots.takeScreenshot('webhook-connector', screenshotDirectories);
+      const saveTestButton = await testSubjects.find('create-connector-flyout-save-test-btn');
+      await saveTestButton.click();
+      await testSubjects.setValue('actionJsonEditor', webhookJson);
+      await commonScreenshots.takeScreenshot('webhook-params-test', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
+    it('pagerduty connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('pagerduty');
+      await testSubjects.setValue('nameInput', 'PagerDuty test connector');
+      await testSubjects.setValue('pagerdutyApiUrlInput', 'https://dev-test.pagerduty.com/');
+      await testSubjects.setValue('pagerdutyRoutingKeyInput', 'testkey');
+      await commonScreenshots.takeScreenshot('pagerduty-connector', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await testSubjects.setValue('eventActionSelect', 'trigger');
+      await commonScreenshots.takeScreenshot('pagerduty-params-test', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
+    it('opsgenie connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('opsgenie');
+      await testSubjects.setValue('nameInput', 'Opsgenie test connector');
+      await testSubjects.setValue('secrets.apiKey-input', 'testkey');
+      await commonScreenshots.takeScreenshot('opsgenie-connector', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await commonScreenshots.takeScreenshot('opsgenie-params-test', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
     });
   });
 }
