@@ -50,25 +50,35 @@ describe('service map', () => {
   describe('when navigating to service map', () => {
     beforeEach(() => {
       cy.intercept('GET', '/internal/apm/service-map?*').as('serviceMap');
-      cy.visitKibana(serviceMapHref);
-
-      cy.wait('@serviceMap');
     });
 
-    it('shows nodes in service map', { retries: 3 }, () => {
+    it('shows nodes in service map', () => {
+      cy.visitKibana(serviceMapHref);
+      cy.wait('@serviceMap');
       cy.wait(500);
-      cy.getByTestSubj('serviceMap').matchImage();
+      cy.getByTestSubj('serviceMap').matchImage({
+        imagesPath: '{spec_path}/snapshots',
+        matchAgainstPath: 'cypress/e2e/service_map/snapshots/service_map.png',
+        maxDiffThreshold: 0.05, // maximum threshold above which the test should fail
+      });
     });
 
     it('shows nodes in detailed service map', () => {
       cy.visitKibana(detailedServiceMap);
+      cy.wait('@serviceMap');
       cy.contains('h1', 'opbeans-java');
       cy.wait(500);
-      cy.getByTestSubj('serviceMap').matchImage();
+      cy.getByTestSubj('serviceMap').matchImage({
+        imagesPath: '{spec_path}/snapshots',
+        matchAgainstPath:
+          'cypress/e2e/service_map/snapshots/detailed_service_map.png',
+        maxDiffThreshold: 0.05, // maximum threshold above which the test should fail
+      });
     });
 
     describe('when there is no data', () => {
       it('shows empty state', () => {
+        cy.visitKibana(serviceMapHref);
         // we need to dismiss the service-group call out first
         cy.contains('Dismiss').click();
         cy.getByTestSubj('apmUnifiedSearchBar').type('_id : foo{enter}');
