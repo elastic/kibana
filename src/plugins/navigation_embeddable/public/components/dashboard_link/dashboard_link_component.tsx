@@ -110,30 +110,46 @@ export const DashboardLinkComponent = ({
     if (!locator) return;
 
     const href = getDashboardHref(locator);
-    return {
-      href,
-      onClick: async (event: React.MouseEvent) => {
-        /**
-         * If the link is being opened via a modified click, then we should use the default `href` navigation behaviour
-         * by passing all the dashboard state via the URL - this will keep behaviour consistent across all browsers.
-         */
-        const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
-        if (modifiedClick) {
-          return;
-        }
+    const onClick = async (event: React.MouseEvent) => {
+      /**
+       * If the link is being opened via a modified click, then we should use the default `href` navigation behaviour
+       * by passing all the dashboard state via the URL - this will keep behaviour consistent across all browsers.
+       */
+      const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
+      if (modifiedClick) {
+        return;
+      }
 
-        /** Otherwise, prevent the default behaviour and handle click depending on `openInNewTab` option */
-        event.preventDefault();
-        if (linkOptions.openInNewTab) {
-          window.open(href, '_blank');
-        } else {
-          const { app, path, state } = locator;
-          await coreServices.application.navigateToApp(app, {
-            path,
-            state,
-          });
+      /** Otherwise, prevent the default behaviour and handle click depending on `openInNewTab` option */
+      event.preventDefault();
+      if (linkOptions.openInNewTab) {
+        window.open(href, '_blank');
+      } else {
+        const { app, path, state } = locator;
+        await coreServices.application.navigateToApp(app, {
+          path,
+          state,
+        });
+      }
+    };
+
+    // TODO External link icon will not appear until
+    // https://github.com/elastic/eui/pull/7159 is available in Kibana
+    const extraAction = linkOptions.openInNewTab
+      ? {
+          alwaysShow: true,
+          iconSize: 's' as const,
+          iconType: 'popout',
+          onClick,
+          'aria-label': linkLabel,
         }
-      },
+      : undefined;
+
+    return {
+      extraAction,
+      href,
+      target: linkOptions.openInNewTab ? '_blank' : '',
+      onClick,
     };
   }, [link]);
 

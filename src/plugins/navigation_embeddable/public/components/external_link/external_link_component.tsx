@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   UrlDrilldownOptions,
@@ -51,6 +51,24 @@ export const ExternalLinkComponent = ({
       : link.destination;
   }, [linkOptions, link.destination]);
 
+  const onClick = useCallback(
+    async (event: React.MouseEvent) => {
+      if (!destination) return;
+
+      /** Only use `navigateToUrl` if we **aren't** opening in a new window/tab; otherwise, just use default href handling */
+      const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
+      if (!modifiedClick) {
+        event.preventDefault();
+        if (linkOptions.openInNewTab) {
+          window.open(destination, '_blank');
+        } else {
+          await coreServices.application.navigateToUrl(destination);
+        }
+      }
+    },
+    [destination, linkOptions.openInNewTab]
+  );
+
   return (
     <EuiListGroupItem
       size="s"
@@ -68,20 +86,19 @@ export const ExternalLinkComponent = ({
       id={`externalLink--${link.id}`}
       label={link.label || link.destination}
       href={destination}
-      onClick={async (event) => {
-        if (!destination) return;
-
-        /** Only use `navigateToUrl` if we **aren't** opening in a new window/tab; otherwise, just use default href handling */
-        const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
-        if (!modifiedClick) {
-          event.preventDefault();
-          if (linkOptions.openInNewTab) {
-            window.open(destination, '_blank');
-          } else {
-            await coreServices.application.navigateToUrl(destination);
-          }
-        }
-      }}
+      target={linkOptions.openInNewTab ? '_blank' : ''}
+      extraAction={
+        linkOptions.openInNewTab
+          ? {
+              alwaysShow: true,
+              iconSize: 's',
+              iconType: 'popout',
+              onClick,
+              'aria-label': link.label,
+            }
+          : undefined
+      }
+      onClick={onClick}
     />
   );
 };
