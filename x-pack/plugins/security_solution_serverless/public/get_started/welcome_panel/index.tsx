@@ -9,58 +9,31 @@ import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } fr
 
 import { css } from '@emotion/react';
 import React from 'react';
-import progress from './images/progress.svg';
-import invite from './images/invite.svg';
-import type { HeaderSection } from './types';
-import {
-  WELCOME_PANEL_PROJECT_CREATED_TITLE,
-  WELCOME_PANEL_PROJECT_CREATED_DESCRIPTION,
-  WELCOME_PANEL_INVITE_YOUR_TEAM_TITLE,
-  WELCOME_PANEL_INVITE_YOUR_TEAM_DESCRIPTION,
-  WELCOME_PANEL_PROGRESS_TRACKER_TITLE,
-} from './translations';
-import { ProgressTracker } from './progress_tracker';
 
-const headerCards: HeaderSection[] = [
-  {
-    icon: { type: 'checkInCircleFilled', color: '#00BFB3' },
-    title: WELCOME_PANEL_PROJECT_CREATED_TITLE,
-    description: () => WELCOME_PANEL_PROJECT_CREATED_DESCRIPTION,
-    id: 'projectCreated',
-  },
-  {
-    icon: { type: invite },
-    title: WELCOME_PANEL_INVITE_YOUR_TEAM_TITLE,
-    description: () => WELCOME_PANEL_INVITE_YOUR_TEAM_DESCRIPTION,
-    id: 'inviteYourTeam',
-  },
-  {
-    icon: { type: progress },
-    title: WELCOME_PANEL_PROGRESS_TRACKER_TITLE,
-    id: 'progressTracker',
-    description: ({
-      totalActiveSteps,
-      totalStepsLeft,
-    }: {
-      totalActiveSteps?: number | null;
-      totalStepsLeft?: number | null;
-    }) => <ProgressTracker totalActiveSteps={totalActiveSteps} totalStepsLeft={totalStepsLeft} />,
-  },
-];
+import type { ProductTier } from '../../../common/product';
+import { useWelcomePanel } from './use_welcome_panel';
 
 const WelcomePanelComponent = ({
   totalActiveSteps,
   totalStepsLeft,
+  productTier,
 }: {
   totalActiveSteps: number | null;
   totalStepsLeft: number | null;
+  productTier: ProductTier | undefined;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const headerCards = useWelcomePanel({
+    productTier,
+    totalActiveSteps,
+    totalStepsLeft,
+  });
 
   return (
     <EuiFlexGroup
       css={css`
         gap: ${euiTheme.size.xl};
+        margin-top: 6px;
       `}
     >
       {headerCards.map((item, index) => {
@@ -84,13 +57,25 @@ const WelcomePanelComponent = ({
                 </EuiTitle>
               }
               description={
-                <span
-                  css={css`
-                    color: ${euiTheme.colors.mediumShade};
-                  `}
-                >
-                  {item?.description?.({ totalActiveSteps, totalStepsLeft })}
-                </span>
+                <>
+                  <span
+                    css={css`
+                      color: ${euiTheme.colors.mediumShade};
+                    `}
+                  >
+                    {item.description && item.description}
+                  </span>
+                  {item.footer && (
+                    <span
+                      className="eui-displayInlineBlock"
+                      css={css`
+                        padding-top: ${euiTheme.size.l};
+                      `}
+                    >
+                      {item.footer}
+                    </span>
+                  )}
+                </>
               }
               hasBorder
               paddingSize="l"
