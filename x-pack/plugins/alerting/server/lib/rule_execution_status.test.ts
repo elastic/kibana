@@ -6,11 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  ActionsCompletion,
-  RuleExecutionStatusErrorReasons,
-  RuleExecutionStatusWarningReasons,
-} from '../types';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { RuleExecutionStatusErrorReasons, RuleExecutionStatusWarningReasons } from '../types';
 import {
   executionStatusFromState,
   executionStatusFromError,

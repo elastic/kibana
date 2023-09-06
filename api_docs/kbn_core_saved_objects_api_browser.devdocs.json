@@ -1383,12 +1383,12 @@
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/build_saved_object.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-              },
-              {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1634,10 +1634,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-browser-mocks",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/hooks/slo/use_fetch_slo_definitions.ts"
               },
               {
                 "plugin": "dashboardEnhanced",
@@ -3008,12 +3004,12 @@
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts"
           },
           {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/application/utils/search_utils.ts"
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
           },
           {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/application/utils/search_utils.ts"
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
           },
           {
             "plugin": "ml",
@@ -3024,12 +3020,12 @@
             "path": "x-pack/plugins/ml/common/types/kibana.ts"
           },
           {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/application/utils/search_utils.ts"
           },
           {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/application/utils/search_utils.ts"
           },
           {
             "plugin": "dashboardEnhanced",

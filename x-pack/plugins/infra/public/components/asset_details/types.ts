@@ -6,6 +6,7 @@
  */
 
 import { TimeRange } from '@kbn/es-query';
+import { Search } from 'history';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 
 export interface Asset {
@@ -26,13 +27,9 @@ export enum FlyoutTabIds {
 
 export type TabIds = `${FlyoutTabIds}`;
 
-export interface TabState {
+export interface OverridableTabState {
   metadata?: {
-    query?: string;
     showActionsColumn?: boolean;
-  };
-  processes?: {
-    query?: string;
   };
   anomalies?: {
     onClose?: () => void;
@@ -40,11 +37,12 @@ export interface TabState {
   alertRule?: {
     onCreateRuleClick?: () => void;
   };
-  logs?: {
-    query?: string;
-  };
 }
 
+export interface TabState extends OverridableTabState {
+  activeTabId?: TabIds;
+  dateRange?: TimeRange;
+}
 export interface FlyoutProps {
   closeFlyout: () => void;
   mode: 'flyout';
@@ -61,25 +59,31 @@ export interface Tab {
   name: string;
 }
 
-export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices' | 'uptime';
+export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
 
 export interface AssetDetailsProps {
   asset: Asset;
   assetType: InventoryItemType;
   dateRange: TimeRange;
   tabs: Tab[];
-  activeTabId?: TabIds;
-  overrides?: TabState;
+  overrides?: OverridableTabState;
   renderMode: RenderMode;
-  onTabsStateChange?: TabsStateChangeFn;
   links?: LinkOptions[];
   // This is temporary. Once we start using the asset details in other plugins,
   // It will have to retrieve the metricAlias internally rather than receive it via props
   metricAlias: string;
 }
 
-export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;
+export type TabsStateChangeFn = (state: TabState) => void;
 
 export interface ContentTemplateProps {
   header: Pick<AssetDetailsProps, 'tabs' | 'links'>;
 }
+
+export interface RouteState {
+  originAppId: string;
+  originPathname?: string;
+  originSearch?: Search;
+}
+
+export type DataViewOrigin = 'logs' | 'metrics';

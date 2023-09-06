@@ -22,11 +22,13 @@ const startMock = (): PluginStart => ({
   getNavLinks$: jest.fn(() => new BehaviorSubject<NavigationLink[]>([])),
   setIsSidebarEnabled: jest.fn(),
   setGetStartedPage: jest.fn(),
+  setIsILMAvailable: jest.fn(),
   getBreadcrumbsNav$: jest.fn(
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
   ),
   setExtraRoutes: jest.fn(),
   getUpselling: () => upselling,
+  setDashboardsLandingCallout: jest.fn(),
 });
 
 export const securitySolutionMock = {

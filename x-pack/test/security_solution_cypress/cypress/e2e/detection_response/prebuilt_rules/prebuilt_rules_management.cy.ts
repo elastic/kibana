@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   COLLAPSED_ACTION_BTN,
@@ -20,6 +18,7 @@ import {
 } from '../../../screens/alerts_detection_rules';
 import {
   deleteFirstRule,
+  disableAutoRefresh,
   getRulesManagementTableRows,
   selectAllRules,
   selectRulesByName,
@@ -34,6 +33,7 @@ import {
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../../tasks/api_calls/prebuilt_rules';
 import {
   cleanKibana,
@@ -50,7 +50,7 @@ const rules = Array.from(Array(5)).map((_, i) => {
   });
 });
 
-describe('Prebuilt rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Prebuilt rules', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -59,10 +59,12 @@ describe('Prebuilt rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     login();
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
+    preventPrebuiltRulesPackageInstallation();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createAndInstallMockedPrebuiltRules({ rules });
     cy.reload();
     waitForPrebuiltDetectionRulesToBeLoaded();
+    disableAutoRefresh();
   });
 
   describe('Alerts rules, prebuilt rules', () => {

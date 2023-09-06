@@ -194,7 +194,7 @@ describe('Detections Rules API', () => {
           method: 'GET',
           query: {
             filter:
-              '(alert.attributes.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.index: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.tactic.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.tactic.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" \\OR \\(foo\\:bar\\)")',
+              '(alert.attributes.name: "\\" OR (foo:bar)" OR alert.attributes.params.index: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" OR (foo:bar)")',
             page: 1,
             per_page: 20,
             sort_field: 'enabled',

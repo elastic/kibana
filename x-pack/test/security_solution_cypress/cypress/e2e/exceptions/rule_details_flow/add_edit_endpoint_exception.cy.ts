@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 
@@ -45,12 +44,13 @@ import {
 } from '../../../screens/exceptions';
 import { createEndpointExceptionList } from '../../../tasks/api_calls/exceptions';
 
-describe('Add endpoint exception from rule details', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165736
+describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const ITEM_NAME = 'Sample Exception List Item';
 
   before(() => {
     cy.task('esArchiverResetKibana');
-    cy.task('esArchiverLoad', 'auditbeat');
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
     login();
     deleteAlertsAndRules();
     // create rule with exception

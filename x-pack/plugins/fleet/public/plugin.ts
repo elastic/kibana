@@ -16,6 +16,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type {
   CustomIntegrationsStart,
@@ -59,6 +60,8 @@ import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
 import type { FleetConfigType } from '../common/types';
+
+import { API_VERSIONS } from '../common/constants';
 
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
@@ -287,7 +290,12 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     ExperimentalFeaturesService.init(this.experimentalFeatures);
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
     const getPermissions = once(() =>
-      core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
+      core.http.fetch<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath(), {
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: API_VERSIONS.public.v1,
+        },
+        version: API_VERSIONS.public.v1,
+      })
     );
 
     // Set up license service

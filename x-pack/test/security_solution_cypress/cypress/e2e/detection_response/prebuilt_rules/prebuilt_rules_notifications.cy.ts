@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   ADD_ELASTIC_RULES_BTN,
@@ -33,7 +31,7 @@ const RULE_1 = createRuleAssetSavedObject({
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update Notifications',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       login();

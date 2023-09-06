@@ -22,7 +22,6 @@ import {
   EuiThemeProvider,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -37,31 +36,29 @@ interface CodeBoxProps {
   languageType?: string;
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
-  http: HttpStart;
-  pluginId: string;
+  assetBasePath: string;
   application?: ApplicationStart;
   sharePlugin: SharePluginStart;
-  showTryInConsole: boolean;
+  consoleRequest?: string;
 }
 
 export const CodeBox: React.FC<CodeBoxProps> = ({
   application,
   codeSnippet,
-  http,
   languageType,
   languages,
-  pluginId,
+  assetBasePath,
   selectedLanguage,
   setSelectedLanguage,
   sharePlugin,
-  showTryInConsole,
+  consoleRequest,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const items = languages.map((language) => (
     <EuiContextMenuItem
       key={language.id}
-      icon={http.basePath.prepend(`/plugins/${pluginId}/assets/${language.iconType}`)}
+      icon={`${assetBasePath}/${language.iconType}`}
       onClick={() => {
         setSelectedLanguage(language);
         setIsPopoverOpen(false);
@@ -115,10 +112,10 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
               )}
             </EuiCopy>
           </EuiFlexItem>
-          {showTryInConsole && (
+          {consoleRequest !== undefined && (
             <EuiFlexItem grow={false}>
               <TryInConsoleButton
-                request={codeSnippet}
+                request={consoleRequest}
                 application={application}
                 sharePlugin={sharePlugin}
               />

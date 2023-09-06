@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('Alert Test', { tags: [tag.ESS] }, () => {
+describe('Alert Test', { tags: ['@ess'] }, () => {
   let ruleName: string;
   let ruleId: string;
 

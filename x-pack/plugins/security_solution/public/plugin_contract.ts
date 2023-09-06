@@ -14,16 +14,21 @@ import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 
 export class PluginContract {
+  public isILMAvailable$: BehaviorSubject<boolean>;
   public isSidebarEnabled$: BehaviorSubject<boolean>;
   public getStartedComponent$: BehaviorSubject<React.ComponentType | null>;
+  public dashboardsLandingCallout$: BehaviorSubject<React.ComponentType | null>;
   public upsellingService: UpsellingService;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
   public appLinksSwitcher: AppLinksSwitcher;
 
   constructor() {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
+    this.isILMAvailable$ = new BehaviorSubject<boolean>(true);
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
     this.getStartedComponent$ = new BehaviorSubject<React.ComponentType | null>(null);
+    this.dashboardsLandingCallout$ = new BehaviorSubject<React.ComponentType | null>(null);
+
     this.upsellingService = new UpsellingService();
     this.appLinksSwitcher = (appLinks) => appLinks;
   }
@@ -31,8 +36,10 @@ export class PluginContract {
   public getStartServices(): ContractStartServices {
     return {
       extraRoutes$: this.extraRoutes$.asObservable(),
+      isILMAvailable$: this.isILMAvailable$.asObservable(),
       isSidebarEnabled$: this.isSidebarEnabled$.asObservable(),
       getStartedComponent$: this.getStartedComponent$.asObservable(),
+      dashboardsLandingCalloutComponent$: this.dashboardsLandingCallout$.asObservable(),
       upselling: this.upsellingService,
     };
   }
@@ -52,8 +59,12 @@ export class PluginContract {
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
+      setIsILMAvailable: (isILMAvailable: boolean) => this.isILMAvailable$.next(isILMAvailable),
       setGetStartedPage: (getStartedComponent) => {
         this.getStartedComponent$.next(getStartedComponent);
+      },
+      setDashboardsLandingCallout: (dashboardsLandingCallout) => {
+        this.dashboardsLandingCallout$.next(dashboardsLandingCallout);
       },
       getBreadcrumbsNav$: () => breadcrumbsNav$,
       getUpselling: () => this.upsellingService,
