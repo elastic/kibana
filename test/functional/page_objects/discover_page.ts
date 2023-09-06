@@ -370,13 +370,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async toggleSidebarCollapse() {
-    const isCollapsed = await this.testSubjects.isDisplayed(
-      'unifiedFieldListSidebar__toggle-expand'
-    );
-    if (isCollapsed) {
-      return await this.testSubjects.click('unifiedFieldListSidebar__toggle-expand');
-    }
-    return await this.testSubjects.click('unifiedFieldListSidebar__toggle-collapse');
+    return await this.testSubjects.click('unifiedFieldListSidebar__toggle');
   }
 
   public async closeSidebar() {
