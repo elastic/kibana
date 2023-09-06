@@ -22,10 +22,12 @@ function createDeepLinks(
     showInServerless: boolean = true
   ): AppNavLinkStatus | undefined {
     if (isServerless) {
+      // in serverless the status needs to be "visible" rather than "default"
+      // for the links to appear in the nav menu.
       return showInServerless && visible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden;
     }
 
-    return visible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden;
+    return visible ? AppNavLinkStatus.default : AppNavLinkStatus.hidden;
   }
 
   return {
