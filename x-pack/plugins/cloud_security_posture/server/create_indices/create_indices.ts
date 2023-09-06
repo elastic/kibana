@@ -24,22 +24,22 @@ import { IndexConfig, IndexTemplateParams } from './types';
 export const initializeCspIndices = async (esClient: ElasticsearchClient, logger: Logger) => {
   await Promise.allSettled([
     createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger),
-    // createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger),
+    createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger),
   ]);
 
   const [
-    // createFindingsLatestIndexPromise,
+    createFindingsLatestIndexPromise,
     createVulnerabilitiesLatestIndexPromise,
     createBenchmarkScoreIndexPromise,
   ] = await Promise.allSettled([
-    // createLatestIndex(esClient, logger, latestIndexConfigs.findings),
+    createLatestIndex(esClient, logger, latestIndexConfigs.findings),
     createLatestIndex(esClient, logger, latestIndexConfigs.vulnerabilities),
     createBenchmarkScoreIndex(esClient, logger),
   ]);
 
-  // if (createFindingsLatestIndexPromise.status === 'rejected') {
-  //   logger.error(createFindingsLatestIndexPromise.reason);
-  // }
+  if (createFindingsLatestIndexPromise.status === 'rejected') {
+    logger.error(createFindingsLatestIndexPromise.reason);
+  }
   if (createVulnerabilitiesLatestIndexPromise.status === 'rejected') {
     logger.error(createVulnerabilitiesLatestIndexPromise.reason);
   }

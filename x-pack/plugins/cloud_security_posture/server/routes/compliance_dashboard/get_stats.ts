@@ -73,7 +73,7 @@ export const getEvaluationsQuery = (
         {
           range: {
             '@timestamp': {
-              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}/h`,
             },
           },
         },
