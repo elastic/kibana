@@ -40,6 +40,7 @@ export type TagCloudChartProps = TagcloudRendererConfig & {
   renderComplete: IInterpreterRenderHandlers['done'];
   palettesRegistry: PaletteRegistry;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
+  isDarkMode: boolean;
 };
 
 const calculateWeight = (value: number, x1: number, y1: number, x2: number, y2: number) =>

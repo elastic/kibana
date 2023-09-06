@@ -138,7 +138,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         >
           <EuiFlexItem>
             <EuiColorPaletteDisplay
-              data-test-subj="lnsXY_dynamicColoring_palette"
+              data-test-subj="lns_dynamicColoring_edit"
               palette={colors}
               type={'fixed'}
               onClick={() => {
@@ -148,7 +148,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="lnsXY_dynamicColoring_trigger"
+              data-test-subj="lns_colorEditing_trigger"
               aria-label={i18n.translate('xpack.lens.paletteXYGradient.customizeLong', {
                 defaultMessage: 'Edit palette',
               })}

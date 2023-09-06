@@ -177,6 +177,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
+      colorMapping: args.colorMapping,
     };
 
     if (handlers?.inspectorAdapters?.tables) {

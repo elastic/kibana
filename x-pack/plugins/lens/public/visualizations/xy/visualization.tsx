@@ -259,7 +259,7 @@ export const getXyVisualization = ({
   initialize(
     addNewLayer,
     state,
-    _mainPalette?,
+    mainPalette?,
     annotationGroups?: AnnotationGroups,
     references?: SavedObjectReference[]
   ) {
@@ -281,7 +281,11 @@ export const getXyVisualization = ({
             seriesType: defaultSeriesType,
             showGridlines: false,
             layerType: LayerTypes.DATA,
-            colorMapping: { ...DEFAULT_COLOR_MAPPING_CONFIG },
+            palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+            colorMapping:
+              mainPalette?.type === 'colorMapping'
+                ? mainPalette.value
+                : { ...DEFAULT_COLOR_MAPPING_CONFIG },
           },
         ],
       }
@@ -487,7 +491,13 @@ export const getXyVisualization = ({
 
   getMainPalette: (state) => {
     if (!state || state.layers.length === 0) return;
-    return getFirstDataLayer(state.layers)?.palette;
+    const firstDataLayer = getFirstDataLayer(state.layers);
+
+    return firstDataLayer?.colorMapping
+      ? { type: 'colorMapping', value: firstDataLayer.colorMapping }
+      : firstDataLayer?.palette
+      ? { type: 'legacyPalette', value: firstDataLayer.palette }
+      : undefined;
   },
 
   getDropProps(dropProps) {

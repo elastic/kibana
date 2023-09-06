@@ -147,9 +147,11 @@ export function PaletteSelector({
         <EuiFlexItem>
           <EuiFormRow label="Palette">
             <EuiColorPalettePicker
+              data-test-subj="kbnColoring_ColorMapping_PalettePicker"
               palettes={[...palettes.values()]
                 .filter((d) => d.name !== 'Neutral')
                 .map((palette) => ({
+                  'data-test-subj': `kbnColoring_ColorMapping_Palette-${palette.id}`,
                   value: palette.id,
                   title: palette.name,
                   palette: Array.from({ length: palette.colorCount }, (_, i) => {

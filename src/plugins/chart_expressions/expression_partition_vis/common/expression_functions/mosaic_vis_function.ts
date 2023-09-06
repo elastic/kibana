@@ -150,6 +150,7 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
+      colorMapping: args.colorMapping,
     };
 
     if (handlers?.inspectorAdapters?.tables) {

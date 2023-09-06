@@ -67,6 +67,7 @@ export const tagcloudRenderer: (
     };
 
     const palettesRegistry = await plugins.charts.palettes.getPalettes();
+    const isDarkMode = plugins.charts.theme.useDarkMode();
 
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -87,6 +88,7 @@ export const tagcloudRenderer: (
                   fireEvent={handlers.event}
                   syncColors={config.syncColors}
                   overrides={config.overrides}
+                  isDarkMode={isDarkMode}
                 />
               </VisualizationContainer>
             )}

@@ -43,7 +43,6 @@ export interface TagcloudRendererConfig {
   visData: Datatable;
   visParams: TagCloudRendererParams;
   syncColors: boolean;
-  isDarkMode: boolean;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 

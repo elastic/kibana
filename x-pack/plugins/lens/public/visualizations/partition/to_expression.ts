@@ -175,6 +175,7 @@ const generateCommonArguments = (
   const datasource = datasourceLayers[layer.layerId];
   const columnToLabelMap = getColumnToLabelMap(layer.metrics, datasource);
   const sortedMetricAccessors = getSortedAccessorsForGroup(datasource, layer, 'metrics');
+  console.log(state);
   return {
     labels: generateCommonLabelsAstArgs(state, attributes, layer, columnToLabelMap),
     buckets: operations

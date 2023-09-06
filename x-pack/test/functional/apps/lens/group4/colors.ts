@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: '@message.raw',
-        palette: 'negative',
+        palette: { mode: 'colorMapping', id: 'negative' },
         keepOpen: true,
       });
 

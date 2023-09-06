@@ -93,7 +93,7 @@ export function TagsDimensionEditor({
     >
       <EuiFlexItem>
         <EuiColorPaletteDisplay
-          data-test-subj="lnsXY_dynamicColoring_palette"
+          data-test-subj="lns_dynamicColoring_edit"
           palette={colors}
           type={'fixed'}
           onClick={() => {
@@ -103,7 +103,7 @@ export function TagsDimensionEditor({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="lnsXY_dynamicColoring_trigger"
+          data-test-subj="lns_colorEditing_trigger"
           aria-label={i18n.translate('xpack.lens.paletteXYGradient.customizeLong', {
             defaultMessage: 'Edit palette',
           })}
@@ -123,7 +123,7 @@ export function TagsDimensionEditor({
           isOpen={isPaletteOpen}
           handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
           title={i18n.translate('xpack.lens.table.colorByTermsPanelTitle', {
-            defaultMessage: 'Color assignments',
+            defaultMessage: 'Color',
           })}
         >
           <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">

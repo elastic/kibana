@@ -8,7 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DEFAULT_COLOR_MAPPING_CONFIG, PaletteRegistry } from '@kbn/coloring';
+import {
+  ColorMapping,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  getPaletteColors,
+  PaletteRegistry,
+} from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
@@ -52,7 +57,7 @@ const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
 });
 
-function newLayerState(layerId: string): PieLayerState {
+function newLayerState(layerId: string, colorMapping: ColorMapping.Config): PieLayerState {
   return {
     layerId,
     primaryGroups: [],
@@ -63,7 +68,7 @@ function newLayerState(layerId: string): PieLayerState {
     legendDisplay: LegendDisplay.DEFAULT,
     nestedLegend: false,
     layerType: LayerTypes.DATA,
-    colorMapping: { ...DEFAULT_COLOR_MAPPING_CONFIG },
+    colorMapping,
   };
 }
 
@@ -139,7 +144,9 @@ export const getPieVisualization = ({
   clearLayer(state) {
     return {
       shape: state.shape,
-      layers: state.layers.map((l) => newLayerState(l.layerId)),
+      layers: state.layers.map((l) =>
+        newLayerState(l.layerId, { ...DEFAULT_COLOR_MAPPING_CONFIG })
+      ),
     };
   },
 
@@ -155,16 +162,33 @@ export const getPieVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   initialize(addNewLayer, state, mainPalette) {
+    console.log('initialize', { state, mainPalette });
     return (
       state || {
         shape: PieChartTypes.DONUT,
-        layers: [newLayerState(addNewLayer())],
-        palette: mainPalette,
+        layers: [
+          newLayerState(
+            addNewLayer(),
+            mainPalette?.type === 'colorMapping'
+              ? mainPalette.value
+              : { ...DEFAULT_COLOR_MAPPING_CONFIG }
+          ),
+        ],
+        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
       }
     );
   },
 
-  getMainPalette: (state) => (state ? state.palette : undefined),
+  getMainPalette: (state) => {
+    if (!state) {
+      return undefined;
+    }
+    return state.layers.length > 0 && state.layers[0].colorMapping
+      ? { type: 'colorMapping', value: state.layers[0].colorMapping }
+      : state.palette
+      ? { type: 'legacyPalette', value: state.palette }
+      : undefined;
+  },
 
   getSuggestions: suggestions,
 
@@ -175,6 +199,19 @@ export const getPieVisualization = ({
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
+
+    let colors: string[] = [];
+    kibanaTheme.theme$
+      .subscribe({
+        next(theme) {
+          colors = state.layers[0]?.colorMapping
+            ? getPaletteColors(theme.darkMode, state.layers[0].colorMapping)
+            : paletteService
+                .get(state.palette?.name || 'default')
+                .getCategoricalColors(10, state.palette?.params);
+        },
+      })
+      .unsubscribe();
 
     const getPrimaryGroupConfig = (): VisualizationDimensionGroupConfig => {
       const originalOrder = getSortedAccessorsForGroup(datasource, layer, 'primaryGroups');
@@ -189,9 +226,7 @@ export const getPieVisualization = ({
       accessors.forEach((accessorConfig) => {
         if (firstNonCollapsedColumnId === accessorConfig.columnId) {
           accessorConfig.triggerIconType = 'colorBy';
-          accessorConfig.palette = paletteService
-            .get(state.palette?.name || 'default')
-            .getCategoricalColors(10, state.palette?.params);
+          accessorConfig.palette = colors;
         }
       });
 

@@ -12,6 +12,7 @@ import {
   NeutralPalette,
   getPalette,
   DEFAULT_NEUTRAL_PALETTE_INDEX,
+  IKEAPalette,
 } from '../palettes/default_palettes';
 
 export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
@@ -30,7 +31,7 @@ export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
       touched: false,
     },
   ],
-  paletteId: 'eui',
+  paletteId: IKEAPalette.id,
   colorMode: {
     type: 'categorical',
   },
