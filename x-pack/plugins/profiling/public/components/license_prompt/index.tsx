@@ -38,7 +38,11 @@ export function LicensePrompt() {
         </p>
       }
       actions={[
-        <EuiButton href={manageLicenseURL} fill>
+        <EuiButton
+          data-test-subj="profilingLicensePromptUpgradeSubscriptionButton"
+          href={manageLicenseURL}
+          fill
+        >
           {i18n.translate('xpack.profiling.invalidLicense.subscriptionManagementLink', {
             defaultMessage: 'Upgrade subscription',
           })}

@@ -17,9 +17,9 @@ export interface WaitOptions {
 }
 
 /**
- * General method to wait for the ES cluster status to be yellow or green
+ * General method to wait for the ES cluster status to be green
  */
-export async function waitForClusterReady({
+export async function waitUntilClusterReady({
   client,
   log,
   readyTimeout = DEFAULT_READY_TIMEOUT,
@@ -27,14 +27,14 @@ export async function waitForClusterReady({
   let attempt = 0;
   const start = Date.now();
 
-  log.info('waiting for ES cluster to report a yellow or green status');
+  log.info('waiting for ES cluster to report a green status');
 
   while (true) {
     attempt += 1;
 
     try {
       const resp = await client.cluster.health();
-      if (resp.status !== 'red') {
+      if (resp.status === 'green') {
         return;
       }
 

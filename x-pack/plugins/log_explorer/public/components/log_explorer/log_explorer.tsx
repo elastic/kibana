@@ -6,7 +6,7 @@
  */
 
 import { ScopedHistory } from '@kbn/core-application-browser';
-import { DataPublicPluginStart, ISearchStart, ISessionService } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import React from 'react';
 import {
@@ -50,13 +50,17 @@ export const createLogExplorer = ({
  * are no-ops.
  */
 const createDataServiceProxy = (data: DataPublicPluginStart) => {
+  const noOpEnableStorage = () => {};
+
+  const sessionServiceProxy = createPropertyGetProxy(data.search.session, {
+    enableStorage: () => noOpEnableStorage,
+  });
+
+  const searchServiceProxy = createPropertyGetProxy(data.search, {
+    session: () => sessionServiceProxy,
+  });
+
   return createPropertyGetProxy(data, {
-    search: (searchService: ISearchStart) =>
-      createPropertyGetProxy(searchService, {
-        session: (sessionService: ISessionService) =>
-          createPropertyGetProxy(sessionService, {
-            enableStorage: () => () => {},
-          }),
-      }),
+    search: () => searchServiceProxy,
   });
 };
