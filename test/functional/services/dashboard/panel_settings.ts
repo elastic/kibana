@@ -58,17 +58,27 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async openDatePickerQuickMenu() {
       log.debug('openDatePickerQuickMenu');
       const button = await this.findToggleQuickMenuButton();
-      if (!(await button.isSelected())) {
-        await button.click();
-      }
+      await retry.try(async () => {
+        if (!(await button.isSelected())) {
+          await button.click();
+        }
+        if (!(await button.isSelected())) {
+          throw new Error('openDatePickerQuickMenu click missed');
+        }
+      });
     }
 
     public async closeDatePickerQuickMenu() {
       log.debug('closeDatePickerQuickMenu');
       const button = await this.findToggleQuickMenuButton();
-      if (await button.isSelected()) {
-        await button.click();
-      }
+      await retry.try(async () => {
+        if (await button.isSelected()) {
+          await button.click();
+        }
+        if (await button.isSelected()) {
+          throw new Error('closeDatePickerQuickMenu click missed');
+        }
+      });
     }
 
     public async clickCommonlyUsedTimeRange(time: CommonlyUsed) {
@@ -125,17 +135,27 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async enableCustomTimeRange() {
       log.debug('enableCustomTimeRange');
       const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
-      if (!(await toggle.isSelected())) {
-        await toggle.click();
-      }
+      await retry.try(async () => {
+        if (!(await toggle.isSelected())) {
+          await toggle.click();
+          if (!(await toggle.isSelected())) {
+            throw new Error('enableCustomTimeRange click missed');
+          }
+        }
+      });
     }
 
     public async disableCustomTimeRange() {
       log.debug('disableCustomTimeRange');
       const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
-      if (await toggle.isSelected()) {
-        await toggle.click();
-      }
+      await retry.try(async () => {
+        if (await toggle.isSelected()) {
+          await toggle.click();
+          if (await toggle.isSelected()) {
+            throw new Error('disableCustomTimeRange click missed');
+          }
+        }
+      });
     }
   })();
 }
