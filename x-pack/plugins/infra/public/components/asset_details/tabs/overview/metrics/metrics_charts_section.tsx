@@ -81,7 +81,7 @@ export const ChartGrid = React.memo(
         {chartsToRender.map(({ dataViewOrigin, id, layers, title, overrides }, index) => (
           <EuiFlexItem key={index} grow={false}>
             <LensChart
-              id={id}
+              id={`${props['data-test-subj']}${id}`}
               borderRadius="m"
               dataView={getDataView(dataViewOrigin)}
               dateRange={timeRange}
@@ -93,7 +93,6 @@ export const ChartGrid = React.memo(
               overrides={overrides}
               visualizationType="lnsXY"
               onBrushEnd={handleBrushEnd}
-              data-test-subj={`${props['data-test-subj']}${id}`}
             />
           </EuiFlexItem>
         ))}
