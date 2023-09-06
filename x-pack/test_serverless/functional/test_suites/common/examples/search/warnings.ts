@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/165379
   // FLAKY: https://github.com/elastic/kibana/issues/165502
   // FLAKY: https://github.com/elastic/kibana/issues/165503
+  // FLAKY: https://github.com/elastic/kibana/issues/165624
   describe.skip('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
     const fromTime = 'Jun 17, 2022 @ 00:00:00.000';
