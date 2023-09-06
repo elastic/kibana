@@ -221,6 +221,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                     values={{
                       hostRequirementsLink: (
                         <EuiLink
+                          data-test-subj="observabilityOnboardingInstallElasticAgentStepsHostRequirementsAndOtherInstallationOptionsLink"
                           external
                           href="https://www.elastic.co/guide/en/fleet/8.7/elastic-agent-installation.html"
                         >
