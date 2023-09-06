@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import {
   QueryDslQueryContainer,
@@ -71,6 +72,7 @@ export async function getTraceItems({
   start,
   end,
   maxTraceItemsFromUrlParam,
+  logger,
 }: {
   traceId: string;
   config: APMConfig;
@@ -78,6 +80,7 @@ export async function getTraceItems({
   start: number;
   end: number;
   maxTraceItemsFromUrlParam?: number;
+  logger: Logger;
 }): Promise<TraceItems> {
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const excludedLogLevels = ['debug', 'info', 'warning'];
@@ -118,6 +121,7 @@ export async function getTraceItems({
     traceId,
     start,
     end,
+    logger,
   });
 
   const [errorResponse, traceResponse, spanLinksCountById] = await Promise.all([
@@ -141,6 +145,8 @@ export async function getTraceItems({
   };
 }
 
+const MAX_ITEMS_PER_PAGE = 10000; // 10000 is the max allowed by ES
+
 async function getTraceDocsPaginated({
   apmEventClient,
   maxTraceItems,
@@ -149,12 +155,14 @@ async function getTraceDocsPaginated({
   end,
   hits = [],
   searchAfter,
+  logger,
 }: {
   apmEventClient: APMEventClient;
   maxTraceItems: number;
   traceId: string;
   start: number;
   end: number;
+  logger: Logger;
   hits?: Awaited<ReturnType<typeof getTraceDocsPerPage>>['hits'];
   searchAfter?: SortResults;
 }): ReturnType<typeof getTraceDocsPerPage> {
@@ -165,13 +173,19 @@ async function getTraceDocsPaginated({
     start,
     end,
     searchAfter,
-    hitsRetrievedCount: hits.length,
   });
 
   const mergedHits = [...hits, ...response.hits];
+
+  logger.debug(
+    `retrieved: ${response.hits.length}, total retrieved: ${mergedHits.length}), max: ${maxTraceItems}, total is ${response.total}`
+  );
+
   if (
     mergedHits.length >= maxTraceItems ||
-    mergedHits.length >= response.total
+    mergedHits.length >= response.total ||
+    mergedHits.length === 0 ||
+    response.hits.length < MAX_ITEMS_PER_PAGE
   ) {
     return {
       hits: mergedHits,
@@ -186,7 +200,8 @@ async function getTraceDocsPaginated({
     start,
     end,
     hits: mergedHits,
-    searchAfter: last(hits)?.sort,
+    searchAfter: last(response.hits)?.sort,
+    logger,
   });
 }
 
@@ -197,7 +212,6 @@ async function getTraceDocsPerPage({
   start,
   end,
   searchAfter,
-  hitsRetrievedCount,
 }: {
   apmEventClient: APMEventClient;
   maxTraceItems: number;
@@ -205,74 +219,82 @@ async function getTraceDocsPerPage({
   start: number;
   end: number;
   searchAfter?: SortResults;
-  hitsRetrievedCount: number;
 }) {
-  const MAX_ITEMS_PER_PAGE = 10000; // 10000 is the max allowed by ES
-  const hitsRemaining = maxTraceItems - hitsRetrievedCount;
-  const size = Math.min(hitsRemaining, MAX_ITEMS_PER_PAGE);
+  const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
+
+  const body = {
+    track_total_hits: true,
+    size,
+    search_after: searchAfter,
+    _source: [
+      TIMESTAMP,
+      TRACE_ID,
+      PARENT_ID,
+      SERVICE_NAME,
+      SERVICE_ENVIRONMENT,
+      AGENT_NAME,
+      EVENT_OUTCOME,
+      PROCESSOR_EVENT,
+      TRANSACTION_DURATION,
+      TRANSACTION_ID,
+      TRANSACTION_NAME,
+      TRANSACTION_TYPE,
+      TRANSACTION_RESULT,
+      FAAS_COLDSTART,
+      SPAN_ID,
+      SPAN_TYPE,
+      SPAN_SUBTYPE,
+      SPAN_ACTION,
+      SPAN_NAME,
+      SPAN_DURATION,
+      SPAN_LINKS,
+      SPAN_COMPOSITE_COUNT,
+      SPAN_COMPOSITE_COMPRESSION_STRATEGY,
+      SPAN_COMPOSITE_SUM,
+      SPAN_SYNC,
+      CHILD_ID,
+    ],
+    query: {
+      bool: {
+        filter: [
+          { term: { [TRACE_ID]: traceId } },
+          ...rangeQuery(start, end),
+        ] as QueryDslQueryContainer[],
+        should: {
+          exists: { field: PARENT_ID },
+        },
+      },
+    },
+    sort: [
+      { _score: 'asc' },
+      {
+        _script: {
+          type: 'number',
+          script: {
+            lang: 'painless',
+            source: `if (doc['${TRANSACTION_DURATION}'].size() > 0) { return doc['${TRANSACTION_DURATION}'].value } else { return doc['${SPAN_DURATION}'].value }`,
+          },
+          order: 'desc',
+        },
+      },
+      {
+        _script: {
+          type: 'string',
+          script: {
+            lang: 'painless',
+            source: `if (doc['${TRANSACTION_ID}'].size() > 0) { return doc['${TRANSACTION_ID}'].value } else { return doc['${SPAN_ID}'].value }`,
+          },
+          order: 'desc',
+        },
+      },
+    ] as Sort,
+  };
 
   const res = await apmEventClient.search('get_trace_docs', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    body: {
-      track_total_hits: true,
-      size,
-      search_after: searchAfter,
-      _source: [
-        TIMESTAMP,
-        TRACE_ID,
-        PARENT_ID,
-        SERVICE_NAME,
-        SERVICE_ENVIRONMENT,
-        AGENT_NAME,
-        EVENT_OUTCOME,
-        PROCESSOR_EVENT,
-        TRANSACTION_DURATION,
-        TRANSACTION_ID,
-        TRANSACTION_NAME,
-        TRANSACTION_TYPE,
-        TRANSACTION_RESULT,
-        FAAS_COLDSTART,
-        SPAN_ID,
-        SPAN_TYPE,
-        SPAN_SUBTYPE,
-        SPAN_ACTION,
-        SPAN_NAME,
-        SPAN_DURATION,
-        SPAN_LINKS,
-        SPAN_COMPOSITE_COUNT,
-        SPAN_COMPOSITE_COMPRESSION_STRATEGY,
-        SPAN_COMPOSITE_SUM,
-        SPAN_SYNC,
-        CHILD_ID,
-      ],
-      query: {
-        bool: {
-          filter: [
-            { term: { [TRACE_ID]: traceId } },
-            ...rangeQuery(start, end),
-          ] as QueryDslQueryContainer[],
-          should: {
-            exists: { field: PARENT_ID },
-          },
-        },
-      },
-      sort: [
-        { _score: 'asc' },
-        {
-          _script: {
-            type: 'number',
-            script: {
-              lang: 'painless',
-              source: `if (doc['${TRANSACTION_DURATION}'].size() > 0) { return doc['${TRANSACTION_DURATION}'].value } else { return doc['${SPAN_DURATION}'].value }`,
-            },
-            order: 'desc',
-          },
-        },
-        { _doc: 'asc' }, // tiebreaker
-      ] as Sort,
-    },
+    body,
   });
 
   return {
