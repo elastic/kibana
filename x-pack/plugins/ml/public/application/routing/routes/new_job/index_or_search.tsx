@@ -185,6 +185,7 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
+
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {
   const {
     services: {

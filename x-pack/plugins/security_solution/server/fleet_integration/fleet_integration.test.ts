@@ -615,7 +615,7 @@ describe('ingest_integration tests ', () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     const invokeDeleteCallback = async (): Promise<void> => {
-      const callback = getPackagePolicyDeleteCallback(exceptionListClient);
+      const callback = getPackagePolicyDeleteCallback(exceptionListClient, soClient);
       await callback(deletePackagePolicyMock(), soClient, esClient);
     };
 
@@ -640,6 +640,27 @@ describe('ingest_integration tests ', () => {
     });
 
     it('removes policy from artifact', async () => {
+      soClient.find.mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [
+          {
+            id: 'id',
+            type: 'type',
+            references: [
+              {
+                id: 'id_package_policy',
+                name: 'package_policy',
+                type: 'ingest-package-policies',
+              },
+            ],
+            attributes: { note: 'note' },
+            score: 1,
+          },
+        ],
+        page: 1,
+        per_page: 10,
+      });
+
       await invokeDeleteCallback();
 
       expect(exceptionListClient.findExceptionListsItem).toHaveBeenCalledWith({
@@ -660,6 +681,8 @@ describe('ingest_integration tests ', () => {
         osTypes: fakeArtifact.os_types,
         tags: [],
       });
+
+      expect(soClient.delete).toBeCalledWith('policy-settings-protection-updates-note', 'id');
     });
   });
 });

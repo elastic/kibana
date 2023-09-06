@@ -52,7 +52,7 @@ export const dataDriftRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = () => {
-  const { context } = useRouteResolver('basic', [], basicResolvers());
+  const { context } = useRouteResolver('full', [], basicResolvers());
 
   return (
     <PageLoader context={context}>
