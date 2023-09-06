@@ -140,14 +140,12 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 40
-    parallelism: 16
+    parallelism: 12
     soft_fail: true
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - "target/kibana-security-solution/**/*"
 
   # status_exception: Native role management is not enabled in this Elasticsearch instance
   # - command: .buildkite/scripts/steps/functional/security_serverless_defend_workflows.sh
@@ -161,8 +159,6 @@ steps:
   #     automatic:
   #       - exit_status: '*'
   #         limit: 1
-  #   artifact_paths:
-  #     - "target/kibana-security-solution/**/*"
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Security Investigations Cypress Tests'
@@ -176,8 +172,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - "target/kibana-security-solution/**/*"
 
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
     label: 'Serverless Security Explore Cypress Tests'
@@ -191,8 +185,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - "target/kibana-security-solution/**/*"
 
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'

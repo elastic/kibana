@@ -22,7 +22,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorScheduling } from '../../../../../../../common/types/connectors';
+import { ConnectorScheduling } from '@kbn/search-connectors';
+
 import { CrawlerIndex } from '../../../../../../../common/types/indices';
 import { EnterpriseSearchCronEditor } from '../../../../../shared/cron_editor/enterprise_search_cron_editor';
 import { docLinks } from '../../../../../shared/doc_links/doc_links';
