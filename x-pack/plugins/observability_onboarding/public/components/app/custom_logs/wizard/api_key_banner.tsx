@@ -93,6 +93,7 @@ export function ApiKeyBanner({
           <EuiCopy textToCopy={payload?.apiKeyEncoded ?? ''}>
             {(copy) => (
               <EuiButtonIcon
+                data-test-subj="observabilityOnboardingApiKeySuccessCalloutButton"
                 iconType="copyClipboard"
                 onClick={copy}
                 color="success"

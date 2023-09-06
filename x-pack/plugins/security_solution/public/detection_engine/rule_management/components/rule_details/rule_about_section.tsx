@@ -32,6 +32,7 @@ import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creatio
 import { ThreatEuiFlexGroup } from '../../../../detections/components/rules/description_step/threat_description';
 
 import { BadgeList } from './badge_list';
+import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 
 const OverrideColumn = styled(EuiFlexItem)`
@@ -357,7 +358,12 @@ export const RuleAboutSection = ({ rule }: RuleAboutSectionProps) => {
         />
       )}
       <EuiSpacer size="m" />
-      <EuiDescriptionList type="column" listItems={aboutSectionListItems} />
+      <EuiDescriptionList
+        type="column"
+        listItems={aboutSectionListItems}
+        columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+        rowGutterSize="m"
+      />
     </div>
   );
 };

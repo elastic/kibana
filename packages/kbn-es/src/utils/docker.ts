@@ -10,11 +10,16 @@ import execa from 'execa';
 import fs from 'fs';
 import Fsp from 'fs/promises';
 import { resolve, basename, join } from 'path';
-import { Client, HttpConnection } from '@elastic/elasticsearch';
+import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
-import { ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
+import {
+  CA_CERT_PATH,
+  ES_P12_PASSWORD,
+  ES_P12_PATH,
+  kibanaDevServiceAccount,
+} from '@kbn/dev-utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
@@ -547,19 +552,21 @@ export async function runServerlessEsNode(
   );
 }
 
-function getESClient(
-  { node }: { node: string } = { node: `http://localhost:${DEFAULT_PORT}` }
-): Client {
+function getESClient(clientOptions: ClientOptions): Client {
   return new Client({
-    node,
     Connection: HttpConnection,
+    ...clientOptions,
   });
 }
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
-async function waitUntilClusterReady(timeoutMs = 60 * 1000): Promise<void> {
+async function waitUntilClusterReady(
+  clientOptions: ClientOptions,
+  timeoutMs = 60 * 1000
+): Promise<void> {
   const started = Date.now();
-  const client = getESClient();
+  const client = getESClient(clientOptions);
+
   while (started + timeoutMs > Date.now()) {
     try {
       await client.info();
@@ -579,6 +586,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   await setupDocker({ log, image, options });
 
   const volumeCmd = await setupServerlessVolumes(log, options);
+  const portCmd = resolvePort(options);
 
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node, i) => {
@@ -593,7 +601,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
             ),
             options
           ),
-          i === 0 ? resolvePort(options) : [],
+          i === 0 ? portCmd : [],
           volumeCmd
         ),
       });
@@ -621,7 +629,30 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
-    await waitUntilClusterReady();
+
+    const esNodeUrl = `${options.ssl ? 'https' : 'http'}://${portCmd[1].substring(
+      0,
+      portCmd[1].lastIndexOf(':')
+    )}`;
+
+    await waitUntilClusterReady({
+      node: esNodeUrl,
+      ...(options.ssl
+        ? {
+            auth: { bearer: kibanaDevServiceAccount.token },
+            tls: {
+              ca: [fs.readFileSync(CA_CERT_PATH)],
+              // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
+              // for the ip which is not validated. As such we are getting the error
+              // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
+              // To work around that we are overriding the function checkServerIdentity too
+              checkServerIdentity: () => {
+                return undefined;
+              },
+            },
+          }
+        : {}),
+    });
     log.success('ES is ready');
   }
 
