@@ -34,11 +34,12 @@ export const getExpirationStatus = (config: SearchSessionsConfigSchema, expires:
     const expiresInHours = Math.floor(durationToExpire.asHours());
 
     toolTipContent = i18n.translate('data.mgmt.searchSessions.status.expiresSoonInHours', {
-      defaultMessage: 'This session expires in {numHours} hours',
+      defaultMessage: `This session expires in {numHours} ${expiresInHours <= 1 ? 'hour' : 'hours'}`,
+      // I'm trying to use a template literal to determine if 'hour' or 'hours' should be displayed based on expiresInHours.
       values: { numHours: expiresInHours },
     });
     statusContent = i18n.translate('data.mgmt.searchSessions.status.expiresSoonInHoursTooltip', {
-      defaultMessage: '{numHours} hours',
+      defaultMessage: `{numHours} ${expiresInHours <= 1 ? 'hour' : 'hours'}`,
       values: { numHours: expiresInHours },
     });
   }
