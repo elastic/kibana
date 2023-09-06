@@ -32,6 +32,10 @@
   flex-wrap: nowrap;
   height: 100%;
 
+  .euiDataGrid__content {
+    background: transparent;
+  }
+
   .euiDataGrid__controls {
     border-top: $euiBorderThin;
   }

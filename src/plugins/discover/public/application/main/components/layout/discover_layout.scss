@@ -31,19 +31,19 @@ discover-app {
   overflow: hidden;
 }
 
-.dscPageContent__wrapper {
-  padding: $euiSizeS $euiSizeS $euiSizeS 0;
-  overflow: hidden; // Ensures horizontal scroll of table
-
-  @include euiBreakpoint('xs', 's') {
-    padding: 0 $euiSizeS $euiSizeS;
+.dscPageBody__sidebar {
+  .unifiedFieldListItemButton.domDragDrop-isDraggable {
+    box-shadow: none;
   }
+}
+
+.dscPageContent__wrapper {
+  overflow: hidden; // Ensures horizontal scroll of table
 }
 
 .dscPageContent {
   position: relative;
   overflow: hidden;
-  border: $euiBorderThin;
   height: 100%;
 }
 

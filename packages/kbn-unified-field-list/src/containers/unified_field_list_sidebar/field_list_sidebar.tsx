@@ -9,7 +9,8 @@
 import './field_list_sidebar.scss';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageSidebar } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageSidebar } from '@elastic/eui';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
 import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
@@ -295,19 +296,18 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
             )}
             {!!onEditField && (
               <EuiFlexItem grow={false}>
-                <EuiButton
+                <ToolbarButton
                   iconType="indexOpen"
+                  label={i18n.translate('unifiedFieldList.fieldListSidebar.addFieldButtonLabel', {
+                    defaultMessage: 'Add a field',
+                  })}
                   data-test-subj={
                     stateService.creationOptions.dataTestSubj?.fieldListAddFieldButtonTestSubj ??
                     'unifiedFieldListAddField'
                   }
                   onClick={() => onEditField()}
                   size="s"
-                >
-                  {i18n.translate('unifiedFieldList.fieldListSidebar.addFieldButtonLabel', {
-                    defaultMessage: 'Add a field',
-                  })}
-                </EuiButton>
+                />
               </EuiFlexItem>
             )}
           </FieldList>

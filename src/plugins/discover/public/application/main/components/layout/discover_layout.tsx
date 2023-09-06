@@ -15,8 +15,10 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiSpacer,
+  useEuiBackgroundColor,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
@@ -77,6 +79,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     inspector,
   } = useDiscoverServices();
+  const { euiTheme } = useEuiTheme();
+  const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
@@ -240,7 +244,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   ]);
 
   return (
-    <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
+    <EuiPage
+      className="dscPage"
+      data-fetch-counter={fetchCounter.current}
+      css={css`
+        background-color: ${pageBackgroundColor};
+      `}
+    >
       <h1
         id="savedSearchTitle"
         className="euiScreenReaderOnly"
@@ -274,8 +284,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           spaces={spaces}
           history={history}
         />
-        <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
+          <EuiFlexItem grow={false} className="dscPageBody__sidebar">
             <SidebarMemoized
               documents$={stateContainer.dataState.data$.documents$}
               onAddField={onAddColumn}
@@ -292,9 +302,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                padding: ${euiTheme.size.m} ${euiTheme.size.s} 0;
+                border-right: ${euiTheme.border.thin};
+              `}
+            >
               <div>
-                <EuiSpacer size="s" />
                 <EuiButtonIcon
                   iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
                   iconSize="m"
@@ -335,7 +350,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 role="main"
                 panelRef={resizeRef}
                 paddingSize="none"
+                borderRadius="none"
                 hasShadow={false}
+                hasBorder={false}
+                color="transparent"
                 className={classNames('dscPageContent', {
                   'dscPageContent--centered': contentCentered,
                 })}
