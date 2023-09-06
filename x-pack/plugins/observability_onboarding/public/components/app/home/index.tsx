@@ -334,6 +334,7 @@ export function Home() {
                     </StyledItem>
                     <StyledItem>
                       <EuiLink
+                        data-test-subj="observabilityOnboardingHomeAwsFirehoseLink"
                         href="https://www.elastic.co/guide/en/kinesis/current/aws-firehose-setup-guide.html"
                         target="_blank"
                         external
