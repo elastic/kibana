@@ -67,7 +67,7 @@ describe(
   'Discover Timeline State Integration',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@brokenInServerless'],
   },
 
   () => {
@@ -186,10 +186,8 @@ describe(
           });
       });
     });
-    it(
-      'should save discover saved search with `Security Solution` tag',
-      { tags: '@brokenInServerless' },
-      () => {
+    context('saved search tags', () => {
+      it('should save discover saved search with `Security Solution` tag', () => {
         const timelineSuffix = Date.now();
         const timelineName = `SavedObject timeline-${timelineSuffix}`;
         const kqlQuery = '_id: *';
@@ -208,8 +206,8 @@ describe(
           'contain.text',
           `Saved Search for timeline - ${timelineName}`
         );
-      }
-    );
+      });
+    });
     context('saved search', () => {
       it('should rename the saved search on timeline rename', () => {
         const timelineSuffix = Date.now();
