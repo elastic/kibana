@@ -2410,7 +2410,6 @@
     "discover.serverLocatorExtension.titleFromLocatorUnknown": "未知搜索",
     "discover.singleDocRoute.errorTitle": "发生错误",
     "discover.skipToBottomButtonLabel": "转到表尾",
-    "discover.toggleSidebarAriaLabel": "切换侧边栏",
     "discover.topNav.openSearchPanel.manageSearchesButtonLabel": "管理搜索",
     "discover.topNav.openSearchPanel.noSearchesFoundDescription": "未找到匹配的搜索。",
     "discover.topNav.openSearchPanel.openSearchTitle": "打开搜索",
