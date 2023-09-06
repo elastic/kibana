@@ -552,7 +552,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       maintenanceWindows: `${KIBANA_DOCS}maintenance-windows.html`,
       pagerDutyAction: `${KIBANA_DOCS}pagerduty-action-type.html`,
       preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
-      preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}index-action-type.html#preconfigured-connector-alert-history`,
+      preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}pre-configured-connectors.html#preconfigured-connector-alert-history`,
       serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
       serviceNowSIRAction: `${KIBANA_DOCS}servicenow-sir-action-type.html`,
       setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
@@ -622,6 +622,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     apis: {
       bulkIndexAlias: `${ELASTICSEARCH_DOCS}indices-aliases.html`,
+      indexStats: `${ELASTICSEARCH_DOCS}indices-stats.html`,
       byteSizeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#byte-units`,
       createAutoFollowPattern: `${ELASTICSEARCH_DOCS}ccr-put-auto-follow-pattern.html`,
       createFollower: `${ELASTICSEARCH_DOCS}ccr-put-follow.html`,

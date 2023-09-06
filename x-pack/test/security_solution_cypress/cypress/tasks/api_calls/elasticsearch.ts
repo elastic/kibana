@@ -9,11 +9,33 @@ import { rootRequest } from '../common';
 export const deleteIndex = (index: string) => {
   rootRequest({
     method: 'DELETE',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}`,
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}?refresh=wait_for`,
     headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };
+
+export const deleteDataStream = (dataStreamName: string) => {
+  rootRequest({
+    method: 'DELETE',
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/_data_stream/${dataStreamName}`,
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    failOnStatusCode: false,
+  });
+};
+
+export const deleteAllDocuments = (target: string) =>
+  rootRequest({
+    method: 'POST',
+    url: `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/${target}/_delete_by_query?conflicts=proceed&scroll_size=10000&refresh`,
+    body: {
+      query: {
+        match_all: {},
+      },
+    },
+  });
 
 export const createIndex = (indexName: string, properties: Record<string, unknown>) =>
   rootRequest({
@@ -29,7 +51,7 @@ export const createIndex = (indexName: string, properties: Record<string, unknow
 export const createDocument = (indexName: string, document: Record<string, unknown>) =>
   rootRequest({
     method: 'POST',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${indexName}/_doc`,
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${indexName}/_doc?refresh=wait_for`,
     body: document,
   });
 

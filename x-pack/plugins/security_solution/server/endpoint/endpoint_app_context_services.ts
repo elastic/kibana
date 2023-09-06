@@ -17,7 +17,6 @@ import type {
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
-import type { AppFeatures } from '../lib/app_features';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -43,9 +42,11 @@ import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ActionCreateService } from './services/actions/create/types';
+import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
+  cloud: CloudSetup;
 }
 
 export interface EndpointAppContextServiceStartContract {
@@ -68,9 +69,8 @@ export interface EndpointAppContextServiceStartContract {
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ActionCreateService | undefined;
-  cloud: CloudSetup;
   esClient: ElasticsearchClient;
-  appFeatures: AppFeatures;
+  appFeaturesService: AppFeaturesService;
 }
 
 /**
@@ -102,13 +102,12 @@ export class EndpointAppContextService {
         logger,
         manifestManager,
         alerting,
-        cloud,
         licenseService,
         exceptionListsClient,
         featureUsageService,
         endpointMetadataService,
         esClient,
-        appFeatures,
+        appFeaturesService,
       } = dependencies;
 
       registerIngestCallback(
@@ -120,8 +119,8 @@ export class EndpointAppContextService {
           alerting,
           licenseService,
           exceptionListsClient,
-          cloud,
-          appFeatures
+          this.setupDependencies.cloud,
+          appFeaturesService
         )
       );
 
@@ -137,9 +136,9 @@ export class EndpointAppContextService {
           licenseService,
           featureUsageService,
           endpointMetadataService,
-          cloud,
+          this.setupDependencies.cloud,
           esClient,
-          appFeatures
+          appFeaturesService
         )
       );
 
