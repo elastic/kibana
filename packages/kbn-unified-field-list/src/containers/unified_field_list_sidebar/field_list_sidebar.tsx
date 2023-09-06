@@ -9,7 +9,14 @@
 import './field_list_sidebar.scss';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiPageSidebar } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageSidebar,
+  useEuiBackgroundColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
@@ -249,6 +256,9 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     ]
   );
 
+  const { euiTheme } = useEuiTheme();
+  const buttonBackgroundColor = useEuiBackgroundColor('plain');
+
   if (!dataView) {
     return null;
   }
@@ -275,10 +285,19 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
         className="unifiedFieldListSidebar__group"
         direction="column"
         alignItems="stretch"
-        gutterSize="s"
+        gutterSize="none"
         responsive={false}
       >
-        {Boolean(prepend) && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
+        {Boolean(prepend) && (
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              margin-bottom: ${euiTheme.size.s};
+            `}
+          >
+            {prepend}
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <FieldList
             isProcessing={isProcessing}
@@ -294,24 +313,31 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
             ) : (
               <EuiFlexItem grow />
             )}
-            {!!onEditField && (
-              <EuiFlexItem grow={false}>
-                <ToolbarButton
-                  iconType="indexOpen"
-                  label={i18n.translate('unifiedFieldList.fieldListSidebar.addFieldButtonLabel', {
-                    defaultMessage: 'Add a field',
-                  })}
-                  data-test-subj={
-                    stateService.creationOptions.dataTestSubj?.fieldListAddFieldButtonTestSubj ??
-                    'unifiedFieldListAddField'
-                  }
-                  onClick={() => onEditField()}
-                  size="s"
-                />
-              </EuiFlexItem>
-            )}
           </FieldList>
         </EuiFlexItem>
+        {!!onEditField && (
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              padding: ${euiTheme.size.s};
+              background-color: ${buttonBackgroundColor};
+              border-top: ${euiTheme.border.thin};
+            `}
+          >
+            <ToolbarButton
+              iconType="indexOpen"
+              label={i18n.translate('unifiedFieldList.fieldListSidebar.addFieldButtonLabel', {
+                defaultMessage: 'Add a field',
+              })}
+              data-test-subj={
+                stateService.creationOptions.dataTestSubj?.fieldListAddFieldButtonTestSubj ??
+                'unifiedFieldListAddField'
+              }
+              onClick={() => onEditField()}
+              size="s"
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPageSidebar>
   );

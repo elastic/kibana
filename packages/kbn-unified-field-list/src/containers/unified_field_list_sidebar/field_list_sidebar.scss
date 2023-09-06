@@ -14,7 +14,7 @@
 }
 
 .unifiedFieldListSidebar__list {
-  padding: $euiSizeS 0 $euiSizeS $euiSizeS;
+  padding: $euiSizeS 0 0 $euiSizeS;
 
   @include euiBreakpoint('xs', 's') {
     padding: $euiSizeS 0 0 0;
