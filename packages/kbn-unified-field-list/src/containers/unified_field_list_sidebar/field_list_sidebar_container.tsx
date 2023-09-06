@@ -73,9 +73,14 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
   getCreationOptions: () => UnifiedFieldListSidebarContainerCreationOptions;
 
   /**
-   * In case if you have a sidebar toggle button
+   * Toggle sidebar visibility
    */
   isSidebarCollapsed?: boolean;
+
+  /**
+   * Sidebar visibility handler
+   */
+  onToggleSidebar?: UnifiedFieldListSidebarProps['onToggleSidebar'];
 
   /**
    * Custom content to render at the top of field list in the flyout (for example a data view picker)
@@ -319,6 +324,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
               <UnifiedFieldListSidebar
                 {...commonSidebarProps}
                 alwaysShowActionButton={true}
+                isSidebarCollapsed={undefined}
                 prepend={prependInFlyout?.()}
               />
             </EuiFlyout>

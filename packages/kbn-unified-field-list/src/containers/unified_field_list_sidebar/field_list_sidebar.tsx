@@ -27,6 +27,7 @@ import { FieldListGrouped, type FieldListGroupedProps } from '../../components/f
 import { FieldsGroupNames } from '../../types';
 import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
+import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
 import {
   getSelectedFields,
   shouldShowField,
@@ -92,6 +93,17 @@ interface UnifiedFieldListSidebarInternalProps {
   alwaysShowActionButton?: UnifiedFieldListItemProps['alwaysShowActionButton'];
 
   /**
+   * In case if sidebar is collapsible by default
+   * Pass `undefined` to hide the collapse/expand buttons from the sidebar
+   */
+  isSidebarCollapsed?: boolean;
+
+  /**
+   * A handler to toggle the sidebar
+   */
+  onToggleSidebar?: SidebarToggleButtonProps['onChange'];
+
+  /**
    * Trigger a field editing
    */
   onEditField: UnifiedFieldListItemProps['onEditField'] | undefined;
@@ -112,6 +124,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   workspaceSelectedFieldNames,
   isProcessing,
   alwaysShowActionButton,
+  isSidebarCollapsed,
   allFields,
   dataView,
   trackUiMetric,
@@ -124,6 +137,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onSelectedFieldFilter,
   onEditField,
   onDeleteField,
+  onToggleSidebar,
 }) => {
   const { dataViews, core } = services;
   const useNewFieldsApi = useMemo(
@@ -301,7 +315,22 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
         <EuiFlexItem>
           <FieldList
             isProcessing={isProcessing}
-            prepend={<FieldListFilters {...fieldListFiltersProps} />}
+            prepend={
+              <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                {typeof isSidebarCollapsed === 'boolean' && onToggleSidebar && (
+                  <EuiFlexItem grow={false}>
+                    <SidebarToggleButton
+                      data-test-subj="unifiedFieldListSidebar__toggle"
+                      isSidebarCollapsed={isSidebarCollapsed}
+                      onChange={onToggleSidebar}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem>
+                  <FieldListFilters {...fieldListFiltersProps} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             className="unifiedFieldListSidebar__list"
           >
             {showFieldList ? (
@@ -318,11 +347,15 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
         {!!onEditField && (
           <EuiFlexItem
             grow={false}
-            css={css`
-              padding: ${euiTheme.size.s};
-              background-color: ${buttonBackgroundColor};
-              border-top: ${euiTheme.border.thin};
-            `}
+            css={
+              alwaysShowActionButton
+                ? undefined
+                : css`
+                    padding: ${euiTheme.size.s};
+                    background-color: ${buttonBackgroundColor};
+                    border-top: ${euiTheme.border.thin};
+                  `
+            }
           >
             <ToolbarButton
               iconType="indexOpen"

@@ -8,7 +8,6 @@
 import './discover_layout.scss';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHideFor,
@@ -23,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
+import { SidebarToggleButton } from '@kbn/unified-field-list/src/containers/unified_field_list_sidebar/sidebar_toggle_button';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import {
@@ -176,10 +176,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     filterManager.setFilters(disabledFilters);
   }, [filterManager]);
 
-  const toggleSidebarCollapse = useCallback(() => {
-    storage.set(SIDEBAR_CLOSED_KEY, !isSidebarClosed);
-    setIsSidebarClosed(!isSidebarClosed);
-  }, [isSidebarClosed, storage]);
+  const onToggleSidebar = useCallback(
+    (isSidebarCollapsed: boolean) => {
+      storage.set(SIDEBAR_CLOSED_KEY, isSidebarCollapsed);
+      setIsSidebarClosed(isSidebarCollapsed);
+    },
+    [setIsSidebarClosed, storage]
+  );
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const documentState = useDataState(stateContainer.dataState.data$.documents$);
@@ -294,7 +297,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               onRemoveField={onRemoveColumn}
               onChangeDataView={stateContainer.actions.onChangeDataView}
               selectedDataView={dataView}
-              isClosed={isSidebarClosed}
+              isSidebarCollapsed={isSidebarClosed}
+              onToggleSidebar={onToggleSidebar}
               trackUiMetric={trackUiMetric}
               onFieldEdited={onFieldEdited}
               onDataViewCreated={stateContainer.actions.onDataViewCreated}
@@ -305,24 +309,18 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             <EuiFlexItem
               grow={false}
               css={css`
-                padding: ${euiTheme.size.m} ${euiTheme.size.s} 0;
                 border-right: ${euiTheme.border.thin};
               `}
             >
-              <div>
-                <EuiButtonIcon
-                  iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                  iconSize="m"
-                  size="xs"
-                  onClick={toggleSidebarCollapse}
-                  data-test-subj="collapseSideBarButton"
-                  aria-controls="discover-sidebar"
-                  aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                  aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
-                    defaultMessage: 'Toggle sidebar',
-                  })}
-                />
-              </div>
+              {isSidebarClosed && (
+                <div
+                  css={css`
+                    padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
+                  `}
+                >
+                  <SidebarToggleButton isSidebarCollapsed={true} onChange={onToggleSidebar} />
+                </div>
+              )}
             </EuiFlexItem>
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper">

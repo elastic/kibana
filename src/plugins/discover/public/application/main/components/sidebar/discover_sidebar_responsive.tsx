@@ -90,7 +90,11 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Has been toggled closed
    */
-  isClosed?: boolean;
+  isSidebarCollapsed?: boolean;
+  /**
+   * Toggle sidebar
+   */
+  onToggleSidebar: UnifiedFieldListSidebarContainerProps['onToggleSidebar'];
   /**
    * Callback function when selecting a field
    */
@@ -148,12 +152,14 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     selectedDataView,
     columns,
     trackUiMetric,
+    isSidebarCollapsed,
     onAddFilter,
     onFieldEdited,
     onDataViewCreated,
     onChangeDataView,
     onAddField,
     onRemoveField,
+    onToggleSidebar,
   } = props;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
@@ -380,7 +386,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       ref={initializeUnifiedFieldListSidebarContainerApi}
       variant={fieldListVariant}
       getCreationOptions={getCreationOptions}
-      isSidebarCollapsed={props.isClosed}
+      isSidebarCollapsed={isSidebarCollapsed}
       services={fieldListSidebarServices}
       dataView={selectedDataView}
       trackUiMetric={trackUiMetric}
@@ -391,6 +397,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
       onAddFilter={onAddFilter}
       onFieldEdited={onFieldEdited}
+      onToggleSidebar={onToggleSidebar}
       prependInFlyout={prependDataViewPickerForMobile}
     />
   );
