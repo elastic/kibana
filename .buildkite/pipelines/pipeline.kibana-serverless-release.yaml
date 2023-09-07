@@ -10,3 +10,6 @@ steps:
         SERVICE: kibana-controller
         NAMESPACE: kibana-ci
         IMAGE_NAME: kibana-serverless
+
+notify:
+  - slack: "#kibana-mission-control"
