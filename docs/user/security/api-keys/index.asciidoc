@@ -9,9 +9,9 @@ For example, if you extract data from an {es} cluster on a daily basis, you migh
 
 You can use {kib} to manage your different API keys:
 
-* Personal API key - Allows external services to access the Elastic Stack on behalf of a user.
-* Cross-Cluster API key - Allows remote clusters to connect to your local cluster.
-* Managed API key - Created and managed by Kibana to correctly run background tasks.
+* Personal API key: allows external services to access the Elastic Stack on behalf of a user.
+* Cross-Cluster API key: allows remote clusters to connect to your local cluster.
+* Managed API key: created and managed by Kibana to correctly run background tasks.
 
 To manage API keys, open the main menu, then click *Stack Management > Security > API Keys*.
 
