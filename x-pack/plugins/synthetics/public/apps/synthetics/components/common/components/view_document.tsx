@@ -53,6 +53,7 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
   return (
     <>
       <EuiButtonIcon
+        data-test-subj="syntheticsViewDocumentButton"
         iconType="inspect"
         title={INSPECT_DOCUMENT}
         onClick={() => {
