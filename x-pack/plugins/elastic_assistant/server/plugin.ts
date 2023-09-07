@@ -14,6 +14,8 @@ import {
   IContextProvider,
 } from '@kbn/core/server';
 
+import { AIAssistantStoreService } from './lib/store/service';
+import { getStoreRoute } from './routes/get_store';
 import {
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,
@@ -50,7 +52,10 @@ export class ElasticAssistantPlugin
     };
   };
 
-  public setup(core: CoreSetup, plugins: ElasticAssistantPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<ElasticAssistantPluginStartDependencies>,
+    plugins: ElasticAssistantPluginSetupDependencies
+  ) {
     this.logger.debug('elasticAssistant: Setup');
     const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
 
@@ -62,7 +67,13 @@ export class ElasticAssistantPlugin
       this.createRouteHandlerContext(core as CoreSetup<ElasticAssistantPluginStart, unknown>)
     );
 
+    const service = new AIAssistantStoreService({
+      logger: this.logger.get('service'),
+      core,
+    });
+
     postActionsConnectorExecuteRoute(router);
+    getStoreRoute(router, service);
     return {
       actions: plugins.actions,
     };

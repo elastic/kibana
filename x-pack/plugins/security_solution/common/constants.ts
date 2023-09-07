@@ -47,6 +47,10 @@ export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
 export const DEFAULT_RISK_SCORE_PAGE_SIZE = 1000 as const;
+
+// name starting with `.alerts` because this index already has correct permissions
+// need to figure out permissions later if merged
+export const DEFAULT_ASSISTANT_INDEX = '.alerts.assistant-security.assistant' as const;
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100 as const;

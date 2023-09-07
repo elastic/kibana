@@ -11,3 +11,4 @@ export const PLUGIN_NAME = 'elasticAssistant';
 export const BASE_PATH = '/internal/elastic_assistant';
 
 export const POST_ACTIONS_CONNECTOR_EXECUTE = `${BASE_PATH}/actions/connector/{connectorId}/_execute`;
+export const STORE_PATH = `${BASE_PATH}/store`;

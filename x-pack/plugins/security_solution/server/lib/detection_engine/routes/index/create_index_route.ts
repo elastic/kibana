@@ -115,6 +115,7 @@ export const createDetectionIndex = async (
   }
 
   if (indexExists) {
+    console.log('hey hey 1');
     await addFieldAliasesToIndices({ esClient, index, spaceId });
     // The internal user is used here because Elasticsearch requires the PUT alias requestor to have 'manage' permissions
     // for BOTH the index AND alias name. However, through 7.14 admins only needed permissions for .siem-signals (the index)
@@ -125,12 +126,16 @@ export const createDetectionIndex = async (
       index,
       aadIndexAliasName,
     });
+    console.log('hey hey 2');
     const indexVersion = await getIndexVersion(esClient, index);
     if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
       await esClient.indices.rollover({ alias: index });
     }
+    console.log('hey hey 2a');
   } else {
+    console.log('hey hey 3');
     await createBootstrapIndex(esClient, index);
+    console.log('hey hey 4');
   }
 };
 

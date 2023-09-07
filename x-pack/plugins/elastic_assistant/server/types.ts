@@ -10,7 +10,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import { CustomRequestHandlerContext } from '@kbn/core/server';
-
+import { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
 /** The plugin setup interface */
 export interface ElasticAssistantPluginSetup {
   actions: ActionsPluginSetup;
@@ -23,9 +23,11 @@ export interface ElasticAssistantPluginStart {
 
 export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
+  security: SecurityPluginSetup;
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  security: SecurityPluginStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {

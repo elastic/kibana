@@ -7,6 +7,7 @@
 
 import type { Conversation } from '@kbn/elastic-assistant';
 
+import { useEsStorage } from '../use_es_store';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { LOCAL_STORAGE_KEY } from '../helpers';
 import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
@@ -24,6 +25,13 @@ export const useConversationStore = (): UseConversationStore => {
       return !valueFromStorage;
     },
   });
+  const [a, b, c] = useEsStorage({
+    defaultValue: BASE_SECURITY_CONVERSATIONS,
+    isInvalidDefault: (valueFromStorage) => {
+      return !valueFromStorage;
+    },
+  });
+  console.log({ a });
 
   return {
     conversations,
