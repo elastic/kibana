@@ -20,7 +20,7 @@ import { SerializedStyles } from '@emotion/react';
 import classNames from 'classnames';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
-import type { ChromeProjectBreadcrumb } from '@kbn/core-chrome-browser';
+import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -39,7 +39,7 @@ import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
 
 export interface InternalDashboardTopNavProps {
-  customLeadingBreadCrumbs?: ChromeProjectBreadcrumb[];
+  customLeadingBreadCrumbs?: EuiBreadcrumbProps[];
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
   originatingApp?: string;

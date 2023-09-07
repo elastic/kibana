@@ -65,8 +65,7 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/content-management-content-editor",
     "@kbn/serverless",
-    "@kbn/no-data-page-plugin",
-    "@kbn/core-chrome-browser"
+    "@kbn/no-data-page-plugin"
   ],
   "exclude": ["target/**/*"]
 }
