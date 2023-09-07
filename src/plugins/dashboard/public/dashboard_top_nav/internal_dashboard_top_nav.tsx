@@ -173,9 +173,13 @@ export function InternalDashboardTopNav({
     if (serverless?.setBreadcrumbs) {
       // set serverless breadcrumbs if available,
       // set only the dashboardTitleBreadcrumbs because the main breadcrumbs automatically come as part of the navigation config
-      serverless.setBreadcrumbs(customLeadingBreadCrumbs.concat(dashboardTitleBreadcrumbs));
+      serverless.setBreadcrumbs(dashboardTitleBreadcrumbs);
     } else {
-      // non-serverless regular breadcrumbs
+      /**
+       * non-serverless regular breadcrumbs
+       * Dashboard embedded in other plugins (e.g. SecuritySolution)
+       * will have custom leading breadcrumbs for back to their app.
+       **/
       setBreadcrumbs(
         customLeadingBreadCrumbs.concat([
           {
