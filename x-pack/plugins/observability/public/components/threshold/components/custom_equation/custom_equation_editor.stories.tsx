@@ -115,7 +115,7 @@ CustomEquationEditorWithEquationErrors.args = {
   expression: {
     ...BASE_ARGS.expression,
     equation: 'Math.round(A / B)',
-    customMetrics: [
+    metrics: [
       { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.cpu.user.pct' },
       { name: 'B', aggType: Aggregators.MAX, field: 'system.cpu.cores' },
     ],
