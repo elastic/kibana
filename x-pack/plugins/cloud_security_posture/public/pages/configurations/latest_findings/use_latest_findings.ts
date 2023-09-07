@@ -44,14 +44,14 @@ export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => ({
   size: MAX_FINDINGS_TO_LOAD,
   aggs: getFindingsCountAggQuery(),
   ignore_unavailable: false,
-  collapse: {
-    field: 'event.code',
-    inner_hits: {
-      name: 'latest_result_evaluation',
-      size: 1,
-      sort: [{ '@timestamp': 'desc' }],
-    },
-  },
+  // collapse: {
+  //   field: 'event.code',
+  //   inner_hits: {
+  //     name: 'latest_result_evaluation',
+  //     size: 1,
+  //     sort: [{ '@timestamp': 'desc' }],
+  //   },
+  // },
 });
 
 /**
