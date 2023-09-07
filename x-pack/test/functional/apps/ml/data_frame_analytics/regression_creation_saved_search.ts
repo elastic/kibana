@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('regression saved search creation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/134671
+  describe.skip('regression saved search creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote_small', '@timestamp');
