@@ -36,6 +36,10 @@ export interface IsolateHostPanelContext {
    * An array of field objects with category and value
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  /**
+   * Isolate action, either 'isolateHost' or 'unisolateHost'
+   */
+  isolateAction: 'isolateHost' | 'unisolateHost';
 }
 
 export const IsolateHostPanelContext = createContext<IsolateHostPanelContext | undefined>(
@@ -53,6 +57,7 @@ export const IsolateHostPanelProvider = ({
   id,
   indexName,
   scopeId,
+  isolateAction,
   children,
 }: IsolateHostPanelProviderProps) => {
   const currentSpaceId = useSpaceId();
@@ -74,15 +79,16 @@ export const IsolateHostPanelProvider = ({
 
   const contextValue = useMemo(
     () =>
-      id && indexName && scopeId
+      id && indexName && scopeId && isolateAction
         ? {
             eventId: id,
             indexName,
             scopeId,
             dataFormattedForFieldBrowser,
+            isolateAction,
           }
         : undefined,
-    [id, indexName, scopeId, dataFormattedForFieldBrowser]
+    [id, indexName, scopeId, dataFormattedForFieldBrowser, isolateAction]
   );
 
   if (loading) {

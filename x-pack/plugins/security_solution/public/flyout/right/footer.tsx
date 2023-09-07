@@ -29,7 +29,7 @@ export const PanelFooter: FC = memo(() => {
   const { isHostIsolationPanelOpen, showHostIsolationPanel } = useHostIsolationTools();
 
   const showHostIsolationPanelCallback = useCallback(
-    (action: unknown) => {
+    (action: 'isolateHost' | 'unisolateHost' | undefined) => {
       showHostIsolationPanel(action);
       openRightPanel({
         id: 'document-details-isolate-host',
@@ -37,6 +37,7 @@ export const PanelFooter: FC = memo(() => {
           id: eventId,
           indexName,
           scopeId,
+          isolateAction: action,
         },
       });
     },

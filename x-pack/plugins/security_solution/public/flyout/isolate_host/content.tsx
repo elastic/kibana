@@ -21,10 +21,10 @@ import { HostIsolationPanel } from '../../detections/components/host_isolation';
  */
 export const PanelContent: FC = memo(() => {
   const { openRightPanel } = useExpandableFlyoutContext();
-  const { dataFormattedForFieldBrowser, eventId, scopeId, indexName } =
+  const { dataFormattedForFieldBrowser, eventId, scopeId, indexName, isolateAction } =
     useIsolateHostPanelContext();
 
-  const { isolateAction, isIsolateActionSuccessBannerVisible, handleIsolationActionSuccess } =
+  const { isIsolateActionSuccessBannerVisible, handleIsolationActionSuccess } =
     useHostIsolationTools();
 
   const { alertId, hostName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);

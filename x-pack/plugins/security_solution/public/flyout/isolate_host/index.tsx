@@ -19,6 +19,7 @@ export interface IsolateHostPanelProps extends FlyoutPanelProps {
     id: string;
     indexName: string;
     scopeId: string;
+    isolateAction: 'isolateHost' | 'unisolateHost' | undefined;
   };
 }
 
