@@ -8,12 +8,30 @@
 
 import React, { Component } from 'react';
 import type { RequestDetailsProps } from '../../types';
+import { getLocalClusterDetails } from './utils';
 
 export class Clusters extends Component<RequestDetailsProps> {
   static shouldShow = (request: Request) =>
     Boolean(request.response?.json);
 
   render() {
+    console.log(this.props);
+    const rawResponse = this.props.request.response?.json?.rawResponse;
+    if (!rawResponse) {
+      return null;
+    }
+
+    const clusters = rawResponse._clusters
+        ? (
+            rawResponse._clusters as estypes.ClusterStatistics & {
+              details: Record<string, ClusterDetails>;
+            }
+          ).details
+        : {
+            local: getLocalClusterDetails(rawResponse)
+          };
+    console.log(clusters);
+
     return this.props.request.response?.json
       ? <div>Cluster details go here</div>
       : null;
