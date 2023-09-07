@@ -6,69 +6,107 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState, ReactNode } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiHealth } from '@elastic/eui';
-
-const COLUMNS = [
-  {
-    field: 'name',
-    name: i18n.translate('inspector.requests.clustersTable.nameLabel', {
-      defaultMessage: 'Name',
-    }),
-  },
-  {
-    field: 'status',
-    name: i18n.translate('inspector.requests.clustersTable.statusLabel', {
-      defaultMessage: 'Status',
-    }),
-    render: (status: estypes.ClusterSearchStatus) => {
-      let color = 'subdued';
-      let label = status;
-      if (status === 'successful') {
-        color = 'success';
-        label = i18n.translate('inspector.requests.clustersTable.successfulLabel', {
-          defaultMessage: 'Successful',
-        });
-      } else if (status === 'partial') {
-        color = 'warning';
-        label = i18n.translate('inspector.requests.clustersTable.partialLabel', {
-          defaultMessage: 'Partial',
-        });
-      } else if (status === 'failed') {
-        color = 'danger';
-        label = i18n.translate('inspector.requests.clustersTable.failedLabel', {
-          defaultMessage: 'Failed',
-        });
-      }
-
-      return (
-        <EuiHealth color={color}>{label}</EuiHealth>
-      );
-    },
-  },
-  {
-    field: 'responseTime',
-    name: i18n.translate('inspector.requests.clustersTable.responseTimeLabel', {
-      defaultMessage: 'Response time',
-    }),
-    render: (responseTime: number | undefined) => (
-      responseTime 
-        ? i18n.translate('inspector.requests.clustersTable.responseTimeInMilliseconds', {
-          defaultMessage: '{responseTime}ms',
-          values: { responseTime }
-        })
-        : null
-    ),
-  }
-];
+import { EuiBasicTable, EuiButtonIcon, EuiHealth } from '@elastic/eui';
 
 interface Props {
   clusters: ClusterDetails;
 }
 
 export function ClustersTable({ clusters }: Props) {
+
+  const [expandedRows, setExpandedRows] = useState<
+    Record<string, ReactNode>
+  >(Object.keys(clusters).length ? { [Object.keys(clusters)[0]]: <div>cluster details</div> } : {});
+
+  const toggleDetails = (name: string) => {
+    const nextExpandedRows = { ...expandedRows };
+    if (name in nextExpandedRows) {
+      delete nextExpandedRows[name];
+    } else {
+      nextExpandedRows[name] = (
+        <div>cluster details</div>
+      );
+    }
+    setExpandedRows(nextExpandedRows);
+  }
+
+  const columns = [
+    {
+      field: 'name',
+      name: i18n.translate('inspector.requests.clustersTable.nameLabel', {
+        defaultMessage: 'Name',
+      }),
+      render: (name: string) => {
+        return (
+          <>
+            <EuiButtonIcon
+              onClick={() => toggleDetails(name)}
+              aria-label={
+                name in expandedRows
+                  ? i18n.translate('inspector.requests.clustersTable.collapseRow', {
+                      defaultMessage: 'Collapse table row to hide cluster details',
+                    })
+                  : i18n.translate('inspector.requests.clustersTable.expandRow', {
+                      defaultMessage: 'Expand table row to view cluster details',
+                    })
+              }
+              iconType={
+                name in expandedRows ? 'arrowDown' : 'arrowRight'
+              }
+            />
+            {name}
+          </>
+        );
+      },
+    },
+    {
+      field: 'status',
+      name: i18n.translate('inspector.requests.clustersTable.statusLabel', {
+        defaultMessage: 'Status',
+      }),
+      render: (status: estypes.ClusterSearchStatus) => {
+        let color = 'subdued';
+        let label = status;
+        if (status === 'successful') {
+          color = 'success';
+          label = i18n.translate('inspector.requests.clustersTable.successfulLabel', {
+            defaultMessage: 'Successful',
+          });
+        } else if (status === 'partial') {
+          color = 'warning';
+          label = i18n.translate('inspector.requests.clustersTable.partialLabel', {
+            defaultMessage: 'Partial',
+          });
+        } else if (status === 'failed') {
+          color = 'danger';
+          label = i18n.translate('inspector.requests.clustersTable.failedLabel', {
+            defaultMessage: 'Failed',
+          });
+        }
+
+        return (
+          <EuiHealth color={color}>{label}</EuiHealth>
+        );
+      },
+    },
+    {
+      field: 'responseTime',
+      name: i18n.translate('inspector.requests.clustersTable.responseTimeLabel', {
+        defaultMessage: 'Response time',
+      }),
+      render: (responseTime: number | undefined) => (
+        responseTime 
+          ? i18n.translate('inspector.requests.clustersTable.responseTimeInMilliseconds', {
+            defaultMessage: '{responseTime}ms',
+            values: { responseTime }
+          })
+          : null
+      ),
+    }
+  ];
 
   return (
     <EuiBasicTable
@@ -79,8 +117,10 @@ export function ClustersTable({ clusters }: Props) {
           responseTime: clusters[key].took,
         };
       })}
-      rowHeader="name"
-      columns={COLUMNS}
+      isExpandable={true}
+      itemIdToExpandedRowMap={expandedRows}
+      itemId="name"
+      columns={columns}
     />
   );
 }
