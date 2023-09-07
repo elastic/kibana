@@ -26,7 +26,7 @@ const Link = ({ children, url }: { children: React.ReactNode; url: string }) => 
 export const GoogleCloudShellGuide = (props: { commandText: string }) => {
   return (
     <>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="xs" />
       <EuiText size="s" color="subdued">
         <p>
           <FormattedMessage
@@ -47,19 +47,13 @@ export const GoogleCloudShellGuide = (props: { commandText: string }) => {
         <EuiText size="s" color="subdued">
           <ol>
             <li>
-              <FormattedMessage
-                id="xpack.fleet.googleCloudShell.guide.steps.login"
-                defaultMessage="Log into your Google Cloud Console"
-              />
-            </li>
-            <li>
               <>
                 <FormattedMessage
                   id="xpack.fleet.googleCloudShell.guide.steps.copy"
-                  defaultMessage="Copy the command below"
+                  defaultMessage="Replace <PROJECT_ID> in the following command with your project ID and copy the command"
                 />
                 <EuiSpacer size="m" />
-                <EuiCodeBlock language="bash" isCopyable>
+                <EuiCodeBlock language="bash" isCopyable contentEditable="true">
                   {props.commandText}
                 </EuiCodeBlock>
               </>
@@ -67,7 +61,7 @@ export const GoogleCloudShellGuide = (props: { commandText: string }) => {
             <li>
               <FormattedMessage
                 id="xpack.fleet.googleCloudShell.guide.steps.launch"
-                defaultMessage="Click the Launch Google Cloud Shell button below and then execute the command you copied earlier in google cloud shell."
+                defaultMessage="Click Launch Google Cloud Shell, then run the command"
               />
             </li>
           </ol>

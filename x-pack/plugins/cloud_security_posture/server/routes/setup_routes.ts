@@ -18,12 +18,13 @@ import { defineGetVulnerabilitiesDashboardRoute } from './vulnerabilities_dashbo
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineGetCspStatusRoute } from './status/status';
 import { defineFindCspRuleTemplateRoute } from './csp_rule_template/get_csp_rule_template';
+import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
 
 /**
  * 1. Registers routes
  * 2. Registers routes handler context
  */
-export function setupRoutes({
+export async function setupRoutes({
   core,
   logger,
   isPluginInitialized,
@@ -38,6 +39,7 @@ export function setupRoutes({
   defineGetBenchmarksRoute(router);
   defineGetCspStatusRoute(router);
   defineFindCspRuleTemplateRoute(router);
+  defineGetDetectionEngineAlertsStatus(router);
 
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,

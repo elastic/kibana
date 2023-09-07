@@ -14,7 +14,7 @@ To begin plugin development, we recommend reading our overview of how plugins wo
 
 Our developer services are changing all the time. One of the best ways to discover and learn about them is to read the available
 READMEs inside our plugins folders: {kib-repo}tree/{branch}/src/plugins[src/plugins] and
-{kib-repo}/tree/{branch}/x-pack/plugins[x-pack/plugins].
+{kib-repo}tree/{branch}/x-pack/plugins[x-pack/plugins].
 
 A few services also automatically generate api documentation which can be browsed inside the {kib-repo}tree/{branch}/docs/development[docs/development section of our repo]
 
@@ -47,6 +47,8 @@ include::core/saved-objects-service.asciidoc[leveloffset=+1]
 include::core/uisettings-service.asciidoc[leveloffset=+1]
 
 include::core/patterns-scoped-services.asciidoc[leveloffset=+1]
+
+include::core/packages.asciidoc[leveloffset=+1]
 
 include::security/index.asciidoc[leveloffset=+1]
 

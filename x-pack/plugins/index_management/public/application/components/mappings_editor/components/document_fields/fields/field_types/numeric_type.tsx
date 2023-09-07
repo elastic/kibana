@@ -9,9 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
 
-import { NormalizedField, Field as FieldType, ComboBoxOption } from '../../../../types';
+import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, FormDataProvider, NumericField, Field } from '../../../../shared_imports';
+import { UseField, useFormData, NumericField, Field } from '../../../../shared_imports';
 import {
   StoreParameter,
   IndexParameter,
@@ -48,28 +48,26 @@ interface Props {
 }
 
 export const NumericType = ({ field, kibanaVersion }: Props) => {
+  const [formData] = useFormData({ watch: 'subType' });
+
   return (
     <>
       <BasicParametersSection>
         {/* scaling_factor */}
-        <FormDataProvider<{ subType?: ComboBoxOption[] }> pathsToWatch="subType">
-          {(formData) => {
-            return formData.subType?.[0]?.value === 'scaled_float' ? (
-              <EditFieldFormRow
-                title={PARAMETERS_DEFINITION.scaling_factor.title!}
-                description={PARAMETERS_DEFINITION.scaling_factor.description}
-                withToggle={false}
-              >
-                <UseField
-                  path="scaling_factor"
-                  config={getFieldConfig('scaling_factor')}
-                  component={Field}
-                  data-test-subj="scalingFactor"
-                />
-              </EditFieldFormRow>
-            ) : null;
-          }}
-        </FormDataProvider>
+        {formData.subType?.[0]?.value === 'scaled_float' ? (
+          <EditFieldFormRow
+            title={PARAMETERS_DEFINITION.scaling_factor.title!}
+            description={PARAMETERS_DEFINITION.scaling_factor.description}
+            withToggle={false}
+          >
+            <UseField
+              path="scaling_factor"
+              config={getFieldConfig('scaling_factor')}
+              component={Field}
+              data-test-subj="scalingFactor"
+            />
+          </EditFieldFormRow>
+        ) : null}
 
         <IndexParameter hasIndexOptions={false} />
 

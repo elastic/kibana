@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
@@ -15,7 +16,12 @@ import {
   ALERT_RULE_NAME,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { AfterKeys, IdentifierType, RiskWeights } from '../../../common/risk_engine';
+import type {
+  AfterKeys,
+  IdentifierType,
+  RiskWeights,
+  RiskScore,
+} from '../../../common/risk_engine';
 import { RiskCategories } from '../../../common/risk_engine';
 import { withSecuritySpan } from '../../utils/with_security_span';
 import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
@@ -30,7 +36,6 @@ import type {
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
   CalculateScoresResponse,
-  RiskScore,
   RiskScoreBucket,
 } from './types';
 
@@ -209,7 +214,7 @@ export const calculateRiskScores = async ({
     const now = new Date().toISOString();
 
     const filter = [{ exists: { field: ALERT_RISK_SCORE } }, filterFromRange(range)];
-    if (userFilter) {
+    if (!isEmpty(userFilter)) {
       filter.push(userFilter as QueryDslQueryContainer);
     }
     const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];

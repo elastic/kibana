@@ -14,6 +14,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AnalyticsNoDataPageKibanaProvider,
@@ -38,6 +39,7 @@ interface NoDataComponentProps {
   dataViews: DataViewsContract;
   dataViewEditor: DataViewEditorStart;
   onDataViewCreated: (dataView: unknown) => void;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 const NoDataComponent = ({
@@ -45,11 +47,13 @@ const NoDataComponent = ({
   dataViews,
   dataViewEditor,
   onDataViewCreated,
+  noDataPage,
 }: NoDataComponentProps) => {
   const analyticsServices = {
     coreStart: core,
     dataViews,
     dataViewEditor,
+    noDataPage,
   };
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
@@ -65,6 +69,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       core,
       kbnUrlStateStorage,
       dataViewEditor,
+      noDataPage,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -125,6 +130,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
         dataViewEditor={dataViewEditor}
         dataViews={dataViews}
         onDataViewCreated={onDataViewCreated}
+        noDataPage={noDataPage}
       />
     );
   }

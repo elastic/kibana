@@ -384,7 +384,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('for rolled up metric (downsampled)', () => {
+      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163971
+      describe.skip('for rolled up metric (downsampled)', () => {
         it('defaults to average for rolled up metric', async () => {
           await PageObjects.lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
           await PageObjects.lens.removeLayer();
@@ -621,21 +622,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             { index: 'regular_index', create: true, removeTSDBFields: true },
           ],
         },
-        {
-          name: 'Dataview with an additional downsampled TSDB stream',
-          indexes: [
-            { index: initialIndex },
-            { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
-          ],
-        },
-        {
-          name: 'Dataview with additional regular index and a downsampled TSDB stream',
-          indexes: [
-            { index: initialIndex },
-            { index: 'regular_index', create: true, removeTSDBFields: true },
-            { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
-          ],
-        },
+        // {
+        //   name: 'Dataview with an additional downsampled TSDB stream',
+        //   indexes: [
+        //     { index: initialIndex },
+        //     { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
+        //   ],
+        // },
+        // {
+        //   name: 'Dataview with additional regular index and a downsampled TSDB stream',
+        //   indexes: [
+        //     { index: initialIndex },
+        //     { index: 'regular_index', create: true, removeTSDBFields: true },
+        //     { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
+        //   ],
+        // },
         {
           name: 'Dataview with an additional TSDB stream',
           indexes: [{ index: initialIndex }, { index: 'tsdb_index_2', create: true, tsdb: true }],

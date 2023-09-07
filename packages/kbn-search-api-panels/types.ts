@@ -23,6 +23,9 @@ export interface LanguageDefinitionSnippetArguments {
   url: string;
   apiKey: string;
   indexName?: string;
+  cloudId?: string;
+  ingestPipeline?: string;
+  extraIngestDocumentValues?: Record<string, boolean>;
 }
 
 type CodeSnippet = string | ((args: LanguageDefinitionSnippetArguments) => string);
@@ -32,6 +35,10 @@ export interface LanguageDefinition {
   basicConfig?: string;
   configureClient: CodeSnippet;
   docLink: string;
+  github?: {
+    link: string;
+    label: string;
+  };
   iconType: string;
   id: Languages;
   ingestData: CodeSnippet;

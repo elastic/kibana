@@ -156,6 +156,7 @@ export const KeyValuePairsField = ({
                 append={
                   <EuiFormLabel>
                     <EuiButtonIcon
+                      data-test-subj="syntheticsKeyValuePairsFieldButton"
                       iconType="trash"
                       aria-label={i18n.translate(
                         'xpack.synthetics.keyValuePairsField.deleteItem.label',

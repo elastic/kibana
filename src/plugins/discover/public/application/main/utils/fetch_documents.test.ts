@@ -16,6 +16,7 @@ import { FetchDeps } from './fetch_all';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 
 const getDeps = () =>
   ({
@@ -46,6 +47,49 @@ describe('test fetchDocuments', () => {
 
     expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).rejects.toEqual(
       new Error('Oh noes!')
+    );
+  });
+
+  test('passes a correct session id', async () => {
+    const deps = getDeps();
+    const hits = [
+      { _id: '1', foo: 'bar' },
+      { _id: '2', foo: 'baz' },
+    ] as unknown as EsHitRecord[];
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
+
+    // regular search source
+
+    const searchSourceRegular = createSearchSourceMock({ index: dataViewMock });
+    searchSourceRegular.fetch$ = <T>() =>
+      of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
+
+    jest.spyOn(searchSourceRegular, 'fetch$');
+
+    expect(fetchDocuments(searchSourceRegular, deps)).resolves.toEqual({
+      records: documents,
+    });
+
+    expect(searchSourceRegular.fetch$ as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({ sessionId: deps.searchSessionId })
+    );
+
+    // search source with `search_after` for "Load more" requests
+
+    const searchSourceForLoadMore = createSearchSourceMock({ index: dataViewMock });
+    searchSourceForLoadMore.setField('searchAfter', ['100']);
+
+    searchSourceForLoadMore.fetch$ = <T>() =>
+      of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
+
+    jest.spyOn(searchSourceForLoadMore, 'fetch$');
+
+    expect(fetchDocuments(searchSourceForLoadMore, deps)).resolves.toEqual({
+      records: documents,
+    });
+
+    expect(searchSourceForLoadMore.fetch$ as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({ sessionId: undefined })
     );
   });
 });

@@ -67,6 +67,8 @@ class DocLinks {
   public connectorsConfluence: string;
   public connectorsContentExtraction: string;
   public connectorsDropbox: string;
+  public connectorsGithub: string;
+  public connectorsGmail: string;
   public connectorsGoogleCloudStorage: string;
   public connectorsGoogleDrive: string;
   public connectorsJira: string;
@@ -75,12 +77,15 @@ class DocLinks {
   public connectorsMySQL: string;
   public connectorsNative: string;
   public connectorsNetworkDrive: string;
+  public connectorsOneDrive: string;
   public connectorsOracle: string;
   public connectorsPostgreSQL: string;
   public connectorsS3: string;
+  public connectorsSalesforce: string;
   public connectorsServiceNow: string;
   public connectorsSharepoint: string;
   public connectorsSharepointOnline: string;
+  public connectorsSlack: string;
   public connectorsWorkplaceSearch: string;
   public consoleGuide: string;
   public crawlerExtractionRules: string;
@@ -113,6 +118,7 @@ class DocLinks {
   public licenseManagement: string;
   public machineLearningStart: string;
   public mlDocumentEnrichment: string;
+  public mlDocumentEnrichmentUpdateMappings: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
   public restApis: string;
@@ -225,6 +231,8 @@ class DocLinks {
     this.connectorsContentExtraction = '';
     this.connectorsClients = '';
     this.connectorsDropbox = '';
+    this.connectorsGithub = '';
+    this.connectorsGmail = '';
     this.connectorsGoogleCloudStorage = '';
     this.connectorsGoogleDrive = '';
     this.connectorsJira = '';
@@ -233,12 +241,15 @@ class DocLinks {
     this.connectorsMySQL = '';
     this.connectorsNative = '';
     this.connectorsNetworkDrive = '';
+    this.connectorsOneDrive = '';
     this.connectorsOracle = '';
     this.connectorsPostgreSQL = '';
     this.connectorsS3 = '';
+    this.connectorsSalesforce = '';
     this.connectorsServiceNow = '';
     this.connectorsSharepoint = '';
     this.connectorsSharepointOnline = '';
+    this.connectorsSlack = '';
     this.connectorsWorkplaceSearch = '';
     this.consoleGuide = '';
     this.crawlerExtractionRules = '';
@@ -271,6 +282,7 @@ class DocLinks {
     this.licenseManagement = '';
     this.machineLearningStart = '';
     this.mlDocumentEnrichment = '';
+    this.mlDocumentEnrichmentUpdateMappings = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
     this.restApis = '';
@@ -384,9 +396,11 @@ class DocLinks {
     this.connectorsContentExtraction = docLinks.links.enterpriseSearch.connectorsContentExtraction;
     this.connectorsClients = docLinks.links.enterpriseSearch.connectorsClients;
     this.connectorsDropbox = docLinks.links.enterpriseSearch.connectorsDropbox;
+    this.connectorsGithub = docLinks.links.enterpriseSearch.connectorsGithub;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
     this.connectorsGoogleDrive = docLinks.links.enterpriseSearch.connectorsGoogleDrive;
+    this.connectorsGmail = docLinks.links.enterpriseSearch.connectorsGmail;
     this.connectorsJira = docLinks.links.enterpriseSearch.connectorsJira;
     this.connectorsMicrosoftSQL = docLinks.links.enterpriseSearch.connectorsMicrosoftSQL;
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
@@ -396,9 +410,11 @@ class DocLinks {
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
     this.connectorsS3 = docLinks.links.enterpriseSearch.connectorsS3;
+    this.connectorsSalesforce = docLinks.links.enterpriseSearch.connectorsSalesforce;
     this.connectorsServiceNow = docLinks.links.enterpriseSearch.connectorsServiceNow;
     this.connectorsSharepoint = docLinks.links.enterpriseSearch.connectorsSharepoint;
     this.connectorsSharepointOnline = docLinks.links.enterpriseSearch.connectorsSharepointOnline;
+    this.connectorsSlack = docLinks.links.enterpriseSearch.connectorsSlack;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
     this.consoleGuide = docLinks.links.console.guide;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
@@ -431,6 +447,8 @@ class DocLinks {
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.machineLearningStart = docLinks.links.enterpriseSearch.machineLearningStart;
     this.mlDocumentEnrichment = docLinks.links.enterpriseSearch.mlDocumentEnrichment;
+    this.mlDocumentEnrichmentUpdateMappings =
+      docLinks.links.enterpriseSearch.mlDocumentEnrichmentUpdateMappings;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
     this.restApis = docLinks.links.apis.restApis;

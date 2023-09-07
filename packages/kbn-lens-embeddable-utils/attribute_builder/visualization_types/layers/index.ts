@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { MetricLayer, type MetricLayerOptions } from './metric_layer';
-export { XYDataLayer, type XYLayerOptions } from './xy_data_layer';
-export { XYReferenceLinesLayer } from './xy_reference_lines_layer';
+export { MetricLayer, type MetricLayerOptions, type MetricLayerConfig } from './metric_layer';
+export { XYDataLayer, type XYLayerOptions, type XYLayerConfig } from './xy_data_layer';
+export {
+  XYReferenceLinesLayer,
+  type XYReferenceLinesLayerConfig,
+} from './xy_reference_lines_layer';
 
-export { FormulaColumn as FormulaDataColumn } from './columns/formula';
-export { ReferenceLineColumn } from './columns/reference_line';
+export { FormulaColumn } from './columns/formula';
+export { StaticColumn } from './columns/static';

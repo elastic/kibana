@@ -18,6 +18,7 @@ export default ({ loadTestFile }: FtrProviderContext) => {
       loadTestFile(require.resolve('./metrics_source_configuration'));
       loadTestFile(require.resolve('./metrics_anomalies'));
       loadTestFile(require.resolve('./metrics_explorer'));
+      loadTestFile(require.resolve('./node_details'));
       loadTestFile(require.resolve('./hosts_view'));
     });
 

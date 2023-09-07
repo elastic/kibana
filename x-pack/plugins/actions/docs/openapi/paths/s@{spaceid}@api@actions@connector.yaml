@@ -40,6 +40,8 @@ post:
         examples:
           createIndexConnectorRequest:
             $ref: '../components/examples/create_index_connector_request.yaml'
+          createWebhookConnectorRequest:
+            $ref: '../components/examples/create_webhook_connector_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -50,6 +52,8 @@ post:
           examples:
             createIndexConnectorResponse:
               $ref: '../components/examples/create_index_connector_response.yaml'
+            createWebhookConnectorResponse:
+              $ref: '../components/examples/create_webhook_connector_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
   servers:

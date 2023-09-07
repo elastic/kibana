@@ -14,6 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import {
   INSTRUCTION_VARIANT,
   getDisplayText,
@@ -44,10 +45,11 @@ export function InstructionsSet({
   const onSelectedTabChange = (tab: string) => {
     setSelectedTab(tab);
   };
+  const { euiTheme } = useEuiTheme();
 
   function InstructionTabs({ agentTabs }: { agentTabs: AgentTab[] }) {
     return (
-      <EuiTabs>
+      <EuiTabs style={{ padding: `0 ${euiTheme.size.l}` }}>
         {agentTabs.map((tab) => (
           <EuiTab
             key={tab.id}

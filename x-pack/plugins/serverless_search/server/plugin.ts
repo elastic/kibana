@@ -23,8 +23,10 @@ import type {
   SetupDependencies,
   StartDependencies,
 } from './types';
+import { registerConnectorsRoutes } from './routes/connectors_routes';
 
 export interface RouteDependencies {
+  http: CoreSetup<StartDependencies>['http'];
   logger: Logger;
   router: IRouter;
   security: SecurityPluginStart;
@@ -56,9 +58,15 @@ export class ServerlessSearchPlugin
     const router = http.createRouter();
     getStartServices().then(([, { security }]) => {
       this.security = security;
-      const dependencies = { logger: this.logger, router, security: this.security };
+      const dependencies = {
+        http,
+        logger: this.logger,
+        router,
+        security: this.security,
+      };
 
       registerApiKeyRoutes(dependencies);
+      registerConnectorsRoutes(dependencies);
       registerIndicesRoutes(dependencies);
     });
 

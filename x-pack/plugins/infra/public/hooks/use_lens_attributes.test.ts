@@ -55,7 +55,7 @@ describe('useHostTable hook', () => {
         layers: [
           {
             data: [normalizedLoad1m],
-            layerType: 'data',
+            type: 'visualization',
             options: {
               buckets: {
                 type: 'date_histogram',
@@ -81,7 +81,7 @@ describe('useHostTable hook', () => {
                 },
               },
             ],
-            layerType: 'referenceLine',
+            type: 'referenceLines',
           },
         ],
         title: 'Injected Normalized Load',
@@ -199,7 +199,7 @@ describe('useHostTable hook', () => {
         layers: [
           {
             data: [normalizedLoad1m],
-            layerType: 'data',
+            type: 'visualization',
           },
         ],
         dataView: mockDataView,

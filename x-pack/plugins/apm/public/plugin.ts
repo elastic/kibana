@@ -415,14 +415,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     const { fleet } = plugins;
 
     plugins.observabilityAIAssistant.register(
-      async ({ signal, registerFunction, registerContext }) => {
-        const mod = await import('./components/assistant_functions');
+      async ({ signal, registerContext, registerFunction }) => {
+        const mod = await import('./assistant_functions');
 
         mod.registerAssistantFunctions({
           coreStart: core,
           pluginsStart: plugins,
-          registerFunction,
           registerContext,
+          registerFunction,
+          signal,
         });
       }
     );
