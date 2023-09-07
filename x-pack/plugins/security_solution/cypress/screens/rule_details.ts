@@ -15,6 +15,8 @@ export const ABOUT_RULE_DESCRIPTION = '[data-test-subj=stepAboutRuleDetailsToggl
 export const ABOUT_DETAILS =
   '[data-test-subj="aboutRule"] [data-test-subj="listItemColumnStepRuleDescription"]';
 
+export const ACTIONS = '[data-test-subj="actions"]';
+
 export const ADDITIONAL_LOOK_BACK_DETAILS = 'Additional look-back time';
 
 export const ALERTS_TAB = '[data-test-subj="navigation-alerts"]';

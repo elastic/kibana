@@ -12,6 +12,7 @@ import { RULE_NAME } from '../../screens/alerts';
 import { RULES_MANAGEMENT_TABLE } from '../../screens/alerts_detection_rules';
 import { TOOLTIP } from '../../screens/common';
 import { actionFormSelector } from '../../screens/common/rule_actions';
+import { ACTIONS } from '../../screens/rule_details';
 import { DISABLED_SNOOZE_BADGE } from '../../screens/rule_snoozing';
 import {
   disableAutoRefresh,
@@ -189,10 +190,7 @@ describe('rule snoozing', () => {
         addEmailConnectorAndRuleAction('abc@example.com', 'Test action');
         saveEditedRule();
 
-        goToRuleEditSettings();
-        goToActionsStepTab();
-
-        cy.get(actionFormSelector(0)).should('be.visible');
+        cy.get(ACTIONS).should('be.visible');
       });
     });
   });
