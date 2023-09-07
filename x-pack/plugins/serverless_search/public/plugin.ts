@@ -8,7 +8,7 @@
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appIds } from '@kbn/management-cards-navigation';
-import { UserProfileUserInfo } from '@kbn/security-plugin/common';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import { docLinks } from '../common/doc_links';
 import {
@@ -42,15 +42,15 @@ export class ServerlessSearchPlugin
         const [coreStart, services] = await core.getStartServices();
         const { security } = services;
         docLinks.setDocLinks(coreStart.docLinks.links);
-        let userProfile: UserProfileUserInfo | undefined;
+        let userProfile: AuthenticatedUser | undefined;
         try {
-          const response = await security.userProfiles.getCurrent();
-          userProfile = response.user;
+          const response = await security.authc.getCurrentUser();
+          userProfile = response;
         } catch {
           userProfile = undefined;
         }
 
-        return await renderApp(element, coreStart, { userProfile, ...services });
+        return await renderApp(element, coreStart, { user, ...services });
       },
     });
 

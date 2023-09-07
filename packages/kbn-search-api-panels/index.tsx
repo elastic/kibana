@@ -9,6 +9,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiImage, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 export * from './components/code_box';
 export * from './components/github_link';
@@ -24,17 +25,14 @@ export * from './types';
 export * from './utils';
 
 export interface WelcomeBannerProps {
-  userProfile?: {
-    full_name?: string;
-    username?: string;
-  };
+  user?: AuthenticatedUser;
   assetBasePath?: string;
   image?: string;
   showDescription?: boolean;
 }
 
 export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
-  userProfile,
+  user,
   assetBasePath,
   image,
   showDescription = true,
@@ -52,13 +50,13 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        {Boolean(userProfile) && (
+        {Boolean(user) && (
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxxs">
               <h2>
                 {i18n.translate('searchApiPanels.welcomeBanner.header.greeting.title', {
                   defaultMessage: 'Hi {name}!',
-                  values: { name: userProfile?.full_name || userProfile?.username },
+                  values: { name: user?.full_name || user.username },
                 })}
               </h2>
             </EuiTitle>
