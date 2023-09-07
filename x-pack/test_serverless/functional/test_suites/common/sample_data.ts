@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header', 'home']);
-  
+
   describe('Sample data in serverless', function () {
     it('Sample data loads', async () => {
       await PageObjects.home.addSampleDataSet('ecommerce');
