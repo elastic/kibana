@@ -16,9 +16,9 @@ import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   createAndInstallMockedPrebuiltRules,
   installPrebuiltRuleAssets,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
-import { login } from '../../../tasks/login';
+import { deleteAlertsAndRules } from '../../../tasks/common';
 import { visit } from '../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
@@ -31,8 +31,8 @@ import {
   UPGRADE_ALL_RULES_BUTTON,
 } from '../../../screens/alerts_detection_rules';
 
+// Rule to test update
 const RULE_1_ID = 'rule_1';
-const RULE_2_ID = 'rule_2';
 const OUTDATED_RULE_1 = createRuleAssetSavedObject({
   name: 'Outdated rule 1',
   rule_id: RULE_1_ID,
@@ -43,20 +43,21 @@ const UPDATED_RULE_1 = createRuleAssetSavedObject({
   rule_id: RULE_1_ID,
   version: 2,
 });
-const OUTDATED_RULE_2 = createRuleAssetSavedObject({
-  name: 'Outdated rule 2',
+
+// Rule to test installation
+const RULE_2_ID = 'rule_2';
+const RULE_2 = createRuleAssetSavedObject({
+  name: 'Rule 2',
   rule_id: RULE_2_ID,
   version: 1,
 });
-const UPDATED_RULE_2 = createRuleAssetSavedObject({
-  name: 'Updated rule 2',
-  rule_id: RULE_2_ID,
-  version: 2,
-});
 
 const loadPageAsReadOnlyUser = (url: string) => {
-  login(ROLES.reader);
   visit(url, { role: ROLES.reader });
+};
+
+const loginPageAsFullPrivilegesUser = (url: string) => {
+  visit(url);
 };
 
 // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
@@ -65,26 +66,19 @@ describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
-    beforeEach(() => {
-      login();
-      resetRulesTableState();
+    before(() => {
       deleteAlertsAndRules();
-      cy.task('esArchiverResetKibana');
-      createAndInstallMockedPrebuiltRules([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+      preventPrebuiltRulesPackageInstallation();
+      // Install on rule to test installation and another to test update
+      installPrebuiltRuleAssets([OUTDATED_RULE_1, RULE_2]);
+      // Create a new version of the outdated rule
+      createAndInstallMockedPrebuiltRules([UPDATED_RULE_1]);
     });
 
     describe('User with read privileges on Security Solution', () => {
-      const RULE_1 = createRuleAssetSavedObject({
-        name: 'Test rule 1',
-        rule_id: 'rule_1',
-      });
-      const RULE_2 = createRuleAssetSavedObject({
-        name: 'Test rule 2',
-        rule_id: 'rule_2',
-      });
       beforeEach(() => {
+        preventPrebuiltRulesPackageInstallation();
         // Now login with read-only user in preparation for test
-        installPrebuiltRuleAssets([RULE_1, RULE_2]);
         loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
       });
 
@@ -97,19 +91,10 @@ describe(
         // installation buttons are disabled
         cy.visit(`${APP_PATH}${RULES_ADD_PATH}`);
         cy.get(INSTALL_ALL_RULES_BUTTON).should('be.disabled');
-        cy.get(getInstallSingleRuleButtonByRuleId(RULE_1['security-rule'].rule_id)).should(
+        cy.get(getInstallSingleRuleButtonByRuleId(UPDATED_RULE_1['security-rule'].rule_id)).should(
           'not.exist'
         );
         cy.get(RULE_CHECKBOX).should('not.exist');
-      });
-    });
-
-    describe('User with read privileges on Security Solution', () => {
-      beforeEach(() => {
-        /* Create a second version of the rule, making it available for update */
-        installPrebuiltRuleAssets([UPDATED_RULE_1, UPDATED_RULE_2]);
-        // Now login with read-only user in preparation for test
-        loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
       });
 
       it('should not be able to upgrade prebuilt rules', () => {
@@ -125,6 +110,40 @@ describe(
           'not.exist'
         );
         cy.get(RULE_CHECKBOX).should('not.exist');
+      });
+    });
+
+    describe('User with full privileges on Security Solution', () => {
+      beforeEach(() => {
+        loginPageAsFullPrivilegesUser(RULES_MANAGEMENT_URL);
+      });
+
+      it.only('should be able to install prebuilt rules', () => {
+        // Check that Add Elastic Rules button is enabled
+        cy.get(ADD_ELASTIC_RULES_BTN).should('not.be.disabled');
+
+        // Navigate to Add Elastic Rules page and assert that rules can be selected
+        // and all installation buttons are enabled
+        cy.get(ADD_ELASTIC_RULES_BTN).click();
+        cy.get(INSTALL_ALL_RULES_BUTTON).should('not.be.disabled');
+        cy.get(getInstallSingleRuleButtonByRuleId(UPDATED_RULE_1['security-rule'].rule_id)).should(
+          'exist'
+        );
+        cy.get(RULE_CHECKBOX).should('exist');
+      });
+
+      it('should be able to upgrade prebuilt rules', () => {
+        // Check that Rule Update tab is shown
+        cy.get(RULES_UPDATES_TAB).should('exist');
+
+        // Navigate to Rule Update tab and assert that rules can be selected
+        // and all upgrade buttons are enabled
+        cy.get(RULES_UPDATES_TAB).click();
+        cy.get(UPGRADE_ALL_RULES_BUTTON).should('not.be.disabled');
+        cy.get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_1['security-rule'].rule_id)).should(
+          'exist'
+        );
+        cy.get(RULE_CHECKBOX).should('exist');
       });
     });
   }
