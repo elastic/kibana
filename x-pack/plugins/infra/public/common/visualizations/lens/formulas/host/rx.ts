@@ -17,4 +17,5 @@ export const rx: FormulaValueConfig = {
       decimals: 1,
     },
   },
+  timeScale: 's',
 };

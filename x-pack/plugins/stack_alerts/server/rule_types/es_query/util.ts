@@ -8,5 +8,13 @@
 import { EsQueryRuleParams } from './rule_type_params';
 
 export function isEsQueryRule(searchType: EsQueryRuleParams['searchType']) {
-  return searchType !== 'searchSource';
+  return searchType === 'esQuery';
+}
+
+export function isSearchSourceRule(searchType: EsQueryRuleParams['searchType']) {
+  return searchType === 'searchSource';
+}
+
+export function isEsqlQueryRule(searchType: EsQueryRuleParams['searchType']) {
+  return searchType === 'esqlQuery';
 }

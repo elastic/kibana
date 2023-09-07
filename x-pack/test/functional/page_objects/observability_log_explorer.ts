@@ -314,5 +314,34 @@ export function ObservabilityLogExplorerPageObject({
 
       expect(await promptTitle.getVisibleText()).to.be('No data streams found');
     },
+
+    getHeaderMenu() {
+      return testSubjects.find('logExplorerHeaderMenu');
+    },
+
+    getDiscoverFallbackLink() {
+      return testSubjects.find('logExplorerDiscoverFallbackLink');
+    },
+
+    // Query Bar
+    getQueryBar() {
+      return testSubjects.find('queryInput');
+    },
+
+    async getQueryBarValue() {
+      const queryBar = await testSubjects.find('queryInput');
+      return queryBar.getAttribute('value');
+    },
+
+    async typeInQueryBar(query: string) {
+      const queryBar = await this.getQueryBar();
+      await queryBar.clearValueWithKeyboard();
+      return queryBar.type(query);
+    },
+
+    async submitQuery(query: string) {
+      await this.typeInQueryBar(query);
+      await testSubjects.click('querySubmitButton');
+    },
   };
 }
