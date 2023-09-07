@@ -52,7 +52,6 @@ import {
   RULE_LAST_RUN,
   TOASTER_CLOSE_ICON,
   ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
-  CONFIRM_DELETE_RULE_BTN,
   AUTO_REFRESH_POPOVER_TRIGGER_BUTTON,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   BULK_ACTIONS_BTN,
@@ -119,14 +118,12 @@ export const checkDuplicatedRule = () => {
 export const deleteFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click();
   cy.get(DELETE_RULE_ACTION_BTN).click();
-  cy.get(CONFIRM_DELETE_RULE_BTN).click();
 };
 
 export const deleteRuleFromDetailsPage = () => {
   cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
   cy.get(RULE_DETAILS_DELETE_BTN).click();
   cy.get(RULE_DETAILS_DELETE_BTN).should('not.exist');
-  cy.get(CONFIRM_DELETE_RULE_BTN).click();
 };
 
 export const exportRule = (name: string) => {

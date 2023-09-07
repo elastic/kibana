@@ -15,7 +15,6 @@ import {
   MODAL_CONFIRMATION_BODY,
   TOASTER_BODY,
   RULES_TAGS_FILTER_BTN,
-  CONFIRM_DELETE_RULE_BTN,
   CONFIRM_DUPLICATE_RULE,
   DELETE_RULE_BULK_BTN,
   DISABLE_RULE_BULK_BTN,
@@ -56,7 +55,6 @@ import { SCHEDULE_DETAILS } from '../screens/rule_details';
 export const deleteSelectedRules = () => {
   cy.get(BULK_ACTIONS_BTN).click();
   cy.get(DELETE_RULE_BULK_BTN).click();
-  cy.get(CONFIRM_DELETE_RULE_BTN).click();
 };
 
 // DUPLICATE

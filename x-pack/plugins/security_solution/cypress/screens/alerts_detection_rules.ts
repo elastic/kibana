@@ -23,9 +23,6 @@ export const DISABLED_RULES_BTN = '[data-test-subj="showDisabledRulesFilterButto
 
 export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
 
-export const CONFIRM_DELETE_RULE_BTN =
-  '[data-test-subj="deleteRulesConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
-
 export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 
 export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
