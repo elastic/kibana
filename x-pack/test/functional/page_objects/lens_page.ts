@@ -1221,6 +1221,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async setPalette(paletteId: string, isLegacy: boolean) {
       await testSubjects.click('lns_colorEditing_trigger');
+      await testSubjects.setEuiSwitch(
+        'lns_colorMappingOrLegacyPalette_switch',
+        isLegacy ? 'uncheck' : 'check'
+      );
       if (isLegacy) {
         await testSubjects.click('lns-palettePicker');
         await find.clickByCssSelector(`#${paletteId}`);

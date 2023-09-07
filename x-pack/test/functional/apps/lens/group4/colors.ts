@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         keepOpen: true,
       });
 
-      await PageObjects.lens.assertPalette('negative');
+      await PageObjects.lens.assertPalette('negative', false);
     });
 
     it('should carry over palette to the pie chart', async () => {
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor(
         'lnsPie_sliceByDimensionPanel > lns-dimensionTrigger'
       );
-      await PageObjects.lens.assertPalette('negative');
+      await PageObjects.lens.assertPalette('negative', false);
     });
 
     it('should carry palette back to the bar chart', async () => {
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor(
         'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
       );
-      await PageObjects.lens.assertPalette('negative');
+      await PageObjects.lens.assertPalette('negative', false);
     });
   });
 }
