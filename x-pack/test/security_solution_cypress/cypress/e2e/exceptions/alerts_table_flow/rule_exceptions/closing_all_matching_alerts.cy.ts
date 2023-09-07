@@ -27,8 +27,9 @@ import {
   submitNewExceptionItem,
 } from '../../../../tasks/exceptions';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967
-describe('Close matching Alerts ', () => {
+describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   const newRule = getNewRule();
   const ITEM_NAME = 'Sample Exception Item';
 

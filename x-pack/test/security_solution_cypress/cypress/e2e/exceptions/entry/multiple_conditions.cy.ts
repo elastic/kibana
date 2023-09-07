@@ -28,12 +28,13 @@ import {
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165651
 // FLAKY: https://github.com/elastic/kibana/issues/165734
 // FLAKY: https://github.com/elastic/kibana/issues/165652
 describe(
   'Add multiple conditions and validate the generated exceptions',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     beforeEach(() => {
       cy.task('esArchiverResetKibana');

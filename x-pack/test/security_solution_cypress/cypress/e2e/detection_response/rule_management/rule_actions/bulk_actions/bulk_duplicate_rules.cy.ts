@@ -52,10 +52,11 @@ const EXPIRED_EXCEPTION_ITEM_NAME = 'Sample exception item';
 
 const NON_EXPIRED_EXCEPTION_ITEM_NAME = 'Sample exception item with future expiration';
 
+// TODO: https://github.com/elastic/kibana/issues/161540
 // Flaky on serverless
 describe(
   'Detection rules, bulk duplicate',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     before(() => {
       cleanKibana();

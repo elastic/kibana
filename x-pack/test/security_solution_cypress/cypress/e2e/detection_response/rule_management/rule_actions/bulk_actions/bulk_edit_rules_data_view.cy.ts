@@ -53,9 +53,10 @@ const DATA_VIEW_ID = 'auditbeat';
 
 const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
 
+// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Bulk editing index patterns of rules with a data view only',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     before(() => {
       cleanKibana();
