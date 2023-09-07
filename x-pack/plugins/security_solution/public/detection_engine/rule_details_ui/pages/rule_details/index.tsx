@@ -38,6 +38,7 @@ import {
   FILTER_OPEN,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { AdHocRunFlyout } from '../../../../detections/components/rules/ad_hoc_run_flyout';
 import { AdHocRunModal } from '../../../../detections/components/rules/ad_hoc_run';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
@@ -233,6 +234,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: ruleLoading,
     isExistingRule,
   } = useRuleWithFallback(ruleId);
+
+  const [isAdHocFlyoutVisible, setIsAdHocFlyoutVisible] = useState(false);
+  const closeAdHocFlyout = () => setIsAdHocFlyoutVisible(false);
+  const showAdHocFlyout = () => setIsAdHocFlyoutVisible(true);
+  let adHocFlyout;
+  if (isAdHocFlyoutVisible) {
+    adHocFlyout = <AdHocRunFlyout ruleId={ruleId} closeFlyout={closeAdHocFlyout} />;
+  }
 
   const [isAdHocModalVisible, setIsAdHocModalVisible] = useState(false);
   const closeAdHocRunModal = () => setIsAdHocModalVisible(false);
@@ -569,6 +578,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         </EuiConfirmModal>
       )}
       {adHocRunModal}
+      {adHocFlyout}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
@@ -655,7 +665,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           )}
                           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
                           confirmDeletion={confirmDeletion}
-                          showAdHocRunModal={showAdHocRunModal}
+                          // showAdHocRunModal={showAdHocRunModal}
+                          showAdHocRunModal={showAdHocFlyout}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
