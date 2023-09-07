@@ -11,7 +11,7 @@ import { getNewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { login, visitSecurityDetectionRulesPage } from '../../../tasks/login';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
-import { goToTheRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
+import { goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -55,7 +55,7 @@ describe('Exceptions viewer read only', { tags: '@ess' }, () => {
 
     login(ROLES.reader);
     visitSecurityDetectionRulesPage(ROLES.reader);
-    goToTheRuleDetailsOf('Test exceptions rule');
+    goToRuleDetailsOf('Test exceptions rule');
     goToExceptionsTab();
   });
 
