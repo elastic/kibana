@@ -6,24 +6,9 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import type { EnrichSummary, EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
+import type { EnrichSummary } from '@elastic/elasticsearch/lib/api/types';
 import type { SerializedEnrichPolicy } from '../../common/types';
-
-const getPolicyType = (policy: EnrichSummary): EnrichPolicyType => {
-  if (policy.config.match) {
-    return 'match';
-  }
-
-  if (policy.config.geo_match) {
-    return 'geo_match';
-  }
-
-  if (policy.config.range) {
-    return 'range';
-  }
-
-  throw new Error('Unknown policy type');
-};
+import { getPolicyType } from '../../common/lib';
 
 export const serializeEnrichmentPolicies = (
   policies: EnrichSummary[]
@@ -48,6 +33,17 @@ const fetchAll = async (client: IScopedClusterClient) => {
   return serializeEnrichmentPolicies(res.policies);
 };
 
+const create = (
+  client: IScopedClusterClient,
+  policyName: string,
+  serializedPolicy: EnrichSummary['config']
+) => {
+  return client.asCurrentUser.enrich.putPolicy({
+    name: policyName,
+    ...serializedPolicy,
+  });
+};
+
 const execute = (client: IScopedClusterClient, policyName: string) => {
   return client.asCurrentUser.enrich.executePolicy({ name: policyName });
 };
@@ -58,6 +54,7 @@ const remove = (client: IScopedClusterClient, policyName: string) => {
 
 export const enrichPoliciesActions = {
   fetchAll,
+  create,
   execute,
   remove,
 };

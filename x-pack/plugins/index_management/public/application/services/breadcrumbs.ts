@@ -69,6 +69,16 @@ class BreadcrumbService {
         }),
       },
     ];
+
+    this.breadcrumbs.enrichPolicyCreate = [
+      ...this.breadcrumbs.home,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.createEnrichPolicyLabel', {
+          defaultMessage: 'Create enrich policy',
+        }),
+        href: `/enrich_policies/create`,
+      },
+    ];
   }
 
   public setBreadcrumbs(type: string): void {

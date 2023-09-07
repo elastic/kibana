@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { ErrorState } from './error_state';
-export { LoadingState } from './loading_state';
-export { EmptyState } from './empty_state';
+export { ConfigurationStep } from './configuration';
+export { FieldSelectionStep } from './field_selection';
+export { CreateStep } from './create';

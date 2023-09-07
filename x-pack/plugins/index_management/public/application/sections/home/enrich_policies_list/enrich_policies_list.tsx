@@ -21,7 +21,7 @@ import { documentationService } from '../../../services/documentation';
 import { useLoadEnrichPolicies } from '../../../services/api';
 import { PoliciesTable } from './policies_table';
 import { DeletePolicyModal, ExecutePolicyModal } from './confirm_modals';
-import { LoadingState, ErrorState } from './empty_states';
+import { LoadingState, ErrorState, EmptyState } from './empty_states';
 import { PolicyDetailsFlyout } from './details_flyout';
 
 const getEnrichPolicyNameFromLocation = (location: Location) => {
@@ -71,6 +71,10 @@ export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = 
 
   if (error) {
     return <ErrorState error={error} resendRequest={reloadPolicies} />;
+  }
+
+  if (policies?.length === 0) {
+    return <EmptyState />;
   }
 
   return (
