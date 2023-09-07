@@ -19,6 +19,7 @@ import {
   agentPolicyRouteService,
   agentRouteService,
   AGENTS_INDEX,
+  API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -106,6 +107,9 @@ export const fetchFleetAgents = async (
     .request<GetAgentsResponse>({
       method: 'GET',
       path: AGENT_API_ROUTES.LIST_PATTERN,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       query: options,
     })
     .catch(catchAxiosErrorFormatAndThrow)
@@ -160,6 +164,9 @@ export const fetchFleetServerUrl = async (kbnClient: KbnClient): Promise<string 
     .request<GetFleetServerHostsResponse>({
       method: 'GET',
       path: fleetServerHostsRoutesService.getListPath(),
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       query: {
         perPage: 100,
       },
@@ -197,6 +204,9 @@ export const fetchAgentPolicyEnrollmentKey = async (
     .request<GetEnrollmentAPIKeysResponse>({
       method: 'GET',
       path: enrollmentAPIKeyRouteService.getListPath(),
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       query: { kuery: `policy_id: "${agentPolicyId}"` },
     })
     .catch(catchAxiosErrorFormatAndThrow)
@@ -222,6 +232,9 @@ export const fetchAgentPolicyList = async (
     .request<GetAgentPoliciesResponse>({
       method: 'GET',
       path: agentPolicyRouteService.getListPath(),
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       query: options,
     })
     .catch(catchAxiosErrorFormatAndThrow)
@@ -323,6 +336,7 @@ export const getAgentDownloadUrl = async (
  * Given a stack version number, function will return the closest Agent download version available
  * for download. THis could be the actual version passed in or lower.
  * @param version
+ * @param log
  */
 export const getLatestAgentDownloadVersion = async (
   version: string,
@@ -386,6 +400,9 @@ export const unEnrollFleetAgent = async (
       method: 'POST',
       path: agentRouteService.getUnenrollPath(agentId),
       body: { revoke: force },
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     })
     .catch(catchAxiosErrorFormatAndThrow);
 
