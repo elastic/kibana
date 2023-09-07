@@ -3350,10 +3350,6 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/index_threshold/rule_type.ts"
-              },
-              {
-                "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/server/rule_types/geo_containment/lib/get_entities_and_generate_alerts.ts"
               },
               {
@@ -4354,7 +4350,7 @@
         "label": "AlertingRulesConfig",
         "description": [],
         "signature": [
-          "Pick<Readonly<{} & { minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; }>, \"minimumScheduleInterval\"> & { isUsingSecurity: boolean; }"
+          "Pick<Readonly<{} & { minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; maxScheduledPerMinute: number; run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; }>, \"minimumScheduleInterval\" | \"maxScheduledPerMinute\"> & { isUsingSecurity: boolean; }"
         ],
         "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
@@ -4891,7 +4887,7 @@
           },
           " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<",
           "GetTagsResult",
-          ">; getAlertFromRaw: (params: ",
+          ">; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
           "GetAlertFromRawParams",
           ") => ",
           {
@@ -5099,6 +5095,54 @@
               "string"
             ],
             "path": "x-pack/plugins/alerting/common/alert_schema/context_to_schema_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.convertDurationToFrequency",
+        "type": "Function",
+        "tags": [],
+        "label": "convertDurationToFrequency",
+        "description": [],
+        "signature": [
+          "(duration: string, denomination: number) => number"
+        ],
+        "path": "x-pack/plugins/alerting/common/parse_duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.convertDurationToFrequency.$1",
+            "type": "string",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/alerting/common/parse_duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.convertDurationToFrequency.$2",
+            "type": "number",
+            "tags": [],
+            "label": "denomination",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
