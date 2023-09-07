@@ -7,7 +7,7 @@
 
 import { cpu } from './snapshot/cpu';
 import { diskLatency } from './snapshot/disk_latency';
-import { diskUsage } from './snapshot/disk_usage';
+import { diskSpaceUsage } from './snapshot/disk_space_usage';
 import { count } from '../../shared/metrics/snapshot/count';
 import { load } from './snapshot/load';
 import { logRate } from './snapshot/log_rate';
@@ -41,7 +41,7 @@ import { InventoryMetrics } from '../../types';
 const exposedHostSnapshotMetrics = {
   cpu,
   diskLatency,
-  diskUsage,
+  diskSpaceUsage,
   load,
   logRate,
   memory,
