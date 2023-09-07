@@ -29,7 +29,7 @@ import { addToSearchAfterReturn, getMaxSignalsWarning } from '../utils/utils';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 
 import type { RuleServices, SearchAfterAndBulkCreateReturnType, RunOpts } from '../types';
-const BATCH_SIZE = 500;
+const BATCH_SIZE = 1000;
 
 interface MultiTermsCompositeArgs {
   filterArgs: GetFilterArgs;
