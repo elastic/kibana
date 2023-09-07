@@ -22,6 +22,8 @@
     "@kbn/serverless",
     "@kbn/core-chrome-browser",
     "@kbn/config-schema",
+    "@kbn/core-application-browser",
+    "@kbn/discover-plugin",
   ],
   "exclude": [
     "target/**/*"

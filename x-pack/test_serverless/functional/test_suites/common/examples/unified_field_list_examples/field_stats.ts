@@ -21,7 +21,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const filterBar = getService('filterBar');
   const dataViewTitle = 'logstash-2015.09.22';
 
-  describe('Field stats', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/165882
+  describe.skip('Field stats', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -58,7 +59,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
     });
 
-    describe('field distribution', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/165797
+    describe.skip('field distribution', () => {
       before(async () => {
         await PageObjects.unifiedFieldList.toggleSidebarSection('empty'); // it will allow to render more fields in Available fields section
       });
