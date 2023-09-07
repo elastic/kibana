@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { StackTraceResponse } from '../stack_traces';
+import type { StackTraceResponse } from '@kbn/profiling-utils';
 
 import stackTraces1x from './stacktraces_60s_1x.json';
 import stackTraces5x from './stacktraces_3600s_5x.json';
