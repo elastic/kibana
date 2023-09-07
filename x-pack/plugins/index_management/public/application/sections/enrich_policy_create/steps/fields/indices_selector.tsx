@@ -68,8 +68,10 @@ export const IndicesSelector = ({ field, ...rest }: Props) => {
 
   const onSearchChange = useCallback(
     async (search: string) => {
+      const indexPattern = isEmpty(search) ? '*' : search;
+
       setIsIndiciesLoading(true);
-      setIndexOptions(await getIndexOptions(search));
+      setIndexOptions(await getIndexOptions(indexPattern));
       setIsIndiciesLoading(false);
     },
     [setIsIndiciesLoading, setIndexOptions]
