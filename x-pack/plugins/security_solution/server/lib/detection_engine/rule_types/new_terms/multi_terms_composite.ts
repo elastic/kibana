@@ -9,7 +9,6 @@ import type { Moment } from 'moment';
 import type { Logger } from '@kbn/logging';
 // import type { AlertInstanceState } from '@kbn/alerting-plugin/server';
 import type { NewTermsRuleParams } from '../../rule_schema';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 import type { EventsAndTerms } from './wrap_new_terms_alerts';
 import type { GetFilterArgs } from '../utils/get_filter';

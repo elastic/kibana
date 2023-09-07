@@ -44,149 +44,154 @@ import {
 } from '../../../screens/exceptions';
 import { createEndpointExceptionList } from '../../../tasks/api_calls/exceptions';
 
-describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverless'] }, () => {
-  const ITEM_NAME = 'Sample Exception List Item';
+// FLAKY: https://github.com/elastic/kibana/issues/165736
+describe(
+  'Add endpoint exception from rule details',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
+    const ITEM_NAME = 'Sample Exception List Item';
 
-  before(() => {
-    cy.task('esArchiverResetKibana');
-    cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
-    login();
-    deleteAlertsAndRules();
-    // create rule with exception
-    createEndpointExceptionList<{
-      id: string;
-      list_id: string;
-      type:
-        | 'detection'
-        | 'rule_default'
-        | 'endpoint'
-        | 'endpoint_trusted_apps'
-        | 'endpoint_events'
-        | 'endpoint_host_isolation_exceptions'
-        | 'endpoint_blocklists';
-      namespace_type: 'agnostic' | 'single';
-    }>().then((response) => {
-      createRule(
-        getNewRule({
-          query: 'event.code:*',
-          index: ['auditbeat*'],
-          exceptions_list: [
-            {
-              id: response.body.id,
-              list_id: response.body.list_id,
-              type: response.body.type,
-              namespace_type: response.body.namespace_type,
-            },
-          ],
-          rule_id: '2',
-        })
-      );
-    });
-  });
-
-  beforeEach(() => {
-    login();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
-    goToEndpointExceptionsTab();
-  });
-
-  after(() => {
-    cy.task('esArchiverUnload', 'auditbeat');
-  });
-
-  it('creates an exception item', () => {
-    // when no exceptions exist, empty component shows with action to add exception
-    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
-
-    // open add exception modal
-    openExceptionFlyoutFromEmptyViewerPrompt();
-
-    // submit button is disabled if no paramerters were added
-    cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-
-    // for endpoint exceptions, must specify OS
-    selectOs('windows');
-
-    // add exception item conditions
-    addExceptionConditions({
-      field: 'event.code',
-      operator: 'is',
-      values: ['foo'],
+    before(() => {
+      cy.task('esArchiverResetKibana');
+      cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
+      login();
+      deleteAlertsAndRules();
+      // create rule with exception
+      createEndpointExceptionList<{
+        id: string;
+        list_id: string;
+        type:
+          | 'detection'
+          | 'rule_default'
+          | 'endpoint'
+          | 'endpoint_trusted_apps'
+          | 'endpoint_events'
+          | 'endpoint_host_isolation_exceptions'
+          | 'endpoint_blocklists';
+        namespace_type: 'agnostic' | 'single';
+      }>().then((response) => {
+        createRule(
+          getNewRule({
+            query: 'event.code:*',
+            index: ['auditbeat*'],
+            exceptions_list: [
+              {
+                id: response.body.id,
+                list_id: response.body.list_id,
+                type: response.body.type,
+                namespace_type: response.body.namespace_type,
+              },
+            ],
+            rule_id: '2',
+          })
+        );
+      });
     });
 
-    // Name is required so want to check that submit is still disabled
-    cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+    beforeEach(() => {
+      login();
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      goToRuleDetails();
+      goToEndpointExceptionsTab();
+    });
 
-    // add exception item name
-    addExceptionFlyoutItemName(ITEM_NAME);
+    after(() => {
+      cy.task('esArchiverUnload', 'auditbeat');
+    });
 
-    // Option to add to rule or add to list should NOT appear
-    cy.get(ADD_TO_RULE_OR_LIST_SECTION).should('not.exist');
+    it('creates an exception item', () => {
+      // when no exceptions exist, empty component shows with action to add exception
+      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
-    // not testing close alert functionality here, just ensuring that the options appear as expected
-    cy.get(CLOSE_SINGLE_ALERT_CHECKBOX).should('not.exist');
-    cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
+      // open add exception modal
+      openExceptionFlyoutFromEmptyViewerPrompt();
 
-    // submit
-    submitNewExceptionItem();
+      // submit button is disabled if no paramerters were added
+      cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
 
-    // new exception item displays
-    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-  });
+      // for endpoint exceptions, must specify OS
+      selectOs('windows');
 
-  it('edits an endpoint exception item', () => {
-    const NEW_ITEM_NAME = 'Exception item-EDITED';
-    const ITEM_FIELD = 'event.code';
-    const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.type';
+      // add exception item conditions
+      addExceptionConditions({
+        field: 'event.code',
+        operator: 'is',
+        values: ['foo'],
+      });
 
-    // displays existing exception items
-    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
-    cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME);
-    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ` ${ITEM_FIELD}IS foo`);
+      // Name is required so want to check that submit is still disabled
+      cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
 
-    // open edit exception modal
-    openEditException();
+      // add exception item name
+      addExceptionFlyoutItemName(ITEM_NAME);
 
-    // edit exception item name
-    editExceptionFlyoutItemName(NEW_ITEM_NAME);
+      // Option to add to rule or add to list should NOT appear
+      cy.get(ADD_TO_RULE_OR_LIST_SECTION).should('not.exist');
 
-    // check that the existing item's field is being populated
-    cy.get(EXCEPTION_ITEM_CONTAINER)
-      .eq(0)
-      .find(FIELD_INPUT_PARENT)
-      .eq(0)
-      .should('have.text', ITEM_FIELD);
-    cy.get(VALUES_INPUT).should('have.text', 'foo');
+      // not testing close alert functionality here, just ensuring that the options appear as expected
+      cy.get(CLOSE_SINGLE_ALERT_CHECKBOX).should('not.exist');
+      cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
 
-    // edit conditions
-    editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);
+      // submit
+      submitNewExceptionItem();
 
-    // submit
-    submitEditedExceptionItem();
+      // new exception item displays
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+    });
 
-    // new exception item displays
-    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+    it('edits an endpoint exception item', () => {
+      const NEW_ITEM_NAME = 'Exception item-EDITED';
+      const ITEM_FIELD = 'event.code';
+      const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.type';
 
-    // check that updates stuck
-    cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
-    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.typeIS foo');
-  });
+      // displays existing exception items
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
+      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME);
+      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ` ${ITEM_FIELD}IS foo`);
 
-  it('allows user to search for items', () => {
-    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+      // open edit exception modal
+      openEditException();
 
-    // can search for an exception value
-    searchForExceptionItem('foo');
+      // edit exception item name
+      editExceptionFlyoutItemName(NEW_ITEM_NAME);
 
-    // new exception item displays
-    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+      // check that the existing item's field is being populated
+      cy.get(EXCEPTION_ITEM_CONTAINER)
+        .eq(0)
+        .find(FIELD_INPUT_PARENT)
+        .eq(0)
+        .should('have.text', ITEM_FIELD);
+      cy.get(VALUES_INPUT).should('have.text', 'foo');
 
-    // displays empty search result view if no matches found
-    searchForExceptionItem('abc');
+      // edit conditions
+      editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);
 
-    // new exception item displays
-    cy.get(NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT).should('exist');
-  });
-});
+      // submit
+      submitEditedExceptionItem();
+
+      // new exception item displays
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+
+      // check that updates stuck
+      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
+      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.typeIS foo');
+    });
+
+    it('allows user to search for items', () => {
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+
+      // can search for an exception value
+      searchForExceptionItem('foo');
+
+      // new exception item displays
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+
+      // displays empty search result view if no matches found
+      searchForExceptionItem('abc');
+
+      // new exception item displays
+      cy.get(NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT).should('exist');
+    });
+  }
+);

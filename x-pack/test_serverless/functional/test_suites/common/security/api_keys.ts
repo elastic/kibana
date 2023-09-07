@@ -29,7 +29,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('API keys', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/165553
+  describe.skip('API keys', () => {
     after(async () => {
       await clearAllApiKeys(es, log);
     });
