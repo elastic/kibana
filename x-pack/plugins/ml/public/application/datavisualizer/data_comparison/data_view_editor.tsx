@@ -7,7 +7,7 @@
 
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
-import React, { ChangeEvent, ReactNode, useMemo, useState } from 'react';
+import React, { ChangeEvent, ReactNode, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -30,6 +30,7 @@ interface DataViewEditorProps {
   dataViewEditorService: DataViewEditorService;
   indexPattern: string;
   setIndexPattern: (ip: string) => void;
+  onError: (errorMsg?: string) => void;
 }
 
 const mustMatchError = i18n.translate(
@@ -44,6 +45,7 @@ export function DataViewEditor({
   dataViewEditorService,
   indexPattern,
   setIndexPattern,
+  onError,
 }: DataViewEditorProps) {
   useDebounce(
     () => {
@@ -105,6 +107,11 @@ export function DataViewEditor({
     return undefined;
   }, [indexPattern, matchedIndices.exactMatchedIndices.length]);
 
+  useEffect(() => {
+    if (onError) {
+      onError(errorMessage);
+    }
+  }, [onError, errorMessage]);
   const { euiTheme } = useEuiTheme();
 
   return (

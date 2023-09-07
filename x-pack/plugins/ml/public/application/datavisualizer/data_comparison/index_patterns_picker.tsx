@@ -9,10 +9,10 @@ import React, { FC, useEffect, useState, useMemo } from 'react';
 import {
   EuiPageBody,
   EuiPageSection,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
+  EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
@@ -20,9 +20,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { type DataViewEditorService as DataViewEditorServiceSpec } from '@kbn/data-view-editor-plugin/public';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
-import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
 import { createPath } from '../../routing/router';
 import { ML_PAGES } from '../../../../common/constants/locator';
+import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
 
 import { MlPageHeader } from '../../components/page_header';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
@@ -51,24 +51,23 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
                   defaultMessage="Select data view or saved search"
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate('xpack.ml.dataDrift.customizeIndexPatternsTooltip', {
-                    defaultMessage: 'Create a data view',
-                  })}
-                >
-                  <EuiButton onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}>
-                    <FormattedMessage
-                      id="xpack.ml.dataDrift.customizeIndexPatternsButton"
-                      defaultMessage="Create a data view"
-                    />
-                  </EuiButton>
-                </EuiToolTip>
-              </EuiFlexItem>
             </EuiFlexGroup>
           </MlPageHeader>
-          <EuiPageSection>
+          <EuiPanel hasShadow={false} hasBorder>
             <SavedObjectFinder
+              leftChildren={
+                <EuiButton
+                  size="m"
+                  color="primary"
+                  iconType="plusInCircleFilled"
+                  onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.dataDrift.customizeIndexPatternsButton"
+                    defaultMessage="Create a data view"
+                  />
+                </EuiButton>
+              }
               key="searchSavedObjectFinder"
               onChoose={onObjectSelection}
               showFilter
@@ -106,7 +105,7 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
                 uiSettings,
               }}
             />
-          </EuiPageSection>
+          </EuiPanel>
         </>
       </EuiPageBody>
     </div>
@@ -193,8 +192,8 @@ export const DataDriftIndexPatternsPicker: FC = () => {
       <EuiPageBody restrictWidth={1200}>
         <MlPageHeader>
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.selectIndexPatterns"
-            defaultMessage="Specify index patterns"
+            id="xpack.ml.dataDrift.createDataDriftDataViewTitle"
+            defaultMessage="Create data view and analyze data drift"
           />
         </MlPageHeader>
         <EuiPageSection>

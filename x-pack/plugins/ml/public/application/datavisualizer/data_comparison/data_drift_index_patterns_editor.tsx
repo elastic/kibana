@@ -76,6 +76,9 @@ export function DataDriftIndexPatternsEditor({
   const [dataViewName, setDataViewName] = useState<string>('');
   const [dataViewMsg, setDataViewMsg] = useState<string | undefined>();
   const [foundDataViewId, setFoundDataViewId] = useState<string | undefined>();
+  const [refError, setRefError] = useState<string | undefined>();
+  const [comparisonError, setComparisonError] = useState<string | undefined>();
+
   // For the purpose of data drift, the two datasets need to have the same common timestamp field if they exist
   // In data view management, creating a data view provides union of all the timestamp fields
   // Here, we need the intersection of two sets instead
@@ -198,6 +201,12 @@ export function DataDriftIndexPatternsEditor({
     await navigateToPath(url);
   };
 
+  const hasError =
+    refError !== undefined ||
+    comparisonError !== undefined ||
+    !productionIndexPattern ||
+    !referenceIndexPattern;
+
   const firstSetOfSteps = [
     {
       title: 'Pick index pattern for reference data',
@@ -214,6 +223,7 @@ export function DataDriftIndexPatternsEditor({
             dataViewEditorService={referenceDataViewEditorService}
             indexPattern={referenceIndexPattern}
             setIndexPattern={setReferenceIndexPattern}
+            onError={setRefError}
           />
         </EuiFlexItem>
       ),
@@ -233,6 +243,7 @@ export function DataDriftIndexPatternsEditor({
             dataViewEditorService={productionDataViewEditorService}
             indexPattern={productionIndexPattern}
             setIndexPattern={setProductionIndexPattern}
+            onError={setComparisonError}
           />
         </EuiFlexItem>
       ),
@@ -314,7 +325,6 @@ export function DataDriftIndexPatternsEditor({
                 }}
                 fullWidth
                 data-test-subj="dataDriftDataViewNameInput"
-                placeholder={`Example Name`}
               />
             </EuiFormRow>
           ) : null}
@@ -327,7 +337,7 @@ export function DataDriftIndexPatternsEditor({
                 <EuiFlexItem>
                   <EuiButton
                     color="primary"
-                    disabled={!productionIndexPattern || !referenceIndexPattern}
+                    disabled={hasError}
                     onClick={createDataViewAndRedirectToDataDriftPage.bind(null, true)}
                     iconType="visTagCloud"
                     data-test-subj="analyzeDataDriftButton"
@@ -348,7 +358,7 @@ export function DataDriftIndexPatternsEditor({
 
               <EuiFlexItem>
                 <EuiButton
-                  disabled={!productionIndexPattern || !referenceIndexPattern}
+                  disabled={hasError}
                   fill
                   onClick={createDataViewAndRedirectToDataDriftPage.bind(null, false)}
                   iconType="visTagCloud"
