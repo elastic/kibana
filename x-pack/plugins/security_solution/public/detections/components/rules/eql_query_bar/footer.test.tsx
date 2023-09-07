@@ -26,7 +26,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 describe('EQL footer', () => {
   describe('EQL Settings', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      jest.clearAllMocks();
     });
 
     it('EQL settings button is enable when popover is NOT open', () => {

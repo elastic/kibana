@@ -148,7 +148,7 @@ describe('Network Details', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   const state: State = mockGlobalState;
