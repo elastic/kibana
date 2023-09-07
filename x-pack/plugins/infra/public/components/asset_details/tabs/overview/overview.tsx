@@ -23,7 +23,7 @@ import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 import { SectionSeparator } from './section_separator';
 
 export const Overview = () => {
-  const { dateRange } = useDateRangeProviderContext();
+  const { getParsedDateRange } = useDateRangeProviderContext();
   const { asset, assetType, renderMode } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
@@ -32,18 +32,19 @@ export const Overview = () => {
   } = useMetadataStateProviderContext();
   const { logs, metrics } = useDataViewsProviderContext();
 
+  const parsedDateRange = getParsedDateRange();
   const isFullPageView = renderMode.mode !== 'flyout';
 
   const metricsSection = isFullPageView ? (
     <MetricsGrid
-      timeRange={dateRange}
+      dateRange={parsedDateRange}
       logsDataView={logs.dataView}
       metricsDataView={metrics.dataView}
       assetName={asset.name}
     />
   ) : (
     <MetricsGridCompact
-      timeRange={dateRange}
+      dateRange={parsedDateRange}
       logsDataView={logs.dataView}
       metricsDataView={metrics.dataView}
       assetName={asset.name}
@@ -58,7 +59,7 @@ export const Overview = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={asset.name} timeRange={dateRange} dataView={metrics.dataView} />
+        <KPIGrid nodeName={asset.name} timeRange={parsedDateRange} dataView={metrics.dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
@@ -88,12 +89,16 @@ export const Overview = () => {
             />
           </EuiCallOut>
         ) : (
-          <>{metadataSummarySection}</>
+          metadataSummarySection
         )}
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AlertsSummaryContent assetName={asset.name} assetType={assetType} dateRange={dateRange} />
+        <AlertsSummaryContent
+          assetName={asset.name}
+          assetType={assetType}
+          dateRange={parsedDateRange}
+        />
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{metricsSection}</EuiFlexItem>
