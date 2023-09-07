@@ -284,7 +284,7 @@ export const RESPONSE_TITLE = i18n.translate(
 );
 
 export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
-  defaultMessage: 'This alert did not generate an external notification.',
+  defaultMessage: 'There are no response actions defined for this event.',
 });
 
 export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
