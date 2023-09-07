@@ -7,8 +7,8 @@
 
 import { takeLeading } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { fetchAgentPolicies } from './api';
-import { getAgentPoliciesAction } from './actions';
+import { fetchAgentPolicies, policyContainsCompleteAgent } from './api';
+import { getAgentPoliciesAction, getAgentPolicyIsCompleteAction } from './actions';
 
 export function* fetchAgentPoliciesEffect() {
   yield takeLeading(
@@ -17,6 +17,17 @@ export function* fetchAgentPoliciesEffect() {
       fetchAgentPolicies,
       getAgentPoliciesAction.success,
       getAgentPoliciesAction.fail
+    )
+  );
+}
+
+export function* fetchAgentPolicyIsCompleteEffect() {
+  yield takeLeading(
+    getAgentPolicyIsCompleteAction.get,
+    fetchEffectFactory(
+      policyContainsCompleteAgent,
+      getAgentPolicyIsCompleteAction.success,
+      getAgentPolicyIsCompleteAction.fail
     )
   );
 }

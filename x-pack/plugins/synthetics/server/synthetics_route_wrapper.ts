@@ -77,12 +77,18 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
         }
       }
 
-      return response.ok({
-        body: {
-          ...res,
-          ...(await uptimeEsClient.getInspectData(uptimeRoute.path)),
-        },
-      });
+      if (isEmpty(inspectData)) {
+        return response.ok({
+          body: res,
+        });
+      } else {
+        return response.ok({
+          body: {
+            ...res,
+            ...inspectData,
+          },
+        });
+      }
     } catch (e) {
       if (e.statusCode === 403) {
         const privileges = await checkIndicesReadPrivileges(uptimeEsClient);

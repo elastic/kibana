@@ -9,7 +9,10 @@ import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
 import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
 import { SyntheticsRestApiRouteFactory } from './types';
 import { getSyntheticsCertsRoute } from './certs/get_certificates';
-import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
+import {
+  getAgentPoliciesRoute,
+  getPolicyHasCompleteAgentRoute,
+} from './settings/private_locations/get_agent_policies';
 import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
 import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
@@ -22,7 +25,7 @@ import { editSyntheticsParamsRoute } from './settings/edit_param';
 import { getSyntheticsParamsRoute } from './settings/params';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
-import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
+import { getAllLocationsRoute } from './synthetics_service/get_all_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
 import {
   disableSyntheticsRoute,
@@ -64,7 +67,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   deleteSyntheticsMonitorProjectRoute,
   disableSyntheticsRoute,
   editSyntheticsMonitorRoute,
-  getServiceLocationsRoute,
+  getAllLocationsRoute,
   getSyntheticsMonitorRoute,
   getSyntheticsProjectMonitorsRoute,
   getAllSyntheticsMonitorRoute,
@@ -101,6 +104,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsFilters,
   inspectSyntheticsMonitorRoute,
   getAgentPoliciesRoute,
+  getPolicyHasCompleteAgentRoute,
   getSyntheticsCertsRoute,
   getActionConnectorsRoute,
   getConnectorTypesRoute,

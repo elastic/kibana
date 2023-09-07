@@ -28,3 +28,5 @@ export interface AgentPolicyInfo {
   status: string;
   description?: string;
 }
+
+export type AgentType = 'complete' | 'lightweight' | 'unknown';

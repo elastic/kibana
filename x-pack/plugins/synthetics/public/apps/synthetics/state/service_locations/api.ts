@@ -18,7 +18,7 @@ export const fetchServiceLocations = async (): Promise<{
   locations: ServiceLocations;
 }> => {
   const { throttling, locations } = await apiService.get(
-    SYNTHETICS_API_URLS.SERVICE_LOCATIONS,
+    SYNTHETICS_API_URLS.ALL_LOCATIONS,
     undefined,
     ServiceLocationsApiResponseCodec
   );

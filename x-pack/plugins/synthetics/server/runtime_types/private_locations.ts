@@ -24,9 +24,7 @@ export const PrivateLocationAttributesCodec = t.intersection([
   }),
 ]);
 
-export const SyntheticsPrivateLocationsAttributesCodec = t.type({
-  locations: t.array(PrivateLocationAttributesCodec),
-});
+export const SyntheticsPrivateLocationsAttributesCodec = t.array(PrivateLocationAttributesCodec);
 
 export type PrivateLocationAttributes = t.TypeOf<typeof PrivateLocationAttributesCodec>;
 export type SyntheticsPrivateLocationsAttributes = t.TypeOf<

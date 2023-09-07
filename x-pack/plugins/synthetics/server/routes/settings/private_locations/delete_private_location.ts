@@ -28,16 +28,16 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<
     }),
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, syntheticsMonitorClient, request }) => {
+  handler: async (routeContext) => {
+    const { request, savedObjectsClient } = routeContext;
     const { locationId } = request.params as { locationId: string };
 
-    const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
-      savedObjectsClient,
-      syntheticsMonitorClient
-    );
+    const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(routeContext);
     const remainingLocations = locations.filter((loc) => loc.id !== locationId);
 
-    const result = await savedObjectsClient.create<SyntheticsPrivateLocationsAttributes>(
+    const result = await savedObjectsClient.create<{
+      locations: SyntheticsPrivateLocationsAttributes;
+    }>(
       privateLocationsSavedObjectName,
       { locations: remainingLocations },
       {
@@ -46,6 +46,6 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<
       }
     );
 
-    return toClientContract(result.attributes, agentPolicies);
+    return toClientContract(result.attributes.locations, agentPolicies);
   },
 });

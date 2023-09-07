@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+import { AgentType } from '../../../../common/types';
+import { resolveAgentPolicyComplete } from './helpers';
 import { AgentPolicyInfo } from '../../../../common/types';
 import { SyntheticsServerSetup } from '../../../types';
 import { SyntheticsRestApiRouteFactory } from '../../types';
@@ -16,6 +19,23 @@ export const getAgentPoliciesRoute: SyntheticsRestApiRouteFactory = () => ({
   validate: {},
   handler: async ({ server }): Promise<AgentPolicyInfo[]> => {
     return getAgentPoliciesAsInternalUser(server);
+  },
+});
+
+export const getPolicyHasCompleteAgentRoute: SyntheticsRestApiRouteFactory = () => ({
+  method: 'GET',
+  path: SYNTHETICS_API_URLS.IS_AGENT_POLICY_COMPLETE,
+  validate: {
+    params: schema.object({
+      policyId: schema.string(),
+    }),
+  },
+  handler: async ({ server, request }): Promise<AgentType> => {
+    const { policyId } = request.params;
+
+    const result = await resolveAgentPolicyComplete([policyId], server);
+
+    return result.find((policy) => policy.id === policyId)?.agentType ?? 'unknown';
   },
 });
 

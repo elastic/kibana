@@ -28,7 +28,7 @@ export const usePrivateLocationsAPI = () => {
 
   const { loading: fetchLoading } = useFetcher(async () => {
     const result = await getSyntheticsPrivateLocations();
-    setPrivateLocations(result.locations);
+    setPrivateLocations(result);
     return result;
   }, []);
 
@@ -38,7 +38,7 @@ export const usePrivateLocationsAPI = () => {
         ...formData,
         id: formData.agentPolicyId,
       });
-      setPrivateLocations(result.locations);
+      setPrivateLocations(result);
       setFormData(undefined);
       setIsAddingNew(false);
       dispatch(getServiceLocations());
@@ -57,7 +57,7 @@ export const usePrivateLocationsAPI = () => {
   const { loading: deleteLoading } = useFetcher(async () => {
     if (deleteId) {
       const result = await deleteSyntheticsPrivateLocations(deleteId);
-      setPrivateLocations(result.locations);
+      setPrivateLocations(result);
       setDeleteId(undefined);
       dispatch(getServiceLocations());
       return result;

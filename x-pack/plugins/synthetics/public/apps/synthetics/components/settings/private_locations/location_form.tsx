@@ -5,19 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiCallOut,
-  EuiCode,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useFormState } from 'react-hook-form';
+import { CompleteAgentCallout } from './complete_agent_callout';
+import { BrowserAgentCallout } from './browser_agent_callout';
+import { MissingAgentCallout } from './missing_agent_callout';
 import { TagsField } from '../components/tags_field';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
@@ -67,67 +61,14 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
         <PolicyHostsField errors={errors} control={control} privateLocations={privateLocations} />
         <EuiSpacer />
         <TagsField tagsList={tagsList} control={control} errors={errors} />
+        <BrowserAgentCallout />
         <EuiSpacer />
-        <EuiCallOut title={AGENT_CALLOUT_TITLE} size="s" style={{ textAlign: 'left' }}>
-          <p>
-            {
-              <FormattedMessage
-                id="xpack.synthetics.monitorManagement.agentCallout.content"
-                defaultMessage='To run "Browser" monitors on this private location, make sure that you&apos;re using the {code} Docker container, which contains the dependencies necessary to run these monitors. For more information, {link}.'
-                values={{
-                  code: <EuiCode>elastic-agent-complete</EuiCode>,
-                  link: (
-                    <EuiLink
-                      data-test-subj="syntheticsLocationFormReadTheDocsLink"
-                      target="_blank"
-                      href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
-                      external
-                    >
-                      <FormattedMessage
-                        id="xpack.synthetics.monitorManagement.agentCallout.link"
-                        defaultMessage="read the docs"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            }
-          </p>
-        </EuiCallOut>
-
+        <CompleteAgentCallout
+          selectedPolicyId={selectedPolicyId}
+          agentsCount={selectedPolicy?.agents ?? 0}
+        />
         <EuiSpacer />
-        {selectedPolicy?.agents === 0 && (
-          <EuiCallOut
-            title={AGENT_MISSING_CALLOUT_TITLE}
-            size="s"
-            style={{ textAlign: 'left' }}
-            color="warning"
-          >
-            <p>
-              {
-                <FormattedMessage
-                  id="xpack.synthetics.monitorManagement.agentMissingCallout.content"
-                  defaultMessage="You have selected an agent policy that has no agent attached. Make sure that you have at least one agent enrolled in this policy. You can add an agent before or after creating a location. For more information, {link}."
-                  values={{
-                    link: (
-                      <EuiLink
-                        data-test-subj="syntheticsLocationFormReadTheDocsLink"
-                        target="_blank"
-                        href="https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html#synthetics-private-location-fleet-agent"
-                        external
-                      >
-                        <FormattedMessage
-                          id="xpack.synthetics.monitorManagement.agentCallout.link"
-                          defaultMessage="read the docs"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
-            </p>
-          </EuiCallOut>
-        )}
+        {selectedPolicy?.agents === 0 && <MissingAgentCallout />}
       </EuiForm>
     </>
   );

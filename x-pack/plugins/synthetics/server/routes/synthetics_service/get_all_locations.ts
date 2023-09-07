@@ -6,19 +6,15 @@
  */
 
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { getAllLocations } from '../../synthetics_service/get_all_locations';
+import { getAllLocationsWithMeta } from '../../synthetics_service/get_all_locations';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
-export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
+export const getAllLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: SYNTHETICS_API_URLS.SERVICE_LOCATIONS,
+  path: SYNTHETICS_API_URLS.ALL_LOCATIONS,
   validate: {},
-  handler: async ({ server, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const { throttling, allLocations } = await getAllLocations({
-      server,
-      syntheticsMonitorClient,
-      savedObjectsClient,
-    });
+  handler: async (routeContext): Promise<any> => {
+    const { throttling, allLocations } = await getAllLocationsWithMeta(routeContext);
 
     return {
       locations: allLocations,
