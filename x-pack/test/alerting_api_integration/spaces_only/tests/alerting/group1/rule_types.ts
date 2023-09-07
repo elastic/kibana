@@ -138,6 +138,7 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
           hasFieldsForAAD: false,
           hasAlertsMappings: false,
           ruleTaskTimeout: '5m',
+          valid_legacy_consumers: ['alerts'],
         });
         expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
       });
