@@ -37,6 +37,7 @@ import {
   toNumber,
 } from '../../../context/url_params_context/helpers';
 import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
+import { SearchQueryActions } from '../../../services/telemetry';
 
 export const DEFAULT_REFRESH_INTERVAL = 60000;
 
@@ -275,13 +276,12 @@ export function UnifiedSearchBar({
       };
 
       if (isUpdate) {
-        action = 'update';
         history.push({
           ...location,
           search: fromQuery(newSearchParams),
         });
       } else {
-        action = 'refresh';
+        action = SearchQueryActions.Refresh;
         onRefresh();
       }
       telemetry.reportSearchQuerySubmitted({

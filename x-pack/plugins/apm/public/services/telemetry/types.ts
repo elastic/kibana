@@ -12,10 +12,14 @@ export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
 }
 
+export enum SearchQueryActions {
+  Submit = 'submit',
+  Refresh = 'refresh',
+}
 export interface SearchQuerySubmittedParams {
   kuery_fields: string[];
   timerange: string;
-  action: 'submit' | 'refresh' | 'update';
+  action: SearchQueryActions;
 }
 
 export type TelemetryEventParams = SearchQuerySubmittedParams;

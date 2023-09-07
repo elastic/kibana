@@ -27,8 +27,7 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
     action: {
       type: 'keyword',
       _meta: {
-        description:
-          'The action performed (e.g., submitted, refreshed, updated)',
+        description: 'The action performed (e.g., submit, refresh)',
       },
     },
   },
