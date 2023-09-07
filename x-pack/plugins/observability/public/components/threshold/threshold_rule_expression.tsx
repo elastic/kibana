@@ -180,7 +180,7 @@ export default function Expressions(props: Props) {
     (newDataView: DataView) => {
       const ruleCriteria = (ruleParams.criteria ? ruleParams.criteria.slice() : []).map(
         (criterion) => {
-          criterion.customMetrics?.forEach((metric) => {
+          criterion.metrics?.forEach((metric) => {
             metric.field = undefined;
           });
           return criterion;

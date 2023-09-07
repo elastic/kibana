@@ -76,7 +76,7 @@ export function thresholdRuleType(
     ...baseCriterion,
     metric: schema.string(),
     aggType: oneOfLiterals(METRIC_EXPLORER_AGGREGATIONS),
-    customMetrics: schema.never(),
+    metrics: schema.never(),
     equation: schema.never(),
     label: schema.never(),
   });
@@ -85,7 +85,7 @@ export function thresholdRuleType(
     ...baseCriterion,
     aggType: schema.literal('count'),
     metric: schema.never(),
-    customMetrics: schema.never(),
+    metrics: schema.never(),
     equation: schema.never(),
     label: schema.never(),
   });
@@ -94,7 +94,7 @@ export function thresholdRuleType(
     ...baseCriterion,
     aggType: schema.literal('custom'),
     metric: schema.never(),
-    customMetrics: schema.arrayOf(
+    metrics: schema.arrayOf(
       schema.oneOf([
         schema.object({
           name: schema.string(),
