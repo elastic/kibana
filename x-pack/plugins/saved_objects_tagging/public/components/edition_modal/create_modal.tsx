@@ -7,10 +7,10 @@
 
 import React, { FC, useState, useCallback } from 'react';
 import { ITagsClient, Tag, TagAttributes } from '../../../common/types';
-import { TagValidation } from '../../../common/validation';
 import { isServerValidationError } from '../../services/tags';
 import { getRandomColor, validateTag } from './utils';
 import { CreateOrEditModal } from './create_or_edit_modal';
+import { useValidation } from './use_validation';
 
 interface CreateTagModalProps {
   defaultValues?: Partial<TagAttributes>;
@@ -26,22 +26,20 @@ const getDefaultAttributes = (providedDefaults?: Partial<TagAttributes>): TagAtt
   ...providedDefaults,
 });
 
-const initialValidation: TagValidation = {
-  valid: true,
-  warnings: [],
-  errors: {},
-};
-
 export const CreateTagModal: FC<CreateTagModalProps> = ({
   defaultValues,
   tagClient,
   onClose,
   onSave,
 }) => {
-  const [validation, setValidation] = useState<TagValidation>(initialValidation);
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(
     getDefaultAttributes(defaultValues)
   );
+  const { validation, setValidation, onNameChange, isValidating, hasDuplicateNameError } =
+    useValidation({
+      tagAttributes,
+      tagClient,
+    });
 
   const setField = useCallback(
     <T extends keyof TagAttributes>(field: T) =>
@@ -55,6 +53,10 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({
   );
 
   const onSubmit = useCallback(async () => {
+    if (hasDuplicateNameError) {
+      return;
+    }
+
     const clientValidation = validateTag(tagAttributes);
     setValidation(clientValidation);
     if (!clientValidation.valid) {
@@ -70,16 +72,18 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({
         setValidation(e.body.attributes);
       }
     }
-  }, [tagAttributes, tagClient, onSave]);
+  }, [tagAttributes, hasDuplicateNameError, setValidation, tagClient, onSave]);
 
   return (
     <CreateOrEditModal
       onClose={onClose}
       onSubmit={onSubmit}
+      onNameChange={onNameChange}
       mode={'create'}
       tag={tagAttributes}
       setField={setField}
       validation={validation}
+      isValidating={isValidating}
     />
   );
 };
