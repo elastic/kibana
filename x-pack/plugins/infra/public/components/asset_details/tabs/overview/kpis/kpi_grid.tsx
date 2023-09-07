@@ -16,6 +16,7 @@ import {
   KPI_CHART_HEIGHT,
   AVERAGE_SUBTITLE,
 } from '../../../../../common/visualizations';
+import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
 
 interface Props {
   dataView?: DataView;
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export const KPIGrid = React.memo(({ nodeName, dataView, timeRange }: Props) => {
+  const { refreshTs } = useDateRangeProviderContext();
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
@@ -43,6 +45,7 @@ export const KPIGrid = React.memo(({ nodeName, dataView, timeRange }: Props) => 
             dataView={dataView}
             dateRange={timeRange}
             layers={{ ...layers, options: { ...layers.options, subtitle: AVERAGE_SUBTITLE } }}
+            lastReloadRequestTime={refreshTs}
             height={KPI_CHART_HEIGHT}
             filters={filters}
             title={title}

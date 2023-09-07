@@ -19,7 +19,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const find = getService('find');
 
-  describe('persistable attachment', () => {
+  describe('Cases persistable attachments', () => {
     describe('lens visualization', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
