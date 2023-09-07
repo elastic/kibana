@@ -47,6 +47,7 @@ export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
   roles: { enabled: boolean };
   export_types: { pdf: { enabled: boolean }; png: { enabled: boolean }; csv: { enabled: boolean } };
+  disableStatefulSettings: { enabled: boolean };
 }
 
 function getStored(): JobId[] {
@@ -124,7 +125,7 @@ export class ReportingPublicPlugin
    */
   private getApiClient(http: HttpSetup, uiSettings: IUiSettingsClient) {
     if (!this.apiClient) {
-      this.apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion);
+      this.apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion, this.config.disableStatefulSettings.enabled);
     }
     return this.apiClient;
   }
