@@ -28,7 +28,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
-  describe('View case', () => {
+  describe('Case View', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
@@ -437,7 +437,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const reporterText = await reporter.getVisibleText();
 
-        expect(reporterText).to.be('elastic');
+        expect(reporterText).to.be('elastic_serverless');
       });
     });
   });
