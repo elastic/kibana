@@ -67,7 +67,6 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
     has_fields_for_a_a_d: false,
     has_alerts_mappings: false,
     rule_task_timeout: '5m',
-    valid_legacy_consumers: ['alerts'],
   };
 
   describe('rule_types', () => {

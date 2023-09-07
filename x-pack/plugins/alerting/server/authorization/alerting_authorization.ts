@@ -454,7 +454,7 @@ export class AlertingAuthorization {
     return new Set(
       Array.from(ruleTypes).map((ruleType) => ({
         ...ruleType,
-        authorizedConsumers,
+        authorizedConsumers: { ...authorizedConsumers },
       }))
     );
   }

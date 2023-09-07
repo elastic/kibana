@@ -48,7 +48,6 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
         has_fields_for_a_a_d: false,
         has_alerts_mappings: false,
         rule_task_timeout: '5m',
-        valid_legacy_consumers: ['alerts'],
       });
       expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
     });
@@ -138,7 +137,6 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
           hasFieldsForAAD: false,
           hasAlertsMappings: false,
           ruleTaskTimeout: '5m',
-          validLegacyConsumers: ['alerts'],
         });
         expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
       });
