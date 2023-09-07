@@ -265,6 +265,33 @@ const setupKnowledgeBaseRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const functionGetDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/functions/get_dataset_info',
+  params: t.type({
+    body: t.type({
+      dataview: t.string,
+      fields: t.array(nonEmptyStringRt),
+    }),
+  }),
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    dataviews: string[];
+    fields: Array<{ name: string; description: string; type: string }>;
+  }> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return client.get_dataset_info(resources.params.body.dataview, resources.params.body.fields);
+  },
+});
+
 export const functionRoutes = {
   ...functionElasticsearchRoute,
   ...functionRecallRoute,
@@ -272,4 +299,5 @@ export const functionRoutes = {
   ...setupKnowledgeBaseRoute,
   ...getKnowledgeBaseStatus,
   ...functionAlertsRoute,
+  ...functionGetDatasetInfoRoute,
 };
