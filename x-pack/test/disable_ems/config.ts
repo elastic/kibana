@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services, pageObjects } from './ftr_provider_context';
 
@@ -13,7 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaFunctionalConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
   );
-  
+
   return {
     ...kibanaFunctionalConfig.getAll(),
     testFiles: [require.resolve('./tests')],
@@ -24,7 +23,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...kibanaFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'), `--map.includeElasticMapsService=false`],
+      serverArgs: [
+        ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
+        `--map.includeElasticMapsService=false`,
+      ],
     },
   };
 }
