@@ -17,6 +17,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
@@ -93,6 +94,7 @@ import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY,
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
 
@@ -361,6 +363,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.data.search.registerSearchStrategy(
         ENDPOINT_FIELDS_SEARCH_STRATEGY,
         endpointFieldsStrategy
+      );
+
+      const endpointPackagePoliciesStatsStrategy =
+        endpointPackagePoliciesStatsSearchStrategyProvider(this.endpointAppContextService);
+      plugins.data.search.registerSearchStrategy(
+        ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY,
+        endpointPackagePoliciesStatsStrategy
       );
 
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
