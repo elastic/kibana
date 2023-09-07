@@ -60,7 +60,7 @@ Refer to the {ref}/security-api-update-cross-cluster-api-key.html[update cross-c
 [[view-api-keys]]
 === View and delete API keys
 
-The *API Keys* feature in Kibana lists your API keys, including the name, date created, and status. If an API key expires, its status changes from `Active` to `Expired`.
+The *API Keys* feature in {kib} lists your API keys, including the name, date created, and status. If an API key expires, its status changes from `Active` to `Expired`.
 
 If you have `manage_security` or `manage_api_key` permissions, you can view the API keys of all users, and see which API key was created by which user in which realm.
 If you have only the `manage_own_api_key` permission, you see only a list of your own keys.
