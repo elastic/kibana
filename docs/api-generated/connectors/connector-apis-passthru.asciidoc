@@ -1006,6 +1006,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#config_properties_index"><code>config_properties_index</code> - Connector request properties for an index connector</a></li>
     <li><a href="#config_properties_jira"><code>config_properties_jira</code> - Connector request properties for a Jira connector</a></li>
     <li><a href="#config_properties_opsgenie"><code>config_properties_opsgenie</code> - Connector request properties for an Opsgenie connector</a></li>
+    <li><a href="#config_properties_pagerduty"><code>config_properties_pagerduty</code> - Connector request properties for a PagerDuty connector</a></li>
     <li><a href="#config_properties_resilient"><code>config_properties_resilient</code> - Connector request properties for a IBM Resilient connector</a></li>
     <li><a href="#config_properties_servicenow"><code>config_properties_servicenow</code> - Connector request properties for a ServiceNow ITSM connector</a></li>
     <li><a href="#config_properties_servicenow_itom"><code>config_properties_servicenow_itom</code> - Connector request properties for a ServiceNow ITSM connector</a></li>
@@ -1089,6 +1090,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#secrets_properties_genai"><code>secrets_properties_genai</code> - Connector secrets properties for a generative AI connector</a></li>
     <li><a href="#secrets_properties_jira"><code>secrets_properties_jira</code> - Connector secrets properties for a Jira connector</a></li>
     <li><a href="#secrets_properties_opsgenie"><code>secrets_properties_opsgenie</code> - Connector secrets properties for an Opsgenie connector</a></li>
+    <li><a href="#secrets_properties_pagerduty"><code>secrets_properties_pagerduty</code> - Connector secrets properties for a PagerDuty connector</a></li>
     <li><a href="#secrets_properties_resilient"><code>secrets_properties_resilient</code> - Connector secrets properties for IBM Resilient connector</a></li>
     <li><a href="#secrets_properties_servicenow"><code>secrets_properties_servicenow</code> - Connector secrets properties for ServiceNow ITOM, ServiceNow ITSM, and ServiceNow SecOps connectors</a></li>
     <li><a href="#secrets_properties_slack_api"><code>secrets_properties_slack_api</code> - Connector secrets properties for a Web API Slack connector</a></li>
@@ -1100,6 +1102,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_connector_request_index"><code>update_connector_request_index</code> - Update index connector request</a></li>
     <li><a href="#update_connector_request_jira"><code>update_connector_request_jira</code> - Update Jira connector request</a></li>
     <li><a href="#update_connector_request_opsgenie"><code>update_connector_request_opsgenie</code> - Update Opsgenie connector request</a></li>
+    <li><a href="#update_connector_request_pagerduty"><code>update_connector_request_pagerduty</code> - Update PagerDuty connector request</a></li>
     <li><a href="#update_connector_request_resilient"><code>update_connector_request_resilient</code> - Update IBM Resilient connector request</a></li>
     <li><a href="#update_connector_request_serverlog"><code>update_connector_request_serverlog</code> - Update server log connector request</a></li>
     <li><a href="#update_connector_request_servicenow"><code>update_connector_request_servicenow</code> - Update ServiceNow ITSM connector or ServiceNow SecOps request</a></li>
@@ -1410,6 +1413,13 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="config_properties_pagerduty"><code>config_properties_pagerduty</code> - Connector request properties for a PagerDuty connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.pagerduty</code>.</div>
+    <div class="field-items">
+      <div class="param">apiUrl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The PagerDuty event URL. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="config_properties_resilient"><code>config_properties_resilient</code> - Connector request properties for a IBM Resilient connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines properties for connectors when type is <code>.resilient</code>.</div>
     <div class="field-items">
@@ -1574,7 +1584,7 @@ Any modifications made to this file will be overwritten.
     <h3><a name="connector_response_properties_pagerduty"><code>connector_response_properties_pagerduty</code> - Connector response properties for a PagerDuty connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.pagerduty</code>. </div>
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_pagerduty">config_properties_pagerduty</a></span>  </div>
 <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.pagerduty</div>
@@ -1856,12 +1866,12 @@ Any modifications made to this file will be overwritten.
     <h3><a name="create_connector_request_pagerduty"><code>create_connector_request_pagerduty</code> - Create PagerDuty connector request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The PagerDuty connector uses the v2 Events API to trigger, acknowledge, and resolve PagerDuty alerts.</div>
     <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.pagerduty</code>. </div>
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_pagerduty">config_properties_pagerduty</a></span>  </div>
 <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.pagerduty</div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.pagerduty</code>. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_pagerduty">secrets_properties_pagerduty</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2377,6 +2387,13 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="secrets_properties_pagerduty"><code>secrets_properties_pagerduty</code> - Connector secrets properties for a PagerDuty connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.pagerduty</code>.</div>
+    <div class="field-items">
+      <div class="param">routingKey </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A 32 character PagerDuty Integration Key for an integration on a service. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="secrets_properties_resilient"><code>secrets_properties_resilient</code> - Connector secrets properties for IBM Resilient connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines secrets for connectors when type is <code>.resilient</code>.</div>
     <div class="field-items">
@@ -2469,6 +2486,15 @@ Any modifications made to this file will be overwritten.
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_opsgenie">config_properties_opsgenie</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_opsgenie">secrets_properties_opsgenie</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_pagerduty"><code>update_connector_request_pagerduty</code> - Update PagerDuty connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_pagerduty">config_properties_pagerduty</a></span>  </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_pagerduty">secrets_properties_pagerduty</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
