@@ -17,7 +17,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlObltNavigation = getService('svlObltNavigation');
 
-  describe('cases list', () => {
+  describe('Cases list', () => {
     before(async () => {
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });

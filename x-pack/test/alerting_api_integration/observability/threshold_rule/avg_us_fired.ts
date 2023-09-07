@@ -96,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [7500000],
                 timeSize: 5,
                 timeUnit: 'm',
-                customMetrics: [
+                metrics: [
                   { name: 'A', field: 'span.self_time.sum.us', aggType: Aggregators.AVERAGE },
                 ],
               },
@@ -189,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [7500000],
                 timeSize: 5,
                 timeUnit: 'm',
-                customMetrics: [{ name: 'A', field: 'span.self_time.sum.us', aggType: 'avg' }],
+                metrics: [{ name: 'A', field: 'span.self_time.sum.us', aggType: 'avg' }],
               },
             ],
             alertOnNoData: true,
