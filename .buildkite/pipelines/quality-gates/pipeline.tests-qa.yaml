@@ -4,7 +4,7 @@
 
 steps:
   - label: ":pipeline::kibana::seedling: Trigger Kibana Serverless Tests for ${ENVIRONMENT}"
-    trigger: appex-qa-kibana-serverless-ftr-tests # https://buildkite.com/elastic/appex-qa-kibana-serverless-ftr-tests
+    trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
     soft_fail: true # Remove this before release or when tests stabilize
     build:
       env:
