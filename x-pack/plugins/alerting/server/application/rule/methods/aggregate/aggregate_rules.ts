@@ -12,7 +12,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common
 import { buildKueryNodeFilter } from '../../../../rules_client/common';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import { RulesClientContext } from '../../../../rules_client/types';
-
+import { aggregateOptionsSchema } from '.';
 import type { AggregateParams } from './types/v1';
 import { validateRuleAggregationFields } from './validation';
 
@@ -30,6 +30,7 @@ export async function aggregateRules<T = Record<string, unknown>>(
       alertingAuthorizationFilterOpts
     );
     validateRuleAggregationFields(aggs);
+    aggregateOptionsSchema.validate(options);
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

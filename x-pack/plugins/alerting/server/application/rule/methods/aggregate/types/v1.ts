@@ -4,22 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TypeOf } from '@kbn/config-schema';
 import { KueryNode } from '@kbn/es-query';
+import { aggregateOptionsSchema } from '..';
 
-export interface AggregateOptions {
-  search?: string;
-  defaultSearchOperator?: 'AND' | 'OR';
-  searchFields?: string[];
-  hasReference?: {
-    type: string;
-    id: string;
-  };
+// Adding filter as in schema it's defined as any instead of KueryNode
+export type AggregateOptions = TypeOf<typeof aggregateOptionsSchema> & {
   filter?: string | KueryNode;
-  page?: number;
-  perPage?: number;
-}
+};
 
 export interface AggregateParams<AggregationResult> {
   options?: AggregateOptions;
