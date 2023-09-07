@@ -15,7 +15,6 @@ import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { ResetSearchButton } from './reset_search_button';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resizeRef: RefObject<HTMLDivElement>;
@@ -48,8 +47,6 @@ export const DiscoverHistogramLayout = ({
   if (!searchSessionId && !isPlainRecord) {
     return null;
   }
-  const textBasedQueryColumns = dataState.data$.documents$.getValue().textBasedQueryColumns;
-  const selectedColumns = mainContentProps.columns;
 
   return (
     <UnifiedHistogramContainer
@@ -64,22 +61,15 @@ export const DiscoverHistogramLayout = ({
       }
       css={histogramLayoutCss}
     >
-      <>
-        <SelectedVSAvailableCallout
-          isPlainRecord={isPlainRecord}
-          textBasedQueryColumns={textBasedQueryColumns}
-          selectedColumns={selectedColumns}
-        />
-        <DiscoverMainContent
-          {...mainContentProps}
-          stateContainer={stateContainer}
-          dataView={dataView}
-          isPlainRecord={isPlainRecord}
-          // The documents grid doesn't rerender when the chart visibility changes
-          // which causes it to render blank space, so we need to force a rerender
-          key={`docKey${hideChart}`}
-        />
-      </>
+      <DiscoverMainContent
+        {...mainContentProps}
+        stateContainer={stateContainer}
+        dataView={dataView}
+        isPlainRecord={isPlainRecord}
+        // The documents grid doesn't rerender when the chart visibility changes
+        // which causes it to render blank space, so we need to force a rerender
+        key={`docKey${hideChart}`}
+      />
     </UnifiedHistogramContainer>
   );
 };
