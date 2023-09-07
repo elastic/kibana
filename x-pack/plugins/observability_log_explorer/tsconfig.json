@@ -24,6 +24,8 @@
     "@kbn/config-schema",
     "@kbn/share-plugin",
     "@kbn/kibana-utils-plugin",
+    "@kbn/core-application-browser",
+    "@kbn/discover-plugin",
   ],
   "exclude": [
     "target/**/*"

@@ -34,6 +34,8 @@
     "@kbn/es-query",
     "@kbn/use-tracked-promise",
     "@kbn/observability-log-explorer-plugin",
+    "@kbn/share-plugin",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

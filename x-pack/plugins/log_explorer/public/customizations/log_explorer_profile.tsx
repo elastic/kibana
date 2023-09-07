@@ -7,10 +7,13 @@
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { CustomizationCallback } from '@kbn/discover-plugin/public';
+import { CustomizationCallback, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import React from 'react';
+import { type BehaviorSubject, combineLatest, from, map, Subscription } from 'rxjs';
 import { dynamic } from '../utils/dynamic';
 import { IDatasetsClient } from '../services/datasets';
+import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
+import { LogExplorerStateContainer } from '../components/log_explorer';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
@@ -19,6 +22,7 @@ export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
   datasetsClient: IDatasetsClient;
+  state$?: BehaviorSubject<LogExplorerStateContainer>;
 }
 
 export const createLogExplorerProfileCustomizations =
@@ -26,6 +30,7 @@ export const createLogExplorerProfileCustomizations =
     core,
     data,
     datasetsClient,
+    state$,
   }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
     // Lazy load dependencies
@@ -39,12 +44,25 @@ export const createLogExplorerProfileCustomizations =
       toasts: core.notifications.toasts,
     });
 
-    //
     /**
      * Wait for the machine to be fully initialized to set the restored selection
      * create the DataView and set it in the stateContainer from Discover
      */
     await waitForState(logExplorerProfileStateService, 'initialized');
+
+    /**
+     * Subscribe the state$ BehaviorSubject when the consumer app wants to react to state changes.
+     * It emits a combined state of:
+     * - log explorer state machine context
+     * - appState from the discover stateContainer
+     */
+    let stateSubscription: Subscription;
+    if (state$) {
+      stateSubscription = createStateUpdater({
+        logExplorerProfileStateService,
+        stateContainer,
+      }).subscribe(state$);
+    }
 
     /**
      * Replace the DataViewPicker with a custom `DatasetSelector` to pick integrations streams
@@ -77,4 +95,25 @@ export const createLogExplorerProfileCustomizations =
         saveItem: { disabled: true },
       },
     });
+
+    return () => {
+      if (stateSubscription) {
+        stateSubscription.unsubscribe();
+      }
+    };
   };
+
+const createStateUpdater = ({
+  logExplorerProfileStateService,
+  stateContainer,
+}: {
+  logExplorerProfileStateService: LogExplorerProfileStateService;
+  stateContainer: DiscoverStateContainer;
+}) => {
+  return combineLatest([from(logExplorerProfileStateService), stateContainer.appState.state$]).pipe(
+    map(([logExplorerState, appState]) => ({
+      logExplorerState: logExplorerState.context,
+      appState,
+    }))
+  );
+};

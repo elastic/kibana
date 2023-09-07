@@ -13,6 +13,7 @@
     ],
     "requiredPlugins": [
       "data",
+      "discover",
       "logExplorer",
       "observabilityShared",
       "share",
@@ -21,6 +22,6 @@
     "optionalPlugins": [
       "serverless"
     ],
-    "requiredBundles": []
+    "requiredBundles": ["kibanaReact"]
   }
 }

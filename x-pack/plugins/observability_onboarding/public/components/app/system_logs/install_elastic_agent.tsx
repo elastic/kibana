@@ -191,7 +191,11 @@ export function InstallElasticAgent() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="text" onClick={onBack}>
+            <EuiButton
+              data-test-subj="observabilityOnboardingInstallElasticAgentBackButton"
+              color="text"
+              onClick={onBack}
+            >
               {i18n.translate(
                 'xpack.observability_onboarding.systemLogs.back',
                 { defaultMessage: 'Back' }

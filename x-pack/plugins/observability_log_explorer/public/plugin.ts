@@ -19,6 +19,7 @@ import {
   AllDatasetsLocatorDefinition,
 } from '../common/locators';
 import { type ObservabilityLogExplorerConfig } from '../common/plugin_config';
+import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../common/constants';
 import { logExplorerAppTitle } from '../common/translations';
 import { renderObservabilityLogExplorer } from './applications/observability_log_explorer';
 import type {
@@ -49,7 +50,7 @@ export class ObservabilityLogExplorerPlugin
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
-      id: 'observability-log-explorer',
+      id: OBSERVABILITY_LOG_EXPLORER_APP_ID,
       title: logExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoLogging',
