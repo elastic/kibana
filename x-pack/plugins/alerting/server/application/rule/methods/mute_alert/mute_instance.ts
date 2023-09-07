@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Boom } from '@hapi/boom';
+import Boom from '@hapi/boom';
 import { muteAlertParamsSchema } from './schemas';
 import type { MuteAlertParams } from './types';
 import { Rule } from '../../../../types';

@@ -13,5 +13,4 @@ export type {
   RuleParams,
   RuleNotifyWhen,
   RuleSnoozeSchedule,
-  RuleMuteAlertParams,
 } from './rule';
