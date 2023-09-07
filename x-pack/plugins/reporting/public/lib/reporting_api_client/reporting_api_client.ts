@@ -169,7 +169,7 @@ export class ReportingAPIClient implements IReportingAPI {
     });
     return `${this.http.basePath.prepend(
       PUBLIC_ROUTES.GENERATE_PREFIX
-    )}/${exportType}?${params}?elasticInternalOrigins=true`;
+    )}/${exportType}?${params}`;
   }
 
   /**
@@ -178,7 +178,7 @@ export class ReportingAPIClient implements IReportingAPI {
   public async createReportingJob(exportType: string, jobParams: BaseParams) {
     const jobParamsRison = rison.encode(jobParams);
     const resp: { job: ReportApiJSON } = await this.http.post(
-      `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}?elasticInternalOrigins=true`,
+      `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}?${ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM}=true`,
       {
         method: 'POST',
         body: JSON.stringify({ jobParams: jobParamsRison }),
