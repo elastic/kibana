@@ -96,7 +96,7 @@ export const hostKPICharts: KPIChartProps[] = [
     toolTip: METRICS_TOOLTIP.memoryUsage,
   },
   {
-    id: 'diskUsage',
+    id: 'diskSpaceUsage',
     title: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.kpi.diskUsage.title', {
       defaultMessage: 'Disk Usage',
     }),
