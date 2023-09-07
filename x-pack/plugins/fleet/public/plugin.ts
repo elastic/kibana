@@ -333,7 +333,10 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
         if (permissionsResponse?.success) {
           const { isInitialized } = await core.http.post<PostFleetSetupResponse>(
-            setupRouteService.getSetupPath()
+            setupRouteService.getSetupPath(),
+            {
+              version: API_VERSIONS.public.v1,
+            }
           );
           if (!isInitialized) {
             throw new Error('Unknown setup error');

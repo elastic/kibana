@@ -563,3 +563,20 @@ describe('getMaxAttempts()', () => {
     expect(maxAttempts).toEqual(3);
   });
 });
+
+describe('getMaxQueued()', () => {
+  test('returns the queued actions max defined in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      queued: { max: 1 },
+    });
+    const max = acu.getMaxQueued();
+    expect(max).toEqual(1);
+  });
+
+  test('returns the default queued actions max', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const max = acu.getMaxQueued();
+    expect(max).toEqual(1000000);
+  });
+});
