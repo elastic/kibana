@@ -42,10 +42,11 @@ export function useDateRangeProvider({
   );
 
   const getParsedDateRange = useCallback(() => {
-    const { from = dateRange.from, to = dateRange.to } = parsedDateRange;
+    const defaultDateRange = getDefaultDateRange();
+    const { from = defaultDateRange.from, to = defaultDateRange.to } = parsedDateRange;
 
     return { from, to };
-  }, [dateRange, parsedDateRange]);
+  }, [parsedDateRange]);
 
   const getDateRangeInTimestamp = useCallback(
     () => toTimestampRange(getParsedDateRange()),
