@@ -2752,7 +2752,7 @@
         }
       },
       "config_properties_xmatters": {
-        "title": "Connector request properties for a xMatters connector",
+        "title": "Connector request properties for an xMatters connector",
         "description": "Defines properties for connectors when type is `.xmatters`.",
         "type": "object",
         "properties": {
