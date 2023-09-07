@@ -111,6 +111,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-pagerduty-configuration>>
 * <<preconfigured-server-log-configuration>>
 * <<preconfigured-webhook-configuration>>
+* <<preconfigured-xmatters-configuration>>
 
 
 [float]
@@ -217,3 +218,44 @@ xpack.actions.preconfigured:
 <6> A valid password. Required if `hasAuth` is set to `true`. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
 
 NOTE: SSL authentication is not supported in preconfigured webhook connectors.
+
+
+[float]
+[[preconfigured-xmatters-configuration]]
+==== xMatters connectors
+
+The following example creates a <<xmatters-action-type,xMatters connector>> with basic authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-xmatters:
+    name: preconfigured-xmatters-connector-type
+    actionTypeId: .xmatters
+    config:
+      configUrl: https://test.host <1>
+      usesBasic: true <2>
+    secrets:
+      user: testuser <3>
+      password: passwordkeystorevalue <4>
+--
+<1> The request URL for the Elastic Alerts trigger in xMatters.
+<2> Indicates whether the connector uses HTTP basic authentication. If `true`, you must provide `user` and `password` values. Defaults to `true`.
+<3> A user name for authentication, whic his required when `usesBasic` is `true`.
+<4> A password for authentication, which is required when `usesBasic` is `true`. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
+
+The following example creates an xMatters connector with URL authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-xmatters:
+    name: preconfigured-xmatters-connector-type
+    actionTypeId: .xmatters
+    config:
+      usesBasic: false <1>
+    secrets:
+      secretsUrl: https://test.host?apiKey=1234-abcd <2>
+--
+<1> Indicates whether the connector uses HTTP basic authentication. Set to `false` to use URL authentication. Defaults to `true`.
+<2> The request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL.
