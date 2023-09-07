@@ -31,7 +31,7 @@ const tableEntries = [
     normalizedLoad: '0.5%',
     memoryUsage: '18.4%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.6%',
+    diskUsage: '17.6%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -41,7 +41,7 @@ const tableEntries = [
     normalizedLoad: '0.1%',
     memoryUsage: '13.8%',
     memoryFree: '3.3 GB',
-    diskSpaceUsage: '16.9%',
+    diskUsage: '16.9%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -51,7 +51,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '16.5%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '16.3%',
+    diskUsage: '16.3%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -61,7 +61,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '18.2%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.8%',
+    diskUsage: '17.8%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -71,7 +71,7 @@ const tableEntries = [
     normalizedLoad: '1.4%',
     memoryUsage: '18%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.5%',
+    diskUsage: '17.5%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -81,7 +81,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '15.9%',
     memoryFree: '3.3 GB',
-    diskSpaceUsage: '16.3%',
+    diskUsage: '16.3%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -293,7 +293,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpuUsage', value: '13.9%' },
             { metric: 'normalizedLoad1m', value: '18.8%' },
             { metric: 'memoryUsage', value: '94.9%' },
-            { metric: 'diskSpaceUsage', value: 'N/A' },
+            { metric: 'diskUsage', value: 'N/A' },
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.try(async () => {
@@ -496,7 +496,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'cpuUsage', value: '0.8%' },
           { metric: 'normalizedLoad1m', value: '0.3%' },
           { metric: 'memoryUsage', value: '16.8%' },
-          { metric: 'diskSpaceUsage', value: '17.1%' },
+          { metric: 'diskUsage', value: '17.1%' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
             await retry.try(async () => {
@@ -651,7 +651,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'cpuUsage', value: '0.8%' },
               { metric: 'normalizedLoad1m', value: '0.2%' },
               { metric: 'memoryUsage', value: '16.3%' },
-              { metric: 'diskSpaceUsage', value: '16.9%' },
+              { metric: 'diskUsage', value: '16.9%' },
             ].map(async ({ metric, value }) => {
               await retry.try(async () => {
                 const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
