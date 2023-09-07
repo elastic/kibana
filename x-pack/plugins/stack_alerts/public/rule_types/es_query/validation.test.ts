@@ -289,7 +289,7 @@ describe('expression params validation', () => {
       searchType: SearchType.esqlQuery,
     } as EsQueryRuleParams<SearchType.esqlQuery>;
     expect(validateExpression(initialParams).errors.esqlQuery.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.esqlQuery[0]).toBe(`ESQL query is required.`);
+    expect(validateExpression(initialParams).errors.esqlQuery[0]).toBe(`ES|QL query is required.`);
   });
 
   test('if esqlQuery timeField property is not defined should return proper error message', () => {
