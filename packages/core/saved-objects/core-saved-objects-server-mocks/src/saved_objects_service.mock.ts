@@ -77,11 +77,9 @@ const createSetupContractMock = () => {
     setSpacesExtension: jest.fn(),
     registerType: jest.fn(),
     getDefaultIndex: jest.fn(),
-    getAllIndices: jest.fn(),
   };
 
   setupContract.getDefaultIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
-  setupContract.getAllIndices.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
 
   return setupContract;
 };

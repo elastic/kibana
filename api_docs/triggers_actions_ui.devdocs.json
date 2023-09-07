@@ -805,6 +805,47 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.getTimeOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeOptions",
+        "description": [],
+        "signature": [
+          "(unitSize: number) => { text: string; value: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.TIME_UNITS",
+            "text": "TIME_UNITS"
+          },
+          "; }[]"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getTimeOptions.$1",
+            "type": "number",
+            "tags": [],
+            "label": "unitSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.getTimeUnitLabel",
         "type": "Function",
         "tags": [],
@@ -5688,6 +5729,26 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.expressions",
+            "type": "Object",
+            "tags": [],
+            "label": "expressions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "public",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-public.ExpressionsStart",
+                "text": "ExpressionsStart"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8188,6 +8249,42 @@
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getGlobalRuleEventLogList",
+          "type": "Function",
+          "tags": [],
+          "label": "getGlobalRuleEventLogList",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "GlobalRuleEventLogListProps",
+            ") => React.ReactElement<",
+            "GlobalRuleEventLogListProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getGlobalRuleEventLogList.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "GlobalRuleEventLogListProps"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
           "returnComment": []
         }
       ],

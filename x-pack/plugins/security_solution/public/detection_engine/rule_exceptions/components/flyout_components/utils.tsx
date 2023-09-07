@@ -33,7 +33,7 @@ import {
 } from '../../utils/helpers';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import type {
   ExceptionListRuleReferencesInfoSchema,
   ExceptionListRuleReferencesSchema,

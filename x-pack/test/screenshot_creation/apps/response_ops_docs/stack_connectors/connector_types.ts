@@ -171,5 +171,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('webhook-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
+
+    it('pagerduty connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('pagerduty');
+      await testSubjects.setValue('nameInput', 'PagerDuty test connector');
+      await testSubjects.setValue('pagerdutyApiUrlInput', 'https://dev-test.pagerduty.com/');
+      await testSubjects.setValue('pagerdutyRoutingKeyInput', 'testkey');
+      await commonScreenshots.takeScreenshot('pagerduty-connector', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await testSubjects.setValue('eventActionSelect', 'trigger');
+      await commonScreenshots.takeScreenshot('pagerduty-params-test', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
+    it('opsgenie connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('opsgenie');
+      await testSubjects.setValue('nameInput', 'Opsgenie test connector');
+      await testSubjects.setValue('secrets.apiKey-input', 'testkey');
+      await commonScreenshots.takeScreenshot('opsgenie-connector', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await commonScreenshots.takeScreenshot('opsgenie-params-test', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
   });
 }

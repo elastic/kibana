@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -18,8 +17,8 @@ import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_
 import { ServerlessRoleName } from '../../support/roles';
 
 const testSpaces = [
-  { name: 'default', tags: [tag.ESS, tag.SERVERLESS] },
-  { name: 'custom-spaces', tags: [tag.ESS] },
+  { name: 'default', tags: ['@ess', '@serverless'] },
+  { name: 'custom-spaces', tags: ['@ess'] },
 ];
 describe('ALL - Custom space', () => {
   testSpaces.forEach((testSpace) => {
@@ -72,7 +71,7 @@ describe('ALL - Custom space', () => {
         }
       });
 
-      it('Discover should be opened in new tab in results table', { tags: [tag.ESS] }, () => {
+      it('Discover should be opened in new tab in results table', { tags: ['@ess'] }, () => {
         cy.contains('New live query').click();
         selectAllAgents();
         inputQuery('select * from uptime;');

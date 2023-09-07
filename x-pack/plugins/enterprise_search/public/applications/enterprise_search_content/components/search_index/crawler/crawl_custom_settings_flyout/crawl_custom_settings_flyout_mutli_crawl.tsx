@@ -13,18 +13,16 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { CrawlCustomSettingsFlyoutCrawlDepthPanel } from './crawl_custom_settings_flyout_crawl_depth_panel';
 import { MultiCrawlScheduler } from './crawl_custom_settings_flyout_crawl_scheduler';
+import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_logic';
 import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel';
-import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 import { CrawlCustomSettingsFlyoutMultiCrawlLogic } from './crawl_custom_settings_flyout_multi_crawl_logic';
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
 
 export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
-  const { domainUrls, multiCrawlerEntryPointUrls, multiCrawlerSitemapUrls } = useValues(
-    CrawlCustomSettingsFlyoutLogic
-  );
+  const { domainUrls } = useValues(CrawlCustomSettingsFlyoutDomainConfigLogic);
 
   const {
-    crawlerConfigurations,
+    crawlerConfigurationsWithDomainData,
     crawlerConfigActiveTab,
     index: crawlerIndex,
   } = useValues(CrawlCustomSettingsFlyoutMultiCrawlLogic);
@@ -43,7 +41,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
 
   return (
     <>
-      {crawlerConfigurations.map((config, index) => {
+      {crawlerConfigurationsWithDomainData.map((config, index) => {
         if (index === crawlerConfigActiveTab) {
           return (
             <React.Fragment key={index}>
@@ -65,8 +63,6 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
                 onSelectEntryPointUrls={(e) => onSelectEntryPointUrls(index, e)}
                 onSelectSitemapUrls={(e) => onSelectSitemapUrls(index, e)}
                 toggleIncludeSitemapsInRobotsTxt={() => toggleIncludeSitemapsInRobotsTxt(index)}
-                entryPointUrls={multiCrawlerEntryPointUrls[index]}
-                sitemapUrls={multiCrawlerSitemapUrls[index]}
               />
               <EuiSpacer />
               <MultiCrawlScheduler

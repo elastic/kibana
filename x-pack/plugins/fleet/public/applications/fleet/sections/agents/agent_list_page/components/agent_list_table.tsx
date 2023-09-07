@@ -180,9 +180,11 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
 
         return (
-          <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
+          <EuiFlexGroup gutterSize="m" style={{ minWidth: 0 }} alignItems="center">
             {agentPolicy && (
-              <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
+              <EuiFlexItem grow={false}>
+                <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
+              </EuiFlexItem>
             )}
             {showWarning && (
               <EuiFlexItem grow={false}>
@@ -191,7 +193,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
                   &nbsp;
                   <FormattedMessage
                     id="xpack.fleet.agentList.outOfDateLabel"
-                    defaultMessage="Out-of-date"
+                    defaultMessage="Outdated policy"
                   />
                 </EuiText>
               </EuiFlexItem>

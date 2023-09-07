@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useContext } from 'react';
-import type { UpsellingService } from '../../..';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 
 export const UpsellingProviderContext = React.createContext<UpsellingService | null>(null);
 

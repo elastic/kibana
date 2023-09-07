@@ -6,7 +6,6 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
 
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -35,8 +34,9 @@ const TEXT_LIST_FILE_NAME = 'value_list.txt';
 const IPS_LIST_FILE_NAME = 'ip_list.txt';
 const CIDRS_LIST_FILE_NAME = 'cidr_list.txt';
 
+// FLAKY: https://github.com/elastic/kibana/issues/165699
 describe('value lists', () => {
-  describe('management modal', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('management modal', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
     beforeEach(() => {
       login();
       deleteValueLists([TEXT_LIST_FILE_NAME, IPS_LIST_FILE_NAME, CIDRS_LIST_FILE_NAME]);
@@ -51,7 +51,8 @@ describe('value lists', () => {
       closeValueListsModal();
     });
 
-    describe('create list types', () => {
+    // Flaky in serverless tests
+    describe('create list types', { tags: ['@brokenInServerless'] }, () => {
       beforeEach(() => {
         openValueListsModal();
       });
@@ -109,7 +110,8 @@ describe('value lists', () => {
       });
     });
 
-    describe('delete list types', () => {
+    // Flaky in serverless tests
+    describe('delete list types', { tags: ['@brokenInServerless'] }, () => {
       it('deletes a "keyword" list from an uploaded file', () => {
         importValueList(TEXT_LIST_FILE_NAME, 'keyword');
         openValueListsModal();
@@ -155,7 +157,8 @@ describe('value lists', () => {
       });
     });
 
-    describe('export list types', () => {
+    // Flaky in serverless tests
+    describe('export list types', { tags: ['@brokenInServerless'] }, () => {
       it('exports a "keyword" list from an uploaded file', () => {
         cy.intercept('POST', `/api/lists/items/_export?list_id=${TEXT_LIST_FILE_NAME}`).as(
           'exportList'
@@ -251,7 +254,7 @@ describe('value lists', () => {
     });
   });
 
-  describe('user with restricted access role', { tags: tag.ESS }, () => {
+  describe('user with restricted access role', { tags: '@ess' }, () => {
     it('Does not allow a t1 analyst user to upload a value list', () => {
       login(ROLES.t1_analyst);
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.t1_analyst);

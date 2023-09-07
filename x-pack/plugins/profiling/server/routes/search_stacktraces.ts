@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { decodeStackTraceResponse } from '../../common/stack_traces';
+import { decodeStackTraceResponse } from '@kbn/profiling-data-access-plugin/common/stack_traces';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { ProjectTimeQuery } from './query';
 

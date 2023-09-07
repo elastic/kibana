@@ -55,6 +55,10 @@ export type UnifiedHistogramContainerProps = {
   | 'resizeRef'
   | 'appendHitsCounter'
   | 'children'
+  | 'onBrushEnd'
+  | 'onFilter'
+  | 'withDefaultActions'
+  | 'disabledActions'
 >;
 
 /**

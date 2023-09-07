@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import {
+  CORRELATIONS_ANCESTRY_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON,
   CORRELATIONS_ANCESTRY_SECTION_TABLE,
   CORRELATIONS_ANCESTRY_SECTION_TITLE,
   CORRELATIONS_CASES_SECTION_TABLE,
   CORRELATIONS_CASES_SECTION_TITLE,
+  CORRELATIONS_SESSION_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON,
   CORRELATIONS_SESSION_SECTION_TABLE,
   CORRELATIONS_SESSION_SECTION_TITLE,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON,
@@ -34,7 +35,7 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 
 describe(
   'Expandable flyout left panel correlations',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -74,6 +75,7 @@ describe(
         .should('be.visible')
         .and('contain.text', '1 alert related by ancestry');
       cy.get(CORRELATIONS_ANCESTRY_SECTION_TABLE).should('be.visible');
+      cy.get(CORRELATIONS_ANCESTRY_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should('be.visible');
 
       // TODO get proper data to test this section
       // cy.get(CORRELATIONS_SOURCE_SECTION).scrollIntoView();
@@ -81,18 +83,27 @@ describe(
       //   .should('be.visible')
       //   .and('contain.text', '0 alerts related by source event');
       // cy.get(CORRELATIONS_SOURCE_SECTION_TABLE).should('be.visible');
+      // cy.get(CORRELATIONS_SESSION_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should('be.visible');
 
       cy.get(CORRELATIONS_SESSION_SECTION_TITLE).scrollIntoView();
       cy.get(CORRELATIONS_SESSION_SECTION_TITLE)
         .should('be.visible')
         .and('contain.text', '1 alert related by session');
       cy.get(CORRELATIONS_SESSION_SECTION_TABLE).should('be.visible');
+      cy.get(CORRELATIONS_SESSION_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should('be.visible');
 
       cy.get(CORRELATIONS_CASES_SECTION_TITLE).scrollIntoView();
       cy.get(CORRELATIONS_CASES_SECTION_TITLE)
         .should('be.visible')
         .and('contain.text', '1 related case');
       cy.get(CORRELATIONS_CASES_SECTION_TABLE).should('be.visible');
+
+      // TODO get proper data to test suppressed alerts
+      // cy.get(CORRELATIONS_SUPPRESSED_ALERTS_TITLE).scrollIntoView();
+      // cy.get(CORRELATIONS_SUPPRESSED_ALERTS_TITLE)
+      //   .should('be.visible')
+      //   .and('contain.text', '1 suppressed alert');
+      // cy.get(CORRELATIONS_SUPPRESSED_ALERTS_INVESTIGATE_IN_TIMELINE_BUTTON).should('be.visible');
     });
   }
 );

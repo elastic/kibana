@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 
@@ -29,9 +28,12 @@ import {
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 
+// FLAKY: https://github.com/elastic/kibana/issues/165651
+// FLAKY: https://github.com/elastic/kibana/issues/165734
+// FLAKY: https://github.com/elastic/kibana/issues/165652
 describe(
   'Add multiple conditions and validate the generated exceptions',
-  { tags: [tag.ESS, tag.SERVERLESS] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       cy.task('esArchiverResetKibana');

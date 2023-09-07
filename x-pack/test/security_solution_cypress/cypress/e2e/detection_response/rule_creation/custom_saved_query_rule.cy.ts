@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { getNewRule, getSavedQueryRule } from '../../../objects/rule';
 
 import {
@@ -47,7 +45,7 @@ const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
 const savedQueryFilterKey = 'testAgent.value';
 
-describe('Custom saved_query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Custom saved_query rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

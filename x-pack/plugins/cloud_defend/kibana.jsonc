@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/cloud-defend-plugin",
-  "owner": "@elastic/sec-cloudnative-integrations",
+  "owner": "@elastic/kibana-cloud-security-posture",
   "description": "Defend for containers (D4C)",
   "plugin": {
     "id": "cloudDefend",
