@@ -79,6 +79,7 @@ describe('service map', () => {
       cy.withHidden('[data-test-subj="headerGlobalNav"]', () =>
         cy.getByTestSubj('serviceMap').matchImage({
           imagesPath: '{spec_path}/snapshots',
+          title: 'detailed_service_map',
           matchAgainstPath:
             'cypress/e2e/service_map/snapshots/detailed_service_map.png',
           maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
@@ -90,7 +91,7 @@ describe('service map', () => {
       it('shows empty state', () => {
         cy.visitKibana(serviceMapHref);
         // we need to dismiss the service-group call out first
-        cy.contains('Dismiss').click();
+        cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
         cy.getByTestSubj('apmUnifiedSearchBar').type('_id : foo{enter}');
         cy.contains('No services available');
         // search bar is still visible
@@ -110,7 +111,4 @@ function prepareCanvasForScreenshot() {
   cy.wait(300);
   cy.getByTestSubj('centerServiceMap').click();
   cy.scrollTo('top');
-  cy.wait(300);
-  cy.getByTestSubj('centerServiceMap').click();
-  cy.wait(300);
 }
