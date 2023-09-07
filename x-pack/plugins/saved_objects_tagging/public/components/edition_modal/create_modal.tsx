@@ -39,6 +39,7 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({
     useValidation({
       tagAttributes,
       tagClient,
+      validateDuplicateNameOnMount: true,
     });
 
   const setField = useCallback(

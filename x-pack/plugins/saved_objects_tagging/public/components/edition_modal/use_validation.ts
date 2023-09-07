@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { type TagValidation, validateTagName } from '../../../common';
 import type { ITagsClient, TagAttributes } from '../../../common/types';
 import { duplicateTagNameErrorMessage, validateTag } from './utils';
@@ -19,10 +19,13 @@ const initialValidation: TagValidation = {
 export const useValidation = ({
   tagAttributes,
   tagClient,
+  validateDuplicateNameOnMount = false,
 }: {
   tagAttributes: TagAttributes;
   tagClient: ITagsClient;
+  validateDuplicateNameOnMount?: boolean;
 }) => {
+  const isMounted = useRef(false);
   const [validation, setValidation] = useState<TagValidation>(initialValidation);
   const [isValidating, setIsValidating] = useState(false);
   const hasDuplicateNameError = validation.errors.name === duplicateTagNameErrorMessage;
@@ -48,6 +51,8 @@ export const useValidation = ({
       } else {
         setValidation(validateTag(tagAttributes));
       }
+
+      setIsValidating(false);
     },
     [tagAttributes, tagClient]
   );
@@ -75,6 +80,14 @@ export const useValidation = ({
   useEffect(() => {
     onNameChange(tagAttributes.name);
   }, [onNameChange, tagAttributes.name]);
+
+  useEffect(() => {
+    if (validateDuplicateNameOnMount && tagAttributes.name && !isMounted.current) {
+      setIsValidating(true);
+      validateDuplicateTagName(tagAttributes.name);
+    }
+    isMounted.current = true;
+  }, [validateDuplicateNameOnMount, tagAttributes.name, validateDuplicateTagName]);
 
   return {
     validation,

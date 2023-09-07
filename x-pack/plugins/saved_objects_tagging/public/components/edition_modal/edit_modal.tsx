@@ -64,7 +64,7 @@ export const EditTagModal: FC<EditTagModalProps> = ({ tag, onSave, onClose, tagC
         setValidation(e.body.attributes);
       }
     }
-  }, [tagAttributes, setValidation, tagClient, tag.id, onSave]);
+  }, [hasDuplicateNameError, tagAttributes, setValidation, tagClient, tag.id, onSave]);
 
   return (
     <CreateOrEditModal
