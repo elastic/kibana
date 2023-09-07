@@ -67,7 +67,8 @@ describe(
   'Discover Timeline State Integration',
   {
     env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@brokenInServerless'],
+    // ESQL and test involving STACK_MANAGEMENT_PAGE are broken in serverless
   },
 
   () => {

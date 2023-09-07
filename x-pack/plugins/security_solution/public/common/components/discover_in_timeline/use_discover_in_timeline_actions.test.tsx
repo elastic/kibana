@@ -18,8 +18,6 @@ import {
 } from '../../mock';
 import { useDiscoverInTimelineActions } from './use_discover_in_timeline_actions';
 import type { Filter } from '@kbn/es-query';
-import type { History } from 'history';
-import { createBrowserHistory } from 'history';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { useKibana } from '../../lib/kibana';
 import type { State } from '../../store';
@@ -28,11 +26,8 @@ import { TimelineId } from '../../../../common/types';
 import type { ComponentType, FC, PropsWithChildren } from 'react';
 import React from 'react';
 
-const history: History = createBrowserHistory();
-history.push('/');
-
 const mockDiscoverStateContainerRef = {
-  current: discoverPluginMock.getMockDiscoverStateContainer({ history }),
+  current: discoverPluginMock.getDiscoverStateMock({}),
 };
 
 jest.mock('../../lib/kibana');
