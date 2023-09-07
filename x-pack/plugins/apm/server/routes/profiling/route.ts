@@ -6,7 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import type { BaseFlameGraph } from '@kbn/profiling-utils';
+import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -53,6 +54,55 @@ const profilingFlamegraphRoute = createApmServerRoute({
   },
 });
 
+const profilingFunctionsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/functions',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([
+      rangeRt,
+      kueryRt,
+      environmentRt,
+      t.type({ startIndex: toNumberRt, endIndex: toNumberRt }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<TopNFunctions | undefined> => {
+    const { context, plugins, params } = resources;
+    const [esClient, apmEventClient, profilingDataAccessStart] =
+      await Promise.all([
+        (await context.core).elasticsearch.client,
+        await getApmEventClient(resources),
+        await plugins.profilingDataAccess?.start(),
+      ]);
+    if (profilingDataAccessStart) {
+      const { start, end, kuery, environment, startIndex, endIndex } =
+        params.query;
+      const { serviceName } = params.path;
+
+      const serviceHostNames = await getServiceHostNames({
+        apmEventClient,
+        start,
+        end,
+        kuery,
+        environment,
+        serviceName,
+      });
+
+      return profilingDataAccessStart?.services.fetchFunction({
+        esClient: esClient.asCurrentUser,
+        rangeFromMs: start,
+        rangeToMs: end,
+        kuery: hostNamesToKuery(serviceHostNames),
+        startIndex,
+        endIndex,
+      });
+    }
+
+    return undefined;
+  },
+});
+
 export const profilingRouteRepository = {
   ...profilingFlamegraphRoute,
+  ...profilingFunctionsRoute,
 };

@@ -40,7 +40,7 @@ interface Props {
   pageIndex: number;
   onChangePage: (nextPage: number) => void;
   sortField: TopNFunctionSortField;
-  sortDirection: 'asc' | 'desc';
+  sortDirection?: 'asc' | 'desc';
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   dataTestSubj?: string;
 }
@@ -60,7 +60,7 @@ export const TopNFunctionsGrid = forwardRef(
       pageIndex,
       onChangePage,
       sortField,
-      sortDirection,
+      sortDirection = 'asc',
       onChangeSort,
       dataTestSubj = 'topNFunctionsGrid',
     }: Props,
@@ -261,6 +261,8 @@ export const TopNFunctionsGrid = forwardRef(
       return null;
     }
 
+    const rowCount = topNFunctions?.TopN ? topNFunctions?.TopN.length : totalCount;
+
     return (
       <>
         <EuiDataGrid
@@ -269,7 +271,7 @@ export const TopNFunctionsGrid = forwardRef(
           aria-label="TopN functions"
           columns={columns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
-          rowCount={totalCount > 100 ? 100 : totalCount}
+          rowCount={rowCount > 100 ? 100 : rowCount}
           renderCellValue={RenderCellValue}
           inMemory={{ level: 'sorting' }}
           sorting={{ columns: [{ id: sortField, direction: sortDirection }], onSort }}

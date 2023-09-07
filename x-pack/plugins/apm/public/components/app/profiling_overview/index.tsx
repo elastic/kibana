@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
+import {
+  EmbeddableFlamegraph,
+  EmbeddableFunctions,
+} from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
@@ -42,15 +46,46 @@ export function ProfilingOverview() {
     [isProfilingAvailable, serviceName, start, end, kuery, environment]
   );
 
+  const { data: functionsData, status: functionsStatus } = useFetcher(
+    (callApmApi) => {
+      if (isProfilingAvailable) {
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/profiling/functions',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                start,
+                end,
+                kuery,
+                environment,
+                startIndex: 1,
+                endIndex: 10,
+              },
+            },
+          }
+        );
+      }
+    },
+    [isProfilingAvailable, serviceName, start, end, kuery, environment]
+  );
+
   if (!isProfilingAvailable) {
     return null;
   }
 
   return (
-    <EmbeddableFlamegraph
-      data={data}
-      height="60vh"
-      isLoading={isPending(status)}
-    />
+    <>
+      <EmbeddableFlamegraph
+        data={data}
+        isLoading={isPending(status)}
+        height="60vh"
+      />
+      <EuiHorizontalRule />
+      <EmbeddableFunctions
+        data={functionsData}
+        isLoading={isPending(functionsStatus)}
+      />
+    </>
   );
 }
