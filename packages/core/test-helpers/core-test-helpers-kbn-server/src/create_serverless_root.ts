@@ -13,6 +13,7 @@ import { Cluster } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { CliArgs } from '@kbn/config';
+import { kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
 export type TestServerlessESUtils = Pick<TestElasticsearchUtils, 'stop' | 'es'> & {
@@ -131,6 +132,9 @@ const getServerlessDefault = () => {
         deprecation: { type: 'console', layout: { type: 'json' } },
         console: { type: 'console', layout: { type: 'pattern' } },
       },
+    },
+    elasticsearch: {
+      serviceAccountToken: kibanaDevServiceAccount.token,
     },
   };
 };
