@@ -45,7 +45,10 @@ jest.mock('../../../public/application/lib/ace', () => {
  */
 import { stubWebWorker } from '@kbn/test-jest-helpers';
 import { createMemoryHistory } from 'history';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../../public/application/services/breadcrumbs';
+import {
+  breadcrumbService,
+  IndexManagementBreadcrumb,
+} from '../../../public/application/services/breadcrumbs';
 stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
