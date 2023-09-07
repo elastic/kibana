@@ -5,39 +5,50 @@
  * 2.0.
  */
 
+import {
+  getExternalServiceSimulatorPath,
+  ExternalServiceSimulator,
+} from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const actions = getService('actions');
   const commonScreenshots = getService('commonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'stack_connectors'];
   const pageObjects = getPageObjects(['common', 'header']);
-  const actions = getService('actions');
   const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
 
   describe('ibm resilient connector', function () {
+    let resilientSimulatorURL: string = '<could not determine kibana url>';
+
+    before(async () => {
+      resilientSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT)
+      );
+    });
+
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('generative ai connector screenshots', async () => {
+    it('ibm resilient connector creation screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('resilient');
       await testSubjects.setValue('nameInput', 'IBM Resilient test connector');
-      await testSubjects.setValue('config.apiUrl-input', 'https://example.com');
-      await testSubjects.setValue('config.orgId-input', 'ES');
+      // await testSubjects.setValue('config.apiUrl-input', 'https://example.com');
+      await testSubjects.setValue('config.apiUrl-input', resilientSimulatorURL);
+      await testSubjects.setValue('config.orgId-input', '201');
       await testSubjects.setValue('secrets.apiKeyId-input', 'tester');
       await testSubjects.setValue('secrets.apiKeySecret-input', 'testkey');
       await commonScreenshots.takeScreenshot('resilient-connector', screenshotDirectories);
       // await testSubjects.click('create-connector-flyout-save-test-btn');
-      // await testSubjects.click('toastCloseButton');
-      // const editor = await testSubjects.find('kibanaCodeEditor');
-      // await editor.clearValue();
-      // await testSubjects.setValue('kibanaCodeEditor', actionBody, {
-      //   clearWithKeyboard: true,
-      // });
-      // await commonScreenshots.takeScreenshot('gen-ai-params-test', screenshotDirectories);
+      // Close all toasts since it is unable to get incident types from example site
+      // await pageObjects.common.clearAllToasts();
+      // await pageObjects.header.waitUntilLoadingHasFinished();
+      // await commonScreenshots.takeScreenshot('resilient-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });
