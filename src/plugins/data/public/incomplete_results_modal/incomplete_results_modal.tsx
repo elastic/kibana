@@ -115,7 +115,7 @@ export function IncompleteResultsModal({ request, response, warning, onClose }: 
             </EuiButtonEmpty>
           )}
         </EuiCopy>
-        <EuiButton onClick={() => onClose()} fill data-test-subj="closeincompleteResultsModal">
+        <EuiButton onClick={() => onClose()} fill data-test-subj="closeIncompleteResultsModal">
           <FormattedMessage
             id="data.search.searchSource.fetch.incompleteResultsModal.close"
             defaultMessage="Close"
