@@ -37,14 +37,14 @@ export const Overview = () => {
 
   const metricsSection = isFullPageView ? (
     <MetricsGrid
-      timeRange={parsedDateRange}
+      dateRange={parsedDateRange}
       logsDataView={logs.dataView}
       metricsDataView={metrics.dataView}
       assetName={asset.name}
     />
   ) : (
     <MetricsGridCompact
-      timeRange={parsedDateRange}
+      dateRange={parsedDateRange}
       logsDataView={logs.dataView}
       metricsDataView={metrics.dataView}
       assetName={asset.name}
@@ -89,7 +89,7 @@ export const Overview = () => {
             />
           </EuiCallOut>
         ) : (
-          <>{metadataSummarySection}</>
+          metadataSummarySection
         )}
         <SectionSeparator />
       </EuiFlexItem>
