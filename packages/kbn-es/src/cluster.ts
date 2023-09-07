@@ -90,7 +90,7 @@ export class Cluster {
   async installSource(options: InstallSourceOptions) {
     this.log.info(chalk.bold('Installing from source'));
     return await this.log.indent(4, async () => {
-      const { installPath } = await installSource(options);
+      const { installPath } = await installSource({ log: this.log, ...options });
       return { installPath };
     });
   }
@@ -135,12 +135,12 @@ export class Cluster {
    * @param options InstallArchiveOptions
    * @returns Promise<{ installPath }>
    */
-  async installArchive(path: string, options: InstallArchiveOptions) {
+  async installArchive(path: string, options?: InstallArchiveOptions) {
     this.log.info(chalk.bold('Installing from an archive'));
     return await this.log.indent(4, async () => {
       const { installPath } = await installArchive(path, {
         log: this.log,
-        ...options,
+        ...(options || {}),
       });
 
       return { installPath };

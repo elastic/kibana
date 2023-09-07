@@ -20,10 +20,11 @@ import { log as defaultLog } from '../utils/log';
 import { cache } from '../utils/cache';
 import { buildSnapshot, archiveForPlatform } from '../utils/build_snapshot';
 import { BASE_PATH } from '../paths';
+import { ArtifactLicense } from '../artifact';
 
 export interface InstallSourceOptions {
   sourcePath: string;
-  license?: string;
+  license?: ArtifactLicense;
   password?: string;
   basePath?: string;
   installPath?: string;

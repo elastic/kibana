@@ -16,12 +16,12 @@ import { extract } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
-import { Artifact } from '../artifact';
+import { Artifact, ArtifactLicense } from '../artifact';
 import { parseSettings, SettingsFilter } from '../settings';
 import { log as defaultLog } from '../utils/log';
 
 export interface InstallArchiveOptions {
-  license?: string;
+  license?: ArtifactLicense;
   password?: string;
   basePath?: string;
   installPath?: string;
@@ -40,7 +40,7 @@ const isHttpUrl = (str: string) => {
 /**
  * Extracts an ES archive and optionally installs plugins
  */
-export async function installArchive(archive: string, options: InstallArchiveOptions = {}) {
+export async function installArchive(archive: string, options?: InstallArchiveOptions) {
   const {
     license = 'basic',
     password = 'changeme',
@@ -48,7 +48,7 @@ export async function installArchive(archive: string, options: InstallArchiveOpt
     installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
     log = defaultLog,
     esArgs = [],
-  } = options;
+  } = options || {};
 
   let dest = archive;
   if (isHttpUrl(archive)) {
