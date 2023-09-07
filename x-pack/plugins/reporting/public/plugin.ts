@@ -125,7 +125,12 @@ export class ReportingPublicPlugin
    */
   private getApiClient(http: HttpSetup, uiSettings: IUiSettingsClient) {
     if (!this.apiClient) {
-      this.apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion, this.config.disableStatefulSettings.enabled);
+      this.apiClient = new ReportingAPIClient(
+        http,
+        uiSettings,
+        this.kibanaVersion,
+        this.config.disableStatefulSettings.enabled
+      );
     }
     return this.apiClient;
   }
