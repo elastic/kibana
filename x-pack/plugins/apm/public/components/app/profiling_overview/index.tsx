@@ -28,7 +28,7 @@ export function ProfilingOverview() {
     (callApmApi) => {
       if (isProfilingAvailable) {
         return callApmApi(
-          'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
+          'GET /internal/apm/services/{serviceName}/profiling',
           {
             params: {
               path: { serviceName },
@@ -37,29 +37,7 @@ export function ProfilingOverview() {
                 end,
                 kuery,
                 environment,
-              },
-            },
-          }
-        );
-      }
-    },
-    [isProfilingAvailable, serviceName, start, end, kuery, environment]
-  );
-
-  const { data: functionsData, status: functionsStatus } = useFetcher(
-    (callApmApi) => {
-      if (isProfilingAvailable) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/profiling/functions',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                start,
-                end,
-                kuery,
-                environment,
-                startIndex: 1,
+                startIndex: 0,
                 endIndex: 10,
               },
             },
@@ -74,18 +52,17 @@ export function ProfilingOverview() {
     return null;
   }
 
+  const isLoading = isPending(status);
+
   return (
     <>
       <EmbeddableFlamegraph
-        data={data}
-        isLoading={isPending(status)}
+        data={data?.flamegraph}
+        isLoading={isLoading}
         height="60vh"
       />
       <EuiHorizontalRule />
-      <EmbeddableFunctions
-        data={functionsData}
-        isLoading={isPending(functionsStatus)}
-      />
+      <EmbeddableFunctions data={data?.functions} isLoading={isLoading} />
     </>
   );
 }
