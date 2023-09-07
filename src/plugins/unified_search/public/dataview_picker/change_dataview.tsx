@@ -27,6 +27,7 @@ import {
   EuiButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AggregateQuery, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -92,7 +93,9 @@ export function ChangeDataView({
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { application, data, storage, dataViews, dataViewEditor } = kibana.services;
+  const { application, data, storage, dataViews, dataViewEditor, appName, usageCollection } =
+    kibana.services;
+  const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
@@ -366,8 +369,9 @@ export function ChangeDataView({
     (q: AggregateQuery) => {
       onTextLangQuerySubmit?.(q);
       setPopoverIsOpen(false);
+      reportUiCounter?.(METRIC_TYPE.CLICK, `esql:unified_search_clicked`);
     },
-    [onTextLangQuerySubmit]
+    [onTextLangQuerySubmit, reportUiCounter]
   );
 
   const cleanup = useCallback(

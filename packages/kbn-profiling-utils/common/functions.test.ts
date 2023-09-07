@@ -9,7 +9,7 @@
 import { sum } from 'lodash';
 import { createTopNFunctions } from './functions';
 import { decodeStackTraceResponse } from '@kbn/profiling-utils';
-import { stackTraceFixtures } from './__fixtures__/stacktraces';
+export { stackTraceFixtures } from './__fixtures__/stacktraces';
 
 describe('TopN function operations', () => {
   stackTraceFixtures.forEach(({ response, seconds, upsampledBy }) => {

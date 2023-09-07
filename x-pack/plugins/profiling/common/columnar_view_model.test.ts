@@ -11,9 +11,9 @@ import {
   createFlameGraph,
   decodeStackTraceResponse,
 } from '@kbn/profiling-utils';
-import { stackTraceFixtures } from './__fixtures__/stacktraces';
 import { sum } from 'lodash';
 import { createColumnarViewModel } from './columnar_view_model';
+export { stackTraceFixtures } from './__fixtures__/stacktraces';
 
 describe('Columnar view model operations', () => {
   stackTraceFixtures.forEach(({ response, seconds, upsampledBy }) => {

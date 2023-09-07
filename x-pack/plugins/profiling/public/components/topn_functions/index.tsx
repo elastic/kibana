@@ -227,6 +227,7 @@ export const TopNFunctionsGrid = forwardRef(
             }
             return (
               <EuiButtonIcon
+                data-test-subj="profilingTopNFunctionsGridButton"
                 aria-label="Show actions"
                 iconType="expand"
                 color="text"

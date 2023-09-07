@@ -21,6 +21,7 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
 import { Index } from '../../../../../../common';
 import { INDEX_OPEN } from '../../../../../../common/constants';
+import { Error } from '../../../../../shared_imports';
 import { loadIndex } from '../../../../services';
 import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
@@ -29,6 +30,7 @@ import { DetailsPageError } from './details_page_error';
 import { ManageIndexButton } from './manage_index_button';
 import { DetailsPageStats } from './details_page_stats';
 import { DetailsPageMappings } from './details_page_mappings';
+import { DetailsPageSettings } from './details_page_settings';
 
 export enum IndexDetailsSection {
   Overview = 'overview',
@@ -86,7 +88,7 @@ export const DetailsPage: React.FunctionComponent<
 }) => {
   const { config } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error | null>(null);
   const [index, setIndex] = useState<Index | null>();
 
   const fetchIndexDetails = useCallback(async () => {
@@ -198,8 +200,10 @@ export const DetailsPage: React.FunctionComponent<
             component={DetailsPageMappings}
           />
           <Route
-            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Settings}`}
-            render={() => <div>Settings</div>}
+            path={`/${Section.Indices}/:indexName/${IndexDetailsSection.Settings}`}
+            render={(props: RouteComponentProps<{ indexName: string }>) => (
+              <DetailsPageSettings {...props} isIndexOpen={index.status === INDEX_OPEN} />
+            )}
           />
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Pipelines}`}

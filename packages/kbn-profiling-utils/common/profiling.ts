@@ -83,7 +83,7 @@ export const emptyStackTrace: StackTrace = {
   FrameIDs: [],
   /** File IDs */
   FileIDs: [],
-  /** Adress or lines */
+  /** Address or lines */
   AddressOrLines: [],
   /** Types */
   Types: [],
