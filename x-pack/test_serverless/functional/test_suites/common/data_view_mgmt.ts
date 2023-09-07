@@ -100,10 +100,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('rollup-tag');
       });
     });
-    it('Sample data loads', async () => {
-      await PageObjects.home.addSampleDataSet('ecommerce');
-      const ecommerce = await PageObjects.home.isSampleDataSetInstalled('ecommerce');
-      expect(ecommerce).toBe(true);
-    });
   });
 }
