@@ -29,7 +29,7 @@ const rewriteBodyRes = (results: RegistryAlertTypeWithAuth[]) => {
       hasFieldsForAAD,
       validLegacyConsumers,
       ...rest
-    }) => ({
+    }: RegistryAlertTypeWithAuth) => ({
       ...rest,
       enabled_in_license: enabledInLicense,
       recovery_action_group: recoveryActionGroup,
