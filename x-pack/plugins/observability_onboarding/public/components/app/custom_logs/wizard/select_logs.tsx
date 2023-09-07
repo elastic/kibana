@@ -48,7 +48,11 @@ export function SelectLogs() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="text" onClick={onBack}>
+            <EuiButton
+              data-test-subj="observabilityOnboardingSelectLogsBackButton"
+              color="text"
+              onClick={onBack}
+            >
               {i18n.translate('xpack.observability_onboarding.steps.back', {
                 defaultMessage: 'Back',
               })}
@@ -183,6 +187,7 @@ export function SelectLogs() {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiLink
+            data-test-subj="observabilityOnboardingSelectLogsExploreOtherIntegrationsLink"
             href="#"
             target="_blank"
             onClick={(event: MouseEvent) => {
