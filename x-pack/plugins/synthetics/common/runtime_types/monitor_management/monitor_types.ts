@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { ProcessorObjectCoded } from './processors';
 import { AlertConfigsCodec } from './alert_config';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
@@ -72,6 +73,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
     [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
     [ConfigKey.PARAMS]: t.string,
+    [ConfigKey.PROCESSORS]: t.array(ProcessorObjectCoded),
   }),
 ]);
 

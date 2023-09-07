@@ -35,6 +35,7 @@ export enum ConfigKey {
   PARAMS = 'params',
   PASSWORD = 'password',
   PLAYWRIGHT_OPTIONS = 'playwright_options',
+  PROCESSORS = 'processors',
   ORIGINAL_SPACE = 'original_space', // the original space the monitor was saved in. Used by push monitors to ensure uniqueness of monitor id sent to heartbeat and prevent data collisions
   PORT = 'url.port',
   PROXY_URL = 'proxy_url',

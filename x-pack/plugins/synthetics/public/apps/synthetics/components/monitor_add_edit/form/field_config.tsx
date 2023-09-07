@@ -59,6 +59,7 @@ import {
   KeyValuePairsField,
   TextArea,
   ThrottlingWrapper,
+  ProcessorsEditorProps,
 } from './field_wrappers';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
@@ -1344,6 +1345,76 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       },
     }),
   },
+  [ConfigKey.PROCESSORS]: {
+    fieldKey: ConfigKey.PROCESSORS,
+    label: i18n.translate('xpack.synthetics.monitorConfig.processors.label', {
+      defaultMessage: 'Processors',
+    }),
+    controlled: true,
+    component: JSONEditor,
+    props: ({ field, setValue }): ProcessorsEditorProps => {
+      return {
+        name: ConfigKey.PROCESSORS,
+        id: 'syntheticsMonitorConfigProcessors',
+        height: '200px',
+        ariaLabel: i18n.translate('xpack.synthetics.monitorConfig.processorsAria.label', {
+          defaultMessage: 'processors code editor',
+        }),
+        readOnly,
+        onChange: (value: string) => {
+          try {
+            const data = JSON.parse(value);
+            if (!Array.isArray(data)) {
+              setValue(ConfigKey.PROCESSORS, [data]);
+            } else {
+              setValue(ConfigKey.PROCESSORS, data);
+            }
+          } catch (e) {
+            setValue(ConfigKey.PROCESSORS, []);
+            // ignore
+          }
+        },
+        value: JSON.stringify(field?.value, null, 2),
+      };
+    },
+    validation: () => ({
+      validate: {
+        validParams: (value) => {
+          const validateFn = validate[DataStream.BROWSER][ConfigKey.PROCESSORS];
+          if (validateFn) {
+            return validateFn({
+              [ConfigKey.PROCESSORS]: value,
+            })
+              ? i18n.translate('xpack.synthetics.monitorConfig.params.error', {
+                  defaultMessage: 'Invalid JSON format',
+                })
+              : true;
+          }
+
+          return true;
+        },
+      },
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.synthetics.monitorConfig.processors.helpText"
+        defaultMessage="Processors are used to enhance the event with metadata. This executes in the agent before the documents are parsed. See {link} for details."
+        values={{
+          link: (
+            <EuiLink
+              data-test-subj="syntheticsFIELDSeeProcessorsForDetailsLink"
+              href={getDocLinks()?.links?.heartbeat.base}
+              target="_blank"
+            >
+              {i18n.translate('xpack.synthetics.monitorConfig.processors.learnMore', {
+                defaultMessage: 'Processors',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
   [ConfigKey.IGNORE_HTTPS_ERRORS]: {
     fieldKey: ConfigKey.IGNORE_HTTPS_ERRORS,
     component: Switch,
@@ -1383,7 +1454,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       </span>
     ),
     props: ({ setValue, field, trigger }): EuiComboBoxProps<string> => ({
-      id: 'syntheticsMontiorConfigSyntheticsArgs',
+      id: 'syntheticsMonitorConfigSyntheticsArgs',
       selectedOptions: Object.values(field?.value || []).map((arg) => ({
         label: arg,
       })),

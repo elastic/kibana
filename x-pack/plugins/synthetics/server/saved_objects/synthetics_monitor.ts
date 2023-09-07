@@ -44,6 +44,7 @@ export const SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
   attributesToExcludeFromAAD: new Set([
     ConfigKey.ALERT_CONFIG,
     ConfigKey.METADATA,
+    ConfigKey.PROCESSORS,
     ...legacyConfigKeys,
   ]),
 };

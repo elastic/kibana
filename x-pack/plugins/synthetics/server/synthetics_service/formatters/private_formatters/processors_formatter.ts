@@ -11,10 +11,12 @@ import { MonitorFields } from '../../../../common/runtime_types';
 type Fields = Record<string, string | boolean>;
 
 interface FieldProcessor {
-  add_fields: {
-    target: string;
-    fields: Fields;
-  };
+  add_fields:
+    | {
+        target: string;
+        fields: Fields;
+      }
+    | unknown;
 }
 
 export const processorsFormatter = (config: Partial<MonitorFields & ProcessorFields>) => {
@@ -39,7 +41,8 @@ export const processorsFormatter = (config: Partial<MonitorFields & ProcessorFie
   if (config['monitor.id']) {
     fields['monitor.id'] = config['monitor.id'];
   }
-  const processors: FieldProcessor[] = [
+  const allProcessors: FieldProcessor[] = [
+    ...(config.processors ?? []),
     {
       add_fields: {
         fields,
@@ -48,5 +51,5 @@ export const processorsFormatter = (config: Partial<MonitorFields & ProcessorFie
     },
   ];
 
-  return JSON.stringify(processors);
+  return JSON.stringify(allProcessors);
 };

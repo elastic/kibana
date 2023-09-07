@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isLeft } from 'fp-ts/lib/Either';
+import { ProcessorObjectArrayCoded } from '../../../../../../common/runtime_types/monitor_management/processors';
 import {
   ConfigKey,
   DataStream,
@@ -100,6 +102,11 @@ const validateCommon: ValidationLibrary = {
         scheduleUnit: unit,
       })
     );
+  },
+  [ConfigKey.PROCESSORS]: ({ [ConfigKey.PROCESSORS]: processors }) => {
+    if (!processors) return false;
+    const decoded = ProcessorObjectArrayCoded.decode(processors);
+    return !!isLeft(decoded);
   },
 };
 

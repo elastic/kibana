@@ -14,6 +14,7 @@ import {
   UseControllerProps,
   FieldValues,
 } from 'react-hook-form';
+import { ProcessorObject } from '../../../../../common/runtime_types/monitor_management/processors';
 import {
   ConfigKey,
   ServiceLocation,
@@ -50,6 +51,7 @@ export type FormConfig = MonitorFields & {
   [AlertConfigKey.STATUS_ENABLED]: boolean;
   [AlertConfigKey.TLS_ENABLED]: boolean;
   [ConfigKey.LOCATIONS]: FormLocation[];
+  data_processors: ProcessorObject[];
 
   /* Dot notation keys must have a type configuration both for their flattened and nested
    * variation in order for types to register for react hook form. For example, `AlertConfigKey.STATUS_ENABLED`
@@ -78,7 +80,7 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
   label?: string | React.ReactNode;
   ariaLabel?: string;
   helpText?: string | React.ReactNode;
-  hidden?: (depenencies: unknown[]) => boolean;
+  hidden?: (dependencies: unknown[]) => boolean;
   props?: (params: {
     field?: ControllerRenderProps<FormConfig, TFieldKey>;
     formState: FormState<FormConfig>;
@@ -159,6 +161,7 @@ export interface FieldMap {
   [ConfigKey.THROTTLING_CONFIG]: FieldMeta<ConfigKey.THROTTLING_CONFIG>;
   [ConfigKey.PARAMS]: FieldMeta<ConfigKey.PARAMS>;
   [ConfigKey.PLAYWRIGHT_OPTIONS]: FieldMeta<ConfigKey.PLAYWRIGHT_OPTIONS>;
+  [ConfigKey.PROCESSORS]: FieldMeta<ConfigKey.PROCESSORS>;
   [ConfigKey.SYNTHETICS_ARGS]: FieldMeta<ConfigKey.SYNTHETICS_ARGS>;
   [ConfigKey.IGNORE_HTTPS_ERRORS]: FieldMeta<ConfigKey.IGNORE_HTTPS_ERRORS>;
   [ConfigKey.MODE]: FieldMeta<ConfigKey.MODE>;

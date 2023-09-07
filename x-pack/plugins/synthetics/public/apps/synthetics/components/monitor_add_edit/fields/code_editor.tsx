@@ -13,6 +13,7 @@ import { EuiPanel } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { CodeEditor as MonacoCodeEditor } from '@kbn/kibana-react-plugin/public';
 
+import { useCodeCompletion } from './use_code_completion';
 import { MonacoEditorLangId } from '../types';
 import { useDimensions } from '../../../hooks';
 
@@ -23,6 +24,7 @@ const CodeEditorContainer = styled(EuiPanel)`
 export interface CodeEditorProps {
   ariaLabel: string;
   id: string;
+  name: string;
   languageId: MonacoEditorLangId;
   onChange: (value: string) => void;
   value: string;
@@ -40,9 +42,11 @@ export const CodeEditor = ({
   placeholder,
   height = '250px',
   readOnly,
+  name,
 }: CodeEditorProps) => {
   const { elementRef: containerRef, width: containerWidth } = useDimensions<HTMLDivElement>();
   const containerWidthThrottled = useThrottle(containerWidth, 500);
+  const codeCompletion = useCodeCompletion(name);
 
   return (
     <>
@@ -70,6 +74,7 @@ export const CodeEditor = ({
             isCopyable={true}
             allowFullScreen={true}
             placeholder={placeholder}
+            suggestionProvider={codeCompletion}
           />
         </MonacoCodeContainer>
       </CodeEditorContainer>
