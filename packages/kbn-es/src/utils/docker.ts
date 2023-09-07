@@ -35,6 +35,7 @@ import {
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
 } from './ess_file_realm';
 import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
+import { waitUntilClusterReady } from './wait_until_cluster_ready';
 
 interface BaseOptions {
   tag?: string;
@@ -340,11 +341,12 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
   await execa('docker', ['pull', image], {
     // inherit is required to show Docker pull output
     stdio: ['ignore', 'inherit', 'pipe'],
-  }).catch(({ message, stderr }) => {
+  }).catch(({ message }) => {
     throw createCliError(
-      stderr.includes('unauthorized: authentication required')
-        ? `Error authenticating with ${DOCKER_REGISTRY}. Visit https://docker-auth.elastic.co/github_auth to login.`
-        : message
+      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.      
+Visit ${chalk.bold.cyan('https://docker-auth.elastic.co/github_auth')} to login.
+
+${message}`
     );
   });
 }
@@ -559,25 +561,6 @@ function getESClient(clientOptions: ClientOptions): Client {
   });
 }
 
-const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
-async function waitUntilClusterReady(
-  clientOptions: ClientOptions,
-  timeoutMs = 60 * 1000
-): Promise<void> {
-  const started = Date.now();
-  const client = getESClient(clientOptions);
-
-  while (started + timeoutMs > Date.now()) {
-    try {
-      await client.info();
-      break;
-    } catch (e) {
-      await delay(1000);
-      /* trap to continue */
-    }
-  }
-}
-
 /**
  * Runs an ES Serverless Cluster through Docker
  */
@@ -635,7 +618,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       portCmd[1].lastIndexOf(':')
     )}`;
 
-    await waitUntilClusterReady({
+    const client = getESClient({
       node: esNodeUrl,
       ...(options.ssl
         ? {
@@ -653,6 +636,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
           }
         : {}),
     });
+    await waitUntilClusterReady({ client, log });
     log.success('ES is ready');
   }
 

@@ -65,16 +65,16 @@ export const ResponseDetails: React.FC = () => {
         <InlineBlock data-test-subj={RESPONSE_EMPTY_TEST_ID}>
           <FormattedMessage
             id="xpack.securitySolution.flyout.documentDetails.response.emptyMessage"
-            defaultMessage="This alert did not generate an external notification. {editRuleLink} to set up notification actions."
+            defaultMessage="There are no response actions defined for this event. To add some, edit the rule’s settings and set up {link}."
             values={{
-              editRuleLink: (
+              link: (
                 <EuiLink
-                  href="https://www.elastic.co/guide/en/security/current/rules-ui-management.html#edit-rules-settings"
+                  href="https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-response-action"
                   target="_blank"
                 >
                   <FormattedMessage
-                    id="xpack.securitySolution.flyout.documentDetails.response.editRuleLink"
-                    defaultMessage="Edit your rule"
+                    id="xpack.securitySolution.flyout.documentDetails.response.responseActionLink"
+                    defaultMessage="response actions"
                   />
                 </EuiLink>
               ),
