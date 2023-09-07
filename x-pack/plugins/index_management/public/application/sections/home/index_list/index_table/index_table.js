@@ -50,6 +50,7 @@ import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
+import { CreateIndexButton } from '../create_index/create_index_button';
 
 const getHeaders = ({ showIndexStats }) => {
   const headers = {};
@@ -623,6 +624,9 @@ export class IndexTable extends Component {
                     </EuiFlexItem>
                   </Fragment>
                 )}
+                <EuiFlexItem grow={false}>
+                  <CreateIndexButton loadIndices={loadIndices} />
+                </EuiFlexItem>
               </EuiFlexGroup>
 
               {this.renderFilterError()}

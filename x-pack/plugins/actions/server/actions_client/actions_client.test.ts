@@ -3019,6 +3019,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
         {
           id: uuidv4(),
@@ -3027,6 +3028,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '456def',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
       ]);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
@@ -3051,6 +3053,7 @@ describe('bulkEnqueueExecution()', () => {
             executionId: '123abc',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
+            actionTypeId: 'my-action-type',
           },
           {
             id: uuidv4(),
@@ -3059,6 +3062,7 @@ describe('bulkEnqueueExecution()', () => {
             executionId: '456def',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
+            actionTypeId: 'my-action-type',
           },
         ])
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
@@ -3081,6 +3085,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
         {
           id: uuidv4(),
@@ -3089,6 +3094,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '456def',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
       ]);
 
@@ -3112,6 +3118,7 @@ describe('bulkEnqueueExecution()', () => {
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'my-action-type',
       },
       {
         id: uuidv4(),
@@ -3120,6 +3127,7 @@ describe('bulkEnqueueExecution()', () => {
         executionId: '456def',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'my-action-type',
       },
     ];
     await expect(actionsClient.bulkEnqueueExecution(opts)).resolves.toMatchInlineSnapshot(
