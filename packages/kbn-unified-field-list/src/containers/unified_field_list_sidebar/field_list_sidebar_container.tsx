@@ -35,6 +35,7 @@ import {
   type ExistingFieldsFetcher,
 } from '../../hooks/use_existing_fields';
 import { useQuerySubscriber } from '../../hooks/use_query_subscriber';
+import { useSidebarToggle } from '../../hooks/use_sidebar_toggle';
 import {
   UnifiedFieldListSidebar,
   type UnifiedFieldListSidebarCustomizableProps,
@@ -71,16 +72,6 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
    * Return static configuration options which don't need to change
    */
   getCreationOptions: () => UnifiedFieldListSidebarContainerCreationOptions;
-
-  /**
-   * Toggle sidebar visibility
-   */
-  isSidebarCollapsed?: boolean;
-
-  /**
-   * Sidebar visibility handler
-   */
-  onToggleSidebar?: UnifiedFieldListSidebarProps['onToggleSidebar'];
 
   /**
    * Custom content to render at the top of field list in the flyout (for example a data view picker)
@@ -129,6 +120,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   );
   const { data, dataViewFieldEditor } = services;
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
+  const { isSidebarCollapsed, onToggleSidebar } = useSidebarToggle({ stateService });
 
   const canEditDataView =
     Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||
@@ -255,6 +247,11 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     onEditField: editField,
     onDeleteField: deleteField,
   };
+
+  if (stateService.creationOptions.showSidebarToggleButton) {
+    commonSidebarProps.isSidebarCollapsed = isSidebarCollapsed;
+    commonSidebarProps.onToggleSidebar = onToggleSidebar;
+  }
 
   const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;
 

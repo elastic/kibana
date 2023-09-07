@@ -116,7 +116,7 @@ export interface UnifiedFieldListSidebarContainerCreationOptions {
   originatingApp: string;
 
   /**
-   * Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
+   * Your app name: "discover", "lens", etc. If not provided, sections and sidebar toggle states would not be persisted.
    */
   localStorageKeyPrefix?: string;
 
@@ -124,6 +124,11 @@ export interface UnifiedFieldListSidebarContainerCreationOptions {
    * Pass `timefilter` only if you are not using search sessions for the global search
    */
   timeRangeUpdatesType?: TimeRangeUpdatesType;
+
+  /**
+   * Pass `true` to make the sidebar collapsible. Additionally, define `localStorageKeyPrefix` to persist toggle state.
+   */
+  showSidebarToggleButton?: boolean;
 
   /**
    * Pass `true` to skip auto fetching of fields existence info

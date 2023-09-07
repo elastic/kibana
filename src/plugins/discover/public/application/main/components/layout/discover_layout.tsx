@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -53,11 +53,6 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 
-/**
- * Local storage key for sidebar persistence state
- */
-export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
-
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
@@ -73,7 +68,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     data,
     uiSettings,
     filterManager,
-    storage,
     history,
     spaces,
     inspector,
@@ -112,8 +106,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
   }, [dataView]);
 
-  const initialSidebarClosed = Boolean(storage.get(SIDEBAR_CLOSED_KEY));
-  const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
@@ -174,14 +166,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       .map((filter) => ({ ...filter, meta: { ...filter.meta, disabled: true } }));
     filterManager.setFilters(disabledFilters);
   }, [filterManager]);
-
-  const onToggleSidebar = useCallback(
-    (isSidebarCollapsed: boolean) => {
-      storage.set(SIDEBAR_CLOSED_KEY, isSidebarCollapsed);
-      setIsSidebarClosed(isSidebarCollapsed);
-    },
-    [setIsSidebarClosed, storage]
-  );
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const documentState = useDataState(stateContainer.dataState.data$.documents$);
@@ -296,8 +280,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               onRemoveField={onRemoveColumn}
               onChangeDataView={stateContainer.actions.onChangeDataView}
               selectedDataView={dataView}
-              isSidebarCollapsed={isSidebarClosed}
-              onToggleSidebar={onToggleSidebar}
               trackUiMetric={trackUiMetric}
               onFieldEdited={onFieldEdited}
               onDataViewCreated={stateContainer.actions.onDataViewCreated}
