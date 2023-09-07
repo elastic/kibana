@@ -26,7 +26,7 @@ import {
   duplicateSelectedRulesWithExceptions,
   duplicateSelectedRulesWithNonExpiredExceptions,
   duplicateSelectedRulesWithoutExceptions,
-} from '../../tasks/rules_bulk_actions';
+} from '../../tasks/rules_bulk_edit';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const RULE_NAME = 'Custom rule for bulk actions';

@@ -85,9 +85,9 @@ export const MESSAGE = '[data-test-subj="formatted-field-message"]';
 export const REASON =
   '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="kibana.alert.reason"]';
 
-export const RISK_SCORE = '[data-test-subj^=formatted-field][data-test-subj$=risk_score]';
+export const RISK_SCORE = '[data-test-subj$=riskScore]';
 
-export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule\\.name]';
+export const RULE_NAME = '[data-test-subj$=ruleName]';
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
@@ -99,7 +99,7 @@ export const OPEN_ANALYZER_BTN = '[data-test-subj="view-in-analyzer"]';
 
 export const ANALYZER_NODE = '[data-test-subj="resolver:node"';
 
-export const SEVERITY = '[data-test-subj^=formatted-field][data-test-subj$=severity]';
+export const SEVERITY = '[data-test-subj$=severity]';
 
 export const SOURCE_IP = '[data-test-subj^=formatted-field][data-test-subj$=source\\.ip]';
 
