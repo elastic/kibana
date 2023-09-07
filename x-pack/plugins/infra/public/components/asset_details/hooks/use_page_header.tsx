@@ -60,7 +60,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
   const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] =
     // If there is a state object in location, it's persisted in case the page is opened in a new tab or after page refresh
     // With that, we can show the return button. Otherwise, it will be hidden (ex: the user opened a shared URL or opened the page from their bookmarks)
-    location.state || location.key
+    location.state || history.length > 1
       ? [
           {
             text: (

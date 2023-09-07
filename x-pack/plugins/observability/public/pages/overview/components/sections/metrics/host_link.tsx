@@ -5,37 +5,19 @@
  * 2.0.
  */
 import React from 'react';
-import rison from '@kbn/rison';
-import { EuiLink } from '@elastic/eui';
-import { crateInfraNodeDetailsLink } from '../../../../../hooks/create_use_rules_link';
 import { StringOrNull } from '../../../../..';
 
 interface Props {
   name: StringOrNull;
-  id: string;
+  id: StringOrNull;
   timerange: { from: number; to: number };
 }
 
 export function HostLink({ name, id, timerange }: Props) {
-  const linkProps = crateInfraNodeDetailsLink({
-    assetType: 'host',
-    assetId: id,
-    search: {
-      from: `${timerange.from}`,
-      to: `${timerange.to}`,
-      ...(!!name
-        ? {
-            assetDetails: rison.encodeUnknown({
-              name,
-            }),
-          }
-        : undefined),
-    },
-  })();
-
+  const link = `../../app/metrics/link-to/host-detail/${id}?from=${timerange.from}&to=${timerange.to}`;
   return (
-    <EuiLink data-test-subj="o11yInfraNodeDetailsLink" {...linkProps}>
-      {name}
-    </EuiLink>
+    <>
+      <a href={link}>{name}</a>
+    </>
   );
 }
