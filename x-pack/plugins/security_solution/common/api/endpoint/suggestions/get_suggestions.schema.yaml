@@ -30,7 +30,7 @@ paths:
           schema:
             type: object
             properties:
-              id:
+              suggestion_type:
                 type: string
                 enum:
                   - eventFilters
