@@ -32,9 +32,12 @@ export const SelectInput = ({
   onChange: onChangeProp,
   optionLabels = {},
   optionValues: optionsProp,
-  name,
   value: valueProp,
 }: SelectInputProps) => {
+  if (optionsProp.length === 0) {
+    throw new Error('non-empty `optionValues` are required for `SelectInput`.');
+  }
+
   const options = useMemo(
     () =>
       optionsProp?.map((option) => ({
@@ -43,10 +46,6 @@ export const SelectInput = ({
       })),
     [optionsProp, optionLabels]
   );
-
-  if (!options) {
-    throw new Error('`optionValues` is required for `SelectInput`.');
-  }
 
   const onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onChangeProp({ value: event.target.value });

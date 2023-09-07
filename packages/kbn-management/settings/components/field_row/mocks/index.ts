@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/packages/kbn-management/settings/components/field_input'],
-};
+export { TestWrapper, createFieldRowServicesMock, wrap } from './context';

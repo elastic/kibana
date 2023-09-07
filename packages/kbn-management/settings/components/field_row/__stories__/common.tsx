@@ -38,22 +38,17 @@ export interface StoryProps<T extends SettingType>
 }
 
 /**
- * Interface defining available {@link https://storybook.js.org/docs/react/writing-stories/parameters parameters}
- * for a {@link FieldRow} Storybook story.
- */
-interface Params {
-  argTypes?: Record<string, unknown>;
-  settingFields?: Partial<UiSettingMetadata<SettingType>>;
-}
-
-/**
  * Utility function for returning a {@link FieldRow} Storybook story
  * definition.
  * @param title The title displayed in the Storybook UI.
  * @param description The description of the Story.
  * @returns A Storybook Story.
  */
-export const getStory = (title: string, description: string) =>
+export const getStory = (
+  title: string,
+  description: string,
+  argTypes: Record<string, unknown> = {}
+) =>
   ({
     title: `Settings/Field Row/${title}`,
     description,
@@ -76,6 +71,7 @@ export const getStory = (title: string, description: string) =>
       isOverridden: {
         name: 'Setting is overridden?',
       },
+      ...argTypes,
     },
     decorators: [
       (Story) => (
@@ -110,7 +106,10 @@ export const storyArgs = {
  * @param type The type of the UiSetting for this {@link FieldRow}.
  * @returns A Storybook Story.
  */
-export const getFieldRowStory = (type: SettingType, params: Params = {}) => {
+export const getFieldRowStory = (
+  type: SettingType,
+  settingFields: Partial<UiSettingMetadata<SettingType>>
+) => {
   const Story = ({
     isCustom,
     isDeprecated,
@@ -124,7 +123,7 @@ export const getFieldRowStory = (type: SettingType, params: Params = {}) => {
       value,
       userValue,
       name: `Some ${type} setting`,
-      ...params.settingFields,
+      ...settingFields,
     };
 
     const [field, unsavedChange, onChangeFn] = useFieldDefinition(setting, {
@@ -134,7 +133,8 @@ export const getFieldRowStory = (type: SettingType, params: Params = {}) => {
     });
 
     const onChange: OnChangeFn<typeof type> = (_key, change) => {
-      onChangeFn(change.unsavedValue);
+      const { error, isInvalid, unsavedValue } = change;
+      onChangeFn({ error: error === null ? undefined : error, isInvalid, value: unsavedValue });
     };
 
     return <FieldRow {...{ field, unsavedChange, isSavingEnabled, onChange }} />;
@@ -143,7 +143,6 @@ export const getFieldRowStory = (type: SettingType, params: Params = {}) => {
   Story.args = {
     userValue: getUserValue(type),
     value: getDefaultValue(type),
-    ...params.argTypes,
     ...storyArgs,
   };
 

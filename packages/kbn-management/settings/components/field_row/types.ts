@@ -46,10 +46,7 @@ export type FieldRowKibanaDependencies = KibanaDependencies & FieldInputKibanaDe
 
 /**
  * An `onChange` handler for a {@link FieldRow} component.
+ * @param id A unique id corresponding to the particular setting being changed.
+ * @param change The {@link UnsavedFieldChange} corresponding to any unsaved change to the field.
  */
-export type OnChangeFn<T extends SettingType> = (
-  /** A unique key corresponding to the particular setting being changed. */
-  key: string,
-  /** The {@link UnsavedFieldChange} corresponding to any unsaved change to the field. */
-  change: UnsavedFieldChange<T>
-) => void;
+export type OnChangeFn<T extends SettingType> = (id: string, change: UnsavedFieldChange<T>) => void;

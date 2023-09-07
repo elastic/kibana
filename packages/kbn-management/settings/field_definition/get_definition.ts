@@ -66,10 +66,15 @@ const getAriaLabel = (name: string = '') => {
  * @internal
  */
 interface GetDefinitionParams<T extends SettingType> {
+  /** The id of the field. */
   id: string;
+  /** The source setting from Kibana. */
   setting: UiSettingMetadata<T>;
+  /** Optional parameters */
   params?: {
+    /** True if the setting it custom, false otherwise */
     isCustom?: boolean;
+    /** True if the setting is overridden in Kibana, false otherwise. */
     isOverridden?: boolean;
   };
 }
@@ -77,12 +82,14 @@ interface GetDefinitionParams<T extends SettingType> {
 /**
  * Create a {@link FieldDefinition} from a {@link UiSettingMetadata} object for use
  * in the UI.
+ *
+ * @param parameters The {@link GetDefinitionParams} for creating the {@link FieldDefinition}.
  */
-export const getFieldDefinition = <T extends SettingType>({
-  id,
-  setting,
-  params = { isCustom: false, isOverridden: false },
-}: GetDefinitionParams<T>): FieldDefinition<T> => {
+export const getFieldDefinition = <T extends SettingType>(
+  parameters: GetDefinitionParams<T>
+): FieldDefinition<T> => {
+  const { id, setting, params = { isCustom: false, isOverridden: false } } = parameters;
+
   const {
     category,
     deprecation,
@@ -115,7 +122,7 @@ export const getFieldDefinition = <T extends SettingType>({
   const definition: FieldDefinition<T> = {
     ariaAttributes: {
       ariaLabel: getAriaLabel(name),
-      // ariaDescribedBy: this.unsavedChange.value ? `${groupId} ${unsavedId}` : undefined,
+      // ariaDescribedBy: unsavedChange.value ? `${groupId} ${unsavedId}` : undefined,
     },
     categories,
     defaultValue,

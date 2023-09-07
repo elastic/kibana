@@ -14,9 +14,16 @@ import { KnownTypeToValue, SettingType } from './setting_type';
  * @public
  */
 export interface UnsavedFieldChange<T extends SettingType> {
+  /**
+   * The type of setting.
+   * @see {@link SettingType}
+   */
   type: T;
+  /** An error message, if any, from the change. */
   error?: string | null;
+  /** True if the change is invalid for the field, false otherwise. */
   isInvalid?: boolean;
+  /** The current unsaved value stored in the field. */
   unsavedValue?: KnownTypeToValue<T> | null;
 }
 

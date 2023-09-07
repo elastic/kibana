@@ -9,28 +9,38 @@
 import { SettingType, UnsavedFieldChange, FieldDefinition } from '@kbn/management-settings-types';
 import { hasUnsavedChange } from './has_unsaved_change';
 
-type D<T extends SettingType> = FieldDefinition<T>;
+type F<T extends SettingType> = Pick<FieldDefinition<T>, 'savedValue' | 'defaultValue'>;
 type C<T extends SettingType> = UnsavedFieldChange<T>;
 
-export function getInputValue(f: D<'array'>, u: C<'array'>): [string[], boolean];
-export function getInputValue(f: D<'color'>, u: C<'color'>): [string, boolean];
-export function getInputValue(f: D<'boolean'>, u: C<'boolean'>): [boolean, boolean];
-export function getInputValue(f: D<'image'>, u: C<'image'>): [string, boolean];
-export function getInputValue(f: D<'json'>, u: C<'json'>): [string, boolean];
-export function getInputValue(f: D<'markdown'>, u: C<'markdown'>): [string, boolean];
-export function getInputValue(f: D<'number'>, u: C<'number'>): [number, boolean];
-export function getInputValue(f: D<'select'>, u: C<'select'>): [string, boolean];
-export function getInputValue(f: D<'string'>, u: C<'string'>): [string, boolean];
+/**
+ * Convenience function that, given a {@link FieldDefinition} and an {@link UnsavedFieldChange},
+ * returns the value to be displayed in the input field, and a boolean indicating whether the
+ * value is an unsaved value.
+ *
+ * @param field The field to compare.
+ * @param change The unsaved change to compare.
+ */
+export function getInputValue(field: F<'array'>, change: C<'array'>): [string[], boolean];
+export function getInputValue(field: F<'color'>, change: C<'color'>): [string, boolean];
+export function getInputValue(field: F<'boolean'>, change: C<'boolean'>): [boolean, boolean];
+export function getInputValue(field: F<'image'>, change: C<'image'>): [string, boolean];
+export function getInputValue(field: F<'json'>, change: C<'json'>): [string, boolean];
+export function getInputValue(field: F<'markdown'>, change: C<'markdown'>): [string, boolean];
+export function getInputValue(field: F<'number'>, change: C<'number'>): [number, boolean];
+export function getInputValue(field: F<'select'>, change: C<'select'>): [string, boolean];
+export function getInputValue(field: F<'string'>, change: C<'string'>): [string, boolean];
 export function getInputValue(
-  f: D<'undefined'>,
-  u: C<'undefined'>
+  field: F<'undefined'>,
+  change: C<'undefined'>
 ): [string | null | undefined, boolean];
-export function getInputValue<S extends SettingType>(f: D<S>, u: C<S>) {
-  const isUnsavedValue = hasUnsavedChange(f, u);
+export function getInputValue<S extends SettingType>(field: F<S>, change: C<S>) {
+  const isUnsavedValue = hasUnsavedChange(field, change);
+
   const value = isUnsavedValue
-    ? u.unsavedValue
-    : f.savedValue !== undefined && f.savedValue !== null
-    ? f.savedValue
-    : f.defaultValue;
+    ? change.unsavedValue
+    : field.savedValue !== undefined && field.savedValue !== null
+    ? field.savedValue
+    : field.defaultValue;
+
   return [value, isUnsavedValue];
 }

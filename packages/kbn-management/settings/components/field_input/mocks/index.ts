@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/kbn-management/settings/utilities'],
-};
+export { TestWrapper, createFieldInputServicesMock, wrap } from './context.mock';
+
+export type { FieldInputProvider } from '../services';
+export type { FieldInputServices } from '../types';

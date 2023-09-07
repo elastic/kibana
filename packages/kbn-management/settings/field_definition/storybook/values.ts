@@ -12,12 +12,12 @@ const LOREM =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec eu odio velit. Integer et mauris quis ligula elementum commodo. Morbi eu ipsum diam. Nulla auctor orci eget egestas vehicula. Aliquam gravida, dolor eu posuere vulputate, neque enim viverra odio, id viverra ipsum quam et ipsum.';
 
 const JSON_DEFAULT = `{
-  foo: 'bar',
+  "foo": "bar"
 }`;
 
 const JSON_USER = `{
-  foo: 'baz',
-  bar: 'qux',
+  "foo": "baz",
+  "bar": "qux"
 }`;
 
 const MARKDOWN = `# Heading 1
@@ -43,7 +43,7 @@ export const getUserValue = (type: SettingType) => {
     case 'boolean':
       return true;
     case 'color':
-      return '#54321';
+      return '#654321';
     case 'image':
       return IMAGE;
     case 'json':

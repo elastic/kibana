@@ -21,35 +21,68 @@ import { KnownTypeToValue, SettingType } from './setting_type';
  * @public
  */
 export interface FieldDefinition<T extends SettingType, V = KnownTypeToValue<T> | null> {
+  /** UX ARIA attributes derived from the setting. */
   ariaAttributes: {
+    /** The `aria-label` attribute for the field input. */
     ariaLabel: string;
+    /** The `aria-describedby` attribute for the field input. */
     ariaDescribedBy?: string;
   };
+  /** A list of categories related to the field. */
   categories: string[];
+  /** The default value of the field from Kibana. */
   defaultValue?: V;
+  /** The text-based display of the default value, for use in the UI. */
   defaultValueDisplay: string;
+  /**
+   * Deprecation information for the field
+   * @see {@link DeprecationSettings}
+   */
   deprecation?: DeprecationSettings;
+  /** A description of the field. */
   description?: string | ReactElement;
+  /** The name of the field suitable for display in the UX. */
   displayName: string;
+  /** The grouping identifier for the field. */
   groupId: string;
+  /** The unique identifier of the field, typically separated by `:` */
   id: string;
+  /** True if the field is a custom setting, false otherwise. */
   isCustom: boolean;
+  /** True if the current saved setting matches the default setting. */
   isDefaultValue: boolean;
+  /** True if the setting is overridden in Kibana, false otherwise. */
   isOverridden: boolean;
+  /** True if the setting is read-only, false otherwise. */
   isReadOnly: boolean;
+  /** Metric information when one interacts with the field. */
   metric?: {
+    /** The metric name. */
     name?: string;
+    /** The metric type. */
     type?: UiCounterMetricType;
   };
+  /** The name of the field suitable for use in the UX. */
   name: string;
+  /** Option information if the field represents a `select` setting. */
   options?: {
+    /** Option values for the field. */
     values: string[] | number[];
+    /** Option labels organized by value. */
     labels: Record<string, string>;
   };
+  /** A rank order for the field relative to other fields. */
   order: number | undefined;
+  /** True if the browser must be reloaded for the setting to take effect, false otherwise. */
   requiresPageReload: boolean;
+  /** The current saved value of the setting. */
   savedValue?: V;
+  /**
+   * The type of setting the field represents.
+   * @see {@link SettingType}
+   */
   type: T;
+  /** An identifier of the field when it has an unsaved change. */
   unsavedFieldId: string;
 }
 
@@ -100,8 +133,11 @@ export type NumberFieldDefinition = FieldDefinition<'number'>;
  * for use in the UI.
  */
 export interface SelectFieldDefinition extends FieldDefinition<'select'> {
+  /** Options are required when this definition is used. */
   options: {
+    /** Option values for the field. */
     values: string[] | number[];
+    /** Option labels organized by value. */
     labels: Record<string, string>;
   };
 }

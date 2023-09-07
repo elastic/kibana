@@ -9,6 +9,7 @@
 import React from 'react';
 import { EuiColorPicker, EuiColorPickerProps } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
@@ -16,6 +17,10 @@ import { TEST_SUBJ_PREFIX_FIELD } from '.';
  * Props for a {@link ColorPickerInput} component.
  */
 export type ColorPickerInputProps = InputProps<'color'>;
+
+const invalidMessage = i18n.translate('management.settings.fieldInput.color.invalidMessage', {
+  defaultMessage: 'Provide a valid color value',
+});
 
 /**
  * Component for manipulating a `color` field.
@@ -25,11 +30,18 @@ export const ColorPickerInput = ({
   ariaLabel,
   id,
   isDisabled = false,
+  isInvalid = false,
   onChange: onChangeProp,
   name,
   value: color,
 }: ColorPickerInputProps) => {
-  const onChange: EuiColorPickerProps['onChange'] = (value) => onChangeProp({ value });
+  const onChange: EuiColorPickerProps['onChange'] = (newColor, { isValid }) => {
+    if (newColor !== '' && !isValid) {
+      onChangeProp({ value: newColor, isInvalid: true, error: invalidMessage });
+    } else {
+      onChangeProp({ value: newColor });
+    }
+  };
 
   return (
     <EuiColorPicker
@@ -38,6 +50,7 @@ export const ColorPickerInput = ({
       data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
       disabled={isDisabled}
       format="hex"
+      isInvalid={isInvalid}
       {...{ name, color, onChange }}
     />
   );

@@ -22,7 +22,7 @@ import { useServices } from '../services';
 
 export const DATA_TEST_SUBJ_DEPRECATION_PREFIX = 'description-block-deprecation';
 
-type Field<T extends SettingType> = Pick<FieldDefinition<T>, 'deprecation' | 'name'>;
+type Field<T extends SettingType> = Pick<FieldDefinition<T>, 'id' | 'deprecation' | 'name'>;
 
 /**
  * Props for a {@link FieldDeprecation} component.
@@ -37,14 +37,14 @@ export interface FieldDeprecationProps<T extends SettingType> {
  */
 export const FieldDeprecation = <T extends SettingType>({ field }: FieldDeprecationProps<T>) => {
   const { links } = useServices();
-  const { deprecation, name } = field;
+  const { deprecation, name, id } = field;
 
   if (!deprecation) {
     return null;
   }
 
   return (
-    <div data-test-subj={`${DATA_TEST_SUBJ_DEPRECATION_PREFIX}-${name}`}>
+    <div data-test-subj={`${DATA_TEST_SUBJ_DEPRECATION_PREFIX}-${id}`}>
       <EuiToolTip content={deprecation.message}>
         <EuiBadge
           color="warning"

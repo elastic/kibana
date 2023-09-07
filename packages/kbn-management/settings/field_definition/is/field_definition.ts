@@ -37,6 +37,7 @@ type Definition = Pick<FieldDefinition<SettingType>, 'type'>;
 /**
  * Returns `true` if the given {@link FieldDefinition} is an {@link ArrayFieldDefinition},
  * `false` otherwise.
+ * @param d The {@link FieldDefinition} to check.
  */
 export const isArrayFieldDefinition = (d: Definition): d is ArrayFieldDefinition =>
   d.type === 'array';
@@ -44,6 +45,7 @@ export const isArrayFieldDefinition = (d: Definition): d is ArrayFieldDefinition
 /**
  * Returns `true` if the given {@link FieldDefinition} is an {@link BooleanFieldDefinition},
  * `false` otherwise.
+ * @param d The {@link FieldDefinition} to check.
  */
 export const isBooleanFieldDefinition = (d: Definition): d is BooleanFieldDefinition =>
   d.type === 'boolean';
@@ -51,6 +53,7 @@ export const isBooleanFieldDefinition = (d: Definition): d is BooleanFieldDefini
 /**
  * Returns `true` if the given {@link FieldDefinition} is an {@link ColorFieldDefinition},
  * `false` otherwise.
+ * @param d The {@link FieldDefinition} to check.
  */
 export const isColorFieldDefinition = (d: Definition): d is ColorFieldDefinition =>
   d.type === 'color';
@@ -58,6 +61,7 @@ export const isColorFieldDefinition = (d: Definition): d is ColorFieldDefinition
 /**
  * Returns `true` if the given {@link FieldDefinition} is an {@link ImageFieldDefinition},
  * `false` otherwise.
+ * @param d The {@link FieldDefinition} to check.
  */
 export const isImageFieldDefinition = (d: Definition): d is ImageFieldDefinition =>
   d.type === 'image';
@@ -65,12 +69,14 @@ export const isImageFieldDefinition = (d: Definition): d is ImageFieldDefinition
 /**
  * Returns `true` if the given {@link FieldDefinition} is an {@link JsonFieldDefinition},
  * `false` otherwise.
+ * @param d The {@link FieldDefinition} to check.
  */
 export const isJsonFieldDefinition = (d: Definition): d is JsonFieldDefinition => d.type === 'json';
 
 /**
  * Returns `true` if the given {@link FieldDefinition} is an {@link MarkdownFieldDefinition},
  * `false` otherwise.
+ * @param d The {@link FieldDefinition} to check.
  */
 export const isMarkdownFieldDefinition = (d: Definition): d is MarkdownFieldDefinition =>
   d.type === 'markdown';
@@ -78,6 +84,7 @@ export const isMarkdownFieldDefinition = (d: Definition): d is MarkdownFieldDefi
 /**
  * Returns `true` if the given {@link FieldDefinition} is an {@link NumberFieldDefinition},
  * `false` otherwise.
+ * @param d The {@link FieldDefinition} to check.
  */
 export const isNumberFieldDefinition = (d: Definition): d is NumberFieldDefinition =>
   d.type === 'number';
@@ -85,6 +92,7 @@ export const isNumberFieldDefinition = (d: Definition): d is NumberFieldDefiniti
 /**
  * Returns `true` if the given {@link FieldDefinition} is an {@link SelectFieldDefinition},
  * `false` otherwise.
+ * @param d The {@link FieldDefinition} to check.
  */
 export const isSelectFieldDefinition = (d: Definition): d is SelectFieldDefinition =>
   d.type === 'select';
@@ -92,6 +100,7 @@ export const isSelectFieldDefinition = (d: Definition): d is SelectFieldDefiniti
 /**
  * Returns `true` if the given {@link FieldDefinition} is an {@link StringFieldDefinition},
  * `false` otherwise.
+ * @param d The {@link FieldDefinition} to check.
  */
 export const isStringFieldDefinition = (d: Definition): d is StringFieldDefinition =>
   d.type === 'string';
@@ -99,10 +108,7 @@ export const isStringFieldDefinition = (d: Definition): d is StringFieldDefiniti
 /**
  * Returns `true` if the given {@link FieldDefinition} is an {@link UndefinedFieldDefinition},
  * `false` otherwise.
+ * @param d The {@link FieldDefinition} to check.
  */
 export const isUndefinedFieldDefinition = (d: Definition): d is UndefinedFieldDefinition =>
   d.type === 'undefined';
-
-//
-// FieldUnsavedChange type guards.
-//

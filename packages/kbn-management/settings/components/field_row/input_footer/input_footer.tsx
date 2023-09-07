@@ -18,7 +18,7 @@ import { OnChangeFn } from '@kbn/management-settings-components-field-input';
 
 import { FieldResetLink } from './reset_link';
 import { ChangeImageLink } from './change_image_link';
-import { OverriddenMessage } from './overridden_message';
+import { FieldOverriddenMessage } from './overridden_message';
 
 export const DATA_TEST_SUBJ_FOOTER_PREFIX = 'field-row-input-footer';
 
@@ -50,7 +50,7 @@ export const FieldInputFooter = <T extends SettingType>({
   ...props
 }: FieldInputFooterProps<T>) => {
   if (field.isOverridden) {
-    return <OverriddenMessage {...{ field }} />;
+    return <FieldOverriddenMessage {...{ field }} />;
   }
 
   if (isSavingEnabled) {

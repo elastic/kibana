@@ -14,6 +14,10 @@ import { KnownTypeToValue } from '@kbn/management-settings-types';
  * Contextual services used by a {@link FieldInput} component.
  */
 export interface FieldInputServices {
+  /**
+   * Displays a danger toast message.
+   * @param value The message to display.
+   */
   showDanger: (value: string) => void;
 }
 
@@ -22,6 +26,7 @@ export interface FieldInputServices {
  * render this component.
  */
 export interface FieldInputKibanaDependencies {
+  /** The portion of the {@link ToastsStart} contract used by this component. */
   toasts: Pick<ToastsStart, 'addDanger'>;
 }
 
@@ -33,8 +38,10 @@ export interface InputProps<T extends SettingType, V = KnownTypeToValue<T> | nul
   ariaDescribedBy?: string;
   ariaLabel: string;
   isDisabled?: boolean;
+  isInvalid?: boolean;
   value?: V;
   name: string;
+  /** The `onChange` handler. */
   onChange: OnChangeFn<T>;
 }
 
@@ -46,9 +53,12 @@ export interface OnChangeParams<T extends SettingType> {
   value?: KnownTypeToValue<T> | null;
   /** An error message, if one occurred. */
   error?: string;
+  /** True if the format of a change is not valid, false otherwise. */
+  isInvalid?: boolean;
 }
 
 /**
  * A function that is called when the value of a {@link FieldInput} changes.
+ * @param params The {@link OnChangeParams} parameters passed to the handler.
  */
 export type OnChangeFn<T extends SettingType> = (params: OnChangeParams<T>) => void;

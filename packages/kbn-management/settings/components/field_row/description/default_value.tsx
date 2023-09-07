@@ -34,14 +34,14 @@ export const FieldDefaultValue = <T extends SettingType>({ field }: FieldDefault
     return null;
   }
 
-  const display = field.defaultValueDisplay;
+  const { defaultValueDisplay: display, id } = field;
 
   let value = <EuiCode>{display}</EuiCode>;
 
   if (isJsonFieldDefinition(field) || isMarkdownFieldDefinition(field)) {
     value = (
       <EuiCodeBlock
-        data-test-subj={`${DATA_TEST_SUBJ_DEFAULT_DISPLAY_PREFIX}-${field.id}`}
+        data-test-subj={`${DATA_TEST_SUBJ_DEFAULT_DISPLAY_PREFIX}-${id}`}
         language={field.type}
         paddingSize="s"
         overflowHeight={display.length >= 500 ? 300 : undefined}

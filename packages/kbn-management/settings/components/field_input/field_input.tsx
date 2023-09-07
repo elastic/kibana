@@ -57,13 +57,19 @@ import {
 import { OnChangeFn } from './types';
 
 /**
- * Props for a {@link FieldInput} component.
+ * The props that are passed to the {@link FieldInput} component.
  */
 export interface FieldInputProps<T extends SettingType> {
+  /** The {@link FieldDefinition} for the component. */
   field: FieldDefinition<T>;
+  /** An {@link UnsavedFieldChange} for the component, if any. */
   unsavedChange?: UnsavedFieldChange<T>;
+  /** The `onChange` handler for the input. */
   onChange: OnChangeFn<T>;
-  isDisabled: boolean;
+  /** True if the input is disabled, false otherwise. */
+  isDisabled?: boolean;
+  /** True if the value within the input is invalid, false otherwise. */
+  isInvalid?: boolean;
 }
 
 /**
@@ -71,24 +77,28 @@ export interface FieldInputProps<T extends SettingType> {
  * match the type of the {@link FieldDefinition}.
  */
 const getMismatchError = (type: SettingType, unsavedType?: SettingType) =>
-  new Error(`Unsaved change for ${type} mismatch: ${unsavedType}"`);
+  new Error(`Unsaved change for ${type} mismatch: ${unsavedType}`);
 
 /**
- * A component that renders an input field to manipulate the value of a
- * {@link FieldDefinition}.
+ * An input that allows one to change a setting in Kibana.
+ *
+ * @param props The props for the {@link FieldInput} component.
  */
-export const FieldInput = <T extends SettingType>({
-  field,
-  unsavedChange,
-  isDisabled = false,
-  onChange: onChangeProp,
-}: FieldInputProps<T>) => {
+export const FieldInput = <T extends SettingType>(props: FieldInputProps<T>) => {
+  const {
+    field,
+    unsavedChange,
+    isDisabled = false,
+    isInvalid = false,
+    onChange: onChangeProp,
+  } = props;
   const { id, name, ariaAttributes } = field;
 
-  const props = {
+  const inputProps = {
     ...ariaAttributes,
     id,
     isDisabled,
+    isInvalid,
     name,
   };
 
@@ -115,7 +125,7 @@ export const FieldInput = <T extends SettingType>({
     // type guard.
     const onChange = onChangeProp as OnChangeFn<'array'>;
 
-    return <ArrayInput {...{ ...props, onChange, value }} />;
+    return <ArrayInput {...{ ...inputProps, onChange, value }} />;
   }
 
   if (isBooleanFieldDefinition(field)) {
@@ -126,7 +136,7 @@ export const FieldInput = <T extends SettingType>({
     const [value] = getInputValue(field, unsavedChange);
     const onChange = onChangeProp as OnChangeFn<'boolean'>;
 
-    return <BooleanInput {...{ ...props, onChange, value }} />;
+    return <BooleanInput {...{ ...inputProps, onChange, value }} />;
   }
 
   if (isColorFieldDefinition(field)) {
@@ -137,7 +147,7 @@ export const FieldInput = <T extends SettingType>({
     const [value] = getInputValue(field, unsavedChange);
     const onChange = onChangeProp as OnChangeFn<'color'>;
 
-    return <ColorPickerInput {...{ ...props, onChange, value }} />;
+    return <ColorPickerInput {...{ ...inputProps, onChange, value }} />;
   }
 
   if (isImageFieldDefinition(field)) {
@@ -150,7 +160,7 @@ export const FieldInput = <T extends SettingType>({
 
     return (
       <ImageInput
-        {...{ ...props, onChange, value }}
+        {...{ ...inputProps, onChange, value }}
         isDefaultValue={field.isDefaultValue}
         hasChanged={unsaved}
       />
@@ -167,7 +177,7 @@ export const FieldInput = <T extends SettingType>({
 
     return (
       <CodeEditorInput
-        {...{ ...props, onChange, value }}
+        {...{ ...inputProps, onChange, value }}
         type="json"
         defaultValue={field.savedValue || ''}
       />
@@ -184,7 +194,7 @@ export const FieldInput = <T extends SettingType>({
 
     return (
       <CodeEditorInput
-        {...{ ...props, onChange, value }}
+        {...{ ...inputProps, onChange, value }}
         type="markdown"
         defaultValue={field.savedValue || ''}
       />
@@ -199,7 +209,7 @@ export const FieldInput = <T extends SettingType>({
     const [value] = getInputValue(field, unsavedChange);
     const onChange = onChangeProp as OnChangeFn<'number'>;
 
-    return <NumberInput {...{ ...props, onChange, value }} />;
+    return <NumberInput {...{ ...inputProps, onChange, value }} />;
   }
 
   if (isSelectFieldDefinition(field)) {
@@ -213,7 +223,7 @@ export const FieldInput = <T extends SettingType>({
       options: { values: optionValues, labels: optionLabels },
     } = field;
 
-    return <SelectInput {...{ ...props, onChange, optionLabels, optionValues, value }} />;
+    return <SelectInput {...{ ...inputProps, onChange, optionLabels, optionValues, value }} />;
   }
 
   if (isStringFieldDefinition(field)) {
@@ -224,7 +234,7 @@ export const FieldInput = <T extends SettingType>({
     const [value] = getInputValue(field, unsavedChange);
     const onChange = onChangeProp as OnChangeFn<'string'>;
 
-    return <TextInput {...{ ...props, onChange, value }} />;
+    return <TextInput {...{ ...inputProps, onChange, value }} />;
   }
 
   if (isUndefinedFieldDefinition(field)) {
@@ -233,7 +243,7 @@ export const FieldInput = <T extends SettingType>({
     }
 
     const [value] = getInputValue(field, unsavedChange);
-    return <TextInput {...{ ...(props as unknown as TextInputProps), value }} />;
+    return <TextInput {...{ ...(inputProps as unknown as TextInputProps), value }} />;
   }
 
   throw new Error(`Unknown or incompatible field type: ${field.type}`);

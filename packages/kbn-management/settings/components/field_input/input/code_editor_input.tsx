@@ -37,6 +37,8 @@ export interface CodeEditorInputProps extends InputProps<Type> {
 
 /**
  * Component for manipulating a `json` or `markdown` field.
+ *
+ * TODO: clintandrewhall - `kibana_react` `CodeEditor` does not support `disabled`.
  */
 export const CodeEditorInput = ({
   ariaDescribedBy,
@@ -44,7 +46,6 @@ export const CodeEditorInput = ({
   defaultValue,
   id,
   isDisabled = false,
-  name,
   onChange: onChangeProp,
   type,
   value: valueProp = '',
@@ -88,10 +89,11 @@ export const CodeEditorInput = ({
   const value = valueProp === null ? '' : valueProp;
 
   return (
-    <div data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${name}`}>
+    <div>
       <CodeEditor
         aria-describedby={ariaDescribedBy}
         aria-label={ariaLabel}
+        data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
         isReadOnly={isDisabled}
         name={`${TEST_SUBJ_PREFIX_FIELD}-${id}-editor`}
         {...{ onChange, type, value }}

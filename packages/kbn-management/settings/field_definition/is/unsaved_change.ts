@@ -37,6 +37,7 @@ type Change = UnsavedFieldChange<SettingType>;
 /**
  * Returns `true` if the given {@link FieldUnsavedChange} is an {@link ArrayUnsavedFieldChange},
  * `false` otherwise.
+ * @param c The {@link FieldUnsavedChange} to check.
  */
 export const isArrayFieldUnsavedChange = (c?: Change): c is ArrayUnsavedFieldChange =>
   !c || c.type === undefined || c.type === 'array';
@@ -44,6 +45,7 @@ export const isArrayFieldUnsavedChange = (c?: Change): c is ArrayUnsavedFieldCha
 /**
  * Returns `true` if the given {@link FieldUnsavedChange} is an {@link BooleanUnsavedFieldChange},
  * `false` otherwise.
+ * @param c The {@link FieldUnsavedChange} to check.
  */
 export const isBooleanFieldUnsavedChange = (c?: Change): c is BooleanUnsavedFieldChange =>
   !c || c.type === undefined || c.type === 'boolean';
@@ -51,6 +53,7 @@ export const isBooleanFieldUnsavedChange = (c?: Change): c is BooleanUnsavedFiel
 /**
  * Returns `true` if the given {@link FieldUnsavedChange} is an {@link ColorUnsavedFieldChange},
  * `false` otherwise.
+ * @param c The {@link FieldUnsavedChange} to check.
  */
 export const isColorFieldUnsavedChange = (c?: Change): c is ColorUnsavedFieldChange =>
   !c || c.type === undefined || c.type === 'color';
@@ -58,6 +61,7 @@ export const isColorFieldUnsavedChange = (c?: Change): c is ColorUnsavedFieldCha
 /**
  * Returns `true` if the given {@link FieldUnsavedChange} is an {@link ImageUnsavedFieldChange},
  * `false` otherwise.
+ * @param c The {@link FieldUnsavedChange} to check.
  */
 export const isImageFieldUnsavedChange = (c?: Change): c is ImageUnsavedFieldChange =>
   !c || c.type === undefined || c.type === 'image';
@@ -65,6 +69,7 @@ export const isImageFieldUnsavedChange = (c?: Change): c is ImageUnsavedFieldCha
 /**
  * Returns `true` if the given {@link FieldUnsavedChange} is an {@link JsonUnsavedFieldChange},
  * `false` otherwise.
+ * @param c The {@link FieldUnsavedChange} to check.
  */
 export const isJsonFieldUnsavedChange = (c?: Change): c is JsonUnsavedFieldChange =>
   !c || c.type === undefined || c.type === 'json';
@@ -72,6 +77,7 @@ export const isJsonFieldUnsavedChange = (c?: Change): c is JsonUnsavedFieldChang
 /**
  * Returns `true` if the given {@link FieldUnsavedChange} is an {@link MarkdownUnsavedFieldChange},
  * `false` otherwise.
+ * @param c The {@link FieldUnsavedChange} to check.
  */
 export const isMarkdownFieldUnsavedChange = (c?: Change): c is MarkdownUnsavedFieldChange =>
   !c || c.type === undefined || c.type === 'markdown';
@@ -79,6 +85,7 @@ export const isMarkdownFieldUnsavedChange = (c?: Change): c is MarkdownUnsavedFi
 /**
  * Returns `true` if the given {@link FieldUnsavedChange} is an {@link NumberUnsavedFieldChange},
  * `false` otherwise.
+ * @param c The {@link FieldUnsavedChange} to check.
  */
 export const isNumberFieldUnsavedChange = (c?: Change): c is NumberUnsavedFieldChange =>
   !c || c.type === undefined || c.type === 'number';
@@ -86,6 +93,7 @@ export const isNumberFieldUnsavedChange = (c?: Change): c is NumberUnsavedFieldC
 /**
  * Returns `true` if the given {@link FieldUnsavedChange} is an {@link SelectUnsavedFieldChange},
  * `false` otherwise.
+ * @param c The {@link FieldUnsavedChange} to check.
  */
 export const isSelectFieldUnsavedChange = (c?: Change): c is SelectUnsavedFieldChange =>
   !c || c.type === undefined || c.type === 'select';
@@ -93,6 +101,7 @@ export const isSelectFieldUnsavedChange = (c?: Change): c is SelectUnsavedFieldC
 /**
  * Returns `true` if the given {@link FieldUnsavedChange} is an {@link StringUnsavedFieldChange},
  * `false` otherwise.
+ * @param c The {@link FieldUnsavedChange} to check.
  */
 export const isStringFieldUnsavedChange = (c?: Change): c is StringUnsavedFieldChange =>
   !c || c.type === undefined || c.type === 'string';
@@ -100,6 +109,7 @@ export const isStringFieldUnsavedChange = (c?: Change): c is StringUnsavedFieldC
 /**
  * Returns `true` if the given {@link FieldUnsavedChange} is an {@link UndefinedUnsavedFieldChange},
  * `false` otherwise.
+ * @param c The {@link FieldUnsavedChange} to check.
  */
 export const isUndefinedFieldUnsavedChange = (c?: Change): c is UndefinedUnsavedFieldChange =>
   !c || c.type === undefined || c.type === 'undefined';

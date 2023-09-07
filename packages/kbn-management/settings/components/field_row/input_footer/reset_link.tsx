@@ -18,11 +18,12 @@ import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
  */
 export interface FieldResetLinkProps<T extends SettingType> {
   /** The {@link FieldDefinition} corresponding the setting. */
-  field: Pick<FieldDefinition<T>, 'name' | 'isDefaultValue' | 'ariaAttributes'>;
+  field: Pick<FieldDefinition<T>, 'id' | 'isDefaultValue' | 'ariaAttributes'>;
   /** A handler for when a field is reset to its default or saved value. */
   onReset: () => void;
 }
 
+export const DATA_TEST_SUBJ_RESET_PREFIX = 'management-settings-resetField';
 /**
  * Component for rendering a link to reset a {@link FieldDefinition} to its default
  * or saved value.
@@ -36,7 +37,7 @@ export const FieldResetLink = <T extends SettingType>({
   }
 
   const {
-    name,
+    id,
     ariaAttributes: { ariaLabel },
   } = field;
 
@@ -50,7 +51,7 @@ export const FieldResetLink = <T extends SettingType>({
           },
         })}
         onClick={onReset}
-        data-test-subj={`management-settings-resetField-${name}`}
+        data-test-subj={`${DATA_TEST_SUBJ_RESET_PREFIX}-${id}`}
       >
         <FormattedMessage
           id="management.settings.resetToDefaultLinkText"

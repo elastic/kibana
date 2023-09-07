@@ -31,6 +31,8 @@ import { FieldInputFooter } from './input_footer';
 import { useFieldStyles } from './field_row.styles';
 import { OnChangeFn } from './types';
 
+export const DATA_TEST_SUBJ_SCREEN_READER_MESSAGE = 'fieldRowScreenReaderMessage';
+
 /**
  * Props for a {@link FieldRow} component.
  */
@@ -39,8 +41,11 @@ export interface FieldRowProps<T extends SettingType> {
   isSavingEnabled: boolean;
   /** The {@link OnChangeFn} handler. */
   onChange: OnChangeFn<T>;
-  /** The onClear handler, if a value is cleared to an empty or default state. */
-  onClear?: (key: string) => void;
+  /**
+   * The onClear handler, if a value is cleared to an empty or default state.
+   * @param id The id relating to the field to clear.
+   */
+  onClear?: (id: string) => void;
   /** The {@link FieldDefinition} corresponding the setting. */
   field: FieldDefinition<T>;
   /** The {@link UnsavedFieldChange} corresponding to any unsaved change to the field. */
@@ -49,16 +54,14 @@ export interface FieldRowProps<T extends SettingType> {
 
 /**
  * Component for displaying a {@link FieldDefinition} in a form row, using a {@link FieldInput}.
+ * @param props The {@link FieldRowProps} for the {@link FieldRow} component.
  */
-export const FieldRow = <T extends SettingType>({
-  isSavingEnabled,
-  onChange: onChangeProp,
-  field,
-  unsavedChange,
-}: FieldRowProps<T>) => {
+export const FieldRow = <T extends SettingType>(props: FieldRowProps<T>) => {
+  const { isSavingEnabled, onChange: onChangeProp, field, unsavedChange } = props;
   const { id, name, groupId, isOverridden, type, unsavedFieldId } = field;
   const { cssFieldFormGroup } = useFieldStyles({
     field,
+    unsavedChange,
   });
 
   const onChange = (changes: UnsavedFieldChange<T>) => {
@@ -70,15 +73,22 @@ export const FieldRow = <T extends SettingType>({
     return onChange({ type, unsavedValue });
   };
 
-  const onFieldChange = ({ value: unsavedValue }: OnChangeParams<T>) => {
+  const onFieldChange = ({ isInvalid, error, value: unsavedValue }: OnChangeParams<T>) => {
+    if (error) {
+      isInvalid = true;
+    }
+
+    const change = {
+      type,
+      isInvalid,
+      error,
+    };
+
     if (!isUnsavedValue(field, unsavedValue)) {
-      onChange({
-        type,
-        unsavedValue: undefined,
-      });
+      onChange(change);
     } else {
       onChange({
-        type,
+        ...change,
         unsavedValue,
       });
     }
@@ -106,9 +116,12 @@ export const FieldRow = <T extends SettingType>({
   if (unsavedChange) {
     unsavedScreenReaderMessage = (
       <EuiScreenReaderOnly>
-        <p id={`${unsavedFieldId}`}>
-          {unsavedChange.error
-            ? unsavedChange.error
+        <p
+          id={`${unsavedFieldId}`}
+          data-test-subj={`${DATA_TEST_SUBJ_SCREEN_READER_MESSAGE}-${id}`}
+        >
+          {error
+            ? error
             : i18n.translate('management.settings.field.settingIsUnsaved', {
                 defaultMessage: 'Setting is currently not saved.',
               })}
@@ -134,6 +147,7 @@ export const FieldRow = <T extends SettingType>({
           <>
             <FieldInput
               isDisabled={!isSavingEnabled || isOverridden}
+              isInvalid={unsavedChange?.isInvalid}
               onChange={onFieldChange}
               {...{ field, unsavedChange }}
             />

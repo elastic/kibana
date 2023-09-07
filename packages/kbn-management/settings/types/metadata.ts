@@ -23,8 +23,14 @@ type UiSetting<T> = PublicUiSettingsParams & UserProvidedValues<T>;
  */
 export interface UiSettingMetadata<T extends SettingType, V = KnownTypeToValue<T> | null>
   extends UiSetting<V> {
+  /**
+   * The type of setting being represented.
+   * @see{@link SettingType}
+   */
   type: T;
+  /** The default value in Kibana for the setting. */
   value?: V;
+  /** The value saved by the user. */
   userValue?: V;
 }
 
@@ -33,46 +39,55 @@ export interface UiSettingMetadata<T extends SettingType, V = KnownTypeToValue<T
  * @public
  */
 export type ArrayUiSettingMetadata = UiSettingMetadata<'array'>;
+
 /**
  * This is an type-safe abstraction over the {@link UiSetting} `boolean` type.
  * @public
  */
 export type BooleanUiSettingMetadata = UiSettingMetadata<'boolean'>;
+
 /**
  * This is an type-safe abstraction over the {@link UiSetting} `color` type.
  * @public
  */
 export type ColorUiSettingMetadata = UiSettingMetadata<'color'>;
+
 /**
  * This is an type-safe abstraction over the {@link UiSetting} `image` type.
  * @public
  */
 export type ImageUiSettingMetadata = UiSettingMetadata<'image'>;
+
 /**
  * This is an type-safe abstraction over the {@link UiSetting} `json` type.
  * @public
  */
 export type JsonUiSettingMetadata = UiSettingMetadata<'json'>;
+
 /**
  * This is an type-safe abstraction over the {@link UiSetting} `markdown` type.
  * @public
  */
 export type MarkdownUiSettingMetadata = UiSettingMetadata<'markdown'>;
+
 /**
  * This is an type-safe abstraction over the {@link UiSetting} `number` type.
  * @public
  */
 export type NumberUiSettingMetadata = UiSettingMetadata<'number'>;
+
 /**
  * This is an type-safe abstraction over the {@link UiSetting} `select` type.
  * @public
  */
 export type SelectUiSettingMetadata = UiSettingMetadata<'select'>;
+
 /**
  * This is an type-safe abstraction over the {@link UiSetting} `string` type.
  * @public
  */
 export type StringUiSettingMetadata = UiSettingMetadata<'string'>;
+
 /**
  * This is an type-safe abstraction over the {@link UiSetting} `undefined` type.
  * @public

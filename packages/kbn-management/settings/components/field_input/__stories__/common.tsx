@@ -100,11 +100,14 @@ export const getInputStory = (type: SettingType, params: Params = {}) => {
 
     const [field, unsavedChange, onChangeFn] = useFieldDefinition(setting);
 
-    const onChange: OnChangeFn<typeof type> = ({ value: newValue }) => {
-      onChangeFn(newValue);
+    const onChange: OnChangeFn<typeof type> = (newChange) => {
+      onChangeFn(newChange);
     };
-
-    return <FieldInput {...{ field, unsavedChange, onChange, isDisabled }} />;
+    return (
+      <FieldInput
+        {...{ field, isInvalid: unsavedChange.isInvalid, unsavedChange, onChange, isDisabled }}
+      />
+    );
   };
 
   Story.args = {

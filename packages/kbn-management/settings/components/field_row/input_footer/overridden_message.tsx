@@ -17,14 +17,16 @@ type Field<T extends SettingType> = Pick<FieldDefinition<T>, 'id' | 'isOverridde
 export const DATA_TEST_SUBJ_OVERRIDDEN_PREFIX = 'field-row-input-overridden-message';
 
 /**
- * Props for a {@link OverriddenMessage} component.
+ * Props for a {@link FieldOverriddenMessage} component.
  */
-export interface OverriddenMessageProps<T extends SettingType> {
+export interface FieldOverriddenMessageProps<T extends SettingType> {
   /** The {@link FieldDefinition} corresponding the setting. */
   field: Field<T>;
 }
 
-export const OverriddenMessage = <T extends SettingType>({ field }: OverriddenMessageProps<T>) => {
+export const FieldOverriddenMessage = <T extends SettingType>({
+  field,
+}: FieldOverriddenMessageProps<T>) => {
   if (!field.isOverridden) {
     return null;
   }

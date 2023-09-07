@@ -12,7 +12,10 @@ import { FieldDefinition, KnownTypeToValue, SettingType } from '@kbn/management-
 
 /**
  * Convenience function to compare a given {@link FieldDefinition} to an {@link UnsavedFieldChange}
- * to determine if the value in the unsaved change is an different value from what is saved.
+ * to determine if the value in the unsaved change is a different value from what is saved.
+ *
+ * @param field The field to compare.
+ * @param unsavedValue The unsaved value to compare.
  */
 export const isUnsavedValue = <T extends SettingType>(
   field: FieldDefinition<T>,

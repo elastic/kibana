@@ -38,7 +38,13 @@ const expandSetting = <T extends SettingType>(
   };
 };
 
-type OnChangeFn<T extends SettingType> = (unsavedValue?: KnownTypeToValue<T> | null) => void;
+interface OnChangeParams<T extends SettingType> {
+  value?: KnownTypeToValue<T> | null;
+  isInvalid?: boolean;
+  error?: string;
+}
+
+type OnChangeFn<T extends SettingType> = (params: OnChangeParams<T> | null) => void;
 
 /**
  * Hook to build and maintain a {@link FieldDefinition} for a given {@link UiSettingMetadata} object
@@ -67,16 +73,21 @@ export const useFieldDefinition = <T extends SettingType>(
 
   const [unsavedChange, setUnsavedChange] = useState<UnsavedFieldChange<T>>({ type });
 
-  const onChange: OnChangeFn<T> = (unsavedValue) => {
-    if (isEqual(unsavedValue, savedValue)) {
+  const onChange: OnChangeFn<T> = (change) => {
+    if (!change) {
+      return;
+    }
+
+    const { value, error, isInvalid } = change;
+
+    if (isEqual(value, savedValue)) {
       setUnsavedChange({ type });
     } else {
-      setUnsavedChange({ type, unsavedValue });
+      setUnsavedChange({ type, unsavedValue: value, error, isInvalid });
     }
 
     const formattedSavedValue = type === 'image' ? String(savedValue).slice(0, 25) : savedValue;
-    const formattedUnsavedValue =
-      type === 'image' ? String(unsavedValue).slice(0, 25) : unsavedValue;
+    const formattedUnsavedValue = type === 'image' ? String(value).slice(0, 25) : value;
 
     action('onChange')({
       type,
