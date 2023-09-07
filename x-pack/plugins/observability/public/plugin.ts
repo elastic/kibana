@@ -56,6 +56,7 @@ import {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
@@ -76,6 +77,7 @@ import {
   RULES_PATH,
   SLOS_PATH,
 } from '../common/locators/paths';
+import { SloListFactoryDefinition } from './embeddable/slo/slo_embeddable_factory';
 
 export interface ConfigSchema {
   unsafe: {
@@ -110,6 +112,7 @@ export interface ObservabilityPublicPluginsSetup {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
@@ -284,6 +287,9 @@ export class Plugin
     coreSetup.application.register(app);
 
     registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
+
+    const factory = new SloListFactoryDefinition();
+    pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
