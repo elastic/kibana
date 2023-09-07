@@ -6,18 +6,23 @@
  */
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
+import { LogExplorerPluginSetup, LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { ObservabilityLogExplorerLocators } from '../common/locators';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityLogExplorerPluginSetup {}
+export interface ObservabilityLogExplorerPluginSetup {
+  locators: ObservabilityLogExplorerLocators;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogExplorerPluginStart {}
 
 export interface ObservabilityLogExplorerSetupDeps {
   serverless?: ServerlessPluginStart;
+  share: SharePluginSetup;
+  logExplorer: LogExplorerPluginSetup;
 }
 
 export interface ObservabilityLogExplorerStartDeps {

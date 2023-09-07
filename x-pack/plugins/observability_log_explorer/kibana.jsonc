@@ -14,7 +14,9 @@
     "requiredPlugins": [
       "data",
       "logExplorer",
-      "observabilityShared"
+      "observabilityShared",
+      "share",
+      "kibanaUtils",
     ],
     "optionalPlugins": [
       "serverless"

@@ -13,6 +13,11 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import {
+  ObservabilityLogExplorerLocators,
+  SingleDatasetLocatorDefinition,
+  AllDatasetsLocatorDefinition,
+} from '../common/locators';
 import { type ObservabilityLogExplorerConfig } from '../common/plugin_config';
 import { logExplorerAppTitle } from '../common/translations';
 import { renderObservabilityLogExplorer } from './applications/observability_log_explorer';
@@ -27,6 +32,7 @@ export class ObservabilityLogExplorerPlugin
   implements Plugin<ObservabilityLogExplorerPluginSetup, ObservabilityLogExplorerPluginStart>
 {
   private config: ObservabilityLogExplorerConfig;
+  private locators?: ObservabilityLogExplorerLocators;
 
   constructor(context: PluginInitializerContext<ObservabilityLogExplorerConfig>) {
     this.config = context.config.get();
@@ -36,6 +42,12 @@ export class ObservabilityLogExplorerPlugin
     core: CoreSetup<ObservabilityLogExplorerStartDeps, ObservabilityLogExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogExplorerSetupDeps
   ) {
+    const {
+      share,
+      logExplorer: { datasetsService },
+    } = _pluginsSetup;
+    const useHash = core.uiSettings.get('state:storeInSessionStorage');
+
     core.application.register({
       id: 'observability-log-explorer',
       title: logExplorerAppTitle,
@@ -57,7 +69,28 @@ export class ObservabilityLogExplorerPlugin
       },
     });
 
-    return {};
+    // Register Locators
+    const singleDatasetLocator = share.url.locators.create(
+      new SingleDatasetLocatorDefinition({
+        datasetsClient: datasetsService,
+        useHash,
+      })
+    );
+    const allDatasetsLocator = share.url.locators.create(
+      new AllDatasetsLocatorDefinition({
+        datasetsClient: datasetsService,
+        useHash,
+      })
+    );
+
+    this.locators = {
+      singleDatasetLocator,
+      allDatasetsLocator,
+    };
+
+    return {
+      locators: this.locators,
+    };
   }
 
   public start(_core: CoreStart, _pluginsStart: ObservabilityLogExplorerStartDeps) {

@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+
 import { Dataset, Integration } from '../../../common/datasets';
 import {
   DATASETS_URL,
@@ -22,6 +23,7 @@ import {
 import { FindDatasetsError, FindIntegrationsError } from '../../../common/datasets/errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { IDatasetsClient } from './types';
+import { AllDatasetSelection, SingleDatasetSelection } from '../../utils/dataset_selection';
 
 const defaultIntegrationsParams: Pick<FindIntegrationsRequestQuery, 'dataStreamType'> = {
   dataStreamType: 'logs',
@@ -42,9 +44,11 @@ export class DatasetsClient implements IDatasetsClient {
 
     const query = findIntegrationsRequestQueryRT.encode(search);
 
-    const response = await this.http.get(INTEGRATIONS_URL, { query }).catch((error) => {
-      throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
-    });
+    const response = await this.http
+      .get(INTEGRATIONS_URL, { query, version: '2023-10-31' })
+      .catch((error) => {
+        throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
+      });
 
     const data = decodeOrThrow(
       findIntegrationsResponseRT,
@@ -71,5 +75,24 @@ export class DatasetsClient implements IDatasetsClient {
     )(response);
 
     return { items: data.items.map((dataset) => Dataset.create(dataset)) };
+  }
+
+  public async generateDataViewId(integrationName?: string, datasetName?: string) {
+    if (!integrationName || !datasetName) return AllDatasetSelection.create().toDataviewSpec().id;
+
+    const { items } = await this.findIntegrations({
+      nameQuery: integrationName,
+    });
+
+    // There should only be one matching integration with the given name
+    const installedIntegration = items[0];
+
+    const datasetSelection = SingleDatasetSelection.create(
+      installedIntegration.datasets.find((d) => d.title === datasetName)!
+    );
+
+    const dataViewId = datasetSelection.toDataviewSpec().id;
+
+    return dataViewId;
   }
 }

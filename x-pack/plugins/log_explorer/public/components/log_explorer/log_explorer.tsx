@@ -27,8 +27,11 @@ export const createLogExplorer = ({
   core,
   data,
   discover: { DiscoverContainer },
+  datasetsClient,
 }: CreateLogExplorerArgs) => {
-  const logExplorerCustomizations = [createLogExplorerProfileCustomizations({ core, data })];
+  const logExplorerCustomizations = [
+    createLogExplorerProfileCustomizations({ core, data, datasetsClient }),
+  ];
 
   const overrideServices = {
     data: createDataServiceProxy(data),

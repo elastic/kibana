@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { IDatasetsClient } from './types';
+import { DatasetLocatorParams } from '../types';
 
-export const createDatasetsClientMock = (): jest.Mocked<IDatasetsClient> => ({
-  findDatasets: jest.fn(),
-  findIntegrations: jest.fn(),
-  generateDataViewId: jest.fn(),
-});
+export type AllDatasetsLocatorParams = DatasetLocatorParams;

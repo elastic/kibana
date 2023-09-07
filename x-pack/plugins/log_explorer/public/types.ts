@@ -8,8 +8,11 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { ComponentType } from 'react';
 import type { LogExplorerProps } from './components/log_explorer';
+import { IDatasetsClient } from './services/datasets';
 
-export type LogExplorerPluginSetup = void;
+export interface LogExplorerPluginSetup {
+  datasetsService: IDatasetsClient;
+}
 export interface LogExplorerPluginStart {
   LogExplorer: ComponentType<LogExplorerProps>;
 }
