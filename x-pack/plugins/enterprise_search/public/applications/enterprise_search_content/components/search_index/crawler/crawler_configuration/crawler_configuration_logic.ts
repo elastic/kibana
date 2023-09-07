@@ -7,8 +7,9 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Connector } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../../../common/types/api';
-import { Connector } from '../../../../../../../common/types/connectors';
 
 import {
   UpdateHtmlExtractionActions,
