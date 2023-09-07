@@ -24,6 +24,8 @@
     "@kbn/config-schema",
     "@kbn/share-plugin",
     "@kbn/kibana-utils-plugin",
+    "@kbn/es-query",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*"
