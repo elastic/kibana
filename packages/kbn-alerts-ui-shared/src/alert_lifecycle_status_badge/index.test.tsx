@@ -10,6 +10,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertLifecycleStatusBadge } from '.';
 
+// dummy change
+
 describe('alertLifecycleStatusBadge', () => {
   it('should display the alert status correctly when active and not flapping', () => {
     const { getByText } = render(

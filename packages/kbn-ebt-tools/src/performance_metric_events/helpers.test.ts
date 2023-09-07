@@ -11,6 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { registerPerformanceMetricEventType, reportPerformanceMetricEvent } from './helpers';
 import { METRIC_EVENT_SCHEMA } from './schema';
 
+// dummy change
 describe('performance metric event helpers', () => {
   let analyticsClient: AnalyticsClient;
 

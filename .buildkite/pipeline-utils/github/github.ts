@@ -12,13 +12,14 @@ const github = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
 
-let prChangesCache: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null;
+type ListFilesResponse = RestEndpointMethodTypes['pulls']['listFiles']['response']['data'];
+let prChangesCache: null | ListFilesResponse = null;
 
 export const getPrChanges = async (
   owner = process.env.GITHUB_PR_BASE_OWNER,
   repo = process.env.GITHUB_PR_BASE_REPO,
   prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
-) => {
+): Promise<ListFilesResponse> => {
   if (!owner || !repo || !prNumber) {
     throw Error(
       "Couldn't retrieve Github PR info from environment variables in order to retrieve PR changes"
