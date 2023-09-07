@@ -65,6 +65,10 @@ export type TestSubjects =
   | 'updateIndexSettingsErrorCallout'
   | 'viewButton'
   | 'indexTableRowCheckbox'
+  | 'createIndexButton'
+  | 'createIndexNameFieldText'
+  | 'createIndexCancelButton'
+  | 'createIndexSaveButton'
   | 'enrichPoliciesTable'
   | 'deletePolicyModal'
   | 'executePolicyModal'
@@ -74,9 +78,6 @@ export type TestSubjects =
   | 'policyMatchFieldValue'
   | 'policyEnrichFieldsValue'
   | 'queryEditor'
-  | 'createIndexButton'
-  | 'createIndexNameFieldText'
-  | 'createIndexCancelButton'
   | 'createEnrichPolicyHeaderContent'
   | 'createEnrichPolicyDocumentationLink'
   | 'policyNameField.input'
@@ -92,5 +93,4 @@ export type TestSubjects =
   | 'createAndExecuteButton'
   | 'enrichPolicySummaryList'
   | 'requestBody'
-  | 'errorWhenCreatingCallout'
-  | 'createIndexSaveButton';
+  | 'errorWhenCreatingCallout';
