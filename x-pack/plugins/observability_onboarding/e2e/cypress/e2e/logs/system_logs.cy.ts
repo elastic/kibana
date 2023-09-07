@@ -649,9 +649,9 @@ describe('[Logs onboarding] System logs', () => {
       cy.wait('@systemIntegrationInstall');
       cy.wait('@checkOnboardingProgress');
       cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
-      cy.url().should('include', '/app/discover');
 
-      cy.get('button[title="logs-*"]').should('exist');
+      cy.url().should('include', '/app/observability-log-explorer');
+      cy.get('button').contains('[System] syslog2').should('exist');
     });
   });
 });
