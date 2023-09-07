@@ -10,10 +10,10 @@ import { getNewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
-  goToEndpointExceptionsTab,
   openEditException,
   openExceptionFlyoutFromEmptyViewerPrompt,
   searchForExceptionItem,
+  waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded,
 } from '../../../tasks/rule_details';
 import {
   addExceptionConditions,
@@ -25,7 +25,7 @@ import {
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL, ruleDetailsUrl } from '../../../urls/navigation';
+import { ruleDetailsUrl } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -49,27 +49,26 @@ import {
 // FLAKY: https://github.com/elastic/kibana/issues/165736
 describe(
   'Add endpoint exception from rule details',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     const ITEM_NAME = 'Sample Exception List Item';
     const NEW_ITEM_NAME = 'Exception item-EDITED';
     const ITEM_FIELD = 'event.code';
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.type';
 
-    before(() => {
+    beforeEach(() => {
       cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
       login();
       deleteAlertsAndRules();
     });
 
-    after(() => {
+    afterEach(() => {
       cy.task('esArchiverUnload', 'auditbeat');
     });
 
     describe('without exception items', () => {
       beforeEach(() => {
-        login();
         createEndpointExceptionList().then((response) => {
           createRule(
             getNewRule({
@@ -135,7 +134,6 @@ describe(
 
     describe('with exception items', () => {
       beforeEach(() => {
-        login();
         createEndpointExceptionList().then((response) => {
           createEndpointExceptionListItem({
             comments: [],
@@ -156,6 +154,7 @@ describe(
 
           createRule(
             getNewRule({
+              name: 'Rule with exceptions',
               query: 'event.code:*',
               index: ['auditbeat*'],
               exceptions_list: [
@@ -169,9 +168,10 @@ describe(
               rule_id: '2',
               enabled: false,
             })
-          ).then((rule) =>
-            visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'endpoint_exceptions'))
-          );
+          ).then((rule) => {
+            visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'endpoint_exceptions'));
+            waitForRuleDetailsPageToBeLoaded('Rule with exceptions');
+          });
         });
       });
 
