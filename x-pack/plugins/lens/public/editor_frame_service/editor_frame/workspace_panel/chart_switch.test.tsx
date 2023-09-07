@@ -553,7 +553,7 @@ describe('chart_switch', () => {
     expect(visualizationMap.visB.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
         keptLayerIds: ['a'],
-        mainPalette: mockPalette,
+        mainPalette: { type: 'legacyPalette', value: mockPalette },
       })
     );
   });

@@ -132,6 +132,7 @@ export function TagsDimensionEditor({
               <EuiFlexItem>
                 <EuiSwitch
                   label="Use new color mapping (tech preview)"
+                  data-test-subj="lns_colorMappingOrLegacyPalette_switch"
                   compressed
                   checked={useNewColorMapping}
                   onChange={({ target: { checked } }) => {

@@ -221,8 +221,30 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
+              "colorMapping": Object {
+                "assignmentMode": "auto",
+                "assignments": Array [],
+                "colorMode": Object {
+                  "type": "categorical",
+                },
+                "paletteId": "eui",
+                "specialAssignments": Array [
+                  Object {
+                    "color": Object {
+                      "colorIndex": 1,
+                      "paletteId": "neutral",
+                      "type": "categorical",
+                    },
+                    "rule": Object {
+                      "type": "other",
+                    },
+                    "touched": false,
+                  },
+                ],
+              },
               "layerId": "l1",
               "layerType": "data",
+              "palette": undefined,
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,
