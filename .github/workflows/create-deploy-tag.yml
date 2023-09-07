@@ -19,7 +19,7 @@ concurrency:
 jobs:
   create-deploy-tag:
     # Temporary, we need a way to limit this to a GitHub team instead of specific users
-    if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck"]', github.triggering_actor)
+    if: contains('["watson","clintandrewhall","kobelb","lukeelmers","thomasneirynck","jbudz","mistic","delanni","Ikuni17"]', github.triggering_actor)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -63,7 +63,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "A new <https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|commit> has been promoted to QA 🎉\n\nOnce promotion is complete, please begin any required manual testing.\n\n*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA."
+                    "text": "Promotion of a new <https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|commit> to QA has been initiated 🎉\n\nOnce promotion is complete, please begin any required manual testing.\n\n*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA."
                   }
                 },
                 {
@@ -72,10 +72,6 @@ jobs:
                     {
                       "type": "mrkdwn",
                       "text": "*Initiated by:*\n<https://github.com/${{ github.triggering_actor }}|${{ github.triggering_actor }}>"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
                     },
                     {
                       "type": "mrkdwn",
@@ -107,7 +103,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Useful links:*\n\n • <https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr|Release process playbook>\n • <https://example.com|QA Quality Gate pipeline>"
+                    "text": "*Useful links:*\n\n • <https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr|Release process playbook>\n • <https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|GitHub Workflow run>\n • <https://buildkite.com/elastic/kibana-tests/builds?branch=main|Quality Gate pipeline>\n • <https://argo-workflows.us-central1.gcp.qa.cld.elstc.co/workflows?label=hash%3D${{ env.COMMIT }}|Argo Workflow>\n • <https://platform-logging.kb.us-central1.gcp.foundit.no/app/dashboards#/view/f710d7d0-00b9-11ee-93d2-8df4bca5a4c9?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))|GPCTL Logs dashboard>"
                   }
                 },
                 {
@@ -153,7 +149,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Promotion of <https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|commit> to QA failed ⛔️"
+                    "text": "Creation of deploy tag on <https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|commit> failed ⛔️"
                   }
                 },
                 {
@@ -165,10 +161,6 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Workflow run:*\n<https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|${{ github.run_id }}>"
-                    },
-                    {
-                      "type": "mrkdwn",
                       "text": "*Commit:*\n<https://github.com/elastic/kibana/commit/${{ env.COMMIT }}|${{ env.COMMIT }}>"
                     }
                   ]
@@ -177,7 +169,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Useful links:*\n\n • <https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr|Release process playbook>"
+                    "text": "*Useful links:*\n\n • <https://docs.google.com/document/d/1c2LzojDh1wawjeMsKh4D_L2jpVJALhxukkmmL-TUbrs/edit#heading=h.50173f90utwr|Release process playbook>\n • <https://github.com/elastic/kibana/actions/runs/${{ github.run_id }}|GitHub Workflow run>"
                   }
                 }
               ]

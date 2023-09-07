@@ -112,7 +112,7 @@ export class KnowledgeBaseService {
       return;
     }
 
-    await this.summarise({
+    await this.summarize({
       entry: operation.document,
     });
   }
@@ -223,7 +223,7 @@ export class KnowledgeBaseService {
     }
   };
 
-  summarise = async ({
+  summarize = async ({
     entry: { id, ...document },
     user,
     namespace,

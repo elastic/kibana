@@ -88,7 +88,7 @@ interface FunctionOptions<TParameters extends CompatibleJSONSchema = CompatibleJ
 }
 
 type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
-  options: { arguments: TArguments },
+  options: { arguments: TArguments; messages: Message[] },
   signal: AbortSignal
 ) => Promise<TResponse>;
 
@@ -99,7 +99,10 @@ type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: 
 
 export interface FunctionDefinition {
   options: FunctionOptions;
-  respond: (options: { arguments: any }, signal: AbortSignal) => Promise<FunctionResponse>;
+  respond: (
+    options: { arguments: any; messages: Message[] },
+    signal: AbortSignal
+  ) => Promise<FunctionResponse>;
   render?: RenderFunction<any, any>;
 }
 

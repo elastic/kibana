@@ -114,6 +114,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="infraLogHighlightsMenuButton"
               aria-label={goToPreviousHighlightLabel}
               iconType="arrowUp"
               onClick={goToPreviousHighlight}
@@ -123,6 +124,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="infraLogHighlightsMenuButton"
               aria-label={goToNextHighlightLabel}
               iconType="arrowDown"
               onClick={goToNextHighlight}
@@ -132,6 +134,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="infraLogHighlightsMenuButton"
               aria-label={clearTermsButtonLabel}
               color="danger"
               isDisabled={highlightTerm === ''}
