@@ -7,12 +7,12 @@
 
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { PLUGIN } from '../common/constants';
 
-import { ClientConfigType, PluginDependencies } from './types';
+import { PluginDependencies } from './types';
 import { getLinks } from './links';
 
 const checkLicenseStatus = (license: ILicense) => {
@@ -21,20 +21,10 @@ const checkLicenseStatus = (license: ILicense) => {
 };
 
 export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencies> {
-  private readonly config: ClientConfigType;
-
-  constructor(ctx: PluginInitializerContext) {
-    this.config = ctx.config.get<ClientConfigType>();
-  }
-
   public setup(
     { http, getStartServices, uiSettings }: CoreSetup,
     { devTools, home, licensing }: PluginDependencies
   ) {
-    if (this.config?.enabled === false) {
-      return;
-    }
-
     home.featureCatalogue.register({
       id: PLUGIN.id,
       title: i18n.translate('xpack.painlessLab.registryProviderTitle', {

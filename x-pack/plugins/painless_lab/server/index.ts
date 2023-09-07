@@ -17,9 +17,6 @@ export const configSchema = schema.object({
 export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
-  exposeToBrowser: {
-    enabled: true,
-  },
   schema: configSchema,
 };
 

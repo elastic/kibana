@@ -12,24 +12,17 @@ import { PLUGIN } from '../common/constants';
 import { License } from './services';
 import { Dependencies } from './types';
 import { registerExecuteRoute } from './routes/api';
-import { ConfigType } from '.';
 
 export class PainlessLabServerPlugin implements Plugin {
-  private readonly config: ConfigType;
   private readonly license: License;
   private readonly logger: Logger;
 
-  constructor({ config, logger }: PluginInitializerContext) {
-    this.config = config.get<ConfigType>();
+  constructor({ logger }: PluginInitializerContext) {
     this.logger = logger.get();
     this.license = new License();
   }
 
   setup({ http }: CoreSetup, { licensing }: Dependencies) {
-    if (this.config?.enabled === false) {
-      return;
-    }
-
     const router = http.createRouter();
 
     this.license.setup(

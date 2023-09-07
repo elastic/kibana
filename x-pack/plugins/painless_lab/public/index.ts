@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-
 import './styles/_index.scss';
 import { PainlessLabUIPlugin } from './plugin';
 
-export function plugin(ctx: PluginInitializerContext) {
-  return new PainlessLabUIPlugin(ctx);
+export function plugin() {
+  return new PainlessLabUIPlugin();
 }
