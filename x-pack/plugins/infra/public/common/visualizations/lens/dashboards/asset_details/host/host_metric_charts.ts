@@ -9,7 +9,7 @@ import {
   diskSpaceUsageAvailable,
   diskThroughputReadWrite,
   diskIOReadWrite,
-  diskSpaceUsageByMountPoint,
+  diskUsageByMountPoint,
 } from '../metric_charts/disk';
 import { logRate } from '../metric_charts/log';
 import { memoryUsage, memoryUsageBreakdown } from '../metric_charts/memory';
@@ -36,7 +36,7 @@ export const hostMetricChartsFullPage: XYConfig[] = [
   loadBreakdown,
   logRate,
   diskSpaceUsageAvailable,
-  diskSpaceUsageByMountPoint,
+  diskUsageByMountPoint,
   diskThroughputReadWrite,
   diskIOReadWrite,
   rxTx,

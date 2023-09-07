@@ -303,7 +303,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={METRICS_TOOLTIP.diskSpaceUsage}
-            formula={hostLensFormulas.diskSpaceUsage.value}
+            formula={hostLensFormulas.diskUsage.value}
           />
         ),
         field: 'diskSpaceUsage',
