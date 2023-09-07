@@ -206,7 +206,6 @@ const ParentClassController = ({
     const parentDiv = viewportRef.parentElement;
     if (!parentDiv) return;
 
-    console.log('addin class!!!! cause it be', parentDiv.id);
     if (maximizedPanelId) {
       parentDiv.classList.add('dshDashboardViewportWrapper');
     } else {
