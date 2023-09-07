@@ -36,7 +36,8 @@ export default ({ getService }: FtrProviderContext) => {
     return true;
   }
 
-  describe('Observability Rule Details page', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165619
+  describe.skip('Observability Rule Details page', function () {
     this.tags('includeFirefox');
 
     let uptimeRuleId: string;
