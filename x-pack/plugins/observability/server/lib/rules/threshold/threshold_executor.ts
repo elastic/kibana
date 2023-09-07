@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES, ALERT_REASON } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -22,7 +22,7 @@ import { AlertsLocatorParams, getAlertUrl, TimeUnitChar } from '../../../../comm
 import { createFormatter } from '../../../../common/threshold_rule/formatters';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { ObservabilityConfig } from '../../..';
-import { AlertStates } from './types';
+import { AlertStates, searchConfigurationSchema } from './types';
 
 import {
   buildFiredAlertReason,
@@ -44,12 +44,6 @@ import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
-export const searchConfigurationSchema = schema.object({
-  query: schema.object({
-    query: schema.string(),
-    language: schema.string(),
-  }),
-});
 export type SearchConfigurationType = TypeOf<typeof searchConfigurationSchema>;
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
@@ -167,7 +161,7 @@ export const createMetricThresholdExecutor = ({
     const compositeSize = config.thresholdRule.groupByPageSize;
     const queryIsSame = isEqual(
       state.searchConfiguration?.query.query,
-      params.searchConfiguration!.query.query
+      params.searchConfiguration.query.query
     );
     const groupByIsSame = isEqual(state.groupBy, params.groupBy);
     const previousMissingGroups =

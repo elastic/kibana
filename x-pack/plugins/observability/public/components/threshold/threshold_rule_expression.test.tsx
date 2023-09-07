@@ -36,7 +36,11 @@ describe('Expression', () => {
     mockKibana();
   });
 
-  async function setup(currentOptions: { metrics?: MetricsExplorerMetric[]; groupBy?: string }) {
+  async function setup(currentOptions: {
+    metrics?: MetricsExplorerMetric[];
+    filterQuery?: string;
+    groupBy?: string;
+  }) {
     const ruleParams = {
       criteria: [],
       groupBy: undefined,
@@ -82,6 +86,7 @@ describe('Expression', () => {
   it('should prefill the alert using the context metadata', async () => {
     const currentOptions = {
       groupBy: 'host.hostname',
+      filterQuery: 'foo',
       metrics: [
         { aggregation: 'avg', field: 'system.load.1' },
         { aggregation: 'cardinality', field: 'system.cpu.user.pct' },
@@ -89,6 +94,7 @@ describe('Expression', () => {
     };
     const { ruleParams } = await setup(currentOptions);
     expect(ruleParams.groupBy).toBe('host.hostname');
+    expect(ruleParams.searchConfiguration.query.query).toBe('foo');
     expect(ruleParams.criteria).toEqual([
       {
         metric: 'system.load.1',

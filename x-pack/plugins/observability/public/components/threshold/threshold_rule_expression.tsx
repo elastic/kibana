@@ -90,7 +90,7 @@ export default function Expressions(props: Props) {
     const initSearchSource = async () => {
       let initialSearchConfiguration = ruleParams.searchConfiguration;
 
-      if (!ruleParams.searchConfiguration) {
+      if (!ruleParams.searchConfiguration || !ruleParams.searchConfiguration.index) {
         const newSearchSource = data.search.searchSource.createEmpty();
         newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
         const defaultDataView = await data.dataViews.getDefaultDataView();
@@ -105,7 +105,12 @@ export default function Expressions(props: Props) {
         const createdSearchSource = await data.search.searchSource.create(
           initialSearchConfiguration
         );
-        setRuleParams('searchConfiguration', initialSearchConfiguration);
+        setRuleParams('searchConfiguration', {
+          ...initialSearchConfiguration,
+          ...(ruleParams.searchConfiguration?.query && {
+            query: ruleParams.searchConfiguration.query,
+          }),
+        });
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
 
@@ -135,6 +140,30 @@ export default function Expressions(props: Props) {
     initSearchSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource, data.dataViews, dataView]);
+
+  useEffect(() => {
+    if (ruleParams.criteria && ruleParams.criteria.length) {
+      setTimeSize(ruleParams.criteria[0].timeSize);
+      setTimeUnit(ruleParams.criteria[0].timeUnit);
+    } else {
+      preFillAlertCriteria();
+    }
+
+    if (!ruleParams.filterQuery) {
+      preFillAlertFilter();
+    }
+
+    if (!ruleParams.groupBy) {
+      preFillAlertGroupBy();
+    }
+
+    if (typeof ruleParams.alertOnNoData === 'undefined') {
+      setRuleParams('alertOnNoData', true);
+    }
+    if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
+      setRuleParams('alertOnGroupDisappear', true);
+    }
+  }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -298,30 +327,6 @@ export default function Expressions(props: Props) {
     }
   }, [metadata, setRuleParams]);
 
-  useEffect(() => {
-    if (ruleParams.criteria && ruleParams.criteria.length) {
-      setTimeSize(ruleParams.criteria[0].timeSize);
-      setTimeUnit(ruleParams.criteria[0].timeUnit);
-    } else {
-      preFillAlertCriteria();
-    }
-
-    if (!ruleParams.filterQuery) {
-      preFillAlertFilter();
-    }
-
-    if (!ruleParams.groupBy) {
-      preFillAlertGroupBy();
-    }
-
-    if (typeof ruleParams.alertOnNoData === 'undefined') {
-      setRuleParams('alertOnNoData', true);
-    }
-    if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
-      setRuleParams('alertOnGroupDisappear', true);
-    }
-  }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const hasGroupBy = useMemo(
     () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
     [ruleParams.groupBy]
@@ -419,12 +424,7 @@ export default function Expressions(props: Props) {
       </EuiTitle>
       <EuiSpacer size="s" />
       <SearchBar
-        appName={i18n.translate(
-          'xpack.observability.threshold.rule.alertFlyout.searchBar.appName',
-          {
-            defaultMessage: 'Threshold rule',
-          }
-        )}
+        appName="Custom threshold rule"
         iconType="search"
         placeholder={placeHolder}
         indexPatterns={dataView ? [dataView] : undefined}

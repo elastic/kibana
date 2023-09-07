@@ -15,6 +15,7 @@ import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plu
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
+import { searchConfigurationSchema } from './types';
 import {
   AlertsLocatorParams,
   observabilityFeatureId,
@@ -131,15 +132,7 @@ export function thresholdRuleType(
           groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
-          searchConfiguration: schema.object({
-            index: schema.string(),
-            query: schema.object({
-              language: schema.string({
-                validate: validateKQLStringFilter,
-              }),
-              query: schema.string(),
-            }),
-          }),
+          searchConfiguration: searchConfigurationSchema,
         },
         { unknowns: 'allow' }
       ),
