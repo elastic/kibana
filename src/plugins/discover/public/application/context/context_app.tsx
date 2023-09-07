@@ -242,7 +242,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
               className="dscDocsContent"
               panelProps={{ role: 'main' }}
             >
-              <EuiSpacer size="s" />
               <EuiText
                 data-test-subj="contextDocumentSurroundingHeader"
                 css={css`
