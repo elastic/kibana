@@ -50,9 +50,6 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     ui: true,
     enableIndexActions: true,
     enableLegacyTemplates: true,
-    dev: {
-      enableIndexDetailsPage: true,
-    },
     enableIndexStats: true,
   },
   schema: schemaLatest,
