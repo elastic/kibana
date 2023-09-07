@@ -34,7 +34,13 @@ import {
   UIM_TEMPLATE_CLONE,
   UIM_TEMPLATE_SIMULATE,
 } from '../../../common/constants';
-import { TemplateDeserialized, TemplateListItem, DataStream, Index } from '../../../common';
+import {
+  TemplateDeserialized,
+  TemplateListItem,
+  DataStream,
+  Index,
+  IndexSettingsResponse,
+} from '../../../common';
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
@@ -393,6 +399,13 @@ export function useLoadIndexMappings(indexName: string) {
 export function loadIndexStatistics(indexName: string) {
   return sendRequest<IndicesStatsResponse>({
     path: `${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`,
+    method: 'get',
+  });
+}
+
+export function useLoadIndexSettings(indexName: string) {
+  return useRequest<IndexSettingsResponse>({
+    path: `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
     method: 'get',
   });
 }

@@ -18,8 +18,8 @@ import { httpService } from './http';
 
 export const sendRequest = <T = any, E = Error>(
   config: SendRequestConfig
-): Promise<SendRequestResponse> => {
-  return _sendRequest<T, E>(httpService.httpClient, config);
+): Promise<SendRequestResponse<T, E>> => {
+  return _sendRequest(httpService.httpClient, config);
 };
 
 export const useRequest = <T = any, E = Error>(config: UseRequestConfig) => {
