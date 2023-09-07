@@ -14,6 +14,7 @@ import { IntegrationError, NamingCollisionError } from '../../types';
 import { IIntegrationsClient } from '../services/integrations_client';
 import {
   createArrayValidator,
+  createCharacterLimitValidation,
   createIsEmptyValidation,
   createIsLowerCaseValidation,
   initializeValidateFields,
@@ -201,15 +202,17 @@ export const createPureCreateCustomIntegrationStateMachine = (
                 fields: {
                   ...context.fields,
                   ...event.fields,
-                  integrationName: event.fields.integrationName
-                    ? replaceSpecialChars(event.fields.integrationName)
-                    : context.fields.integrationName,
-                  datasets: event.fields.datasets
-                    ? event.fields.datasets.map((dataset) => ({
-                        ...dataset,
-                        name: replaceSpecialChars(dataset.name),
-                      }))
-                    : context.fields.datasets,
+                  integrationName:
+                    event.fields.integrationName !== undefined
+                      ? replaceSpecialChars(event.fields.integrationName)
+                      : context.fields.integrationName,
+                  datasets:
+                    event.fields.datasets !== undefined
+                      ? event.fields.datasets.map((dataset) => ({
+                          ...dataset,
+                          name: replaceSpecialChars(dataset.name),
+                        }))
+                      : context.fields.datasets,
                 },
                 touchedFields: {
                   ...context.touchedFields,
@@ -265,18 +268,33 @@ export const createCreateCustomIntegrationStateMachine = ({
               defaultMessage: 'An integration name should be lowercase.',
             })
           ),
+          createCharacterLimitValidation(
+            i18n.translate(
+              'customIntegrationsPackage.validations.integrationName.characterLimitError',
+              {
+                defaultMessage: 'An integration name should be less than 100 characters.',
+              }
+            ),
+            100
+          ),
         ],
         datasets: createArrayValidator({
           name: [
             createIsEmptyValidation(
-              i18n.translate('customIntegrationsPackage.validations.datasetName.requiredError', {
+              i18n.translate('customIntegrationsPackage.validations.datasets.requiredError', {
                 defaultMessage: 'Dataset name is required.',
               })
             ),
             createIsLowerCaseValidation(
-              i18n.translate('customIntegrationsPackage.validations.datasetName.lowerCaseError', {
+              i18n.translate('customIntegrationsPackage.validations.datasets.lowerCaseError', {
                 defaultMessage: 'Dataset name should be lowercase.',
               })
+            ),
+            createCharacterLimitValidation(
+              i18n.translate('customIntegrationsPackage.validations.datasets.characterLimitError', {
+                defaultMessage: 'A dataset name should be less than 100 characters.',
+              }),
+              100
             ),
           ],
         }),
