@@ -284,33 +284,37 @@ export class ExecutionHandler<
           throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
         }
       } else if (isSystemAction(action) && summarizedAlerts) {
-        const connectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.get(
+        const hasConnectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.has(
           action.actionTypeId
         );
-
-        if (!connectorAdapter) {
-          this.logger.warn(
-            `Rule "${this.taskInstance.params.alertId}" skipped scheduling system action "${action.id}" because no connector adapter is configured`
-          );
-        }
 
         /**
          * System actions without an adapter
          * cannot be executed
          *
          */
-        if (connectorAdapter) {
-          const { actionsToEnqueueForExecution, actionsToLog } = await this.runSystemAction({
-            action,
-            connectorAdapter,
-            summarizedAlerts,
-            rule: this.rule,
-            spaceId,
-          });
+        if (!hasConnectorAdapter) {
+          this.logger.warn(
+            `Rule "${this.taskInstance.params.alertId}" skipped scheduling system action "${action.id}" because no connector adapter is configured`
+          );
 
-          enqueueActions.push(...actionsToEnqueueForExecution);
-          logActions.push(...actionsToLog);
+          continue;
         }
+
+        const connectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.get(
+          action.actionTypeId
+        );
+
+        const { actionsToEnqueueForExecution, actionsToLog } = await this.runSystemAction({
+          action,
+          connectorAdapter,
+          summarizedAlerts,
+          rule: this.rule,
+          spaceId,
+        });
+
+        enqueueActions.push(...actionsToEnqueueForExecution);
+        logActions.push(...actionsToLog);
       } else if (!isSystemAction(action) && alert) {
         const { actionsToEnqueueForExecution, actionsToLog } = await this.runAction({
           action,

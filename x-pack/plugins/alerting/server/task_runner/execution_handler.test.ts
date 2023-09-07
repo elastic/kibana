@@ -1596,6 +1596,10 @@ describe('Execution Handler', () => {
   });
 
   describe('System actions', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     test('triggers system actions with summarization per rule run', async () => {
       const actionsParams = { myParams: 'test' };
 
@@ -1718,6 +1722,110 @@ describe('Execution Handler', () => {
         id: '1',
         typeId: '.test-system-action',
       });
+    });
+
+    test('does not execute if the connector adapter is not configured', async () => {
+      const actionsParams = { myParams: 'test' };
+
+      alertsClient.getSummarizedAlerts.mockResolvedValue({
+        new: {
+          count: 1,
+          data: [mockAAD],
+        },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      });
+
+      const executorParams = generateExecutionParams({
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions: [
+            {
+              id: 'action-id',
+              actionTypeId: '.connector-adapter-not-exists',
+              params: actionsParams,
+              type: RuleActionTypes.SYSTEM,
+              uui: 'test',
+            },
+          ],
+        },
+      });
+
+      const buildActionParams = jest.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
+
+      executorParams.actionsClient.isSystemAction.mockReturnValue(true);
+      executorParams.taskRunnerContext.kibanaBaseUrl = 'https://example.com';
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(executorParams));
+
+      const res = await executionHandler.run(generateAlert({ id: 1 }));
+
+      /**
+       * Verifies that system actions are not throttled
+       */
+      expect(res).toEqual({ throttledSummaryActions: {} });
+
+      /**
+       * Verifies that system actions
+       * work only with summarized alerts
+       */
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
+        executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        ruleId: '1',
+        spaceId: 'test1',
+        excludedAlertInstanceIds: [],
+        alertsFilter: undefined,
+      });
+
+      expect(buildActionParams).not.toHaveBeenCalledWith();
+      expect(actionsClient.ephemeralEnqueuedExecution).not.toHaveBeenCalled();
+      expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+      expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
+      expect(executorParams.logger.warn).toHaveBeenCalledWith(
+        'Rule "1" skipped scheduling system action "action-id" because no connector adapter is configured'
+      );
+    });
+
+    test('do not execute if the rule type does not support summarized alerts', async () => {
+      const actionsParams = { myParams: 'test' };
+
+      const executorParams = generateExecutionParams({
+        ruleType: {
+          ...ruleType,
+          alerts: undefined,
+        },
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions: [
+            {
+              id: 'action-id',
+              actionTypeId: '.test-system-action',
+              params: actionsParams,
+              type: RuleActionTypes.SYSTEM,
+              uui: 'test',
+            },
+          ],
+        },
+      });
+
+      const buildActionParams = jest.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
+
+      executorParams.actionsClient.isSystemAction.mockReturnValue(true);
+      executorParams.taskRunnerContext.kibanaBaseUrl = 'https://example.com';
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(executorParams));
+
+      const res = await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(res).toEqual({ throttledSummaryActions: {} });
+      expect(buildActionParams).not.toHaveBeenCalled();
+      expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
+      expect(actionsClient.ephemeralEnqueuedExecution).not.toHaveBeenCalled();
+      expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+      expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
+      expect(executorParams.logger.error).toHaveBeenCalledWith(
+        'Skipping action "action-id" for rule "1" because the rule type "Test" does not support alert-as-data.'
+      );
     });
   });
 

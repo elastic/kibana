@@ -1885,6 +1885,13 @@ instanceStateValue: true
 
         const startDate = new Date().toISOString();
         const reference = alertUtils.generateReference();
+        /**
+         * Creates a rule that always fire with a system action
+         * that has configured a connector adapter.
+         *
+         * System action: x-pack/test/alerting_api_integration/common/plugins/alerts/server/action_types.ts
+         * Adapter: x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+         */
         const response = await alertUtils.createAlwaysFiringSystemAction({
           reference,
           overwrites: { schedule: { interval: '1s' } },
@@ -1900,6 +1907,12 @@ instanceStateValue: true
           startDate,
         });
 
+        /**
+         * The executor function of the system action
+         * writes the params in the test index. We
+         * get the doc to verify that the connector adapter
+         * injected the param correctly.
+         */
         await esTestIndexTool.waitForDocs(
           'action:test.system-action-connector-adapter',
           reference,
@@ -1917,6 +1930,10 @@ instanceStateValue: true
           myParam: 'param from rule action',
           index: '.kibana-alerting-test-data',
           reference: 'alert-utils-ref:1:superuser',
+          /**
+           * Param was injected by the connector adapter in
+           * x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+           */
           injected: 'param from connector adapter',
         });
       });
